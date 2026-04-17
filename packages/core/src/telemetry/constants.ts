@@ -39,6 +39,15 @@ export const EVENT_SKILL_LAUNCH = 'tram.skill_launch';
 export const EVENT_AUTH = 'tram.auth';
 export const EVENT_USER_FEEDBACK = 'tram.user_feedback';
 
+// Prompt Suggestion Events
+export const EVENT_PROMPT_SUGGESTION = 'qwen-code.prompt_suggestion';
+export const EVENT_SPECULATION = 'qwen-code.speculation';
+
+// Arena Events
+export const EVENT_ARENA_SESSION_STARTED = 'qwen-code.arena_session_started';
+export const EVENT_ARENA_AGENT_COMPLETED = 'qwen-code.arena_agent_completed';
+export const EVENT_ARENA_SESSION_ENDED = 'qwen-code.arena_session_ended';
+
 // Performance Events
 export const EVENT_STARTUP_PERFORMANCE = 'tram.startup.performance';
 export const EVENT_MEMORY_USAGE = 'tram.memory.usage';

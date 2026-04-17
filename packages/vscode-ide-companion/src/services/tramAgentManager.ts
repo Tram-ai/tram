@@ -7,6 +7,7 @@ import { AcpConnection } from './acpConnection.js';
 import type {
   ModelInfo,
   AvailableCommand,
+  ContentBlock,
   RequestPermissionRequest,
   SessionNotification,
 } from '@agentclientprotocol/sdk';
@@ -81,6 +82,7 @@ interface AgentConnectOptions {
 }
 interface AgentSessionOptions {
   autoAuthenticate?: boolean;
+  forceNew?: boolean;
 }
 
 export class TramAgentManager {
@@ -293,6 +295,16 @@ export class TramAgentManager {
         console.warn('[TramAgentManager] onInitialized parse error:', err);
       }
     };
+
+    this.connection.onDisconnected = (
+      code: number | null,
+      signal: string | null,
+    ) => {
+      console.log(
+        `[QwenAgentManager] Process disconnected (code: ${code}, signal: ${signal})`,
+      );
+      this.callbacks.onDisconnected?.(code, signal);
+    };
   }
 
   /**
@@ -347,11 +359,28 @@ export class TramAgentManager {
   }
 
   /**
+   * Reconnect after unexpected disconnect.
+   * Re-spawns the ACP process and creates a new session.
+   */
+  async reconnect(
+    cliEntryPath: string,
+    options?: AgentConnectOptions,
+  ): Promise<QwenConnectionResult> {
+    console.log('[QwenAgentManager] Attempting reconnection...');
+    try {
+      this.connection.disconnect();
+    } catch (_e) {
+      // Already disconnected
+    }
+    return this.connect(this.currentWorkingDir, cliEntryPath, options);
+  }
+
+  /**
    * Send message
    *
    * @param message - Message content
    */
-  async sendMessage(message: string): Promise<void> {
+  async sendMessage(message: string | ContentBlock[]): Promise<void> {
     await this.connection.sendPrompt(message);
   }
 
@@ -381,16 +410,28 @@ export class TramAgentManager {
     try {
       await this.connection.setModel(modelId);
       const confirmedModelId = modelId;
-      const modelInfo: ModelInfo = {
+      const modelInfo = this.baselineAvailableModels.find(
+        (model) => model.modelId === confirmedModelId,
+      ) ?? {
         modelId: confirmedModelId,
         name: confirmedModelId,
       };
+      this.baselineModelInfo = modelInfo;
       this.callbacks.onModelChanged?.(modelInfo);
       return modelInfo;
     } catch (err) {
       console.error('[TramAgentManager] Failed to set model:', err);
       throw err;
     }
+  }
+
+  async getAccountInfo(): Promise<{
+    authType: string | null;
+    model: string | null;
+    baseUrl: string | null;
+    apiKeyEnvKey: string | null;
+  }> {
+    return this.connection.getAccountInfo();
   }
 
   /**
@@ -1159,8 +1200,10 @@ export class TramAgentManager {
     options?: AgentSessionOptions,
   ): Promise<string | null> {
     const autoAuthenticate = options?.autoAuthenticate ?? true;
-    // Reuse existing session if present
-    if (this.connection.currentSessionId) {
+    const forceNew = options?.forceNew ?? false;
+    // Reuse the current session for implicit session bootstrap paths.
+    // Explicit "new session" actions must bypass this and call session/new.
+    if (!forceNew && this.connection.currentSessionId) {
       console.log(
         '[TramAgentManager] createNewSession: reusing existing session',
         this.connection.currentSessionId,
@@ -1172,7 +1215,10 @@ export class TramAgentManager {
       console.log(
         '[TramAgentManager] createNewSession: session creation already in flight',
       );
-      return this.sessionCreateInFlight;
+      if (!forceNew) {
+        return this.sessionCreateInFlight;
+      }
+      await this.sessionCreateInFlight;
     }
 
     console.log('[TramAgentManager] Creating new session...');
@@ -1405,6 +1451,15 @@ export class TramAgentManager {
   onAvailableModels(callback: (models: ModelInfo[]) => void): void {
     this.callbacks.onAvailableModels = callback;
     this.sessionUpdateHandler.updateCallbacks(this.callbacks);
+  }
+
+  /**
+   * Register callback for unexpected process disconnection
+   */
+  onDisconnected(
+    callback: (code: number | null, signal: string | null) => void,
+  ): void {
+    this.callbacks.onDisconnected = callback;
   }
 
   /**

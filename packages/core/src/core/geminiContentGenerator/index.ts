@@ -38,10 +38,12 @@ export function createGeminiContentGenerator(
       'x-gemini-api-privileged-user-id': `${installationId}`,
     };
   }
-  const httpOptions = {
-    headers,
-    ...(config.baseUrl ? { baseUrl: config.baseUrl } : {}),
-  };
+  const httpOptions = config.baseUrl
+    ? {
+        headers,
+        baseUrl: config.baseUrl,
+      }
+    : { headers };
 
   const geminiContentGenerator = new GeminiContentGenerator(
     {

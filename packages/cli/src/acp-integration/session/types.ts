@@ -11,6 +11,7 @@ import type {
   ToolCallLocation,
   ToolKind,
 } from '@agentclientprotocol/sdk';
+import type { MessageRewriteMiddleware } from './rewrite/index.js';
 
 export type ApprovalModeValue = 'plan' | 'default' | 'auto-edit' | 'yolo';
 
@@ -29,15 +30,18 @@ export interface SessionUpdateSender {
 export interface SessionContext extends SessionUpdateSender {
   readonly sessionId: string;
   readonly config: Config;
+  /** Optional message rewrite middleware for ACP message transformation.
+   *  Installed after history replay to avoid rewriting historical messages. */
+  messageRewriter?: MessageRewriteMiddleware;
 }
 
 /**
  * Subagent metadata for tracking parent tool call context.
  */
 export interface SubagentMeta {
-  /** ID of the parent TaskTool call that created this subagent */
+  /** ID of the parent AgentTool call that created this subagent */
   parentToolCallId?: string;
-  /** Type of subagent (from TaskParams.subagent_type) */
+  /** Type of subagent (from AgentParams.subagent_type) */
   subagentType?: string;
 }
 

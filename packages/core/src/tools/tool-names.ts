@@ -18,7 +18,7 @@ export const ToolNames = {
   SHELL: 'run_shell_command',
   TODO_WRITE: 'todo_write',
   MEMORY: 'save_memory',
-  TASK: 'task',
+  AGENT: 'agent',
   SKILL: 'skill',
   EXIT_PLAN_MODE: 'exit_plan_mode',
   WEB_FETCH: 'web_fetch',
@@ -27,20 +27,9 @@ export const ToolNames = {
   LS: 'list_directory',
   LSP: 'lsp',
   ASK_USER_QUESTION: 'ask_user_question',
-  REQUEST_LOG_PATTERN: 'request_log_pattern',
-  SERVICE_MANAGE: 'service_manage',
-  MOD_SEARCH: 'mod_search',
-  MOD_HASH_LOOKUP: 'mod_hash_lookup',
-  MINECRAFT_SERVER_INFO: 'minecraft_server_info',
-  DOWNLOAD_FILE: 'download_file',
-  MEDIA_COMPRESS: 'media_compress',
-  SHARE_LOG: 'share_log',
-  VIDEO_TO_AUDIO: 'video_to_audio',
-  MODPACK_SERVER_PACK: 'modpack_server_pack',
-  INIT_PROJECT: 'init_project',
-  BILIBILI_VIDEO_INFO: 'bilibili_video_info',
-  SCHEDULED_TASK: 'scheduled_task',
-  KNOWLEDGE_SEARCH: 'knowledge_search',
+  CRON_CREATE: 'cron_create',
+  CRON_LIST: 'cron_list',
+  CRON_DELETE: 'cron_delete',
 } as const;
 
 /**
@@ -57,7 +46,7 @@ export const ToolDisplayNames = {
   SHELL: 'Shell',
   TODO_WRITE: 'TodoWrite',
   MEMORY: 'SaveMemory',
-  TASK: 'Task',
+  AGENT: 'Agent',
   SKILL: 'Skill',
   EXIT_PLAN_MODE: 'ExitPlanMode',
   WEB_FETCH: 'WebFetch',
@@ -66,20 +55,9 @@ export const ToolDisplayNames = {
   LS: 'ListFiles',
   LSP: 'Lsp',
   ASK_USER_QUESTION: 'AskUserQuestion',
-  REQUEST_LOG_PATTERN: 'RequestLogPattern',
-  SERVICE_MANAGE: 'ServiceManage',
-  MOD_SEARCH: 'ModSearch',
-  MOD_HASH_LOOKUP: 'ModHashLookup',
-  MINECRAFT_SERVER_INFO: 'MinecraftServerInfo',
-  DOWNLOAD_FILE: 'DownloadFile',
-  MEDIA_COMPRESS: 'MediaCompress',
-  SHARE_LOG: 'ShareLog',
-  VIDEO_TO_AUDIO: 'VideoToAudio',
-  MODPACK_SERVER_PACK: 'ModpackServerPack',
-  INIT_PROJECT: 'InitProject',
-  BILIBILI_VIDEO_INFO: 'BilibiliVideoInfo',
-  SCHEDULED_TASK: 'ScheduledTask',
-  KNOWLEDGE_SEARCH: 'KnowledgeSearch',
+  CRON_CREATE: 'CronCreate',
+  CRON_LIST: 'CronList',
+  CRON_DELETE: 'CronDelete',
 } as const;
 
 // Migration from old tool names to new tool names
@@ -88,6 +66,7 @@ export const ToolDisplayNames = {
 export const ToolNamesMigration = {
   search_file_content: ToolNames.GREP, // Legacy name from grep tool
   replace: ToolNames.EDIT, // Legacy name from edit tool
+  task: ToolNames.AGENT, // Legacy name from agent tool (renamed from task)
 } as const;
 
 // Migration from old tool display names to new tool display names
@@ -96,4 +75,5 @@ export const ToolDisplayNamesMigration = {
   SearchFiles: ToolDisplayNames.GREP, // Old display name for Grep
   FindFiles: ToolDisplayNames.GLOB, // Old display name for Glob
   ReadFolder: ToolDisplayNames.LS, // Old display name for ListFiles
+  Task: ToolDisplayNames.AGENT, // Old display name for Agent (renamed from Task)
 } as const;

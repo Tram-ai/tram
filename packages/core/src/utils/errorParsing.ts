@@ -31,8 +31,11 @@ export function parseAndFormatApiError(
   authType?: AuthType,
 ): string {
   if (isStructuredError(error)) {
-    // TRAM OAuth quota errors have their own user-friendly message; don't wrap them
-    if (error.message.startsWith('TRAM OAuth quota exceeded:')) {
+    // Qwen OAuth quota errors have their own user-friendly message; don't wrap them
+    if (
+      error.message.startsWith('Qwen OAuth quota exceeded:') ||
+      error.message.startsWith('Qwen OAuth free tier has been discontinued')
+    ) {
       return error.message;
     }
 

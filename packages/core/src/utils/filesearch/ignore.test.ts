@@ -6,7 +6,10 @@
 
 import { describe, it, expect, afterEach } from 'vitest';
 import { Ignore, loadIgnoreRules } from './ignore.js';
-import { createTmpDir, cleanupTmpDir } from '@tram-ai/tram-test-utils';
+import {
+  createTmpDir,
+  cleanupTmpDir,
+} from '../../test-utils/file-system-test-helpers.js';
 
 describe('Ignore', () => {
   describe('getDirectoryFilter', () => {

@@ -1,6 +1,6 @@
 {
   "name": "@tram-ai/tram",
-  "version": "0.12.6",
+  "version": "0.14.5",
   "description": "TRAM",
   "repository": {
     "type": "git",
@@ -33,13 +33,17 @@
     "dist"
   ],
   "config": {
-    "sandboxImageUri": "ghcr.io/tram-ai/tram:0.12.6"
+    "sandboxImageUri": "ghcr.io/tram-ai/tram:0.14.5"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "^0.14.1",
     "@google/genai": "1.30.0",
     "@iarna/toml": "^2.2.5",
     "@modelcontextprotocol/sdk": "^1.25.1",
+    "@tram-ai/channel-base": "file:../channels/base",
+    "@tram-ai/channel-telegram": "file:../channels/telegram",
+    "@tram-ai/channel-weixin": "file:../channels/weixin",
+    "@tram-ai/channel-dingtalk": "file:../channels/dingtalk",
     "@tram-ai/tram-core": "file:../core",
     "@tram-ai/web-templates": "file:../web-templates",
     "@types/update-notifier": "^6.0.8",
@@ -75,7 +79,7 @@
   "devDependencies": {
     "@babel/runtime": "^7.27.6",
     "@google/gemini-cli-test-utils": "file:../test-utils",
-    "@tram-ai/tram-test-utils": "file:../test-utils",
+    "@tram-ai/qwen-code-test-utils": "file:../test-utils",
     "@testing-library/react": "^16.3.0",
     "@types/archiver": "^6.0.3",
     "@types/command-exists": "^1.2.3",

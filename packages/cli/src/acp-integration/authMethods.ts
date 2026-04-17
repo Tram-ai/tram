@@ -19,10 +19,9 @@ export function buildAuthMethods(): AuthMethod[] {
       },
     },
     {
-      id: AuthType.TRAM_OAUTH,
-      name: 'TRAM OAuth',
-      description:
-        'OAuth authentication for TRAM with free daily requests',
+      id: AuthType.QWEN_OAUTH,
+      name: 'Qwen OAuth',
+      description: 'Qwen OAuth (free tier discontinued 2026-04-15)',
       _meta: {
         type: 'terminal',
         args: ['--auth-type=tram-oauth'],

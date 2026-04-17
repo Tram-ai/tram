@@ -31,9 +31,10 @@ import {
   Turn,
   type ChatCompressionInfo,
 } from './turn.js';
-import { getCoreSystemPrompt } from './prompts.js';
-import { DEFAULT_TRAM_FLASH_MODEL } from '../config/models.js';
+import { getCoreSystemPrompt, getCustomSystemPrompt } from './prompts.js';
+import { DEFAULT_QWEN_FLASH_MODEL } from '../config/models.js';
 import { FileDiscoveryService } from '../services/fileDiscoveryService.js';
+import { promptIdContext } from '../utils/promptIdContext.js';
 import { setSimulate429 } from '../utils/testUtils.js';
 import { ideContextStore } from '../ide/ideContext.js';
 import { uiTelemetryService } from '../telemetry/uiTelemetry.js';
@@ -315,13 +316,19 @@ describe('Gemini Client (client.ts)', () => {
       getVertexAI: vi.fn().mockReturnValue(false),
       getUserAgent: vi.fn().mockReturnValue('test-agent'),
       getUserMemory: vi.fn().mockReturnValue(''),
-      refreshHierarchicalMemory: vi.fn().mockResolvedValue(undefined),
+      getSystemPrompt: vi.fn().mockReturnValue(undefined),
+      getAppendSystemPrompt: vi.fn().mockReturnValue(undefined),
       getFullContext: vi.fn().mockReturnValue(false),
       getSessionId: vi.fn().mockReturnValue('test-session-id'),
       getProxy: vi.fn().mockReturnValue(undefined),
       getWorkingDir: vi.fn().mockReturnValue('/test/dir'),
       getFileService: vi.fn().mockReturnValue(fileService),
       getMaxSessionTurns: vi.fn().mockReturnValue(0),
+      getClearContextOnIdle: vi.fn().mockReturnValue({
+        thinkingThresholdMinutes: 5,
+        toolResultsThresholdMinutes: 60,
+        toolResultsNumToKeep: 5,
+      }),
       getSessionTokenLimit: vi.fn().mockReturnValue(32000),
       getNoBrowser: vi.fn().mockReturnValue(false),
       getUsageStatisticsEnabled: vi.fn().mockReturnValue(true),
@@ -358,8 +365,18 @@ describe('Gemini Client (client.ts)', () => {
       getSkipLoopDetection: vi.fn().mockReturnValue(false),
       getChatRecordingService: vi.fn().mockReturnValue(undefined),
       getResumedSessionData: vi.fn().mockReturnValue(undefined),
-      getEnableHooks: vi.fn().mockReturnValue(false),
+      getArenaAgentClient: vi.fn().mockReturnValue(null),
+      getDisableAllHooks: vi.fn().mockReturnValue(true),
+      getArenaManager: vi.fn().mockReturnValue(null),
       getMessageBus: vi.fn().mockReturnValue(undefined),
+      hasHooksForEvent: vi.fn().mockReturnValue(false),
+      getHookSystem: vi.fn().mockReturnValue(undefined),
+      getDebugLogger: vi.fn().mockReturnValue({
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+      }),
     } as unknown as Config;
 
     client = new GeminiClient(mockConfig);
@@ -416,6 +433,119 @@ describe('Gemini Client (client.ts)', () => {
     });
   });
 
+  describe('thinking block idle cleanup and latch', () => {
+    let mockChat: Partial<GeminiChat>;
+
+    beforeEach(() => {
+      const mockStream = (async function* () {
+        yield {
+          type: GeminiEventType.Content,
+          value: 'response',
+        };
+      })();
+      mockTurnRunFn.mockReturnValue(mockStream);
+
+      mockChat = {
+        addHistory: vi.fn(),
+        getHistory: vi.fn().mockReturnValue([]),
+        stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
+      };
+      client['chat'] = mockChat as GeminiChat;
+    });
+
+    it('should not strip thoughts on active session (< 5min idle)', async () => {
+      // Simulate a recent API completion (2 minutes ago — within default 5 min threshold)
+      client['lastApiCompletionTimestamp'] = Date.now() - 2 * 60 * 1000;
+      client['thinkingClearLatched'] = false;
+
+      const gen = client.sendMessageStream(
+        [{ text: 'Hello' }],
+        new AbortController().signal,
+        'prompt-1',
+        { type: SendMessageType.UserQuery },
+      );
+      for await (const _ of gen) {
+        /* drain */
+      }
+
+      expect(
+        mockChat.stripThoughtsFromHistoryKeepRecent,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should latch and strip thoughts after > 5min idle', async () => {
+      // Simulate an old API completion (10 minutes ago — exceeds default 5 min threshold)
+      client['lastApiCompletionTimestamp'] = Date.now() - 10 * 60 * 1000;
+      client['thinkingClearLatched'] = false;
+
+      const gen = client.sendMessageStream(
+        [{ text: 'Hello' }],
+        new AbortController().signal,
+        'prompt-2',
+        { type: SendMessageType.UserQuery },
+      );
+      for await (const _ of gen) {
+        /* drain */
+      }
+
+      expect(client['thinkingClearLatched']).toBe(true);
+      expect(mockChat.stripThoughtsFromHistoryKeepRecent).toHaveBeenCalledWith(
+        1,
+      );
+    });
+
+    it('should keep stripping once latched even if idle < 5min', async () => {
+      // Pre-set latch with a recent timestamp (2 minutes ago — within threshold)
+      client['lastApiCompletionTimestamp'] = Date.now() - 2 * 60 * 1000;
+      client['thinkingClearLatched'] = true;
+
+      const gen = client.sendMessageStream(
+        [{ text: 'Hello' }],
+        new AbortController().signal,
+        'prompt-3',
+        { type: SendMessageType.UserQuery },
+      );
+      for await (const _ of gen) {
+        /* drain */
+      }
+
+      expect(client['thinkingClearLatched']).toBe(true);
+      expect(mockChat.stripThoughtsFromHistoryKeepRecent).toHaveBeenCalledWith(
+        1,
+      );
+    });
+
+    it('should update lastApiCompletionTimestamp after API call', async () => {
+      client['lastApiCompletionTimestamp'] = null;
+
+      const before = Date.now();
+      const gen = client.sendMessageStream(
+        [{ text: 'Hello' }],
+        new AbortController().signal,
+        'prompt-4',
+        { type: SendMessageType.UserQuery },
+      );
+      for await (const _ of gen) {
+        /* drain */
+      }
+
+      expect(client['lastApiCompletionTimestamp']).toBeGreaterThanOrEqual(
+        before,
+      );
+    });
+
+    it('should reset latch and timestamp on resetChat', async () => {
+      client['lastApiCompletionTimestamp'] = Date.now();
+      client['thinkingClearLatched'] = true;
+
+      await client.resetChat();
+
+      expect(client['thinkingClearLatched']).toBe(false);
+      expect(client['lastApiCompletionTimestamp']).toBeNull();
+    });
+  });
+
   describe('tryCompressChat', () => {
     const mockGetHistory = vi.fn();
 
@@ -425,6 +555,7 @@ describe('Gemini Client (client.ts)', () => {
         addHistory: vi.fn(),
         setHistory: vi.fn(),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       } as unknown as GeminiChat;
     });
 
@@ -446,6 +577,7 @@ describe('Gemini Client (client.ts)', () => {
         getHistory: vi.fn((_curated?: boolean) => chatHistory),
         setHistory: vi.fn(),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockOriginalChat as GeminiChat;
 
@@ -503,9 +635,10 @@ describe('Gemini Client (client.ts)', () => {
         setHistory: vi.fn(),
       };
 
-      client['startChat'] = vi
-        .fn()
-        .mockResolvedValue(mockNewChat as GeminiChat);
+      client['startChat'] = vi.fn().mockImplementation(async () => {
+        client['chat'] = mockNewChat as GeminiChat;
+        return mockNewChat as GeminiChat;
+      });
 
       // New token count formula: originalTokenCount - (compressionInputTokenCount - 1000) + compressionOutputTokenCount
       const estimatedNewTokenCount = Math.max(
@@ -807,9 +940,10 @@ describe('Gemini Client (client.ts)', () => {
       const mockNewChat: Partial<GeminiChat> = {
         getHistory: vi.fn().mockReturnValue(newCompressedHistory),
       };
-      client['startChat'] = vi
-        .fn()
-        .mockResolvedValue(mockNewChat as GeminiChat);
+      client['startChat'] = vi.fn().mockImplementation(async () => {
+        client['chat'] = mockNewChat as GeminiChat;
+        return mockNewChat as GeminiChat;
+      });
 
       // Mock the summary response from the chat
       // newTokenCount = 501 - (1400 - 1000) + 50 = 501 - 400 + 50 = 151 <= 501 (success)
@@ -901,9 +1035,10 @@ describe('Gemini Client (client.ts)', () => {
       const mockNewChat: Partial<GeminiChat> = {
         getHistory: vi.fn().mockReturnValue(newCompressedHistory),
       };
-      client['startChat'] = vi
-        .fn()
-        .mockResolvedValue(mockNewChat as GeminiChat);
+      client['startChat'] = vi.fn().mockImplementation(async () => {
+        client['chat'] = mockNewChat as GeminiChat;
+        return mockNewChat as GeminiChat;
+      });
 
       // Mock the summary response from the chat
       // newTokenCount = 700 - (1500 - 1000) + 50 = 700 - 500 + 50 = 250 <= 700 (success)
@@ -977,9 +1112,10 @@ describe('Gemini Client (client.ts)', () => {
       const mockNewChat: Partial<GeminiChat> = {
         getHistory: vi.fn().mockReturnValue(newCompressedHistory),
       };
-      client['startChat'] = vi
-        .fn()
-        .mockResolvedValue(mockNewChat as GeminiChat);
+      client['startChat'] = vi.fn().mockImplementation(async () => {
+        client['chat'] = mockNewChat as GeminiChat;
+        return mockNewChat as GeminiChat;
+      });
 
       // Mock the summary response from the chat
       // newTokenCount = 100 - (1060 - 1000) + 20 = 100 - 60 + 20 = 60 <= 100 (success)
@@ -1171,6 +1307,7 @@ describe('Gemini Client (client.ts)', () => {
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       } as unknown as GeminiChat;
       client['chat'] = mockChat;
 
@@ -1226,6 +1363,7 @@ Other open files:
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockChat as GeminiChat;
 
@@ -1282,6 +1420,7 @@ Other open files:
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockChat as GeminiChat;
 
@@ -1348,6 +1487,7 @@ hello
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockChat as GeminiChat;
 
@@ -1387,6 +1527,7 @@ Other open files:
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockChat as GeminiChat;
 
@@ -1432,6 +1573,7 @@ Other open files:
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockChat as GeminiChat;
 
@@ -1520,6 +1662,7 @@ Other open files:
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockChat as GeminiChat;
 
@@ -1577,6 +1720,7 @@ Other open files:
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockChat as GeminiChat;
 
@@ -1658,6 +1802,7 @@ Other open files:
               { role: 'user', parts: [{ text: 'previous message' }] },
             ]),
           stripThoughtsFromHistory: vi.fn(),
+          stripThoughtsFromHistoryKeepRecent: vi.fn(),
         };
         client['chat'] = mockChat as GeminiChat;
       });
@@ -1911,6 +2056,7 @@ Other open files:
           getHistory: vi.fn().mockReturnValue([]), // Default empty history
           setHistory: vi.fn(),
           stripThoughtsFromHistory: vi.fn(),
+          stripThoughtsFromHistoryKeepRecent: vi.fn(),
         };
         client['chat'] = mockChat as GeminiChat;
 
@@ -2250,6 +2396,7 @@ Other open files:
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockChat as GeminiChat;
 
@@ -2287,6 +2434,7 @@ Other open files:
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockChat as GeminiChat;
 
@@ -2327,6 +2475,7 @@ Other open files:
         addHistory: vi.fn(),
         getHistory: vi.fn().mockReturnValue([]),
         stripThoughtsFromHistory: vi.fn(),
+        stripThoughtsFromHistoryKeepRecent: vi.fn(),
       };
       client['chat'] = mockChat as GeminiChat;
 
@@ -2351,6 +2500,7 @@ Other open files:
           getHistory: vi.fn().mockReturnValue([]),
           setHistory: vi.fn(),
           stripThoughtsFromHistory: vi.fn(),
+          stripThoughtsFromHistoryKeepRecent: vi.fn(),
           stripOrphanedUserEntriesFromHistory: vi.fn(),
         };
         client['chat'] = mockChat as GeminiChat;
@@ -2383,6 +2533,7 @@ Other open files:
           getHistory: vi.fn().mockReturnValue([]),
           setHistory: vi.fn(),
           stripThoughtsFromHistory: vi.fn(),
+          stripThoughtsFromHistoryKeepRecent: vi.fn(),
           stripOrphanedUserEntriesFromHistory: vi.fn(),
         };
         client['chat'] = mockChat as GeminiChat;
@@ -2405,6 +2556,106 @@ Other open files:
         }
 
         expect(client['sessionTurnCount']).toBe(turnCountBefore);
+      });
+    });
+
+    describe('hooks fast-path optimization', () => {
+      let mockChat: Partial<GeminiChat>;
+
+      beforeEach(() => {
+        vi.spyOn(client, 'tryCompressChat').mockResolvedValue({
+          originalTokenCount: 0,
+          newTokenCount: 0,
+          compressionStatus: CompressionStatus.COMPRESSED,
+        });
+
+        const mockStream = (async function* () {
+          yield { type: 'content', value: 'Hello' };
+        })();
+        mockTurnRunFn.mockReturnValue(mockStream);
+
+        mockChat = {
+          addHistory: vi.fn(),
+          getHistory: vi.fn().mockReturnValue([]),
+          stripThoughtsFromHistory: vi.fn(),
+          stripThoughtsFromHistoryKeepRecent: vi.fn(),
+        };
+        client['chat'] = mockChat as GeminiChat;
+      });
+
+      it('should skip messageBus.request for UserPromptSubmit when hasHooksForEvent returns false', async () => {
+        // Enable hooks and provide messageBus
+        const mockMessageBus = {
+          request: vi.fn(),
+          response: vi.fn(),
+        };
+        vi.mocked(mockConfig.getDisableAllHooks).mockReturnValue(false);
+        vi.mocked(mockConfig.getMessageBus).mockReturnValue(
+          mockMessageBus as unknown as ReturnType<Config['getMessageBus']>,
+        );
+        vi.mocked(mockConfig.hasHooksForEvent).mockReturnValue(false);
+
+        const stream = client.sendMessageStream(
+          [{ text: 'Hi' }],
+          new AbortController().signal,
+          'prompt-hooks-1',
+        );
+        for await (const _ of stream) {
+          // consume stream
+        }
+
+        // messageBus.request should NOT be called because hasHooksForEvent returned false
+        expect(mockMessageBus.request).not.toHaveBeenCalled();
+      });
+
+      it('should skip messageBus.request for Stop when hasHooksForEvent returns false', async () => {
+        const mockMessageBus = {
+          request: vi.fn(),
+          response: vi.fn(),
+        };
+        vi.mocked(mockConfig.getDisableAllHooks).mockReturnValue(false);
+        vi.mocked(mockConfig.getMessageBus).mockReturnValue(
+          mockMessageBus as unknown as ReturnType<Config['getMessageBus']>,
+        );
+        vi.mocked(mockConfig.hasHooksForEvent).mockReturnValue(false);
+
+        const stream = client.sendMessageStream(
+          [{ text: 'Hi' }],
+          new AbortController().signal,
+          'prompt-hooks-2',
+        );
+        for await (const _ of stream) {
+          // consume stream
+        }
+
+        // messageBus.request should NOT be called for Stop hook either
+        expect(mockMessageBus.request).not.toHaveBeenCalled();
+      });
+
+      it('should not skip hooks when hasHooksForEvent returns true', async () => {
+        const mockMessageBus = {
+          request: vi.fn().mockResolvedValue({ modifiedPrompt: undefined }),
+          response: vi.fn(),
+        };
+        vi.mocked(mockConfig.getDisableAllHooks).mockReturnValue(false);
+        vi.mocked(mockConfig.getMessageBus).mockReturnValue(
+          mockMessageBus as unknown as ReturnType<Config['getMessageBus']>,
+        );
+        vi.mocked(mockConfig.hasHooksForEvent).mockImplementation(
+          (event: string) => event === 'UserPromptSubmit',
+        );
+
+        const stream = client.sendMessageStream(
+          [{ text: 'Hi' }],
+          new AbortController().signal,
+          'prompt-hooks-3',
+        );
+        for await (const _ of stream) {
+          // consume stream
+        }
+
+        // messageBus.request SHOULD be called for UserPromptSubmit
+        expect(mockMessageBus.request).toHaveBeenCalled();
       });
     });
   });
@@ -2461,6 +2712,153 @@ Other open files:
           config: expect.any(Object),
           contents,
         },
+        'test-session-id',
+      );
+    });
+
+    it('should prefer the current prompt id context for stateless requests', async () => {
+      const contents = [{ role: 'user', parts: [{ text: 'hello' }] }];
+      const abortSignal = new AbortController().signal;
+
+      await promptIdContext.run('btw-prompt-id', async () => {
+        await client.generateContent(
+          contents,
+          {},
+          abortSignal,
+          DEFAULT_QWEN_FLASH_MODEL,
+        );
+      });
+
+      expect(mockContentGenerator.generateContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: DEFAULT_QWEN_FLASH_MODEL,
+          contents,
+        }),
+        'btw-prompt-id',
+      );
+    });
+
+    it('should prefer an explicit prompt id override over the current context', async () => {
+      const contents = [{ role: 'user', parts: [{ text: 'hello' }] }];
+      const abortSignal = new AbortController().signal;
+
+      await promptIdContext.run('context-prompt-id', async () => {
+        await (
+          client.generateContent as unknown as (
+            ...args: unknown[]
+          ) => Promise<GenerateContentResponse>
+        )(
+          contents,
+          {},
+          abortSignal,
+          DEFAULT_QWEN_FLASH_MODEL,
+          'override-prompt-id',
+        );
+      });
+
+      expect(mockContentGenerator.generateContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: DEFAULT_QWEN_FLASH_MODEL,
+          contents,
+        }),
+        'override-prompt-id',
+      );
+    });
+
+    it('should use config system prompt override when provided', async () => {
+      const contents = [{ role: 'user', parts: [{ text: 'hello' }] }];
+      const abortSignal = new AbortController().signal;
+
+      vi.spyOn(client['config'], 'getSystemPrompt').mockReturnValue(
+        'Override prompt',
+      );
+      vi.spyOn(client['config'], 'getUserMemory').mockReturnValue(
+        'Saved memory',
+      );
+      vi.mocked(getCustomSystemPrompt).mockReturnValueOnce(
+        'Override prompt with memory',
+      );
+
+      await client.generateContent(
+        contents,
+        {},
+        abortSignal,
+        DEFAULT_QWEN_FLASH_MODEL,
+      );
+
+      expect(getCustomSystemPrompt).toHaveBeenCalledWith(
+        'Override prompt',
+        'Saved memory',
+        undefined,
+      );
+      expect(mockContentGenerator.generateContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            systemInstruction: 'Override prompt with memory',
+          }),
+        }),
+        'test-session-id',
+      );
+    });
+
+    it('should append config appendSystemPrompt to the core system prompt', async () => {
+      const contents = [{ role: 'user', parts: [{ text: 'hello' }] }];
+      const abortSignal = new AbortController().signal;
+
+      vi.mocked(getCoreSystemPrompt).mockClear();
+      vi.spyOn(client['config'], 'getAppendSystemPrompt').mockReturnValue(
+        'Be extra concise.',
+      );
+
+      await client.generateContent(
+        contents,
+        {},
+        abortSignal,
+        DEFAULT_QWEN_FLASH_MODEL,
+      );
+
+      expect(getCoreSystemPrompt).toHaveBeenCalledWith(
+        '',
+        'test-model',
+        'Be extra concise.',
+      );
+    });
+
+    it('should append config appendSystemPrompt after a config system prompt override', async () => {
+      const contents = [{ role: 'user', parts: [{ text: 'hello' }] }];
+      const abortSignal = new AbortController().signal;
+
+      vi.spyOn(client['config'], 'getSystemPrompt').mockReturnValue(
+        'Override prompt',
+      );
+      vi.spyOn(client['config'], 'getAppendSystemPrompt').mockReturnValue(
+        'Focus on findings only.',
+      );
+      vi.spyOn(client['config'], 'getUserMemory').mockReturnValue(
+        'Saved memory',
+      );
+      vi.mocked(getCustomSystemPrompt).mockReturnValueOnce(
+        'Override prompt with memory and append',
+      );
+
+      await client.generateContent(
+        contents,
+        {},
+        abortSignal,
+        DEFAULT_QWEN_FLASH_MODEL,
+      );
+
+      expect(getCustomSystemPrompt).toHaveBeenCalledWith(
+        'Override prompt',
+        'Saved memory',
+        'Focus on findings only.',
+      );
+      expect(mockContentGenerator.generateContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            systemInstruction: 'Override prompt with memory and append',
+          }),
+        }),
         'test-session-id',
       );
     });

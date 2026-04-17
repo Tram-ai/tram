@@ -6,8 +6,13 @@
 
 import * as vscode from 'vscode';
 import { BaseMessageHandler } from './BaseMessageHandler.js';
-import type { ChatMessage } from '../../services/tramAgentManager.js';
+import type { ChatMessage } from '../../services/qwenAgentManager.js';
+import type { ImageAttachment } from '../../utils/imageSupport.js';
 import type { ApprovalModeValue } from '../../types/approvalModeValueTypes.js';
+import {
+  processImageAttachments,
+  buildPromptBlocks,
+} from '../utils/imageHandler.js';
 import { isAuthenticationRequiredError } from '../../utils/authErrors.js';
 import { getErrorMessage } from '../../utils/errorMessage.js';
 
@@ -67,6 +72,7 @@ export class SessionMessageHandler extends BaseMessageHandler {
                 endLine?: number;
               }
             | undefined,
+          data?.attachments as ImageAttachment[] | undefined,
         );
         break;
 
@@ -94,7 +100,13 @@ export class SessionMessageHandler extends BaseMessageHandler {
         // This does not alter the current conversation in this tab; the new tab
         // will initialize its own state and (optionally) create a new session.
         try {
-          await vscode.commands.executeCommand('tramCode.openNewChatTab');
+          const modelId =
+            typeof data?.modelId === 'string' && data.modelId.trim().length > 0
+              ? data.modelId.trim()
+              : undefined;
+          await vscode.commands.executeCommand('qwenCode.openNewChatTab', {
+            initialModelId: modelId,
+          });
         } catch (error) {
           console.error(
             '[SessionMessageHandler] Failed to open new chat tab:',
@@ -280,20 +292,21 @@ export class SessionMessageHandler extends BaseMessageHandler {
       startLine?: number;
       endLine?: number;
     },
+    attachments?: ImageAttachment[],
   ): Promise<void> {
     console.log('[SessionMessageHandler] handleSendMessage called with:', text);
-
     // Guard: do not process empty or whitespace-only messages.
     // This prevents ghost user-message bubbles when slash-command completions
     // or model-selector interactions clear the input but still trigger a submit.
     const trimmedText = text.replace(/\u200B/g, '').trim();
-    if (!trimmedText) {
+    const hasAttachments = (attachments?.length ?? 0) > 0;
+    if (!trimmedText && !hasAttachments) {
       console.warn('[SessionMessageHandler] Ignoring empty message');
       return;
     }
 
-    // Format message with file context if present
-    let formattedText = text;
+    let displayText = trimmedText ? text : '';
+    let promptText = text;
     if (context && context.length > 0) {
       const contextParts = context
         .map((ctx) => {
@@ -304,7 +317,28 @@ export class SessionMessageHandler extends BaseMessageHandler {
         })
         .join('\n');
 
-      formattedText = `${contextParts}\n\n${text}`;
+      promptText = `${contextParts}\n\n${text}`;
+    }
+
+    const {
+      formattedText,
+      displayText: updatedDisplayText,
+      savedImageCount,
+      promptImages,
+    } = await processImageAttachments(promptText, attachments);
+    promptText = formattedText;
+    displayText = updatedDisplayText;
+
+    if (hasAttachments && !trimmedText && savedImageCount === 0) {
+      const errorMsg =
+        'Failed to attach the pasted image. Nothing was sent. Please paste the image again.';
+      console.warn('[SessionMessageHandler]', errorMsg);
+      vscode.window.showErrorMessage(errorMsg);
+      this.sendToWebView({
+        type: 'error',
+        data: { message: errorMsg },
+      });
+      return;
     }
 
     // Ensure we have an active conversation
@@ -359,12 +393,11 @@ export class SessionMessageHandler extends BaseMessageHandler {
 
     // Generate title for first message, but only if it hasn't been set yet
     if (isFirstMessage && !this.isTitleSet) {
-      const title = text.substring(0, 50) + (text.length > 50 ? '...' : '');
       this.sendToWebView({
         type: 'sessionTitleUpdated',
         data: {
           sessionId: this.currentConversationId,
-          title,
+          title: displayText,
         },
       });
       this.isTitleSet = true; // Mark title as set
@@ -373,7 +406,7 @@ export class SessionMessageHandler extends BaseMessageHandler {
     // Save user message
     const userMessage: ChatMessage = {
       role: 'user',
-      content: text,
+      content: displayText,
       timestamp: Date.now(),
     };
 
@@ -382,7 +415,6 @@ export class SessionMessageHandler extends BaseMessageHandler {
       userMessage,
     );
 
-    // Send to WebView
     this.sendToWebView({
       type: 'message',
       data: { ...userMessage, fileContext },
@@ -445,7 +477,9 @@ export class SessionMessageHandler extends BaseMessageHandler {
         },
       });
 
-      await this.agentManager.sendMessage(formattedText);
+      await this.agentManager.sendMessage(
+        buildPromptBlocks(promptText, promptImages),
+      );
 
       // Save assistant message
       if (this.currentStreamContent && this.currentConversationId) {
@@ -557,7 +591,8 @@ export class SessionMessageHandler extends BaseMessageHandler {
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
       const workingDir = workspaceFolder?.uri.fsPath || process.cwd();
 
-      await this.agentManager.createNewSession(workingDir);
+      await this.agentManager.createNewSession(workingDir, { forceNew: true });
+      this.currentConversationId = null;
 
       this.sendToWebView({
         type: 'conversationCleared',
@@ -696,8 +731,12 @@ export class SessionMessageHandler extends BaseMessageHandler {
         // If we are connected, try to create a fresh ACP session so user can interact
         if (this.agentManager.isConnected) {
           try {
-            const newAcpSessionId =
-              await this.agentManager.createNewSession(workingDir);
+            const newAcpSessionId = await this.agentManager.createNewSession(
+              workingDir,
+              {
+                forceNew: true,
+              },
+            );
 
             this.currentConversationId = newAcpSessionId;
 

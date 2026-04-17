@@ -63,7 +63,11 @@ We welcome contributions! See our [Contributing Guide](https://github.com/tram-a
 
 ## Terms of Service and Privacy Notice
 
+<<<<<<< HEAD
 By installing this extension, you agree to the [Terms of Service](https://github.com/tram-ai/tram/blob/main/docs/tos-privacy.md).
+=======
+By installing this extension, you agree to the [Terms of Service](https://qwenlm.github.io/qwen-code-docs/en/users/support/tos-privacy/).
+>>>>>>> v0.14.5
 
 ## License
 

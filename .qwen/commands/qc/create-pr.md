@@ -25,11 +25,17 @@ Create a well-structured pull request with proper description and title.
    - Include context and motivation
    - List any breaking changes
    - Link related issues if provided, or use "No linked issues"
+   - Leave the "Screenshots / Video Demo" section empty for the author to fill in manually
    - Add this line at the end of PR body: "🤖 Generated with [Qwen Code](https://github.com/QwenLM/qwen-code)", with a line separator
 
 4. **Set up PR**
    - Create PR title and body
    - Submit PR with gh command
+   - **If a GitHub token is provided in the user's message**, use it by setting the `GH_TOKEN` environment variable:
+     ```bash
+     GH_TOKEN=<provided_token> gh pr create --title "..." --body "..."
+     ```
+   - If no token is provided, use the default `gh` authentication
 
 ## PR Template
 

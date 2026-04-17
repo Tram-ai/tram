@@ -72,25 +72,16 @@ if (existsSync(bundledSkillsDir)) {
   );
 }
 
-// Copy i18n locales so they are available at runtime.
-// In the esbuild bundle, import.meta.url resolves to dist/cli.js, so
-// i18n system looks for locales at dist/locales/.
-const localesDir = join(
-  root,
-  'packages',
-  'cli',
-  'src',
-  'i18n',
-  'locales',
-);
-if (existsSync(localesDir)) {
-  const destLocalesDir = join(distDir, 'locales');
-  copyRecursiveSync(localesDir, destLocalesDir);
-  console.log('Copied i18n locales to dist/locales/');
+// Copy user docs into qc-helper bundled skill so it can reference them at runtime.
+// The qc-helper skill reads docs from a `docs/` subdirectory relative to its own
+// directory. In the esbuild bundle this becomes dist/bundled/qc-helper/docs/.
+const userDocsDir = join(root, 'docs', 'users');
+if (existsSync(userDocsDir)) {
+  const destDocsDir = join(distDir, 'bundled', 'qc-helper', 'docs');
+  copyRecursiveSync(userDocsDir, destDocsDir);
+  console.log('Copied docs/users/ to dist/bundled/qc-helper/docs/');
 } else {
-  console.warn(
-    `Warning: Locales directory not found at ${localesDir}`,
-  );
+  console.warn(`Warning: User docs directory not found at ${userDocsDir}`);
 }
 
 console.log('\n✅ All bundle assets copied to dist/');

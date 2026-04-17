@@ -2,7 +2,7 @@
   "name": "tram-vscode-ide-companion",
   "displayName": "TRAM Companion",
   "description": "Enable TRAM with direct access to your VS Code workspace.",
-  "version": "0.12.6",
+  "version": "0.14.5",
   "publisher": "tram-ai",
   "icon": "assets/icon.png",
   "repository": {
@@ -48,7 +48,7 @@
           "id": "tram-sidebar",
           "title": "TRAM",
           "icon": "assets/sidebar-icon.svg",
-          "when": "tram:doesNotSupportSecondarySidebar"
+          "when": "!tram:supportsSecondarySidebar"
         }
       ],
       "secondarySidebar": [
@@ -56,7 +56,7 @@
           "id": "tram-secondary",
           "title": "TRAM",
           "icon": "assets/sidebar-icon.svg",
-          "when": "!tram:doesNotSupportSecondarySidebar"
+          "when": "tram:supportsSecondarySidebar"
         }
       ]
     },
@@ -67,7 +67,7 @@
           "id": "tram.chatView.sidebar",
           "name": "TRAM",
           "icon": "assets/sidebar-icon.svg",
-          "when": "tram:doesNotSupportSecondarySidebar"
+          "when": "!tram:supportsSecondarySidebar"
         }
       ],
       "tram-secondary": [
@@ -76,7 +76,7 @@
           "id": "tram.chatView.secondary",
           "name": "TRAM",
           "icon": "assets/sidebar-icon.svg",
-          "when": "!tram:doesNotSupportSecondarySidebar"
+          "when": "tram:supportsSecondarySidebar"
         }
       ]
     },
@@ -224,7 +224,6 @@
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
-    "@vscode/vsce": "^3.6.0",
     "autoprefixer": "^10.4.22",
     "esbuild": "^0.25.3",
     "eslint": "^9.25.1",

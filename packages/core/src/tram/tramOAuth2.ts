@@ -420,9 +420,15 @@ export class TramOAuth2Client implements ITramOAuth2Client {
 
     if (!response.ok) {
       const errorData = await response.text();
+<<<<<<< HEAD:packages/core/src/tram/tramOAuth2.ts
       // Handle 400 errors which might indicate refresh token expiry
       if (response.status === 400) {
         await clearTramCredentials();
+=======
+      // Handle 400/401 errors which indicate refresh token expiry or invalidity
+      if (response.status === 400 || response.status === 401) {
+        await clearQwenCredentials();
+>>>>>>> v0.14.5:packages/core/src/qwen/qwenOAuth2.ts
         throw new CredentialsClearRequiredError(
           "Refresh token expired or invalid. Please use '/auth' to re-authenticate.",
           { status: response.status, response: errorData },
@@ -433,7 +439,21 @@ export class TramOAuth2Client implements ITramOAuth2Client {
       );
     }
 
-    const responseData = (await response.json()) as TokenRefreshResponse;
+    let responseText: string;
+    try {
+      responseText = await response.text();
+    } catch {
+      responseText = '';
+    }
+
+    let responseData: TokenRefreshResponse;
+    try {
+      responseData = JSON.parse(responseText) as TokenRefreshResponse;
+    } catch {
+      throw new Error(
+        `Qwen OAuth refresh returned invalid JSON: ${responseText || '(empty response body)'}`,
+      );
+    }
 
     // Check if the response indicates success
     if (isErrorResponse(responseData)) {

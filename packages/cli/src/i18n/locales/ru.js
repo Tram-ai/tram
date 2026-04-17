@@ -153,6 +153,7 @@ export default {
   // ============================================================================
   // System Information Fields
   // ============================================================================
+<<<<<<< HEAD
   'TRAM': 'TRAM',
   Runtime: 'Runtime',
   OS: 'OS',
@@ -172,6 +173,28 @@ export default {
   Proxy: 'Proxy',
   'Memory Usage': 'Memory Usage',
   'IDE Client': 'IDE Client',
+=======
+  'Qwen Code': 'Qwen Code',
+  Runtime: 'Среда выполнения',
+  OS: 'ОС',
+  Auth: 'Аутентификация',
+  'CLI Version': 'Версия CLI',
+  'Git Commit': 'Git-коммит',
+  Model: 'Модель',
+  'Fast Model': 'Быстрая модель',
+  Sandbox: 'Песочница',
+  'OS Platform': 'Платформа ОС',
+  'OS Arch': 'Архитектура ОС',
+  'OS Release': 'Версия ОС',
+  'Node.js Version': 'Версия Node.js',
+  'NPM Version': 'Версия NPM',
+  'Session ID': 'ID сессии',
+  'Auth Method': 'Метод авторизации',
+  'Base URL': 'Базовый URL',
+  Proxy: 'Прокси',
+  'Memory Usage': 'Использование памяти',
+  'IDE Client': 'Клиент IDE',
+>>>>>>> v0.14.5
 
   // ============================================================================
   // Commands - General
@@ -726,10 +749,147 @@ export default {
   // ============================================================================
   // Commands - Hooks
   // ============================================================================
+<<<<<<< HEAD
   'Manage TRAM hooks': 'Manage TRAM hooks',
   'List all configured hooks': 'List all configured hooks',
   'Enable a disabled hook': 'Enable a disabled hook',
   'Disable an active hook': 'Disable an active hook',
+=======
+  'Manage Qwen Code hooks': 'Управлять хуками Qwen Code',
+  'List all configured hooks': 'Показать все настроенные хуки',
+  'Enable a disabled hook': 'Включить отключенный хук',
+  'Disable an active hook': 'Отключить активный хук',
+  // Hooks - Dialog
+  Hooks: 'Хуки',
+  'Loading hooks...': 'Загрузка хуков...',
+  'Error loading hooks:': 'Ошибка загрузки хуков:',
+  'Press Escape to close': 'Нажмите Escape для закрытия',
+  'Press Escape, Ctrl+C, or Ctrl+D to cancel':
+    'Нажмите Escape, Ctrl+C или Ctrl+D для отмены',
+  'Press Space, Enter, or Escape to dismiss':
+    'Нажмите Пробел, Enter или Escape для закрытия',
+  'No hook selected': 'Хук не выбран',
+  // Hooks - List Step
+  'No hook events found.': 'События хуков не найдены.',
+  '{{count}} hook configured': '{{count}} хук настроен',
+  '{{count}} hooks configured': '{{count}} хуков настроено',
+  'This menu is read-only. To add or modify hooks, edit settings.json directly or ask Qwen Code.':
+    'Это меню только для чтения. Чтобы добавить или изменить хуки, отредактируйте settings.json напрямую или спросите Qwen Code.',
+  'Enter to select · Esc to cancel': 'Enter для выбора · Esc для отмены',
+  // Hooks - Detail Step
+  'Exit codes:': 'Коды выхода:',
+  'Configured hooks:': 'Настроенные хуки:',
+  'No hooks configured for this event.':
+    'Для этого события нет настроенных хуков.',
+  'To add hooks, edit settings.json directly or ask Qwen.':
+    'Чтобы добавить хуки, отредактируйте settings.json напрямую или спросите Qwen.',
+  'Enter to select · Esc to go back': 'Enter для выбора · Esc для возврата',
+  // Hooks - Config Detail Step
+  'Hook details': 'Детали хука',
+  'Event:': 'Событие:',
+  'Extension:': 'Расширение:',
+  'Desc:': 'Описание:',
+  'No hook config selected': 'Конфигурация хука не выбрана',
+  'To modify or remove this hook, edit settings.json directly or ask Qwen to help.':
+    'Чтобы изменить или удалить этот хук, отредактируйте settings.json напрямую или спросите Qwen.',
+  // Hooks - Disabled Step
+  'Hook Configuration - Disabled': 'Конфигурация хуков - Отключено',
+  'All hooks are currently disabled. You have {{count}} that are not running.':
+    'Все хуки в данный момент отключены. У вас {{count}} не выполняются.',
+  '{{count}} configured hook': '{{count}} настроенный хук',
+  '{{count}} configured hooks': '{{count}} настроенных хуков',
+  'When hooks are disabled:': 'Когда хуки отключены:',
+  'No hook commands will execute': 'Никакие команды хуков не будут выполняться',
+  'StatusLine will not be displayed': 'StatusLine не будет отображаться',
+  'Tool operations will proceed without hook validation':
+    'Операции инструментов будут выполняться без проверки хуков',
+  'To re-enable hooks, remove "disableAllHooks" from settings.json or ask Qwen Code.':
+    'Чтобы снова включить хуки, удалите "disableAllHooks" из settings.json или спросите Qwen Code.',
+  // Hooks - Source
+  Project: 'Проект',
+  User: 'Пользователь',
+  System: 'Система',
+  Extension: 'Расширение',
+  'Local Settings': 'Локальные настройки',
+  'User Settings': 'Пользовательские настройки',
+  'System Settings': 'Системные настройки',
+  Extensions: 'Расширения',
+  // Hooks - Status
+  '✓ Enabled': '✓ Включен',
+  '✗ Disabled': '✗ Отключен',
+  // Hooks - Event Descriptions (short)
+  'Before tool execution': 'Перед выполнением инструмента',
+  'After tool execution': 'После выполнения инструмента',
+  'After tool execution fails': 'При неудачном выполнении инструмента',
+  'When notifications are sent': 'При отправке уведомлений',
+  'When the user submits a prompt': 'Когда пользователь отправляет промпт',
+  'When a new session is started': 'При запуске новой сессии',
+  'Right before Qwen Code concludes its response':
+    'Непосредственно перед завершением ответа Qwen Code',
+  'When a subagent (Agent tool call) is started':
+    'При запуске субагента (вызов инструмента Agent)',
+  'Right before a subagent concludes its response':
+    'Непосредственно перед завершением ответа субагента',
+  'Before conversation compaction': 'Перед сжатием разговора',
+  'When a session is ending': 'При завершении сессии',
+  'When a permission dialog is displayed': 'При отображении диалога разрешений',
+  // Hooks - Event Descriptions (detailed)
+  'Input to command is JSON of tool call arguments.':
+    'Ввод в команду — это JSON аргументов вызова инструмента.',
+  'Input to command is JSON with fields "inputs" (tool call arguments) and "response" (tool call response).':
+    'Ввод в команду — это JSON с полями "inputs" (аргументы вызова инструмента) и "response" (ответ вызова инструмента).',
+  'Input to command is JSON with tool_name, tool_input, tool_use_id, error, error_type, is_interrupt, and is_timeout.':
+    'Ввод в команду — это JSON с tool_name, tool_input, tool_use_id, error, error_type, is_interrupt и is_timeout.',
+  'Input to command is JSON with notification message and type.':
+    'Ввод в команду — это JSON с сообщением уведомления и типом.',
+  'Input to command is JSON with original user prompt text.':
+    'Ввод в команду — это JSON с исходным текстом промпта пользователя.',
+  'Input to command is JSON with session start source.':
+    'Ввод в команду — это JSON с источником запуска сессии.',
+  'Input to command is JSON with session end reason.':
+    'Ввод в команду — это JSON с причиной завершения сессии.',
+  'Input to command is JSON with agent_id and agent_type.':
+    'Ввод в команду — это JSON с agent_id и agent_type.',
+  'Input to command is JSON with agent_id, agent_type, and agent_transcript_path.':
+    'Ввод в команду — это JSON с agent_id, agent_type и agent_transcript_path.',
+  'Input to command is JSON with compaction details.':
+    'Ввод в команду — это JSON с деталями сжатия.',
+  'Input to command is JSON with tool_name, tool_input, and tool_use_id. Output JSON with hookSpecificOutput containing decision to allow or deny.':
+    'Ввод в команду — это JSON с tool_name, tool_input и tool_use_id. Вывод — JSON с hookSpecificOutput, содержащим решение о разрешении или отказе.',
+  // Hooks - Exit Code Descriptions
+  'stdout/stderr not shown': 'stdout/stderr не отображаются',
+  'show stderr to model and continue conversation':
+    'показать stderr модели и продолжить разговор',
+  'show stderr to user only': 'показать stderr только пользователю',
+  'stdout shown in transcript mode (ctrl+o)':
+    'stdout отображается в режиме транскрипции (ctrl+o)',
+  'show stderr to model immediately': 'показать stderr модели немедленно',
+  'show stderr to user only but continue with tool call':
+    'показать stderr только пользователю, но продолжить вызов инструмента',
+  'block processing, erase original prompt, and show stderr to user only':
+    'заблокировать обработку, стереть исходный промпт и показать stderr только пользователю',
+  'stdout shown to Qwen': 'stdout показан Qwen',
+  'show stderr to user only (blocking errors ignored)':
+    'показать stderr только пользователю (блокирующие ошибки игнорируются)',
+  'command completes successfully': 'команда успешно завершена',
+  'stdout shown to subagent': 'stdout показан субагенту',
+  'show stderr to subagent and continue having it run':
+    'показать stderr субагенту и продолжить его выполнение',
+  'stdout appended as custom compact instructions':
+    'stdout добавлен как пользовательские инструкции сжатия',
+  'block compaction': 'заблокировать сжатие',
+  'show stderr to user only but continue with compaction':
+    'показать stderr только пользователю, но продолжить сжатие',
+  'use hook decision if provided':
+    'использовать решение хука, если предоставлено',
+  // Hooks - Messages
+  'Config not loaded.': 'Конфигурация не загружена.',
+  'Hooks are not enabled. Enable hooks in settings to use this feature.':
+    'Хуки не включены. Включите хуки в настройках, чтобы использовать эту функцию.',
+  'No hooks configured. Add hooks in your settings.json file.':
+    'Хуки не настроены. Добавьте хуки в файл settings.json.',
+  'Configured Hooks ({{count}} total)': 'Настроенные хуки (всего {{count}})',
+>>>>>>> v0.14.5
 
   // ============================================================================
   // Commands - Session Export
@@ -835,10 +995,16 @@ export default {
   'Automatically approve file edits': 'Automatically approve file edits',
   'Automatically approve all tools': 'Automatically approve all tools',
   'Workspace approval mode exists and takes priority. User-level change will have no effect.':
+<<<<<<< HEAD
     'Workspace approval mode exists and takes priority. User-level change will have no effect.',
   'Apply To': 'Apply To',
   'User Settings': 'User Settings',
   'Workspace Settings': 'Workspace Settings',
+=======
+    'Режим подтверждения рабочего пространства существует и имеет приоритет. Изменение на уровне пользователя не будет иметь эффекта.',
+  'Apply To': 'Применить к',
+  'Workspace Settings': 'Настройки рабочего пространства',
+>>>>>>> v0.14.5
 
   // ============================================================================
   // Commands - Memory
@@ -888,11 +1054,18 @@ export default {
   'Authenticate with an OAuth-enabled MCP server':
     'Authenticate with an OAuth-enabled MCP server',
   'List configured MCP servers and tools':
+<<<<<<< HEAD
     'List configured MCP servers and tools',
   'Restarts MCP servers.': 'Restarts MCP servers.',
   'Open MCP management dialog': 'Open MCP management dialog',
   'Config not loaded.': 'Config not loaded.',
   'Could not retrieve tool registry.': 'Could not retrieve tool registry.',
+=======
+    'Просмотр настроенных MCP-серверов и инструментов',
+  'Restarts MCP servers.': 'Перезапустить MCP-серверы.',
+  'Could not retrieve tool registry.':
+    'Не удалось получить реестр инструментов.',
+>>>>>>> v0.14.5
   'No MCP servers configured with OAuth authentication.':
     'No MCP servers configured with OAuth authentication.',
   'MCP servers with OAuth authentication:':
@@ -1086,7 +1259,14 @@ export default {
   // ============================================================================
   // Commands - Model
   // ============================================================================
+<<<<<<< HEAD
   'Switch the model for this session': 'Switch the model for this session',
+=======
+  'Switch the model for this session (--fast for suggestion model)':
+    'Переключение модели для этой сессии (--fast для модели подсказок)',
+  'Set a lighter model for prompt suggestions and speculative execution':
+    'Установить облегчённую модель для подсказок и спекулятивного выполнения',
+>>>>>>> v0.14.5
   'Content generator configuration not available.':
     'Content generator configuration not available.',
   'Authentication type not available.': 'Authentication type not available.',
@@ -1148,6 +1328,7 @@ export default {
   // ============================================================================
   // Dialogs - Tool Confirmation
   // ============================================================================
+<<<<<<< HEAD
   'Do you want to proceed?': 'Do you want to proceed?',
   'Yes, allow once': 'Yes, allow once',
   'Allow always': 'Allow always',
@@ -1170,6 +1351,68 @@ export default {
   'URLs to fetch:': 'URLs to fetch:',
   'MCP Server: {{server}}': 'MCP Server: {{server}}',
   'Tool: {{tool}}': 'Tool: {{tool}}',
+=======
+  'Do you want to proceed?': 'Вы хотите продолжить?',
+  'Yes, allow once': 'Да, разрешить один раз',
+  'Allow always': 'Всегда разрешать',
+  Yes: 'Да',
+  No: 'Нет',
+  'No (esc)': 'Нет (esc)',
+  'Yes, allow always for this session': 'Да, всегда разрешать для этой сессии',
+
+  // MCP Management - Core translations
+  Disable: 'Отключить',
+  Enable: 'Включить',
+  Authenticate: 'Аутентификация',
+  'Re-authenticate': 'Повторная аутентификация',
+  'Clear Authentication': 'Очистить аутентификацию',
+  disabled: 'отключен',
+  'Server:': 'Сервер:',
+  Reconnect: 'Переподключить',
+  'View tools': 'Просмотреть инструменты',
+  '(disabled)': '(отключен)',
+  'Error:': 'Ошибка:',
+  tool: 'инструмент',
+  connected: 'подключен',
+  connecting: 'подключение',
+  disconnected: 'отключен',
+  error: 'ошибка',
+  // Invalid tool related translations
+  '{{count}} invalid tools': '{{count}} недействительных инструментов',
+  invalid: 'недействительный',
+  'invalid: {{reason}}': 'недействительно: {{reason}}',
+  'missing name': 'отсутствует имя',
+  'missing description': 'отсутствует описание',
+  '(unnamed)': '(без имени)',
+  'Warning: This tool cannot be called by the LLM':
+    'Предупреждение: Этот инструмент не может быть вызван LLM',
+  Reason: 'Причина',
+  'Tools must have both name and description to be used by the LLM.':
+    'Инструменты должны иметь как имя, так и описание, чтобы использоваться LLM.',
+  'Modify in progress:': 'Идет изменение:',
+  'Save and close external editor to continue':
+    'Сохраните и закройте внешний редактор для продолжения',
+  'Apply this change?': 'Применить это изменение?',
+  'Yes, allow always': 'Да, всегда разрешать',
+  'Modify with external editor': 'Изменить во внешнем редакторе',
+  'No, suggest changes (esc)': 'Нет, предложить изменения (esc)',
+  "Allow execution of: '{{command}}'?": "Разрешить выполнение: '{{command}}'?",
+  'Yes, allow always ...': 'Да, всегда разрешать ...',
+  'Always allow in this project': 'Всегда разрешать в этом проекте',
+  'Always allow {{action}} in this project':
+    'Всегда разрешать {{action}} в этом проекте',
+  'Always allow for this user': 'Всегда разрешать для этого пользователя',
+  'Always allow {{action}} for this user':
+    'Всегда разрешать {{action}} для этого пользователя',
+  'Yes, restore previous mode ({{mode}})':
+    'Да, восстановить предыдущий режим ({{mode}})',
+  'Yes, and auto-accept edits': 'Да, и автоматически принимать правки',
+  'Yes, and manually approve edits': 'Да, и вручную подтверждать правки',
+  'No, keep planning (esc)': 'Нет, продолжить планирование (esc)',
+  'URLs to fetch:': 'URL для загрузки:',
+  'MCP Server: {{server}}': 'MCP-сервер: {{server}}',
+  'Tool: {{tool}}': 'Инструмент: {{tool}}',
+>>>>>>> v0.14.5
   'Allow execution of MCP tool "{{tool}}" from server "{{server}}"?':
     'Allow execution of MCP tool "{{tool}}" from server "{{server}}"?',
   'Yes, always allow tool "{{tool}}" from server "{{server}}"':
@@ -1220,12 +1463,27 @@ export default {
   'You must select an auth method to proceed. Press Ctrl+C again to exit.':
     'You must select an auth method to proceed. Press Ctrl+C again to exit.',
   'Terms of Services and Privacy Notice':
+<<<<<<< HEAD
     'Terms of Services and Privacy Notice',
   'TRAM OAuth': 'TRAM OAuth',
   'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models':
     'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models',
   'Login with TramChat account to use daily free quota.':
     'Login with TramChat account to use daily free quota.',
+=======
+    'Условия обслуживания и уведомление о конфиденциальности',
+  'Qwen OAuth': 'Qwen OAuth',
+  'Discontinued — switch to Coding Plan or API Key':
+    'Прекращено — переключитесь на Coding Plan или API Key',
+  'Qwen OAuth free tier was discontinued on 2026-04-15. Run /auth to switch provider.':
+    'Бесплатный уровень Qwen OAuth прекращён 2026-04-15. Выполните /auth для смены провайдера.',
+  'Qwen OAuth free tier was discontinued on 2026-04-15. Please select Coding Plan or API Key instead.':
+    'Бесплатный уровень Qwen OAuth прекращён 2026-04-15. Выберите Coding Plan или API Key.',
+  'Qwen OAuth free tier was discontinued on 2026-04-15. Please select a model from another provider or run /auth to switch.':
+    'Бесплатный уровень Qwen OAuth был прекращен 2026-04-15. Пожалуйста, выберите модель от другого провайдера или выполните /auth для переключения.',
+  '\n⚠ Qwen OAuth free tier was discontinued on 2026-04-15. Please select another option.\n':
+    '\n⚠ Бесплатный уровень Qwen OAuth прекращён 2026-04-15. Выберите другую опцию.\n',
+>>>>>>> v0.14.5
   'Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models':
     'Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models',
   'Alibaba Cloud Coding Plan': 'Alibaba Cloud Coding Plan',
@@ -1318,20 +1576,101 @@ export default {
   none: 'none',
   unknown: 'unknown',
   "Failed to switch model to '{{modelId}}'.\n\n{{error}}":
+<<<<<<< HEAD
     "Failed to switch model to '{{modelId}}'.\n\n{{error}}",
   'Tram 3.5 Plus 闂?efficient hybrid model with leading coding performance':
     'Tram 3.5 Plus 闂?efficient hybrid model with leading coding performance',
   'The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
     'The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)',
+=======
+    "Не удалось переключиться на модель '{{modelId}}'.\n\n{{error}}",
+  'Qwen 3.6 Plus — efficient hybrid model with leading coding performance':
+    'Qwen 3.6 Plus — эффективная гибридная модель с лидирующей производительностью в программировании',
+  'The latest Qwen Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
+    'Последняя модель Qwen Vision от Alibaba Cloud ModelStudio (версия: qwen3-vl-plus-2025-09-23)',
+>>>>>>> v0.14.5
 
   // ============================================================================
   // Dialogs - Permissions
   // ============================================================================
+<<<<<<< HEAD
   'Manage folder trust settings': 'Manage folder trust settings',
+=======
+  'Manage folder trust settings': 'Управление настройками доверия к папкам',
+  'Manage permission rules': 'Управление правилами разрешений',
+  Allow: 'Разрешить',
+  Ask: 'Спросить',
+  Deny: 'Запретить',
+  Workspace: 'Рабочая область',
+  "Qwen Code won't ask before using allowed tools.":
+    'Qwen Code не будет спрашивать перед использованием разрешённых инструментов.',
+  'Qwen Code will ask before using these tools.':
+    'Qwen Code спросит перед использованием этих инструментов.',
+  'Qwen Code is not allowed to use denied tools.':
+    'Qwen Code не может использовать запрещённые инструменты.',
+  'Manage trusted directories for this workspace.':
+    'Управление доверенными каталогами для этой рабочей области.',
+  'Any use of the {{tool}} tool': 'Любое использование инструмента {{tool}}',
+  "{{tool}} commands matching '{{pattern}}'":
+    "Команды {{tool}}, соответствующие '{{pattern}}'",
+  'From user settings': 'Из пользовательских настроек',
+  'From project settings': 'Из настроек проекта',
+  'From session': 'Из сессии',
+  'Project settings (local)': 'Настройки проекта (локальные)',
+  'Saved in .qwen/settings.local.json': 'Сохранено в .qwen/settings.local.json',
+  'Project settings': 'Настройки проекта',
+  'Checked in at .qwen/settings.json': 'Зафиксировано в .qwen/settings.json',
+  'User settings': 'Пользовательские настройки',
+  'Saved in at ~/.qwen/settings.json': 'Сохранено в ~/.qwen/settings.json',
+  'Add a new rule…': 'Добавить новое правило…',
+  'Add {{type}} permission rule': 'Добавить правило разрешения {{type}}',
+  'Permission rules are a tool name, optionally followed by a specifier in parentheses.':
+    'Правила разрешений — это имя инструмента, за которым может следовать спецификатор в скобках.',
+  'e.g.,': 'напр.',
+  or: 'или',
+  'Enter permission rule…': 'Введите правило разрешения…',
+  'Enter to submit · Esc to cancel': 'Enter для отправки · Esc для отмены',
+  'Where should this rule be saved?': 'Где сохранить это правило?',
+  'Enter to confirm · Esc to cancel':
+    'Enter для подтверждения · Esc для отмены',
+  'Delete {{type}} rule?': 'Удалить правило {{type}}?',
+  'Are you sure you want to delete this permission rule?':
+    'Вы уверены, что хотите удалить это правило разрешения?',
+  'Permissions:': 'Разрешения:',
+  '(←/→ or tab to cycle)': '(←/→ или Tab для переключения)',
+  'Press ↑↓ to navigate · Enter to select · Type to search · Esc to cancel':
+    '↑↓ навигация · Enter выбор · Ввод для поиска · Esc отмена',
+  'Search…': 'Поиск…',
+  'Use /trust to manage folder trust settings for this workspace.':
+    'Используйте /trust для управления настройками доверия к папкам этой рабочей области.',
+  // Workspace directory management
+  'Add directory…': 'Добавить каталог…',
+  'Add directory to workspace': 'Добавить каталог в рабочую область',
+  'Qwen Code can read files in the workspace, and make edits when auto-accept edits is on.':
+    'Qwen Code может читать файлы в рабочей области и вносить правки, когда автоприём правок включён.',
+  'Qwen Code will be able to read files in this directory and make edits when auto-accept edits is on.':
+    'Qwen Code сможет читать файлы в этом каталоге и вносить правки, когда автоприём правок включён.',
+  'Enter the path to the directory:': 'Введите путь к каталогу:',
+  'Enter directory path…': 'Введите путь к каталогу…',
+  'Tab to complete · Enter to add · Esc to cancel':
+    'Tab для завершения · Enter для добавления · Esc для отмены',
+  'Remove directory?': 'Удалить каталог?',
+  'Are you sure you want to remove this directory from the workspace?':
+    'Вы уверены, что хотите удалить этот каталог из рабочей области?',
+  '  (Original working directory)': '  (Исходный рабочий каталог)',
+  '  (from settings)': '  (из настроек)',
+  'Directory does not exist.': 'Каталог не существует.',
+  'Path is not a directory.': 'Путь не является каталогом.',
+  'This directory is already in the workspace.':
+    'Этот каталог уже есть в рабочей области.',
+  'Already covered by existing directory: {{dir}}':
+    'Уже охвачен существующим каталогом: {{dir}}',
+>>>>>>> v0.14.5
 
   // ============================================================================
   // Status Bar
   // ============================================================================
+<<<<<<< HEAD
   'Using:': 'Using:',
   '{{count}} open file': '{{count}} open file',
   '{{count}} open files': '{{count}} open files',
@@ -1346,6 +1685,24 @@ export default {
   'Press Ctrl+C again to exit.': 'Press Ctrl+C again to exit.',
   'Press Ctrl+D again to exit.': 'Press Ctrl+D again to exit.',
   'Press Esc again to clear.': 'Press Esc again to clear.',
+=======
+  'Using:': 'Используется:',
+  '{{count}} open file': '{{count}} открытый файл',
+  '{{count}} open files': '{{count}} открытых файла(ов)',
+  '(ctrl+g to view)': '(ctrl+g для просмотра)',
+  '{{count}} {{name}} file': '{{count}} файл {{name}}',
+  '{{count}} {{name}} files': '{{count}} файла(ов) {{name}}',
+  '{{count}} MCP server': '{{count}} MCP-сервер',
+  '{{count}} MCP servers': '{{count}} MCP-сервера(ов)',
+  '{{count}} Blocked': '{{count}} заблокирован(о)',
+  '(ctrl+t to view)': '(ctrl+t для просмотра)',
+  '(ctrl+t to toggle)': '(ctrl+t для переключения)',
+  'Press Ctrl+C again to exit.': 'Нажмите Ctrl+C снова для выхода.',
+  'Press Ctrl+D again to exit.': 'Нажмите Ctrl+D снова для выхода.',
+  'Press Esc again to clear.': 'Нажмите Esc снова для очистки.',
+  'Press ↑ to edit queued messages':
+    'Нажмите ↑ для редактирования сообщений в очереди',
+>>>>>>> v0.14.5
 
   // ============================================================================
   // MCP Status
@@ -1672,6 +2029,7 @@ export default {
   'Opening extensions page in your browser: {{url}}':
     'Opening extensions page in your browser: {{url}}',
   'Failed to open browser. Check out the extensions gallery at {{url}}':
+<<<<<<< HEAD
     'Failed to open browser. Check out the extensions gallery at {{url}}',
 
   // ============================================================================
@@ -1700,6 +2058,39 @@ export default {
     'Coding Plan API key not found. Please re-authenticate with Coding Plan.',
   'Failed to update Coding Plan configuration: {{message}}':
     'Failed to update Coding Plan configuration: {{message}}',
+=======
+    'Не удалось открыть браузер. Посетите галерею расширений по адресу {{url}}',
+  'Use /compress when the conversation gets long to summarize history and free up context.':
+    'Используйте /compress, когда разговор становится длинным, чтобы подвести итог и освободить контекст.',
+  'Start a fresh idea with /clear or /new; the previous session stays available in history.':
+    'Начните новую идею с /clear или /new; предыдущая сессия останется в истории.',
+  'Use /bug to submit issues to the maintainers when something goes off.':
+    'Используйте /bug, чтобы сообщить о проблемах разработчикам.',
+  'Switch auth type quickly with /auth.':
+    'Быстро переключите тип аутентификации с помощью /auth.',
+  'You can run any shell commands from Qwen Code using ! (e.g. !ls).':
+    'Вы можете выполнять любые shell-команды в Qwen Code с помощью ! (например, !ls).',
+  'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.':
+    'Введите /, чтобы открыть меню команд; Tab автодополняет слэш-команды и сохранённые промпты.',
+  'You can resume a previous conversation by running qwen --continue or qwen --resume.':
+    'Вы можете продолжить предыдущий разговор, запустив qwen --continue или qwen --resume.',
+  'You can switch permission mode quickly with Shift+Tab or /approval-mode.':
+    'Вы можете быстро переключать режим разрешений с помощью Shift+Tab или /approval-mode.',
+  'You can switch permission mode quickly with Tab or /approval-mode.':
+    'Вы можете быстро переключать режим разрешений с помощью Tab или /approval-mode.',
+  'Try /insight to generate personalized insights from your chat history.':
+    'Попробуйте /insight, чтобы получить персонализированные выводы из истории чатов.',
+  'Add a QWEN.md file to give Qwen Code persistent project context.':
+    'Добавьте файл QWEN.md, чтобы предоставить Qwen Code постоянный контекст проекта.',
+  'Use /btw to ask a quick side question without disrupting the conversation.':
+    'Используйте /btw, чтобы задать короткий побочный вопрос, не прерывая основной разговор.',
+  'Context is almost full! Run /compress now or start /new to continue.':
+    'Контекст почти заполнен! Выполните /compress сейчас или начните /new, чтобы продолжить.',
+  'Context is getting full. Use /compress to free up space.':
+    'Контекст заполняется. Используйте /compress, чтобы освободить место.',
+  'Long conversation? /compress summarizes history to free context.':
+    'Долгий разговор? /compress подведёт итог истории, чтобы освободить контекст.',
+>>>>>>> v0.14.5
 
   // ============================================================================
   // Custom API Key Configuration
@@ -1713,9 +2104,15 @@ export default {
   // Auth Dialog - View Titles and Labels
   // ============================================================================
   'Coding Plan': 'Coding Plan',
+<<<<<<< HEAD
   "Paste your api key of Bailian Coding Plan and you're all set!":
     "Paste your api key of Bailian Coding Plan and you're all set!",
   Custom: 'Custom',
+=======
+  "Paste your api key of ModelStudio Coding Plan and you're all set!":
+    'Вставьте ваш API-ключ ModelStudio Coding Plan и всё готово!',
+  Custom: 'Пользовательский',
+>>>>>>> v0.14.5
   'More instructions about configuring `modelProviders` manually.':
     'More instructions about configuring `modelProviders` manually.',
   'Select API-KEY configuration mode:': 'Select API-KEY configuration mode:',
@@ -1733,7 +2130,115 @@ export default {
   'New model configurations are available for {{region}}. Update now?':
     'New model configurations are available for {{region}}. Update now?',
   '{{region}} configuration updated successfully. Model switched to "{{model}}".':
+<<<<<<< HEAD
     '{{region}} configuration updated successfully. Model switched to "{{model}}".',
+=======
+    'Конфигурация {{region}} успешно обновлена. Модель переключена на "{{model}}".',
+  'Authenticated successfully with {{region}}. API key and model configs saved to settings.json (backed up).':
+    'Успешная аутентификация с {{region}}. API-ключ и конфигурации моделей сохранены в settings.json (резервная копия создана).',
+
+  // ============================================================================
+  // Context Usage Component
+  // ============================================================================
+  'Context Usage': 'Использование контекста',
+  'No API response yet. Send a message to see actual usage.':
+    'Пока нет ответа от API. Отправьте сообщение, чтобы увидеть фактическое использование.',
+  'Estimated pre-conversation overhead':
+    'Оценочные накладные расходы перед беседой',
+  'Context window': 'Контекстное окно',
+  tokens: 'токенов',
+  Used: 'Использовано',
+  Free: 'Свободно',
+  'Autocompact buffer': 'Буфер автоупаковки',
+  'Usage by category': 'Использование по категориям',
+  'System prompt': 'Системная подсказка',
+  'Built-in tools': 'Встроенные инструменты',
+  'MCP tools': 'Инструменты MCP',
+  'Memory files': 'Файлы памяти',
+  Skills: 'Навыки',
+  Messages: 'Сообщения',
+  'Show context window usage breakdown.':
+    'Показать разбивку использования контекстного окна.',
+  'Run /context detail for per-item breakdown.':
+    'Выполните /context detail для детализации по элементам.',
+  active: 'активно',
+  'body loaded': 'содержимое загружено',
+  memory: 'память',
+  // MCP Management Dialog
+  // ============================================================================
+  'MCP Management': 'Управление MCP',
+  'Server List': 'Список серверов',
+  'Server Detail': 'Детали сервера',
+  'Disable Server': 'Отключить сервер',
+  'Tool List': 'Список инструментов',
+  'Tool Detail': 'Детали инструмента',
+  'Loading...': 'Загрузка...',
+  'Unknown step': 'Неизвестный шаг',
+  'Esc to back': 'Esc для возврата',
+  '↑↓ to navigate · Enter to select · Esc to close':
+    '↑↓ навигация · Enter выбрать · Esc закрыть',
+  '↑↓ to navigate · Enter to select · Esc to back':
+    '↑↓ навигация · Enter выбрать · Esc назад',
+  '↑↓ to navigate · Enter to confirm · Esc to back':
+    '↑↓ навигация · Enter подтвердить · Esc назад',
+  'User Settings (global)': 'Настройки пользователя (глобальные)',
+  'Workspace Settings (project-specific)':
+    'Настройки рабочего пространства (проектные)',
+  'Disable server:': 'Отключить сервер:',
+  'Select where to add the server to the exclude list:':
+    'Выберите, где добавить сервер в список исключений:',
+  'Press Enter to confirm, Esc to cancel':
+    'Enter для подтверждения, Esc для отмены',
+  'Status:': 'Статус:',
+  'Command:': 'Команда:',
+  'Working Directory:': 'Рабочий каталог:',
+  'Capabilities:': 'Возможности:',
+  'No server selected': 'Сервер не выбран',
+
+  // MCP Server List
+  'User MCPs': 'MCP пользователя',
+  'Project MCPs': 'MCP проекта',
+  'Extension MCPs': 'MCP расширений',
+  server: 'сервер',
+  servers: 'серверов',
+  'Add MCP servers to your settings to get started.':
+    'Добавьте серверы MCP в настройки, чтобы начать.',
+  'Run qwen --debug to see error logs':
+    'Запустите qwen --debug для просмотра журналов ошибок',
+
+  // MCP OAuth Authentication
+  'OAuth Authentication': 'OAuth-аутентификация',
+  'Press Enter to start authentication, Esc to go back':
+    'Нажмите Enter для начала аутентификации, Esc для возврата',
+  'Authenticating... Please complete the login in your browser.':
+    'Аутентификация... Пожалуйста, завершите вход в браузере.',
+  'Press Enter or Esc to go back': 'Нажмите Enter или Esc для возврата',
+
+  // MCP Tool List
+  'No tools available for this server.':
+    'Для этого сервера нет доступных инструментов.',
+  destructive: 'деструктивный',
+  'read-only': 'только чтение',
+  'open-world': 'открытый мир',
+  idempotent: 'идемпотентный',
+  'Tools for {{name}}': 'Инструменты для {{name}}',
+  'Tools for {{serverName}}': 'Инструменты для {{serverName}}',
+  '{{current}}/{{total}}': '{{current}}/{{total}}',
+
+  // MCP Tool Detail
+  required: 'обязательный',
+  Type: 'Тип',
+  Enum: 'Перечисление',
+  Parameters: 'Параметры',
+  'No tool selected': 'Инструмент не выбран',
+  Annotations: 'Аннотации',
+  Title: 'Заголовок',
+  'Read Only': 'Только чтение',
+  Destructive: 'Деструктивный',
+  Idempotent: 'Идемпотентный',
+  'Open World': 'Открытый мир',
+  Server: 'Сервер',
+>>>>>>> v0.14.5
   '{{region}} configuration updated successfully.':
     '{{region}} configuration updated successfully.',
   'Authenticated successfully with {{region}}. API key and model configs saved to settings.json.':
@@ -1822,6 +2327,7 @@ export default {
   'User declined to answer the questions.':
     'User declined to answer the questions.',
   'User has provided the following answers:':
+<<<<<<< HEAD
     'User has provided the following answers:',
   'Failed to process user answers:': 'Failed to process user answers:',
   'Type something...': 'Type something...',
@@ -1852,3 +2358,118 @@ export default {
   '% used': '% used',
   '% context used': '% context used',
 };
+=======
+    'Пользователь предоставил следующие ответы:',
+  'Failed to process user answers:':
+    'Не удалось обработать ответы пользователя:',
+  'Type something...': 'Введите что-то...',
+  Submit: 'Отправить',
+  'Submit answers': 'Отправить ответы',
+  Cancel: 'Отмена',
+  'Your answers:': 'Ваши ответы:',
+  '(not answered)': '(не отвечено)',
+  'Ready to submit your answers?': 'Готовы отправить свои ответы?',
+  '↑/↓: Navigate | ←/→: Switch tabs | Enter: Select':
+    '↑/↓: Навигация | ←/→: Переключение вкладок | Enter: Выбор',
+  '↑/↓: Navigate | ←/→: Switch tabs | Space/Enter: Toggle | Esc: Cancel':
+    '↑/↓: Навигация | ←/→: Переключение вкладок | Space/Enter: Переключить | Esc: Отмена',
+  '↑/↓: Navigate | Space/Enter: Toggle | Esc: Cancel':
+    '↑/↓: Навигация | Space/Enter: Переключить | Esc: Отмена',
+  '↑/↓: Navigate | Enter: Select | Esc: Cancel':
+    '↑/↓: Навигация | Enter: Выбор | Esc: Отмена',
+
+  // ============================================================================
+  // Commands - Auth
+  // ============================================================================
+  'Configure Qwen authentication information with Qwen-OAuth or Alibaba Cloud Coding Plan':
+    'Настроить аутентификацию Qwen через Qwen-OAuth или Alibaba Cloud Coding Plan',
+  'Authenticate using Qwen OAuth': 'Аутентификация через Qwen OAuth',
+  'Authenticate using Alibaba Cloud Coding Plan':
+    'Аутентификация через Alibaba Cloud Coding Plan',
+  'Region for Coding Plan (china/global)':
+    'Регион для Coding Plan (china/global)',
+  'API key for Coding Plan': 'API-ключ для Coding Plan',
+  'Show current authentication status':
+    'Показать текущий статус аутентификации',
+  'Authentication completed successfully.': 'Аутентификация успешно завершена.',
+  'Starting Qwen OAuth authentication...':
+    'Запуск аутентификации Qwen OAuth...',
+  'Successfully authenticated with Qwen OAuth.':
+    'Успешная аутентификация через Qwen OAuth.',
+  'Failed to authenticate with Qwen OAuth: {{error}}':
+    'Ошибка аутентификации через Qwen OAuth: {{error}}',
+  'Processing Alibaba Cloud Coding Plan authentication...':
+    'Обработка аутентификации Alibaba Cloud Coding Plan...',
+  'Successfully authenticated with Alibaba Cloud Coding Plan.':
+    'Успешная аутентификация через Alibaba Cloud Coding Plan.',
+  'Failed to authenticate with Coding Plan: {{error}}':
+    'Ошибка аутентификации через Coding Plan: {{error}}',
+  '中国 (China)': '中国 (China)',
+  '阿里云百炼 (aliyun.com)': '阿里云百炼 (aliyun.com)',
+  Global: 'Глобальный',
+  'Alibaba Cloud (alibabacloud.com)': 'Alibaba Cloud (alibabacloud.com)',
+  'Select region for Coding Plan:': 'Выберите регион для Coding Plan:',
+  'Enter your Coding Plan API key: ': 'Введите ваш API-ключ Coding Plan: ',
+  'Select authentication method:': 'Выберите метод аутентификации:',
+  '\n=== Authentication Status ===\n': '\n=== Статус аутентификации ===\n',
+  '⚠️  No authentication method configured.\n':
+    '⚠️  Метод аутентификации не настроен.\n',
+  'Run one of the following commands to get started:\n':
+    'Выполните одну из следующих команд для начала:\n',
+  '  qwen auth qwen-oauth     - Authenticate with Qwen OAuth (discontinued)':
+    '  qwen auth qwen-oauth     - Аутентификация через Qwen OAuth (прекращено)',
+  '  qwen auth coding-plan      - Authenticate with Alibaba Cloud Coding Plan\n':
+    '  qwen auth coding-plan      - Аутентификация через Alibaba Cloud Coding Plan\n',
+  'Or simply run:': 'Или просто выполните:',
+  '  qwen auth                - Interactive authentication setup\n':
+    '  qwen auth                - Интерактивная настройка аутентификации\n',
+  '✓ Authentication Method: Qwen OAuth': '✓ Метод аутентификации: Qwen OAuth',
+  '  Type: Free tier (discontinued 2026-04-15)':
+    '  Тип: Бесплатный уровень (прекращено 2026-04-15)',
+  '  Limit: No longer available': '  Лимит: Больше не доступен',
+  'Qwen OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan, OpenRouter, Fireworks AI, or another provider.':
+    'Бесплатный уровень Qwen OAuth прекращён 2026-04-15. Выполните /auth для переключения на Coding Plan, OpenRouter, Fireworks AI или другого провайдера.',
+  '  Models: Qwen latest models\n': '  Модели: Последние модели Qwen\n',
+  '✓ Authentication Method: Alibaba Cloud Coding Plan':
+    '✓ Метод аутентификации: Alibaba Cloud Coding Plan',
+  '中国 (China) - 阿里云百炼': '中国 (China) - 阿里云百炼',
+  'Global - Alibaba Cloud': 'Глобальный - Alibaba Cloud',
+  '  Region: {{region}}': '  Регион: {{region}}',
+  '  Current Model: {{model}}': '  Текущая модель: {{model}}',
+  '  Config Version: {{version}}': '  Версия конфигурации: {{version}}',
+  '  Status: API key configured\n': '  Статус: API-ключ настроен\n',
+  '⚠️  Authentication Method: Alibaba Cloud Coding Plan (Incomplete)':
+    '⚠️  Метод аутентификации: Alibaba Cloud Coding Plan (Не завершён)',
+  '  Issue: API key not found in environment or settings\n':
+    '  Проблема: API-ключ не найден в окружении или настройках\n',
+  '  Run `qwen auth coding-plan` to re-configure.\n':
+    '  Выполните `qwen auth coding-plan` для повторной настройки.\n',
+  '✓ Authentication Method: {{type}}': '✓ Метод аутентификации: {{type}}',
+  '  Status: Configured\n': '  Статус: Настроено\n',
+  'Failed to check authentication status: {{error}}':
+    'Не удалось проверить статус аутентификации: {{error}}',
+  'Select an option:': 'Выберите вариант:',
+  'Raw mode not available. Please run in an interactive terminal.':
+    'Raw-режим недоступен. Пожалуйста, запустите в интерактивном терминале.',
+  '(Use ↑ ↓ arrows to navigate, Enter to select, Ctrl+C to exit)\n':
+    '(↑ ↓ стрелки для навигации, Enter для выбора, Ctrl+C для выхода)\n',
+  compact: 'компактный',
+  'Hide tool output and thinking for a cleaner view (toggle with Ctrl+O).':
+    'Скрывать вывод инструментов и процесс рассуждений для более чистого вида (переключить с помощью Ctrl+O).',
+  'Press Ctrl+O to show full tool output':
+    'Нажмите Ctrl+O для показа полного вывода инструментов',
+
+  'Switch to plan mode or exit plan mode':
+    'Switch to plan mode or exit plan mode',
+  'Exited plan mode. Previous approval mode restored.':
+    'Exited plan mode. Previous approval mode restored.',
+  'Enabled plan mode. The agent will analyze and plan without executing tools.':
+    'Enabled plan mode. The agent will analyze and plan without executing tools.',
+  'Already in plan mode. Use "/plan exit" to exit plan mode.':
+    'Already in plan mode. Use "/plan exit" to exit plan mode.',
+  'Not in plan mode. Use "/plan" to enter plan mode first.':
+    'Not in plan mode. Use "/plan" to enter plan mode first.',
+
+  "Set up Qwen Code's status line UI": "Set up Qwen Code's status line UI",
+};
+>>>>>>> v0.14.5

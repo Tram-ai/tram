@@ -98,7 +98,8 @@ export async function loadSandboxConfig(
   const packageJson = await getPackageJson();
   const image =
     argv.sandboxImage ??
-    process.env['TRAM_SANDBOX_IMAGE'] ??
+    process.env['QWEN_SANDBOX_IMAGE'] ??
+    settings.tools?.sandboxImage ??
     packageJson?.config?.sandboxImageUri;
 
   return command && image ? { command, image } : undefined;

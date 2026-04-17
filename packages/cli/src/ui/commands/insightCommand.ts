@@ -10,9 +10,8 @@ import { MessageType } from '../types.js';
 import type { HistoryItemInsightProgress } from '../types.js';
 import { t } from '../../i18n/index.js';
 import { join } from 'path';
-import os from 'os';
 import { StaticInsightGenerator } from '../../services/insight/generators/StaticInsightGenerator.js';
-import { createDebugLogger } from '@tram-ai/tram-core';
+import { createDebugLogger, Storage } from '@tram-ai/tram-core';
 import open from 'open';
 
 const logger = createDebugLogger('DataProcessor');
@@ -29,7 +28,7 @@ export const insightCommand: SlashCommand = {
     try {
       context.ui.setDebugMessage(t('Generating insights...'));
 
-      const projectsDir = join(os.homedir(), '.tram', 'projects');
+      const projectsDir = join(Storage.getRuntimeBaseDir(), 'projects');
       if (!context.services.config) {
         throw new Error('Config service is not available');
       }

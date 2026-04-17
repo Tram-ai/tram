@@ -16,6 +16,11 @@ import type { ApprovalModeValue } from '../../types/approvalModeValueTypes.js';
 import type { PlanEntry } from '../../types/chatTypes.js';
 import type { ModelInfo, AvailableCommand } from '@agentclientprotocol/sdk';
 import type { Question } from '../../types/acpTypes.js';
+import {
+  useImageResolution,
+  type WebViewMessage,
+  type WebViewMessageBase,
+} from './useImage.js';
 
 const FORCE_CLEAR_STREAM_END_REASONS = new Set([
   'user_cancelled',
@@ -66,23 +71,11 @@ interface UseWebViewMessagesProps {
   // Message handling
   messageHandling: {
     setMessages: (
-      messages: Array<{
-        role: 'user' | 'assistant' | 'thinking';
-        content: string;
-        timestamp: number;
-        fileContext?: {
-          fileName: string;
-          filePath: string;
-          startLine?: number;
-          endLine?: number;
-        };
-      }>,
+      messages:
+        | WebViewMessage[]
+        | ((prev: WebViewMessage[]) => WebViewMessage[]),
     ) => void;
-    addMessage: (message: {
-      role: 'user' | 'assistant' | 'thinking';
-      content: string;
-      timestamp: number;
-    }) => void;
+    addMessage: (message: WebViewMessage) => void;
     clearMessages: () => void;
     startStreaming: (timestamp?: number) => void;
     appendStreamChunk: (chunk: string) => void;
@@ -124,7 +117,7 @@ interface UseWebViewMessagesProps {
   ) => void;
 
   // Input
-  inputFieldRef: React.RefObject<HTMLDivElement>;
+  inputFieldRef: React.RefObject<HTMLDivElement | null>;
   setInputText: (text: string) => void;
   // Edit mode setter (maps ACP modes to UI modes)
   setEditMode?: (mode: ApprovalModeValue) => void;
@@ -138,6 +131,65 @@ interface UseWebViewMessagesProps {
   setAvailableCommands?: (commands: AvailableCommand[]) => void;
   // Available models setter
   setAvailableModels?: (models: ModelInfo[]) => void;
+  // Account info setter (triggers dialog)
+  setAccountInfo?: (
+    info: {
+      authType?: string | null;
+      baseUrl?: string | null;
+      envKey?: string | null;
+      modelId?: string | null;
+      error?: string;
+    } | null,
+  ) => void;
+}
+
+type ConversationResetHandlers = {
+  messageHandling: Pick<
+    UseWebViewMessagesProps['messageHandling'],
+    | 'clearMessages'
+    | 'endStreaming'
+    | 'clearWaitingForResponse'
+    | 'clearThinking'
+  >;
+  clearToolCalls: UseWebViewMessagesProps['clearToolCalls'];
+  clearActiveExecToolCalls: () => void;
+  setPlanEntries: UseWebViewMessagesProps['setPlanEntries'];
+  handlePermissionRequest: UseWebViewMessagesProps['handlePermissionRequest'];
+  handleAskUserQuestion: UseWebViewMessagesProps['handleAskUserQuestion'];
+  sessionManagement: Pick<
+    UseWebViewMessagesProps['sessionManagement'],
+    'setCurrentSessionId' | 'setCurrentSessionTitle'
+  >;
+  setUsageStats?: UseWebViewMessagesProps['setUsageStats'];
+};
+
+export function resetConversationState({
+  handlers,
+  clearImageResolutions,
+  vscode,
+}: {
+  handlers: ConversationResetHandlers;
+  clearImageResolutions: () => void;
+  vscode: { postMessage: (message: unknown) => void };
+}) {
+  handlers.messageHandling.endStreaming();
+  handlers.clearActiveExecToolCalls();
+  handlers.messageHandling.clearWaitingForResponse();
+  handlers.messageHandling.clearThinking();
+  handlers.messageHandling.clearMessages();
+  handlers.clearToolCalls();
+  handlers.setPlanEntries([]);
+  handlers.handlePermissionRequest(null);
+  handlers.handleAskUserQuestion(null);
+  handlers.sessionManagement.setCurrentSessionId(null);
+  clearImageResolutions();
+  handlers.setUsageStats?.(undefined);
+  handlers.sessionManagement.setCurrentSessionTitle('Past Conversations');
+  // Reset the VS Code tab title to default label
+  vscode.postMessage({
+    type: 'updatePanelTitle',
+    data: { title: 'Qwen Code' },
+  });
 }
 
 /**
@@ -161,9 +213,21 @@ export const useWebViewMessages = ({
   setModelInfo,
   setAvailableCommands,
   setAvailableModels,
+  setAccountInfo,
 }: UseWebViewMessagesProps) => {
   // VS Code API for posting messages back to the extension host
   const vscode = useVSCode();
+
+  // Image resolution handling
+  const {
+    materializeMessages,
+    materializeMessage,
+    mergeResolvedImages,
+    clearImageResolutions,
+  } = useImageResolution({
+    vscode,
+  });
+
   // Track active long-running tool calls (execute/bash/command) so we can
   // keep the bottom "waiting" message visible until all of them complete.
   const activeExecToolCallsRef = useRef<Set<string>>(new Set());
@@ -186,6 +250,7 @@ export const useWebViewMessages = ({
     setModelInfo,
     setAvailableCommands,
     setAvailableModels,
+    setAccountInfo,
   });
 
   // Track last "Updated Plan" snapshot toolcall to support merge/dedupe
@@ -236,6 +301,7 @@ export const useWebViewMessages = ({
       setModelInfo,
       setAvailableCommands,
       setAvailableModels,
+      setAccountInfo,
     };
   });
 
@@ -420,9 +486,26 @@ export const useWebViewMessages = ({
           break;
         }
 
+        case 'accountInfo': {
+          const info = message?.data as
+            | {
+                authType?: string | null;
+                baseUrl?: string | null;
+                envKey?: string | null;
+                modelId?: string | null;
+                error?: string;
+              }
+            | undefined;
+          handlers.setAccountInfo?.(info ?? null);
+          break;
+        }
+
         case 'conversationLoaded': {
           const conversation = message.data as Conversation;
-          handlers.messageHandling.setMessages(conversation.messages);
+          clearImageResolutions();
+          handlers.messageHandling.setMessages(
+            materializeMessages(conversation.messages as WebViewMessageBase[]),
+          );
           break;
         }
 
@@ -431,11 +514,15 @@ export const useWebViewMessages = ({
             role?: 'user' | 'assistant' | 'thinking';
             content?: string;
             timestamp?: number;
+            fileContext?: {
+              fileName: string;
+              filePath: string;
+              startLine?: number;
+              endLine?: number;
+            };
           };
-          handlers.messageHandling.addMessage(
-            msg as unknown as Parameters<
-              typeof handlers.messageHandling.addMessage
-            >[0],
+          materializeMessage(msg as WebViewMessageBase).forEach((entry) =>
+            handlers.messageHandling.addMessage(entry),
           );
           // Robustness: if an assistant message arrives outside the normal stream
           // pipeline (no explicit streamEnd), ensure we clear streaming/waiting states
@@ -864,7 +951,12 @@ export const useWebViewMessages = ({
             vscode.postMessage({ type: 'updatePanelTitle', data: { title } });
           }
           if (message.data.messages) {
-            handlers.messageHandling.setMessages(message.data.messages);
+            clearImageResolutions();
+            handlers.messageHandling.setMessages(
+              materializeMessages(
+                message.data.messages as WebViewMessageBase[],
+              ),
+            );
           } else {
             handlers.messageHandling.clearMessages();
           }
@@ -898,16 +990,15 @@ export const useWebViewMessages = ({
           break;
 
         case 'conversationCleared':
-          handlers.messageHandling.clearMessages();
-          handlers.clearToolCalls();
-          handlers.sessionManagement.setCurrentSessionId(null);
-          handlers.sessionManagement.setCurrentSessionTitle(
-            'Past Conversations',
-          );
-          // Reset the VS Code tab title to default label
-          vscode.postMessage({
-            type: 'updatePanelTitle',
-            data: { title: 'TRAM' },
+          resetConversationState({
+            handlers: {
+              ...handlers,
+              clearActiveExecToolCalls: () => {
+                activeExecToolCallsRef.current.clear();
+              },
+            },
+            clearImageResolutions,
+            vscode,
           });
           lastPlanSnapshotRef.current = null;
           break;
@@ -986,6 +1077,18 @@ export const useWebViewMessages = ({
           break;
         }
 
+        case 'imagePathsResolved': {
+          const resolved =
+            (
+              message.data as
+                | { resolved?: Array<{ path: string; src?: string | null }> }
+                | undefined
+            )?.resolved ?? [];
+          handlers.messageHandling.setMessages((prevMessages) =>
+            mergeResolvedImages(prevMessages, resolved),
+          );
+          break;
+        }
         case 'cancelStreaming':
           // Handle cancel streaming response from extension
           // Note: The "Interrupted" message is already added by handleCancel in App.tsx
@@ -999,7 +1102,16 @@ export const useWebViewMessages = ({
           break;
       }
     },
-    [inputFieldRef, setInputText, vscode, setEditMode],
+    [
+      inputFieldRef,
+      setInputText,
+      vscode,
+      setEditMode,
+      materializeMessages,
+      materializeMessage,
+      mergeResolvedImages,
+      clearImageResolutions,
+    ],
   );
 
   useEffect(() => {

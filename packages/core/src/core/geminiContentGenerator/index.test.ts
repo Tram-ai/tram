@@ -39,12 +39,33 @@ describe('createGeminiContentGenerator', () => {
     expect(generator).toBeDefined();
   });
 
-  it('should forward custom baseUrl to Gemini httpOptions', () => {
+  it('should pass baseUrl through httpOptions when provided', () => {
     const config = {
       model: 'gemini-1.5-flash',
       apiKey: 'test-key',
-      baseUrl:
-        'https://gateway.ai.cloudflare.com/v1/account-id/gateway-id/google-ai-studio',
+      authType: AuthType.USE_GEMINI,
+      baseUrl: 'https://proxy.example.com/gemini',
+    };
+
+    createGeminiContentGenerator(config, mockConfig);
+
+    expect(GeminiContentGenerator).toHaveBeenCalledWith(
+      expect.objectContaining({
+        httpOptions: expect.objectContaining({
+          headers: expect.objectContaining({
+            'User-Agent': expect.any(String),
+          }),
+          baseUrl: 'https://proxy.example.com/gemini',
+        }),
+      }),
+      config,
+    );
+  });
+
+  it('should keep httpOptions unchanged when baseUrl is missing', () => {
+    const config = {
+      model: 'gemini-1.5-flash',
+      apiKey: 'test-key',
       authType: AuthType.USE_GEMINI,
     };
 
@@ -52,13 +73,20 @@ describe('createGeminiContentGenerator', () => {
 
     expect(GeminiContentGenerator).toHaveBeenCalledWith(
       expect.objectContaining({
-        apiKey: 'test-key',
         httpOptions: expect.objectContaining({
-          baseUrl:
-            'https://gateway.ai.cloudflare.com/v1/account-id/gateway-id/google-ai-studio',
+          headers: expect.objectContaining({
+            'User-Agent': expect.any(String),
+          }),
         }),
       }),
       config,
+    );
+    expect(vi.mocked(GeminiContentGenerator).mock.calls[0]?.[0]).not.toEqual(
+      expect.objectContaining({
+        httpOptions: expect.objectContaining({
+          baseUrl: expect.any(String),
+        }),
+      }),
     );
   });
 });

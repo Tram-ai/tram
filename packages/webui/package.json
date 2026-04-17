@@ -1,6 +1,6 @@
 {
   "name": "@tram-ai/webui",
-  "version": "0.12.6",
+  "version": "0.14.5",
   "description": "Shared UI components for TRAM packages",
   "type": "module",
   "main": "./dist/index.cjs",
