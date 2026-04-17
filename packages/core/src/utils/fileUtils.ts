@@ -20,8 +20,83 @@ import type { Config } from '../config/config.js';
 import { createDebugLogger } from './debugLogger.js';
 import type { InputModalities } from '../core/contentGenerator.js';
 import { detectEncodingFromBuffer } from './systemEncoding.js';
+import {
+  extractImageText,
+  transcribeAudio,
+} from '../services/siliconFlowFallback.js';
 
 const debugLogger = createDebugLogger('FILE_UTILS');
+
+/**
+ * Extract basic metadata from an image buffer (dimensions, format).
+ * Supports PNG, JPEG, GIF, BMP, WebP without external dependencies.
+ */
+function extractImageMetadata(buffer: Buffer, filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+  const fileSizeKB = (buffer.length / 1024).toFixed(1);
+  const fileSizeMB = (buffer.length / (1024 * 1024)).toFixed(2);
+  const sizeStr = buffer.length > 1024 * 1024 ? `${fileSizeMB}MB` : `${fileSizeKB}KB`;
+  let width = 0;
+  let height = 0;
+  let format = ext.replace('.', '').toUpperCase();
+
+  try {
+    // PNG: width at offset 16 (4 bytes BE), height at offset 20 (4 bytes BE)
+    if (buffer.length >= 24 && buffer[0] === 0x89 && buffer[1] === 0x50) {
+      width = buffer.readUInt32BE(16);
+      height = buffer.readUInt32BE(20);
+      format = 'PNG';
+    }
+    // JPEG: scan for SOF0/SOF2 markers (0xFF 0xC0 or 0xFF 0xC2)
+    else if (buffer.length >= 4 && buffer[0] === 0xFF && buffer[1] === 0xD8) {
+      format = 'JPEG';
+      let offset = 2;
+      while (offset < buffer.length - 8) {
+        if (buffer[offset] !== 0xFF) break;
+        const marker = buffer[offset + 1]!;
+        if (marker === 0xC0 || marker === 0xC2) {
+          height = buffer.readUInt16BE(offset + 5);
+          width = buffer.readUInt16BE(offset + 7);
+          break;
+        }
+        const segLen = buffer.readUInt16BE(offset + 2);
+        offset += 2 + segLen;
+      }
+    }
+    // GIF: width at offset 6 (2 bytes LE), height at offset 8
+    else if (buffer.length >= 10 && buffer[0] === 0x47 && buffer[1] === 0x49) {
+      width = buffer.readUInt16LE(6);
+      height = buffer.readUInt16LE(8);
+      format = 'GIF';
+    }
+    // BMP: width at offset 18 (4 bytes LE), height at offset 22
+    else if (buffer.length >= 26 && buffer[0] === 0x42 && buffer[1] === 0x4D) {
+      width = buffer.readInt32LE(18);
+      height = Math.abs(buffer.readInt32LE(22));
+      format = 'BMP';
+    }
+    // WebP: RIFF header, check for VP8 chunk
+    else if (buffer.length >= 30 && buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP') {
+      format = 'WebP';
+      if (buffer.toString('ascii', 12, 16) === 'VP8 ' && buffer.length >= 30) {
+        width = buffer.readUInt16LE(26) & 0x3FFF;
+        height = buffer.readUInt16LE(28) & 0x3FFF;
+      } else if (buffer.toString('ascii', 12, 16) === 'VP8L' && buffer.length >= 25) {
+        const bits = buffer.readUInt32LE(21);
+        width = (bits & 0x3FFF) + 1;
+        height = ((bits >> 14) & 0x3FFF) + 1;
+      }
+    }
+  } catch {
+    // Silently skip if metadata extraction fails
+  }
+
+  const parts = [`Format: ${format}`, `Size: ${sizeStr}`];
+  if (width > 0 && height > 0) {
+    parts.push(`Dimensions: ${width}×${height}px`);
+  }
+  return parts.join(', ');
+}
 
 // Default values for encoding and separator format
 export const DEFAULT_ENCODING: BufferEncoding = 'utf-8';
@@ -538,6 +613,9 @@ function unsupportedModalityMessage(
   if (modality === 'pdf') {
     hint =
       'This model does not support PDF input directly. The read_file tool cannot extract PDF content either. To extract text from the PDF file, try using skills if applicable, or guide user to install pdf skill by running this slash command:\n/extensions install https://github.com/anthropics/skills:document-skills';
+  } else if (modality === 'video') {
+    hint =
+      'This model does not support video input. Use the video_to_audio tool to extract audio from the video file first, then use read_file on the resulting audio file.';
   } else {
     hint = `This model does not support ${modality} input. The read_file tool cannot process this type of file either. To handle this file, try using skills if applicable, or any tools installed at system wide, or let the user know you cannot process this type of file.`;
   }
@@ -606,6 +684,52 @@ export async function processSingleFileContent(
       const modalities: InputModalities =
         config.getContentGeneratorConfig()?.modalities ?? {};
       if (!modalities[modality]) {
+        // Try SiliconFlow fallback for image/audio when API key is configured
+        const sfApiKey = config.getSiliconFlowApiKey();
+        if (sfApiKey && (modality === 'image' || modality === 'audio')) {
+          debugLogger.info(
+            `Model '${config.getModel()}' does not support ${modality} input. ` +
+              `Using SiliconFlow fallback for: ${relativePathForDisplay}`,
+          );
+          try {
+            const contentBuffer = await fs.promises.readFile(filePath);
+            if (modality === 'image') {
+              const base64Data = contentBuffer.toString('base64');
+              const mimeType =
+                mime.getType(filePath) || 'application/octet-stream';
+              const metadata = extractImageMetadata(contentBuffer, filePath);
+              const ocrResult = await extractImageText(
+                sfApiKey,
+                base64Data,
+                mimeType,
+                displayName,
+              );
+              return {
+                llmContent: `[Image metadata: ${metadata}]\n${ocrResult}`,
+                returnDisplay: `OCR (SiliconFlow): ${relativePathForDisplay} [${metadata}]`,
+              };
+            } else {
+              // audio
+              const transcription = await transcribeAudio(
+                sfApiKey,
+                contentBuffer,
+                displayName,
+              );
+              return {
+                llmContent: transcription,
+                returnDisplay: `Transcribed (SiliconFlow): ${relativePathForDisplay}`,
+              };
+            }
+          } catch (error: unknown) {
+            const errMsg =
+              error instanceof Error ? error.message : String(error);
+            debugLogger.error(
+              `SiliconFlow fallback failed for ${relativePathForDisplay}: ${errMsg}`,
+            );
+            // Fall through to unsupported message
+          }
+        }
+
         const message = unsupportedModalityMessage(modality, displayName);
         debugLogger.warn(
           `Model '${config.getModel()}' does not support ${modality} input. ` +
@@ -732,6 +856,13 @@ export async function processSingleFileContent(
             errorType: ToolErrorType.FILE_TOO_LARGE,
           };
         }
+
+        // For images, include metadata in the display
+        let metadataStr = '';
+        if (fileType === 'image') {
+          metadataStr = extractImageMetadata(contentBuffer, filePath);
+        }
+
         return {
           llmContent: {
             inlineData: {
@@ -740,7 +871,9 @@ export async function processSingleFileContent(
               displayName,
             },
           },
-          returnDisplay: `Read ${fileType} file: ${relativePathForDisplay}`,
+          returnDisplay: metadataStr
+            ? `Read ${fileType} file: ${relativePathForDisplay} [${metadataStr}]`
+            : `Read ${fileType} file: ${relativePathForDisplay}`,
         };
       }
       default: {

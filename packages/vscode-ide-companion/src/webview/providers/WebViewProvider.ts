@@ -1,11 +1,11 @@
 /**
  * @license
- * Copyright 2025 Qwen Team
+ * Copyright 2025 TRAM Team
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import * as vscode from 'vscode';
-import { QwenAgentManager } from '../../services/qwenAgentManager.js';
+import { TramAgentManager } from '../../services/tramAgentManager.js';
 import { ConversationStore } from '../../services/conversationStore.js';
 import type {
   RequestPermissionRequest,
@@ -27,7 +27,7 @@ import { getErrorMessage } from '../../utils/errorMessage.js';
 export class WebViewProvider {
   private panelManager: PanelManager;
   private messageHandler: MessageHandler;
-  private agentManager: QwenAgentManager;
+  private agentManager: TramAgentManager;
   private conversationStore: ConversationStore;
   private disposables: vscode.Disposable[] = [];
   private agentInitialized = false; // Track if agent has been initialized
@@ -61,7 +61,7 @@ export class WebViewProvider {
     private context: vscode.ExtensionContext,
     private extensionUri: vscode.Uri,
   ) {
-    this.agentManager = new QwenAgentManager();
+    this.agentManager = new TramAgentManager();
     this.conversationStore = new ConversationStore(context);
     this.panelManager = new PanelManager(extensionUri, () => {
       // Panel dispose callback — unblock any pending ACP Promises
@@ -211,7 +211,7 @@ export class WebViewProvider {
       });
     });
 
-    // Note: Tool call updates are handled in handleSessionUpdate within QwenAgentManager
+    // Note: Tool call updates are handled in handleSessionUpdate within TramAgentManager
     // and sent via onStreamChunk callback
     this.agentManager.onToolCall((update) => {
       // Always surface tool calls; they are part of the live assistant flow.
@@ -316,8 +316,8 @@ export class WebViewProvider {
               optionId === 'cancel' ||
               optionId.toLowerCase().includes('reject');
 
-            // Always close open qwen-diff editors after any permission decision
-            void vscode.commands.executeCommand('qwen.diff.closeAll');
+            // Always close open tram-diff editors after any permission decision
+            void vscode.commands.executeCommand('tram.diff.closeAll');
 
             if (isCancel) {
               // Fire and forget — cancel generation and update UI
@@ -387,7 +387,7 @@ export class WebViewProvider {
               })();
             } else {
               // Allowed/proceeded — suppress diff re-open briefly
-              void vscode.commands.executeCommand('qwen.diff.suppressBriefly');
+              void vscode.commands.executeCommand('tram.diff.suppressBriefly');
             }
           };
           // Store handler in message handler
@@ -656,7 +656,7 @@ export class WebViewProvider {
           ).trim();
           const panelRef = this.panelManager.getPanel();
           if (panelRef) {
-            panelRef.title = title || 'Qwen Code';
+            panelRef.title = title || 'TRAM';
           }
           return;
         }
@@ -765,6 +765,13 @@ export class WebViewProvider {
     await this.attemptAuthStateRestoration();
   }
 
+  async submitMessage(text: string): Promise<void> {
+    await this.messageHandler.route({
+      type: 'sendMessage',
+      data: { text },
+    });
+  }
+
   /**
    * Attempt to restore authentication state and initialize connection
    * This is called when the webview is first shown
@@ -826,7 +833,7 @@ export class WebViewProvider {
       const bundledCliEntry = vscode.Uri.joinPath(
         this.extensionUri,
         'dist',
-        'qwen-cli',
+        'tram-cli',
         'cli.js',
       ).fsPath;
 
@@ -864,7 +871,7 @@ export class WebViewProvider {
           });
         }
 
-        // Load messages from the current Qwen session
+        // Load messages from the current TRAM session
         const sessionReady = await this.loadCurrentSessionMessages(options);
 
         if (sessionReady) {
@@ -882,7 +889,7 @@ export class WebViewProvider {
         const errorMsg = getErrorMessage(_error);
         console.error('[WebViewProvider] Agent connection error:', _error);
         vscode.window.showWarningMessage(
-          `Failed to connect to Qwen CLI: ${errorMsg}\nYou can still use the chat UI, but messages won't be sent to AI.`,
+          `Failed to connect to TRAM CLI: ${errorMsg}\nYou can still use the chat UI, but messages won't be sent to AI.`,
         );
         // Fallback to empty conversation
         await this.initializeEmptyConversation();
@@ -1017,7 +1024,7 @@ export class WebViewProvider {
   }
 
   /**
-   * Load messages from current Qwen session
+   * Load messages from current TRAM session
    * Skips session restoration and creates a new session directly
    */
   private async loadCurrentSessionMessages(options?: {
@@ -1203,7 +1210,7 @@ export class WebViewProvider {
    * Context-aware handler for the "New Chat" action (openNewChatTab message).
    *
    * - View host (sidebar / secondary bar): resets the conversation in-place by
-   *   routing to the newQwenSession handler (includes auth checks and UI clearing).
+   *   routing to the newTramSession handler (includes auth checks and UI clearing).
    * - Editor tab: returns false so the message falls through to
    *   SessionMessageHandler which opens a brand-new editor tab.
    *
@@ -1216,7 +1223,7 @@ export class WebViewProvider {
     if (message.type !== 'openNewChatTab' || !this.isViewHost) {
       return false;
     }
-    void this.messageHandler.route({ type: 'newQwenSession', data: {} });
+    void this.messageHandler.route({ type: 'newTramSession', data: {} });
     return true;
   }
 
@@ -1352,7 +1359,7 @@ export class WebViewProvider {
 
     // Ensure restored tab title starts from default label
     try {
-      panel.title = 'Qwen Code';
+      panel.title = 'TRAM';
     } catch (e) {
       console.warn(
         '[WebViewProvider] Failed to reset restored panel title:',
@@ -1382,7 +1389,7 @@ export class WebViewProvider {
           ).trim();
           const panelRef = this.panelManager.getPanel();
           if (panelRef) {
-            panelRef.title = title || 'Qwen Code';
+            panelRef.title = title || 'TRAM';
           }
           return;
         }
@@ -1581,7 +1588,7 @@ export class WebViewProvider {
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
       const workingDir = workspaceFolder?.uri.fsPath || process.cwd();
 
-      // Create new Qwen session via agent manager
+      // Create new TRAM session via agent manager
       await this.agentManager.createNewSession(workingDir);
 
       // Clear current conversation UI

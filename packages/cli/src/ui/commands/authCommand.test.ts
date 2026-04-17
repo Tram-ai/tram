@@ -16,7 +16,7 @@ describe('authCommand', () => {
     mockContext = createMockCommandContext();
   });
 
-  it('should return a dialog action to open the auth dialog', () => {
+  it('should open the initialize dialog', () => {
     if (!authCommand.action) {
       throw new Error('The auth command must have an action.');
     }
@@ -25,14 +25,14 @@ describe('authCommand', () => {
 
     expect(result).toEqual({
       type: 'dialog',
-      dialog: 'auth',
+      dialog: 'initialize',
     });
   });
 
   it('should have the correct name and description', () => {
     expect(authCommand.name).toBe('auth');
     expect(authCommand.description).toBe(
-      'Configure authentication information for login',
+      'Open the initialization wizard to configure providers and authentication',
     );
   });
 });

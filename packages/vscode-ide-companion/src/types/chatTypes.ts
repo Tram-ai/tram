@@ -53,7 +53,7 @@ export interface UsageStatsPayload {
   tokenLimit?: number | null;
 }
 
-export interface QwenAgentCallbacks {
+export interface TramAgentCallbacks {
   onMessage?: (message: ChatMessage) => void;
   onStreamChunk?: (chunk: string) => void;
   onThoughtChunk?: (chunk: string) => void;

@@ -35,11 +35,11 @@ function getProjectHash(projectRoot) {
 const projectHash = getProjectHash(projectRoot);
 
 // User-level .gemini directory in home
-const USER_GEMINI_DIR = path.join(os.homedir(), '.qwen');
+const USER_GEMINI_DIR = path.join(os.homedir(), '.tram');
 // Project-level .gemini directory in the workspace
-const WORKSPACE_QWEN_DIR = path.join(projectRoot, '.qwen');
+const WORKSPACE_QWEN_DIR = path.join(projectRoot, '.tram');
 
-// Telemetry artifacts are stored in a hashed directory under the user's ~/.qwen/tmp
+// Telemetry artifacts are stored in a hashed directory under the user's ~/.tram/tmp
 export const OTEL_DIR = path.join(USER_GEMINI_DIR, 'tmp', projectHash, 'otel');
 export const BIN_DIR = path.join(OTEL_DIR, 'bin');
 
@@ -52,12 +52,12 @@ export const WORKSPACE_SETTINGS_FILE = path.join(
 export function getJson(url) {
   const tmpFile = path.join(
     os.tmpdir(),
-    `qwen-code-releases-${Date.now()}.json`,
+    `tram-releases-${Date.now()}.json`,
   );
   try {
     const result = spawnSync(
       'curl',
-      ['-sL', '-H', 'User-Agent: qwen-code-dev-script', '-o', tmpFile, url],
+      ['-sL', '-H', 'User-Agent: tram-dev-script', '-o', tmpFile, url],
       { stdio: 'pipe', encoding: 'utf-8' },
     );
     if (result.status !== 0) {
@@ -261,7 +261,7 @@ export async function ensureBinary(
   }
 
   const downloadUrl = asset.browser_download_url;
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'qwen-code-telemetry-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tram-telemetry-'));
   const archivePath = path.join(tmpDir, asset.name);
 
   try {

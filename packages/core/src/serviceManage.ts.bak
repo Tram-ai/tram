@@ -1,0 +1,238 @@
+/**
+ * @license
+ * Copyright 2025 Qwen
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import type { FunctionDeclaration } from '@google/genai';
+import { ToolDisplayNames, ToolNames } from './tool-names.js';
+import type { ToolResult } from './tools.js';
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
+
+type ServiceAction =
+  | 'list'
+  | 'register'
+  | 'start'
+  | 'stop'
+  | 'restart'
+  | 'remove'
+  | 'follow'
+  | 'unfollow'
+  | 'log'
+  | 'alert'
+  | 'analyze'
+  | 'send';
+
+export interface ServiceManageParams {
+  action: ServiceAction;
+  name?: string;
+  command?: string;
+  cwd?: string;
+  autoStart?: boolean;
+  watchPatterns?: string[];
+  stopInputs?: string[];
+  tail?: number;
+  follow?: boolean;
+  mode?: 'all' | 'errors';
+  input?: string;
+}
+
+const description =
+  'Manage background services through structured parameters. Supports register/start/stop/restart/remove/follow/unfollow/log/alert/analyze/send/list. Important: after send, wait briefly and then read logs (for example, call log with tail) before concluding. Note: alert action triggers ask_user_question tool; after receiving user response, you automatically decide next steps (e.g., analyze logs, defer alert) based on the chosen action.';
+
+const schema: FunctionDeclaration = {
+  name: ToolNames.SERVICE_MANAGE,
+  description,
+  parametersJsonSchema: {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'object',
+    properties: {
+      action: {
+        type: 'string',
+        enum: [
+          'list',
+          'register',
+          'start',
+          'stop',
+          'restart',
+          'remove',
+          'follow',
+          'unfollow',
+          'log',
+          'alert',
+          'analyze',
+          'send',
+        ],
+      },
+      name: { type: 'string' },
+      command: { type: 'string' },
+      cwd: { type: 'string' },
+      autoStart: { type: 'boolean' },
+      watchPatterns: {
+        type: 'array',
+        items: { type: 'string' },
+      },
+      stopInputs: {
+        type: 'array',
+        items: { type: 'string' },
+      },
+      tail: { type: 'number' },
+      follow: { type: 'boolean' },
+      mode: { type: 'string', enum: ['all', 'errors'] },
+      input: { type: 'string' },
+    },
+    required: ['action'],
+    additionalProperties: false,
+  },
+};
+
+function quoteIfNeeded(value: string): string {
+  if (!value.includes(' ') && !value.includes('"')) {
+    return value;
+  }
+  return `"${value.replace(/"/g, '\\"')}"`;
+}
+
+class ServiceManageToolInvocation extends BaseToolInvocation<
+  ServiceManageParams,
+  ToolResult
+> {
+  getDescription(): string {
+    return `Manage service action: ${this.params.action}`;
+  }
+
+  async execute(_signal: AbortSignal): Promise<ToolResult> {
+    const slash = this.buildServiceSlash();
+    const postSendGuidance =
+      this.params.action === 'send'
+        ? `\nAfter sending input, wait a short moment, then inspect logs (example: service_manage action=log, same name, tail=120) before responding.`
+        : '';
+    const message = `Prepared service command: ${slash}\n[AUTO_SLASH:${slash}]${postSendGuidance}`;
+    return {
+      llmContent: message,
+      returnDisplay: message,
+    };
+  }
+
+  private buildServiceSlash(): string {
+    const { action, name } = this.params;
+
+    if (action === 'list') {
+      return '/service list';
+    }
+
+    if (
+      [
+        'start',
+        'stop',
+        'restart',
+        'remove',
+        'follow',
+        'unfollow',
+        'alert',
+      ].includes(action)
+    ) {
+      return `/service ${action} ${name}`;
+    }
+
+    if (action === 'register') {
+      const flags: string[] = [];
+      if (this.params.autoStart === true) {
+        flags.push('--autostart');
+      } else if (this.params.autoStart === false) {
+        flags.push('--no-autostart');
+      }
+      if (this.params.cwd) {
+        flags.push('--cwd', quoteIfNeeded(this.params.cwd));
+      }
+      if (this.params.watchPatterns && this.params.watchPatterns.length > 0) {
+        flags.push('--watch', this.params.watchPatterns.join(','));
+      }
+      if (this.params.stopInputs && this.params.stopInputs.length > 0) {
+        flags.push('--stop-inputs', this.params.stopInputs.join(','));
+      }
+      const flagsText = flags.length > 0 ? ` ${flags.join(' ')}` : '';
+      return `/service register ${name}${flagsText} -- ${this.params.command}`;
+    }
+
+    if (action === 'log') {
+      const args: string[] = [];
+      if (this.params.tail && this.params.tail > 0) {
+        args.push('--tail', String(this.params.tail));
+      }
+      if (this.params.follow) {
+        args.push('--follow');
+      }
+      const argsText = args.length > 0 ? ` ${args.join(' ')}` : '';
+      return `/service log ${name}${argsText}`;
+    }
+
+    if (action === 'analyze') {
+      return `/service analyze ${name} ${this.params.mode || 'all'}`;
+    }
+
+    if (action === 'send') {
+      return `/service send ${name} ${this.params.input}`;
+    }
+
+    return `/service ${action}`;
+  }
+}
+
+export class ServiceManageTool extends BaseDeclarativeTool<
+  ServiceManageParams,
+  ToolResult
+> {
+  static readonly Name = ToolNames.SERVICE_MANAGE;
+
+  constructor() {
+    super(
+      ToolNames.SERVICE_MANAGE,
+      ToolDisplayNames.SERVICE_MANAGE,
+      description,
+      Kind.Execute,
+      schema.parametersJsonSchema as Record<string, unknown>,
+    );
+  }
+
+  override validateToolParamValues(params: ServiceManageParams): string | null {
+    const needName = new Set<ServiceAction>([
+      'register',
+      'start',
+      'stop',
+      'restart',
+      'remove',
+      'follow',
+      'unfollow',
+      'log',
+      'alert',
+      'analyze',
+      'send',
+    ]);
+
+    if (needName.has(params.action) && !params.name) {
+      return `name is required for action: ${params.action}`;
+    }
+
+    if (params.action === 'register' && !params.command) {
+      return 'command is required for register action';
+    }
+
+    if (params.action === 'send' && !params.input) {
+      return 'input is required for send action';
+    }
+
+    if (params.action === 'log' && params.tail !== undefined && params.tail <= 0) {
+      return 'tail must be a positive integer when provided';
+    }
+
+    return null;
+  }
+
+  override createInvocation(
+    params: ServiceManageParams,
+  ): BaseToolInvocation<ServiceManageParams, ToolResult> {
+    return new ServiceManageToolInvocation(params);
+  }
+}
+

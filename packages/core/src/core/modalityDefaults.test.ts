@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen Team
+ * Copyright 2025 Tram Team
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -105,9 +105,9 @@ describe('defaultModalities', () => {
     });
   });
 
-  describe('Qwen', () => {
-    it('returns image + video for qwen-vl-max', () => {
-      const m = defaultModalities('qwen-vl-max');
+  describe('Tram', () => {
+    it('returns image + video for tram-vl-max', () => {
+      const m = defaultModalities('tram-vl-max');
       expect(m.image).toBe(true);
       expect(m.video).toBe(true);
       expect(m.pdf).toBeUndefined();
@@ -139,8 +139,8 @@ describe('defaultModalities', () => {
       expect(m.audio).toBeUndefined();
     });
 
-    it('returns text-only for qwen-turbo', () => {
-      expect(defaultModalities('qwen-turbo')).toEqual({});
+    it('returns text-only for tram-turbo', () => {
+      expect(defaultModalities('tram-turbo')).toEqual({});
     });
   });
 

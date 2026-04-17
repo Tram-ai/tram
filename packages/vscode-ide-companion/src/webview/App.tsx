@@ -19,7 +19,7 @@ import { useMessageHandling } from './hooks/message/useMessageHandling.js';
 import { useToolCalls } from './hooks/useToolCalls.js';
 import { useWebViewMessages } from './hooks/useWebViewMessages.js';
 import { useMessageSubmit } from './hooks/useMessageSubmit.js';
-import type { PermissionOption, PermissionToolCall } from '@qwen-code/webui';
+import type { PermissionOption, PermissionToolCall } from '@tram-ai/webui';
 import type { TextMessage } from './hooks/message/useMessageHandling.js';
 import type { ToolCallData } from './components/messages/toolcalls/ToolCall.js';
 import { ToolCall } from './components/messages/toolcalls/ToolCall.js';
@@ -39,7 +39,7 @@ import {
   EmptyState,
   ChatHeader,
   SessionSelector,
-} from '@qwen-code/webui';
+} from '@tram-ai/webui';
 import { InputForm } from './components/layout/InputForm.js';
 import { ApprovalMode, NEXT_APPROVAL_MODE } from '../types/acpTypes.js';
 import type { ApprovalModeValue } from '../types/approvalModeValueTypes.js';
@@ -49,8 +49,8 @@ import type { Question } from '../types/acpTypes.js';
 import {
   DEFAULT_TOKEN_LIMIT,
   tokenLimit,
-} from '@qwen-code/qwen-code-core/src/core/tokenLimits.js';
-import { AskUserQuestionDialog } from '@qwen-code/webui';
+} from '@tram-ai/tram-core/src/core/tokenLimits.js';
+import { AskUserQuestionDialog } from '@tram-ai/webui';
 
 export const App: React.FC = () => {
   const vscode = useVSCode();
@@ -175,7 +175,7 @@ export const App: React.FC = () => {
           {
             id: 'login',
             label: 'Login',
-            description: 'Login to Qwen Code',
+            description: 'Login to TRAM',
             type: 'command',
             group: 'Account',
           },
@@ -901,7 +901,7 @@ export const App: React.FC = () => {
           <div className="text-center">
             <div className="border-primary mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2"></div>
             <p className="text-muted-foreground text-sm">
-              Preparing Qwen Code...
+              Preparing TRAM...
             </p>
           </div>
         </div>
@@ -925,8 +925,8 @@ export const App: React.FC = () => {
 
       <ChatHeader
         currentSessionTitle={sessionManagement.currentSessionTitle}
-        onLoadSessions={sessionManagement.handleLoadQwenSessions}
-        onNewSession={sessionManagement.handleNewQwenSession}
+        onLoadSessions={sessionManagement.handleLoadTramSessions}
+        onNewSession={sessionManagement.handleNewTramSession}
       />
 
       <div
@@ -939,7 +939,7 @@ export const App: React.FC = () => {
               onLogin={() => {
                 vscode.postMessage({ type: 'login', data: {} });
                 messageHandling.setWaitingForResponse(
-                  'Logging in to Qwen Code...',
+                  'Logging in to TRAM...',
                 );
               }}
             />

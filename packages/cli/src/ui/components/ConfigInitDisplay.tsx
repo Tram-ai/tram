@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { appEvents } from './../../utils/events.js';
 import { Box, Text } from 'ink';
 import { useConfig } from '../contexts/ConfigContext.js';
-import { type McpClient, MCPServerStatus } from '@qwen-code/qwen-code-core';
+import { type McpClient, MCPServerStatus } from '@tram-ai/tram-core';
 import { GeminiSpinner } from './GeminiRespondingSpinner.js';
 import { theme } from '../semantic-colors.js';
 import { t } from '../../i18n/index.js';
@@ -24,15 +24,23 @@ export const ConfigInitDisplay = () => {
         return;
       }
       let connected = 0;
+      let total = 0;
       for (const client of clients.values()) {
+        // Skip hidden (auto-injected internal) servers from the count
+        if (client.isHidden()) continue;
+        total++;
         if (client.getStatus() === MCPServerStatus.CONNECTED) {
           connected++;
         }
       }
+      if (total === 0) {
+        setMessage(t('Initializing...'));
+        return;
+      }
       setMessage(
         t('Connecting to MCP servers... ({{connected}}/{{total}})', {
           connected: String(connected),
-          total: String(clients.size),
+          total: String(total),
         }),
       );
     };

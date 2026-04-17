@@ -11,7 +11,7 @@ import { disableCommand } from './hooks/disable.js';
 export const hooksCommand: CommandModule = {
   command: 'hooks <command>',
   aliases: ['hook'],
-  describe: 'Manage Qwen Code hooks.',
+  describe: 'Manage TRAM hooks.',
   builder: (yargs) =>
     yargs
       .command(enableCommand)

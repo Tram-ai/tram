@@ -1,5 +1,5 @@
 {
-  "name": "@qwen-code/qwen-code",
+  "name": "@tram-ai/tram",
   "version": "0.12.6",
   "engines": {
     "node": ">=20.0.0"
@@ -10,10 +10,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/QwenLM/qwen-code.git"
+    "url": "git+https://github.com/QwenLM/tram.git"
   },
   "config": {
-    "sandboxImageUri": "ghcr.io/qwenlm/qwen-code:0.12.6"
+    "sandboxImageUri": "ghcr.io/qwenlm/tram:0.12.6"
   },
   "scripts": {
     "start": "cross-env node scripts/start.js",
@@ -68,7 +68,7 @@
     "baseline-browser-mapping": "^2.9.19"
   },
   "bin": {
-    "qwen": "dist/cli.js"
+    "tram": "dist/cli.js"
   },
   "files": [
     "dist/",

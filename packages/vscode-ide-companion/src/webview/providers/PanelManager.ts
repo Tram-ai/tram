@@ -14,7 +14,7 @@ export class PanelManager {
   private panel: vscode.WebviewPanel | null = null;
   private panelTab: vscode.Tab | null = null;
   // Best-effort tracking of the group (by view column) that currently hosts
-  // the Qwen webview. We update this when creating/revealing the panel and
+  // the TRAM webview. We update this when creating/revealing the panel and
   // whenever we can capture the Tab from the tab model.
   private panelGroupViewColumn: vscode.ViewColumn | null = null;
 
@@ -47,17 +47,17 @@ export class PanelManager {
       return false; // Panel already exists
     }
 
-    // First, check if there's an existing Qwen Code group
-    const existingGroup = this.findExistingQwenCodeGroup();
+    // First, check if there's an existing TRAM group
+    const existingGroup = this.findExistingTramCodeGroup();
 
     if (existingGroup) {
-      // If Qwen Code webview already exists in a locked group, create the new panel in that same group
+      // If TRAM webview already exists in a locked group, create the new panel in that same group
       console.log(
-        '[PanelManager] Found existing Qwen Code group, creating panel in same group',
+        '[PanelManager] Found existing TRAM group, creating panel in same group',
       );
       this.panel = vscode.window.createWebviewPanel(
-        'qwenCode.chat',
-        'Qwen Code',
+        'tramCode.chat',
+        'TRAM',
         { viewColumn: existingGroup.viewColumn, preserveFocus: false },
         {
           enableScripts: true,
@@ -71,7 +71,7 @@ export class PanelManager {
       // Track the group column hosting this panel
       this.panelGroupViewColumn = existingGroup.viewColumn;
     } else {
-      // If no existing Qwen Code group, create a new group to the right of the active editor group
+      // If no existing TRAM group, create a new group to the right of the active editor group
       try {
         // Create a new group to the right of the current active group
         await vscode.commands.executeCommand('workbench.action.newGroupRight');
@@ -84,8 +84,8 @@ export class PanelManager {
         const activeColumn =
           vscode.window.activeTextEditor?.viewColumn || vscode.ViewColumn.One;
         this.panel = vscode.window.createWebviewPanel(
-          'qwenCode.chat',
-          'Qwen Code',
+          'tramCode.chat',
+          'TRAM',
           { viewColumn: activeColumn, preserveFocus: false },
           {
             enableScripts: true,
@@ -105,8 +105,8 @@ export class PanelManager {
       const newGroupColumn = vscode.window.tabGroups.activeTabGroup.viewColumn;
 
       this.panel = vscode.window.createWebviewPanel(
-        'qwenCode.chat',
-        'Qwen Code',
+        'tramCode.chat',
+        'TRAM',
         { viewColumn: newGroupColumn, preserveFocus: false },
         {
           enableScripts: true,
@@ -125,7 +125,7 @@ export class PanelManager {
       this.panelGroupViewColumn = newGroupColumn;
     }
 
-    // Set panel icon to Qwen logo
+    // Set panel icon to TRAM logo
     this.panel.iconPath = vscode.Uri.joinPath(
       this.extensionUri,
       'assets',
@@ -140,10 +140,10 @@ export class PanelManager {
   }
 
   /**
-   * Find the group and view column where the existing Qwen Code webview is located
+   * Find the group and view column where the existing TRAM webview is located
    * @returns The found group and view column, or undefined if not found
    */
-  private findExistingQwenCodeGroup():
+  private findExistingTramCodeGroup():
     | { group: vscode.TabGroup; viewColumn: vscode.ViewColumn }
     | undefined {
     for (const group of vscode.window.tabGroups.all) {
@@ -154,10 +154,10 @@ export class PanelManager {
 
         if (
           isWebviewInput(input) &&
-          input.viewType === 'mainThreadWebview-qwenCode.chat'
+          input.viewType === 'mainThreadWebview-tramCode.chat'
         ) {
-          // Found an existing Qwen Code tab
-          console.log('[PanelManager] Found existing Qwen Code group:', {
+          // Found an existing TRAM tab
+          console.log('[PanelManager] Found existing TRAM group:', {
             viewColumn: group.viewColumn,
             tabCount: group.tabs.length,
             isActive: group.isActive,
@@ -243,7 +243,7 @@ export class PanelManager {
         const isWebviewInput = (inp: unknown): inp is { viewType: string } =>
           !!inp && typeof inp === 'object' && 'viewType' in inp;
         const isWebview = isWebviewInput(input);
-        const sameViewType = isWebview && input.viewType === 'qwenCode.chat';
+        const sameViewType = isWebview && input.viewType === 'tramCode.chat';
         const sameLabel = t.label === panelTitle;
         return !!(sameViewType || sameLabel);
       });
@@ -292,15 +292,15 @@ export class PanelManager {
         this.onPanelDispose();
 
         // After VS Code updates its tab model, check if that group is now
-        // empty (and typically locked for Qwen). If so, close the group to
-        // avoid leaving an empty locked column when the user closes Qwen.
+        // empty (and typically locked for TRAM). If so, close the group to
+        // avoid leaving an empty locked column when the user closes TRAM.
         if (targetColumn !== null) {
           const column: vscode.ViewColumn = targetColumn;
           setTimeout(async () => {
             try {
               const groups = vscode.window.tabGroups.all;
               const group = groups.find((g) => g.viewColumn === column);
-              // If the group that hosted Qwen is now empty, close it to avoid
+              // If the group that hosted TRAM is now empty, close it to avoid
               // leaving an empty locked column around. VS Code's stable API
               // does not expose the lock state on TabGroup, so we only check
               // for emptiness here.
@@ -319,7 +319,7 @@ export class PanelManager {
                     );
                   } catch (err) {
                     console.warn(
-                      '[PanelManager] Failed to close empty group after Qwen panel disposed:',
+                      '[PanelManager] Failed to close empty group after TRAM panel disposed:',
                       err,
                     );
                   }
@@ -327,7 +327,7 @@ export class PanelManager {
               }
             } catch (err) {
               console.warn(
-                '[PanelManager] Error while trying to close empty Qwen group:',
+                '[PanelManager] Error while trying to close empty TRAM group:',
                 err,
               );
             }

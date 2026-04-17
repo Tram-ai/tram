@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { QwenAgentManager } from '../../services/qwenAgentManager.js';
+import type { TramAgentManager } from '../../services/tramAgentManager.js';
 import type { ConversationStore } from '../../services/conversationStore.js';
 import type {
   PermissionResponseMessage,
@@ -21,7 +21,7 @@ export class MessageHandler {
   private router: MessageRouter;
 
   constructor(
-    agentManager: QwenAgentManager,
+    agentManager: TramAgentManager,
     conversationStore: ConversationStore,
     currentConversationId: string | null,
     sendToWebView: (message: unknown) => void,

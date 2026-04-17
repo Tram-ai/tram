@@ -15,8 +15,8 @@ import { DefaultLight } from './default-light.js';
 import { DefaultDark } from './default.js';
 import { ShadesOfPurple } from './shades-of-purple.js';
 import { XCode } from './xcode.js';
-import { QwenLight } from './qwen-light.js';
-import { QwenDark } from './qwen-dark.js';
+import { TramLight } from './tram-light.js';
+import { TramDark } from './tram-dark.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -27,7 +27,7 @@ import { ANSI } from './ansi.js';
 import { ANSILight } from './ansi-light.js';
 import { NoColorTheme } from './no-color.js';
 import process from 'node:process';
-import { createDebugLogger } from '@qwen-code/qwen-code-core';
+import { createDebugLogger } from '@tram-ai/tram-core';
 
 const debugLogger = createDebugLogger('THEME_MANAGER');
 
@@ -37,7 +37,7 @@ export interface ThemeDisplay {
   isCustom?: boolean;
 }
 
-export const DEFAULT_THEME: Theme = QwenDark;
+export const DEFAULT_THEME: Theme = TramDark;
 
 class ThemeManager {
   private readonly availableThemes: Theme[];
@@ -55,8 +55,8 @@ class ThemeManager {
       GitHubDark,
       GitHubLight,
       GoogleCode,
-      QwenLight,
-      QwenDark,
+      TramLight,
+      TramDark,
       ShadesOfPurple,
       XCode,
       ANSI,
@@ -195,12 +195,12 @@ class ThemeManager {
       }),
     );
 
-    // Separate Qwen themes
-    const qwenThemes = builtInThemes.filter(
-      (theme) => theme.name === QwenLight.name || theme.name === QwenDark.name,
+    // Separate TRAM themes
+    const tramThemes = builtInThemes.filter(
+      (theme) => theme.name === TramLight.name || theme.name === TramDark.name,
     );
     const otherBuiltInThemes = builtInThemes.filter(
-      (theme) => theme.name !== QwenLight.name && theme.name !== QwenDark.name,
+      (theme) => theme.name !== TramLight.name && theme.name !== TramDark.name,
     );
 
     // Sort other themes by type and then name
@@ -229,8 +229,8 @@ class ThemeManager {
       },
     );
 
-    // Combine Qwen themes first, then sorted others
-    return [...qwenThemes, ...sortedOtherThemes];
+    // Combine TRAM themes first, then sorted others
+    return [...tramThemes, ...sortedOtherThemes];
   }
 
   /**

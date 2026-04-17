@@ -5,8 +5,8 @@
  */
 
 import { Box, Text } from 'ink';
-import { type Extension } from '@qwen-code/qwen-code-core';
-import { createDebugLogger } from '@qwen-code/qwen-code-core';
+import { type Extension } from '@tram-ai/tram-core';
+import { createDebugLogger } from '@tram-ai/tram-core';
 import { theme } from '../../../semantic-colors.js';
 import { useKeypress } from '../../../hooks/useKeypress.js';
 import { t } from '../../../../i18n/index.js';

@@ -17,12 +17,12 @@ import { t, getCurrentLanguage } from '../../i18n/index.js';
 export const docsCommand: SlashCommand = {
   name: 'docs',
   get description() {
-    return t('open full Qwen Code documentation in your browser');
+    return t('open full TRAM documentation in your browser');
   },
   kind: CommandKind.BUILT_IN,
   action: async (context: CommandContext): Promise<void> => {
     const langPath = getCurrentLanguage()?.startsWith('zh') ? 'zh' : 'en';
-    const docsUrl = `https://qwenlm.github.io/qwen-code-docs/${langPath}`;
+    const docsUrl = `https://tram-ai.github.io/docs/${langPath}`;
 
     if (process.env['SANDBOX'] && process.env['SANDBOX'] !== 'sandbox-exec') {
       context.ui.addItem(

@@ -9,7 +9,7 @@ import open from 'open';
 import { bugCommand } from './bugCommand.js';
 import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
 import { GIT_COMMIT_INFO } from '../../generated/git-commit.js';
-import { AuthType } from '@qwen-code/qwen-code-core';
+import { AuthType } from '@tram-ai/tram-core';
 import * as systemInfoUtils from '../../utils/systemInfo.js';
 
 // Mock dependencies
@@ -36,7 +36,7 @@ describe('bugCommand', () => {
           ? GIT_COMMIT_INFO
           : undefined,
     });
-    vi.stubEnv('SANDBOX', 'qwen-test');
+    vi.stubEnv('SANDBOX', 'tram-test');
   });
 
   afterEach(() => {
@@ -56,11 +56,11 @@ describe('bugCommand', () => {
     if (!bugCommand.action) throw new Error('Action is not defined');
     await bugCommand.action(mockContext, 'A test bug');
 
-    const qwenCodeLine =
+    const tramCodeLine =
       GIT_COMMIT_INFO && !['N/A'].includes(GIT_COMMIT_INFO)
-        ? `Qwen Code: 0.1.0 (${GIT_COMMIT_INFO})`
-        : 'Qwen Code: 0.1.0';
-    const expectedInfo = `${qwenCodeLine}
+        ? `TRAM: 0.1.0 (${GIT_COMMIT_INFO})`
+        : 'TRAM: 0.1.0';
+    const expectedInfo = `${tramCodeLine}
 Runtime: Node.js v20.0.0 / npm 10.0.0
 IDE Client: VSCode
 OS: test-platform x64 (22.0.0)
@@ -70,7 +70,7 @@ Sandbox: test
 Proxy: no proxy
 Memory Usage: 100 MB`;
     const expectedUrl =
-      'https://github.com/QwenLM/qwen-code/issues/new?template=bug_report.yml&title=A%20test%20bug&info=' +
+      'https://github.com/tram-ai/tram/issues/new?template=bug_report.yml&title=A%20test%20bug&info=' +
       encodeURIComponent(`\n${expectedInfo}\n`);
 
     expect(open).toHaveBeenCalledWith(expectedUrl);
@@ -90,11 +90,11 @@ Memory Usage: 100 MB`;
     if (!bugCommand.action) throw new Error('Action is not defined');
     await bugCommand.action(mockContext, 'A custom bug');
 
-    const qwenCodeLine =
+    const tramCodeLine =
       GIT_COMMIT_INFO && !['N/A'].includes(GIT_COMMIT_INFO)
-        ? `Qwen Code: 0.1.0 (${GIT_COMMIT_INFO})`
-        : 'Qwen Code: 0.1.0';
-    const expectedInfo = `${qwenCodeLine}
+        ? `TRAM: 0.1.0 (${GIT_COMMIT_INFO})`
+        : 'TRAM: 0.1.0';
+    const expectedInfo = `${tramCodeLine}
 Runtime: Node.js v20.0.0 / npm 10.0.0
 IDE Client: VSCode
 OS: test-platform x64 (22.0.0)
@@ -142,11 +142,11 @@ Memory Usage: 100 MB`;
     if (!bugCommand.action) throw new Error('Action is not defined');
     await bugCommand.action(mockContext, 'OpenAI bug');
 
-    const qwenCodeLine =
+    const tramCodeLine =
       GIT_COMMIT_INFO && !['N/A'].includes(GIT_COMMIT_INFO)
-        ? `Qwen Code: 0.1.0 (${GIT_COMMIT_INFO})`
-        : 'Qwen Code: 0.1.0';
-    const expectedInfo = `${qwenCodeLine}
+        ? `TRAM: 0.1.0 (${GIT_COMMIT_INFO})`
+        : 'TRAM: 0.1.0';
+    const expectedInfo = `${tramCodeLine}
 Runtime: Node.js v20.0.0 / npm 10.0.0
 IDE Client: VSCode
 OS: test-platform x64 (22.0.0)
@@ -158,7 +158,7 @@ Sandbox: test
 Proxy: no proxy
 Memory Usage: 100 MB`;
     const expectedUrl =
-      'https://github.com/QwenLM/qwen-code/issues/new?template=bug_report.yml&title=OpenAI%20bug&info=' +
+      'https://github.com/tram-ai/tram/issues/new?template=bug_report.yml&title=OpenAI%20bug&info=' +
       encodeURIComponent(`\n${expectedInfo}\n`);
 
     expect(open).toHaveBeenCalledWith(expectedUrl);

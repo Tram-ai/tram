@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import pathMod from 'node:path';
 import { useState, useCallback, useEffect, useMemo, useReducer } from 'react';
-import { createDebugLogger, unescapePath } from '@qwen-code/qwen-code-core';
+import { createDebugLogger, unescapePath } from '@tram-ai/tram-core';
 import {
   toCodePoints,
   cpLen,
@@ -1840,7 +1840,7 @@ export function useTextBuffer({
         process.env['VISUAL'] ??
         process.env['EDITOR'] ??
         (process.platform === 'win32' ? 'notepad' : 'vi');
-      const tmpDir = fs.mkdtempSync(pathMod.join(os.tmpdir(), 'qwen-edit-'));
+      const tmpDir = fs.mkdtempSync(pathMod.join(os.tmpdir(), 'tram-edit-'));
       const filePath = pathMod.join(tmpDir, 'buffer.txt');
       fs.writeFileSync(filePath, text, 'utf8');
 

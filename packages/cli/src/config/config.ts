@@ -8,7 +8,7 @@ import {
   ApprovalMode,
   AuthType,
   Config,
-  DEFAULT_QWEN_EMBEDDING_MODEL,
+  DEFAULT_TRAM_EMBEDDING_MODEL,
   FileDiscoveryService,
   getAllGeminiMdFilenames,
   loadServerHierarchicalMemory,
@@ -30,7 +30,7 @@ import {
   NativeLspClient,
   createDebugLogger,
   NativeLspService,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import { extensionsCommand } from '../commands/extensions.js';
 import { hooksCommand } from '../commands/hooks.js';
 import type { Settings } from './settings.js';
@@ -64,10 +64,16 @@ function isValidUUID(value: string): boolean {
 }
 
 import { isWorkspaceTrusted } from './trustedFolders.js';
-import { buildWebSearchConfig } from './webSearch.js';
 import { writeStderrLine } from '../utils/stdioHelpers.js';
 
 const debugLogger = createDebugLogger('CONFIG');
+
+const PROXY_ENV_KEYS = [
+  'HTTPS_PROXY',
+  'https_proxy',
+  'HTTP_PROXY',
+  'http_proxy',
+] as const;
 
 const VALID_APPROVAL_MODE_VALUES = [
   'plan',
@@ -100,6 +106,42 @@ function parseApprovalModeValue(value: string): ApprovalMode {
     default:
       throw formatApprovalModeError(value);
   }
+}
+
+function normalizeString(value: string | undefined): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function getSystemProxyFromEnv(): string | undefined {
+  for (const key of PROXY_ENV_KEYS) {
+    const value = normalizeString(process.env[key]);
+    if (value) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+function resolveProxy(argvProxy: string | undefined, settings: Settings) {
+  const cliProxy = normalizeString(argvProxy);
+  if (cliProxy) {
+    return cliProxy;
+  }
+
+  const mode = settings.advanced?.proxy?.mode;
+  if (mode === 'off') {
+    return undefined;
+  }
+
+  if (mode === 'custom') {
+    return normalizeString(settings.advanced?.proxy?.customUrl);
+  }
+
+  return getSystemProxyFromEnv();
 }
 
 export interface CliArgs {
@@ -157,6 +199,10 @@ export interface CliArgs {
   excludeTools: string[] | undefined;
   authType: string | undefined;
   channel: string | undefined;
+  /** Run initialization setup wizard */
+  initialize: boolean | undefined;
+  /** Enable local model list input in initialize wizard */
+  initializeLocalModelList: boolean | undefined;
 }
 
 function normalizeOutputFormat(
@@ -180,7 +226,7 @@ export async function parseArguments(): Promise<CliArgs> {
   // hack: if the first argument is the CLI entry point, remove it
   if (
     rawArgv.length > 0 &&
-    (rawArgv[0].endsWith('/dist/qwen-cli/cli.js') ||
+    (rawArgv[0].endsWith('/dist/tram-cli/cli.js') ||
       rawArgv[0].endsWith('/dist/cli.js') ||
       rawArgv[0].endsWith('/dist/cli/cli.js'))
   ) {
@@ -189,9 +235,9 @@ export async function parseArguments(): Promise<CliArgs> {
 
   const yargsInstance = yargs(rawArgv)
     .locale('en')
-    .scriptName('qwen')
+    .scriptName('tram')
     .usage(
-      'Usage: qwen [options] [command]\n\nQwen Code - Launch an interactive CLI, use -p/--prompt for non-interactive mode',
+      'Usage: tram [options] [command]\n\nTRAM - Launch an interactive CLI, use -p/--prompt for non-interactive mode',
     )
     .option('telemetry', {
       type: 'boolean',
@@ -256,7 +302,7 @@ export async function parseArguments(): Promise<CliArgs> {
     })
     .option('proxy', {
       type: 'string',
-      description: 'Proxy for Qwen Code, like schema://user:password@host:port',
+      description: 'Proxy for TRAM, like schema://user:password@host:port',
     })
     .deprecateOption(
       'proxy',
@@ -267,7 +313,7 @@ export async function parseArguments(): Promise<CliArgs> {
       description:
         'Enable chat recording to disk. If false, chat history is not saved and --continue/--resume will not work.',
     })
-    .command('$0 [query..]', 'Launch Qwen Code CLI', (yargsInstance: Argv) =>
+    .command('$0 [query..]', 'Launch TRAM CLI', (yargsInstance: Argv) =>
       yargsInstance
         .positional('query', {
           description:
@@ -450,6 +496,18 @@ export async function parseArguments(): Promise<CliArgs> {
             'Include partial assistant messages when using stream-json output.',
           default: false,
         })
+        .option('initialize', {
+          type: 'boolean',
+          description:
+            'Run the initialization setup wizard to configure AI settings, approval mode, proxy, and theme.',
+          default: false,
+        })
+        .option('initialize-local-model-list', {
+          type: 'boolean',
+          description:
+            'Enable local model list input during initialization for providers that cannot fetch models from APIs.',
+          default: false,
+        })
         .option('continue', {
           alias: 'c',
           type: 'boolean',
@@ -497,7 +555,7 @@ export async function parseArguments(): Promise<CliArgs> {
           choices: [
             AuthType.USE_OPENAI,
             AuthType.USE_ANTHROPIC,
-            AuthType.QWEN_OAUTH,
+            AuthType.TRAM_OAUTH,
             AuthType.USE_GEMINI,
             AuthType.USE_VERTEX_AI,
           ],
@@ -549,6 +607,18 @@ export async function parseArguments(): Promise<CliArgs> {
             argv['outputFormat'] !== OutputFormat.STREAM_JSON
           ) {
             return '--input-format stream-json requires --output-format stream-json';
+          }
+          if (argv['initialize']) {
+            // When --initialize is used, other conflicting options should not be allowed
+            if (argv['prompt'] || argv['promptInteractive'] || argv['query']) {
+              return 'Cannot use --initialize with --prompt (-p), --prompt-interactive (-i), or positional query arguments.';
+            }
+            if (argv['continue'] || argv['resume']) {
+              return 'Cannot use --initialize with --continue (-c) or --resume (-r).';
+            }
+            if (argv['sessionId']) {
+              return 'Cannot use --initialize with --session-id.';
+            }
           }
           if (argv['continue'] && argv['resume']) {
             return 'Cannot use both --continue and --resume together. Use --continue to resume the latest session, or --resume <sessionId> to resume a specific session.';
@@ -706,11 +776,11 @@ export async function loadCliConfig(
   // Automatically load output-language.md if it exists
   const projectStorage = new Storage(cwd);
   const projectOutputLanguagePath = path.join(
-    projectStorage.getQwenDir(),
+    projectStorage.getTramDir(),
     'output-language.md',
   );
   const globalOutputLanguagePath = path.join(
-    Storage.getGlobalQwenDir(),
+    Storage.getGlobalTramDir(),
     'output-language.md',
   );
 
@@ -757,7 +827,7 @@ export async function loadCliConfig(
   } else if (settings.tools?.approvalMode) {
     approvalMode = parseApprovalModeValue(settings.tools.approvalMode);
   } else {
-    approvalMode = ApprovalMode.DEFAULT;
+    approvalMode = ApprovalMode.YOLO; //DEFAULT原本
   }
 
   // Force approval mode to default if the folder is not trusted.
@@ -929,7 +999,7 @@ export async function loadCliConfig(
       sessionId = argv.resume;
       sessionData = await sessionService.loadSession(argv.resume);
       if (!sessionData) {
-        const message = `No saved session found with ID ${argv.resume}. Run \`qwen --resume\` without an ID to choose from existing sessions.`;
+        const message = `No saved session found with ID ${argv.resume}. Run \`tram --resume\` without an ID to choose from existing sessions.`;
         writeStderrLine(message);
         process.exit(1);
       }
@@ -952,7 +1022,7 @@ export async function loadCliConfig(
   const config = new Config({
     sessionId,
     sessionData,
-    embeddingModel: DEFAULT_QWEN_EMBEDDING_MODEL,
+    embeddingModel: DEFAULT_TRAM_EMBEDDING_MODEL,
     sandbox: sandboxConfig,
     targetDir: cwd,
     includeDirectories,
@@ -984,12 +1054,7 @@ export async function loadCliConfig(
     fileFiltering: settings.context?.fileFiltering,
     checkpointing:
       argv.checkpointing || settings.general?.checkpointing?.enabled,
-    proxy:
-      argv.proxy ||
-      process.env['HTTPS_PROXY'] ||
-      process.env['https_proxy'] ||
-      process.env['HTTP_PROXY'] ||
-      process.env['http_proxy'],
+    proxy: resolveProxy(argv.proxy, settings),
     cwd,
     fileDiscoveryService: fileService,
     bugCommand: settings.advanced?.bugCommand,
@@ -1011,7 +1076,6 @@ export async function loadCliConfig(
     generationConfig: resolvedCliConfig.generationConfig,
     warnings: resolvedCliConfig.warnings,
     cliVersion: await getCliVersion(),
-    webSearch: buildWebSearchConfig(argv, settings, selectedAuthType),
     ideMode,
     chatCompression: settings.model?.chatCompression,
     folderTrust,
@@ -1041,6 +1105,8 @@ export async function loadCliConfig(
     chatRecording:
       argv.chatRecording ?? settings.general?.chatRecording ?? true,
     defaultFileEncoding: settings.general?.defaultFileEncoding,
+    douyinMcpEndpoint: settings.general?.douyinMcpEndpoint,
+    siliconFlowApiKey: settings.general?.siliconFlowApiKey,
     lsp: {
       enabled: lspEnabled,
     },

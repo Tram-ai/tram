@@ -10,7 +10,7 @@ import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 
 /**
- * Vite configuration for @qwen-code/webui library
+ * Vite configuration for @tram-ai/webui library
  *
  * Build outputs:
  * - ESM: dist/index.js (primary format)
@@ -32,7 +32,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'QwenCodeWebUI',
+      name: 'TramWebUI',
       formats: ['es', 'cjs', 'umd'],
       fileName: (format) => {
         if (format === 'es') return 'index.js';

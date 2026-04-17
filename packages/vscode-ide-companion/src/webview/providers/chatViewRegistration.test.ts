@@ -64,8 +64,8 @@ describe('registerChatViewProviders', () => {
     >;
 
     expect(calls.map((call) => call[0])).toEqual([
-      'qwen-code.chatView.sidebar',
-      'qwen-code.chatView.secondary',
+      'tram.chatView.sidebar',
+      'tram.chatView.secondary',
     ]);
     expect(calls[0]?.[2]).toEqual({
       webviewOptions: { retainContextWhenHidden: true },
@@ -83,7 +83,7 @@ describe('registerChatViewProviders', () => {
 
     expect(executeCommand).toHaveBeenCalledWith(
       'setContext',
-      'qwen-code:doesNotSupportSecondarySidebar',
+      'tram:doesNotSupportSecondarySidebar',
       true,
     );
   });

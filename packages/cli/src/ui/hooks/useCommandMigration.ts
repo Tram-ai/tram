@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Storage } from '@qwen-code/qwen-code-core';
+import { Storage } from '@tram-ai/tram-core';
 import { detectTomlCommands } from '../../services/command-migration-tool.js';
 import type { LoadedSettings } from '../../config/settings.js';
 
@@ -24,12 +24,12 @@ export function useCommandMigration(
     const checkTomlCommands = async () => {
       const allFiles: string[] = [];
 
-      // Check workspace commands directory (.qwen/commands)
+      // Check workspace commands directory (.tram/commands)
       const workspaceCommandsDir = storage.getProjectCommandsDir();
       const workspaceFiles = await detectTomlCommands(workspaceCommandsDir);
       allFiles.push(...workspaceFiles.map((f) => `workspace: ${f}`));
 
-      // Check user commands directory (~/.qwen/commands)
+      // Check user commands directory (~/.tram/commands)
       const userCommandsDir = Storage.getUserCommandsDir();
       const userFiles = await detectTomlCommands(userCommandsDir);
       allFiles.push(...userFiles.map((f) => `user: ${f}`));

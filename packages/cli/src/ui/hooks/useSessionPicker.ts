@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen Code
+ * Copyright 2025 TRAM
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -18,7 +18,7 @@ import type {
   ListSessionsResult,
   SessionListItem,
   SessionService,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import {
   filterSessions,
   SESSION_PAGE_SIZE,

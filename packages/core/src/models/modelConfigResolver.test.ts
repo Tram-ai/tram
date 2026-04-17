@@ -10,7 +10,7 @@ import {
   validateModelConfig,
 } from './modelConfigResolver.js';
 import { AuthType } from '../core/contentGenerator.js';
-import { DEFAULT_QWEN_MODEL, MAINLINE_CODER_MODEL } from '../config/models.js';
+import { DEFAULT_TRAM_MODEL, MAINLINE_CODER_MODEL } from '../config/models.js';
 
 describe('modelConfigResolver', () => {
   describe('resolveModelConfig', () => {
@@ -127,39 +127,39 @@ describe('modelConfigResolver', () => {
         expect(result.sources['apiKey'].via?.kind).toBe('modelProviders');
       });
 
-      it('reads QWEN_MODEL as fallback for OPENAI_MODEL', () => {
+      it('reads TRAM_MODEL as fallback for OPENAI_MODEL', () => {
         const result = resolveModelConfig({
           authType: AuthType.USE_OPENAI,
           cli: {},
           settings: {},
           env: {
-            QWEN_MODEL: 'qwen-model',
+            TRAM_MODEL: 'tram-model',
             OPENAI_API_KEY: 'key',
           },
         });
 
-        expect(result.config.model).toBe('qwen-model');
-        expect(result.sources['model'].envKey).toBe('QWEN_MODEL');
+        expect(result.config.model).toBe('tram-model');
+        expect(result.sources['model'].envKey).toBe('TRAM_MODEL');
       });
     });
 
-    describe('Qwen OAuth auth type', () => {
-      it('uses default model for Qwen OAuth', () => {
+    describe('TRAM OAuth auth type', () => {
+      it('uses default model for TRAM OAuth', () => {
         const result = resolveModelConfig({
-          authType: AuthType.QWEN_OAUTH,
+          authType: AuthType.TRAM_OAUTH,
           cli: {},
           settings: {},
           env: {},
         });
 
-        expect(result.config.model).toBe(DEFAULT_QWEN_MODEL);
-        expect(result.config.apiKey).toBe('QWEN_OAUTH_DYNAMIC_TOKEN');
+        expect(result.config.model).toBe(DEFAULT_TRAM_MODEL);
+        expect(result.config.apiKey).toBe('TRAM_OAUTH_DYNAMIC_TOKEN');
         expect(result.sources['apiKey'].kind).toBe('computed');
       });
 
-      it('allows coder-model for Qwen OAuth', () => {
+      it('allows coder-model for TRAM OAuth', () => {
         const result = resolveModelConfig({
-          authType: AuthType.QWEN_OAUTH,
+          authType: AuthType.TRAM_OAUTH,
           cli: {
             model: 'coder-model',
           },
@@ -171,9 +171,9 @@ describe('modelConfigResolver', () => {
         expect(result.sources['model'].kind).toBe('cli');
       });
 
-      it('warns and falls back for unsupported Qwen OAuth models', () => {
+      it('warns and falls back for unsupported TRAM OAuth models', () => {
         const result = resolveModelConfig({
-          authType: AuthType.QWEN_OAUTH,
+          authType: AuthType.TRAM_OAUTH,
           cli: {
             model: 'unsupported-model',
           },
@@ -181,7 +181,7 @@ describe('modelConfigResolver', () => {
           env: {},
         });
 
-        expect(result.config.model).toBe(DEFAULT_QWEN_MODEL);
+        expect(result.config.model).toBe(DEFAULT_TRAM_MODEL);
         expect(result.warnings).toHaveLength(1);
         expect(result.warnings[0]).toContain('unsupported-model');
       });
@@ -311,11 +311,11 @@ describe('modelConfigResolver', () => {
       expect(result.errors[0].message).toContain('Missing model');
     });
 
-    it('always passes for Qwen OAuth', () => {
+    it('always passes for TRAM OAuth', () => {
       const result = validateModelConfig({
-        authType: AuthType.QWEN_OAUTH,
-        model: DEFAULT_QWEN_MODEL,
-        apiKey: 'QWEN_OAUTH_DYNAMIC_TOKEN',
+        authType: AuthType.TRAM_OAUTH,
+        model: DEFAULT_TRAM_MODEL,
+        apiKey: 'TRAM_OAUTH_DYNAMIC_TOKEN',
       });
 
       expect(result.valid).toBe(true);

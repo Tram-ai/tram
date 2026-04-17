@@ -38,10 +38,10 @@ export const ThinkingIcon: FC<ThinkingIconProps> = ({
       strokeWidth="0.27"
       style={{
         stroke: enabled
-          ? 'var(--app-qwen-ivory)'
+          ? 'var(--app-tram-ivory)'
           : 'var(--app-secondary-foreground)',
         fill: enabled
-          ? 'var(--app-qwen-ivory)'
+          ? 'var(--app-tram-ivory)'
           : 'var(--app-secondary-foreground)',
         ...style,
       }}

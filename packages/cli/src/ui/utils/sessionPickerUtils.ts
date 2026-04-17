@@ -1,10 +1,10 @@
 /**
  * @license
- * Copyright 2025 Qwen Code
+ * Copyright 2025 TRAM
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { SessionListItem } from '@qwen-code/qwen-code-core';
+import type { SessionListItem } from '@tram-ai/tram-core';
 
 /**
  * State for managing loaded sessions in the session picker.

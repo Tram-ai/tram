@@ -6,7 +6,7 @@
 
 import type { ReactNode } from 'react';
 import type { Content, PartListUnion } from '@google/genai';
-import type { Config, GitService, Logger } from '@qwen-code/qwen-code-core';
+import type { Config, GitService, Logger } from '@tram-ai/tram-core';
 import type {
   HistoryItemWithoutId,
   HistoryItem,
@@ -150,7 +150,8 @@ export interface OpenDialogActionReturn {
     | 'approval-mode'
     | 'resume'
     | 'extensions_manage'
-    | 'mcp';
+    | 'mcp'
+    | 'initialize';
 }
 
 /**

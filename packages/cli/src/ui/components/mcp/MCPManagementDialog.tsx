@@ -30,7 +30,7 @@ import {
   type AnyDeclarativeTool,
   type DiscoveredMCPPrompt,
   createDebugLogger,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import { loadSettings, SettingScope } from '../../../config/settings.js';
 import { isToolValid, getToolInvalidReasons } from './utils.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
@@ -76,6 +76,8 @@ export const MCPManagementDialog: React.FC<MCPManagementDialogProps> = ({
     for (const [name, serverConfig] of Object.entries(mcpServers) as Array<
       [string, MCPServerConfig]
     >) {
+      // Skip servers marked as hidden (auto-injected internal servers)
+      if (serverConfig.hidden) continue;
       const status = getMCPServerStatus(name);
 
       // Get tools for this server
@@ -700,7 +702,7 @@ export const MCPManagementDialog: React.FC<MCPManagementDialogProps> = ({
   return (
     <Box flexDirection="column" width={boxWidth}>
       <Box
-        borderStyle="single"
+        borderStyle="round"
         borderColor={theme.border.default}
         flexDirection="column"
         width={boxWidth}

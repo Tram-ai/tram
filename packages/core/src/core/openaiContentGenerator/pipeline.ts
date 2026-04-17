@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen
+ * Copyright 2025 Tram
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -40,11 +40,15 @@ export class ContentGenerationPipeline {
   private converter: OpenAIContentConverter;
   private contentGeneratorConfig: ContentGeneratorConfig;
 
+  private getEffectiveRequestModel(): string {
+    return this.contentGeneratorConfig.requestModel || this.contentGeneratorConfig.model;
+  }
+
   constructor(private config: PipelineConfig) {
     this.contentGeneratorConfig = config.contentGeneratorConfig;
     this.client = this.config.provider.buildClient();
     this.converter = new OpenAIContentConverter(
-      this.contentGeneratorConfig.model,
+      this.getEffectiveRequestModel(),
       this.contentGeneratorConfig.schemaCompliance,
       this.contentGeneratorConfig.modalities ?? {},
     );
@@ -57,7 +61,7 @@ export class ContentGenerationPipeline {
     // For OpenAI-compatible providers, the configured model is the single source of truth.
     // We intentionally ignore request.model because upstream callers may pass a model string
     // that is not valid/available for the OpenAI-compatible backend.
-    const effectiveModel = this.contentGeneratorConfig.model;
+    const effectiveModel = this.getEffectiveRequestModel();
     this.converter.setModel(effectiveModel);
     this.converter.setModalities(this.contentGeneratorConfig.modalities ?? {});
     return this.executeWithErrorHandling(
@@ -85,7 +89,7 @@ export class ContentGenerationPipeline {
     request: GenerateContentParameters,
     userPromptId: string,
   ): Promise<AsyncGenerator<GenerateContentResponse>> {
-    const effectiveModel = this.contentGeneratorConfig.model;
+    const effectiveModel = this.getEffectiveRequestModel();
     this.converter.setModel(effectiveModel);
     this.converter.setModalities(this.contentGeneratorConfig.modalities ?? {});
     return this.executeWithErrorHandling(

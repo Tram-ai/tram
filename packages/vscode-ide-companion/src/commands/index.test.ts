@@ -100,7 +100,7 @@ describe('registerNewCommands', () => {
     await getRegisteredHandler(focusChatCommand)();
 
     expect(executeCommand).toHaveBeenCalledWith(
-      'qwen-code.chatView.secondary.focus',
+      'tram.chatView.secondary.focus',
     );
   });
 
@@ -118,7 +118,7 @@ describe('registerNewCommands', () => {
     await getRegisteredHandler(focusChatCommand)();
 
     expect(executeCommand).toHaveBeenCalledWith(
-      'qwen-code.chatView.sidebar.focus',
+      'tram.chatView.sidebar.focus',
     );
   });
 });

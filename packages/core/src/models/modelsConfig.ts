@@ -9,7 +9,7 @@ import process from 'node:process';
 import { AuthType } from '../core/contentGenerator.js';
 import type { ContentGeneratorConfig } from '../core/contentGenerator.js';
 import type { ContentGeneratorConfigSources } from '../core/contentGenerator.js';
-import { DEFAULT_QWEN_MODEL } from '../config/models.js';
+import { DEFAULT_TRAM_MODEL } from '../config/models.js';
 import { tokenLimit } from '../core/tokenLimits.js';
 import { defaultModalities } from '../core/modalityDefaults.js';
 
@@ -82,8 +82,8 @@ export class ModelsConfig {
   // Flag for strict model provider selection
   private strictModelProviderSelection: boolean = false;
 
-  // One-shot flag for qwen-oauth credential caching
-  private requireCachedQwenCredentialsOnce: boolean = false;
+  // One-shot flag for tram-oauth credential caching
+  private requireCachedTramCredentialsOnce: boolean = false;
 
   // One-shot flag indicating credentials were manually set via updateCredentials()
   // When true, syncAfterAuthRefresh should NOT override these credentials with
@@ -172,7 +172,7 @@ export class ModelsConfig {
     generationConfig: Partial<ContentGeneratorConfig>;
     generationConfigSources: ContentGeneratorConfigSources;
     strictModelProviderSelection: boolean;
-    requireCachedQwenCredentialsOnce: boolean;
+    requireCachedTramCredentialsOnce: boolean;
     hasManualCredentials: boolean;
     activeRuntimeModelSnapshotId: string | undefined;
   } {
@@ -183,7 +183,7 @@ export class ModelsConfig {
         this.generationConfigSources,
       ),
       strictModelProviderSelection: this.strictModelProviderSelection,
-      requireCachedQwenCredentialsOnce: this.requireCachedQwenCredentialsOnce,
+      requireCachedTramCredentialsOnce: this.requireCachedTramCredentialsOnce,
       hasManualCredentials: this.hasManualCredentials,
       activeRuntimeModelSnapshotId: this.activeRuntimeModelSnapshotId,
     };
@@ -202,8 +202,8 @@ export class ModelsConfig {
     this._generationConfig = snapshot.generationConfig;
     this.generationConfigSources = snapshot.generationConfigSources;
     this.strictModelProviderSelection = snapshot.strictModelProviderSelection;
-    this.requireCachedQwenCredentialsOnce =
-      snapshot.requireCachedQwenCredentialsOnce;
+    this.requireCachedTramCredentialsOnce =
+      snapshot.requireCachedTramCredentialsOnce;
     this.hasManualCredentials = snapshot.hasManualCredentials;
     this.activeRuntimeModelSnapshotId = snapshot.activeRuntimeModelSnapshotId;
   }
@@ -212,7 +212,24 @@ export class ModelsConfig {
    * Get current model ID
    */
   getModel(): string {
-    return this._generationConfig.model || DEFAULT_QWEN_MODEL;
+    return this._generationConfig.model || DEFAULT_TRAM_MODEL;
+  }
+
+  /**
+   * Get current model display name
+   */
+  getModelName(): string {
+    const modelId = this.getModel();
+    if (this.currentAuthType) {
+      const resolved = this.modelRegistry.getModel(
+        this.currentAuthType,
+        modelId,
+      );
+      if (resolved) {
+        return resolved.name;
+      }
+    }
+    return modelId;
   }
 
   /**
@@ -251,7 +268,7 @@ export class ModelsConfig {
    *
    * Notes:
    * - By default, returns models across all authTypes.
-   * - qwen-oauth models are always ordered first.
+   * - tram-oauth models are always ordered first.
    * - Runtime model option (if active) is included before registry models of the same authType.
    */
   getAllConfiguredModels(authTypes?: AuthType[]): AvailableModel[] {
@@ -268,13 +285,13 @@ export class ModelsConfig {
       }
     }
 
-    // Force qwen-oauth to the front (if requested / defaulted in).
+    // Force tram-oauth to the front (if requested / defaulted in).
     const orderedAuthTypes: AuthType[] = [];
-    if (uniqueAuthTypes.includes(AuthType.QWEN_OAUTH)) {
-      orderedAuthTypes.push(AuthType.QWEN_OAUTH);
+    if (uniqueAuthTypes.includes(AuthType.TRAM_OAUTH)) {
+      orderedAuthTypes.push(AuthType.TRAM_OAUTH);
     }
     for (const authType of uniqueAuthTypes) {
-      if (authType !== AuthType.QWEN_OAUTH) {
+      if (authType !== AuthType.TRAM_OAUTH) {
         orderedAuthTypes.push(authType);
       }
     }
@@ -309,11 +326,11 @@ export class ModelsConfig {
     newModel: string,
     metadata?: ModelSwitchMetadata,
   ): Promise<void> {
-    // Special case: qwen-oauth model switch - hot update in place
+    // Special case: tram-oauth model switch - hot update in place
     // coder-model supports vision capabilities and can be hot-updated
     if (
-      this.currentAuthType === AuthType.QWEN_OAUTH &&
-      newModel === DEFAULT_QWEN_MODEL
+      this.currentAuthType === AuthType.TRAM_OAUTH &&
+      newModel === DEFAULT_TRAM_MODEL
     ) {
       this.strictModelProviderSelection = false;
       this._generationConfig.model = newModel;
@@ -324,7 +341,7 @@ export class ModelsConfig {
 
       // Notify Config to update contentGeneratorConfig
       if (this.onModelChange) {
-        await this.onModelChange(AuthType.QWEN_OAUTH, false);
+        await this.onModelChange(AuthType.TRAM_OAUTH, false);
       }
       return;
     }
@@ -371,8 +388,8 @@ export class ModelsConfig {
     }
 
     const rollbackSnapshot = this.createStateSnapshotForRollback();
-    if (authType === AuthType.QWEN_OAUTH && options?.requireCachedCredentials) {
-      this.requireCachedQwenCredentialsOnce = true;
+    if (authType === AuthType.TRAM_OAUTH && options?.requireCachedCredentials) {
+      this.requireCachedTramCredentialsOnce = true;
     }
 
     try {
@@ -673,8 +690,8 @@ export class ModelsConfig {
    * Check and consume the one-shot cached credentials flag
    */
   consumeRequireCachedCredentialsFlag(): boolean {
-    const value = this.requireCachedQwenCredentialsOnce;
-    this.requireCachedQwenCredentialsOnce = false;
+    const value = this.requireCachedTramCredentialsOnce;
+    this.requireCachedTramCredentialsOnce = false;
     return value;
   }
 
@@ -687,6 +704,8 @@ export class ModelsConfig {
     // should no longer block syncAfterAuthRefresh from applying provider defaults.
     this.hasManualCredentials = false;
 
+    const requestModel = model.upstreamModelId || model.id;
+
     this._generationConfig.model = model.id;
     this.generationConfigSources['model'] = {
       kind: 'modelProviders',
@@ -694,20 +713,27 @@ export class ModelsConfig {
       modelId: model.id,
       detail: 'model.id',
     };
+    this._generationConfig.requestModel = requestModel;
+    this.generationConfigSources['requestModel'] = {
+      kind: 'modelProviders',
+      authType: model.authType,
+      modelId: model.id,
+      detail: model.upstreamModelId ? 'upstreamModelId' : 'model.id',
+    };
 
     // Clear credentials to avoid reusing previous model's API key
 
-    // For Qwen OAuth, apiKey must always be a placeholder. It will be dynamically
+    // For TRAM OAuth, apiKey must always be a placeholder. It will be dynamically
     // replaced when building requests. Do not preserve any previous key or read
     // from envKey.
     //
     // (OpenAI client instantiation requires an apiKey even though it will be
     // replaced later.)
-    if (this.currentAuthType === AuthType.QWEN_OAUTH) {
-      this._generationConfig.apiKey = 'QWEN_OAUTH_DYNAMIC_TOKEN';
+    if (this.currentAuthType === AuthType.TRAM_OAUTH) {
+      this._generationConfig.apiKey = 'TRAM_OAUTH_DYNAMIC_TOKEN';
       this.generationConfigSources['apiKey'] = {
         kind: 'computed',
-        detail: 'Qwen OAuth placeholder token',
+        detail: 'TRAM OAuth placeholder token',
       };
       this._generationConfig.apiKeyEnvKey = undefined;
       delete this.generationConfigSources['apiKeyEnvKey'];
@@ -765,7 +791,7 @@ export class ModelsConfig {
 
     // contextWindowSize fallback: auto-detect from model when not set by provider
     if (gc.contextWindowSize === undefined) {
-      this._generationConfig.contextWindowSize = tokenLimit(model.id, 'input');
+      this._generationConfig.contextWindowSize = tokenLimit(requestModel, 'input');
       this.generationConfigSources['contextWindowSize'] = {
         kind: 'computed',
         detail: 'auto-detected from model',
@@ -774,7 +800,7 @@ export class ModelsConfig {
 
     // modalities fallback: auto-detect from model when not set by provider
     if (gc.modalities === undefined) {
-      this._generationConfig.modalities = defaultModalities(model.id);
+      this._generationConfig.modalities = defaultModalities(requestModel);
       this.generationConfigSources['modalities'] = {
         kind: 'computed',
         detail: 'auto-detected from model',
@@ -793,13 +819,13 @@ export class ModelsConfig {
    * - We're checking if switching between two models within the SAME authType needs refresh
    *
    * Examples:
-   * - Qwen OAuth: coder-model switches (same authType, hot-update safe)
+   * - TRAM OAuth: coder-model switches (same authType, hot-update safe)
    * - OpenAI: model-a -> model-b with same envKey (same authType, hot-update safe)
    * - OpenAI: gpt-4 -> deepseek-chat with different envKey (same authType, needs refresh)
    *
    * Cross-authType scenarios:
-   * - OpenAI -> Qwen OAuth: handled by switchModel(authType, modelId), always refreshes
-   * - Qwen OAuth -> OpenAI: handled by switchModel(authType, modelId), always refreshes
+   * - OpenAI -> TRAM OAuth: handled by switchModel(authType, modelId), always refreshes
+   * - TRAM OAuth -> OpenAI: handled by switchModel(authType, modelId), always refreshes
    */
   private checkRequiresRefresh(previousModelId: string): boolean {
     // Defensive: this method is only called after switchModel() sets currentAuthType,
@@ -809,9 +835,9 @@ export class ModelsConfig {
       return true;
     }
 
-    // For Qwen OAuth, model switches within the same authType can always be hot-updated
+    // For TRAM OAuth, model switches within the same authType can always be hot-updated
     // (coder-model supports vision capabilities and doesn't require ContentGenerator recreation)
-    if (authType === AuthType.QWEN_OAUTH) {
+    if (authType === AuthType.TRAM_OAUTH) {
       return false;
     }
 
@@ -1127,7 +1153,7 @@ export class ModelsConfig {
       label: snapshot.modelId,
       authType: snapshot.authType,
       /**
-       * `isVision` is for automatic switching of qwen-oauth vision model.
+       * `isVision` is for automatic switching of tram-oauth vision model.
        * Runtime models are basically specified via CLI arguments, env variables,
        * or settings for other auth types.
        */

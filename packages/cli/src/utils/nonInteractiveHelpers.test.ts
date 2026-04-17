@@ -10,13 +10,13 @@ import type {
   SessionMetrics,
   TaskResultDisplay,
   ToolCallResponseInfo,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import {
   ToolErrorType,
   MCPServerStatus,
   getMCPServerStatus,
   OutputFormat,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import type { Part } from '@google/genai';
 import type {
   CLIUserMessage,
@@ -72,9 +72,9 @@ vi.mock('../ui/utils/computeStats.js', () => ({
   }),
 }));
 
-vi.mock('@qwen-code/qwen-code-core', async (importOriginal) => {
+vi.mock('@tram-ai/tram-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@qwen-code/qwen-code-core')>();
+    await importOriginal<typeof import('@tram-ai/tram-core')>();
   return {
     ...actual,
     getMCPServerStatus: vi.fn(),
@@ -542,7 +542,7 @@ describe('buildSystemMessage', () => {
       model: 'test-model',
       permission_mode: 'auto',
       slash_commands: ['commit', 'compress', 'init', 'summary'],
-      qwen_code_version: '1.0.0',
+      tram_code_version: '1.0.0',
       agents: [],
     });
   });
@@ -592,7 +592,7 @@ describe('buildSystemMessage', () => {
       ['init', 'summary'],
     );
 
-    expect(result.qwen_code_version).toBe('unknown');
+    expect(result.tram_code_version).toBe('unknown');
   });
 
   it('should only include allowed built-in commands and all file commands', async () => {

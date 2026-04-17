@@ -5,7 +5,7 @@
  */
 
 /**
- * Development entry point for Qwen Code CLI.
+ * Development entry point for TRAM CLI.
  *
  * Runs the CLI directly from TypeScript source files without requiring a build step.
  * Changes to packages/core or packages/cli are reflected immediately.
@@ -40,7 +40,7 @@ import { pathToFileURL } from 'node:url';
 const coreSourceUrl = '${coreSourceUrl}';
 
 export function resolve(specifier, context, nextResolve) {
-  if (specifier === '@qwen-code/qwen-code-core') {
+  if (specifier === '@tram-ai/tram-core') {
     return {
       shortCircuit: true,
       url: coreSourceUrl,

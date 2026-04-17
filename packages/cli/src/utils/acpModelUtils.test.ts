@@ -1,11 +1,11 @@
 /**
  * @license
- * Copyright 2025 Qwen Team
+ * Copyright 2025 Tram Team
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { describe, it, expect } from 'vitest';
-import { AuthType } from '@qwen-code/qwen-code-core';
+import { AuthType } from '@tram-ai/tram-core';
 import {
   formatAcpModelId,
   parseAcpBaseModelId,
@@ -14,8 +14,8 @@ import {
 
 describe('acpModelUtils', () => {
   it('formats modelId(authType)', () => {
-    expect(formatAcpModelId('qwen3', AuthType.QWEN_OAUTH)).toBe(
-      `qwen3(${AuthType.QWEN_OAUTH})`,
+    expect(formatAcpModelId('qwen3', AuthType.TRAM_OAUTH)).toBe(
+      `qwen3(${AuthType.TRAM_OAUTH})`,
     );
   });
 

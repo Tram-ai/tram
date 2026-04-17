@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen Team
+ * Copyright 2025 TRAM Team
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -105,7 +105,7 @@ export class AcpConnection {
 
     if (!fs.existsSync(cliEntryPath)) {
       throw new Error(
-        `Bundled Qwen CLI entry not found at ${cliEntryPath}. The extension may not have been packaged correctly.`,
+        `Bundled TRAM CLI entry not found at ${cliEntryPath}. The extension may not have been packaged correctly.`,
       );
     }
 
@@ -131,9 +131,9 @@ export class AcpConnection {
         message.toLowerCase().includes('error') &&
         !message.includes('Loaded cached')
       ) {
-        console.error(`[ACP qwen]:`, message);
+        console.error(`[ACP tram]:`, message);
       } else {
-        console.log(`[ACP qwen]:`, message);
+        console.log(`[ACP tram]:`, message);
       }
     });
 
@@ -143,7 +143,7 @@ export class AcpConnection {
 
     this.child!.on('exit', (code: number | null, signal: string | null) => {
       console.error(
-        `[ACP qwen] Process exited with code: ${code}, signal: ${signal}`,
+        `[ACP tram] Process exited with code: ${code}, signal: ${signal}`,
       );
     });
 
@@ -154,7 +154,7 @@ export class AcpConnection {
     }
 
     if (!this.child || this.child.killed) {
-      throw new Error(`Qwen ACP process failed to start`);
+      throw new Error(`TRAM ACP process failed to start`);
     }
 
     // Convert Node.js child process streams to Web Streams for SDK
@@ -166,7 +166,6 @@ export class AcpConnection {
     const stream = ndJsonStream(stdin, stdout);
 
     // Build the SDK Client implementation that bridges to our callbacks.
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     this.sdkConnection = new ClientSideConnection(
       (_agent: Agent): Client => ({

@@ -17,15 +17,15 @@ import path from 'node:path';
 import {
   getErrorMessage,
   loadServerHierarchicalMemory,
-  QWEN_DIR,
+  TRAM_DIR,
   setGeminiMdFilename,
   type FileDiscoveryService,
   type LoadServerHierarchicalMemoryResponse,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 
-vi.mock('@qwen-code/qwen-code-core', async (importOriginal) => {
+vi.mock('@tram-ai/tram-core', async (importOriginal) => {
   const original =
-    await importOriginal<typeof import('@qwen-code/qwen-code-core')>();
+    await importOriginal<typeof import('@tram-ai/tram-core')>();
   return {
     ...original,
     getErrorMessage: vi.fn((error: unknown) => {
@@ -68,7 +68,7 @@ describe('memoryCommand', () => {
     let mockGetGeminiMdFileCount: Mock;
 
     beforeEach(() => {
-      setGeminiMdFilename('QWEN.md');
+      setGeminiMdFilename('TRAM.md');
       mockReadFile.mockReset();
       vi.restoreAllMocks();
 
@@ -158,7 +158,7 @@ describe('memoryCommand', () => {
 
       await globalCommand.action(mockContext, '');
 
-      const expectedGlobalPath = path.join('/home/user', QWEN_DIR, 'AGENTS.md');
+      const expectedGlobalPath = path.join('/home/user', TRAM_DIR, 'AGENTS.md');
       expect(mockReadFile).toHaveBeenCalledWith(expectedGlobalPath, 'utf-8');
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {

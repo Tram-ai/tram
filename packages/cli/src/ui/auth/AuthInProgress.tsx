@@ -41,7 +41,7 @@ export function AuthInProgress({
 
   return (
     <Box
-      borderStyle="single"
+      borderStyle="round"
       borderColor={theme.border.default}
       flexDirection="column"
       padding={1}

@@ -31,7 +31,7 @@ const debugLogger = createDebugLogger('MEMORY_TOOL');
 const memoryToolSchemaData: FunctionDeclaration = {
   name: 'save_memory',
   description:
-    'Saves a specific piece of information or fact to your long-term memory. Use this when the user explicitly asks you to remember something, or when they state a clear, concise fact that seems important to retain for future interactions.',
+    'Saves a specific piece of information or fact to your long-term memory. Use this when the user explicitly asks you to remember something, or when they state a clear, concise fact that seems important to retain for future interactions. For server operations data (JDK paths, ports, server configs), use scope "ops".',
   parametersJsonSchema: {
     type: 'object',
     properties: {
@@ -43,8 +43,8 @@ const memoryToolSchemaData: FunctionDeclaration = {
       scope: {
         type: 'string',
         description:
-          'Where to save the memory: "global" saves to user-level ~/.qwen/QWEN.md (shared across all projects), "project" saves to current project\'s QWEN.md (project-specific). If not specified, will prompt user to choose.',
-        enum: ['global', 'project'],
+          'Where to save the memory: "global" saves to user-level ~/.tram/TRAM.md (shared across all projects), "project" saves to current project\'s TRAM.md (project-specific), "ops" saves to ~/.tram/ops-data/ops-memory.md (server operations data like JDK paths, ports, service configs). If not specified, will prompt user to choose.',
+        enum: ['global', 'project', 'ops'],
       },
     },
     required: ['fact'],
@@ -69,19 +69,20 @@ Do NOT use this tool:
 
 - \`fact\` (string, required): The specific fact or piece of information to remember. This should be a clear, self-contained statement. For example, if the user says "My favorite color is blue", the fact would be "My favorite color is blue".
 - \`scope\` (string, optional): Where to save the memory:
-  - "global": Saves to user-level ~/.qwen/QWEN.md (shared across all projects)
-  - "project": Saves to current project's QWEN.md (project-specific)
+  - "global": Saves to user-level ~/.tram/TRAM.md (shared across all projects)
+  - "project": Saves to current project's TRAM.md (project-specific)
+  - "ops": Saves to ~/.tram/ops-data/ops-memory.md (server operations data like JDK paths, ports, service configs)
   - If not specified, the tool will ask the user where they want to save the memory.
 `;
 
-export const QWEN_CONFIG_DIR = '.qwen';
-export const DEFAULT_CONTEXT_FILENAME = 'QWEN.md';
+export const TRAM_CONFIG_DIR = '.tram';
+export const DEFAULT_CONTEXT_FILENAME = 'TRAM.md';
 export const AGENT_CONTEXT_FILENAME = 'AGENTS.md';
-export const MEMORY_SECTION_HEADER = '## Qwen Added Memories';
+export const MEMORY_SECTION_HEADER = '## TRAM Added Memories';
 
 // This variable will hold the currently configured filename for context files.
-// It defaults to include both QWEN.md and AGENTS.md but can be overridden by setGeminiMdFilename.
-// QWEN.md is first to maintain backward compatibility (used by /init command and save_memory tool).
+// It defaults to include both TRAM.md and AGENTS.md but can be overridden by setGeminiMdFilename.
+// TRAM.md is first to maintain backward compatibility (used by /init command and save_memory tool).
 let currentGeminiMdFilename: string | string[] = [
   DEFAULT_CONTEXT_FILENAME,
   AGENT_CONTEXT_FILENAME,
@@ -115,18 +116,23 @@ interface SaveMemoryParams {
   fact: string;
   modified_by_user?: boolean;
   modified_content?: string;
-  scope?: 'global' | 'project';
+  scope?: 'global' | 'project' | 'ops';
 }
 
 function getGlobalMemoryFilePath(): string {
-  return path.join(Storage.getGlobalQwenDir(), getCurrentGeminiMdFilename());
+  return path.join(Storage.getGlobalTramDir(), getCurrentGeminiMdFilename());
 }
 
 function getProjectMemoryFilePath(): string {
   return path.join(process.cwd(), getCurrentGeminiMdFilename());
 }
 
-function getMemoryFilePath(scope: 'global' | 'project' = 'global'): string {
+function getOpsMemoryFilePath(): string {
+  return Storage.getOpsMemoryFilePath();
+}
+
+function getMemoryFilePath(scope: 'global' | 'project' | 'ops' = 'global'): string {
+  if (scope === 'ops') return getOpsMemoryFilePath();
   return scope === 'project'
     ? getProjectMemoryFilePath()
     : getGlobalMemoryFilePath();
@@ -148,10 +154,16 @@ function ensureNewlineSeparation(currentContent: string): string {
  * Reads the current content of the memory file
  */
 async function readMemoryFileContent(
-  scope: 'global' | 'project' = 'global',
+  scope: 'global' | 'project' | 'ops' = 'global',
 ): Promise<string> {
   try {
-    return await fs.readFile(getMemoryFilePath(scope), 'utf-8');
+    const filePath = getMemoryFilePath(scope);
+    // Ensure ops-data directory exists for ops scope
+    if (scope === 'ops') {
+      const dir = path.dirname(filePath);
+      await fs.mkdir(dir, { recursive: true });
+    }
+    return await fs.readFile(filePath, 'utf-8');
   } catch (err) {
     const error = err as Error & { code?: string };
     if (!(error instanceof Error) || error.code !== 'ENOENT') throw err;

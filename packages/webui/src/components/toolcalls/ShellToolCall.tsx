@@ -38,7 +38,7 @@ const ExecuteToolCallContainer: FC<ToolCallContainerProps> = ({
   isLast = false,
 }) => (
   <div
-    className={`ExecuteToolCall qwen-message message-item ${_className || ''} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
+    className={`ExecuteToolCall tram-message message-item ${_className || ''} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
     data-first={isFirst}
     data-last={isLast}
   >

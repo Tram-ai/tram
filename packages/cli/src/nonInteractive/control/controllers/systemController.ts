@@ -26,7 +26,7 @@ import {
   MCPServerConfig,
   AuthProviderType,
   type MCPOAuthConfig,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 
 const debugLogger = createDebugLogger('SYSTEM_CONTROLLER');
 

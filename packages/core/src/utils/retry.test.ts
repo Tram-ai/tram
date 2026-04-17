@@ -285,8 +285,8 @@ describe('retryWithBackoff', () => {
     });
   });
 
-  describe('Qwen OAuth 429 error handling', () => {
-    it('should retry for Qwen OAuth 429 errors that are throttling-related', async () => {
+  describe('TRAM OAuth 429 error handling', () => {
+    it('should retry for TRAM OAuth 429 errors that are throttling-related', async () => {
       const errorWith429: HttpError = new Error('Rate limit exceeded');
       errorWith429.status = 429;
 
@@ -299,7 +299,7 @@ describe('retryWithBackoff', () => {
         maxAttempts: 5,
         initialDelayMs: 100,
         maxDelayMs: 1000,
-        authType: AuthType.QWEN_OAUTH,
+        authType: AuthType.TRAM_OAUTH,
       });
 
       // Fast-forward time for delays
@@ -311,7 +311,7 @@ describe('retryWithBackoff', () => {
       expect(fn).toHaveBeenCalledTimes(2);
     });
 
-    it('should throw immediately for Qwen OAuth with insufficient_quota message', async () => {
+    it('should throw immediately for TRAM OAuth with insufficient_quota message', async () => {
       const errorWithInsufficientQuota = new Error('insufficient_quota');
 
       const fn = vi.fn().mockRejectedValue(errorWithInsufficientQuota);
@@ -320,16 +320,16 @@ describe('retryWithBackoff', () => {
         maxAttempts: 5,
         initialDelayMs: 1000,
         maxDelayMs: 5000,
-        authType: AuthType.QWEN_OAUTH,
+        authType: AuthType.TRAM_OAUTH,
       });
 
-      await expect(promise).rejects.toThrow(/Qwen OAuth quota exceeded/);
+      await expect(promise).rejects.toThrow(/TRAM OAuth quota exceeded/);
 
       // Should be called only once (no retries)
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw immediately for Qwen OAuth with free allocated quota exceeded message', async () => {
+    it('should throw immediately for TRAM OAuth with free allocated quota exceeded message', async () => {
       const errorWithQuotaExceeded = new Error(
         'Free allocated quota exceeded.',
       );
@@ -340,16 +340,16 @@ describe('retryWithBackoff', () => {
         maxAttempts: 5,
         initialDelayMs: 1000,
         maxDelayMs: 5000,
-        authType: AuthType.QWEN_OAUTH,
+        authType: AuthType.TRAM_OAUTH,
       });
 
-      await expect(promise).rejects.toThrow(/Qwen OAuth quota exceeded/);
+      await expect(promise).rejects.toThrow(/TRAM OAuth quota exceeded/);
 
       // Should be called only once (no retries)
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('should retry for Qwen OAuth with throttling message', async () => {
+    it('should retry for TRAM OAuth with throttling message', async () => {
       const throttlingError: HttpError = new Error(
         'requests throttling triggered',
       );
@@ -365,7 +365,7 @@ describe('retryWithBackoff', () => {
         maxAttempts: 5,
         initialDelayMs: 100,
         maxDelayMs: 1000,
-        authType: AuthType.QWEN_OAUTH,
+        authType: AuthType.TRAM_OAUTH,
       });
 
       // Fast-forward time for delays
@@ -377,7 +377,7 @@ describe('retryWithBackoff', () => {
       expect(fn).toHaveBeenCalledTimes(3);
     });
 
-    it('should retry for Qwen OAuth with throttling error', async () => {
+    it('should retry for TRAM OAuth with throttling error', async () => {
       const throttlingError: HttpError = new Error('throttling');
       throttlingError.status = 429;
 
@@ -390,7 +390,7 @@ describe('retryWithBackoff', () => {
         maxAttempts: 5,
         initialDelayMs: 100,
         maxDelayMs: 1000,
-        authType: AuthType.QWEN_OAUTH,
+        authType: AuthType.TRAM_OAUTH,
       });
 
       // Fast-forward time for delays
@@ -402,7 +402,7 @@ describe('retryWithBackoff', () => {
       expect(fn).toHaveBeenCalledTimes(2);
     });
 
-    it('should throw immediately for Qwen OAuth with quota message', async () => {
+    it('should throw immediately for TRAM OAuth with quota message', async () => {
       const errorWithQuota = new Error('quota exceeded');
 
       const fn = vi.fn().mockRejectedValue(errorWithQuota);
@@ -411,16 +411,16 @@ describe('retryWithBackoff', () => {
         maxAttempts: 5,
         initialDelayMs: 1000,
         maxDelayMs: 5000,
-        authType: AuthType.QWEN_OAUTH,
+        authType: AuthType.TRAM_OAUTH,
       });
 
-      await expect(promise).rejects.toThrow(/Qwen OAuth quota exceeded/);
+      await expect(promise).rejects.toThrow(/TRAM OAuth quota exceeded/);
 
       // Should be called only once (no retries)
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('should retry normal errors for Qwen OAuth (not quota-related)', async () => {
+    it('should retry normal errors for TRAM OAuth (not quota-related)', async () => {
       const normalError: HttpError = new Error('Network error');
       normalError.status = 500;
 
@@ -434,7 +434,7 @@ describe('retryWithBackoff', () => {
         maxAttempts: 5,
         initialDelayMs: 100,
         maxDelayMs: 1000,
-        authType: AuthType.QWEN_OAUTH,
+        authType: AuthType.TRAM_OAUTH,
       });
 
       // Fast-forward time for delays

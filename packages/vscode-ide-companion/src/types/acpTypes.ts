@@ -9,13 +9,13 @@ import type { Usage } from '@agentclientprotocol/sdk';
 import type { ApprovalModeValue } from './approvalModeValueTypes.js';
 
 // ---------------------------------------------------------------------------
-// Private / Qwen-specific types (not part of ACP spec)
+// Private / TRAM-specific types (not part of ACP spec)
 // ---------------------------------------------------------------------------
 
-export const authMethod = 'qwen-oauth';
+export const authMethod = 'tram-oauth';
 
 /**
- * Authenticate update notification (Qwen extension, not ACP spec).
+ * Authenticate update notification (TRAM extension, not ACP spec).
  * Sent by agent during the OAuth flow.
  */
 export interface AuthenticateUpdateNotification {

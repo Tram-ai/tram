@@ -1,1162 +1,1854 @@
 /**
  * @license
- * Copyright 2025 Qwen
+ * Copyright 2025 Tram
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Japanese translations for Qwen Code CLI
+// English translations for TRAM CLI
+// The key serves as both the translation key and the default English text
 
 export default {
   // ============================================================================
   // Help / UI Components
   // ============================================================================
-  'Basics:': '基本操作:',
-  'Add context': 'コンテキストを追加',
+  // Attachment hints
+  '闂?to manage attachments': '闂?to manage attachments',
+  '闂?闂?select, Delete to remove, 闂?to exit':
+    '闂?闂?select, Delete to remove, 闂?to exit',
+  'Attachments: ': 'Attachments: ',
+
+  'Basics:': 'Basics:',
+  'Add context': 'Add context',
   'Use {{symbol}} to specify files for context (e.g., {{example}}) to target specific files or folders.':
-    '{{symbol}} を使用してコンテキスト用のファイルを指定します(例: {{example}}) また、特定のファイルやフォルダを対象にできます',
+    'Use {{symbol}} to specify files for context (e.g., {{example}}) to target specific files or folders.',
   '@': '@',
   '@src/myFile.ts': '@src/myFile.ts',
-  'Shell mode': 'シェルモード',
-  'YOLO mode': 'YOLOモード',
-  'plan mode': 'プランモード',
-  'auto-accept edits': '編集を自動承認',
-  'Accepting edits': '編集を承認中',
-  '(shift + tab to cycle)': '(Shift + Tab で切り替え)',
+  'Shell mode': 'Shell mode',
+  'YOLO mode': 'YOLO mode',
+  'plan mode': 'plan mode',
+  'auto-accept edits': 'auto-accept edits',
+  'Accepting edits': 'Accepting edits',
+  '(shift + tab to cycle)': '(shift + tab to cycle)',
+  '(tab to cycle)': '(tab to cycle)',
   'Execute shell commands via {{symbol}} (e.g., {{example1}}) or use natural language (e.g., {{example2}}).':
-    '{{symbol}} でシェルコマンドを実行(例: {{example1}})、または自然言語で入力(例: {{example2}})',
+    'Execute shell commands via {{symbol}} (e.g., {{example1}}) or use natural language (e.g., {{example2}}).',
   '!': '!',
   '!npm run start': '!npm run start',
-  'start server': 'サーバーを起動',
-  'Commands:': 'コマンド:',
-  'shell command': 'シェルコマンド',
+  'start server': 'start server',
+  'Commands:': 'Commands:',
+  'shell command': 'shell command',
   'Model Context Protocol command (from external servers)':
-    'Model Context Protocol コマンド(外部サーバーから)',
-  'Keyboard Shortcuts:': 'キーボードショートカット:',
-  'Jump through words in the input': '入力欄の単語間を移動',
+    'Model Context Protocol command (from external servers)',
+  'Keyboard Shortcuts:': 'Keyboard Shortcuts:',
+  'Toggle this help display': 'Toggle this help display',
+  'Toggle shell mode': 'Toggle shell mode',
+  'Open command menu': 'Open command menu',
+  'Add file context': 'Add file context',
+  'Accept suggestion / Autocomplete': 'Accept suggestion / Autocomplete',
+  'Reverse search history': 'Reverse search history',
+  'Press ? again to close': 'Press ? again to close',
+  // Keyboard shortcuts panel descriptions
+  'for shell mode': 'for shell mode',
+  'for commands': 'for commands',
+  'for file paths': 'for file paths',
+  'to clear input': 'to clear input',
+  'to cycle approvals': 'to cycle approvals',
+  'to quit': 'to quit',
+  'for newline': 'for newline',
+  'to clear screen': 'to clear screen',
+  'to search history': 'to search history',
+  'to paste images': 'to paste images',
+  'for external editor': 'for external editor',
+  'Jump through words in the input': 'Jump through words in the input',
   'Close dialogs, cancel requests, or quit application':
-    'ダイアログを閉じる、リクエストをキャンセル、またはアプリを終了',
-  'New line': '改行',
+    'Close dialogs, cancel requests, or quit application',
+  'New line': 'New line',
   'New line (Alt+Enter works for certain linux distros)':
-    '改行(一部のLinuxディストリビューションではAlt+Enterが有効)',
-  'Clear the screen': '画面をクリア',
-  'Open input in external editor': '外部エディタで入力を開く',
-  'Send message': 'メッセージを送信',
-  'Initializing...': '初期化中...',
+    'New line (Alt+Enter works for certain linux distros)',
+  'Clear the screen': 'Clear the screen',
+  'Open input in external editor': 'Open input in external editor',
+  'Send message': 'Send message',
+  'Initializing...': 'Initializing...',
   'Connecting to MCP servers... ({{connected}}/{{total}})':
-    'MCPサーバーに接続中... ({{connected}}/{{total}})',
-  'Type your message or @path/to/file':
-    'メッセージを入力、@パス/ファイルでファイルを添付(D&D対応)',
+    'Connecting to MCP servers... ({{connected}}/{{total}})',
+  'Type your message or @path/to/file': 'Type your message or @path/to/file',
+  '? for shortcuts': '? for shortcuts',
   "Press 'i' for INSERT mode and 'Esc' for NORMAL mode.":
-    "'i' でINSERTモード、'Esc' でNORMALモード",
+    "Press 'i' for INSERT mode and 'Esc' for NORMAL mode.",
   'Cancel operation / Clear input (double press)':
-    '操作をキャンセル / 入力をクリア(2回押し)',
-  'Cycle approval modes': '承認モードを切り替え',
-  'Cycle through your prompt history': 'プロンプト履歴を順に表示',
+    'Cancel operation / Clear input (double press)',
+  'Cycle approval modes': 'Cycle approval modes',
+  'Cycle through your prompt history': 'Cycle through your prompt history',
   'For a full list of shortcuts, see {{docPath}}':
-    'ショートカットの完全なリストは {{docPath}} を参照',
+    'For a full list of shortcuts, see {{docPath}}',
   'docs/keyboard-shortcuts.md': 'docs/keyboard-shortcuts.md',
-  'for help on Qwen Code': 'Qwen Code のヘルプ',
-  'show version info': 'バージョン情報を表示',
-  'submit a bug report': 'バグレポートを送信',
-  'About Qwen Code': 'Qwen Code について',
+  'for help on TRAM': 'for help on TRAM',
+  'show version info': 'show version info',
+  'submit a bug report': 'submit a bug report',
+  'About TRAM': 'About TRAM',
+  Status: 'Status',
+  '(/model to change)': '(/model to change)',
+
+  // Initialization wizard
+  'TRAM Initialization Wizard': 'TRAM Initialization Wizard',
+  'Esc to cancel at any time.': 'Esc to cancel at any time.',
+  'Initialization: Select providers': 'Initialization: Select providers',
+  'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to move, Space to toggle, Enter to continue. You can configure multiple providers in one run.':
+    'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to move, Space to toggle, Enter to continue. You can configure multiple providers in one run.',
+  'Select at least one provider.': 'Select at least one provider.',
+  'No provider selected.': 'No provider selected.',
+  Enabled: 'Enabled',
+  'Configure provider {{current}}/{{total}}: {{name}}':
+    'Configure provider {{current}}/{{total}}: {{name}}',
+  'This provider uses OAuth. Press Enter to continue to model selection.':
+    'This provider uses OAuth. Press Enter to continue to model selection.',
+  'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose a field. Enter to edit. Press N to continue to model selection.':
+    'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose a field. Enter to edit. Press N to continue to model selection.',
+  'Editing {{field}}: {{value}}': 'Editing {{field}}: {{value}}',
+  'Model selection: {{name}}': 'Model selection: {{name}}',
+  'Try OpenAI-compatible /models list first. If unavailable or incomplete, choose custom model.':
+    'Try OpenAI-compatible /models list first. If unavailable or incomplete, choose custom model.',
+  'Loading models...': 'Loading models...',
+  'Custom model...': 'Custom model...',
+  'Enter custom model name': 'Enter custom model name',
+  'Press Enter to confirm.': 'Press Enter to confirm.',
+  'Model name cannot be empty.': 'Model name cannot be empty.',
+  'Select approval mode': 'Select approval mode',
+  'Recommended: YOLO': 'Recommended: YOLO',
+  'Plan only': 'Plan only',
+  'Only generate plans, no execution. Best safety, lowest automation.':
+    'Only generate plans, no execution. Best safety, lowest automation.',
+  'Ask every time': 'Ask every time',
+  'Every action requires confirmation. Safe but slower.':
+    'Every action requires confirmation. Safe but slower.',
+  'Auto-approve edits': 'Auto-approve edits',
+  'Edit/write tools are auto-approved, others still ask.':
+    'Edit/write tools are auto-approved, others still ask.',
+  'YOLO (recommended)': 'YOLO (recommended)',
+  'Fastest workflow. Fully automated execution with higher risk.':
+    'Fastest workflow. Fully automated execution with higher risk.',
+  'Proxy configuration': 'Proxy configuration',
+  'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose.': 'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose.',
+  'Follow system proxy': 'Follow system proxy',
+  'No proxy': 'No proxy',
+  'Custom proxy': 'Custom proxy',
+  'Enter custom proxy': 'Enter custom proxy',
+  'Example: http://127.0.0.1:7890': 'Example: http://127.0.0.1:7890',
+  'Select theme': 'Select theme',
+  'This list follows built-in /theme options.':
+    'This list follows built-in /theme options.',
+  'Review configuration': 'Review configuration',
+  Providers: 'Providers',
+  'Default provider': 'Default provider',
+  'Default model': 'Default model',
+  'Approval mode': 'Approval mode',
+  'At least one provider must be configured.':
+    'At least one provider must be configured.',
+  'Press Enter to save, Esc to cancel.':
+    'Press Enter to save, Esc to cancel.',
+  'Initialization complete.': 'Initialization complete.',
+  'Settings were saved. Press Enter to continue.':
+    'Settings were saved. Press Enter to continue.',
 
   // ============================================================================
   // System Information Fields
   // ============================================================================
-  'CLI Version': 'CLIバージョン',
-  'Git Commit': 'Gitコミット',
-  Model: 'モデル',
-  Sandbox: 'サンドボックス',
-  'OS Platform': 'OSプラットフォーム',
-  'OS Arch': 'OSアーキテクチャ',
-  'OS Release': 'OSリリース',
-  'Node.js Version': 'Node.js バージョン',
-  'NPM Version': 'NPM バージョン',
-  'Session ID': 'セッションID',
-  'Auth Method': '認証方式',
-  'Base URL': 'ベースURL',
-  'Memory Usage': 'メモリ使用量',
-  'IDE Client': 'IDEクライアント',
+  'TRAM': 'TRAM',
+  Runtime: 'Runtime',
+  OS: 'OS',
+  Auth: 'Auth',
+  'CLI Version': 'CLI Version',
+  'Git Commit': 'Git Commit',
+  Model: 'Model',
+  Sandbox: 'Sandbox',
+  'OS Platform': 'OS Platform',
+  'OS Arch': 'OS Arch',
+  'OS Release': 'OS Release',
+  'Node.js Version': 'Node.js Version',
+  'NPM Version': 'NPM Version',
+  'Session ID': 'Session ID',
+  'Auth Method': 'Auth Method',
+  'Base URL': 'Base URL',
+  Proxy: 'Proxy',
+  'Memory Usage': 'Memory Usage',
+  'IDE Client': 'IDE Client',
 
   // ============================================================================
   // Commands - General
   // ============================================================================
-  'Analyzes the project and creates a tailored QWEN.md file.':
-    'プロジェクトを分析し、カスタマイズされた QWEN.md ファイルを作成',
-  'List available Qwen Code tools. Usage: /tools [desc]':
-    '利用可能な Qwen Code ツールを一覧表示。使い方: /tools [desc]',
-  'List available skills.': '利用可能なスキルを一覧表示する。',
-  'Available Qwen Code CLI tools:': '利用可能な Qwen Code CLI ツール:',
-  'No tools available': '利用可能なツールはありません',
+  'Analyzes the project and creates a tailored TRAM.md file.':
+    'Analyzes the project and creates a tailored TRAM.md file.',
+  'List available TRAM tools. Usage: /tools [desc]':
+    'List available TRAM tools. Usage: /tools [desc]',
+  'List available skills.': 'List available skills.',
+  'Available TRAM CLI tools:': 'Available TRAM CLI tools:',
+  'No tools available': 'No tools available',
   'View or change the approval mode for tool usage':
-    'ツール使用の承認モードを表示または変更',
-  'View or change the language setting': '言語設定を表示または変更',
-  'change the theme': 'テーマを変更',
-  'Select Theme': 'テーマを選択',
-  Preview: 'プレビュー',
+    'View or change the approval mode for tool usage',
+  'Invalid approval mode "{{arg}}". Valid modes: {{modes}}':
+    'Invalid approval mode "{{arg}}". Valid modes: {{modes}}',
+  'Approval mode set to "{{mode}}"': 'Approval mode set to "{{mode}}"',
+  'View or change the language setting': 'View or change the language setting',
+  'change the theme': 'change the theme',
+  'Select Theme': 'Select Theme',
+  Preview: 'Preview',
   '(Use Enter to select, Tab to configure scope)':
-    '(Enter で選択、Tab でスコープを設定)',
-  '(Use Enter to apply scope, Tab to select theme)':
-    '(Enter でスコープを適用、Tab でテーマを選択)',
+    '(Use Enter to select, Tab to configure scope)',
+  '(Use Enter to apply scope, Tab to go back)':
+    '(Use Enter to apply scope, Tab to go back)',
   'Theme configuration unavailable due to NO_COLOR env variable.':
-    'NO_COLOR 環境変数のためテーマ設定は利用できません',
-  'Theme "{{themeName}}" not found.': 'テーマ "{{themeName}}" が見つかりません',
+    'Theme configuration unavailable due to NO_COLOR env variable.',
+  'Theme "{{themeName}}" not found.': 'Theme "{{themeName}}" not found.',
   'Theme "{{themeName}}" not found in selected scope.':
-    '選択したスコープにテーマ "{{themeName}}" が見つかりません',
+    'Theme "{{themeName}}" not found in selected scope.',
   'Clear conversation history and free up context':
-    '会話履歴をクリアしてコンテキストを解放',
+    'Clear conversation history and free up context',
   'Compresses the context by replacing it with a summary.':
-    'コンテキストを要約に置き換えて圧縮',
-  'open full Qwen Code documentation in your browser':
-    'ブラウザで Qwen Code のドキュメントを開く',
-  'Configuration not available.': '設定が利用できません',
-  'change the auth method': '認証方式を変更',
+    'Compresses the context by replacing it with a summary.',
+  'open full TRAM documentation in your browser':
+    'open full TRAM documentation in your browser',
+  'Configuration not available.': 'Configuration not available.',
+  'change the auth method': 'change the auth method',
   'Configure authentication information for login':
-    'ログイン用の認証情報を設定',
+    'Configure authentication information for login',
   'Copy the last result or code snippet to clipboard':
-    '最後の結果またはコードスニペットをクリップボードにコピー',
+    'Copy the last result or code snippet to clipboard',
 
   // ============================================================================
   // Commands - Agents
   // ============================================================================
   'Manage subagents for specialized task delegation.':
-    '専門タスクを委任するサブエージェントを管理',
+    'Manage subagents for specialized task delegation.',
   'Manage existing subagents (view, edit, delete).':
-    '既存のサブエージェントを管理(表示、編集、削除)',
+    'Manage existing subagents (view, edit, delete).',
   'Create a new subagent with guided setup.':
-    'ガイド付きセットアップで新しいサブエージェントを作成',
+    'Create a new subagent with guided setup.',
 
   // ============================================================================
   // Agents - Management Dialog
   // ============================================================================
-  Agents: 'エージェント',
-  'Choose Action': 'アクションを選択',
-  'Edit {{name}}': '{{name}} を編集',
-  'Edit Tools: {{name}}': 'ツールを編集: {{name}}',
-  'Edit Color: {{name}}': '色を編集: {{name}}',
-  'Delete {{name}}': '{{name}} を削除',
-  'Unknown Step': '不明なステップ',
-  'Esc to close': 'Esc で閉じる',
-  'Enter to select, ↑↓ to navigate, Esc to close':
-    'Enter で選択、↑↓ で移動、Esc で閉じる',
-  'Esc to go back': 'Esc で戻る',
-  'Enter to confirm, Esc to cancel': 'Enter で確定、Esc でキャンセル',
-  'Enter to select, ↑↓ to navigate, Esc to go back':
-    'Enter で選択、↑↓ で移動、Esc で戻る',
-  'Enter to submit, Esc to go back': 'Enter で送信、Esc で戻る',
-  'Invalid step: {{step}}': '無効なステップ: {{step}}',
-  'No subagents found.': 'サブエージェントが見つかりません',
+  Agents: 'Agents',
+  'Choose Action': 'Choose Action',
+  'Edit {{name}}': 'Edit {{name}}',
+  'Edit Tools: {{name}}': 'Edit Tools: {{name}}',
+  'Edit Color: {{name}}': 'Edit Color: {{name}}',
+  'Delete {{name}}': 'Delete {{name}}',
+  'Unknown Step': 'Unknown Step',
+  'Esc to close': 'Esc to close',
+  'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to close':
+    'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to close',
+  'Esc to go back': 'Esc to go back',
+  'Enter to confirm, Esc to cancel': 'Enter to confirm, Esc to cancel',
+  'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to go back':
+    'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to go back',
+  'Enter to submit, Esc to go back': 'Enter to submit, Esc to go back',
+  'Invalid step: {{step}}': 'Invalid step: {{step}}',
+  'No subagents found.': 'No subagents found.',
   "Use '/agents create' to create your first subagent.":
-    "'/agents create' で最初のサブエージェントを作成してください",
-  '(built-in)': '(組み込み)',
-  '(overridden by project level agent)':
-    '(プロジェクトレベルのエージェントで上書き)',
-  'Project Level ({{path}})': 'プロジェクトレベル ({{path}})',
-  'User Level ({{path}})': 'ユーザーレベル ({{path}})',
-  'Built-in Agents': '組み込みエージェント',
-  'Using: {{count}} agents': '使用中: {{count}} エージェント',
-  'View Agent': 'エージェントを表示',
-  'Edit Agent': 'エージェントを編集',
-  'Delete Agent': 'エージェントを削除',
-  Back: '戻る',
-  'No agent selected': 'エージェントが選択されていません',
-  'File Path: ': 'ファイルパス: ',
-  'Tools: ': 'ツール: ',
-  'Color: ': '色: ',
-  'Description:': '説明:',
-  'System Prompt:': 'システムプロンプト:',
-  'Open in editor': 'エディタで開く',
-  'Edit tools': 'ツールを編集',
-  'Edit color': '色を編集',
-  '❌ Error:': '❌ エラー:',
+    "Use '/agents create' to create your first subagent.",
+  '(built-in)': '(built-in)',
+  '(overridden by project level agent)': '(overridden by project level agent)',
+  'Project Level ({{path}})': 'Project Level ({{path}})',
+  'User Level ({{path}})': 'User Level ({{path}})',
+  'Built-in Agents': 'Built-in Agents',
+  'Extension Agents': 'Extension Agents',
+  'Using: {{count}} agents': 'Using: {{count}} agents',
+  'View Agent': 'View Agent',
+  'Edit Agent': 'Edit Agent',
+  'Delete Agent': 'Delete Agent',
+  Back: 'Back',
+  'No agent selected': 'No agent selected',
+  'File Path: ': 'File Path: ',
+  'Tools: ': 'Tools: ',
+  'Color: ': 'Color: ',
+  'Description:': 'Description:',
+  'System Prompt:': 'System Prompt:',
+  'Open in editor': 'Open in editor',
+  'Edit tools': 'Edit tools',
+  'Edit color': 'Edit color',
+  '闂?Error:': '闂?Error:',
   'Are you sure you want to delete agent "{{name}}"?':
-    'エージェント "{{name}}" を削除してもよろしいですか?',
-  'Project Level (.qwen/agents/)': 'プロジェクトレベル (.qwen/agents/)',
-  'User Level (~/.qwen/agents/)': 'ユーザーレベル (~/.qwen/agents/)',
-  '✅ Subagent Created Successfully!':
-    '✅ サブエージェントの作成に成功しました!',
+    'Are you sure you want to delete agent "{{name}}"?',
+  // ============================================================================
+  // Agents - Creation Wizard
+  // ============================================================================
+  'Project Level (.tram/agents/)': 'Project Level (.tram/agents/)',
+  'User Level (~/.tram/agents/)': 'User Level (~/.tram/agents/)',
+  '闂?Subagent Created Successfully!': '闂?Subagent Created Successfully!',
   'Subagent "{{name}}" has been saved to {{level}} level.':
-    'サブエージェント "{{name}}" を {{level}} に保存しました',
-  'Name: ': '名前: ',
-  'Location: ': '場所: ',
-  '❌ Error saving subagent:': '❌ サブエージェント保存エラー:',
-  'Warnings:': '警告:',
-  'Step {{n}}: Choose Location': 'ステップ {{n}}: 場所を選択',
-  'Step {{n}}: Choose Generation Method': 'ステップ {{n}}: 作成方法を選択',
-  'Generate with Qwen Code (Recommended)': 'Qwen Code で生成(推奨)',
-  'Manual Creation': '手動作成',
-  'Generating subagent configuration...': 'サブエージェント設定を生成中...',
-  'Failed to generate subagent: {{error}}':
-    'サブエージェントの生成に失敗: {{error}}',
-  'Step {{n}}: Describe Your Subagent':
-    'ステップ {{n}}: サブエージェントを説明',
-  'Step {{n}}: Enter Subagent Name': 'ステップ {{n}}: サブエージェント名を入力',
-  'Step {{n}}: Enter System Prompt': 'ステップ {{n}}: システムプロンプトを入力',
-  'Step {{n}}: Enter Description': 'ステップ {{n}}: 説明を入力',
-  'Step {{n}}: Select Tools': 'ステップ {{n}}: ツールを選択',
-  'All Tools (Default)': '全ツール(デフォルト)',
-  'All Tools': '全ツール',
-  'Read-only Tools': '読み取り専用ツール',
-  'Read & Edit Tools': '読み取り＆編集ツール',
-  'Read & Edit & Execution Tools': '読み取り＆編集＆実行ツール',
-  'Selected tools:': '選択されたツール:',
-  'Step {{n}}: Choose Background Color': 'ステップ {{n}}: 背景色を選択',
-  'Step {{n}}: Confirm and Save': 'ステップ {{n}}: 確認して保存',
-  'Esc to cancel': 'Esc でキャンセル',
-  cancel: 'キャンセル',
-  'go back': '戻る',
-  '↑↓ to navigate, ': '↑↓ で移動、',
-  'Name cannot be empty.': '名前は空にできません',
-  'System prompt cannot be empty.': 'システムプロンプトは空にできません',
-  'Description cannot be empty.': '説明は空にできません',
-  'Failed to launch editor: {{error}}': 'エディタの起動に失敗: {{error}}',
-  'Failed to save and edit subagent: {{error}}':
-    'サブエージェントの保存と編集に失敗: {{error}}',
+    'Subagent "{{name}}" has been saved to {{level}} level.',
+  'Name: ': 'Name: ',
+  'Location: ': 'Location: ',
+  '闂?Error saving subagent:': '闂?Error saving subagent:',
+  'Warnings:': 'Warnings:',
   'Name "{{name}}" already exists at {{level}} level - will overwrite existing subagent':
-    '"{{name}}" は {{level}} に既に存在します - 既存のサブエージェントを上書きします',
+    'Name "{{name}}" already exists at {{level}} level - will overwrite existing subagent',
   'Name "{{name}}" exists at user level - project level will take precedence':
-    '"{{name}}" はユーザーレベルに存在します - プロジェクトレベルが優先されます',
+    'Name "{{name}}" exists at user level - project level will take precedence',
   'Name "{{name}}" exists at project level - existing subagent will take precedence':
-    '"{{name}}" はプロジェクトレベルに存在します - 既存のサブエージェントが優先されます',
+    'Name "{{name}}" exists at project level - existing subagent will take precedence',
   'Description is over {{length}} characters':
-    '説明が {{length}} 文字を超えています',
+    'Description is over {{length}} characters',
   'System prompt is over {{length}} characters':
-    'システムプロンプトが {{length}} 文字を超えています',
+    'System prompt is over {{length}} characters',
+  // Agents - Creation Wizard Steps
+  'Step {{n}}: Choose Location': 'Step {{n}}: Choose Location',
+  'Step {{n}}: Choose Generation Method':
+    'Step {{n}}: Choose Generation Method',
+  'Generate with TRAM (Recommended)':
+    'Generate with TRAM (Recommended)',
+  'Manual Creation': 'Manual Creation',
   'Describe what this subagent should do and when it should be used. (Be comprehensive for best results)':
-    'このサブエージェントの役割と使用タイミングを説明してください(詳細に記述するほど良い結果が得られます)',
+    'Describe what this subagent should do and when it should be used. (Be comprehensive for best results)',
   'e.g., Expert code reviewer that reviews code based on best practices...':
-    '例: ベストプラクティスに基づいてコードをレビューするエキスパートレビュアー...',
+    'e.g., Expert code reviewer that reviews code based on best practices...',
+  'Generating subagent configuration...':
+    'Generating subagent configuration...',
+  'Failed to generate subagent: {{error}}':
+    'Failed to generate subagent: {{error}}',
+  'Step {{n}}: Describe Your Subagent': 'Step {{n}}: Describe Your Subagent',
+  'Step {{n}}: Enter Subagent Name': 'Step {{n}}: Enter Subagent Name',
+  'Step {{n}}: Enter System Prompt': 'Step {{n}}: Enter System Prompt',
+  'Step {{n}}: Enter Description': 'Step {{n}}: Enter Description',
+  // Agents - Tool Selection
+  'Step {{n}}: Select Tools': 'Step {{n}}: Select Tools',
+  'All Tools (Default)': 'All Tools (Default)',
+  'All Tools': 'All Tools',
+  'Read-only Tools': 'Read-only Tools',
+  'Read & Edit Tools': 'Read & Edit Tools',
+  'Read & Edit & Execution Tools': 'Read & Edit & Execution Tools',
   'All tools selected, including MCP tools':
-    'MCPツールを含むすべてのツールを選択',
-  'Read-only tools:': '読み取り専用ツール:',
-  'Edit tools:': '編集ツール:',
-  'Execution tools:': '実行ツール:',
+    'All tools selected, including MCP tools',
+  'Selected tools:': 'Selected tools:',
+  'Read-only tools:': 'Read-only tools:',
+  'Edit tools:': 'Edit tools:',
+  'Execution tools:': 'Execution tools:',
+  'Step {{n}}: Choose Background Color': 'Step {{n}}: Choose Background Color',
+  'Step {{n}}: Confirm and Save': 'Step {{n}}: Confirm and Save',
+  // Agents - Navigation & Instructions
+  'Esc to cancel': 'Esc to cancel',
   'Press Enter to save, e to save and edit, Esc to go back':
-    'Enter で保存、e で保存して編集、Esc で戻る',
+    'Press Enter to save, e to save and edit, Esc to go back',
   'Press Enter to continue, {{navigation}}Esc to {{action}}':
-    'Enter で続行、{{navigation}}Esc で{{action}}',
+    'Press Enter to continue, {{navigation}}Esc to {{action}}',
+  cancel: 'cancel',
+  'go back': 'go back',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate, ': '闂佹剚鍋呴崹鐔煎疮?to navigate, ',
   'Enter a clear, unique name for this subagent.':
-    'このサブエージェントの明確で一意な名前を入力してください',
-  'e.g., Code Reviewer': '例: コードレビュアー',
+    'Enter a clear, unique name for this subagent.',
+  'e.g., Code Reviewer': 'e.g., Code Reviewer',
+  'Name cannot be empty.': 'Name cannot be empty.',
   "Write the system prompt that defines this subagent's behavior. Be comprehensive for best results.":
-    'このサブエージェントの動作を定義するシステムプロンプトを記述してください (詳細に書くほど良い結果が得られます)',
+    "Write the system prompt that defines this subagent's behavior. Be comprehensive for best results.",
   'e.g., You are an expert code reviewer...':
-    '例: あなたはエキスパートコードレビュアーです...',
+    'e.g., You are an expert code reviewer...',
+  'System prompt cannot be empty.': 'System prompt cannot be empty.',
   'Describe when and how this subagent should be used.':
-    'このサブエージェントをいつどのように使用するかを説明してください',
+    'Describe when and how this subagent should be used.',
   'e.g., Reviews code for best practices and potential bugs.':
-    '例: ベストプラクティスと潜在的なバグについてコードをレビューします。',
+    'e.g., Reviews code for best practices and potential bugs.',
+  'Description cannot be empty.': 'Description cannot be empty.',
+  'Failed to launch editor: {{error}}': 'Failed to launch editor: {{error}}',
+  'Failed to save and edit subagent: {{error}}':
+    'Failed to save and edit subagent: {{error}}',
+
+  // ============================================================================
+  // Extensions - Management Dialog
+  // ============================================================================
+  'Manage Extensions': 'Manage Extensions',
+  'Extension Details': 'Extension Details',
+  'View Extension': 'View Extension',
+  'Update Extension': 'Update Extension',
+  'Disable Extension': 'Disable Extension',
+  'Enable Extension': 'Enable Extension',
+  'Uninstall Extension': 'Uninstall Extension',
+  'Select Scope': 'Select Scope',
+  'User Scope': 'User Scope',
+  'Workspace Scope': 'Workspace Scope',
+  'No extensions found.': 'No extensions found.',
+  Active: 'Active',
+  Disabled: 'Disabled',
+  'Update available': 'Update available',
+  'Up to date': 'Up to date',
+  'Checking...': 'Checking...',
+  'Updating...': 'Updating...',
+  Unknown: 'Unknown',
+  Error: 'Error',
+  'Version:': 'Version:',
+  'Status:': 'Status:',
+  'Are you sure you want to uninstall extension "{{name}}"?':
+    'Are you sure you want to uninstall extension "{{name}}"?',
+  'This action cannot be undone.': 'This action cannot be undone.',
+  'Extension "{{name}}" disabled successfully.':
+    'Extension "{{name}}" disabled successfully.',
+  'Extension "{{name}}" enabled successfully.':
+    'Extension "{{name}}" enabled successfully.',
+  'Extension "{{name}}" updated successfully.':
+    'Extension "{{name}}" updated successfully.',
+  'Failed to update extension "{{name}}": {{error}}':
+    'Failed to update extension "{{name}}": {{error}}',
+  'Select the scope for this action:': 'Select the scope for this action:',
+  'User - Applies to all projects': 'User - Applies to all projects',
+  'Workspace - Applies to current project only':
+    'Workspace - Applies to current project only',
+  // Extension dialog - missing keys
+  'Name:': 'Name:',
+  'MCP Servers:': 'MCP Servers:',
+  'Settings:': 'Settings:',
+  active: 'active',
+  disabled: 'disabled',
+  'View Details': 'View Details',
+  'Update failed:': 'Update failed:',
+  'Updating {{name}}...': 'Updating {{name}}...',
+  'Update complete!': 'Update complete!',
+  'User (global)': 'User (global)',
+  'Workspace (project-specific)': 'Workspace (project-specific)',
+  'Disable "{{name}}" - Select Scope': 'Disable "{{name}}" - Select Scope',
+  'Enable "{{name}}" - Select Scope': 'Enable "{{name}}" - Select Scope',
+  'No extension selected': 'No extension selected',
+  'Press Y/Enter to confirm, N/Esc to cancel':
+    'Press Y/Enter to confirm, N/Esc to cancel',
+  'Y/Enter to confirm, N/Esc to cancel': 'Y/Enter to confirm, N/Esc to cancel',
+  '{{count}} extensions installed': '{{count}} extensions installed',
+  "Use '/extensions install' to install your first extension.":
+    "Use '/extensions install' to install your first extension.",
+  // Update status values
+  'up to date': 'up to date',
+  'update available': 'update available',
+  'checking...': 'checking...',
+  'not updatable': 'not updatable',
+  error: 'error',
+
+  // ============================================================================
   // Commands - General (continued)
-  '(Use Enter to select{{tabText}})': '(Enter で選択{{tabText}})',
-  ', Tab to change focus': '、Tab でフォーカス変更',
-  'To see changes, Qwen Code must be restarted. Press r to exit and apply changes now.':
-    '変更を確認するには Qwen Code を再起動する必要があります。 r を押して終了し、変更を適用してください',
+  // ============================================================================
+  'View and edit TRAM settings': 'View and edit TRAM settings',
+  Settings: 'Settings',
+  'To see changes, TRAM must be restarted. Press r to exit and apply changes now.':
+    'To see changes, TRAM must be restarted. Press r to exit and apply changes now.',
   'The command "/{{command}}" is not supported in non-interactive mode.':
-    'コマンド "/{{command}}" は非対話モードではサポートされていません',
-  'View and edit Qwen Code settings': 'Qwen Code の設定を表示・編集',
-  Settings: '設定',
-  'Vim Mode': 'Vim モード',
-  'Disable Auto Update': '自動更新を無効化',
-  Language: '言語',
-  'Output Format': '出力形式',
-  'Hide Tips': 'ヒントを非表示',
-  'Hide Banner': 'バナーを非表示',
-  'Show Memory Usage': 'メモリ使用量を表示',
-  'Show Line Numbers': '行番号を表示',
-  Text: 'テキスト',
-  JSON: 'JSON',
-  Plan: 'プラン',
-  Default: 'デフォルト',
-  'Auto Edit': '自動編集',
-  YOLO: 'YOLO',
-  'toggle vim mode on/off': 'Vim モードのオン/オフを切り替え',
-  'exit the cli': 'CLIを終了',
-  Timeout: 'タイムアウト',
-  'Max Retries': '最大リトライ回数',
-  'Auto Accept': '自動承認',
-  'Folder Trust': 'フォルダの信頼',
-  'Enable Prompt Completion': 'プロンプト補完を有効化',
-  'Debug Keystroke Logging': 'キーストロークのデバッグログ',
-  'Hide Window Title': 'ウィンドウタイトルを非表示',
-  'Show Status in Title': 'タイトルにステータスを表示',
-  'Hide Context Summary': 'コンテキスト要約を非表示',
-  'Hide CWD': '作業ディレクトリを非表示',
-  'Hide Sandbox Status': 'サンドボックス状態を非表示',
-  'Hide Model Info': 'モデル情報を非表示',
-  'Hide Footer': 'フッターを非表示',
-  'Show Citations': '引用を表示',
-  'Custom Witty Phrases': 'カスタムウィットフレーズ',
-  'Enable Welcome Back': 'ウェルカムバック機能を有効化',
-  'Disable Loading Phrases': 'ローディングフレーズを無効化',
-  'Screen Reader Mode': 'スクリーンリーダーモード',
-  'IDE Mode': 'IDEモード',
-  'Max Session Turns': '最大セッションターン数',
-  'Skip Next Speaker Check': '次の発言者チェックをスキップ',
-  'Skip Loop Detection': 'ループ検出をスキップ',
-  'Skip Startup Context': '起動時コンテキストをスキップ',
-  'Enable OpenAI Logging': 'OpenAI ログを有効化',
-  'OpenAI Logging Directory': 'OpenAI ログディレクトリ',
-  'Disable Cache Control': 'キャッシュ制御を無効化',
-  'Memory Discovery Max Dirs': 'メモリ検出の最大ディレクトリ数',
+    'The command "/{{command}}" is not supported in non-interactive mode.',
+  // ============================================================================
+  // Settings Labels
+  // ============================================================================
+  'Vim Mode': 'Vim Mode',
+  'Disable Auto Update': 'Disable Auto Update',
+  'Attribution: commit': 'Attribution: commit',
+  'Terminal Bell Notification': 'Terminal Bell Notification',
+  'Enable Usage Statistics': 'Enable Usage Statistics',
+  Theme: 'Theme',
+  'Preferred Editor': 'Preferred Editor',
+  'Auto-connect to IDE': 'Auto-connect to IDE',
+  'Enable Prompt Completion': 'Enable Prompt Completion',
+  'Debug Keystroke Logging': 'Debug Keystroke Logging',
+  'Language: UI': 'Language: UI',
+  'Language: Model': 'Language: Model',
+  'Output Format': 'Output Format',
+  'Hide Window Title': 'Hide Window Title',
+  'Show Status in Title': 'Show Status in Title',
+  'Hide Tips': 'Hide Tips',
+  'Show Line Numbers in Code': 'Show Line Numbers in Code',
+  'Show Citations': 'Show Citations',
+  'Custom Witty Phrases': 'Custom Witty Phrases',
+  'Show Welcome Back Dialog': 'Show Welcome Back Dialog',
+  'Enable User Feedback': 'Enable User Feedback',
+  'How is TRAM doing this session? (optional)':
+    'How is TRAM doing this session? (optional)',
+  Bad: 'Bad',
+  Fine: 'Fine',
+  Good: 'Good',
+  Dismiss: 'Dismiss',
+  'Not Sure Yet': 'Not Sure Yet',
+  'Any other key': 'Any other key',
+  'Disable Loading Phrases': 'Disable Loading Phrases',
+  'Screen Reader Mode': 'Screen Reader Mode',
+  'IDE Mode': 'IDE Mode',
+  'Max Session Turns': 'Max Session Turns',
+  'Skip Next Speaker Check': 'Skip Next Speaker Check',
+  'Skip Loop Detection': 'Skip Loop Detection',
+  'Skip Startup Context': 'Skip Startup Context',
+  'Enable OpenAI Logging': 'Enable OpenAI Logging',
+  'OpenAI Logging Directory': 'OpenAI Logging Directory',
+  Timeout: 'Timeout',
+  'Max Retries': 'Max Retries',
+  'Disable Cache Control': 'Disable Cache Control',
+  'Memory Discovery Max Dirs': 'Memory Discovery Max Dirs',
   'Load Memory From Include Directories':
-    'インクルードディレクトリからメモリを読み込み',
-  'Respect .gitignore': '.gitignore を優先',
-  'Respect .qwenignore': '.qwenignore を優先',
-  'Enable Recursive File Search': '再帰的ファイル検索を有効化',
-  'Disable Fuzzy Search': 'ファジー検索を無効化',
-  'Enable Interactive Shell': '対話型シェルを有効化',
-  'Show Color': '色を表示',
-  'Use Ripgrep': 'Ripgrep を使用',
-  'Use Builtin Ripgrep': '組み込み Ripgrep を使用',
-  'Enable Tool Output Truncation': 'ツール出力の切り詰めを有効化',
-  'Tool Output Truncation Threshold': 'ツール出力切り詰めのしきい値',
-  'Tool Output Truncation Lines': 'ツール出力の切り詰め行数',
-  'Vision Model Preview': 'ビジョンモデルプレビュー',
-  'Tool Schema Compliance': 'ツールスキーマ準拠',
-  'Auto (detect from system)': '自動(システムから検出)',
+    'Load Memory From Include Directories',
+  'Respect .gitignore': 'Respect .gitignore',
+  'Respect .tramignore': 'Respect .tramignore',
+  'Enable Recursive File Search': 'Enable Recursive File Search',
+  'Disable Fuzzy Search': 'Disable Fuzzy Search',
+  'Interactive Shell (PTY)': 'Interactive Shell (PTY)',
+  'Show Color': 'Show Color',
+  'Auto Accept': 'Auto Accept',
+  'Use Ripgrep': 'Use Ripgrep',
+  'Use Builtin Ripgrep': 'Use Builtin Ripgrep',
+  'Enable Tool Output Truncation': 'Enable Tool Output Truncation',
+  'Tool Output Truncation Threshold': 'Tool Output Truncation Threshold',
+  'Tool Output Truncation Lines': 'Tool Output Truncation Lines',
+  'Folder Trust': 'Folder Trust',
+  'Vision Model Preview': 'Vision Model Preview',
+  'Tool Schema Compliance': 'Tool Schema Compliance',
+  // Settings enum options
+  'Auto (detect from system)': 'Auto (detect from system)',
+  Text: 'Text',
+  JSON: 'JSON',
+  Plan: 'Plan',
+  Default: 'Default',
+  'Auto Edit': 'Auto Edit',
+  YOLO: 'YOLO',
+  'toggle vim mode on/off': 'toggle vim mode on/off',
   'check session stats. Usage: /stats [model|tools]':
-    'セッション統計を確認。使い方: /stats [model|tools]',
-  'Show model-specific usage statistics.': 'モデル別の使用統計を表示',
-  'Show tool-specific usage statistics.': 'ツール別の使用統計を表示',
+    'check session stats. Usage: /stats [model|tools]',
+  'Show model-specific usage statistics.':
+    'Show model-specific usage statistics.',
+  'Show tool-specific usage statistics.':
+    'Show tool-specific usage statistics.',
+  'exit the cli': 'exit the cli',
   'Open MCP management dialog, or authenticate with OAuth-enabled servers':
-    'MCP管理ダイアログを開く、またはOAuth対応サーバーで認証',
+    'Open MCP management dialog, or authenticate with OAuth-enabled servers',
   'List configured MCP servers and tools, or authenticate with OAuth-enabled servers':
-    '設定済みのMCPサーバーとツールを一覧表示、またはOAuth対応サーバーで認証',
-  'Manage workspace directories': 'ワークスペースディレクトリを管理',
+    'List configured MCP servers and tools, or authenticate with OAuth-enabled servers',
+  'Manage workspace directories': 'Manage workspace directories',
   'Add directories to the workspace. Use comma to separate multiple paths':
-    'ワークスペースにディレクトリを追加。複数パスはカンマで区切ってください',
+    'Add directories to the workspace. Use comma to separate multiple paths',
   'Show all directories in the workspace':
-    'ワークスペース内のすべてのディレクトリを表示',
-  'set external editor preference': '外部エディタの設定',
-  'Manage extensions': '拡張機能を管理',
-  'Manage installed extensions': 'インストール済みの拡張機能を管理する',
-  'List active extensions': '有効な拡張機能を一覧表示',
+    'Show all directories in the workspace',
+  'set external editor preference': 'set external editor preference',
+  'Select Editor': 'Select Editor',
+  'Editor Preference': 'Editor Preference',
+  'These editors are currently supported. Please note that some editors cannot be used in sandbox mode.':
+    'These editors are currently supported. Please note that some editors cannot be used in sandbox mode.',
+  'Your preferred editor is:': 'Your preferred editor is:',
+  'Manage extensions': 'Manage extensions',
+  'Manage installed extensions': 'Manage installed extensions',
+  'List active extensions': 'List active extensions',
   'Update extensions. Usage: update <extension-names>|--all':
-    '拡張機能を更新。使い方: update <拡張機能名>|--all',
-  'You are installing an extension from {{originSource}}. Some features may not work perfectly with Qwen Code.':
-    '{{originSource}} から拡張機能をインストールしています。一部の機能は Qwen Code で完全に動作しない可能性があります。',
-  'manage IDE integration': 'IDE連携を管理',
-  'check status of IDE integration': 'IDE連携の状態を確認',
+    'Update extensions. Usage: update <extension-names>|--all',
+  'Disable an extension': 'Disable an extension',
+  'Enable an extension': 'Enable an extension',
+  'Install an extension from a git repo or local path':
+    'Install an extension from a git repo or local path',
+  'Uninstall an extension': 'Uninstall an extension',
+  'No extensions installed.': 'No extensions installed.',
+  'Usage: /extensions update <extension-names>|--all':
+    'Usage: /extensions update <extension-names>|--all',
+  'Extension "{{name}}" not found.': 'Extension "{{name}}" not found.',
+  'No extensions to update.': 'No extensions to update.',
+  'Usage: /extensions install <source>': 'Usage: /extensions install <source>',
+  'Installing extension from "{{source}}"...':
+    'Installing extension from "{{source}}"...',
+  'Extension "{{name}}" installed successfully.':
+    'Extension "{{name}}" installed successfully.',
+  'Failed to install extension from "{{source}}": {{error}}':
+    'Failed to install extension from "{{source}}": {{error}}',
+  'Usage: /extensions uninstall <extension-name>':
+    'Usage: /extensions uninstall <extension-name>',
+  'Uninstalling extension "{{name}}"...':
+    'Uninstalling extension "{{name}}"...',
+  'Extension "{{name}}" uninstalled successfully.':
+    'Extension "{{name}}" uninstalled successfully.',
+  'Failed to uninstall extension "{{name}}": {{error}}':
+    'Failed to uninstall extension "{{name}}": {{error}}',
+  'Usage: /extensions {{command}} <extension> [--scope=<user|workspace>]':
+    'Usage: /extensions {{command}} <extension> [--scope=<user|workspace>]',
+  'Unsupported scope "{{scope}}", should be one of "user" or "workspace"':
+    'Unsupported scope "{{scope}}", should be one of "user" or "workspace"',
+  'Extension "{{name}}" disabled for scope "{{scope}}"':
+    'Extension "{{name}}" disabled for scope "{{scope}}"',
+  'Extension "{{name}}" enabled for scope "{{scope}}"':
+    'Extension "{{name}}" enabled for scope "{{scope}}"',
+  'Do you want to continue? [Y/n]: ': 'Do you want to continue? [Y/n]: ',
+  'Do you want to continue?': 'Do you want to continue?',
+  'Installing extension "{{name}}".': 'Installing extension "{{name}}".',
+  '**Extensions may introduce unexpected behavior. Ensure you have investigated the extension source and trust the author.**':
+    '**Extensions may introduce unexpected behavior. Ensure you have investigated the extension source and trust the author.**',
+  'This extension will run the following MCP servers:':
+    'This extension will run the following MCP servers:',
+  local: 'local',
+  remote: 'remote',
+  'This extension will add the following commands: {{commands}}.':
+    'This extension will add the following commands: {{commands}}.',
+  'This extension will append info to your TRAM.md context using {{fileName}}':
+    'This extension will append info to your TRAM.md context using {{fileName}}',
+  'This extension will exclude the following core tools: {{tools}}':
+    'This extension will exclude the following core tools: {{tools}}',
+  'This extension will install the following skills:':
+    'This extension will install the following skills:',
+  'This extension will install the following subagents:':
+    'This extension will install the following subagents:',
+  'Installation cancelled for "{{name}}".':
+    'Installation cancelled for "{{name}}".',
+  'You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.':
+    'You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.',
+  '--ref and --auto-update are not applicable for marketplace extensions.':
+    '--ref and --auto-update are not applicable for marketplace extensions.',
+  'Extension "{{name}}" installed successfully and enabled.':
+    'Extension "{{name}}" installed successfully and enabled.',
+  'Installs an extension from a git repository URL, local path, or claude marketplace (marketplace-url:plugin-name).':
+    'Installs an extension from a git repository URL, local path, or claude marketplace (marketplace-url:plugin-name).',
+  'The github URL, local path, or marketplace source (marketplace-url:plugin-name) of the extension to install.':
+    'The github URL, local path, or marketplace source (marketplace-url:plugin-name) of the extension to install.',
+  'The git ref to install from.': 'The git ref to install from.',
+  'Enable auto-update for this extension.':
+    'Enable auto-update for this extension.',
+  'Enable pre-release versions for this extension.':
+    'Enable pre-release versions for this extension.',
+  'Acknowledge the security risks of installing an extension and skip the confirmation prompt.':
+    'Acknowledge the security risks of installing an extension and skip the confirmation prompt.',
+  'The source argument must be provided.':
+    'The source argument must be provided.',
+  'Extension "{{name}}" successfully uninstalled.':
+    'Extension "{{name}}" successfully uninstalled.',
+  'Uninstalls an extension.': 'Uninstalls an extension.',
+  'The name or source path of the extension to uninstall.':
+    'The name or source path of the extension to uninstall.',
+  'Please include the name of the extension to uninstall as a positional argument.':
+    'Please include the name of the extension to uninstall as a positional argument.',
+  'Enables an extension.': 'Enables an extension.',
+  'The name of the extension to enable.':
+    'The name of the extension to enable.',
+  'The scope to enable the extenison in. If not set, will be enabled in all scopes.':
+    'The scope to enable the extenison in. If not set, will be enabled in all scopes.',
+  'Extension "{{name}}" successfully enabled for scope "{{scope}}".':
+    'Extension "{{name}}" successfully enabled for scope "{{scope}}".',
+  'Extension "{{name}}" successfully enabled in all scopes.':
+    'Extension "{{name}}" successfully enabled in all scopes.',
+  'Invalid scope: {{scope}}. Please use one of {{scopes}}.':
+    'Invalid scope: {{scope}}. Please use one of {{scopes}}.',
+  'Disables an extension.': 'Disables an extension.',
+  'The name of the extension to disable.':
+    'The name of the extension to disable.',
+  'The scope to disable the extenison in.':
+    'The scope to disable the extenison in.',
+  'Extension "{{name}}" successfully disabled for scope "{{scope}}".':
+    'Extension "{{name}}" successfully disabled for scope "{{scope}}".',
+  'Extension "{{name}}" successfully updated: {{oldVersion}} 闂?{{newVersion}}.':
+    'Extension "{{name}}" successfully updated: {{oldVersion}} 闂?{{newVersion}}.',
+  'Unable to install extension "{{name}}" due to missing install metadata':
+    'Unable to install extension "{{name}}" due to missing install metadata',
+  'Extension "{{name}}" is already up to date.':
+    'Extension "{{name}}" is already up to date.',
+  'Updates all extensions or a named extension to the latest version.':
+    'Updates all extensions or a named extension to the latest version.',
+  'Update all extensions.': 'Update all extensions.',
+  'Either an extension name or --all must be provided':
+    'Either an extension name or --all must be provided',
+  'Lists installed extensions.': 'Lists installed extensions.',
+  'Path:': 'Path:',
+  'Source:': 'Source:',
+  'Type:': 'Type:',
+  'Ref:': 'Ref:',
+  'Release tag:': 'Release tag:',
+  'Enabled (User):': 'Enabled (User):',
+  'Enabled (Workspace):': 'Enabled (Workspace):',
+  'Context files:': 'Context files:',
+  'Skills:': 'Skills:',
+  'Agents:': 'Agents:',
+  'MCP servers:': 'MCP servers:',
+  'Link extension failed to install.': 'Link extension failed to install.',
+  'Extension "{{name}}" linked successfully and enabled.':
+    'Extension "{{name}}" linked successfully and enabled.',
+  'Links an extension from a local path. Updates made to the local path will always be reflected.':
+    'Links an extension from a local path. Updates made to the local path will always be reflected.',
+  'The name of the extension to link.': 'The name of the extension to link.',
+  'Set a specific setting for an extension.':
+    'Set a specific setting for an extension.',
+  'Name of the extension to configure.': 'Name of the extension to configure.',
+  'The setting to configure (name or env var).':
+    'The setting to configure (name or env var).',
+  'The scope to set the setting in.': 'The scope to set the setting in.',
+  'List all settings for an extension.': 'List all settings for an extension.',
+  'Name of the extension.': 'Name of the extension.',
+  'Extension "{{name}}" has no settings to configure.':
+    'Extension "{{name}}" has no settings to configure.',
+  'Settings for "{{name}}":': 'Settings for "{{name}}":',
+  '(workspace)': '(workspace)',
+  '(user)': '(user)',
+  '[not set]': '[not set]',
+  '[value stored in keychain]': '[value stored in keychain]',
+  'Value:': 'Value:',
+  'Manage extension settings.': 'Manage extension settings.',
+  'You need to specify a command (set or list).':
+    'You need to specify a command (set or list).',
+  // ============================================================================
+  // Plugin Choice / Marketplace
+  // ============================================================================
+  'No plugins available in this marketplace.':
+    'No plugins available in this marketplace.',
+  'Select a plugin to install from marketplace "{{name}}":':
+    'Select a plugin to install from marketplace "{{name}}":',
+  'Plugin selection cancelled.': 'Plugin selection cancelled.',
+  'Select a plugin from "{{name}}"': 'Select a plugin from "{{name}}"',
+  'Use 闂佹剚鍋呴崹鐔煎疮?or j/k to navigate, Enter to select, Escape to cancel':
+    'Use 闂佹剚鍋呴崹鐔煎疮?or j/k to navigate, Enter to select, Escape to cancel',
+  '{{count}} more above': '{{count}} more above',
+  '{{count}} more below': '{{count}} more below',
+  'manage IDE integration': 'manage IDE integration',
+  'check status of IDE integration': 'check status of IDE integration',
   'install required IDE companion for {{ideName}}':
-    '{{ideName}} 用の必要なIDEコンパニオンをインストール',
-  'enable IDE integration': 'IDE連携を有効化',
-  'disable IDE integration': 'IDE連携を無効化',
-  'IDE integration is not supported in your current environment. To use this feature, run Qwen Code in one of these supported IDEs: VS Code or VS Code forks.':
-    '現在の環境ではIDE連携はサポートされていません。この機能を使用するには、VS Code または VS Code 派生エディタで Qwen Code を実行してください',
-  'Set up GitHub Actions': 'GitHub Actions を設定',
+    'install required IDE companion for {{ideName}}',
+  'enable IDE integration': 'enable IDE integration',
+  'disable IDE integration': 'disable IDE integration',
+  'IDE integration is not supported in your current environment. To use this feature, run TRAM in one of these supported IDEs: VS Code or VS Code forks.':
+    'IDE integration is not supported in your current environment. To use this feature, run TRAM in one of these supported IDEs: VS Code or VS Code forks.',
+  'Set up GitHub Actions': 'Set up GitHub Actions',
   'Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)':
-    '複数行入力用のターミナルキーバインドを設定(VS Code、Cursor、Windsurf、Trae)',
+    'Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)',
   'Please restart your terminal for the changes to take effect.':
-    '変更を有効にするにはターミナルを再起動してください',
+    'Please restart your terminal for the changes to take effect.',
   'Failed to configure terminal: {{error}}':
-    'ターミナルの設定に失敗: {{error}}',
+    'Failed to configure terminal: {{error}}',
   'Could not determine {{terminalName}} config path on Windows: APPDATA environment variable is not set.':
-    'Windows で {{terminalName}} の設定パスを特定できません: APPDATA 環境変数が設定されていません',
+    'Could not determine {{terminalName}} config path on Windows: APPDATA environment variable is not set.',
   '{{terminalName}} keybindings.json exists but is not a valid JSON array. Please fix the file manually or delete it to allow automatic configuration.':
-    '{{terminalName}} の keybindings.json は存在しますが、有効なJSON配列ではありません。ファイルを手動で修正するか、削除して自動設定を許可してください',
-  'File: {{file}}': 'ファイル: {{file}}',
+    '{{terminalName}} keybindings.json exists but is not a valid JSON array. Please fix the file manually or delete it to allow automatic configuration.',
+  'File: {{file}}': 'File: {{file}}',
   'Failed to parse {{terminalName}} keybindings.json. The file contains invalid JSON. Please fix the file manually or delete it to allow automatic configuration.':
-    '{{terminalName}} の keybindings.json の解析に失敗しました。ファイルに無効なJSONが含まれています。手動で修正するか、削除して自動設定を許可してください',
-  'Error: {{error}}': 'エラー: {{error}}',
-  'Shift+Enter binding already exists': 'Shift+Enter バインドは既に存在します',
-  'Ctrl+Enter binding already exists': 'Ctrl+Enter バインドは既に存在します',
+    'Failed to parse {{terminalName}} keybindings.json. The file contains invalid JSON. Please fix the file manually or delete it to allow automatic configuration.',
+  'Error: {{error}}': 'Error: {{error}}',
+  'Shift+Enter binding already exists': 'Shift+Enter binding already exists',
+  'Ctrl+Enter binding already exists': 'Ctrl+Enter binding already exists',
   'Existing keybindings detected. Will not modify to avoid conflicts.':
-    '既存のキーバインドが検出されました。競合を避けるため変更をしません',
+    'Existing keybindings detected. Will not modify to avoid conflicts.',
   'Please check and modify manually if needed: {{file}}':
-    '必要に応じて手動で確認・変更してください: {{file}}',
+    'Please check and modify manually if needed: {{file}}',
   'Added Shift+Enter and Ctrl+Enter keybindings to {{terminalName}}.':
-    '{{terminalName}} に Shift+Enter と Ctrl+Enter のキーバインドを追加しました',
-  'Modified: {{file}}': '変更済み: {{file}}',
+    'Added Shift+Enter and Ctrl+Enter keybindings to {{terminalName}}.',
+  'Modified: {{file}}': 'Modified: {{file}}',
   '{{terminalName}} keybindings already configured.':
-    '{{terminalName}} のキーバインドは既に設定されています',
+    '{{terminalName}} keybindings already configured.',
   'Failed to configure {{terminalName}}.':
-    '{{terminalName}} の設定に失敗しました',
+    'Failed to configure {{terminalName}}.',
   'Your terminal is already configured for an optimal experience with multiline input (Shift+Enter and Ctrl+Enter).':
-    'ターミナルは複数行入力(Shift+Enter と Ctrl+Enter)に最適化されています',
+    'Your terminal is already configured for an optimal experience with multiline input (Shift+Enter and Ctrl+Enter).',
   // ============================================================================
   // Commands - Hooks
   // ============================================================================
-  'Manage Qwen Code hooks': 'Qwen Code のフックを管理する',
-  'List all configured hooks': '設定済みのフックをすべて表示する',
-  'Enable a disabled hook': '無効なフックを有効にする',
-  'Disable an active hook': '有効なフックを無効にする',
+  'Manage TRAM hooks': 'Manage TRAM hooks',
+  'List all configured hooks': 'List all configured hooks',
+  'Enable a disabled hook': 'Enable a disabled hook',
+  'Disable an active hook': 'Disable an active hook',
 
   // ============================================================================
   // Commands - Session Export
   // ============================================================================
   'Export current session message history to a file':
-    '現在のセッションのメッセージ履歴をファイルにエクスポートする',
-  'Export session to HTML format': 'セッションを HTML 形式でエクスポートする',
-  'Export session to JSON format': 'セッションを JSON 形式でエクスポートする',
+    'Export current session message history to a file',
+  'Export session to HTML format': 'Export session to HTML format',
+  'Export session to JSON format': 'Export session to JSON format',
   'Export session to JSONL format (one message per line)':
-    'セッションを JSONL 形式でエクスポートする（1 行に 1 メッセージ）',
-  'Export session to markdown format':
-    'セッションを Markdown 形式でエクスポートする',
+    'Export session to JSONL format (one message per line)',
+  'Export session to markdown format': 'Export session to markdown format',
 
   // ============================================================================
   // Commands - Insights
   // ============================================================================
   'generate personalized programming insights from your chat history':
-    'チャット履歴からパーソナライズされたプログラミングインサイトを生成する',
+    'generate personalized programming insights from your chat history',
 
   // ============================================================================
   // Commands - Session History
   // ============================================================================
-  'Resume a previous session': '前のセッションを再開する',
+  'Resume a previous session': 'Resume a previous session',
   'Restore a tool call. This will reset the conversation and file history to the state it was in when the tool call was suggested':
-    'ツール呼び出しを復元します。これにより、会話とファイルの履歴はそのツール呼び出しが提案された時点の状態に戻ります',
+    'Restore a tool call. This will reset the conversation and file history to the state it was in when the tool call was suggested',
   'Could not detect terminal type. Supported terminals: VS Code, Cursor, Windsurf, and Trae.':
-    'ターミナルの種類を検出できませんでした。サポートされているターミナル: VS Code、Cursor、Windsurf、Trae',
+    'Could not detect terminal type. Supported terminals: VS Code, Cursor, Windsurf, and Trae.',
   'Terminal "{{terminal}}" is not supported yet.':
-    'ターミナル "{{terminal}}" はまだサポートされていません',
-  // Commands - Language
-  'Invalid language. Available: {{options}}':
-    '無効な言語です。使用可能: {{options}}',
-  'Language subcommands do not accept additional arguments.':
-    '言語サブコマンドは追加の引数を受け付けません',
-  'Current UI language: {{lang}}': '現在のUI言語: {{lang}}',
-  'Current LLM output language: {{lang}}': '現在のLLM出力言語: {{lang}}',
-  'LLM output language not set': 'LLM出力言語が設定されていません',
-  'Set UI language': 'UI言語を設定',
-  'Set LLM output language': 'LLM出力言語を設定',
-  'Usage: /language ui [{{options}}]': '使い方: /language ui [{{options}}]',
-  'Usage: /language output <language>': '使い方: /language output <言語>',
-  'Example: /language output 中文': '例: /language output 中文',
-  'Example: /language output English': '例: /language output English',
-  'Example: /language output 日本語': '例: /language output 日本語',
-  'Example: /language output Português': '例: /language output Português',
-  'UI language changed to {{lang}}': 'UI言語を {{lang}} に変更しました',
-  'LLM output language rule file generated at {{path}}':
-    'LLM出力言語ルールファイルを {{path}} に生成しました',
-  'Please restart the application for the changes to take effect.':
-    '変更を有効にするにはアプリケーションを再起動してください',
-  'Failed to generate LLM output language rule file: {{error}}':
-    'LLM出力言語ルールファイルの生成に失敗: {{error}}',
-  'Invalid command. Available subcommands:':
-    '無効なコマンドです。使用可能なサブコマンド:',
-  'Available subcommands:': '使用可能なサブコマンド:',
-  'To request additional UI language packs, please open an issue on GitHub.':
-    '追加のUI言語パックをリクエストするには、GitHub で Issue を作成してください',
-  'Available options:': '使用可能なオプション:',
-  'Set UI language to {{name}}': 'UI言語を {{name}} に設定',
-  // Approval Mode
-  'Approval Mode': '承認モード',
-  'Current approval mode: {{mode}}': '現在の承認モード: {{mode}}',
-  'Available approval modes:': '利用可能な承認モード:',
-  'Approval mode changed to: {{mode}}': '承認モードを変更しました: {{mode}}',
-  'Approval mode changed to: {{mode}} (saved to {{scope}} settings{{location}})':
-    '承認モードを {{mode}} に変更しました({{scope}} 設定{{location}}に保存)',
-  'Usage: /approval-mode <mode> [--session|--user|--project]':
-    '使い方: /approval-mode <モード> [--session|--user|--project]',
-  'Scope subcommands do not accept additional arguments.':
-    'スコープサブコマンドは追加の引数を受け付けません',
-  'Plan mode - Analyze only, do not modify files or execute commands':
-    'プランモード - 分析のみ、ファイルの変更やコマンドの実行はしません',
-  'Default mode - Require approval for file edits or shell commands':
-    'デフォルトモード - ファイル編集やシェルコマンドには承認が必要',
-  'Auto-edit mode - Automatically approve file edits':
-    '自動編集モード - ファイル編集を自動承認',
-  'YOLO mode - Automatically approve all tools':
-    'YOLOモード - すべてのツールを自動承認',
-  '{{mode}} mode': '{{mode}}モード',
-  'Settings service is not available; unable to persist the approval mode.':
-    '設定サービスが利用できません。承認モードを保存できません',
-  'Failed to save approval mode: {{error}}':
-    '承認モードの保存に失敗: {{error}}',
-  'Failed to change approval mode: {{error}}':
-    '承認モードの変更に失敗: {{error}}',
-  'Apply to current session only (temporary)':
-    '現在のセッションのみに適用(一時的)',
-  'Persist for this project/workspace': 'このプロジェクト/ワークスペースに保存',
-  'Persist for this user on this machine': 'このマシンのこのユーザーに保存',
-  'Analyze only, do not modify files or execute commands':
-    '分析のみ、ファイルの変更やコマンドの実行はしません',
-  'Require approval for file edits or shell commands':
-    'ファイル編集やシェルコマンドには承認が必要',
-  'Automatically approve file edits': 'ファイル編集を自動承認',
-  'Automatically approve all tools': 'すべてのツールを自動承認',
-  'Workspace approval mode exists and takes priority. User-level change will have no effect.':
-    'ワークスペースの承認モードが存在し、優先されます。ユーザーレベルの変更は効果がありません',
-  '(Use Enter to select, Tab to change focus)':
-    '(Enter で選択、Tab でフォーカス変更)',
-  'Apply To': '適用先',
-  'User Settings': 'ユーザー設定',
-  'Workspace Settings': 'ワークスペース設定',
-  // Memory
-  'Commands for interacting with memory.': 'メモリ操作のコマンド',
-  'Show the current memory contents.': '現在のメモリ内容を表示',
-  'Show project-level memory contents.': 'プロジェクトレベルのメモリ内容を表示',
-  'Show global memory contents.': 'グローバルメモリ内容を表示',
-  'Add content to project-level memory.':
-    'プロジェクトレベルのメモリにコンテンツを追加',
-  'Add content to global memory.': 'グローバルメモリにコンテンツを追加',
-  'Refresh the memory from the source.': 'ソースからメモリを更新',
-  'Usage: /memory add --project <text to remember>':
-    '使い方: /memory add --project <記憶するテキスト>',
-  'Usage: /memory add --global <text to remember>':
-    '使い方: /memory add --global <記憶するテキスト>',
-  'Attempting to save to project memory: "{{text}}"':
-    'プロジェクトメモリへの保存を試行中: "{{text}}"',
-  'Attempting to save to global memory: "{{text}}"':
-    'グローバルメモリへの保存を試行中: "{{text}}"',
-  'Current memory content from {{count}} file(s):':
-    '{{count}} 個のファイルからの現在のメモリ内容:',
-  'Memory is currently empty.': 'メモリは現在空です',
-  'Project memory file not found or is currently empty.':
-    'プロジェクトメモリファイルが見つからないか、現在空です',
-  'Global memory file not found or is currently empty.':
-    'グローバルメモリファイルが見つからないか、現在空です',
-  'Global memory is currently empty.': 'グローバルメモリは現在空です',
-  'Global memory content:\n\n---\n{{content}}\n---':
-    'グローバルメモリ内容:\n\n---\n{{content}}\n---',
-  'Project memory content from {{path}}:\n\n---\n{{content}}\n---':
-    '{{path}} からのプロジェクトメモリ内容:\n\n---\n{{content}}\n---',
-  'Project memory is currently empty.': 'プロジェクトメモリは現在空です',
-  'Refreshing memory from source files...':
-    'ソースファイルからメモリを更新中...',
-  'Add content to the memory. Use --global for global memory or --project for project memory.':
-    'メモリにコンテンツを追加。グローバルメモリには --global、プロジェクトメモリには --project を使用',
-  'Usage: /memory add [--global|--project] <text to remember>':
-    '使い方: /memory add [--global|--project] <記憶するテキスト>',
-  'Attempting to save to memory {{scope}}: "{{fact}}"':
-    'メモリ {{scope}} への保存を試行中: "{{fact}}"',
-  // MCP
-  'Authenticate with an OAuth-enabled MCP server':
-    'OAuth対応のMCPサーバーで認証',
-  'List configured MCP servers and tools':
-    '設定済みのMCPサーバーとツールを一覧表示',
-  'No MCP servers configured.': 'MCPサーバーが設定されていません',
-  'Restarts MCP servers.': 'MCPサーバーを再起動します',
-  'Config not loaded.': '設定が読み込まれていません',
-  'Could not retrieve tool registry.': 'ツールレジストリを取得できませんでした',
-  'No MCP servers configured with OAuth authentication.':
-    'OAuth認証が設定されたMCPサーバーはありません',
-  'MCP servers with OAuth authentication:': 'OAuth認証のMCPサーバー:',
-  'Use /mcp auth <server-name> to authenticate.':
-    '認証するには /mcp auth <サーバー名> を使用',
-  "MCP server '{{name}}' not found.": "MCPサーバー '{{name}}' が見つかりません",
-  "Successfully authenticated and refreshed tools for '{{name}}'.":
-    "'{{name}}' の認証とツール更新に成功しました",
-  "Failed to authenticate with MCP server '{{name}}': {{error}}":
-    "MCPサーバー '{{name}}' での認証に失敗: {{error}}",
-  "Re-discovering tools from '{{name}}'...":
-    "'{{name}}' からツールを再検出中...",
-  "Discovered {{count}} tool(s) from '{{name}}'.":
-    "'{{name}}' から {{count}} 個のツールを検出しました。",
-  'Authentication complete. Returning to server details...':
-    '認証完了。サーバー詳細に戻ります...',
-  'Authentication successful.': '認証成功。',
-  'If the browser does not open, copy and paste this URL into your browser:':
-    'ブラウザが開かない場合は、このURLをコピーしてブラウザに貼り付けてください：',
-  'Make sure to copy the COMPLETE URL - it may wrap across multiple lines.':
-    '⚠️  URL全体をコピーしてください——複数行にまたがる場合があります。',
-  'Configured MCP servers:': '設定済みMCPサーバー:',
-  Ready: '準備完了',
-  Disconnected: '切断',
-  '{{count}} tool': '{{count}} ツール',
-  '{{count}} tools': '{{count}} ツール',
-  'Restarting MCP servers...': 'MCPサーバーを再起動中...',
-  // Chat
-  'Manage conversation history.': '会話履歴を管理します',
-  'List saved conversation checkpoints':
-    '保存された会話チェックポイントを一覧表示',
-  'No saved conversation checkpoints found.':
-    '保存された会話チェックポイントが見つかりません',
-  'List of saved conversations:': '保存された会話の一覧:',
-  'Note: Newest last, oldest first':
-    '注: 最新のものが下にあり、過去のものが上にあります',
-  'Save the current conversation as a checkpoint. Usage: /chat save <tag>':
-    '現在の会話をチェックポイントとして保存。使い方: /chat save <タグ>',
-  'Missing tag. Usage: /chat save <tag>':
-    'タグが不足しています。使い方: /chat save <タグ>',
-  'Delete a conversation checkpoint. Usage: /chat delete <tag>':
-    '会話チェックポイントを削除。使い方: /chat delete <タグ>',
-  'Missing tag. Usage: /chat delete <tag>':
-    'タグが不足しています。使い方: /chat delete <タグ>',
-  "Conversation checkpoint '{{tag}}' has been deleted.":
-    "会話チェックポイント '{{tag}}' を削除しました",
-  "Error: No checkpoint found with tag '{{tag}}'.":
-    "エラー: タグ '{{tag}}' のチェックポイントが見つかりません",
-  'Resume a conversation from a checkpoint. Usage: /chat resume <tag>':
-    'チェックポイントから会話を再開。使い方: /chat resume <タグ>',
-  'Missing tag. Usage: /chat resume <tag>':
-    'タグが不足しています。使い方: /chat resume <タグ>',
-  'No saved checkpoint found with tag: {{tag}}.':
-    'タグ {{tag}} のチェックポイントが見つかりません',
-  'A checkpoint with the tag {{tag}} already exists. Do you want to overwrite it?':
-    'タグ {{tag}} のチェックポイントは既に存在します。上書きしますか?',
-  'No chat client available to save conversation.':
-    '会話を保存するためのチャットクライアントがありません',
-  'Conversation checkpoint saved with tag: {{tag}}.':
-    'タグ {{tag}} で会話チェックポイントを保存しました',
-  'No conversation found to save.': '保存する会話が見つかりません',
-  'No chat client available to share conversation.':
-    '会話を共有するためのチャットクライアントがありません',
-  'Invalid file format. Only .md and .json are supported.':
-    '無効なファイル形式です。.md と .json のみサポートされています',
-  'Error sharing conversation: {{error}}': '会話の共有中にエラー: {{error}}',
-  'Conversation shared to {{filePath}}': '会話を {{filePath}} に共有しました',
-  'No conversation found to share.': '共有する会話が見つかりません',
-  'Share the current conversation to a markdown or json file. Usage: /chat share <file>':
-    '現在の会話をmarkdownまたはjsonファイルに共有。使い方: /chat share <ファイル>',
-  // Summary
-  'Generate a project summary and save it to .qwen/PROJECT_SUMMARY.md':
-    'プロジェクトサマリーを生成し、.qwen/PROJECT_SUMMARY.md に保存',
-  'No chat client available to generate summary.':
-    'サマリーを生成するためのチャットクライアントがありません',
-  'Already generating summary, wait for previous request to complete':
-    'サマリー生成中です。前のリクエストの完了をお待ちください',
-  'No conversation found to summarize.': '要約する会話が見つかりません',
-  'Failed to generate project context summary: {{error}}':
-    'プロジェクトコンテキストサマリーの生成に失敗: {{error}}',
-  'Saved project summary to {{filePathForDisplay}}.':
-    'プロジェクトサマリーを {{filePathForDisplay}} に保存しました',
-  'Saving project summary...': 'プロジェクトサマリーを保存中...',
-  'Generating project summary...': 'プロジェクトサマリーを生成中...',
-  'Failed to generate summary - no text content received from LLM response':
-    'サマリーの生成に失敗 - LLMレスポンスからテキストコンテンツを受信できませんでした',
-  // Model
-  'Switch the model for this session': 'このセッションのモデルを切り替え',
-  'Content generator configuration not available.':
-    'コンテンツジェネレーター設定が利用できません',
-  'Authentication type not available.': '認証タイプが利用できません',
-  'No models available for the current authentication type ({{authType}}).':
-    '現在の認証タイプ({{authType}})で利用可能なモデルはありません',
-  // Clear
-  'Starting a new session, resetting chat, and clearing terminal.':
-    '新しいセッションを開始し、チャットをリセットし、ターミナルをクリアしています',
-  'Starting a new session and clearing.':
-    '新しいセッションを開始してクリアしています',
-  // Compress
-  'Already compressing, wait for previous request to complete':
-    '圧縮中です。前のリクエストの完了をお待ちください',
-  'Failed to compress chat history.': 'チャット履歴の圧縮に失敗しました',
-  'Failed to compress chat history: {{error}}':
-    'チャット履歴の圧縮に失敗: {{error}}',
-  'Compressing chat history': 'チャット履歴を圧縮中',
-  'Chat history compressed from {{originalTokens}} to {{newTokens}} tokens.':
-    'チャット履歴を {{originalTokens}} トークンから {{newTokens}} トークンに圧縮しました',
-  'Compression was not beneficial for this history size.':
-    'この履歴サイズには圧縮の効果がありませんでした',
-  'Chat history compression did not reduce size. This may indicate issues with the compression prompt.':
-    'チャット履歴の圧縮でサイズが減少しませんでした。圧縮プロンプトに問題がある可能性があります',
-  'Could not compress chat history due to a token counting error.':
-    'トークンカウントエラーのため、チャット履歴を圧縮できませんでした',
-  'Chat history is already compressed.': 'チャット履歴は既に圧縮されています',
-  // Directory
-  'Configuration is not available.': '設定が利用できません',
-  'Please provide at least one path to add.':
-    '追加するパスを少なくとも1つ指定してください',
-  'The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.':
-    '制限的なサンドボックスプロファイルでは /directory add コマンドはサポートされていません。代わりにセッション開始時に --include-directories を使用してください',
-  "Error adding '{{path}}': {{error}}":
-    "'{{path}}' の追加中にエラー: {{error}}",
-  'Successfully added QWEN.md files from the following directories if there are:\n- {{directories}}':
-    '以下のディレクトリから QWEN.md ファイルを追加しました(存在する場合):\n- {{directories}}',
-  'Error refreshing memory: {{error}}': 'メモリの更新中にエラー: {{error}}',
-  'Successfully added directories:\n- {{directories}}':
-    'ディレクトリを正常に追加しました:\n- {{directories}}',
-  'Current workspace directories:\n{{directories}}':
-    '現在のワークスペースディレクトリ:\n{{directories}}',
-  // Docs
-  'Please open the following URL in your browser to view the documentation:\n{{url}}':
-    'ドキュメントを表示するには、ブラウザで以下のURLを開いてください:\n{{url}}',
-  'Opening documentation in your browser: {{url}}':
-    '  ブラウザでドキュメントを開きました: {{url}}',
-  // Dialogs - Tool Confirmation
-  'Do you want to proceed?': '続行しますか?',
-  'Yes, allow once': 'はい(今回のみ許可)',
-  'Allow always': '常に許可する',
-  Yes: 'はい',
-  No: 'いいえ',
-  'No (esc)': 'いいえ (Esc)',
-  'Yes, allow always for this session': 'はい、このセッションで常に許可',
+    'Terminal "{{terminal}}" is not supported yet.',
 
-  // MCP Management - Core translations
-  'Manage MCP servers': 'MCPサーバーを管理',
-  'Server Detail': 'サーバー詳細',
-  'Disable Server': 'サーバーを無効化',
-  Tools: 'ツール',
-  'Tool Detail': 'ツール詳細',
-  'MCP Management': 'MCP管理',
-  'Loading...': '読み込み中...',
-  'Unknown step': '不明なステップ',
-  'Esc to back': 'Esc 戻る',
-  '↑↓ to navigate · Enter to select · Esc to close':
-    '↑↓ ナビゲート · Enter 選択 · Esc 閉じる',
-  '↑↓ to navigate · Enter to select · Esc to back':
-    '↑↓ ナビゲート · Enter 選択 · Esc 戻る',
-  '↑↓ to navigate · Enter to confirm · Esc to back':
-    '↑↓ ナビゲート · Enter 確認 · Esc 戻る',
-  'User Settings (global)': 'ユーザー設定（グローバル）',
+  // ============================================================================
+  // Commands - Language
+  // ============================================================================
+  'Invalid language. Available: {{options}}':
+    'Invalid language. Available: {{options}}',
+  'Language subcommands do not accept additional arguments.':
+    'Language subcommands do not accept additional arguments.',
+  'Current UI language: {{lang}}': 'Current UI language: {{lang}}',
+  'Current LLM output language: {{lang}}':
+    'Current LLM output language: {{lang}}',
+  'LLM output language not set': 'LLM output language not set',
+  'Set UI language': 'Set UI language',
+  'Set LLM output language': 'Set LLM output language',
+  'Usage: /language ui [{{options}}]': 'Usage: /language ui [{{options}}]',
+  'Usage: /language output <language>': 'Usage: /language output <language>',
+  'Example: /language output Chinese': 'Example: /language output Chinese',
+  'Example: /language output English': 'Example: /language output English',
+  'Example: /language output Russian': 'Example: /language output Russian',
+  'Example: /language output Portuguese': 'Example: /language output Portuguese',
+  'UI language changed to {{lang}}': 'UI language changed to {{lang}}',
+  'LLM output language set to {{lang}}': 'LLM output language set to {{lang}}',
+  'LLM output language rule file generated at {{path}}':
+    'LLM output language rule file generated at {{path}}',
+  'Please restart the application for the changes to take effect.':
+    'Please restart the application for the changes to take effect.',
+  'Failed to generate LLM output language rule file: {{error}}':
+    'Failed to generate LLM output language rule file: {{error}}',
+  'Invalid command. Available subcommands:':
+    'Invalid command. Available subcommands:',
+  'Available subcommands:': 'Available subcommands:',
+  'To request additional UI language packs, please open an issue on GitHub.':
+    'To request additional UI language packs, please open an issue on GitHub.',
+  'Available options:': 'Available options:',
+  'Set UI language to {{name}}': 'Set UI language to {{name}}',
+
+  // ============================================================================
+  // Commands - Approval Mode
+  // ============================================================================
+  'Tool Approval Mode': 'Tool Approval Mode',
+  'Current approval mode: {{mode}}': 'Current approval mode: {{mode}}',
+  'Available approval modes:': 'Available approval modes:',
+  'Approval mode changed to: {{mode}}': 'Approval mode changed to: {{mode}}',
+  'Approval mode changed to: {{mode}} (saved to {{scope}} settings{{location}})':
+    'Approval mode changed to: {{mode}} (saved to {{scope}} settings{{location}})',
+  'Usage: /approval-mode <mode> [--session|--user|--project]':
+    'Usage: /approval-mode <mode> [--session|--user|--project]',
+
+  'Scope subcommands do not accept additional arguments.':
+    'Scope subcommands do not accept additional arguments.',
+  'Plan mode - Analyze only, do not modify files or execute commands':
+    'Plan mode - Analyze only, do not modify files or execute commands',
+  'Default mode - Require approval for file edits or shell commands':
+    'Default mode - Require approval for file edits or shell commands',
+  'Auto-edit mode - Automatically approve file edits':
+    'Auto-edit mode - Automatically approve file edits',
+  'YOLO mode - Automatically approve all tools':
+    'YOLO mode - Automatically approve all tools',
+  '{{mode}} mode': '{{mode}} mode',
+  'Settings service is not available; unable to persist the approval mode.':
+    'Settings service is not available; unable to persist the approval mode.',
+  'Failed to save approval mode: {{error}}':
+    'Failed to save approval mode: {{error}}',
+  'Failed to change approval mode: {{error}}':
+    'Failed to change approval mode: {{error}}',
+  'Apply to current session only (temporary)':
+    'Apply to current session only (temporary)',
+  'Persist for this project/workspace': 'Persist for this project/workspace',
+  'Persist for this user on this machine':
+    'Persist for this user on this machine',
+  'Analyze only, do not modify files or execute commands':
+    'Analyze only, do not modify files or execute commands',
+  'Require approval for file edits or shell commands':
+    'Require approval for file edits or shell commands',
+  'Automatically approve file edits': 'Automatically approve file edits',
+  'Automatically approve all tools': 'Automatically approve all tools',
+  'Workspace approval mode exists and takes priority. User-level change will have no effect.':
+    'Workspace approval mode exists and takes priority. User-level change will have no effect.',
+  'Apply To': 'Apply To',
+  'User Settings': 'User Settings',
+  'Workspace Settings': 'Workspace Settings',
+
+  // ============================================================================
+  // Commands - Memory
+  // ============================================================================
+  'Commands for interacting with memory.':
+    'Commands for interacting with memory.',
+  'Show the current memory contents.': 'Show the current memory contents.',
+  'Show project-level memory contents.': 'Show project-level memory contents.',
+  'Show global memory contents.': 'Show global memory contents.',
+  'Add content to project-level memory.':
+    'Add content to project-level memory.',
+  'Add content to global memory.': 'Add content to global memory.',
+  'Refresh the memory from the source.': 'Refresh the memory from the source.',
+  'Usage: /memory add --project <text to remember>':
+    'Usage: /memory add --project <text to remember>',
+  'Usage: /memory add --global <text to remember>':
+    'Usage: /memory add --global <text to remember>',
+  'Attempting to save to project memory: "{{text}}"':
+    'Attempting to save to project memory: "{{text}}"',
+  'Attempting to save to global memory: "{{text}}"':
+    'Attempting to save to global memory: "{{text}}"',
+  'Current memory content from {{count}} file(s):':
+    'Current memory content from {{count}} file(s):',
+  'Memory is currently empty.': 'Memory is currently empty.',
+  'Project memory file not found or is currently empty.':
+    'Project memory file not found or is currently empty.',
+  'Global memory file not found or is currently empty.':
+    'Global memory file not found or is currently empty.',
+  'Global memory is currently empty.': 'Global memory is currently empty.',
+  'Global memory content:\n\n---\n{{content}}\n---':
+    'Global memory content:\n\n---\n{{content}}\n---',
+  'Project memory content from {{path}}:\n\n---\n{{content}}\n---':
+    'Project memory content from {{path}}:\n\n---\n{{content}}\n---',
+  'Project memory is currently empty.': 'Project memory is currently empty.',
+  'Refreshing memory from source files...':
+    'Refreshing memory from source files...',
+  'Add content to the memory. Use --global for global memory or --project for project memory.':
+    'Add content to the memory. Use --global for global memory or --project for project memory.',
+  'Usage: /memory add [--global|--project] <text to remember>':
+    'Usage: /memory add [--global|--project] <text to remember>',
+  'Attempting to save to memory {{scope}}: "{{fact}}"':
+    'Attempting to save to memory {{scope}}: "{{fact}}"',
+
+  // ============================================================================
+  // Commands - MCP
+  // ============================================================================
+  'Authenticate with an OAuth-enabled MCP server':
+    'Authenticate with an OAuth-enabled MCP server',
+  'List configured MCP servers and tools':
+    'List configured MCP servers and tools',
+  'Restarts MCP servers.': 'Restarts MCP servers.',
+  'Open MCP management dialog': 'Open MCP management dialog',
+  'Config not loaded.': 'Config not loaded.',
+  'Could not retrieve tool registry.': 'Could not retrieve tool registry.',
+  'No MCP servers configured with OAuth authentication.':
+    'No MCP servers configured with OAuth authentication.',
+  'MCP servers with OAuth authentication:':
+    'MCP servers with OAuth authentication:',
+  'Use /mcp auth <server-name> to authenticate.':
+    'Use /mcp auth <server-name> to authenticate.',
+  "MCP server '{{name}}' not found.": "MCP server '{{name}}' not found.",
+  "Successfully authenticated and refreshed tools for '{{name}}'.":
+    "Successfully authenticated and refreshed tools for '{{name}}'.",
+  "Failed to authenticate with MCP server '{{name}}': {{error}}":
+    "Failed to authenticate with MCP server '{{name}}': {{error}}",
+  "Re-discovering tools from '{{name}}'...":
+    "Re-discovering tools from '{{name}}'...",
+  "Discovered {{count}} tool(s) from '{{name}}'.":
+    "Discovered {{count}} tool(s) from '{{name}}'.",
+  'Authentication complete. Returning to server details...':
+    'Authentication complete. Returning to server details...',
+  'Authentication successful.': 'Authentication successful.',
+  'If the browser does not open, copy and paste this URL into your browser:':
+    'If the browser does not open, copy and paste this URL into your browser:',
+  'Make sure to copy the COMPLETE URL - it may wrap across multiple lines.':
+    'Make sure to copy the COMPLETE URL - it may wrap across multiple lines.',
+
+  // ============================================================================
+  // MCP Management Dialog
+  // ============================================================================
+  'Manage MCP servers': 'Manage MCP servers',
+  'Server Detail': 'Server Detail',
+  'Disable Server': 'Disable Server',
+  Tools: 'Tools',
+  'Tool Detail': 'Tool Detail',
+  'MCP Management': 'MCP Management',
+  'Loading...': 'Loading...',
+  'Unknown step': 'Unknown step',
+  'Esc to back': 'Esc to back',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to close':
+    '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to close',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to back':
+    '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to back',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to confirm 閻?Esc to back':
+    '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to confirm 閻?Esc to back',
+  'User Settings (global)': 'User Settings (global)',
   'Workspace Settings (project-specific)':
-    'ワークスペース設定（プロジェクト固有）',
-  'Disable server:': 'サーバーを無効化:',
+    'Workspace Settings (project-specific)',
+  'Disable server:': 'Disable server:',
   'Select where to add the server to the exclude list:':
-    'サーバーを除外リストに追加する場所を選択してください:',
-  'Press Enter to confirm, Esc to cancel': 'Enter で確認、Esc でキャンセル',
-  Disable: '無効化',
-  Enable: '有効化',
-  Authenticate: '認証',
-  'Re-authenticate': '再認証',
-  'Clear Authentication': '認証をクリア',
-  disabled: '無効',
-  'Server:': 'サーバー:',
-  Reconnect: '再接続',
-  'View tools': 'ツールを表示',
-  'Status:': 'ステータス:',
-  'Source:': 'ソース:',
-  'Command:': 'コマンド:',
-  'Working Directory:': '作業ディレクトリ:',
-  'Capabilities:': '機能:',
-  'No server selected': 'サーバーが選択されていません',
-  '(disabled)': '(無効)',
-  'Error:': 'エラー:',
-  Extension: '拡張機能',
-  tool: 'ツール',
-  tools: 'ツール',
-  connected: '接続済み',
-  connecting: '接続中',
-  disconnected: '切断済み',
-  error: 'エラー',
+    'Select where to add the server to the exclude list:',
+  'Press Enter to confirm, Esc to cancel':
+    'Press Enter to confirm, Esc to cancel',
+  'View tools': 'View tools',
+  Reconnect: 'Reconnect',
+  Enable: 'Enable',
+  Disable: 'Disable',
+  Authenticate: 'Authenticate',
+  'Re-authenticate': 'Re-authenticate',
+  'Clear Authentication': 'Clear Authentication',
+  'Server:': 'Server:',
+  'Command:': 'Command:',
+  'Working Directory:': 'Working Directory:',
+  'Capabilities:': 'Capabilities:',
+  'No server selected': 'No server selected',
+  prompts: 'prompts',
+  '(disabled)': '(disabled)',
+  'Error:': 'Error:',
+  Extension: 'Extension',
+  tool: 'tool',
+  tools: 'tools',
+  connected: 'connected',
+  connecting: 'connecting',
+  disconnected: 'disconnected',
 
   // MCP Server List
-  'User MCPs': 'ユーザーMCP',
-  'Project MCPs': 'プロジェクトMCP',
-  'Extension MCPs': '拡張機能MCP',
-  server: 'サーバー',
-  servers: 'サーバー',
+  'User MCPs': 'User MCPs',
+  'Project MCPs': 'Project MCPs',
+  'Extension MCPs': 'Extension MCPs',
+  server: 'server',
+  servers: 'servers',
   'Add MCP servers to your settings to get started.':
-    '設定にMCPサーバーを追加して開始してください。',
-  'Run qwen --debug to see error logs':
-    'qwen --debug を実行してエラーログを確認してください',
+    'Add MCP servers to your settings to get started.',
+  'Run tram --debug to see error logs': 'Run tram --debug to see error logs',
 
   // MCP OAuth Authentication
-  'OAuth Authentication': 'OAuth 認証',
+  'OAuth Authentication': 'OAuth Authentication',
   'Press Enter to start authentication, Esc to go back':
-    'Enter で認証開始、Esc で戻る',
+    'Press Enter to start authentication, Esc to go back',
   'Authenticating... Please complete the login in your browser.':
-    '認証中... ブラウザでログインを完了してください。',
-  'Press Enter or Esc to go back': 'Enter または Esc で戻る',
+    'Authenticating... Please complete the login in your browser.',
+  'Press Enter or Esc to go back': 'Press Enter or Esc to go back',
 
   // MCP Tool List
-  'No tools available for this server.':
-    'このサーバーには使用可能なツールがありません。',
-  destructive: '破壊的',
-  'read-only': '読み取り専用',
-  'open-world': 'オープンワールド',
-  idempotent: '冪等',
-  'Tools for {{name}}': '{{name}} のツール',
-  'Tools for {{serverName}}': '{{serverName}} のツール',
+  'No tools available for this server.': 'No tools available for this server.',
+  destructive: 'destructive',
+  'read-only': 'read-only',
+  'open-world': 'open-world',
+  idempotent: 'idempotent',
+  'Tools for {{name}}': 'Tools for {{name}}',
+  'Tools for {{serverName}}': 'Tools for {{serverName}}',
   '{{current}}/{{total}}': '{{current}}/{{total}}',
 
   // MCP Tool Detail
-  required: '必須',
-  Type: '型',
-  Enum: '列挙',
-  Parameters: 'パラメータ',
-  'No tool selected': 'ツールが選択されていません',
-  Annotations: '注釈',
-  Title: 'タイトル',
-  'Read Only': '読み取り専用',
-  Destructive: '破壊的',
-  Idempotent: '冪等',
-  'Open World': 'オープンワールド',
-  Server: 'サーバー',
+  required: 'required',
+  Type: 'Type',
+  Enum: 'Enum',
+  Parameters: 'Parameters',
+  'No tool selected': 'No tool selected',
+  Annotations: 'Annotations',
+  Title: 'Title',
+  'Read Only': 'Read Only',
+  Destructive: 'Destructive',
+  Idempotent: 'Idempotent',
+  'Open World': 'Open World',
+  Server: 'Server',
 
   // Invalid tool related translations
-  '{{count}} invalid tools': '{{count}} 個の無効なツール',
-  invalid: '無効',
-  'invalid: {{reason}}': '無効: {{reason}}',
-  'missing name': '名前なし',
-  'missing description': '説明なし',
-  '(unnamed)': '(名前なし)',
+  '{{count}} invalid tools': '{{count}} invalid tools',
+  invalid: 'invalid',
+  'invalid: {{reason}}': 'invalid: {{reason}}',
+  'missing name': 'missing name',
+  'missing description': 'missing description',
+  '(unnamed)': '(unnamed)',
   'Warning: This tool cannot be called by the LLM':
-    '警告: このツールはLLMによって呼び出すことができません',
-  Reason: '理由',
+    'Warning: This tool cannot be called by the LLM',
+  Reason: 'Reason',
   'Tools must have both name and description to be used by the LLM.':
-    'ツールはLLMによって使用されるには名前と説明の両方が必要です。',
-  'Modify in progress:': '変更中:',
+    'Tools must have both name and description to be used by the LLM.',
+
+  // ============================================================================
+  // Commands - Chat
+  // ============================================================================
+  'Manage conversation history.': 'Manage conversation history.',
+  'List saved conversation checkpoints': 'List saved conversation checkpoints',
+  'No saved conversation checkpoints found.':
+    'No saved conversation checkpoints found.',
+  'List of saved conversations:': 'List of saved conversations:',
+  'Note: Newest last, oldest first': 'Note: Newest last, oldest first',
+  'Save the current conversation as a checkpoint. Usage: /chat save <tag>':
+    'Save the current conversation as a checkpoint. Usage: /chat save <tag>',
+  'Missing tag. Usage: /chat save <tag>':
+    'Missing tag. Usage: /chat save <tag>',
+  'Delete a conversation checkpoint. Usage: /chat delete <tag>':
+    'Delete a conversation checkpoint. Usage: /chat delete <tag>',
+  'Missing tag. Usage: /chat delete <tag>':
+    'Missing tag. Usage: /chat delete <tag>',
+  "Conversation checkpoint '{{tag}}' has been deleted.":
+    "Conversation checkpoint '{{tag}}' has been deleted.",
+  "Error: No checkpoint found with tag '{{tag}}'.":
+    "Error: No checkpoint found with tag '{{tag}}'.",
+  'Resume a conversation from a checkpoint. Usage: /chat resume <tag>':
+    'Resume a conversation from a checkpoint. Usage: /chat resume <tag>',
+  'Missing tag. Usage: /chat resume <tag>':
+    'Missing tag. Usage: /chat resume <tag>',
+  'No saved checkpoint found with tag: {{tag}}.':
+    'No saved checkpoint found with tag: {{tag}}.',
+  'A checkpoint with the tag {{tag}} already exists. Do you want to overwrite it?':
+    'A checkpoint with the tag {{tag}} already exists. Do you want to overwrite it?',
+  'No chat client available to save conversation.':
+    'No chat client available to save conversation.',
+  'Conversation checkpoint saved with tag: {{tag}}.':
+    'Conversation checkpoint saved with tag: {{tag}}.',
+  'No conversation found to save.': 'No conversation found to save.',
+  'No chat client available to share conversation.':
+    'No chat client available to share conversation.',
+  'Invalid file format. Only .md and .json are supported.':
+    'Invalid file format. Only .md and .json are supported.',
+  'Error sharing conversation: {{error}}':
+    'Error sharing conversation: {{error}}',
+  'Conversation shared to {{filePath}}': 'Conversation shared to {{filePath}}',
+  'No conversation found to share.': 'No conversation found to share.',
+  'Share the current conversation to a markdown or json file. Usage: /chat share <file>':
+    'Share the current conversation to a markdown or json file. Usage: /chat share <file>',
+
+  // ============================================================================
+  // Commands - Summary
+  // ============================================================================
+  'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md':
+    'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md',
+  'No chat client available to generate summary.':
+    'No chat client available to generate summary.',
+  'Already generating summary, wait for previous request to complete':
+    'Already generating summary, wait for previous request to complete',
+  'No conversation found to summarize.': 'No conversation found to summarize.',
+  'Failed to generate project context summary: {{error}}':
+    'Failed to generate project context summary: {{error}}',
+  'Saved project summary to {{filePathForDisplay}}.':
+    'Saved project summary to {{filePathForDisplay}}.',
+  'Saving project summary...': 'Saving project summary...',
+  'Generating project summary...': 'Generating project summary...',
+  'Failed to generate summary - no text content received from LLM response':
+    'Failed to generate summary - no text content received from LLM response',
+
+  // ============================================================================
+  // Commands - Model
+  // ============================================================================
+  'Switch the model for this session': 'Switch the model for this session',
+  'Content generator configuration not available.':
+    'Content generator configuration not available.',
+  'Authentication type not available.': 'Authentication type not available.',
+  'No models available for the current authentication type ({{authType}}).':
+    'No models available for the current authentication type ({{authType}}).',
+
+  // ============================================================================
+  // Commands - Clear
+  // ============================================================================
+  'Starting a new session, resetting chat, and clearing terminal.':
+    'Starting a new session, resetting chat, and clearing terminal.',
+  'Starting a new session and clearing.':
+    'Starting a new session and clearing.',
+
+  // ============================================================================
+  // Commands - Compress
+  // ============================================================================
+  'Already compressing, wait for previous request to complete':
+    'Already compressing, wait for previous request to complete',
+  'Failed to compress chat history.': 'Failed to compress chat history.',
+  'Failed to compress chat history: {{error}}':
+    'Failed to compress chat history: {{error}}',
+  'Compressing chat history': 'Compressing chat history',
+  'Chat history compressed from {{originalTokens}} to {{newTokens}} tokens.':
+    'Chat history compressed from {{originalTokens}} to {{newTokens}} tokens.',
+  'Compression was not beneficial for this history size.':
+    'Compression was not beneficial for this history size.',
+  'Chat history compression did not reduce size. This may indicate issues with the compression prompt.':
+    'Chat history compression did not reduce size. This may indicate issues with the compression prompt.',
+  'Could not compress chat history due to a token counting error.':
+    'Could not compress chat history due to a token counting error.',
+  'Chat history is already compressed.': 'Chat history is already compressed.',
+
+  // ============================================================================
+  // Commands - Directory
+  // ============================================================================
+  'Configuration is not available.': 'Configuration is not available.',
+  'Please provide at least one path to add.':
+    'Please provide at least one path to add.',
+  'The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.':
+    'The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.',
+  "Error adding '{{path}}': {{error}}": "Error adding '{{path}}': {{error}}",
+  'Successfully added TRAM.md files from the following directories if there are:\n- {{directories}}':
+    'Successfully added TRAM.md files from the following directories if there are:\n- {{directories}}',
+  'Error refreshing memory: {{error}}': 'Error refreshing memory: {{error}}',
+  'Successfully added directories:\n- {{directories}}':
+    'Successfully added directories:\n- {{directories}}',
+  'Current workspace directories:\n{{directories}}':
+    'Current workspace directories:\n{{directories}}',
+
+  // ============================================================================
+  // Commands - Docs
+  // ============================================================================
+  'Please open the following URL in your browser to view the documentation:\n{{url}}':
+    'Please open the following URL in your browser to view the documentation:\n{{url}}',
+  'Opening documentation in your browser: {{url}}':
+    'Opening documentation in your browser: {{url}}',
+
+  // ============================================================================
+  // Dialogs - Tool Confirmation
+  // ============================================================================
+  'Do you want to proceed?': 'Do you want to proceed?',
+  'Yes, allow once': 'Yes, allow once',
+  'Allow always': 'Allow always',
+  Yes: 'Yes',
+  No: 'No',
+  'No (esc)': 'No (esc)',
+  'Yes, allow always for this session': 'Yes, allow always for this session',
+  'Modify in progress:': 'Modify in progress:',
   'Save and close external editor to continue':
-    '続行するには外部エディタを保存して閉じてください',
-  'Apply this change?': 'この変更を適用しますか?',
-  'Yes, allow always': 'はい、常に許可',
-  'Modify with external editor': '外部エディタで編集',
-  'No, suggest changes (esc)': 'いいえ、変更を提案 (Esc)',
-  "Allow execution of: '{{command}}'?": "'{{command}}' の実行を許可しますか?",
-  'Yes, allow always ...': 'はい、常に許可...',
-  'Yes, and auto-accept edits': 'はい、編集を自動承認',
-  'Yes, and manually approve edits': 'はい、編集を手動承認',
-  'No, keep planning (esc)': 'いいえ、計画を続ける (Esc)',
-  'URLs to fetch:': '取得するURL:',
-  'MCP Server: {{server}}': 'MCPサーバー: {{server}}',
-  'Tool: {{tool}}': 'ツール: {{tool}}',
+    'Save and close external editor to continue',
+  'Apply this change?': 'Apply this change?',
+  'Yes, allow always': 'Yes, allow always',
+  'Modify with external editor': 'Modify with external editor',
+  'No, suggest changes (esc)': 'No, suggest changes (esc)',
+  "Allow execution of: '{{command}}'?": "Allow execution of: '{{command}}'?",
+  'Yes, allow always ...': 'Yes, allow always ...',
+  'Yes, and auto-accept edits': 'Yes, and auto-accept edits',
+  'Yes, and manually approve edits': 'Yes, and manually approve edits',
+  'No, keep planning (esc)': 'No, keep planning (esc)',
+  'URLs to fetch:': 'URLs to fetch:',
+  'MCP Server: {{server}}': 'MCP Server: {{server}}',
+  'Tool: {{tool}}': 'Tool: {{tool}}',
   'Allow execution of MCP tool "{{tool}}" from server "{{server}}"?':
-    'サーバー "{{server}}" からの MCPツール "{{tool}}" の実行を許可しますか?',
+    'Allow execution of MCP tool "{{tool}}" from server "{{server}}"?',
   'Yes, always allow tool "{{tool}}" from server "{{server}}"':
-    'はい、サーバー "{{server}}" からのツール "{{tool}}" を常に許可',
+    'Yes, always allow tool "{{tool}}" from server "{{server}}"',
   'Yes, always allow all tools from server "{{server}}"':
-    'はい、サーバー "{{server}}" からのすべてのツールを常に許可',
+    'Yes, always allow all tools from server "{{server}}"',
+
+  // ============================================================================
   // Dialogs - Shell Confirmation
-  'Shell Command Execution': 'シェルコマンド実行',
+  // ============================================================================
+  'Shell Command Execution': 'Shell Command Execution',
   'A custom command wants to run the following shell commands:':
-    'カスタムコマンドが以下のシェルコマンドを実行しようとしています:',
+    'A custom command wants to run the following shell commands:',
+
+  // ============================================================================
   // Dialogs - Pro Quota
+  // ============================================================================
   'Pro quota limit reached for {{model}}.':
-    '{{model}} のProクォータ上限に達しました',
+    'Pro quota limit reached for {{model}}.',
   'Change auth (executes the /auth command)':
-    '認証を変更(/auth コマンドを実行)',
-  'Continue with {{model}}': '{{model}} で続行',
+    'Change auth (executes the /auth command)',
+  'Continue with {{model}}': 'Continue with {{model}}',
+
+  // ============================================================================
   // Dialogs - Welcome Back
-  'Current Plan:': '現在のプラン:',
+  // ============================================================================
+  'Current Plan:': 'Current Plan:',
   'Progress: {{done}}/{{total}} tasks completed':
-    '進捗: {{done}}/{{total}} タスク完了',
-  ', {{inProgress}} in progress': '、{{inProgress}} 進行中',
-  'Pending Tasks:': '保留中のタスク:',
-  'What would you like to do?': '何をしますか?',
+    'Progress: {{done}}/{{total}} tasks completed',
+  ', {{inProgress}} in progress': ', {{inProgress}} in progress',
+  'Pending Tasks:': 'Pending Tasks:',
+  'What would you like to do?': 'What would you like to do?',
   'Choose how to proceed with your session:':
-    'セッションの続行方法を選択してください:',
-  'Start new chat session': '新しいチャットセッションを開始',
-  'Continue previous conversation': '前回の会話を続行',
-  '👋 Welcome back! (Last updated: {{timeAgo}})':
-    '👋 おかえりなさい!(最終更新: {{timeAgo}})',
-  '🎯 Overall Goal:': '🎯 全体目標:',
+    'Choose how to proceed with your session:',
+  'Start new chat session': 'Start new chat session',
+  'Continue previous conversation': 'Continue previous conversation',
+  '濡絽鍟崯?Welcome back! (Last updated: {{timeAgo}})':
+    '濡絽鍟崯?Welcome back! (Last updated: {{timeAgo}})',
+  '濡絽鍟粻?Overall Goal:': '濡絽鍟粻?Overall Goal:',
+
+  // ============================================================================
   // Dialogs - Auth
-  'Get started': '始める',
-  'Select Authentication Method': '認証方法を選択',
+  // ============================================================================
+  'Get started': 'Get started',
+  'Select Authentication Method': 'Select Authentication Method',
   'OpenAI API key is required to use OpenAI authentication.':
-    'OpenAI認証を使用するには OpenAI APIキーが必要です',
+    'OpenAI API key is required to use OpenAI authentication.',
   'You must select an auth method to proceed. Press Ctrl+C again to exit.':
-    '続行するには認証方法を選択してください。Ctrl+C をもう一度押すと終了します',
-  'Terms of Services and Privacy Notice': '利用規約とプライバシー通知',
-  'Qwen OAuth': 'Qwen OAuth',
-  'Free \u00B7 Up to 1,000 requests/day \u00B7 Qwen latest models':
-    '無料 \u00B7 1日最大1,000リクエスト \u00B7 Qwen最新モデル',
-  'Login with QwenChat account to use daily free quota.':
-    'QwenChatアカウントでログインして、毎日の無料クォータをご利用ください。',
+    'You must select an auth method to proceed. Press Ctrl+C again to exit.',
+  'Terms of Services and Privacy Notice':
+    'Terms of Services and Privacy Notice',
+  'TRAM OAuth': 'TRAM OAuth',
+  'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models':
+    'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models',
+  'Login with TramChat account to use daily free quota.':
+    'Login with TramChat account to use daily free quota.',
   'Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models':
-    '有料 \u00B7 5時間最大6,000リクエスト \u00B7 すべての Alibaba Cloud Coding Plan モデル',
+    'Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models',
   'Alibaba Cloud Coding Plan': 'Alibaba Cloud Coding Plan',
-  'Bring your own API key': '自分のAPIキーを使用',
+  'Bring your own API key': 'Bring your own API key',
   'API-KEY': 'API-KEY',
   'Use coding plan credentials or your own api-keys/providers.':
-    'Coding Planの認証情報またはご自身のAPIキー/プロバイダーをご利用ください。',
+    'Use coding plan credentials or your own api-keys/providers.',
   OpenAI: 'OpenAI',
   'Failed to login. Message: {{message}}':
-    'ログインに失敗しました。メッセージ: {{message}}',
+    'Failed to login. Message: {{message}}',
   'Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.':
-    '認証は {{enforcedType}} に強制されていますが、現在 {{currentType}} を使用しています',
-  'Qwen OAuth authentication timed out. Please try again.':
-    'Qwen OAuth認証がタイムアウトしました。再度お試しください',
-  'Qwen OAuth authentication cancelled.':
-    'Qwen OAuth認証がキャンセルされました',
-  'Qwen OAuth Authentication': 'Qwen OAuth認証',
-  'Please visit this URL to authorize:':
-    '認証するには以下のURLにアクセスしてください:',
-  'Or scan the QR code below:': 'または以下のQRコードをスキャン:',
-  'Waiting for authorization': '認証を待っています',
-  'Time remaining:': '残り時間:',
-  '(Press ESC or CTRL+C to cancel)': '(ESC または CTRL+C でキャンセル)',
-  'Qwen OAuth Authentication Timeout': 'Qwen OAuth認証タイムアウト',
+    'Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.',
+  'TRAM OAuth authentication timed out. Please try again.':
+    'TRAM OAuth authentication timed out. Please try again.',
+  'TRAM OAuth authentication cancelled.':
+    'TRAM OAuth authentication cancelled.',
+  'TRAM OAuth Authentication': 'TRAM OAuth Authentication',
+  'Please visit this URL to authorize:': 'Please visit this URL to authorize:',
+  'Or scan the QR code below:': 'Or scan the QR code below:',
+  'Waiting for authorization': 'Waiting for authorization',
+  'Time remaining:': 'Time remaining:',
+  '(Press ESC or CTRL+C to cancel)': '(Press ESC or CTRL+C to cancel)',
+  'TRAM OAuth Authentication Timeout': 'TRAM OAuth Authentication Timeout',
   'OAuth token expired (over {{seconds}} seconds). Please select authentication method again.':
-    'OAuthトークンが期限切れです({{seconds}}秒以上)。認証方法を再度選択してください',
+    'OAuth token expired (over {{seconds}} seconds). Please select authentication method again.',
   'Press any key to return to authentication type selection.':
-    '認証タイプ選択に戻るには任意のキーを押してください',
-  'Waiting for Qwen OAuth authentication...': 'Qwen OAuth認証を待っています...',
-  'Note: Your existing API key in settings.json will not be cleared when using Qwen OAuth. You can switch back to OpenAI authentication later if needed.':
-    '注: Qwen OAuthを使用しても、settings.json内の既存のAPIキーはクリアされません。必要に応じて後でOpenAI認証に切り替えることができます',
-  'Note: Your existing API key will not be cleared when using Qwen OAuth.':
-    '注: Qwen OAuthを使用しても、既存のAPIキーはクリアされません。',
+    'Press any key to return to authentication type selection.',
+  'Waiting for TRAM OAuth authentication...':
+    'Waiting for TRAM OAuth authentication...',
+  'Note: Your existing API key in settings.json will not be cleared when using TRAM OAuth. You can switch back to OpenAI authentication later if needed.':
+    'Note: Your existing API key in settings.json will not be cleared when using TRAM OAuth. You can switch back to OpenAI authentication later if needed.',
+  'Note: Your existing API key will not be cleared when using TRAM OAuth.':
+    'Note: Your existing API key will not be cleared when using TRAM OAuth.',
   'Authentication timed out. Please try again.':
-    '認証がタイムアウトしました。再度お試しください',
+    'Authentication timed out. Please try again.',
   'Waiting for auth... (Press ESC or CTRL+C to cancel)':
-    '認証を待っています... (ESC または CTRL+C でキャンセル)',
+    'Waiting for auth... (Press ESC or CTRL+C to cancel)',
+  'Missing API key for OpenAI-compatible auth. Set settings.security.auth.apiKey, or set the {{envKeyHint}} environment variable.':
+    'Missing API key for OpenAI-compatible auth. Set settings.security.auth.apiKey, or set the {{envKeyHint}} environment variable.',
+  '{{envKeyHint}} environment variable not found.':
+    '{{envKeyHint}} environment variable not found.',
+  '{{envKeyHint}} environment variable not found. Please set it in your .env file or environment variables.':
+    '{{envKeyHint}} environment variable not found. Please set it in your .env file or environment variables.',
+  '{{envKeyHint}} environment variable not found (or set settings.security.auth.apiKey). Please set it in your .env file or environment variables.':
+    '{{envKeyHint}} environment variable not found (or set settings.security.auth.apiKey). Please set it in your .env file or environment variables.',
+  'Missing API key for OpenAI-compatible auth. Set the {{envKeyHint}} environment variable.':
+    'Missing API key for OpenAI-compatible auth. Set the {{envKeyHint}} environment variable.',
+  'Anthropic provider missing required baseUrl in modelProviders[].baseUrl.':
+    'Anthropic provider missing required baseUrl in modelProviders[].baseUrl.',
+  'ANTHROPIC_BASE_URL environment variable not found.':
+    'ANTHROPIC_BASE_URL environment variable not found.',
+  'Invalid auth method selected.': 'Invalid auth method selected.',
   'Failed to authenticate. Message: {{message}}':
-    '認証に失敗しました。メッセージ: {{message}}',
+    'Failed to authenticate. Message: {{message}}',
   'Authenticated successfully with {{authType}} credentials.':
-    '{{authType}} 認証情報で正常に認証されました',
-  'Invalid QWEN_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}':
-    '無効な QWEN_DEFAULT_AUTH_TYPE 値: "{{value}}"。有効な値: {{validValues}}',
-  'OpenAI Configuration Required': 'OpenAI設定が必要です',
+    'Authenticated successfully with {{authType}} credentials.',
+  'Invalid TRAM_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}':
+    'Invalid TRAM_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}',
+  'OpenAI Configuration Required': 'OpenAI Configuration Required',
   'Please enter your OpenAI configuration. You can get an API key from':
-    'OpenAI設定を入力してください。APIキーは以下から取得できます',
-  'API Key:': 'APIキー:',
-  'Invalid credentials: {{errorMessage}}': '無効な認証情報: {{errorMessage}}',
-  'Failed to validate credentials': '認証情報の検証に失敗しました',
-  'Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel':
-    'Enter で続行、Tab/↑↓ で移動、Esc でキャンセル',
-  // Dialogs - Model
-  'Select Model': 'モデルを選択',
-  '(Press Esc to close)': '(Esc で閉じる)',
-  Modality: 'モダリティ',
-  'Context Window': 'コンテキストウィンドウ',
-  text: 'テキスト',
-  'text-only': 'テキストのみ',
-  image: '画像',
-  pdf: 'PDF',
-  audio: '音声',
-  video: '動画',
-  'not set': '未設定',
-  none: 'なし',
-  unknown: '不明',
-  'Qwen 3.5 Plus — efficient hybrid model with leading coding performance':
-    'Qwen 3.5 Plus — 効率的なハイブリッドモデル、業界トップクラスのコーディング性能',
-  'The latest Qwen Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
-    'Alibaba Cloud ModelStudioの最新Qwen Visionモデル(バージョン: qwen3-vl-plus-2025-09-23)',
-  // Dialogs - Permissions
-  'Manage folder trust settings': 'フォルダ信頼設定を管理',
-  // Status Bar
-  'Using:': '使用中:',
-  '{{count}} open file': '{{count}} 個のファイルを開いています',
-  '{{count}} open files': '{{count}} 個のファイルを開いています',
-  '(ctrl+g to view)': '(Ctrl+G で表示)',
-  '{{count}} {{name}} file': '{{count}} {{name}} ファイル',
-  '{{count}} {{name}} files': '{{count}} {{name}} ファイル',
-  '{{count}} MCP server': '{{count}} MCPサーバー',
-  '{{count}} MCP servers': '{{count}} MCPサーバー',
-  '{{count}} Blocked': '{{count}} ブロック',
-  '(ctrl+t to view)': '(Ctrl+T で表示)',
-  '(ctrl+t to toggle)': '(Ctrl+T で切り替え)',
-  'Press Ctrl+C again to exit.': 'Ctrl+C をもう一度押すと終了します',
-  'Press Ctrl+D again to exit.': 'Ctrl+D をもう一度押すと終了します',
-  'Press Esc again to clear.': 'Esc をもう一度押すとクリアします',
-  // MCP Status
-  '⏳ MCP servers are starting up ({{count}} initializing)...':
-    '⏳ MCPサーバーを起動中({{count}} 初期化中)...',
-  'Note: First startup may take longer. Tool availability will update automatically.':
-    '注: 初回起動には時間がかかる場合があります。ツールの利用可能状況は自動的に更新されます',
-  'Starting... (first startup may take longer)':
-    '起動中...(初回起動には時間がかかる場合があります)',
-  '{{count}} prompt': '{{count}} プロンプト',
-  '{{count}} prompts': '{{count}} プロンプト',
-  '(from {{extensionName}})': '({{extensionName}} から)',
-  OAuth: 'OAuth',
-  'OAuth expired': 'OAuth 期限切れ',
-  'OAuth not authenticated': 'OAuth 未認証',
-  'tools and prompts will appear when ready':
-    'ツールとプロンプトは準備完了後に表示されます',
-  '{{count}} tools cached': '{{count}} ツール(キャッシュ済み)',
-  'Tools:': 'ツール:',
-  'Parameters:': 'パラメータ:',
-  'Prompts:': 'プロンプト:',
-  Blocked: 'ブロック',
-  '💡 Tips:': '💡 ヒント:',
-  Use: '使用',
-  'to show server and tool descriptions': 'サーバーとツールの説明を表示',
-  'to show tool parameter schemas': 'ツールパラメータスキーマを表示',
-  'to hide descriptions': '説明を非表示',
-  'to authenticate with OAuth-enabled servers': 'OAuth対応サーバーで認証',
-  Press: '押す',
-  'to toggle tool descriptions on/off': 'ツール説明の表示/非表示を切り替え',
-  "Starting OAuth authentication for MCP server '{{name}}'...":
-    "MCPサーバー '{{name}}' のOAuth認証を開始中...",
-  // Startup Tips
-  'Tips:': 'ヒント：',
-  'Use /compress when the conversation gets long to summarize history and free up context.':
-    '会話が長くなったら /compress で履歴を要約し、コンテキストを解放できます。',
-  'Start a fresh idea with /clear or /new; the previous session stays available in history.':
-    '/clear または /new で新しいアイデアを始められます。前のセッションは履歴に残ります。',
-  'Use /bug to submit issues to the maintainers when something goes off.':
-    '問題が発生したら /bug でメンテナーに報告できます。',
-  'Switch auth type quickly with /auth.':
-    '/auth で認証タイプをすばやく切り替えられます。',
-  'You can run any shell commands from Qwen Code using ! (e.g. !ls).':
-    'Qwen Code から ! を使って任意のシェルコマンドを実行できます（例: !ls）。',
-  'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.':
-    '/ を入力してコマンドポップアップを開きます。Tab でスラッシュコマンドと保存済みプロンプトを補完できます。',
-  'You can resume a previous conversation by running qwen --continue or qwen --resume.':
-    'qwen --continue または qwen --resume で前の会話を再開できます。',
-  'You can switch permission mode quickly with Shift+Tab or /approval-mode.':
-    'Shift+Tab または /approval-mode で権限モードをすばやく切り替えられます。',
-  'You can switch permission mode quickly with Tab or /approval-mode.':
-    'Tab または /approval-mode で権限モードをすばやく切り替えられます。',
-  'Try /insight to generate personalized insights from your chat history.':
-    '/insight でチャット履歴からパーソナライズされたインサイトを生成できます。',
-  'Tips for getting started:': '始めるためのヒント:',
-  '1. Ask questions, edit files, or run commands.':
-    '1. 質問したり、ファイルを編集したり、コマンドを実行したりできます',
-  '2. Be specific for the best results.':
-    '2. 具体的に指示すると最良の結果が得られます',
-  'files to customize your interactions with Qwen Code.':
-    'Qwen Code との対話をカスタマイズするためのファイル',
-  'for more information.': '詳細情報を確認できます',
-  // Exit Screen / Stats
-  'Agent powering down. Goodbye!': 'エージェントを終了します。さようなら!',
-  'To continue this session, run': 'このセッションを続行するには、次を実行:',
-  'Interaction Summary': 'インタラクション概要',
-  'Session ID:': 'セッションID:',
-  'Tool Calls:': 'ツール呼び出し:',
-  'Success Rate:': '成功率:',
-  'User Agreement:': 'ユーザー同意:',
-  reviewed: 'レビュー済み',
-  'Code Changes:': 'コード変更:',
-  Performance: 'パフォーマンス',
-  'Wall Time:': '経過時間:',
-  'Agent Active:': 'エージェント稼働時間:',
-  'API Time:': 'API時間:',
-  'Tool Time:': 'ツール時間:',
-  'Session Stats': 'セッション統計',
-  'Model Usage': 'モデル使用量',
-  Reqs: 'リクエスト',
-  'Input Tokens': '入力トークン',
-  'Output Tokens': '出力トークン',
-  'Savings Highlight:': '節約ハイライト:',
-  'of input tokens were served from the cache, reducing costs.':
-    '入力トークンがキャッシュから提供され、コストを削減しました',
-  'Tip: For a full token breakdown, run `/stats model`.':
-    'ヒント: トークンの詳細な内訳は `/stats model` を実行してください',
-  'Model Stats For Nerds': 'マニア向けモデル統計',
-  'Tool Stats For Nerds': 'マニア向けツール統計',
-  Metric: 'メトリック',
-  API: 'API',
-  Requests: 'リクエスト',
-  Errors: 'エラー',
-  'Avg Latency': '平均レイテンシ',
-  Tokens: 'トークン',
-  Total: '合計',
-  Prompt: 'プロンプト',
-  Cached: 'キャッシュ',
-  Thoughts: '思考',
-  Tool: 'ツール',
-  Output: '出力',
-  'No API calls have been made in this session.':
-    'このセッションではAPI呼び出しが行われていません',
-  'Tool Name': 'ツール名',
-  Calls: '呼び出し',
-  'Success Rate': '成功率',
-  'Avg Duration': '平均時間',
-  'User Decision Summary': 'ユーザー決定サマリー',
-  'Total Reviewed Suggestions:': '総レビュー提案数:',
-  ' » Accepted:': ' » 承認:',
-  ' » Rejected:': ' » 却下:',
-  ' » Modified:': ' » 変更:',
-  ' Overall Agreement Rate:': ' 全体承認率:',
-  'No tool calls have been made in this session.':
-    'このセッションではツール呼び出しが行われていません',
-  'Session start time is unavailable, cannot calculate stats.':
-    'セッション開始時刻が利用できないため、統計を計算できません',
-  // Loading
-  'Waiting for user confirmation...': 'ユーザーの確認を待っています...',
-  '(esc to cancel, {{time}})': '(Esc でキャンセル、{{time}})',
-  // Witty Loading Phrases
-  WITTY_LOADING_PHRASES: [
-    '運任せで検索中...',
-    '中の人がタイピング中...',
-    'ロジックを最適化中...',
-    '電子の数を確認中...',
-    '宇宙のバグをチェック中...',
-    '大量の0と1をコンパイル中...',
-    'HDDと思い出をデフラグ中...',
-    'ビットをこっそり入れ替え中...',
-    'ニューロンの接続を再構築中...',
-    'どこかに行ったセミコロンを捜索中...',
-    'フラックスキャパシタを調整中...',
-    'フォースと交感中...',
-    'アルゴリズムをチューニング中...',
-    '白いウサギを追跡中...',
-    'カセットフーフー中...',
-    'ローディングメッセージを考え中...',
-    'ほぼ完了...多分...',
-    '最新のミームについて調査中...',
-    'この表示を改善するアイデアを思索中...',
-    'この問題を考え中...',
-    'それはバグでなく誰も知らない新機能だよ',
-    'ダイヤルアップ接続音が終わるのを待機中...',
-    'コードに油を追加中...',
+    'Please enter your OpenAI configuration. You can get an API key from',
+  'API Key:': 'API Key:',
+  'Invalid credentials: {{errorMessage}}':
+    'Invalid credentials: {{errorMessage}}',
+  'Failed to validate credentials': 'Failed to validate credentials',
+  'Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel':
+    'Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel',
 
-    // かなり意訳が入ってるもの
-    'イヤホンをほどき中...',
-    'カフェインをコードに変換中...',
-    '天動説を地動説に書き換え中...',
-    'プールで時計の完成を待機中...',
-    '笑撃的な回答を用意中...',
-    '適切なミームを記述中...',
-    'Aボタンを押して次へ...',
-    'コードにリックロールを仕込み中...',
-    'プログラマーが貧乏なのはキャッシュを使いすぎるから...',
-    'プログラマーがダークモードなのはバグを見たくないから...',
-    'コードが壊れた?叩けば治るさ',
-    'USBの差し込みに挑戦中...',
+  // ============================================================================
+  // Dialogs - Model
+  // ============================================================================
+  'Select Model': 'Select Model',
+  '(Press Esc to close)': '(Press Esc to close)',
+  'Current (effective) configuration': 'Current (effective) configuration',
+  AuthType: 'AuthType',
+  'API Key': 'API Key',
+  unset: 'unset',
+  '(default)': '(default)',
+  '(set)': '(set)',
+  '(not set)': '(not set)',
+  Modality: 'Modality',
+  'Context Window': 'Context Window',
+  text: 'text',
+  'text-only': 'text-only',
+  image: 'image',
+  pdf: 'pdf',
+  audio: 'audio',
+  video: 'video',
+  'not set': 'not set',
+  none: 'none',
+  unknown: 'unknown',
+  "Failed to switch model to '{{modelId}}'.\n\n{{error}}":
+    "Failed to switch model to '{{modelId}}'.\n\n{{error}}",
+  'Tram 3.5 Plus 闂?efficient hybrid model with leading coding performance':
+    'Tram 3.5 Plus 闂?efficient hybrid model with leading coding performance',
+  'The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
+    'The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)',
+
+  // ============================================================================
+  // Dialogs - Permissions
+  // ============================================================================
+  'Manage folder trust settings': 'Manage folder trust settings',
+
+  // ============================================================================
+  // Status Bar
+  // ============================================================================
+  'Using:': 'Using:',
+  '{{count}} open file': '{{count}} open file',
+  '{{count}} open files': '{{count}} open files',
+  '(ctrl+g to view)': '(ctrl+g to view)',
+  '{{count}} {{name}} file': '{{count}} {{name}} file',
+  '{{count}} {{name}} files': '{{count}} {{name}} files',
+  '{{count}} MCP server': '{{count}} MCP server',
+  '{{count}} MCP servers': '{{count}} MCP servers',
+  '{{count}} Blocked': '{{count}} Blocked',
+  '(ctrl+t to view)': '(ctrl+t to view)',
+  '(ctrl+t to toggle)': '(ctrl+t to toggle)',
+  'Press Ctrl+C again to exit.': 'Press Ctrl+C again to exit.',
+  'Press Ctrl+D again to exit.': 'Press Ctrl+D again to exit.',
+  'Press Esc again to clear.': 'Press Esc again to clear.',
+
+  // ============================================================================
+  // MCP Status
+  // ============================================================================
+  'No MCP servers configured.': 'No MCP servers configured.',
+  '闂?MCP servers are starting up ({{count}} initializing)...':
+    '闂?MCP servers are starting up ({{count}} initializing)...',
+  'Note: First startup may take longer. Tool availability will update automatically.':
+    'Note: First startup may take longer. Tool availability will update automatically.',
+  'Configured MCP servers:': 'Configured MCP servers:',
+  Ready: 'Ready',
+  'Starting... (first startup may take longer)':
+    'Starting... (first startup may take longer)',
+  Disconnected: 'Disconnected',
+  '{{count}} tool': '{{count}} tool',
+  '{{count}} tools': '{{count}} tools',
+  '{{count}} prompt': '{{count}} prompt',
+  '{{count}} prompts': '{{count}} prompts',
+  '(from {{extensionName}})': '(from {{extensionName}})',
+  OAuth: 'OAuth',
+  'OAuth expired': 'OAuth expired',
+  'OAuth not authenticated': 'OAuth not authenticated',
+  'tools and prompts will appear when ready':
+    'tools and prompts will appear when ready',
+  '{{count}} tools cached': '{{count}} tools cached',
+  'Tools:': 'Tools:',
+  'Parameters:': 'Parameters:',
+  'Prompts:': 'Prompts:',
+  Blocked: 'Blocked',
+  '濡絽鍟€?Tips:': '濡絽鍟€?Tips:',
+  Use: 'Use',
+  'to show server and tool descriptions':
+    'to show server and tool descriptions',
+  'to show tool parameter schemas': 'to show tool parameter schemas',
+  'to hide descriptions': 'to hide descriptions',
+  'to authenticate with OAuth-enabled servers':
+    'to authenticate with OAuth-enabled servers',
+  Press: 'Press',
+  'to toggle tool descriptions on/off': 'to toggle tool descriptions on/off',
+  "Starting OAuth authentication for MCP server '{{name}}'...":
+    "Starting OAuth authentication for MCP server '{{name}}'...",
+  'Restarting MCP servers...': 'Restarting MCP servers...',
+
+  // ============================================================================
+  // Startup Tips
+  // ============================================================================
+  'Tips:': 'Tips:',
+  'Use /compress when the conversation gets long to summarize history and free up context.':
+    'Use /compress when the conversation gets long to summarize history and free up context.',
+  'Start a fresh idea with /clear or /new; the previous session stays available in history.':
+    'Start a fresh idea with /clear or /new; the previous session stays available in history.',
+  'Use /bug to submit issues to the maintainers when something goes off.':
+    'Use /bug to submit issues to the maintainers when something goes off.',
+  'Switch auth type quickly with /auth.':
+    'Switch auth type quickly with /auth.',
+  'You can run any shell commands from TRAM using ! (e.g. !ls).':
+    'You can run any shell commands from TRAM using ! (e.g. !ls).',
+  'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.':
+    'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.',
+  'You can resume a previous conversation by running tram --continue or tram --resume.':
+    'You can resume a previous conversation by running tram --continue or tram --resume.',
+  'You can switch permission mode quickly with Shift+Tab or /approval-mode.':
+    'You can switch permission mode quickly with Shift+Tab or /approval-mode.',
+  'You can switch permission mode quickly with Tab or /approval-mode.':
+    'You can switch permission mode quickly with Tab or /approval-mode.',
+  'Try /insight to generate personalized insights from your chat history.':
+    'Try /insight to generate personalized insights from your chat history.',
+
+  // ============================================================================
+  // Exit Screen / Stats
+  // ============================================================================
+  'Agent powering down. Goodbye!': 'Agent powering down. Goodbye!',
+  'To continue this session, run': 'To continue this session, run',
+  'Interaction Summary': 'Interaction Summary',
+  'Session ID:': 'Session ID:',
+  'Tool Calls:': 'Tool Calls:',
+  'Success Rate:': 'Success Rate:',
+  'User Agreement:': 'User Agreement:',
+  reviewed: 'reviewed',
+  'Code Changes:': 'Code Changes:',
+  Performance: 'Performance',
+  'Wall Time:': 'Wall Time:',
+  'Agent Active:': 'Agent Active:',
+  'API Time:': 'API Time:',
+  'Tool Time:': 'Tool Time:',
+  'Session Stats': 'Session Stats',
+  'Model Usage': 'Model Usage',
+  Reqs: 'Reqs',
+  'Input Tokens': 'Input Tokens',
+  'Output Tokens': 'Output Tokens',
+  'Savings Highlight:': 'Savings Highlight:',
+  'of input tokens were served from the cache, reducing costs.':
+    'of input tokens were served from the cache, reducing costs.',
+  'Tip: For a full token breakdown, run `/stats model`.':
+    'Tip: For a full token breakdown, run `/stats model`.',
+  'Model Stats For Nerds': 'Model Stats For Nerds',
+  'Tool Stats For Nerds': 'Tool Stats For Nerds',
+  Metric: 'Metric',
+  API: 'API',
+  Requests: 'Requests',
+  Errors: 'Errors',
+  'Avg Latency': 'Avg Latency',
+  Tokens: 'Tokens',
+  Total: 'Total',
+  Prompt: 'Prompt',
+  Cached: 'Cached',
+  Thoughts: 'Thoughts',
+  Tool: 'Tool',
+  Output: 'Output',
+  'No API calls have been made in this session.':
+    'No API calls have been made in this session.',
+  'Tool Name': 'Tool Name',
+  Calls: 'Calls',
+  'Success Rate': 'Success Rate',
+  'Avg Duration': 'Avg Duration',
+  'User Decision Summary': 'User Decision Summary',
+  'Total Reviewed Suggestions:': 'Total Reviewed Suggestions:',
+  ' 缂?Accepted:': ' 缂?Accepted:',
+  ' 缂?Rejected:': ' 缂?Rejected:',
+  ' 缂?Modified:': ' 缂?Modified:',
+  ' Overall Agreement Rate:': ' Overall Agreement Rate:',
+  'No tool calls have been made in this session.':
+    'No tool calls have been made in this session.',
+  'Session start time is unavailable, cannot calculate stats.':
+    'Session start time is unavailable, cannot calculate stats.',
+
+  // ============================================================================
+  // Command Format Migration
+  // ============================================================================
+  'Command Format Migration': 'Command Format Migration',
+  'Found {{count}} TOML command file:': 'Found {{count}} TOML command file:',
+  'Found {{count}} TOML command files:': 'Found {{count}} TOML command files:',
+  '... and {{count}} more': '... and {{count}} more',
+  'The TOML format is deprecated. Would you like to migrate them to Markdown format?':
+    'The TOML format is deprecated. Would you like to migrate them to Markdown format?',
+  '(Backups will be created and original files will be preserved)':
+    '(Backups will be created and original files will be preserved)',
+
+  // ============================================================================
+  // Loading Phrases
+  // ============================================================================
+  'Waiting for user confirmation...': 'Waiting for user confirmation...',
+  '(esc to cancel, {{time}})': '(esc to cancel, {{time}})',
+
+  // ============================================================================
+  // Loading Phrases
+  // ============================================================================
+  WITTY_LOADING_PHRASES: [
+    "I'm Feeling Lucky",
+    'Shipping awesomeness... ',
+    'Painting the serifs back on...',
+    'Navigating the slime mold...',
+    'Consulting the digital spirits...',
+    'Reticulating splines...',
+    'Warming up the AI hamsters...',
+    'Asking the magic conch shell...',
+    'Generating witty retort...',
+    'Polishing the algorithms...',
+    "Don't rush perfection (or my code)...",
+    'Brewing fresh bytes...',
+    'Counting electrons...',
+    'Engaging cognitive processors...',
+    'Checking for syntax errors in the universe...',
+    'One moment, optimizing humor...',
+    'Shuffling punchlines...',
+    'Untangling neural nets...',
+    'Compiling brilliance...',
+    'Loading wit.exe...',
+    'Summoning the cloud of wisdom...',
+    'Preparing a witty response...',
+    "Just a sec, I'm debugging reality...",
+    'Confuzzling the options...',
+    'Tuning the cosmic frequencies...',
+    'Crafting a response worthy of your patience...',
+    'Compiling the 1s and 0s...',
+    'Resolving dependencies... and existential crises...',
+    'Defragmenting memories... both RAM and personal...',
+    'Rebooting the humor module...',
+    'Caching the essentials (mostly cat memes)...',
+    'Optimizing for ludicrous speed',
+    "Swapping bits... don't tell the bytes...",
+    'Garbage collecting... be right back...',
+    'Assembling the interwebs...',
+    'Converting coffee into code...',
+    'Updating the syntax for reality...',
+    'Rewiring the synapses...',
+    'Looking for a misplaced semicolon...',
+    "Greasin' the cogs of the machine...",
+    'Pre-heating the servers...',
+    'Calibrating the flux capacitor...',
+    'Engaging the improbability drive...',
+    'Channeling the Force...',
+    'Aligning the stars for optimal response...',
+    'So say we all...',
+    'Loading the next great idea...',
+    "Just a moment, I'm in the zone...",
+    'Preparing to dazzle you with brilliance...',
+    "Just a tick, I'm polishing my wit...",
+    "Hold tight, I'm crafting a masterpiece...",
+    "Just a jiffy, I'm debugging the universe...",
+    "Just a moment, I'm aligning the pixels...",
+    "Just a sec, I'm optimizing the humor...",
+    "Just a moment, I'm tuning the algorithms...",
+    'Warp speed engaged...',
+    'Mining for more Dilithium crystals...',
+    "Don't panic...",
+    'Following the white rabbit...',
+    'The truth is in here... somewhere...',
+    'Blowing on the cartridge...',
+    'Loading... Do a barrel roll!',
+    'Waiting for the respawn...',
+    'Finishing the Kessel Run in less than 12 parsecs...',
+    "The cake is not a lie, it's just still loading...",
+    'Fiddling with the character creation screen...',
+    "Just a moment, I'm finding the right meme...",
+    "Pressing 'A' to continue...",
+    'Herding digital cats...',
+    'Polishing the pixels...',
+    'Finding a suitable loading screen pun...',
+    'Distracting you with this witty phrase...',
+    'Almost there... probably...',
+    'Our hamsters are working as fast as they can...',
+    'Giving Cloudy a pat on the head...',
+    'Petting the cat...',
+    'Rickrolling my boss...',
+    'Never gonna give you up, never gonna let you down...',
+    'Slapping the bass...',
+    'Tasting the snozberries...',
+    "I'm going the distance, I'm going for speed...",
+    'Is this the real life? Is this just fantasy?...',
+    "I've got a good feeling about this...",
+    'Poking the bear...',
+    'Doing research on the latest memes...',
+    'Figuring out how to make this more witty...',
+    'Hmmm... let me think...',
+    'What do you call a fish with no eyes? A fsh...',
+    'Why did the computer go to therapy? It had too many bytes...',
+    "Why don't programmers like nature? It has too many bugs...",
+    'Why do programmers prefer dark mode? Because light attracts bugs...',
+    'Why did the developer go broke? Because they used up all their cache...',
+    "What can you do with a broken pencil? Nothing, it's pointless...",
+    'Applying percussive maintenance...',
+    'Searching for the correct USB orientation...',
+    'Ensuring the magic smoke stays inside the wires...',
+    'Trying to exit Vim...',
+    'Spinning up the hamster wheel...',
+    "That's not a bug, it's an undocumented feature...",
+    'Engage.',
+    "I'll be back... with an answer.",
+    'My other process is a TARDIS...',
+    'Communing with the machine spirit...',
+    'Letting the thoughts marinate...',
+    'Just remembered where I put my keys...',
+    'Pondering the orb...',
+    "I've seen things you people wouldn't believe... like a user who reads loading messages.",
+    'Initiating thoughtful gaze...',
+    "What's a computer's favorite snack? Microchips.",
+    "Why do Java developers wear glasses? Because they don't C#.",
+    'Charging the laser... pew pew!',
+    'Dividing by zero... just kidding!',
+    'Looking for an adult superviso... I mean, processing.',
+    'Making it go beep boop.',
+    'Buffering... because even AIs need a moment.',
+    'Entangling quantum particles for a faster response...',
+    'Polishing the chrome... on the algorithms.',
+    'Are you not entertained? (Working on it!)',
+    'Summoning the code gremlins... to help, of course.',
+    'Just waiting for the dial-up tone to finish...',
+    'Recalibrating the humor-o-meter.',
+    'My other loading screen is even funnier.',
+    "Pretty sure there's a cat walking on the keyboard somewhere...",
+    'Enhancing... Enhancing... Still loading.',
+    "It's not a bug, it's a feature... of this loading screen.",
+    'Have you tried turning it off and on again? (The loading screen, not me.)',
+    'Constructing additional pylons...',
   ],
+
+  // ============================================================================
+  // Extension Settings Input
+  // ============================================================================
+  'Enter value...': 'Enter value...',
+  'Enter sensitive value...': 'Enter sensitive value...',
+  'Press Enter to submit, Escape to cancel':
+    'Press Enter to submit, Escape to cancel',
+
+  // ============================================================================
+  // Command Migration Tool
+  // ============================================================================
+  'Markdown file already exists: {{filename}}':
+    'Markdown file already exists: {{filename}}',
+  'TOML Command Format Deprecation Notice':
+    'TOML Command Format Deprecation Notice',
+  'Found {{count}} command file(s) in TOML format:':
+    'Found {{count}} command file(s) in TOML format:',
+  'The TOML format for commands is being deprecated in favor of Markdown format.':
+    'The TOML format for commands is being deprecated in favor of Markdown format.',
+  'Markdown format is more readable and easier to edit.':
+    'Markdown format is more readable and easier to edit.',
+  'You can migrate these files automatically using:':
+    'You can migrate these files automatically using:',
+  'Or manually convert each file:': 'Or manually convert each file:',
+  'TOML: prompt = "..." / description = "..."':
+    'TOML: prompt = "..." / description = "..."',
+  'Markdown: YAML frontmatter + content':
+    'Markdown: YAML frontmatter + content',
+  'The migration tool will:': 'The migration tool will:',
+  'Convert TOML files to Markdown': 'Convert TOML files to Markdown',
+  'Create backups of original files': 'Create backups of original files',
+  'Preserve all command functionality': 'Preserve all command functionality',
+  'TOML format will continue to work for now, but migration is recommended.':
+    'TOML format will continue to work for now, but migration is recommended.',
+
+  // ============================================================================
+  // Extensions - Explore Command
+  // ============================================================================
+  'Open extensions page in your browser':
+    'Open extensions page in your browser',
+  'Unknown extensions source: {{source}}.':
+    'Unknown extensions source: {{source}}.',
+  'Would open extensions page in your browser: {{url}} (skipped in test environment)':
+    'Would open extensions page in your browser: {{url}} (skipped in test environment)',
+  'View available extensions at {{url}}':
+    'View available extensions at {{url}}',
+  'Opening extensions page in your browser: {{url}}':
+    'Opening extensions page in your browser: {{url}}',
+  'Failed to open browser. Check out the extensions gallery at {{url}}':
+    'Failed to open browser. Check out the extensions gallery at {{url}}',
+
+  // ============================================================================
+  // Retry / Rate Limit
+  // ============================================================================
+  'Rate limit error: {{reason}}': 'Rate limit error: {{reason}}',
+  'Retrying in {{seconds}} seconds闂?(attempt {{attempt}}/{{maxRetries}})':
+    'Retrying in {{seconds}} seconds闂?(attempt {{attempt}}/{{maxRetries}})',
+  'Press Ctrl+Y to retry': 'Press Ctrl+Y to retry',
+  'No failed request to retry.': 'No failed request to retry.',
+  'to retry last request': 'to retry last request',
+
+  // ============================================================================
+  // Coding Plan Authentication
+  // ============================================================================
+  'API key cannot be empty.': 'API key cannot be empty.',
+  'You can get your Coding Plan API key here':
+    'You can get your Coding Plan API key here',
+  'API key is stored in settings.env. You can migrate it to a .env file for better security.':
+    'API key is stored in settings.env. You can migrate it to a .env file for better security.',
+  'New model configurations are available for Alibaba Cloud Coding Plan. Update now?':
+    'New model configurations are available for Alibaba Cloud Coding Plan. Update now?',
+  'Coding Plan configuration updated successfully. New models are now available.':
+    'Coding Plan configuration updated successfully. New models are now available.',
+  'Coding Plan API key not found. Please re-authenticate with Coding Plan.':
+    'Coding Plan API key not found. Please re-authenticate with Coding Plan.',
+  'Failed to update Coding Plan configuration: {{message}}':
+    'Failed to update Coding Plan configuration: {{message}}',
 
   // ============================================================================
   // Custom API Key Configuration
   // ============================================================================
   'You can configure your API key and models in settings.json':
-    'settings.json で API キーとモデルを設定できます',
+    'You can configure your API key and models in settings.json',
   'Refer to the documentation for setup instructions':
-    'セットアップ手順はドキュメントを参照してください',
-
-  // ============================================================================
-  // Coding Plan Authentication
-  // ============================================================================
-  'API key cannot be empty.': 'APIキーは空にできません。',
-  'You can get your Coding Plan API key here':
-    'Coding Plan APIキーはこちらで取得できます',
-  'Coding Plan configuration updated successfully. New models are now available.':
-    'Coding Plan の設定が正常に更新されました。新しいモデルが利用可能になりました。',
-  'Coding Plan API key not found. Please re-authenticate with Coding Plan.':
-    'Coding Plan の API キーが見つかりません。Coding Plan で再認証してください。',
-  'Failed to update Coding Plan configuration: {{message}}':
-    'Coding Plan の設定更新に失敗しました: {{message}}',
+    'Refer to the documentation for setup instructions',
 
   // ============================================================================
   // Auth Dialog - View Titles and Labels
   // ============================================================================
   'Coding Plan': 'Coding Plan',
   "Paste your api key of Bailian Coding Plan and you're all set!":
-    'Bailian Coding PlanのAPIキーを貼り付けるだけで準備完了です！',
-  Custom: 'カスタム',
+    "Paste your api key of Bailian Coding Plan and you're all set!",
+  Custom: 'Custom',
   'More instructions about configuring `modelProviders` manually.':
-    '`modelProviders`を手動で設定する方法の詳細はこちら。',
-  'Select API-KEY configuration mode:': 'API-KEY設定モードを選択してください：',
-  '(Press Escape to go back)': '(Escapeキーで戻る)',
+    'More instructions about configuring `modelProviders` manually.',
+  'Select API-KEY configuration mode:': 'Select API-KEY configuration mode:',
+  '(Press Escape to go back)': '(Press Escape to go back)',
   '(Press Enter to submit, Escape to cancel)':
-    '(Enterで送信、Escapeでキャンセル)',
-  'More instructions please check:': '詳細な手順はこちらをご確認ください：',
-  'Select Region for Coding Plan': 'Coding Planのリージョンを選択',
+    '(Press Enter to submit, Escape to cancel)',
+  'Select Region for Coding Plan': 'Select Region for Coding Plan',
   'Choose based on where your account is registered':
-    'アカウントの登録先に応じて選択してください',
-  'Enter Coding Plan API Key': 'Coding Plan APIキーを入力',
+    'Choose based on where your account is registered',
+  'Enter Coding Plan API Key': 'Enter Coding Plan API Key',
 
   // ============================================================================
   // Coding Plan International Updates
   // ============================================================================
   'New model configurations are available for {{region}}. Update now?':
-    '{{region}} の新しいモデル設定が利用可能です。今すぐ更新しますか？',
+    'New model configurations are available for {{region}}. Update now?',
   '{{region}} configuration updated successfully. Model switched to "{{model}}".':
-    '{{region}} の設定が正常に更新されました。モデルが "{{model}}" に切り替わりました。',
+    '{{region}} configuration updated successfully. Model switched to "{{model}}".',
   '{{region}} configuration updated successfully.':
-    '{{region}} の設定が正常に更新されました。',
+    '{{region}} configuration updated successfully.',
   'Authenticated successfully with {{region}}. API key and model configs saved to settings.json.':
-    '{{region}} での認証に成功しました。APIキーとモデル設定が settings.json に保存されました。',
+    'Authenticated successfully with {{region}}. API key and model configs saved to settings.json.',
   'Tip: Use /model to switch between available Coding Plan models.':
-    'ヒント: /model で利用可能な Coding Plan モデルを切り替えられます。',
+    'Tip: Use /model to switch between available Coding Plan models.',
+
+  // ============================================================================
+  // Service Command
+  // ============================================================================
+  'Manage persistent background services.':
+    'Manage persistent background services.',
+  'Tip: Recommended Alt+L to open the ask flow quickly. You can also type /service alert <name>.':
+    'Tip: Recommended Alt+L to open the ask flow quickly. You can also type /service alert <name>.',
+  'Tip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    'Tip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.',
+  'No services registered. Use /service register ... to add one.\nCurrent max running services: {{maxRunningServices}}':
+    'No services registered. Use /service register ... to add one.\nCurrent max running services: {{maxRunningServices}}',
+  '- {{runningStatus}} {{name}} | autoStart={{autoStart}} | pid={{pid}} | follow={{follow}} | notify={{notify}} | alert={{alert}} | cwd={{cwd}} | cmd={{command}}':
+    '- {{runningStatus}} {{name}} | autoStart={{autoStart}} | pid={{pid}} | follow={{follow}} | notify={{notify}} | alert={{alert}} | cwd={{cwd}} | cmd={{command}}',
+  'Registered services ({{count}})\nMax running services: {{maxRunningServices}}\nTo change the limit manually, edit services.json in project storage.\n\n{{listLines}}':
+    'Registered services ({{count}})\nMax running services: {{maxRunningServices}}\nTo change the limit manually, edit services.json in project storage.\n\n{{listLines}}',
+  'Unknown option: {{option}}': 'Unknown option: {{option}}',
+  'Service "{{name}}" registered and started.\nautoStart={{autoStart}}, watch={{watchPatterns}}':
+    'Service "{{name}}" registered and started.\nautoStart={{autoStart}}, watch={{watchPatterns}}',
+  'Service name is required for /service {{action}}.':
+    'Service name is required for /service {{action}}.',
+  'Service "{{name}}" started.': 'Service "{{name}}" started.',
+  'Service "{{name}}" stopped.': 'Service "{{name}}" stopped.',
+  'Service "{{name}}" restarted.': 'Service "{{name}}" restarted.',
+  'Service "{{name}}" removed.': 'Service "{{name}}" removed.',
+  'Service "{{name}}" not found.': 'Service "{{name}}" not found.',
+  'Service "{{name}}" realtime notifications enabled.':
+    'Service "{{name}}" realtime notifications enabled.',
+  'Service "{{name}}" realtime notifications muted.\nErrors are still buffered. Use /service alert {{name}} to inspect buffered logs.':
+    'Service "{{name}}" realtime notifications muted.\nErrors are still buffered. Use /service alert {{name}} to inspect buffered logs.',
+  'Unknown option for log: {{option}}': 'Unknown option for log: {{option}}',
+  'Service {{name}} ({{runningStatus}}, pid={{pid}})\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}':
+    'Service {{name}} ({{runningStatus}}, pid={{pid}})\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}',
+  'No pending alert buffer for service "{{name}}".':
+    'No pending alert buffer for service "{{name}}".',
+  'Service {{name}} has alerts. Choose the next action.\nStart line: {{startLine}}, buffered lines: {{bufferedLines}}, error lines: {{errorLines}}\nRecommended: press Alt+L to open ask flow quickly; command input is also supported.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    'Service {{name}} has alerts. Choose the next action.\nStart line: {{startLine}}, buffered lines: {{bufferedLines}}, error lines: {{errorLines}}\nRecommended: press Alt+L to open ask flow quickly; command input is also supported.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.',
+  'Analyze logs only': 'Analyze logs only',
+  'Alert handling': 'Alert handling',
+  'Analyze logs without entering repair flow (equivalent: /service analyze {{name}} all)':
+    'Analyze logs without entering repair flow (equivalent: /service analyze {{name}} all)',
+  'Analyze then fix issue (Recommended)':
+    'Analyze then fix issue (Recommended)',
+  'Analyze logs and continue to fix. You can run /service analyze {{name}} all first, then ask the model to directly repair in follow-up prompts.':
+    'Analyze logs and continue to fix. You can run /service analyze {{name}} all first, then ask the model to directly repair in follow-up prompts.',
+  'Handle later': 'Handle later',
+  'Do not process now; continue buffering subsequent logs in background.':
+    'Do not process now; continue buffering subsequent logs in background.',
+  'No pending alert logs for service "{{name}}".':
+    'No pending alert logs for service "{{name}}".',
+  'No logs available in selected mode ({{mode}}) for service "{{name}}".':
+    'No logs available in selected mode ({{mode}}) for service "{{name}}".',
+  'Please analyze the following service logs for service "{{name}}".\nMode: {{mode}}.\nProvide: root cause, confidence, immediate mitigation, and next checks.\n\n':
+    'Please analyze the following service logs for service "{{name}}".\nMode: {{mode}}.\nProvide: root cause, confidence, immediate mitigation, and next checks.\n\n',
+  'No log patterns configured for service "{{name}}".':
+    'No log patterns configured for service "{{name}}".',
+  '- [{{id}}] Pattern: `{{pattern}}` | Action: {{action}} | Description: {{description}}':
+    '- [{{id}}] Pattern: `{{pattern}}` | Action: {{action}} | Description: {{description}}',
+  'Log patterns for service "{{name}}":\n{{listText}}':
+    'Log patterns for service "{{name}}":\n{{listText}}',
+  'To add log patterns for service "{{name}}", LM will use the request_log_pattern tool.':
+    'To add log patterns for service "{{name}}", LM will use the request_log_pattern tool.',
+  'Removed pattern rule "{{ruleId}}" from service "{{name}}".':
+    'Removed pattern rule "{{ruleId}}" from service "{{name}}".',
+  'Pattern rule "{{ruleId}}" not found in service "{{name}}".':
+    'Pattern rule "{{ruleId}}" not found in service "{{name}}".',
+  'Sent input to service "{{name}}".': 'Sent input to service "{{name}}".',
+  'Unknown subcommand: {{subcommand}}\n\n{{helpText}}':
+    'Unknown subcommand: {{subcommand}}\n\n{{helpText}}',
+  '[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    '[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.',
 
   // ============================================================================
   // Ask User Question Tool
   // ============================================================================
-  'Please answer the following question(s):': '以下の質問に答えてください：',
+  'Please answer the following question(s):':
+    'Please answer the following question(s):',
   'Cannot ask user questions in non-interactive mode. Please run in interactive mode to use this tool.':
-    '非対話モードではユーザーに質問できません。このツールを使用するには対話モードで実行してください。',
+    'Cannot ask user questions in non-interactive mode. Please run in interactive mode to use this tool.',
   'User declined to answer the questions.':
-    'ユーザーは質問への回答を拒否しました。',
+    'User declined to answer the questions.',
   'User has provided the following answers:':
-    'ユーザーは以下の回答を提供しました：',
-  'Failed to process user answers:': 'ユーザー回答の処理に失敗しました：',
-  'Type something...': '何か入力...',
-  Submit: '送信',
-  'Submit answers': '回答を送信',
-  Cancel: 'キャンセル',
-  'Your answers:': 'あなたの回答：',
-  '(not answered)': '(未回答)',
-  'Ready to submit your answers?': '回答を送信しますか？',
-  '↑/↓: Navigate | ←/→: Switch tabs | Enter: Select':
-    '↑/↓: ナビゲート | ←/→: タブ切り替え | Enter: 選択',
-  '↑/↓: Navigate | ←/→: Switch tabs | Space/Enter: Toggle | Esc: Cancel':
-    '↑/↓: ナビゲート | ←/→: タブ切り替え | Space/Enter: 切り替え | Esc: キャンセル',
-  '↑/↓: Navigate | Space/Enter: Toggle | Esc: Cancel':
-    '↑/↓: ナビゲート | Space/Enter: 切り替え | Esc: キャンセル',
-  '↑/↓: Navigate | Enter: Select | Esc: Cancel':
-    '↑/↓: ナビゲート | Enter: 選択 | Esc: キャンセル',
+    'User has provided the following answers:',
+  'Failed to process user answers:': 'Failed to process user answers:',
+  'Type something...': 'Type something...',
+  Submit: 'Submit',
+  'Submit answers': 'Submit answers',
+  Cancel: 'Cancel',
+  'Your answers:': 'Your answers:',
+  '(not answered)': '(not answered)',
+  'Ready to submit your answers?': 'Ready to submit your answers?',
+  '闂?闂? Navigate | 闂?闂? Switch tabs | Enter: Select':
+    '闂?闂? Navigate | 闂?闂? Switch tabs | Enter: Select',
+  '闂?闂? Navigate | 闂?闂? Switch tabs | Space/Enter: Toggle | Esc: Cancel':
+    '闂?闂? Navigate | 闂?闂? Switch tabs | Space/Enter: Toggle | Esc: Cancel',
+  '闂?闂? Navigate | Space/Enter: Toggle | Esc: Cancel':
+    '闂?闂? Navigate | Space/Enter: Toggle | Esc: Cancel',
+  '闂?闂? Navigate | Enter: Select | Esc: Cancel':
+    '闂?闂? Navigate | Enter: Select | Esc: Cancel',
+  
+  // ============================================================================
+  // Context Usage Display
+  // ============================================================================
+  '% used': '% used',
+  '% context used': '% context used',
+  
+  // ============================================================================
+  // Context Usage Display
+  // ============================================================================
+  '% used': '% used',
+  '% context used': '% context used',
 };

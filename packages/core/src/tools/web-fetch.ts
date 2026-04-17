@@ -22,7 +22,7 @@ import {
   Kind,
   ToolConfirmationOutcome,
 } from './tools.js';
-import { DEFAULT_QWEN_MODEL } from '../config/models.js';
+import { DEFAULT_TRAM_MODEL } from '../config/models.js';
 import { ToolNames, ToolDisplayNames } from './tool-names.js';
 import { createDebugLogger, type DebugLogger } from '../utils/debugLogger.js';
 
@@ -77,14 +77,32 @@ class WebFetchToolInvocation extends BaseToolInvocation<
       this.debugLogger.debug(`[WebFetchTool] Fetching content from: ${url}`);
       const response = await fetchWithTimeout(url, URL_FETCH_TIMEOUT_MS);
 
+      // Collect response metadata for the model
+      const responseStatus = response.status;
+      const responseStatusText = response.statusText;
+      const contentType = response.headers.get('content-type') || 'unknown';
+      const contentLength = response.headers.get('content-length') || 'unknown';
+      const finalUrl = response.url || url;
+      const wasRedirected = response.redirected || finalUrl !== url;
+
+      const headerInfo = [
+        `HTTP ${responseStatus} ${responseStatusText}`,
+        `Content-Type: ${contentType}`,
+        `Content-Length: ${contentLength}`,
+        wasRedirected ? `Redirected: ${url} → ${finalUrl}` : null,
+      ].filter(Boolean).join('\n');
+
       if (!response.ok) {
-        const errorMessage = `Request failed with status code ${response.status} ${response.statusText}`;
+        const errorMessage = `Request failed with status code ${responseStatus} ${responseStatusText}`;
         this.debugLogger.error(`[WebFetchTool] ${errorMessage}`);
-        throw new Error(errorMessage);
+        return {
+          llmContent: `${headerInfo}\n\nError: ${errorMessage}`,
+          returnDisplay: `Error: ${errorMessage}\n${headerInfo}`,
+        };
       }
 
       this.debugLogger.debug(
-        `[WebFetchTool] Successfully fetched content from ${url}`,
+        `[WebFetchTool] Successfully fetched content from ${finalUrl}`,
       );
       const html = await response.text();
       const textContent = convert(html, {
@@ -102,7 +120,11 @@ class WebFetchToolInvocation extends BaseToolInvocation<
       const geminiClient = this.config.getGeminiClient();
       const fallbackPrompt = `The user requested the following: "${this.params.prompt}".
 
-I have fetched the content from ${this.params.url}. Please use the following content to answer the user's request.
+I have fetched the content from ${this.params.url}.
+${wasRedirected ? `(Redirected to: ${finalUrl})` : ''}
+Response: ${headerInfo}
+
+Please use the following content to answer the user's request.
 
 ---
 ${textContent}
@@ -116,7 +138,7 @@ ${textContent}
         [{ role: 'user', parts: [{ text: fallbackPrompt }] }],
         {},
         signal,
-        this.config.getModel() || DEFAULT_QWEN_MODEL,
+        this.config.getModel() || DEFAULT_TRAM_MODEL,
       );
       const resultText = getResponseText(result) || '';
 
@@ -125,8 +147,8 @@ ${textContent}
       );
 
       return {
-        llmContent: resultText,
-        returnDisplay: `Content from ${this.params.url} processed successfully.`,
+        llmContent: `${headerInfo}\n\n${resultText}`,
+        returnDisplay: `Content from ${finalUrl} processed successfully.\n${headerInfo}`,
       };
     } catch (e) {
       const error = e as Error;

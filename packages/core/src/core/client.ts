@@ -26,6 +26,8 @@ import {
   getCoreSystemPrompt,
   getCustomSystemPrompt,
   getPlanModeSystemReminder,
+  getPersistentMemorySystemReminder,
+  getProactiveInitSystemReminder,
   getSubagentSystemReminder,
 } from './prompts.js';
 import {
@@ -110,6 +112,20 @@ export class GeminiClient {
    * being forced and did it fail?
    */
   private hasFailedCompressionAttempt = false;
+
+  /**
+   * Threshold for deferred compression based on cumulative input tokens.
+   * When cumulative input tokens exceed this value, compression will be
+   * triggered after the entire chat turn completes (no pending tool calls).
+   */
+  private static readonly CUMULATIVE_TOKEN_COMPRESSION_THRESHOLD = 100_000;
+
+  /**
+   * Flag indicating that cumulative token threshold was reached during
+   * the current chat cycle and compression should be performed once
+   * the turn fully completes (no pending tool calls).
+   */
+  private deferredCompressionPending = false;
 
   constructor(private readonly config: Config) {
     this.loopDetector = new LoopDetectionService(config);
@@ -201,6 +217,7 @@ export class GeminiClient {
   async startChat(extraHistory?: Content[]): Promise<GeminiChat> {
     this.forceFullIdeContext = true;
     this.hasFailedCompressionAttempt = false;
+    this.deferredCompressionPending = false;
 
     const toolRegistry = this.config.getToolRegistry();
     const toolDeclarations = toolRegistry.getFunctionDeclarations();
@@ -209,9 +226,9 @@ export class GeminiClient {
     const history = await getInitialChatHistory(this.config, extraHistory);
 
     try {
-      const userMemory = this.config.getUserMemory();
       const model = this.config.getModel();
-      const systemInstruction = getCoreSystemPrompt(userMemory, model);
+
+      const systemInstruction = getCoreSystemPrompt(model);
 
       return new GeminiChat(
         this.config,
@@ -484,6 +501,15 @@ export class GeminiClient {
     }
 
     if (messageType === SendMessageType.UserQuery) {
+      try {
+        await this.config.refreshHierarchicalMemory();
+      } catch (error) {
+        debugLogger.warn(
+          'Failed to refresh hierarchical memory before processing user query.',
+          error,
+        );
+      }
+
       this.loopDetector.reset(prompt_id);
       this.lastPromptId = prompt_id;
 
@@ -538,7 +564,7 @@ export class GeminiClient {
     }
 
     // Prevent context updates from being sent while a tool call is
-    // waiting for a response. The Qwen API requires that a functionResponse
+    // waiting for a response. The TRAM API requires that a functionResponse
     // part from the user immediately follows a functionCall part from the model
     // in the conversation history . The IDE context is not discarded; it will
     // be included in the next regular message sent to the model.
@@ -570,6 +596,21 @@ export class GeminiClient {
     let requestToSent = await flatMapTextParts(request, async (text) => [text]);
     if (messageType === SendMessageType.UserQuery) {
       const systemReminders = [];
+
+      const latestUserMemory = this.config.getUserMemory();
+      const persistentMemoryReminder = getPersistentMemorySystemReminder(
+        latestUserMemory,
+      );
+      if (persistentMemoryReminder) {
+        systemReminders.push(persistentMemoryReminder);
+      }
+
+      const proactiveInitReminder = getProactiveInitSystemReminder(
+        latestUserMemory,
+      );
+      if (proactiveInitReminder) {
+        systemReminders.push(proactiveInitReminder);
+      }
 
       // add subagent system reminder if there are subagents
       const hasTaskTool = this.config.getToolRegistry().getTool(TaskTool.Name);
@@ -668,34 +709,53 @@ export class GeminiClient {
     }
 
     if (!turn.pendingToolCalls.length && signal && !signal.aborted) {
-      if (this.config.getSkipNextSpeakerCheck()) {
-        return turn;
-      }
-
-      const nextSpeakerCheck = await checkNextSpeaker(
-        this.getChat(),
-        this.config,
-        signal,
-        prompt_id,
-      );
-      logNextSpeakerCheck(
-        this.config,
-        new NextSpeakerCheckEvent(
-          prompt_id,
-          turn.finishReason?.toString() || '',
-          nextSpeakerCheck?.next_speaker || '',
-        ),
-      );
-      if (nextSpeakerCheck?.next_speaker === 'model') {
-        const nextRequest = [{ text: 'Please continue.' }];
-        // This recursive call's events will be yielded out, and the final
-        // turn object from the recursive call will be returned.
-        return yield* this.sendMessageStream(
-          nextRequest,
+      if (!this.config.getSkipNextSpeakerCheck()) {
+        const nextSpeakerCheck = await checkNextSpeaker(
+          this.getChat(),
+          this.config,
           signal,
           prompt_id,
-          options,
-          boundedTurns - 1,
+        );
+        logNextSpeakerCheck(
+          this.config,
+          new NextSpeakerCheckEvent(
+            prompt_id,
+            turn.finishReason?.toString() || '',
+            nextSpeakerCheck?.next_speaker || '',
+          ),
+        );
+        if (nextSpeakerCheck?.next_speaker === 'model') {
+          const nextRequest = [{ text: 'Please continue.' }];
+          // This recursive call's events will be yielded out, and the final
+          // turn object from the recursive call will be returned.
+          return yield* this.sendMessageStream(
+            nextRequest,
+            signal,
+            prompt_id,
+            options,
+            boundedTurns - 1,
+          );
+        }
+      }
+    }
+
+    // Check for deferred compression based on cumulative input token threshold.
+    // When cumulative input tokens reach the threshold, mark compression as pending.
+    const cumulativeInputTokens = uiTelemetryService.getCumulativeInputTokenCount();
+    if (cumulativeInputTokens >= GeminiClient.CUMULATIVE_TOKEN_COMPRESSION_THRESHOLD) {
+      this.deferredCompressionPending = true;
+    }
+
+    // Execute deferred compression only when the entire chat cycle is complete
+    // (no pending tool calls = the model has finished and the user will see the response).
+    if (this.deferredCompressionPending && !turn.pendingToolCalls.length) {
+      this.deferredCompressionPending = false;
+      const deferredCompressed = await this.tryCompressChat(prompt_id, false);
+      if (deferredCompressed.compressionStatus === CompressionStatus.COMPRESSED) {
+        yield { type: GeminiEventType.ChatCompressed, value: deferredCompressed };
+        debugLogger.debug(
+          `Deferred compression triggered at ${cumulativeInputTokens} cumulative input tokens. ` +
+          `Compressed from ${deferredCompressed.originalTokenCount} to ${deferredCompressed.newTokenCount} tokens.`,
         );
       }
     }
@@ -713,9 +773,12 @@ export class GeminiClient {
 
     try {
       const userMemory = this.config.getUserMemory();
+      const basePrompt = getCoreSystemPrompt(this.config.getModel());
       const finalSystemInstruction = generationConfig.systemInstruction
         ? getCustomSystemPrompt(generationConfig.systemInstruction, userMemory)
-        : getCoreSystemPrompt(userMemory, this.config.getModel());
+        : (userMemory && userMemory.trim().length > 0
+          ? `${basePrompt}\n\n---\n\n${userMemory.trim()}`
+          : basePrompt);
 
       const requestConfig: GenerateContentConfig = {
         abortSignal,

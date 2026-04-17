@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen Code
+ * Copyright 2025 TRAM
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,7 +12,7 @@ import { t } from '../../i18n/index.js';
 import { join } from 'path';
 import os from 'os';
 import { StaticInsightGenerator } from '../../services/insight/generators/StaticInsightGenerator.js';
-import { createDebugLogger } from '@qwen-code/qwen-code-core';
+import { createDebugLogger } from '@tram-ai/tram-core';
 import open from 'open';
 
 const logger = createDebugLogger('DataProcessor');
@@ -29,7 +29,7 @@ export const insightCommand: SlashCommand = {
     try {
       context.ui.setDebugMessage(t('Generating insights...'));
 
-      const projectsDir = join(os.homedir(), '.qwen', 'projects');
+      const projectsDir = join(os.homedir(), '.tram', 'projects');
       if (!context.services.config) {
         throw new Error('Config service is not available');
       }

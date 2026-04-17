@@ -16,7 +16,7 @@ import type {
   ThoughtSummary,
   ToolCallRequestInfo,
   GeminiErrorEventValue,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import {
   GeminiEventType as ServerGeminiEventType,
   SendMessageType,
@@ -40,7 +40,7 @@ import {
   ApiCancelEvent,
   isSupportedImageMimeType,
   getUnsupportedImageFormatWarning,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import { type Part, type PartListUnion, FinishReason } from '@google/genai';
 import type {
   HistoryItem,
@@ -962,11 +962,78 @@ export const useGeminiStream = (
     });
   }, [handleLoopDetectionConfirmation]);
 
+  const executeAutoSlashCommandsFromText = useCallback(
+    async (text: string, signal: AbortSignal, promptId: string): Promise<string[]> => {
+      const markerRegex = /\[AUTO_SLASH:([^\]]+)\]/g;
+      const commands = Array.from(text.matchAll(markerRegex))
+        .map((match) => match[1]?.trim())
+        .filter((cmd): cmd is string => Boolean(cmd));
+
+      const lmOutputs: string[] = [];
+
+      for (const command of commands) {
+        // Safety boundary: only allow /service commands via LM marker.
+        if (!command.startsWith('/service')) {
+          continue;
+        }
+
+        const slashCommandResult = await handleSlashCommand(command);
+        if (!slashCommandResult) {
+          continue;
+        }
+
+        switch (slashCommandResult.type) {
+          case 'schedule_tool': {
+            const { toolName, toolArgs } = slashCommandResult;
+            const toolCallRequest: ToolCallRequestInfo = {
+              callId: `${toolName}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+              name: toolName,
+              args: toolArgs,
+              isClientInitiated: true,
+              prompt_id: promptId,
+            };
+            scheduleToolCalls([toolCallRequest], signal);
+            break;
+          }
+          case 'submit_prompt': {
+            const content = typeof slashCommandResult.content === 'string'
+              ? slashCommandResult.content
+              : 'Auto slash generated a non-text prompt payload.';
+            lmOutputs.push(`[Command Output: ${command}]\n${content}`);
+            addItem(
+              {
+                type: MessageType.INFO,
+                text: content,
+              },
+              Date.now(),
+            );
+            break;
+          }
+          case 'handled':
+            if (slashCommandResult.output) {
+              lmOutputs.push(`[Command Output: ${command}]\n${slashCommandResult.output}`);
+            }
+            break;
+          default: {
+            const unreachable: never = slashCommandResult;
+            throw new Error(
+              `Unhandled slash command result type: ${unreachable}`,
+            );
+          }
+        }
+      }
+      
+      return lmOutputs;
+    },
+    [handleSlashCommand, scheduleToolCalls, addItem],
+  );
+
   const processGeminiStreamEvents = useCallback(
     async (
       stream: AsyncIterable<GeminiEvent>,
       userMessageTimestamp: number,
       signal: AbortSignal,
+      promptId: string,
     ): Promise<StreamProcessingStatus> => {
       let geminiMessageBuffer = '';
       let thoughtBuffer = '';
@@ -1061,6 +1128,21 @@ export const useGeminiStream = (
       if (toolCallRequests.length > 0) {
         scheduleToolCalls(toolCallRequests, signal);
       }
+
+      if (geminiMessageBuffer.length > 0) {
+        const extraOutputs = await executeAutoSlashCommandsFromText(geminiMessageBuffer, signal, promptId);
+        // If there are auto-slash commands generated straight from text (not from a tool call),
+        // we might want to submit the output back. For now, since they run on text, wait, 
+        // usually they return 'submit_prompt' which we should actually submit.
+        if (extraOutputs.length > 0) {
+          // Send it back as a user query so the model can process the results
+          // of the slash command it asked us to run via text
+          setTimeout(() => {
+            submitQuery(extraOutputs.join('\n\n'), SendMessageType.UserQuery, promptId);
+          }, 0);
+        }
+      }
+
       return StreamProcessingStatus.Completed;
     },
     [
@@ -1079,6 +1161,7 @@ export const useGeminiStream = (
       setThought,
       pendingHistoryItemRef,
       setPendingHistoryItem,
+      executeAutoSlashCommandsFromText,
     ],
   );
 
@@ -1206,6 +1289,7 @@ export const useGeminiStream = (
             stream,
             userMessageTimestamp,
             abortSignal,
+            prompt_id!,
           );
 
           if (processingStatus === StreamProcessingStatus.UserCancelled) {
@@ -1390,6 +1474,30 @@ export const useGeminiStream = (
       );
       if (clientTools.length > 0) {
         markToolsAsSubmitted(clientTools.map((t) => t.request.callId));
+
+        // Client-initiated ask_user_question should continue the LM flow
+        // by forwarding the selected answer text as a continuation prompt.
+        const clientAskUserQuestionTools = clientTools.filter(
+          (t) => t.request.name === 'ask_user_question' && t.status !== 'cancelled',
+        );
+
+        const askUserQuestionOutputs = clientAskUserQuestionTools
+          .flatMap((toolCall) => toolCall.response.responseParts)
+          .map((part) => part.functionResponse?.response?.['output'])
+          .filter(
+            (output): output is string =>
+              typeof output === 'string' && output.trim().length > 0,
+          );
+
+
+
+        if (askUserQuestionOutputs.length > 0 && !modelSwitchedFromQuotaError) {
+          submitQuery(
+            askUserQuestionOutputs.join('\n\n'),
+            SendMessageType.ToolResult,
+            clientAskUserQuestionTools[0].request.prompt_id,
+          );
+        }
       }
 
       // Identify new, successful save_memory calls that we haven't processed yet.
@@ -1453,6 +1561,46 @@ export const useGeminiStream = (
         (toolCall) => toolCall.request.prompt_id,
       );
 
+      const geminiToolOutputs = geminiTools
+        .flatMap((toolCall) => toolCall.response.responseParts)
+        .map((part) => part.functionResponse?.response?.['output'])
+        .filter(
+          (output): output is string =>
+            typeof output === 'string' && output.trim().length > 0,
+        );
+
+      let extraOutputs = '';
+      if (geminiToolOutputs.length > 0) {
+        const generated = await executeAutoSlashCommandsFromText(
+          geminiToolOutputs.join('\n\n'),
+          new AbortController().signal,
+          prompt_ids[0],
+        );
+        if (generated.length > 0) {
+          extraOutputs = `\n\n=== Auto-Slash Command Outputs ===\n${generated.join('\n\n')}`;
+        }
+      }
+
+      if (extraOutputs && responsesToSend.length > 0) {
+        // Create a copy of the last part to avoid mutating the cached tool call
+        const lastPart = { ...responsesToSend[responsesToSend.length - 1] };
+        if (lastPart.functionResponse) {
+          lastPart.functionResponse = {
+            ...lastPart.functionResponse,
+            response: {
+              ...lastPart.functionResponse.response,
+            },
+          };
+          const responseDict = lastPart.functionResponse.response as Record<string, unknown>;
+          if (typeof responseDict['output'] === 'string') {
+            responseDict['output'] += extraOutputs;
+          } else {
+            responseDict['output'] = extraOutputs;
+          }
+          responsesToSend[responsesToSend.length - 1] = lastPart;
+        }
+      }
+
       markToolsAsSubmitted(callIdsToMarkAsSubmitted);
 
       // Don't continue if model was switched due to quota error
@@ -1469,6 +1617,9 @@ export const useGeminiStream = (
       geminiClient,
       performMemoryRefresh,
       modelSwitchedFromQuotaError,
+      executeAutoSlashCommandsFromText,
+      handleSlashCommand,
+      scheduleToolCalls,
     ],
   );
 

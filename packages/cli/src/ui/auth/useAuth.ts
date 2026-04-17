@@ -9,13 +9,13 @@ import type {
   ContentGeneratorConfig,
   ModelProvidersConfig,
   ProviderModelConfig,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import {
   AuthEvent,
   AuthType,
   getErrorMessage,
   logAuth,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import { useCallback, useEffect, useState } from 'react';
 import type { LoadedSettings } from '../../config/settings.js';
 import { getPersistScopeForModelSelection } from '../../config/modelProvidersScope.js';
@@ -25,7 +25,7 @@ export interface OpenAICredentials {
   baseUrl?: string;
   model?: string;
 }
-import { useQwenAuth } from '../hooks/useQwenAuth.js';
+import { useTramAuth } from '../hooks/useTramAuth.js';
 import { AuthState, MessageType } from '../types.js';
 import type { HistoryItem } from '../types.js';
 import { t } from '../../i18n/index.js';
@@ -37,7 +37,7 @@ import {
 } from '../../constants/codingPlan.js';
 import { backupSettingsFile } from '../../utils/settingsUtils.js';
 
-export type { QwenAuthState } from '../hooks/useQwenAuth.js';
+export type { TramAuthState } from '../hooks/useTramAuth.js';
 
 export const useAuthCommand = (
   settings: LoadedSettings,
@@ -54,12 +54,12 @@ export const useAuthCommand = (
   const [authError, setAuthError] = useState<string | null>(null);
 
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(unAuthenticated);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [pendingAuthType, setPendingAuthType] = useState<AuthType | undefined>(
     undefined,
   );
 
-  const { qwenAuthState, cancelQwenAuth } = useQwenAuth(
+  const { TramAuthState, cancelTramAuth } = useTramAuth(
     pendingAuthType,
     isAuthenticating,
   );
@@ -69,7 +69,7 @@ export const useAuthCommand = (
       setAuthError(error);
       if (error) {
         setAuthState(AuthState.Updating);
-        setIsAuthDialogOpen(true);
+        setIsAuthDialogOpen(false);
       }
     },
     [setAuthError, setAuthState],
@@ -121,9 +121,9 @@ export const useAuthCommand = (
           );
         }
 
-        // Only update credentials if not switching to QWEN_OAUTH,
-        // so that OpenAI credentials are preserved when switching to QWEN_OAUTH.
-        if (authType !== AuthType.QWEN_OAUTH && credentials) {
+        // Only update credentials if not switching to TRAM_OAUTH,
+        // so that OpenAI credentials are preserved when switching to TRAM_OAUTH.
+        if (authType !== AuthType.TRAM_OAUTH && credentials) {
           if (credentials?.apiKey != null) {
             settings.setValue(
               authTypeScope,
@@ -265,12 +265,19 @@ export const useAuthCommand = (
   );
 
   const openAuthDialog = useCallback(() => {
-    setIsAuthDialogOpen(true);
-  }, []);
+    addItem(
+      {
+        type: MessageType.INFO,
+        text: t('Please run tram --initialize to configure providers and authentication.'),
+      },
+      Date.now(),
+    );
+    setIsAuthDialogOpen(false);
+  }, [addItem]);
 
   const cancelAuthentication = useCallback(() => {
-    if (isAuthenticating && pendingAuthType === AuthType.QWEN_OAUTH) {
-      cancelQwenAuth();
+    if (isAuthenticating && pendingAuthType === AuthType.TRAM_OAUTH) {
+      cancelTramAuth();
     }
 
     // Log authentication cancellation
@@ -281,9 +288,9 @@ export const useAuthCommand = (
 
     // Do not reset pendingAuthType here, persist the previously selected type.
     setIsAuthenticating(false);
-    setIsAuthDialogOpen(true);
+    setIsAuthDialogOpen(false);
     setAuthError(null);
-  }, [isAuthenticating, pendingAuthType, cancelQwenAuth, config]);
+  }, [isAuthenticating, pendingAuthType, cancelTramAuth, config]);
 
   /**
    * Handle coding plan submission - generates configs from template and stores api-key
@@ -432,11 +439,11 @@ export const useAuthCommand = (
     * or broken authentication cycles.
     */
   useEffect(() => {
-    const defaultAuthType = process.env['QWEN_DEFAULT_AUTH_TYPE'];
+    const defaultAuthType = process.env['TRAM_DEFAULT_AUTH_TYPE'];
     if (
       defaultAuthType &&
       ![
-        AuthType.QWEN_OAUTH,
+        AuthType.TRAM_OAUTH,
         AuthType.USE_OPENAI,
         AuthType.USE_ANTHROPIC,
         AuthType.USE_GEMINI,
@@ -445,11 +452,11 @@ export const useAuthCommand = (
     ) {
       onAuthError(
         t(
-          'Invalid QWEN_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}',
+          'Invalid TRAM_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}',
           {
             value: defaultAuthType,
             validValues: [
-              AuthType.QWEN_OAUTH,
+              AuthType.TRAM_OAUTH,
               AuthType.USE_OPENAI,
               AuthType.USE_ANTHROPIC,
               AuthType.USE_GEMINI,
@@ -469,7 +476,7 @@ export const useAuthCommand = (
     isAuthDialogOpen,
     isAuthenticating,
     pendingAuthType,
-    qwenAuthState,
+    TramAuthState,
     handleAuthSelect,
     handleCodingPlanSubmit,
     openAuthDialog,

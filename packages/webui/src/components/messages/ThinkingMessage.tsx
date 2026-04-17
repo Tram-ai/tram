@@ -50,7 +50,7 @@ export const ThinkingMessage: FC<ThinkingMessageProps> = ({
 
   return (
     <div
-      className={`qwen-message message-item thinking-message thinking-status-${status}`}
+      className={`tram-message message-item thinking-message thinking-status-${status}`}
     >
       <div className="thinking-content-wrapper">
         {/* Clickable title bar */}

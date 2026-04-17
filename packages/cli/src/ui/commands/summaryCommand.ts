@@ -11,7 +11,7 @@ import {
   CommandKind,
   type SlashCommandActionReturn,
 } from './types.js';
-import { getProjectSummaryPrompt } from '@qwen-code/qwen-code-core';
+import { getProjectSummaryPrompt } from '@tram-ai/tram-core';
 import type { HistoryItemSummary } from '../types.js';
 import { t } from '../../i18n/index.js';
 
@@ -19,7 +19,7 @@ export const summaryCommand: SlashCommand = {
   name: 'summary',
   get description() {
     return t(
-      'Generate a project summary and save it to .qwen/PROJECT_SUMMARY.md',
+      'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md',
     );
   },
   kind: CommandKind.BUILT_IN,
@@ -132,17 +132,17 @@ export const summaryCommand: SlashCommand = {
       filePathForDisplay: string;
       fullPath: string;
     }> => {
-      // Ensure .qwen directory exists
+      // Ensure .tram directory exists
       const projectRoot = config.getProjectRoot();
-      const qwenDir = path.join(projectRoot, '.qwen');
+      const tramDir = path.join(projectRoot, '.tram');
       try {
-        await fsPromises.mkdir(qwenDir, { recursive: true });
+        await fsPromises.mkdir(tramDir, { recursive: true });
       } catch (_err) {
         // Directory might already exist, ignore error
       }
 
       // Save the summary to PROJECT_SUMMARY.md
-      const summaryPath = path.join(qwenDir, 'PROJECT_SUMMARY.md');
+      const summaryPath = path.join(tramDir, 'PROJECT_SUMMARY.md');
       const summaryContent = `${markdownSummary}
 
 ---
@@ -154,7 +154,7 @@ export const summaryCommand: SlashCommand = {
       await fsPromises.writeFile(summaryPath, summaryContent, 'utf8');
 
       return {
-        filePathForDisplay: '.qwen/PROJECT_SUMMARY.md',
+        filePathForDisplay: '.tram/PROJECT_SUMMARY.md',
         fullPath: summaryPath,
       };
     };

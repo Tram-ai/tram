@@ -5,7 +5,7 @@
  */
 
 /**
- * Converter for Claude Code plugins to Qwen Code format.
+ * Converter for Claude Code plugins to TRAM format.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -153,63 +153,63 @@ function parseStringOrArray(value: unknown): string[] | undefined {
 }
 
 /**
- * Converts a Claude agent config to Qwen Code subagent format.
+ * Converts a Claude agent config to TRAM subagent format.
  * @param claudeAgent Claude agent configuration
- * @returns Converted agent config compatible with Qwen Code SubagentConfig
+ * @returns Converted agent config compatible with TRAM SubagentConfig
  */
 export function convertClaudeAgentConfig(
   claudeAgent: ClaudeAgentConfig,
 ): Record<string, unknown> {
   // Base config with required fields
-  const qwenAgent: Record<string, unknown> = {
+  const tramAgent: Record<string, unknown> = {
     name: claudeAgent.name,
     description: claudeAgent.description,
   };
 
   if (claudeAgent.color) {
-    qwenAgent['color'] = claudeAgent.color;
+    tramAgent['color'] = claudeAgent.color;
   }
 
   // Convert system prompt if present
   if (claudeAgent.systemPrompt) {
-    qwenAgent['systemPrompt'] = claudeAgent.systemPrompt;
+    tramAgent['systemPrompt'] = claudeAgent.systemPrompt;
   }
 
   // Convert tools using claudeBuildInToolsTransform
   if (claudeAgent.tools && claudeAgent.tools.length > 0) {
-    qwenAgent['tools'] = claudeBuildInToolsTransform(claudeAgent.tools);
+    tramAgent['tools'] = claudeBuildInToolsTransform(claudeAgent.tools);
   }
 
   // Convert model to modelConfig
   if (claudeAgent.model) {
-    // Map Claude model names to Qwen model config
+    // Map Claude model names to TRAM model config
     // Claude uses: sonnet, opus, haiku, inherit
     // We preserve the model name for now, the actual mapping will be handled at runtime
-    qwenAgent['modelConfig'] = {
+    tramAgent['modelConfig'] = {
       model: claudeAgent.model === 'inherit' ? undefined : claudeAgent.model,
     };
   }
 
   // Preserve unsupported fields as-is for potential future compatibility
-  // These fields are not supported by Qwen Code SubagentConfig but we keep them
+  // These fields are not supported by TRAM SubagentConfig but we keep them
   if (claudeAgent.permissionMode) {
-    qwenAgent['permissionMode'] = claudeAgent.permissionMode;
+    tramAgent['permissionMode'] = claudeAgent.permissionMode;
   }
   if (claudeAgent.hooks) {
-    qwenAgent['hooks'] = claudeAgent.hooks;
+    tramAgent['hooks'] = claudeAgent.hooks;
   }
   if (claudeAgent.skills && claudeAgent.skills.length > 0) {
-    qwenAgent['skills'] = claudeAgent.skills;
+    tramAgent['skills'] = claudeAgent.skills;
   }
   if (claudeAgent.disallowedTools && claudeAgent.disallowedTools.length > 0) {
-    qwenAgent['disallowedTools'] = claudeAgent.disallowedTools;
+    tramAgent['disallowedTools'] = claudeAgent.disallowedTools;
   }
 
-  return qwenAgent;
+  return tramAgent;
 }
 
 /**
- * Converts all agent files in a directory from Claude format to Qwen format.
+ * Converts all agent files in a directory from Claude format to TRAM format.
  * Parses the YAML frontmatter, converts the configuration, and writes back.
  * @param agentsDir Directory containing agent markdown files
  */
@@ -256,12 +256,12 @@ async function convertAgentFiles(agentsDir: string): Promise<void> {
         systemPrompt: body.trim(),
       };
 
-      // Convert to Qwen format
-      const qwenAgent = convertClaudeAgentConfig(claudeAgent);
+      // Convert to TRAM format
+      const tramAgent = convertClaudeAgentConfig(claudeAgent);
 
       // Build new frontmatter (excluding systemPrompt as it goes in body)
       const newFrontmatter: Record<string, unknown> = {};
-      for (const [key, value] of Object.entries(qwenAgent)) {
+      for (const [key, value] of Object.entries(tramAgent)) {
         if (key !== 'systemPrompt' && value !== undefined) {
           newFrontmatter[key] = value;
         }
@@ -269,7 +269,7 @@ async function convertAgentFiles(agentsDir: string): Promise<void> {
 
       // Write converted content back
       const newYaml = stringifyYaml(newFrontmatter);
-      const systemPrompt = (qwenAgent['systemPrompt'] as string) || body.trim();
+      const systemPrompt = (tramAgent['systemPrompt'] as string) || body.trim();
       const newContent = `---
 ${newYaml}
 ---
@@ -287,11 +287,11 @@ ${systemPrompt}
 }
 
 /**
- * Converts a Claude plugin config to Qwen Code format.
+ * Converts a Claude plugin config to TRAM format.
  * @param claudeConfig Claude plugin configuration
- * @returns Qwen ExtensionConfig
+ * @returns TRAM ExtensionConfig
  */
-export function convertClaudeToQwenConfig(
+export function convertClaudeToTramConfig(
   claudeConfig: ClaudePluginConfig,
 ): ExtensionConfig {
   // Validate required fields
@@ -333,9 +333,9 @@ export function convertClaudeToQwenConfig(
 }
 
 /**
- * Converts a complete Claude plugin package to Qwen Code format.
+ * Converts a complete Claude plugin package to TRAM format.
  * Creates a new temporary directory with:
- * 1. Converted qwen-extension.json
+ * 1. Converted tram-extension.json
  * 2. Commands, skills, and agents collected to respective folders
  * 3. MCP servers resolved from JSON files if needed
  * 4. All other files preserved
@@ -461,23 +461,23 @@ export async function convertClaudePluginPackage(
       // Otherwise, keep the existing folder from pluginSource (default behavior)
     }
 
-    // Step 9.1: Convert collected agent files from Claude format to Qwen format
+    // Step 9.1: Convert collected agent files from Claude format to TRAM format
     const agentsDestDir = path.join(tmpDir, 'agents');
     await convertAgentFiles(agentsDestDir);
 
-    // Step 10: Convert to Qwen format config
-    const qwenConfig = convertClaudeToQwenConfig(mergedConfig);
+    // Step 10: Convert to TRAM format config
+    const tramConfig = convertClaudeToTramConfig(mergedConfig);
 
-    // Step 11: Write qwen-extension.json
-    const qwenConfigPath = path.join(tmpDir, 'qwen-extension.json');
+    // Step 11: Write tram-extension.json
+    const tramConfigPath = path.join(tmpDir, 'tram-extension.json');
     fs.writeFileSync(
-      qwenConfigPath,
-      JSON.stringify(qwenConfig, null, 2),
+      tramConfigPath,
+      JSON.stringify(tramConfig, null, 2),
       'utf-8',
     );
 
     return {
-      config: qwenConfig,
+      config: tramConfig,
       convertedDir: tmpDir,
     };
   } catch (error) {

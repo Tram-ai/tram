@@ -13,7 +13,7 @@ import * as vscode from 'vscode';
 export class ReadonlyFileSystemProvider
   implements vscode.FileSystemProvider, vscode.Disposable
 {
-  private static readonly scheme = 'qwen-readonly';
+  private static readonly scheme = 'tram-readonly';
   private static instance: ReadonlyFileSystemProvider | null = null;
 
   private readonly files = new Map<string, Uint8Array>();

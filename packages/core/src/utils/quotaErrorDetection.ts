@@ -99,8 +99,8 @@ export function isGenericQuotaExceededError(error: unknown): boolean {
   return false;
 }
 
-export function isQwenQuotaExceededError(error: unknown): boolean {
-  // Check for Qwen insufficient quota errors (should not retry)
+export function isTramQuotaExceededError(error: unknown): boolean {
+  // Check for TRAM insufficient quota errors (should not retry)
   const checkMessage = (message: string): boolean => {
     const lowerMessage = message.toLowerCase();
     return (

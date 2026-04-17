@@ -54,7 +54,7 @@ export interface JSONLMessage {
   type: 'user' | 'assistant' | 'system' | 'tool_call';
   message?: {
     role?: string;
-    parts?: Array<{ text: string }>; // Qwen format
+    parts?: Array<{ text: string }>; // TRAM format
     content?: string | unknown[]; // Claude format
   };
   model?: string;

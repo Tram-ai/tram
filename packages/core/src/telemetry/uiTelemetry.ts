@@ -116,6 +116,16 @@ const createInitialMetrics = (): SessionMetrics => ({
   },
 });
 
+const SUBLM_PROMPT_ID_SUFFIX = ':sublm';
+const SUBLM_MODEL_SUFFIX = ' (SubLM)';
+
+function getMetricsModelName(model: string, promptId?: string): string {
+  if (typeof promptId === 'string' && promptId.endsWith(SUBLM_PROMPT_ID_SUFFIX)) {
+    return `${model}${SUBLM_MODEL_SUFFIX}`;
+  }
+  return model;
+}
+
 export class UiTelemetryService extends EventEmitter {
   #metrics: SessionMetrics = createInitialMetrics();
   #lastPromptTokenCount = 0;
@@ -150,6 +160,17 @@ export class UiTelemetryService extends EventEmitter {
     return this.#lastPromptTokenCount;
   }
 
+  /**
+   * Returns the cumulative input (prompt) token count across all models in this session.
+   */
+  getCumulativeInputTokenCount(): number {
+    let total = 0;
+    for (const modelMetrics of Object.values(this.#metrics.models)) {
+      total += modelMetrics.tokens.prompt;
+    }
+    return total;
+  }
+
   setLastPromptTokenCount(lastPromptTokenCount: number): void {
     this.#lastPromptTokenCount = lastPromptTokenCount;
     this.emit('update', {
@@ -178,7 +199,8 @@ export class UiTelemetryService extends EventEmitter {
   }
 
   private processApiResponse(event: ApiResponseEvent) {
-    const modelMetrics = this.getOrCreateModelMetrics(event.model);
+    const modelName = getMetricsModelName(event.model, event.prompt_id);
+    const modelMetrics = this.getOrCreateModelMetrics(modelName);
 
     modelMetrics.api.totalRequests++;
     modelMetrics.api.totalLatencyMs += event.duration_ms;
@@ -192,7 +214,8 @@ export class UiTelemetryService extends EventEmitter {
   }
 
   private processApiError(event: ApiErrorEvent) {
-    const modelMetrics = this.getOrCreateModelMetrics(event.model);
+    const modelName = getMetricsModelName(event.model, event.prompt_id);
+    const modelMetrics = this.getOrCreateModelMetrics(modelName);
     modelMetrics.api.totalRequests++;
     modelMetrics.api.totalErrors++;
     modelMetrics.api.totalLatencyMs += event.duration_ms;

@@ -15,7 +15,7 @@ import { t } from '../../i18n/index.js';
 export const toolsCommand: SlashCommand = {
   name: 'tools',
   get description() {
-    return t('list available Qwen Code tools. Usage: /tools [desc]');
+    return t('list available TRAM tools. Usage: /tools [desc]');
   },
   kind: CommandKind.BUILT_IN,
   action: async (context: CommandContext, args?: string): Promise<void> => {
@@ -41,7 +41,10 @@ export const toolsCommand: SlashCommand = {
 
     const tools = toolRegistry.getAllTools();
     // Filter out MCP tools by checking for the absence of a serverName property
-    const geminiTools = tools.filter((tool) => !('serverName' in tool));
+    // Also filter out LM-only tools (those marked with isLmOnly: true)
+    const geminiTools = tools.filter(
+      (tool) => !('serverName' in tool) && !(tool as any).isLmOnly,
+    );
 
     const toolsListItem: HistoryItemToolsList = {
       type: MessageType.TOOLS_LIST,

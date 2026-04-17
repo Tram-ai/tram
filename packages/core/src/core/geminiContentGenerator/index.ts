@@ -24,7 +24,7 @@ export function createGeminiContentGenerator(
   const version = process.env['CLI_VERSION'] || process.version;
   const userAgent =
     config.userAgent ||
-    `QwenCode/${version} (${process.platform}; ${process.arch})`;
+    `TramCode/${version} (${process.platform}; ${process.arch})`;
   const baseHeaders: Record<string, string> = {
     'User-Agent': userAgent,
   };
@@ -38,7 +38,10 @@ export function createGeminiContentGenerator(
       'x-gemini-api-privileged-user-id': `${installationId}`,
     };
   }
-  const httpOptions = { headers };
+  const httpOptions = {
+    headers,
+    ...(config.baseUrl ? { baseUrl: config.baseUrl } : {}),
+  };
 
   const geminiContentGenerator = new GeminiContentGenerator(
     {

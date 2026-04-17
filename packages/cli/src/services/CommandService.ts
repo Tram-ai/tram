@@ -6,7 +6,7 @@
 
 import type { SlashCommand } from '../ui/commands/types.js';
 import type { ICommandLoader } from './types.js';
-import { createDebugLogger } from '@qwen-code/qwen-code-core';
+import { createDebugLogger } from '@tram-ai/tram-core';
 
 const debugLogger = createDebugLogger('CLI_COMMANDS');
 

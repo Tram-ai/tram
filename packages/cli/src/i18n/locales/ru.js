@@ -1,1665 +1,1854 @@
 /**
  * @license
- * Copyright 2025 Qwen
+ * Copyright 2025 Tram
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Русский перевод для Qwen Code CLI
-// Ключ служит одновременно ключом перевода и текстом по умолчанию
+// English translations for TRAM CLI
+// The key serves as both the translation key and the default English text
 
 export default {
   // ============================================================================
-  // Справка / Компоненты интерфейса
+  // Help / UI Components
   // ============================================================================
   // Attachment hints
-  '↑ to manage attachments': '↑ управление вложениями',
-  '← → select, Delete to remove, ↓ to exit':
-    '← → выбрать, Delete удалить, ↓ выйти',
-  'Attachments: ': 'Вложения: ',
+  '闂?to manage attachments': '闂?to manage attachments',
+  '闂?闂?select, Delete to remove, 闂?to exit':
+    '闂?闂?select, Delete to remove, 闂?to exit',
+  'Attachments: ': 'Attachments: ',
 
-  'Basics:': 'Основы:',
-  'Add context': 'Добавить контекст',
+  'Basics:': 'Basics:',
+  'Add context': 'Add context',
   'Use {{symbol}} to specify files for context (e.g., {{example}}) to target specific files or folders.':
-    'Используйте {{symbol}} для добавления файлов в контекст (например, {{example}}) для выбора конкретных файлов или папок).',
+    'Use {{symbol}} to specify files for context (e.g., {{example}}) to target specific files or folders.',
   '@': '@',
   '@src/myFile.ts': '@src/myFile.ts',
-  'Shell mode': 'Режим терминала',
-  'YOLO mode': 'Режим YOLO',
-  'plan mode': 'Режим планирования',
-  'auto-accept edits': 'Режим принятия правок',
-  'Accepting edits': 'Принятие правок',
-  '(shift + tab to cycle)': '(shift + tab для переключения)',
-  '(tab to cycle)': '(Tab для переключения)',
+  'Shell mode': 'Shell mode',
+  'YOLO mode': 'YOLO mode',
+  'plan mode': 'plan mode',
+  'auto-accept edits': 'auto-accept edits',
+  'Accepting edits': 'Accepting edits',
+  '(shift + tab to cycle)': '(shift + tab to cycle)',
+  '(tab to cycle)': '(tab to cycle)',
   'Execute shell commands via {{symbol}} (e.g., {{example1}}) or use natural language (e.g., {{example2}}).':
-    'Выполняйте команды терминала через {{symbol}} (например, {{example1}}) или используйте естественный язык (например, {{example2}}).',
+    'Execute shell commands via {{symbol}} (e.g., {{example1}}) or use natural language (e.g., {{example2}}).',
   '!': '!',
   '!npm run start': '!npm run start',
   'start server': 'start server',
-  'Commands:': 'Команды:',
-  'shell command': 'команда терминала',
+  'Commands:': 'Commands:',
+  'shell command': 'shell command',
   'Model Context Protocol command (from external servers)':
-    'Команда Model Context Protocol (из внешних серверов)',
-  'Keyboard Shortcuts:': 'Горячие клавиши:',
-  'Toggle this help display': 'Показать/скрыть эту справку',
-  'Toggle shell mode': 'Переключить режим оболочки',
-  'Open command menu': 'Открыть меню команд',
-  'Add file context': 'Добавить файл в контекст',
-  'Accept suggestion / Autocomplete': 'Принять подсказку / Автодополнение',
-  'Reverse search history': 'Обратный поиск по истории',
-  'Press ? again to close': 'Нажмите ? ещё раз, чтобы закрыть',
-  'Jump through words in the input': 'Переход по словам во вводе',
-  'Close dialogs, cancel requests, or quit application':
-    'Закрыть диалоги, отменить запросы или выйти из приложения',
-  'New line': 'Новая строка',
-  'New line (Alt+Enter works for certain linux distros)':
-    'Новая строка (Alt+Enter работает только в некоторых дистрибутивах Linux)',
-  'Clear the screen': 'Очистить экран',
-  'Open input in external editor': 'Открыть ввод во внешнем редакторе',
-  'Send message': 'Отправить сообщение',
-  'Initializing...': 'Инициализация...',
-  'Connecting to MCP servers... ({{connected}}/{{total}})':
-    'Подключение к MCP-серверам... ({{connected}}/{{total}})',
-  'Type your message or @path/to/file': 'Введите сообщение или @путь/к/файлу',
-  '? for shortcuts': '? — горячие клавиши',
-  "Press 'i' for INSERT mode and 'Esc' for NORMAL mode.":
-    "Нажмите 'i' для режима ВСТАВКА и 'Esc' для ОБЫЧНОГО режима.",
-  'Cancel operation / Clear input (double press)':
-    'Отменить операцию / Очистить ввод (двойное нажатие)',
-  'Cycle approval modes': 'Переключение режимов подтверждения',
-  'Cycle through your prompt history': 'Пролистать историю запросов',
-  'For a full list of shortcuts, see {{docPath}}':
-    'Полный список горячих клавиш см. в {{docPath}}',
-  'docs/keyboard-shortcuts.md': 'docs/keyboard-shortcuts.md',
-  'for help on Qwen Code': 'Справка по Qwen Code',
-  'show version info': 'Просмотр информации о версии',
-  'submit a bug report': 'Отправка отчёта об ошибке',
-  'About Qwen Code': 'Об Qwen Code',
-  Status: 'Статус',
-
+    'Model Context Protocol command (from external servers)',
+  'Keyboard Shortcuts:': 'Keyboard Shortcuts:',
+  'Toggle this help display': 'Toggle this help display',
+  'Toggle shell mode': 'Toggle shell mode',
+  'Open command menu': 'Open command menu',
+  'Add file context': 'Add file context',
+  'Accept suggestion / Autocomplete': 'Accept suggestion / Autocomplete',
+  'Reverse search history': 'Reverse search history',
+  'Press ? again to close': 'Press ? again to close',
   // Keyboard shortcuts panel descriptions
-  'for shell mode': 'режим оболочки',
-  'for commands': 'меню команд',
-  'for file paths': 'пути к файлам',
-  'to clear input': 'очистить ввод',
-  'to cycle approvals': 'переключить режим',
-  'to quit': 'выход',
-  'for newline': 'новая строка',
-  'to clear screen': 'очистить экран',
-  'to search history': 'поиск в истории',
-  'to paste images': 'вставить изображения',
-  'for external editor': 'внешний редактор',
+  'for shell mode': 'for shell mode',
+  'for commands': 'for commands',
+  'for file paths': 'for file paths',
+  'to clear input': 'to clear input',
+  'to cycle approvals': 'to cycle approvals',
+  'to quit': 'to quit',
+  'for newline': 'for newline',
+  'to clear screen': 'to clear screen',
+  'to search history': 'to search history',
+  'to paste images': 'to paste images',
+  'for external editor': 'for external editor',
+  'Jump through words in the input': 'Jump through words in the input',
+  'Close dialogs, cancel requests, or quit application':
+    'Close dialogs, cancel requests, or quit application',
+  'New line': 'New line',
+  'New line (Alt+Enter works for certain linux distros)':
+    'New line (Alt+Enter works for certain linux distros)',
+  'Clear the screen': 'Clear the screen',
+  'Open input in external editor': 'Open input in external editor',
+  'Send message': 'Send message',
+  'Initializing...': 'Initializing...',
+  'Connecting to MCP servers... ({{connected}}/{{total}})':
+    'Connecting to MCP servers... ({{connected}}/{{total}})',
+  'Type your message or @path/to/file': 'Type your message or @path/to/file',
+  '? for shortcuts': '? for shortcuts',
+  "Press 'i' for INSERT mode and 'Esc' for NORMAL mode.":
+    "Press 'i' for INSERT mode and 'Esc' for NORMAL mode.",
+  'Cancel operation / Clear input (double press)':
+    'Cancel operation / Clear input (double press)',
+  'Cycle approval modes': 'Cycle approval modes',
+  'Cycle through your prompt history': 'Cycle through your prompt history',
+  'For a full list of shortcuts, see {{docPath}}':
+    'For a full list of shortcuts, see {{docPath}}',
+  'docs/keyboard-shortcuts.md': 'docs/keyboard-shortcuts.md',
+  'for help on TRAM': 'for help on TRAM',
+  'show version info': 'show version info',
+  'submit a bug report': 'submit a bug report',
+  'About TRAM': 'About TRAM',
+  Status: 'Status',
+  '(/model to change)': '(/model to change)',
+
+  // Initialization wizard
+  'TRAM Initialization Wizard': 'TRAM Initialization Wizard',
+  'Esc to cancel at any time.': 'Esc to cancel at any time.',
+  'Initialization: Select providers': 'Initialization: Select providers',
+  'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to move, Space to toggle, Enter to continue. You can configure multiple providers in one run.':
+    'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to move, Space to toggle, Enter to continue. You can configure multiple providers in one run.',
+  'Select at least one provider.': 'Select at least one provider.',
+  'No provider selected.': 'No provider selected.',
+  Enabled: 'Enabled',
+  'Configure provider {{current}}/{{total}}: {{name}}':
+    'Configure provider {{current}}/{{total}}: {{name}}',
+  'This provider uses OAuth. Press Enter to continue to model selection.':
+    'This provider uses OAuth. Press Enter to continue to model selection.',
+  'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose a field. Enter to edit. Press N to continue to model selection.':
+    'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose a field. Enter to edit. Press N to continue to model selection.',
+  'Editing {{field}}: {{value}}': 'Editing {{field}}: {{value}}',
+  'Model selection: {{name}}': 'Model selection: {{name}}',
+  'Try OpenAI-compatible /models list first. If unavailable or incomplete, choose custom model.':
+    'Try OpenAI-compatible /models list first. If unavailable or incomplete, choose custom model.',
+  'Loading models...': 'Loading models...',
+  'Custom model...': 'Custom model...',
+  'Enter custom model name': 'Enter custom model name',
+  'Press Enter to confirm.': 'Press Enter to confirm.',
+  'Model name cannot be empty.': 'Model name cannot be empty.',
+  'Select approval mode': 'Select approval mode',
+  'Recommended: YOLO': 'Recommended: YOLO',
+  'Plan only': 'Plan only',
+  'Only generate plans, no execution. Best safety, lowest automation.':
+    'Only generate plans, no execution. Best safety, lowest automation.',
+  'Ask every time': 'Ask every time',
+  'Every action requires confirmation. Safe but slower.':
+    'Every action requires confirmation. Safe but slower.',
+  'Auto-approve edits': 'Auto-approve edits',
+  'Edit/write tools are auto-approved, others still ask.':
+    'Edit/write tools are auto-approved, others still ask.',
+  'YOLO (recommended)': 'YOLO (recommended)',
+  'Fastest workflow. Fully automated execution with higher risk.':
+    'Fastest workflow. Fully automated execution with higher risk.',
+  'Proxy configuration': 'Proxy configuration',
+  'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose.': 'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose.',
+  'Follow system proxy': 'Follow system proxy',
+  'No proxy': 'No proxy',
+  'Custom proxy': 'Custom proxy',
+  'Enter custom proxy': 'Enter custom proxy',
+  'Example: http://127.0.0.1:7890': 'Example: http://127.0.0.1:7890',
+  'Select theme': 'Select theme',
+  'This list follows built-in /theme options.':
+    'This list follows built-in /theme options.',
+  'Review configuration': 'Review configuration',
+  Providers: 'Providers',
+  'Default provider': 'Default provider',
+  'Default model': 'Default model',
+  'Approval mode': 'Approval mode',
+  'At least one provider must be configured.':
+    'At least one provider must be configured.',
+  'Press Enter to save, Esc to cancel.':
+    'Press Enter to save, Esc to cancel.',
+  'Initialization complete.': 'Initialization complete.',
+  'Settings were saved. Press Enter to continue.':
+    'Settings were saved. Press Enter to continue.',
 
   // ============================================================================
-  // Поля системной информации
+  // System Information Fields
   // ============================================================================
-  'Qwen Code': 'Qwen Code',
-  Runtime: 'Среда выполнения',
-  OS: 'ОС',
-  Auth: 'Аутентификация',
-  'CLI Version': 'Версия CLI',
-  'Git Commit': 'Git-коммит',
-  Model: 'Модель',
-  Sandbox: 'Песочница',
-  'OS Platform': 'Платформа ОС',
-  'OS Arch': 'Архитектура ОС',
-  'OS Release': 'Версия ОС',
-  'Node.js Version': 'Версия Node.js',
-  'NPM Version': 'Версия NPM',
-  'Session ID': 'ID сессии',
-  'Auth Method': 'Метод авторизации',
-  'Base URL': 'Базовый URL',
-  Proxy: 'Прокси',
-  'Memory Usage': 'Использование памяти',
-  'IDE Client': 'Клиент IDE',
+  'TRAM': 'TRAM',
+  Runtime: 'Runtime',
+  OS: 'OS',
+  Auth: 'Auth',
+  'CLI Version': 'CLI Version',
+  'Git Commit': 'Git Commit',
+  Model: 'Model',
+  Sandbox: 'Sandbox',
+  'OS Platform': 'OS Platform',
+  'OS Arch': 'OS Arch',
+  'OS Release': 'OS Release',
+  'Node.js Version': 'Node.js Version',
+  'NPM Version': 'NPM Version',
+  'Session ID': 'Session ID',
+  'Auth Method': 'Auth Method',
+  'Base URL': 'Base URL',
+  Proxy: 'Proxy',
+  'Memory Usage': 'Memory Usage',
+  'IDE Client': 'IDE Client',
 
   // ============================================================================
-  // Команды - Общие
+  // Commands - General
   // ============================================================================
-  'Analyzes the project and creates a tailored QWEN.md file.':
-    'Анализ проекта и создание адаптированного файла QWEN.md',
-  'List available Qwen Code tools. Usage: /tools [desc]':
-    'Просмотр доступных инструментов Qwen Code. Использование: /tools [desc]',
-  'List available skills.': 'Показать доступные навыки.',
-  'Available Qwen Code CLI tools:': 'Доступные инструменты Qwen Code CLI:',
-  'No tools available': 'Нет доступных инструментов',
+  'Analyzes the project and creates a tailored TRAM.md file.':
+    'Analyzes the project and creates a tailored TRAM.md file.',
+  'List available TRAM tools. Usage: /tools [desc]':
+    'List available TRAM tools. Usage: /tools [desc]',
+  'List available skills.': 'List available skills.',
+  'Available TRAM CLI tools:': 'Available TRAM CLI tools:',
+  'No tools available': 'No tools available',
   'View or change the approval mode for tool usage':
-    'Просмотр или изменение режима подтверждения для использования инструментов',
+    'View or change the approval mode for tool usage',
   'Invalid approval mode "{{arg}}". Valid modes: {{modes}}':
-    'Недопустимый режим подтверждения "{{arg}}". Допустимые режимы: {{modes}}',
-  'Approval mode set to "{{mode}}"':
-    'Режим подтверждения установлен на "{{mode}}"',
-  'View or change the language setting':
-    'Просмотр или изменение настроек языка',
-  'change the theme': 'Изменение темы',
-  'Select Theme': 'Выбор темы',
-  Preview: 'Предпросмотр',
+    'Invalid approval mode "{{arg}}". Valid modes: {{modes}}',
+  'Approval mode set to "{{mode}}"': 'Approval mode set to "{{mode}}"',
+  'View or change the language setting': 'View or change the language setting',
+  'change the theme': 'change the theme',
+  'Select Theme': 'Select Theme',
+  Preview: 'Preview',
   '(Use Enter to select, Tab to configure scope)':
-    '(Enter для выбора, Tab для настройки области)',
+    '(Use Enter to select, Tab to configure scope)',
   '(Use Enter to apply scope, Tab to go back)':
-    '(Enter для применения области, Tab для возврата)',
+    '(Use Enter to apply scope, Tab to go back)',
   'Theme configuration unavailable due to NO_COLOR env variable.':
-    'Настройка темы недоступна из-за переменной окружения NO_COLOR.',
-  'Theme "{{themeName}}" not found.': 'Тема "{{themeName}}" не найдена.',
+    'Theme configuration unavailable due to NO_COLOR env variable.',
+  'Theme "{{themeName}}" not found.': 'Theme "{{themeName}}" not found.',
   'Theme "{{themeName}}" not found in selected scope.':
-    'Тема "{{themeName}}" не найдена в выбранной области.',
+    'Theme "{{themeName}}" not found in selected scope.',
   'Clear conversation history and free up context':
-    'Очистить историю диалога и освободить контекст',
+    'Clear conversation history and free up context',
   'Compresses the context by replacing it with a summary.':
-    'Сжатие контекста заменой на краткую сводку',
-  'open full Qwen Code documentation in your browser':
-    'Открытие полной документации Qwen Code в браузере',
-  'Configuration not available.': 'Конфигурация недоступна.',
-  'change the auth method': 'Изменение метода авторизации',
+    'Compresses the context by replacing it with a summary.',
+  'open full TRAM documentation in your browser':
+    'open full TRAM documentation in your browser',
+  'Configuration not available.': 'Configuration not available.',
+  'change the auth method': 'change the auth method',
   'Configure authentication information for login':
-    'Настройка аутентификационной информации для входа',
+    'Configure authentication information for login',
   'Copy the last result or code snippet to clipboard':
-    'Копирование последнего результата или фрагмента кода в буфер обмена',
+    'Copy the last result or code snippet to clipboard',
 
   // ============================================================================
-  // Команды - Агенты
+  // Commands - Agents
   // ============================================================================
   'Manage subagents for specialized task delegation.':
-    'Управление подагентами для делегирования специализированных задач',
+    'Manage subagents for specialized task delegation.',
   'Manage existing subagents (view, edit, delete).':
-    'Управление существующими подагентами (просмотр, правка, удаление)',
+    'Manage existing subagents (view, edit, delete).',
   'Create a new subagent with guided setup.':
-    'Создание нового подагента с пошаговой настройкой',
+    'Create a new subagent with guided setup.',
 
   // ============================================================================
-  // Агенты - Диалог управления
+  // Agents - Management Dialog
   // ============================================================================
-  Agents: 'Агенты',
-  'Choose Action': 'Выберите действие',
-  'Edit {{name}}': 'Редактировать {{name}}',
-  'Edit Tools: {{name}}': 'Редактировать инструменты: {{name}}',
-  'Edit Color: {{name}}': 'Редактировать цвет: {{name}}',
-  'Delete {{name}}': 'Удалить {{name}}',
-  'Unknown Step': 'Неизвестный шаг',
-  'Esc to close': 'Esc для закрытия',
-  'Enter to select, ↑↓ to navigate, Esc to close':
-    'Enter для выбора, ↑↓ для навигации, Esc для закрытия',
-  'Esc to go back': 'Esc для возврата',
-  'Enter to confirm, Esc to cancel': 'Enter для подтверждения, Esc для отмены',
-  'Enter to select, ↑↓ to navigate, Esc to go back':
-    'Enter для выбора, ↑↓ для навигации, Esc для возврата',
-  'Enter to submit, Esc to go back': 'Enter для отправки, Esc для возврата',
-  'Invalid step: {{step}}': 'Неверный шаг: {{step}}',
-  'No subagents found.': 'Подагенты не найдены.',
+  Agents: 'Agents',
+  'Choose Action': 'Choose Action',
+  'Edit {{name}}': 'Edit {{name}}',
+  'Edit Tools: {{name}}': 'Edit Tools: {{name}}',
+  'Edit Color: {{name}}': 'Edit Color: {{name}}',
+  'Delete {{name}}': 'Delete {{name}}',
+  'Unknown Step': 'Unknown Step',
+  'Esc to close': 'Esc to close',
+  'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to close':
+    'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to close',
+  'Esc to go back': 'Esc to go back',
+  'Enter to confirm, Esc to cancel': 'Enter to confirm, Esc to cancel',
+  'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to go back':
+    'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to go back',
+  'Enter to submit, Esc to go back': 'Enter to submit, Esc to go back',
+  'Invalid step: {{step}}': 'Invalid step: {{step}}',
+  'No subagents found.': 'No subagents found.',
   "Use '/agents create' to create your first subagent.":
-    "Используйте '/agents create' для создания первого подагента.",
-  '(built-in)': '(встроенный)',
-  '(overridden by project level agent)':
-    '(переопределен агентом уровня проекта)',
-  'Project Level ({{path}})': 'Уровень проекта ({{path}})',
-  'User Level ({{path}})': 'Уровень пользователя ({{path}})',
-  'Built-in Agents': 'Встроенные агенты',
-  'Extension Agents': 'Агенты расширений',
-  'Using: {{count}} agents': 'Используется: {{count}} агент(ов)',
-  'View Agent': 'Просмотреть агента',
-  'Edit Agent': 'Редактировать агента',
-  'Delete Agent': 'Удалить агента',
-  Back: 'Назад',
-  'No agent selected': 'Агент не выбран',
-  'File Path: ': 'Путь к файлу: ',
-  'Tools: ': 'Инструменты: ',
-  'Color: ': 'Цвет: ',
-  'Description:': 'Описание:',
-  'System Prompt:': 'Системный промпт:',
-  'Open in editor': 'Открыть в редакторе',
-  'Edit tools': 'Редактировать инструменты',
-  'Edit color': 'Редактировать цвет',
-  '❌ Error:': '❌ Ошибка:',
+    "Use '/agents create' to create your first subagent.",
+  '(built-in)': '(built-in)',
+  '(overridden by project level agent)': '(overridden by project level agent)',
+  'Project Level ({{path}})': 'Project Level ({{path}})',
+  'User Level ({{path}})': 'User Level ({{path}})',
+  'Built-in Agents': 'Built-in Agents',
+  'Extension Agents': 'Extension Agents',
+  'Using: {{count}} agents': 'Using: {{count}} agents',
+  'View Agent': 'View Agent',
+  'Edit Agent': 'Edit Agent',
+  'Delete Agent': 'Delete Agent',
+  Back: 'Back',
+  'No agent selected': 'No agent selected',
+  'File Path: ': 'File Path: ',
+  'Tools: ': 'Tools: ',
+  'Color: ': 'Color: ',
+  'Description:': 'Description:',
+  'System Prompt:': 'System Prompt:',
+  'Open in editor': 'Open in editor',
+  'Edit tools': 'Edit tools',
+  'Edit color': 'Edit color',
+  '闂?Error:': '闂?Error:',
   'Are you sure you want to delete agent "{{name}}"?':
-    'Вы уверены, что хотите удалить агента "{{name}}"?',
+    'Are you sure you want to delete agent "{{name}}"?',
   // ============================================================================
-  // Агенты - Мастер создания
+  // Agents - Creation Wizard
   // ============================================================================
-  'Project Level (.qwen/agents/)': 'Уровень проекта (.qwen/agents/)',
-  'User Level (~/.qwen/agents/)': 'Уровень пользователя (~/.qwen/agents/)',
-  '✅ Subagent Created Successfully!': '✅ Подагент успешно создан!',
+  'Project Level (.tram/agents/)': 'Project Level (.tram/agents/)',
+  'User Level (~/.tram/agents/)': 'User Level (~/.tram/agents/)',
+  '闂?Subagent Created Successfully!': '闂?Subagent Created Successfully!',
   'Subagent "{{name}}" has been saved to {{level}} level.':
-    'Подагент "{{name}}" сохранен на уровне {{level}}.',
-  'Name: ': 'Имя: ',
-  'Location: ': 'Расположение: ',
-  '❌ Error saving subagent:': '❌ Ошибка сохранения подагента:',
-  'Warnings:': 'Предупреждения:',
+    'Subagent "{{name}}" has been saved to {{level}} level.',
+  'Name: ': 'Name: ',
+  'Location: ': 'Location: ',
+  '闂?Error saving subagent:': '闂?Error saving subagent:',
+  'Warnings:': 'Warnings:',
   'Name "{{name}}" already exists at {{level}} level - will overwrite existing subagent':
-    'Имя "{{name}}" уже существует на уровне {{level}} - существующий подагент будет перезаписан',
+    'Name "{{name}}" already exists at {{level}} level - will overwrite existing subagent',
   'Name "{{name}}" exists at user level - project level will take precedence':
-    'Имя "{{name}}" существует на уровне пользователя - уровень проекта будет иметь приоритет',
+    'Name "{{name}}" exists at user level - project level will take precedence',
   'Name "{{name}}" exists at project level - existing subagent will take precedence':
-    'Имя "{{name}}" существует на уровне проекта - существующий подагент будет иметь приоритет',
+    'Name "{{name}}" exists at project level - existing subagent will take precedence',
   'Description is over {{length}} characters':
-    'Описание превышает {{length}} символов',
+    'Description is over {{length}} characters',
   'System prompt is over {{length}} characters':
-    'Системный промпт превышает {{length}} символов',
-  // Агенты - Шаги мастера создания
-  'Step {{n}}: Choose Location': 'Шаг {{n}}: Выберите расположение',
-  'Step {{n}}: Choose Generation Method': 'Шаг {{n}}: Выберите метод генерации',
-  'Generate with Qwen Code (Recommended)':
-    'Сгенерировать с помощью Qwen Code (Рекомендуется)',
-  'Manual Creation': 'Ручное создание',
+    'System prompt is over {{length}} characters',
+  // Agents - Creation Wizard Steps
+  'Step {{n}}: Choose Location': 'Step {{n}}: Choose Location',
+  'Step {{n}}: Choose Generation Method':
+    'Step {{n}}: Choose Generation Method',
+  'Generate with TRAM (Recommended)':
+    'Generate with TRAM (Recommended)',
+  'Manual Creation': 'Manual Creation',
   'Describe what this subagent should do and when it should be used. (Be comprehensive for best results)':
-    'Опишите, что должен делать этот подагент и когда его следует использовать. (Будьте подробны для лучших результатов)',
+    'Describe what this subagent should do and when it should be used. (Be comprehensive for best results)',
   'e.g., Expert code reviewer that reviews code based on best practices...':
-    'например, Экспертный ревьювер кода, проверяющий код на соответствие лучшим практикам...',
-  'Generating subagent configuration...': 'Генерация конфигурации подагента...',
+    'e.g., Expert code reviewer that reviews code based on best practices...',
+  'Generating subagent configuration...':
+    'Generating subagent configuration...',
   'Failed to generate subagent: {{error}}':
-    'Не удалось сгенерировать подагента: {{error}}',
-  'Step {{n}}: Describe Your Subagent': 'Шаг {{n}}: Опишите подагента',
-  'Step {{n}}: Enter Subagent Name': 'Шаг {{n}}: Введите имя подагента',
-  'Step {{n}}: Enter System Prompt': 'Шаг {{n}}: Введите системный промпт',
-  'Step {{n}}: Enter Description': 'Шаг {{n}}: Введите описание',
-  // Агенты - Выбор инструментов
-  'Step {{n}}: Select Tools': 'Шаг {{n}}: Выберите инструменты',
-  'All Tools (Default)': 'Все инструменты (по умолчанию)',
-  'All Tools': 'Все инструменты',
-  'Read-only Tools': 'Инструменты только для чтения',
-  'Read & Edit Tools': 'Инструменты для чтения и редактирования',
-  'Read & Edit & Execution Tools':
-    'Инструменты для чтения, редактирования и выполнения',
+    'Failed to generate subagent: {{error}}',
+  'Step {{n}}: Describe Your Subagent': 'Step {{n}}: Describe Your Subagent',
+  'Step {{n}}: Enter Subagent Name': 'Step {{n}}: Enter Subagent Name',
+  'Step {{n}}: Enter System Prompt': 'Step {{n}}: Enter System Prompt',
+  'Step {{n}}: Enter Description': 'Step {{n}}: Enter Description',
+  // Agents - Tool Selection
+  'Step {{n}}: Select Tools': 'Step {{n}}: Select Tools',
+  'All Tools (Default)': 'All Tools (Default)',
+  'All Tools': 'All Tools',
+  'Read-only Tools': 'Read-only Tools',
+  'Read & Edit Tools': 'Read & Edit Tools',
+  'Read & Edit & Execution Tools': 'Read & Edit & Execution Tools',
   'All tools selected, including MCP tools':
-    'Все инструменты выбраны, включая инструменты MCP',
-  'Selected tools:': 'Выбранные инструменты:',
-  'Read-only tools:': 'Инструменты только для чтения:',
-  'Edit tools:': 'Инструменты редактирования:',
-  'Execution tools:': 'Инструменты выполнения:',
-  'Step {{n}}: Choose Background Color': 'Шаг {{n}}: Выберите цвет фона',
-  'Step {{n}}: Confirm and Save': 'Шаг {{n}}: Подтвердите и сохраните',
-  // Агенты - Навигация и инструкции
-  'Esc to cancel': 'Esc для отмены',
+    'All tools selected, including MCP tools',
+  'Selected tools:': 'Selected tools:',
+  'Read-only tools:': 'Read-only tools:',
+  'Edit tools:': 'Edit tools:',
+  'Execution tools:': 'Execution tools:',
+  'Step {{n}}: Choose Background Color': 'Step {{n}}: Choose Background Color',
+  'Step {{n}}: Confirm and Save': 'Step {{n}}: Confirm and Save',
+  // Agents - Navigation & Instructions
+  'Esc to cancel': 'Esc to cancel',
   'Press Enter to save, e to save and edit, Esc to go back':
-    'Enter для сохранения, e для сохранения и редактирования, Esc для возврата',
+    'Press Enter to save, e to save and edit, Esc to go back',
   'Press Enter to continue, {{navigation}}Esc to {{action}}':
-    'Enter для продолжения, {{navigation}}Esc для {{action}}',
-  cancel: 'отмены',
-  'go back': 'возврата',
-  '↑↓ to navigate, ': '↑↓ для навигации, ',
+    'Press Enter to continue, {{navigation}}Esc to {{action}}',
+  cancel: 'cancel',
+  'go back': 'go back',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate, ': '闂佹剚鍋呴崹鐔煎疮?to navigate, ',
   'Enter a clear, unique name for this subagent.':
-    'Введите четкое, уникальное имя для этого подагента.',
-  'e.g., Code Reviewer': 'например, Ревьювер кода',
-  'Name cannot be empty.': 'Имя не может быть пустым.',
+    'Enter a clear, unique name for this subagent.',
+  'e.g., Code Reviewer': 'e.g., Code Reviewer',
+  'Name cannot be empty.': 'Name cannot be empty.',
   "Write the system prompt that defines this subagent's behavior. Be comprehensive for best results.":
-    'Напишите системный промпт, определяющий поведение подагента. Будьте подробны для лучших результатов.',
+    "Write the system prompt that defines this subagent's behavior. Be comprehensive for best results.",
   'e.g., You are an expert code reviewer...':
-    'например, Вы экспертный ревьювер кода...',
-  'System prompt cannot be empty.': 'Системный промпт не может быть пустым.',
+    'e.g., You are an expert code reviewer...',
+  'System prompt cannot be empty.': 'System prompt cannot be empty.',
   'Describe when and how this subagent should be used.':
-    'Опишите, когда и как следует использовать этого подагента.',
+    'Describe when and how this subagent should be used.',
   'e.g., Reviews code for best practices and potential bugs.':
-    'например, Проверяет код на соответствие лучшим практикам и потенциальные ошибки.',
-  'Description cannot be empty.': 'Описание не может быть пустым.',
-  'Failed to launch editor: {{error}}':
-    'Не удалось запустить редактор: {{error}}',
+    'e.g., Reviews code for best practices and potential bugs.',
+  'Description cannot be empty.': 'Description cannot be empty.',
+  'Failed to launch editor: {{error}}': 'Failed to launch editor: {{error}}',
   'Failed to save and edit subagent: {{error}}':
-    'Не удалось сохранить и отредактировать подагента: {{error}}',
+    'Failed to save and edit subagent: {{error}}',
 
   // ============================================================================
-  // Команды - Общие (продолжение)
+  // Extensions - Management Dialog
   // ============================================================================
-  'View and edit Qwen Code settings': 'Просмотр и изменение настроек Qwen Code',
-  Settings: 'Настройки',
-  'To see changes, Qwen Code must be restarted. Press r to exit and apply changes now.':
-    'Для применения изменений необходимо перезапустить Qwen Code. Нажмите r для выхода и применения изменений.',
+  'Manage Extensions': 'Manage Extensions',
+  'Extension Details': 'Extension Details',
+  'View Extension': 'View Extension',
+  'Update Extension': 'Update Extension',
+  'Disable Extension': 'Disable Extension',
+  'Enable Extension': 'Enable Extension',
+  'Uninstall Extension': 'Uninstall Extension',
+  'Select Scope': 'Select Scope',
+  'User Scope': 'User Scope',
+  'Workspace Scope': 'Workspace Scope',
+  'No extensions found.': 'No extensions found.',
+  Active: 'Active',
+  Disabled: 'Disabled',
+  'Update available': 'Update available',
+  'Up to date': 'Up to date',
+  'Checking...': 'Checking...',
+  'Updating...': 'Updating...',
+  Unknown: 'Unknown',
+  Error: 'Error',
+  'Version:': 'Version:',
+  'Status:': 'Status:',
+  'Are you sure you want to uninstall extension "{{name}}"?':
+    'Are you sure you want to uninstall extension "{{name}}"?',
+  'This action cannot be undone.': 'This action cannot be undone.',
+  'Extension "{{name}}" disabled successfully.':
+    'Extension "{{name}}" disabled successfully.',
+  'Extension "{{name}}" enabled successfully.':
+    'Extension "{{name}}" enabled successfully.',
+  'Extension "{{name}}" updated successfully.':
+    'Extension "{{name}}" updated successfully.',
+  'Failed to update extension "{{name}}": {{error}}':
+    'Failed to update extension "{{name}}": {{error}}',
+  'Select the scope for this action:': 'Select the scope for this action:',
+  'User - Applies to all projects': 'User - Applies to all projects',
+  'Workspace - Applies to current project only':
+    'Workspace - Applies to current project only',
+  // Extension dialog - missing keys
+  'Name:': 'Name:',
+  'MCP Servers:': 'MCP Servers:',
+  'Settings:': 'Settings:',
+  active: 'active',
+  disabled: 'disabled',
+  'View Details': 'View Details',
+  'Update failed:': 'Update failed:',
+  'Updating {{name}}...': 'Updating {{name}}...',
+  'Update complete!': 'Update complete!',
+  'User (global)': 'User (global)',
+  'Workspace (project-specific)': 'Workspace (project-specific)',
+  'Disable "{{name}}" - Select Scope': 'Disable "{{name}}" - Select Scope',
+  'Enable "{{name}}" - Select Scope': 'Enable "{{name}}" - Select Scope',
+  'No extension selected': 'No extension selected',
+  'Press Y/Enter to confirm, N/Esc to cancel':
+    'Press Y/Enter to confirm, N/Esc to cancel',
+  'Y/Enter to confirm, N/Esc to cancel': 'Y/Enter to confirm, N/Esc to cancel',
+  '{{count}} extensions installed': '{{count}} extensions installed',
+  "Use '/extensions install' to install your first extension.":
+    "Use '/extensions install' to install your first extension.",
+  // Update status values
+  'up to date': 'up to date',
+  'update available': 'update available',
+  'checking...': 'checking...',
+  'not updatable': 'not updatable',
+  error: 'error',
+
+  // ============================================================================
+  // Commands - General (continued)
+  // ============================================================================
+  'View and edit TRAM settings': 'View and edit TRAM settings',
+  Settings: 'Settings',
+  'To see changes, TRAM must be restarted. Press r to exit and apply changes now.':
+    'To see changes, TRAM must be restarted. Press r to exit and apply changes now.',
   'The command "/{{command}}" is not supported in non-interactive mode.':
-    'Команда "/{{command}}" не поддерживается в неинтерактивном режиме.',
+    'The command "/{{command}}" is not supported in non-interactive mode.',
   // ============================================================================
-  // Метки настроек
+  // Settings Labels
   // ============================================================================
-  'Vim Mode': 'Режим Vim',
-  'Disable Auto Update': 'Отключить автообновление',
-  'Attribution: commit': 'Атрибуция: коммит',
-  'Terminal Bell Notification': 'Звуковое уведомление терминала',
-  'Enable Usage Statistics': 'Включить сбор статистики использования',
-  Theme: 'Тема',
-  'Preferred Editor': 'Предпочтительный редактор',
-  'Auto-connect to IDE': 'Автоподключение к IDE',
-  'Enable Prompt Completion': 'Включить автодополнение промптов',
-  'Debug Keystroke Logging': 'Логирование нажатий клавиш для отладки',
-  'Language: UI': 'Язык: интерфейс',
-  'Language: Model': 'Язык: модель',
-  'Output Format': 'Формат вывода',
-  'Hide Window Title': 'Скрыть заголовок окна',
-  'Show Status in Title': 'Показывать статус в заголовке',
-  'Hide Tips': 'Скрыть подсказки',
-  'Show Line Numbers in Code': 'Показывать номера строк в коде',
-  'Show Citations': 'Показывать цитаты',
-  'Custom Witty Phrases': 'Пользовательские остроумные фразы',
-  'Show Welcome Back Dialog': 'Показывать диалог приветствия',
-  'Enable User Feedback': 'Включить отзывы пользователей',
-  'How is Qwen doing this session? (optional)':
-    'Как дела у Qwen в этой сессии? (необязательно)',
-  Bad: 'Плохо',
-  Fine: 'Нормально',
-  Good: 'Хорошо',
-  Dismiss: 'Отклонить',
-  'Not Sure Yet': 'Пока не уверен',
-  'Any other key': 'Любая другая клавиша',
-  'Disable Loading Phrases': 'Отключить фразы при загрузке',
-  'Screen Reader Mode': 'Режим программы чтения с экрана',
-  'IDE Mode': 'Режим IDE',
-  'Max Session Turns': 'Макс. количество ходов сессии',
-  'Skip Next Speaker Check': 'Пропустить проверку следующего говорящего',
-  'Skip Loop Detection': 'Пропустить обнаружение циклов',
-  'Skip Startup Context': 'Пропустить начальный контекст',
-  'Enable OpenAI Logging': 'Включить логирование OpenAI',
-  'OpenAI Logging Directory': 'Директория логов OpenAI',
-  Timeout: 'Таймаут',
-  'Max Retries': 'Макс. количество попыток',
-  'Disable Cache Control': 'Отключить управление кэшем',
-  'Memory Discovery Max Dirs': 'Макс. директорий для поиска в памяти',
+  'Vim Mode': 'Vim Mode',
+  'Disable Auto Update': 'Disable Auto Update',
+  'Attribution: commit': 'Attribution: commit',
+  'Terminal Bell Notification': 'Terminal Bell Notification',
+  'Enable Usage Statistics': 'Enable Usage Statistics',
+  Theme: 'Theme',
+  'Preferred Editor': 'Preferred Editor',
+  'Auto-connect to IDE': 'Auto-connect to IDE',
+  'Enable Prompt Completion': 'Enable Prompt Completion',
+  'Debug Keystroke Logging': 'Debug Keystroke Logging',
+  'Language: UI': 'Language: UI',
+  'Language: Model': 'Language: Model',
+  'Output Format': 'Output Format',
+  'Hide Window Title': 'Hide Window Title',
+  'Show Status in Title': 'Show Status in Title',
+  'Hide Tips': 'Hide Tips',
+  'Show Line Numbers in Code': 'Show Line Numbers in Code',
+  'Show Citations': 'Show Citations',
+  'Custom Witty Phrases': 'Custom Witty Phrases',
+  'Show Welcome Back Dialog': 'Show Welcome Back Dialog',
+  'Enable User Feedback': 'Enable User Feedback',
+  'How is TRAM doing this session? (optional)':
+    'How is TRAM doing this session? (optional)',
+  Bad: 'Bad',
+  Fine: 'Fine',
+  Good: 'Good',
+  Dismiss: 'Dismiss',
+  'Not Sure Yet': 'Not Sure Yet',
+  'Any other key': 'Any other key',
+  'Disable Loading Phrases': 'Disable Loading Phrases',
+  'Screen Reader Mode': 'Screen Reader Mode',
+  'IDE Mode': 'IDE Mode',
+  'Max Session Turns': 'Max Session Turns',
+  'Skip Next Speaker Check': 'Skip Next Speaker Check',
+  'Skip Loop Detection': 'Skip Loop Detection',
+  'Skip Startup Context': 'Skip Startup Context',
+  'Enable OpenAI Logging': 'Enable OpenAI Logging',
+  'OpenAI Logging Directory': 'OpenAI Logging Directory',
+  Timeout: 'Timeout',
+  'Max Retries': 'Max Retries',
+  'Disable Cache Control': 'Disable Cache Control',
+  'Memory Discovery Max Dirs': 'Memory Discovery Max Dirs',
   'Load Memory From Include Directories':
-    'Загружать память из включенных директорий',
-  'Respect .gitignore': 'Учитывать .gitignore',
-  'Respect .qwenignore': 'Учитывать .qwenignore',
-  'Enable Recursive File Search': 'Включить рекурсивный поиск файлов',
-  'Disable Fuzzy Search': 'Отключить нечеткий поиск',
-  'Interactive Shell (PTY)': 'Интерактивный терминал (PTY)',
-  'Show Color': 'Показывать цвета',
-  'Auto Accept': 'Автоподтверждение',
-  'Use Ripgrep': 'Использовать Ripgrep',
-  'Use Builtin Ripgrep': 'Использовать встроенный Ripgrep',
-  'Enable Tool Output Truncation': 'Включить обрезку вывода инструментов',
-  'Tool Output Truncation Threshold': 'Порог обрезки вывода инструментов',
-  'Tool Output Truncation Lines': 'Лимит строк вывода инструментов',
-  'Folder Trust': 'Доверие к папке',
-  'Vision Model Preview': 'Визуальная модель (предпросмотр)',
-  'Tool Schema Compliance': 'Соответствие схеме инструмента',
-  // Варианты перечислений настроек
-  'Auto (detect from system)': 'Авто (определить из системы)',
-  Text: 'Текст',
+    'Load Memory From Include Directories',
+  'Respect .gitignore': 'Respect .gitignore',
+  'Respect .tramignore': 'Respect .tramignore',
+  'Enable Recursive File Search': 'Enable Recursive File Search',
+  'Disable Fuzzy Search': 'Disable Fuzzy Search',
+  'Interactive Shell (PTY)': 'Interactive Shell (PTY)',
+  'Show Color': 'Show Color',
+  'Auto Accept': 'Auto Accept',
+  'Use Ripgrep': 'Use Ripgrep',
+  'Use Builtin Ripgrep': 'Use Builtin Ripgrep',
+  'Enable Tool Output Truncation': 'Enable Tool Output Truncation',
+  'Tool Output Truncation Threshold': 'Tool Output Truncation Threshold',
+  'Tool Output Truncation Lines': 'Tool Output Truncation Lines',
+  'Folder Trust': 'Folder Trust',
+  'Vision Model Preview': 'Vision Model Preview',
+  'Tool Schema Compliance': 'Tool Schema Compliance',
+  // Settings enum options
+  'Auto (detect from system)': 'Auto (detect from system)',
+  Text: 'Text',
   JSON: 'JSON',
-  Plan: 'План',
-  Default: 'По умолчанию',
-  'Auto Edit': 'Авторедактирование',
+  Plan: 'Plan',
+  Default: 'Default',
+  'Auto Edit': 'Auto Edit',
   YOLO: 'YOLO',
-  'toggle vim mode on/off': 'Включение/выключение режима vim',
+  'toggle vim mode on/off': 'toggle vim mode on/off',
   'check session stats. Usage: /stats [model|tools]':
-    'Просмотр статистики сессии. Использование: /stats [model|tools]',
+    'check session stats. Usage: /stats [model|tools]',
   'Show model-specific usage statistics.':
-    'Показать статистику использования модели.',
+    'Show model-specific usage statistics.',
   'Show tool-specific usage statistics.':
-    'Показать статистику использования инструментов.',
-  'exit the cli': 'Выход из CLI',
+    'Show tool-specific usage statistics.',
+  'exit the cli': 'exit the cli',
   'Open MCP management dialog, or authenticate with OAuth-enabled servers':
-    'Открыть диалог управления MCP или авторизоваться на сервере с поддержкой OAuth',
+    'Open MCP management dialog, or authenticate with OAuth-enabled servers',
   'List configured MCP servers and tools, or authenticate with OAuth-enabled servers':
-    'Показать настроенные MCP-серверы и инструменты, или авторизоваться на серверах с поддержкой OAuth',
-  'Manage workspace directories':
-    'Управление директориями рабочего пространства',
+    'List configured MCP servers and tools, or authenticate with OAuth-enabled servers',
+  'Manage workspace directories': 'Manage workspace directories',
   'Add directories to the workspace. Use comma to separate multiple paths':
-    'Добавить директории в рабочее пространство. Используйте запятую для разделения путей',
+    'Add directories to the workspace. Use comma to separate multiple paths',
   'Show all directories in the workspace':
-    'Показать все директории в рабочем пространстве',
-  'set external editor preference':
-    'Установка предпочитаемого внешнего редактора',
-  'Select Editor': 'Выбрать редактор',
-  'Editor Preference': 'Настройка редактора',
+    'Show all directories in the workspace',
+  'set external editor preference': 'set external editor preference',
+  'Select Editor': 'Select Editor',
+  'Editor Preference': 'Editor Preference',
   'These editors are currently supported. Please note that some editors cannot be used in sandbox mode.':
-    'В настоящее время поддерживаются следующие редакторы. Обратите внимание, что некоторые редакторы нельзя использовать в режиме песочницы.',
-  'Your preferred editor is:': 'Ваш предпочитаемый редактор:',
-  'Manage extensions': 'Управление расширениями',
-  'Manage installed extensions': 'Управлять установленными расширениями',
-  'List active extensions': 'Показать активные расширения',
+    'These editors are currently supported. Please note that some editors cannot be used in sandbox mode.',
+  'Your preferred editor is:': 'Your preferred editor is:',
+  'Manage extensions': 'Manage extensions',
+  'Manage installed extensions': 'Manage installed extensions',
+  'List active extensions': 'List active extensions',
   'Update extensions. Usage: update <extension-names>|--all':
-    'Обновить расширения. Использование: update <extension-names>|--all',
-  'Disable an extension': 'Отключить расширение',
-  'Enable an extension': 'Включить расширение',
+    'Update extensions. Usage: update <extension-names>|--all',
+  'Disable an extension': 'Disable an extension',
+  'Enable an extension': 'Enable an extension',
   'Install an extension from a git repo or local path':
-    'Установить расширение из Git-репозитория или локального пути',
-  'Uninstall an extension': 'Удалить расширение',
-  'No extensions installed.': 'Расширения не установлены.',
+    'Install an extension from a git repo or local path',
+  'Uninstall an extension': 'Uninstall an extension',
+  'No extensions installed.': 'No extensions installed.',
   'Usage: /extensions update <extension-names>|--all':
-    'Использование: /extensions update <имена-расширений>|--all',
-  'Extension "{{name}}" not found.': 'Расширение "{{name}}" не найдено.',
-  'No extensions to update.': 'Нет расширений для обновления.',
-  'Usage: /extensions install <source>':
-    'Использование: /extensions install <источник>',
+    'Usage: /extensions update <extension-names>|--all',
+  'Extension "{{name}}" not found.': 'Extension "{{name}}" not found.',
+  'No extensions to update.': 'No extensions to update.',
+  'Usage: /extensions install <source>': 'Usage: /extensions install <source>',
   'Installing extension from "{{source}}"...':
-    'Установка расширения из "{{source}}"...',
+    'Installing extension from "{{source}}"...',
   'Extension "{{name}}" installed successfully.':
-    'Расширение "{{name}}" успешно установлено.',
+    'Extension "{{name}}" installed successfully.',
   'Failed to install extension from "{{source}}": {{error}}':
-    'Не удалось установить расширение из "{{source}}": {{error}}',
+    'Failed to install extension from "{{source}}": {{error}}',
   'Usage: /extensions uninstall <extension-name>':
-    'Использование: /extensions uninstall <имя-расширения>',
-  'Uninstalling extension "{{name}}"...': 'Удаление расширения "{{name}}"...',
+    'Usage: /extensions uninstall <extension-name>',
+  'Uninstalling extension "{{name}}"...':
+    'Uninstalling extension "{{name}}"...',
   'Extension "{{name}}" uninstalled successfully.':
-    'Расширение "{{name}}" успешно удалено.',
+    'Extension "{{name}}" uninstalled successfully.',
   'Failed to uninstall extension "{{name}}": {{error}}':
-    'Не удалось удалить расширение "{{name}}": {{error}}',
+    'Failed to uninstall extension "{{name}}": {{error}}',
   'Usage: /extensions {{command}} <extension> [--scope=<user|workspace>]':
-    'Использование: /extensions {{command}} <расширение> [--scope=<user|workspace>]',
+    'Usage: /extensions {{command}} <extension> [--scope=<user|workspace>]',
   'Unsupported scope "{{scope}}", should be one of "user" or "workspace"':
-    'Неподдерживаемая область "{{scope}}", должна быть "user" или "workspace"',
+    'Unsupported scope "{{scope}}", should be one of "user" or "workspace"',
   'Extension "{{name}}" disabled for scope "{{scope}}"':
-    'Расширение "{{name}}" отключено для области "{{scope}}"',
+    'Extension "{{name}}" disabled for scope "{{scope}}"',
   'Extension "{{name}}" enabled for scope "{{scope}}"':
-    'Расширение "{{name}}" включено для области "{{scope}}"',
-  'Do you want to continue? [Y/n]: ': 'Хотите продолжить? [Y/n]: ',
-  'Do you want to continue?': 'Хотите продолжить?',
-  'Installing extension "{{name}}".': 'Установка расширения "{{name}}".',
+    'Extension "{{name}}" enabled for scope "{{scope}}"',
+  'Do you want to continue? [Y/n]: ': 'Do you want to continue? [Y/n]: ',
+  'Do you want to continue?': 'Do you want to continue?',
+  'Installing extension "{{name}}".': 'Installing extension "{{name}}".',
   '**Extensions may introduce unexpected behavior. Ensure you have investigated the extension source and trust the author.**':
-    '**Расширения могут вызывать неожиданное поведение. Убедитесь, что вы изучили источник расширения и доверяете автору.**',
+    '**Extensions may introduce unexpected behavior. Ensure you have investigated the extension source and trust the author.**',
   'This extension will run the following MCP servers:':
-    'Это расширение запустит следующие MCP-серверы:',
-  local: 'локальный',
-  remote: 'удалённый',
+    'This extension will run the following MCP servers:',
+  local: 'local',
+  remote: 'remote',
   'This extension will add the following commands: {{commands}}.':
-    'Это расширение добавит следующие команды: {{commands}}.',
-  'This extension will append info to your QWEN.md context using {{fileName}}':
-    'Это расширение добавит информацию в ваш контекст QWEN.md с помощью {{fileName}}',
+    'This extension will add the following commands: {{commands}}.',
+  'This extension will append info to your TRAM.md context using {{fileName}}':
+    'This extension will append info to your TRAM.md context using {{fileName}}',
   'This extension will exclude the following core tools: {{tools}}':
-    'Это расширение исключит следующие основные инструменты: {{tools}}',
+    'This extension will exclude the following core tools: {{tools}}',
   'This extension will install the following skills:':
-    'Это расширение установит следующие навыки:',
+    'This extension will install the following skills:',
   'This extension will install the following subagents:':
-    'Это расширение установит следующие подагенты:',
-  'Installation cancelled for "{{name}}".': 'Установка "{{name}}" отменена.',
-  'You are installing an extension from {{originSource}}. Some features may not work perfectly with Qwen Code.':
-    'Вы устанавливаете расширение от {{originSource}}. Некоторые функции могут работать не идеально с Qwen Code.',
+    'This extension will install the following subagents:',
+  'Installation cancelled for "{{name}}".':
+    'Installation cancelled for "{{name}}".',
+  'You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.':
+    'You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.',
   '--ref and --auto-update are not applicable for marketplace extensions.':
-    '--ref и --auto-update неприменимы для расширений из маркетплейса.',
+    '--ref and --auto-update are not applicable for marketplace extensions.',
   'Extension "{{name}}" installed successfully and enabled.':
-    'Расширение "{{name}}" успешно установлено и включено.',
+    'Extension "{{name}}" installed successfully and enabled.',
   'Installs an extension from a git repository URL, local path, or claude marketplace (marketplace-url:plugin-name).':
-    'Устанавливает расширение из URL Git-репозитория, локального пути или маркетплейса Claude (marketplace-url:plugin-name).',
+    'Installs an extension from a git repository URL, local path, or claude marketplace (marketplace-url:plugin-name).',
   'The github URL, local path, or marketplace source (marketplace-url:plugin-name) of the extension to install.':
-    'URL GitHub, локальный путь или источник в маркетплейсе (marketplace-url:plugin-name) устанавливаемого расширения.',
-  'The git ref to install from.': 'Git-ссылка для установки.',
+    'The github URL, local path, or marketplace source (marketplace-url:plugin-name) of the extension to install.',
+  'The git ref to install from.': 'The git ref to install from.',
   'Enable auto-update for this extension.':
-    'Включить автообновление для этого расширения.',
+    'Enable auto-update for this extension.',
   'Enable pre-release versions for this extension.':
-    'Включить пре-релизные версии для этого расширения.',
+    'Enable pre-release versions for this extension.',
   'Acknowledge the security risks of installing an extension and skip the confirmation prompt.':
-    'Подтвердить риски безопасности установки расширения и пропустить запрос подтверждения.',
+    'Acknowledge the security risks of installing an extension and skip the confirmation prompt.',
   'The source argument must be provided.':
-    'Необходимо указать аргумент источника.',
+    'The source argument must be provided.',
   'Extension "{{name}}" successfully uninstalled.':
-    'Расширение "{{name}}" успешно удалено.',
-  'Uninstalls an extension.': 'Удаляет расширение.',
+    'Extension "{{name}}" successfully uninstalled.',
+  'Uninstalls an extension.': 'Uninstalls an extension.',
   'The name or source path of the extension to uninstall.':
-    'Имя или путь к источнику удаляемого расширения.',
+    'The name or source path of the extension to uninstall.',
   'Please include the name of the extension to uninstall as a positional argument.':
-    'Пожалуйста, укажите имя удаляемого расширения как позиционный аргумент.',
-  'Enables an extension.': 'Включает расширение.',
-  'The name of the extension to enable.': 'Имя включаемого расширения.',
+    'Please include the name of the extension to uninstall as a positional argument.',
+  'Enables an extension.': 'Enables an extension.',
+  'The name of the extension to enable.':
+    'The name of the extension to enable.',
   'The scope to enable the extenison in. If not set, will be enabled in all scopes.':
-    'Область для включения расширения. Если не задана, будет включено во всех областях.',
+    'The scope to enable the extenison in. If not set, will be enabled in all scopes.',
   'Extension "{{name}}" successfully enabled for scope "{{scope}}".':
-    'Расширение "{{name}}" успешно включено для области "{{scope}}".',
+    'Extension "{{name}}" successfully enabled for scope "{{scope}}".',
   'Extension "{{name}}" successfully enabled in all scopes.':
-    'Расширение "{{name}}" успешно включено во всех областях.',
+    'Extension "{{name}}" successfully enabled in all scopes.',
   'Invalid scope: {{scope}}. Please use one of {{scopes}}.':
-    'Недопустимая область: {{scope}}. Пожалуйста, используйте одну из {{scopes}}.',
-  'Disables an extension.': 'Отключает расширение.',
-  'The name of the extension to disable.': 'Имя отключаемого расширения.',
+    'Invalid scope: {{scope}}. Please use one of {{scopes}}.',
+  'Disables an extension.': 'Disables an extension.',
+  'The name of the extension to disable.':
+    'The name of the extension to disable.',
   'The scope to disable the extenison in.':
-    'Область для отключения расширения.',
+    'The scope to disable the extenison in.',
   'Extension "{{name}}" successfully disabled for scope "{{scope}}".':
-    'Расширение "{{name}}" успешно отключено для области "{{scope}}".',
-  'Extension "{{name}}" successfully updated: {{oldVersion}} → {{newVersion}}.':
-    'Расширение "{{name}}" успешно обновлено: {{oldVersion}} → {{newVersion}}.',
+    'Extension "{{name}}" successfully disabled for scope "{{scope}}".',
+  'Extension "{{name}}" successfully updated: {{oldVersion}} 闂?{{newVersion}}.':
+    'Extension "{{name}}" successfully updated: {{oldVersion}} 闂?{{newVersion}}.',
   'Unable to install extension "{{name}}" due to missing install metadata':
-    'Невозможно установить расширение "{{name}}" из-за отсутствия метаданных установки',
+    'Unable to install extension "{{name}}" due to missing install metadata',
   'Extension "{{name}}" is already up to date.':
-    'Расширение "{{name}}" уже актуально.',
+    'Extension "{{name}}" is already up to date.',
   'Updates all extensions or a named extension to the latest version.':
-    'Обновляет все расширения или указанное расширение до последней версии.',
-  'The name of the extension to update.': 'Имя обновляемого расширения.',
-  'Update all extensions.': 'Обновить все расширения.',
+    'Updates all extensions or a named extension to the latest version.',
+  'Update all extensions.': 'Update all extensions.',
   'Either an extension name or --all must be provided':
-    'Необходимо указать имя расширения или --all',
-  'Lists installed extensions.': 'Показывает установленные расширения.',
-  'Path:': 'Путь:',
-  'Source:': 'Источник:',
-  'Type:': 'Тип:',
-  'Ref:': 'Ссылка:',
-  'Release tag:': 'Тег релиза:',
-  'Enabled (User):': 'Включено (Пользователь):',
-  'Enabled (Workspace):': 'Включено (Рабочее пространство):',
-  'Context files:': 'Контекстные файлы:',
-  'Skills:': 'Навыки:',
-  'Agents:': 'Агенты:',
-  'MCP servers:': 'MCP-серверы:',
-  'Link extension failed to install.':
-    'Не удалось установить связанное расширение.',
+    'Either an extension name or --all must be provided',
+  'Lists installed extensions.': 'Lists installed extensions.',
+  'Path:': 'Path:',
+  'Source:': 'Source:',
+  'Type:': 'Type:',
+  'Ref:': 'Ref:',
+  'Release tag:': 'Release tag:',
+  'Enabled (User):': 'Enabled (User):',
+  'Enabled (Workspace):': 'Enabled (Workspace):',
+  'Context files:': 'Context files:',
+  'Skills:': 'Skills:',
+  'Agents:': 'Agents:',
+  'MCP servers:': 'MCP servers:',
+  'Link extension failed to install.': 'Link extension failed to install.',
   'Extension "{{name}}" linked successfully and enabled.':
-    'Расширение "{{name}}" успешно связано и включено.',
+    'Extension "{{name}}" linked successfully and enabled.',
   'Links an extension from a local path. Updates made to the local path will always be reflected.':
-    'Связывает расширение из локального пути. Изменения в локальном пути будут всегда отражаться.',
-  'The name of the extension to link.': 'Имя связываемого расширения.',
+    'Links an extension from a local path. Updates made to the local path will always be reflected.',
+  'The name of the extension to link.': 'The name of the extension to link.',
   'Set a specific setting for an extension.':
-    'Установить конкретную настройку для расширения.',
-  'Name of the extension to configure.': 'Имя настраиваемого расширения.',
+    'Set a specific setting for an extension.',
+  'Name of the extension to configure.': 'Name of the extension to configure.',
   'The setting to configure (name or env var).':
-    'Настройка для конфигурирования (имя или переменная окружения).',
-  'The scope to set the setting in.': 'Область для установки настройки.',
-  'List all settings for an extension.': 'Показать все настройки расширения.',
-  'Name of the extension.': 'Имя расширения.',
+    'The setting to configure (name or env var).',
+  'The scope to set the setting in.': 'The scope to set the setting in.',
+  'List all settings for an extension.': 'List all settings for an extension.',
+  'Name of the extension.': 'Name of the extension.',
   'Extension "{{name}}" has no settings to configure.':
-    'Расширение "{{name}}" не имеет настроек для конфигурирования.',
-  'Settings for "{{name}}":': 'Настройки для "{{name}}":',
-  '(workspace)': '(рабочее пространство)',
-  '(user)': '(пользователь)',
-  '[not set]': '[не задано]',
-  '[value stored in keychain]': '[значение хранится в связке ключей]',
-  'Manage extension settings.': 'Управление настройками расширений.',
+    'Extension "{{name}}" has no settings to configure.',
+  'Settings for "{{name}}":': 'Settings for "{{name}}":',
+  '(workspace)': '(workspace)',
+  '(user)': '(user)',
+  '[not set]': '[not set]',
+  '[value stored in keychain]': '[value stored in keychain]',
+  'Value:': 'Value:',
+  'Manage extension settings.': 'Manage extension settings.',
   'You need to specify a command (set or list).':
-    'Необходимо указать команду (set или list).',
+    'You need to specify a command (set or list).',
   // ============================================================================
   // Plugin Choice / Marketplace
   // ============================================================================
   'No plugins available in this marketplace.':
-    'В этом маркетплейсе нет доступных плагинов.',
+    'No plugins available in this marketplace.',
   'Select a plugin to install from marketplace "{{name}}":':
-    'Выберите плагин для установки из маркетплейса "{{name}}":',
-  'Plugin selection cancelled.': 'Выбор плагина отменён.',
-  'Select a plugin from "{{name}}"': 'Выберите плагин из "{{name}}"',
-  'Use ↑↓ or j/k to navigate, Enter to select, Escape to cancel':
-    'Используйте ↑↓ или j/k для навигации, Enter для выбора, Escape для отмены',
-  '{{count}} more above': 'ещё {{count}} выше',
-  '{{count}} more below': 'ещё {{count}} ниже',
-  'manage IDE integration': 'Управление интеграцией с IDE',
-  'check status of IDE integration': 'Проверить статус интеграции с IDE',
+    'Select a plugin to install from marketplace "{{name}}":',
+  'Plugin selection cancelled.': 'Plugin selection cancelled.',
+  'Select a plugin from "{{name}}"': 'Select a plugin from "{{name}}"',
+  'Use 闂佹剚鍋呴崹鐔煎疮?or j/k to navigate, Enter to select, Escape to cancel':
+    'Use 闂佹剚鍋呴崹鐔煎疮?or j/k to navigate, Enter to select, Escape to cancel',
+  '{{count}} more above': '{{count}} more above',
+  '{{count}} more below': '{{count}} more below',
+  'manage IDE integration': 'manage IDE integration',
+  'check status of IDE integration': 'check status of IDE integration',
   'install required IDE companion for {{ideName}}':
-    'Установить необходимый компаньон IDE для {{ideName}}',
-  'enable IDE integration': 'Включение интеграции с IDE',
-  'disable IDE integration': 'Отключение интеграции с IDE',
-  'IDE integration is not supported in your current environment. To use this feature, run Qwen Code in one of these supported IDEs: VS Code or VS Code forks.':
-    'Интеграция с IDE не поддерживается в вашем окружении. Для использования этой функции запустите Qwen Code в одной из поддерживаемых IDE: VS Code или форках VS Code.',
-  'Set up GitHub Actions': 'Настройка GitHub Actions',
+    'install required IDE companion for {{ideName}}',
+  'enable IDE integration': 'enable IDE integration',
+  'disable IDE integration': 'disable IDE integration',
+  'IDE integration is not supported in your current environment. To use this feature, run TRAM in one of these supported IDEs: VS Code or VS Code forks.':
+    'IDE integration is not supported in your current environment. To use this feature, run TRAM in one of these supported IDEs: VS Code or VS Code forks.',
+  'Set up GitHub Actions': 'Set up GitHub Actions',
   'Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)':
-    'Настройка привязки клавиш терминала для многострочного ввода (VS Code, Cursor, Windsurf, Trae)',
+    'Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)',
   'Please restart your terminal for the changes to take effect.':
-    'Пожалуйста, перезапустите терминал для применения изменений.',
+    'Please restart your terminal for the changes to take effect.',
   'Failed to configure terminal: {{error}}':
-    'Не удалось настроить терминал: {{error}}',
+    'Failed to configure terminal: {{error}}',
   'Could not determine {{terminalName}} config path on Windows: APPDATA environment variable is not set.':
-    'Не удалось определить путь конфигурации {{terminalName}} в Windows: переменная окружения APPDATA не установлена.',
+    'Could not determine {{terminalName}} config path on Windows: APPDATA environment variable is not set.',
   '{{terminalName}} keybindings.json exists but is not a valid JSON array. Please fix the file manually or delete it to allow automatic configuration.':
-    '{{terminalName}} keybindings.json существует, но не является корректным массивом JSON. Пожалуйста, исправьте файл вручную или удалите его для автоматической настройки.',
-  'File: {{file}}': 'Файл: {{file}}',
+    '{{terminalName}} keybindings.json exists but is not a valid JSON array. Please fix the file manually or delete it to allow automatic configuration.',
+  'File: {{file}}': 'File: {{file}}',
   'Failed to parse {{terminalName}} keybindings.json. The file contains invalid JSON. Please fix the file manually or delete it to allow automatic configuration.':
-    'Не удалось разобрать {{terminalName}} keybindings.json. Файл содержит некорректный JSON. Пожалуйста, исправьте файл вручную или удалите его для автоматической настройки.',
-  'Error: {{error}}': 'Ошибка: {{error}}',
-  'Shift+Enter binding already exists': 'Привязка Shift+Enter уже существует',
-  'Ctrl+Enter binding already exists': 'Привязка Ctrl+Enter уже существует',
+    'Failed to parse {{terminalName}} keybindings.json. The file contains invalid JSON. Please fix the file manually or delete it to allow automatic configuration.',
+  'Error: {{error}}': 'Error: {{error}}',
+  'Shift+Enter binding already exists': 'Shift+Enter binding already exists',
+  'Ctrl+Enter binding already exists': 'Ctrl+Enter binding already exists',
   'Existing keybindings detected. Will not modify to avoid conflicts.':
-    'Обнаружены существующие привязки клавиш. Не будут изменены во избежание конфликтов.',
+    'Existing keybindings detected. Will not modify to avoid conflicts.',
   'Please check and modify manually if needed: {{file}}':
-    'Пожалуйста, проверьте и измените вручную при необходимости: {{file}}',
+    'Please check and modify manually if needed: {{file}}',
   'Added Shift+Enter and Ctrl+Enter keybindings to {{terminalName}}.':
-    'Добавлены привязки Shift+Enter и Ctrl+Enter для {{terminalName}}.',
-  'Modified: {{file}}': 'Изменено: {{file}}',
+    'Added Shift+Enter and Ctrl+Enter keybindings to {{terminalName}}.',
+  'Modified: {{file}}': 'Modified: {{file}}',
   '{{terminalName}} keybindings already configured.':
-    'Привязки клавиш {{terminalName}} уже настроены.',
+    '{{terminalName}} keybindings already configured.',
   'Failed to configure {{terminalName}}.':
-    'Не удалось настроить {{terminalName}}.',
+    'Failed to configure {{terminalName}}.',
   'Your terminal is already configured for an optimal experience with multiline input (Shift+Enter and Ctrl+Enter).':
-    'Ваш терминал уже настроен для оптимальной работы с многострочным вводом (Shift+Enter и Ctrl+Enter).',
+    'Your terminal is already configured for an optimal experience with multiline input (Shift+Enter and Ctrl+Enter).',
   // ============================================================================
   // Commands - Hooks
   // ============================================================================
-  'Manage Qwen Code hooks': 'Управлять хуками Qwen Code',
-  'List all configured hooks': 'Показать все настроенные хуки',
-  'Enable a disabled hook': 'Включить отключенный хук',
-  'Disable an active hook': 'Отключить активный хук',
+  'Manage TRAM hooks': 'Manage TRAM hooks',
+  'List all configured hooks': 'List all configured hooks',
+  'Enable a disabled hook': 'Enable a disabled hook',
+  'Disable an active hook': 'Disable an active hook',
 
   // ============================================================================
   // Commands - Session Export
   // ============================================================================
   'Export current session message history to a file':
-    'Экспортировать историю сообщений текущей сессии в файл',
-  'Export session to HTML format': 'Экспортировать сессию в формат HTML',
-  'Export session to JSON format': 'Экспортировать сессию в формат JSON',
+    'Export current session message history to a file',
+  'Export session to HTML format': 'Export session to HTML format',
+  'Export session to JSON format': 'Export session to JSON format',
   'Export session to JSONL format (one message per line)':
-    'Экспортировать сессию в формат JSONL (одно сообщение на строку)',
-  'Export session to markdown format':
-    'Экспортировать сессию в формат Markdown',
+    'Export session to JSONL format (one message per line)',
+  'Export session to markdown format': 'Export session to markdown format',
 
   // ============================================================================
   // Commands - Insights
   // ============================================================================
   'generate personalized programming insights from your chat history':
-    'Создать персонализированные инсайты по программированию на основе истории чата',
+    'generate personalized programming insights from your chat history',
 
   // ============================================================================
   // Commands - Session History
   // ============================================================================
-  'Resume a previous session': 'Продолжить предыдущую сессию',
+  'Resume a previous session': 'Resume a previous session',
   'Restore a tool call. This will reset the conversation and file history to the state it was in when the tool call was suggested':
-    'Восстановить вызов инструмента. Это вернет историю разговора и файлов к состоянию на момент, когда был предложен этот вызов инструмента',
+    'Restore a tool call. This will reset the conversation and file history to the state it was in when the tool call was suggested',
   'Could not detect terminal type. Supported terminals: VS Code, Cursor, Windsurf, and Trae.':
-    'Не удалось определить тип терминала. Поддерживаемые терминалы: VS Code, Cursor, Windsurf и Trae.',
+    'Could not detect terminal type. Supported terminals: VS Code, Cursor, Windsurf, and Trae.',
   'Terminal "{{terminal}}" is not supported yet.':
-    'Терминал "{{terminal}}" еще не поддерживается.',
+    'Terminal "{{terminal}}" is not supported yet.',
 
   // ============================================================================
-  // Команды - Язык
+  // Commands - Language
   // ============================================================================
   'Invalid language. Available: {{options}}':
-    'Недопустимый язык. Доступны: {{options}}',
+    'Invalid language. Available: {{options}}',
   'Language subcommands do not accept additional arguments.':
-    'Подкоманды языка не принимают дополнительных аргументов.',
-  'Current UI language: {{lang}}': 'Текущий язык интерфейса: {{lang}}',
-  'Current LLM output language: {{lang}}': 'Текущий язык вывода LLM: {{lang}}',
-  'LLM output language not set': 'Язык вывода LLM не установлен',
-  'Set UI language': 'Установка языка интерфейса',
-  'Set LLM output language': 'Установка языка вывода LLM',
-  'Usage: /language ui [{{options}}]':
-    'Использование: /language ui [{{options}}]',
-  'Usage: /language output <language>':
-    'Использование: /language output <language>',
-  'Example: /language output 中文': 'Пример: /language output 中文',
-  'Example: /language output English': 'Пример: /language output English',
-  'Example: /language output 日本語': 'Пример: /language output 日本語',
-  'Example: /language output Português': 'Пример: /language output Português',
-  'UI language changed to {{lang}}': 'Язык интерфейса изменен на {{lang}}',
-  'LLM output language set to {{lang}}':
-    'Язык вывода LLM установлен на {{lang}}',
+    'Language subcommands do not accept additional arguments.',
+  'Current UI language: {{lang}}': 'Current UI language: {{lang}}',
+  'Current LLM output language: {{lang}}':
+    'Current LLM output language: {{lang}}',
+  'LLM output language not set': 'LLM output language not set',
+  'Set UI language': 'Set UI language',
+  'Set LLM output language': 'Set LLM output language',
+  'Usage: /language ui [{{options}}]': 'Usage: /language ui [{{options}}]',
+  'Usage: /language output <language>': 'Usage: /language output <language>',
+  'Example: /language output Chinese': 'Example: /language output Chinese',
+  'Example: /language output English': 'Example: /language output English',
+  'Example: /language output Russian': 'Example: /language output Russian',
+  'Example: /language output Portuguese': 'Example: /language output Portuguese',
+  'UI language changed to {{lang}}': 'UI language changed to {{lang}}',
+  'LLM output language set to {{lang}}': 'LLM output language set to {{lang}}',
   'LLM output language rule file generated at {{path}}':
-    'Файл правил языка вывода LLM создан в {{path}}',
+    'LLM output language rule file generated at {{path}}',
   'Please restart the application for the changes to take effect.':
-    'Пожалуйста, перезапустите приложение для применения изменений.',
+    'Please restart the application for the changes to take effect.',
   'Failed to generate LLM output language rule file: {{error}}':
-    'Не удалось создать файл правил языка вывода LLM: {{error}}',
+    'Failed to generate LLM output language rule file: {{error}}',
   'Invalid command. Available subcommands:':
-    'Неверная команда. Доступные подкоманды:',
-  'Available subcommands:': 'Доступные подкоманды:',
+    'Invalid command. Available subcommands:',
+  'Available subcommands:': 'Available subcommands:',
   'To request additional UI language packs, please open an issue on GitHub.':
-    'Для запроса дополнительных языковых пакетов интерфейса, пожалуйста, создайте обращение на GitHub.',
-  'Available options:': 'Доступные варианты:',
-  'Set UI language to {{name}}': 'Установить язык интерфейса на {{name}}',
+    'To request additional UI language packs, please open an issue on GitHub.',
+  'Available options:': 'Available options:',
+  'Set UI language to {{name}}': 'Set UI language to {{name}}',
 
   // ============================================================================
-  // Команды - Режим подтверждения
+  // Commands - Approval Mode
   // ============================================================================
-  'Tool Approval Mode': 'Режим подтверждения инструментов',
-  'Current approval mode: {{mode}}': 'Текущий режим подтверждения: {{mode}}',
-  'Available approval modes:': 'Доступные режимы подтверждения:',
-  'Approval mode changed to: {{mode}}':
-    'Режим подтверждения изменен на: {{mode}}',
+  'Tool Approval Mode': 'Tool Approval Mode',
+  'Current approval mode: {{mode}}': 'Current approval mode: {{mode}}',
+  'Available approval modes:': 'Available approval modes:',
+  'Approval mode changed to: {{mode}}': 'Approval mode changed to: {{mode}}',
   'Approval mode changed to: {{mode}} (saved to {{scope}} settings{{location}})':
-    'Режим подтверждения изменен на: {{mode}} (сохранено в настройках {{scope}}{{location}})',
+    'Approval mode changed to: {{mode}} (saved to {{scope}} settings{{location}})',
   'Usage: /approval-mode <mode> [--session|--user|--project]':
-    'Использование: /approval-mode <mode> [--session|--user|--project]',
+    'Usage: /approval-mode <mode> [--session|--user|--project]',
+
   'Scope subcommands do not accept additional arguments.':
-    'Подкоманды области не принимают дополнительных аргументов.',
+    'Scope subcommands do not accept additional arguments.',
   'Plan mode - Analyze only, do not modify files or execute commands':
-    'Режим планирования - только анализ, без изменения файлов или выполнения команд',
+    'Plan mode - Analyze only, do not modify files or execute commands',
   'Default mode - Require approval for file edits or shell commands':
-    'Режим по умолчанию - требуется подтверждение для редактирования файлов или команд терминала',
+    'Default mode - Require approval for file edits or shell commands',
   'Auto-edit mode - Automatically approve file edits':
-    'Режим авторедактирования - автоматическое подтверждение изменений файлов',
+    'Auto-edit mode - Automatically approve file edits',
   'YOLO mode - Automatically approve all tools':
-    'Режим YOLO - автоматическое подтверждение всех инструментов',
-  '{{mode}} mode': 'Режим {{mode}}',
+    'YOLO mode - Automatically approve all tools',
+  '{{mode}} mode': '{{mode}} mode',
   'Settings service is not available; unable to persist the approval mode.':
-    'Служба настроек недоступна; невозможно сохранить режим подтверждения.',
+    'Settings service is not available; unable to persist the approval mode.',
   'Failed to save approval mode: {{error}}':
-    'Не удалось сохранить режим подтверждения: {{error}}',
+    'Failed to save approval mode: {{error}}',
   'Failed to change approval mode: {{error}}':
-    'Не удалось изменить режим подтверждения: {{error}}',
+    'Failed to change approval mode: {{error}}',
   'Apply to current session only (temporary)':
-    'Применить только к текущей сессии (временно)',
-  'Persist for this project/workspace':
-    'Сохранить для этого проекта/рабочего пространства',
+    'Apply to current session only (temporary)',
+  'Persist for this project/workspace': 'Persist for this project/workspace',
   'Persist for this user on this machine':
-    'Сохранить для этого пользователя на этой машине',
+    'Persist for this user on this machine',
   'Analyze only, do not modify files or execute commands':
-    'Только анализ, без изменения файлов или выполнения команд',
+    'Analyze only, do not modify files or execute commands',
   'Require approval for file edits or shell commands':
-    'Требуется подтверждение для редактирования файлов или команд терминала',
-  'Automatically approve file edits':
-    'Автоматически подтверждать изменения файлов',
-  'Automatically approve all tools':
-    'Автоматически подтверждать все инструменты',
+    'Require approval for file edits or shell commands',
+  'Automatically approve file edits': 'Automatically approve file edits',
+  'Automatically approve all tools': 'Automatically approve all tools',
   'Workspace approval mode exists and takes priority. User-level change will have no effect.':
-    'Режим подтверждения рабочего пространства существует и имеет приоритет. Изменение на уровне пользователя не будет иметь эффекта.',
-  'Apply To': 'Применить к',
-  'User Settings': 'Настройки пользователя',
-  'Workspace Settings': 'Настройки рабочего пространства',
+    'Workspace approval mode exists and takes priority. User-level change will have no effect.',
+  'Apply To': 'Apply To',
+  'User Settings': 'User Settings',
+  'Workspace Settings': 'Workspace Settings',
 
   // ============================================================================
-  // Команды - Память
+  // Commands - Memory
   // ============================================================================
   'Commands for interacting with memory.':
-    'Команды для взаимодействия с памятью',
-  'Show the current memory contents.': 'Показать текущее содержимое памяти.',
-  'Show project-level memory contents.': 'Показать память уровня проекта.',
-  'Show global memory contents.': 'Показать глобальную память.',
+    'Commands for interacting with memory.',
+  'Show the current memory contents.': 'Show the current memory contents.',
+  'Show project-level memory contents.': 'Show project-level memory contents.',
+  'Show global memory contents.': 'Show global memory contents.',
   'Add content to project-level memory.':
-    'Добавить содержимое в память уровня проекта.',
-  'Add content to global memory.': 'Добавить содержимое в глобальную память.',
-  'Refresh the memory from the source.': 'Обновить память из источника.',
+    'Add content to project-level memory.',
+  'Add content to global memory.': 'Add content to global memory.',
+  'Refresh the memory from the source.': 'Refresh the memory from the source.',
   'Usage: /memory add --project <text to remember>':
-    'Использование: /memory add --project <текст для запоминания>',
+    'Usage: /memory add --project <text to remember>',
   'Usage: /memory add --global <text to remember>':
-    'Использование: /memory add --global <текст для запоминания>',
+    'Usage: /memory add --global <text to remember>',
   'Attempting to save to project memory: "{{text}}"':
-    'Попытка сохранить в память проекта: "{{text}}"',
+    'Attempting to save to project memory: "{{text}}"',
   'Attempting to save to global memory: "{{text}}"':
-    'Попытка сохранить в глобальную память: "{{text}}"',
+    'Attempting to save to global memory: "{{text}}"',
   'Current memory content from {{count}} file(s):':
-    'Текущее содержимое памяти из {{count}} файла(ов):',
-  'Memory is currently empty.': 'Память в настоящее время пуста.',
+    'Current memory content from {{count}} file(s):',
+  'Memory is currently empty.': 'Memory is currently empty.',
   'Project memory file not found or is currently empty.':
-    'Файл памяти проекта не найден или в настоящее время пуст.',
+    'Project memory file not found or is currently empty.',
   'Global memory file not found or is currently empty.':
-    'Файл глобальной памяти не найден или в настоящее время пуст.',
-  'Global memory is currently empty.':
-    'Глобальная память в настоящее время пуста.',
+    'Global memory file not found or is currently empty.',
+  'Global memory is currently empty.': 'Global memory is currently empty.',
   'Global memory content:\n\n---\n{{content}}\n---':
-    'Содержимое глобальной памяти:\n\n---\n{{content}}\n---',
+    'Global memory content:\n\n---\n{{content}}\n---',
   'Project memory content from {{path}}:\n\n---\n{{content}}\n---':
-    'Содержимое памяти проекта из {{path}}:\n\n---\n{{content}}\n---',
-  'Project memory is currently empty.':
-    'Память проекта в настоящее время пуста.',
+    'Project memory content from {{path}}:\n\n---\n{{content}}\n---',
+  'Project memory is currently empty.': 'Project memory is currently empty.',
   'Refreshing memory from source files...':
-    'Обновление памяти из исходных файлов...',
+    'Refreshing memory from source files...',
   'Add content to the memory. Use --global for global memory or --project for project memory.':
-    'Добавить содержимое в память. Используйте --global для глобальной памяти или --project для памяти проекта.',
+    'Add content to the memory. Use --global for global memory or --project for project memory.',
   'Usage: /memory add [--global|--project] <text to remember>':
-    'Использование: /memory add [--global|--project] <текст для запоминания>',
+    'Usage: /memory add [--global|--project] <text to remember>',
   'Attempting to save to memory {{scope}}: "{{fact}}"':
-    'Попытка сохранить в память {{scope}}: "{{fact}}"',
+    'Attempting to save to memory {{scope}}: "{{fact}}"',
 
   // ============================================================================
-  // Команды - MCP
+  // Commands - MCP
   // ============================================================================
   'Authenticate with an OAuth-enabled MCP server':
-    'Авторизоваться на MCP-сервере с поддержкой OAuth',
+    'Authenticate with an OAuth-enabled MCP server',
   'List configured MCP servers and tools':
-    'Просмотр настроенных MCP-серверов и инструментов',
-  'Restarts MCP servers.': 'Перезапустить MCP-серверы.',
-  'Config not loaded.': 'Конфигурация не загружена.',
-  'Could not retrieve tool registry.':
-    'Не удалось получить реестр инструментов.',
+    'List configured MCP servers and tools',
+  'Restarts MCP servers.': 'Restarts MCP servers.',
+  'Open MCP management dialog': 'Open MCP management dialog',
+  'Config not loaded.': 'Config not loaded.',
+  'Could not retrieve tool registry.': 'Could not retrieve tool registry.',
   'No MCP servers configured with OAuth authentication.':
-    'Нет MCP-серверов, настроенных с авторизацией OAuth.',
-  'MCP servers with OAuth authentication:': 'MCP-серверы с авторизацией OAuth:',
+    'No MCP servers configured with OAuth authentication.',
+  'MCP servers with OAuth authentication:':
+    'MCP servers with OAuth authentication:',
   'Use /mcp auth <server-name> to authenticate.':
-    'Используйте /mcp auth <имя-сервера> для авторизации.',
-  "MCP server '{{name}}' not found.": "MCP-сервер '{{name}}' не найден.",
+    'Use /mcp auth <server-name> to authenticate.',
+  "MCP server '{{name}}' not found.": "MCP server '{{name}}' not found.",
   "Successfully authenticated and refreshed tools for '{{name}}'.":
-    "Успешно авторизовано и обновлены инструменты для '{{name}}'.",
+    "Successfully authenticated and refreshed tools for '{{name}}'.",
   "Failed to authenticate with MCP server '{{name}}': {{error}}":
-    "Не удалось авторизоваться на MCP-сервере '{{name}}': {{error}}",
+    "Failed to authenticate with MCP server '{{name}}': {{error}}",
   "Re-discovering tools from '{{name}}'...":
-    "Повторное обнаружение инструментов от '{{name}}'...",
+    "Re-discovering tools from '{{name}}'...",
   "Discovered {{count}} tool(s) from '{{name}}'.":
-    "Обнаружено {{count}} инструмент(ов) от '{{name}}'.",
+    "Discovered {{count}} tool(s) from '{{name}}'.",
   'Authentication complete. Returning to server details...':
-    'Аутентификация завершена. Возврат к деталям сервера...',
-  'Authentication successful.': 'Аутентификация успешна.',
+    'Authentication complete. Returning to server details...',
+  'Authentication successful.': 'Authentication successful.',
   'If the browser does not open, copy and paste this URL into your browser:':
-    'Если браузер не открылся, скопируйте этот URL и вставьте его в браузер:',
+    'If the browser does not open, copy and paste this URL into your browser:',
   'Make sure to copy the COMPLETE URL - it may wrap across multiple lines.':
-    '⚠️  Убедитесь, что скопировали ПОЛНЫЙ URL — он может занимать несколько строк.',
+    'Make sure to copy the COMPLETE URL - it may wrap across multiple lines.',
 
   // ============================================================================
-  // Команды - Чат
+  // MCP Management Dialog
   // ============================================================================
-  'Manage conversation history.': 'Управление историей диалогов.',
-  'List saved conversation checkpoints':
-    'Показать сохраненные точки восстановления диалога',
+  'Manage MCP servers': 'Manage MCP servers',
+  'Server Detail': 'Server Detail',
+  'Disable Server': 'Disable Server',
+  Tools: 'Tools',
+  'Tool Detail': 'Tool Detail',
+  'MCP Management': 'MCP Management',
+  'Loading...': 'Loading...',
+  'Unknown step': 'Unknown step',
+  'Esc to back': 'Esc to back',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to close':
+    '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to close',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to back':
+    '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to back',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to confirm 閻?Esc to back':
+    '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to confirm 閻?Esc to back',
+  'User Settings (global)': 'User Settings (global)',
+  'Workspace Settings (project-specific)':
+    'Workspace Settings (project-specific)',
+  'Disable server:': 'Disable server:',
+  'Select where to add the server to the exclude list:':
+    'Select where to add the server to the exclude list:',
+  'Press Enter to confirm, Esc to cancel':
+    'Press Enter to confirm, Esc to cancel',
+  'View tools': 'View tools',
+  Reconnect: 'Reconnect',
+  Enable: 'Enable',
+  Disable: 'Disable',
+  Authenticate: 'Authenticate',
+  'Re-authenticate': 'Re-authenticate',
+  'Clear Authentication': 'Clear Authentication',
+  'Server:': 'Server:',
+  'Command:': 'Command:',
+  'Working Directory:': 'Working Directory:',
+  'Capabilities:': 'Capabilities:',
+  'No server selected': 'No server selected',
+  prompts: 'prompts',
+  '(disabled)': '(disabled)',
+  'Error:': 'Error:',
+  Extension: 'Extension',
+  tool: 'tool',
+  tools: 'tools',
+  connected: 'connected',
+  connecting: 'connecting',
+  disconnected: 'disconnected',
+
+  // MCP Server List
+  'User MCPs': 'User MCPs',
+  'Project MCPs': 'Project MCPs',
+  'Extension MCPs': 'Extension MCPs',
+  server: 'server',
+  servers: 'servers',
+  'Add MCP servers to your settings to get started.':
+    'Add MCP servers to your settings to get started.',
+  'Run tram --debug to see error logs': 'Run tram --debug to see error logs',
+
+  // MCP OAuth Authentication
+  'OAuth Authentication': 'OAuth Authentication',
+  'Press Enter to start authentication, Esc to go back':
+    'Press Enter to start authentication, Esc to go back',
+  'Authenticating... Please complete the login in your browser.':
+    'Authenticating... Please complete the login in your browser.',
+  'Press Enter or Esc to go back': 'Press Enter or Esc to go back',
+
+  // MCP Tool List
+  'No tools available for this server.': 'No tools available for this server.',
+  destructive: 'destructive',
+  'read-only': 'read-only',
+  'open-world': 'open-world',
+  idempotent: 'idempotent',
+  'Tools for {{name}}': 'Tools for {{name}}',
+  'Tools for {{serverName}}': 'Tools for {{serverName}}',
+  '{{current}}/{{total}}': '{{current}}/{{total}}',
+
+  // MCP Tool Detail
+  required: 'required',
+  Type: 'Type',
+  Enum: 'Enum',
+  Parameters: 'Parameters',
+  'No tool selected': 'No tool selected',
+  Annotations: 'Annotations',
+  Title: 'Title',
+  'Read Only': 'Read Only',
+  Destructive: 'Destructive',
+  Idempotent: 'Idempotent',
+  'Open World': 'Open World',
+  Server: 'Server',
+
+  // Invalid tool related translations
+  '{{count}} invalid tools': '{{count}} invalid tools',
+  invalid: 'invalid',
+  'invalid: {{reason}}': 'invalid: {{reason}}',
+  'missing name': 'missing name',
+  'missing description': 'missing description',
+  '(unnamed)': '(unnamed)',
+  'Warning: This tool cannot be called by the LLM':
+    'Warning: This tool cannot be called by the LLM',
+  Reason: 'Reason',
+  'Tools must have both name and description to be used by the LLM.':
+    'Tools must have both name and description to be used by the LLM.',
+
+  // ============================================================================
+  // Commands - Chat
+  // ============================================================================
+  'Manage conversation history.': 'Manage conversation history.',
+  'List saved conversation checkpoints': 'List saved conversation checkpoints',
   'No saved conversation checkpoints found.':
-    'Не найдено сохраненных точек восстановления диалога.',
-  'List of saved conversations:': 'Список сохраненных диалогов:',
-  'Note: Newest last, oldest first':
-    'Примечание: новые последними, старые первыми',
+    'No saved conversation checkpoints found.',
+  'List of saved conversations:': 'List of saved conversations:',
+  'Note: Newest last, oldest first': 'Note: Newest last, oldest first',
   'Save the current conversation as a checkpoint. Usage: /chat save <tag>':
-    'Сохранить текущий диалог как точку восстановления. Использование: /chat save <тег>',
+    'Save the current conversation as a checkpoint. Usage: /chat save <tag>',
   'Missing tag. Usage: /chat save <tag>':
-    'Отсутствует тег. Использование: /chat save <тег>',
+    'Missing tag. Usage: /chat save <tag>',
   'Delete a conversation checkpoint. Usage: /chat delete <tag>':
-    'Удалить точку восстановления диалога. Использование: /chat delete <тег>',
+    'Delete a conversation checkpoint. Usage: /chat delete <tag>',
   'Missing tag. Usage: /chat delete <tag>':
-    'Отсутствует тег. Использование: /chat delete <тег>',
+    'Missing tag. Usage: /chat delete <tag>',
   "Conversation checkpoint '{{tag}}' has been deleted.":
-    "Точка восстановления диалога '{{tag}}' удалена.",
+    "Conversation checkpoint '{{tag}}' has been deleted.",
   "Error: No checkpoint found with tag '{{tag}}'.":
-    "Ошибка: точка восстановления с тегом '{{tag}}' не найдена.",
+    "Error: No checkpoint found with tag '{{tag}}'.",
   'Resume a conversation from a checkpoint. Usage: /chat resume <tag>':
-    'Возобновить диалог из точки восстановления. Использование: /chat resume <тег>',
+    'Resume a conversation from a checkpoint. Usage: /chat resume <tag>',
   'Missing tag. Usage: /chat resume <tag>':
-    'Отсутствует тег. Использование: /chat resume <тег>',
+    'Missing tag. Usage: /chat resume <tag>',
   'No saved checkpoint found with tag: {{tag}}.':
-    'Не найдена сохраненная точка восстановления с тегом: {{tag}}.',
+    'No saved checkpoint found with tag: {{tag}}.',
   'A checkpoint with the tag {{tag}} already exists. Do you want to overwrite it?':
-    'Точка восстановления с тегом {{tag}} уже существует. Перезаписать?',
+    'A checkpoint with the tag {{tag}} already exists. Do you want to overwrite it?',
   'No chat client available to save conversation.':
-    'Нет доступного клиента чата для сохранения диалога.',
+    'No chat client available to save conversation.',
   'Conversation checkpoint saved with tag: {{tag}}.':
-    'Точка восстановления диалога сохранена с тегом: {{tag}}.',
-  'No conversation found to save.': 'Нет диалога для сохранения.',
+    'Conversation checkpoint saved with tag: {{tag}}.',
+  'No conversation found to save.': 'No conversation found to save.',
   'No chat client available to share conversation.':
-    'Нет доступного клиента чата для экспорта диалога.',
+    'No chat client available to share conversation.',
   'Invalid file format. Only .md and .json are supported.':
-    'Неверный формат файла. Поддерживаются только .md и .json.',
+    'Invalid file format. Only .md and .json are supported.',
   'Error sharing conversation: {{error}}':
-    'Ошибка при экспорте диалога: {{error}}',
-  'Conversation shared to {{filePath}}': 'Диалог экспортирован в {{filePath}}',
-  'No conversation found to share.': 'Нет диалога для экспорта.',
+    'Error sharing conversation: {{error}}',
+  'Conversation shared to {{filePath}}': 'Conversation shared to {{filePath}}',
+  'No conversation found to share.': 'No conversation found to share.',
   'Share the current conversation to a markdown or json file. Usage: /chat share <file>':
-    'Экспортировать текущий диалог в markdown или json файл. Использование: /chat share <файл>',
+    'Share the current conversation to a markdown or json file. Usage: /chat share <file>',
 
   // ============================================================================
-  // Команды - Резюме
+  // Commands - Summary
   // ============================================================================
-  'Generate a project summary and save it to .qwen/PROJECT_SUMMARY.md':
-    'Сгенерировать сводку проекта и сохранить её в .qwen/PROJECT_SUMMARY.md',
+  'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md':
+    'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md',
   'No chat client available to generate summary.':
-    'Нет доступного чат-клиента для генерации сводки.',
+    'No chat client available to generate summary.',
   'Already generating summary, wait for previous request to complete':
-    'Генерация сводки уже выполняется, дождитесь завершения предыдущего запроса',
-  'No conversation found to summarize.':
-    'Не найдено диалогов для создания сводки.',
+    'Already generating summary, wait for previous request to complete',
+  'No conversation found to summarize.': 'No conversation found to summarize.',
   'Failed to generate project context summary: {{error}}':
-    'Не удалось сгенерировать сводку контекста проекта: {{error}}',
+    'Failed to generate project context summary: {{error}}',
   'Saved project summary to {{filePathForDisplay}}.':
-    'Сводка проекта сохранена в {{filePathForDisplay}}',
-  'Saving project summary...': 'Сохранение сводки проекта...',
-  'Generating project summary...': 'Генерация сводки проекта...',
+    'Saved project summary to {{filePathForDisplay}}.',
+  'Saving project summary...': 'Saving project summary...',
+  'Generating project summary...': 'Generating project summary...',
   'Failed to generate summary - no text content received from LLM response':
-    'Не удалось сгенерировать сводку - не получен текстовый контент из ответа LLM',
+    'Failed to generate summary - no text content received from LLM response',
 
   // ============================================================================
-  // Команды - Модель
+  // Commands - Model
   // ============================================================================
-  'Switch the model for this session': 'Переключение модели для этой сессии',
+  'Switch the model for this session': 'Switch the model for this session',
   'Content generator configuration not available.':
-    'Конфигурация генератора содержимого недоступна.',
-  'Authentication type not available.': 'Тип авторизации недоступен.',
+    'Content generator configuration not available.',
+  'Authentication type not available.': 'Authentication type not available.',
   'No models available for the current authentication type ({{authType}}).':
-    'Нет доступных моделей для текущего типа авторизации ({{authType}}).',
+    'No models available for the current authentication type ({{authType}}).',
 
   // ============================================================================
-  // Команды - Очистка
+  // Commands - Clear
   // ============================================================================
   'Starting a new session, resetting chat, and clearing terminal.':
-    'Начало новой сессии, сброс чата и очистка терминала.',
-  'Starting a new session and clearing.': 'Начало новой сессии и очистка.',
+    'Starting a new session, resetting chat, and clearing terminal.',
+  'Starting a new session and clearing.':
+    'Starting a new session and clearing.',
 
   // ============================================================================
-  // Команды - Сжатие
+  // Commands - Compress
   // ============================================================================
   'Already compressing, wait for previous request to complete':
-    'Уже выполняется сжатие, дождитесь завершения предыдущего запроса',
-  'Failed to compress chat history.': 'Не удалось сжать историю чата.',
+    'Already compressing, wait for previous request to complete',
+  'Failed to compress chat history.': 'Failed to compress chat history.',
   'Failed to compress chat history: {{error}}':
-    'Не удалось сжать историю чата: {{error}}',
-  'Compressing chat history': 'Сжатие истории чата',
+    'Failed to compress chat history: {{error}}',
+  'Compressing chat history': 'Compressing chat history',
   'Chat history compressed from {{originalTokens}} to {{newTokens}} tokens.':
-    'История чата сжата с {{originalTokens}} до {{newTokens}} токенов.',
+    'Chat history compressed from {{originalTokens}} to {{newTokens}} tokens.',
   'Compression was not beneficial for this history size.':
-    'Сжатие не было полезным для этого размера истории.',
+    'Compression was not beneficial for this history size.',
   'Chat history compression did not reduce size. This may indicate issues with the compression prompt.':
-    'Сжатие истории чата не уменьшило размер. Это может указывать на проблемы с промптом сжатия.',
+    'Chat history compression did not reduce size. This may indicate issues with the compression prompt.',
   'Could not compress chat history due to a token counting error.':
-    'Не удалось сжать историю чата из-за ошибки подсчета токенов.',
-  'Chat history is already compressed.': 'История чата уже сжата.',
+    'Could not compress chat history due to a token counting error.',
+  'Chat history is already compressed.': 'Chat history is already compressed.',
 
   // ============================================================================
-  // Команды - Директория
+  // Commands - Directory
   // ============================================================================
-  'Configuration is not available.': 'Конфигурация недоступна.',
+  'Configuration is not available.': 'Configuration is not available.',
   'Please provide at least one path to add.':
-    'Пожалуйста, укажите хотя бы один путь для добавления.',
+    'Please provide at least one path to add.',
   'The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.':
-    'Команда /directory add не поддерживается в ограничительных профилях песочницы. Пожалуйста, используйте --include-directories при запуске сессии.',
-  "Error adding '{{path}}': {{error}}":
-    "Ошибка при добавлении '{{path}}': {{error}}",
-  'Successfully added QWEN.md files from the following directories if there are:\n- {{directories}}':
-    'Успешно добавлены файлы QWEN.md из следующих директорий (если они есть):\n- {{directories}}',
-  'Error refreshing memory: {{error}}':
-    'Ошибка при обновлении памяти: {{error}}',
+    'The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.',
+  "Error adding '{{path}}': {{error}}": "Error adding '{{path}}': {{error}}",
+  'Successfully added TRAM.md files from the following directories if there are:\n- {{directories}}':
+    'Successfully added TRAM.md files from the following directories if there are:\n- {{directories}}',
+  'Error refreshing memory: {{error}}': 'Error refreshing memory: {{error}}',
   'Successfully added directories:\n- {{directories}}':
-    'Успешно добавлены директории:\n- {{directories}}',
+    'Successfully added directories:\n- {{directories}}',
   'Current workspace directories:\n{{directories}}':
-    'Текущие директории рабочего пространства:\n{{directories}}',
+    'Current workspace directories:\n{{directories}}',
 
   // ============================================================================
-  // Команды - Документация
+  // Commands - Docs
   // ============================================================================
   'Please open the following URL in your browser to view the documentation:\n{{url}}':
-    'Пожалуйста, откройте следующий URL в браузере для просмотра документации:\n{{url}}',
+    'Please open the following URL in your browser to view the documentation:\n{{url}}',
   'Opening documentation in your browser: {{url}}':
-    'Открытие документации в браузере: {{url}}',
+    'Opening documentation in your browser: {{url}}',
 
   // ============================================================================
-  // Диалоги - Подтверждение инструментов
+  // Dialogs - Tool Confirmation
   // ============================================================================
-  'Do you want to proceed?': 'Вы хотите продолжить?',
-  'Yes, allow once': 'Да, разрешить один раз',
-  'Allow always': 'Всегда разрешать',
-  Yes: 'Да',
-  No: 'Нет',
-  'No (esc)': 'Нет (esc)',
-  'Yes, allow always for this session': 'Да, всегда разрешать для этой сессии',
-
-  // MCP Management - Core translations
-  Disable: 'Отключить',
-  Enable: 'Включить',
-  Authenticate: 'Аутентификация',
-  'Re-authenticate': 'Повторная аутентификация',
-  'Clear Authentication': 'Очистить аутентификацию',
-  disabled: 'отключен',
-  'Server:': 'Сервер:',
-  Reconnect: 'Переподключить',
-  'View tools': 'Просмотреть инструменты',
-  '(disabled)': '(отключен)',
-  'Error:': 'Ошибка:',
-  Extension: 'Расширение',
-  tool: 'инструмент',
-  connected: 'подключен',
-  connecting: 'подключение',
-  disconnected: 'отключен',
-  error: 'ошибка',
-  // Invalid tool related translations
-  '{{count}} invalid tools': '{{count}} недействительных инструментов',
-  invalid: 'недействительный',
-  'invalid: {{reason}}': 'недействительно: {{reason}}',
-  'missing name': 'отсутствует имя',
-  'missing description': 'отсутствует описание',
-  '(unnamed)': '(без имени)',
-  'Warning: This tool cannot be called by the LLM':
-    'Предупреждение: Этот инструмент не может быть вызван LLM',
-  Reason: 'Причина',
-  'Tools must have both name and description to be used by the LLM.':
-    'Инструменты должны иметь как имя, так и описание, чтобы использоваться LLM.',
-  'Modify in progress:': 'Идет изменение:',
+  'Do you want to proceed?': 'Do you want to proceed?',
+  'Yes, allow once': 'Yes, allow once',
+  'Allow always': 'Allow always',
+  Yes: 'Yes',
+  No: 'No',
+  'No (esc)': 'No (esc)',
+  'Yes, allow always for this session': 'Yes, allow always for this session',
+  'Modify in progress:': 'Modify in progress:',
   'Save and close external editor to continue':
-    'Сохраните и закройте внешний редактор для продолжения',
-  'Apply this change?': 'Применить это изменение?',
-  'Yes, allow always': 'Да, всегда разрешать',
-  'Modify with external editor': 'Изменить во внешнем редакторе',
-  'No, suggest changes (esc)': 'Нет, предложить изменения (esc)',
-  "Allow execution of: '{{command}}'?": "Разрешить выполнение: '{{command}}'?",
-  'Yes, allow always ...': 'Да, всегда разрешать ...',
-  'Yes, and auto-accept edits': 'Да, и автоматически принимать правки',
-  'Yes, and manually approve edits': 'Да, и вручную подтверждать правки',
-  'No, keep planning (esc)': 'Нет, продолжить планирование (esc)',
-  'URLs to fetch:': 'URL для загрузки:',
-  'MCP Server: {{server}}': 'MCP-сервер: {{server}}',
-  'Tool: {{tool}}': 'Инструмент: {{tool}}',
+    'Save and close external editor to continue',
+  'Apply this change?': 'Apply this change?',
+  'Yes, allow always': 'Yes, allow always',
+  'Modify with external editor': 'Modify with external editor',
+  'No, suggest changes (esc)': 'No, suggest changes (esc)',
+  "Allow execution of: '{{command}}'?": "Allow execution of: '{{command}}'?",
+  'Yes, allow always ...': 'Yes, allow always ...',
+  'Yes, and auto-accept edits': 'Yes, and auto-accept edits',
+  'Yes, and manually approve edits': 'Yes, and manually approve edits',
+  'No, keep planning (esc)': 'No, keep planning (esc)',
+  'URLs to fetch:': 'URLs to fetch:',
+  'MCP Server: {{server}}': 'MCP Server: {{server}}',
+  'Tool: {{tool}}': 'Tool: {{tool}}',
   'Allow execution of MCP tool "{{tool}}" from server "{{server}}"?':
-    'Разрешить выполнение инструмента MCP "{{tool}}" с сервера "{{server}}"?',
+    'Allow execution of MCP tool "{{tool}}" from server "{{server}}"?',
   'Yes, always allow tool "{{tool}}" from server "{{server}}"':
-    'Да, всегда разрешать инструмент "{{tool}}" с сервера "{{server}}"',
+    'Yes, always allow tool "{{tool}}" from server "{{server}}"',
   'Yes, always allow all tools from server "{{server}}"':
-    'Да, всегда разрешать все инструменты с сервера "{{server}}"',
+    'Yes, always allow all tools from server "{{server}}"',
 
   // ============================================================================
-  // Диалоги - Подтверждение оболочки
+  // Dialogs - Shell Confirmation
   // ============================================================================
-  'Shell Command Execution': 'Выполнение команды терминала',
+  'Shell Command Execution': 'Shell Command Execution',
   'A custom command wants to run the following shell commands:':
-    'Пользовательская команда хочет выполнить следующие команды терминала:',
+    'A custom command wants to run the following shell commands:',
 
   // ============================================================================
-  // Диалоги - Квота подписки Pro
+  // Dialogs - Pro Quota
   // ============================================================================
   'Pro quota limit reached for {{model}}.':
-    'Исчерпана квота подписки Pro для {{model}}.',
+    'Pro quota limit reached for {{model}}.',
   'Change auth (executes the /auth command)':
-    'Изменить авторизацию (выполняет команду /auth)',
-  'Continue with {{model}}': 'Продолжить с {{model}}',
+    'Change auth (executes the /auth command)',
+  'Continue with {{model}}': 'Continue with {{model}}',
 
   // ============================================================================
-  // Диалоги - Приветствие при возвращении
+  // Dialogs - Welcome Back
   // ============================================================================
-  'Current Plan:': 'Текущий план:',
+  'Current Plan:': 'Current Plan:',
   'Progress: {{done}}/{{total}} tasks completed':
-    'Прогресс: {{done}}/{{total}} задач выполнено',
-  ', {{inProgress}} in progress': ', {{inProgress}} в процессе',
-  'Pending Tasks:': 'Ожидающие задачи:',
-  'What would you like to do?': 'Что вы хотите сделать?',
+    'Progress: {{done}}/{{total}} tasks completed',
+  ', {{inProgress}} in progress': ', {{inProgress}} in progress',
+  'Pending Tasks:': 'Pending Tasks:',
+  'What would you like to do?': 'What would you like to do?',
   'Choose how to proceed with your session:':
-    'Выберите, как продолжить сессию:',
-  'Start new chat session': 'Начать новую сессию чата',
-  'Continue previous conversation': 'Продолжить предыдущий диалог',
-  '👋 Welcome back! (Last updated: {{timeAgo}})':
-    '👋 С возвращением! (Последнее обновление: {{timeAgo}})',
-  '🎯 Overall Goal:': '🎯 Общая цель:',
+    'Choose how to proceed with your session:',
+  'Start new chat session': 'Start new chat session',
+  'Continue previous conversation': 'Continue previous conversation',
+  '濡絽鍟崯?Welcome back! (Last updated: {{timeAgo}})':
+    '濡絽鍟崯?Welcome back! (Last updated: {{timeAgo}})',
+  '濡絽鍟粻?Overall Goal:': '濡絽鍟粻?Overall Goal:',
 
   // ============================================================================
-  // Диалоги - Авторизация
+  // Dialogs - Auth
   // ============================================================================
-  'Get started': 'Начать',
-  'Select Authentication Method': 'Выберите метод авторизации',
+  'Get started': 'Get started',
+  'Select Authentication Method': 'Select Authentication Method',
   'OpenAI API key is required to use OpenAI authentication.':
-    'Для использования авторизации OpenAI требуется ключ API OpenAI.',
+    'OpenAI API key is required to use OpenAI authentication.',
   'You must select an auth method to proceed. Press Ctrl+C again to exit.':
-    'Вы должны выбрать метод авторизации для продолжения. Нажмите Ctrl+C снова для выхода.',
+    'You must select an auth method to proceed. Press Ctrl+C again to exit.',
   'Terms of Services and Privacy Notice':
-    'Условия обслуживания и уведомление о конфиденциальности',
-  'Qwen OAuth': 'Qwen OAuth',
-  'Free \u00B7 Up to 1,000 requests/day \u00B7 Qwen latest models':
-    'Бесплатно \u00B7 До 1 000 запросов/день \u00B7 Новейшие модели Qwen',
-  'Login with QwenChat account to use daily free quota.':
-    'Войдите с помощью аккаунта QwenChat, чтобы использовать ежедневную бесплатную квоту.',
+    'Terms of Services and Privacy Notice',
+  'TRAM OAuth': 'TRAM OAuth',
+  'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models':
+    'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models',
+  'Login with TramChat account to use daily free quota.':
+    'Login with TramChat account to use daily free quota.',
   'Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models':
-    'Платно \u00B7 До 6 000 запросов/5 часов \u00B7 Все модели Alibaba Cloud Coding Plan',
+    'Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models',
   'Alibaba Cloud Coding Plan': 'Alibaba Cloud Coding Plan',
-  'Bring your own API key': 'Используйте свой API-ключ',
+  'Bring your own API key': 'Bring your own API key',
   'API-KEY': 'API-KEY',
   'Use coding plan credentials or your own api-keys/providers.':
-    'Используйте учетные данные Coding Plan или свои собственные API-ключи/провайдеры.',
+    'Use coding plan credentials or your own api-keys/providers.',
   OpenAI: 'OpenAI',
   'Failed to login. Message: {{message}}':
-    'Не удалось войти. Сообщение: {{message}}',
+    'Failed to login. Message: {{message}}',
   'Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.':
-    'Авторизация должна быть {{enforcedType}}, но вы сейчас используете {{currentType}}.',
-  'Qwen OAuth authentication timed out. Please try again.':
-    'Время ожидания авторизации Qwen OAuth истекло. Пожалуйста, попробуйте снова.',
-  'Qwen OAuth authentication cancelled.': 'Авторизация Qwen OAuth отменена.',
-  'Qwen OAuth Authentication': 'Авторизация Qwen OAuth',
-  'Please visit this URL to authorize:':
-    'Пожалуйста, посетите этот URL для авторизации:',
-  'Or scan the QR code below:': 'Или отсканируйте QR-код ниже:',
-  'Waiting for authorization': 'Ожидание авторизации',
-  'Time remaining:': 'Осталось времени:',
-  '(Press ESC or CTRL+C to cancel)': '(Нажмите ESC или CTRL+C для отмены)',
-  'Qwen OAuth Authentication Timeout': 'Таймаут авторизации Qwen OAuth',
+    'Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.',
+  'TRAM OAuth authentication timed out. Please try again.':
+    'TRAM OAuth authentication timed out. Please try again.',
+  'TRAM OAuth authentication cancelled.':
+    'TRAM OAuth authentication cancelled.',
+  'TRAM OAuth Authentication': 'TRAM OAuth Authentication',
+  'Please visit this URL to authorize:': 'Please visit this URL to authorize:',
+  'Or scan the QR code below:': 'Or scan the QR code below:',
+  'Waiting for authorization': 'Waiting for authorization',
+  'Time remaining:': 'Time remaining:',
+  '(Press ESC or CTRL+C to cancel)': '(Press ESC or CTRL+C to cancel)',
+  'TRAM OAuth Authentication Timeout': 'TRAM OAuth Authentication Timeout',
   'OAuth token expired (over {{seconds}} seconds). Please select authentication method again.':
-    'Токен OAuth истек (более {{seconds}} секунд). Пожалуйста, выберите метод авторизации снова.',
+    'OAuth token expired (over {{seconds}} seconds). Please select authentication method again.',
   'Press any key to return to authentication type selection.':
-    'Нажмите любую клавишу для возврата к выбору типа авторизации.',
-  'Waiting for Qwen OAuth authentication...':
-    'Ожидание авторизации Qwen OAuth...',
-  'Note: Your existing API key in settings.json will not be cleared when using Qwen OAuth. You can switch back to OpenAI authentication later if needed.':
-    'Примечание: Ваш существующий ключ API в settings.json не будет удален при использовании Qwen OAuth. Вы можете переключиться обратно на авторизацию OpenAI позже при необходимости.',
-  'Note: Your existing API key will not be cleared when using Qwen OAuth.':
-    'Примечание: Ваш существующий ключ API не будет удален при использовании Qwen OAuth.',
+    'Press any key to return to authentication type selection.',
+  'Waiting for TRAM OAuth authentication...':
+    'Waiting for TRAM OAuth authentication...',
+  'Note: Your existing API key in settings.json will not be cleared when using TRAM OAuth. You can switch back to OpenAI authentication later if needed.':
+    'Note: Your existing API key in settings.json will not be cleared when using TRAM OAuth. You can switch back to OpenAI authentication later if needed.',
+  'Note: Your existing API key will not be cleared when using TRAM OAuth.':
+    'Note: Your existing API key will not be cleared when using TRAM OAuth.',
   'Authentication timed out. Please try again.':
-    'Время ожидания авторизации истекло. Пожалуйста, попробуйте снова.',
+    'Authentication timed out. Please try again.',
   'Waiting for auth... (Press ESC or CTRL+C to cancel)':
-    'Ожидание авторизации... (Нажмите ESC или CTRL+C для отмены)',
+    'Waiting for auth... (Press ESC or CTRL+C to cancel)',
   'Missing API key for OpenAI-compatible auth. Set settings.security.auth.apiKey, or set the {{envKeyHint}} environment variable.':
-    'Отсутствует API-ключ для аутентификации, совместимой с OpenAI. Укажите settings.security.auth.apiKey или переменную окружения {{envKeyHint}}.',
+    'Missing API key for OpenAI-compatible auth. Set settings.security.auth.apiKey, or set the {{envKeyHint}} environment variable.',
   '{{envKeyHint}} environment variable not found.':
-    'Переменная окружения {{envKeyHint}} не найдена.',
+    '{{envKeyHint}} environment variable not found.',
   '{{envKeyHint}} environment variable not found. Please set it in your .env file or environment variables.':
-    'Переменная окружения {{envKeyHint}} не найдена. Укажите её в файле .env или среди системных переменных.',
+    '{{envKeyHint}} environment variable not found. Please set it in your .env file or environment variables.',
   '{{envKeyHint}} environment variable not found (or set settings.security.auth.apiKey). Please set it in your .env file or environment variables.':
-    'Переменная окружения {{envKeyHint}} не найдена (или установите settings.security.auth.apiKey). Укажите её в файле .env или среди системных переменных.',
+    '{{envKeyHint}} environment variable not found (or set settings.security.auth.apiKey). Please set it in your .env file or environment variables.',
   'Missing API key for OpenAI-compatible auth. Set the {{envKeyHint}} environment variable.':
-    'Отсутствует API-ключ для аутентификации, совместимой с OpenAI. Установите переменную окружения {{envKeyHint}}.',
+    'Missing API key for OpenAI-compatible auth. Set the {{envKeyHint}} environment variable.',
   'Anthropic provider missing required baseUrl in modelProviders[].baseUrl.':
-    'У провайдера Anthropic отсутствует обязательный baseUrl в modelProviders[].baseUrl.',
+    'Anthropic provider missing required baseUrl in modelProviders[].baseUrl.',
   'ANTHROPIC_BASE_URL environment variable not found.':
-    'Переменная окружения ANTHROPIC_BASE_URL не найдена.',
-  'Invalid auth method selected.': 'Выбран недопустимый метод авторизации.',
+    'ANTHROPIC_BASE_URL environment variable not found.',
+  'Invalid auth method selected.': 'Invalid auth method selected.',
   'Failed to authenticate. Message: {{message}}':
-    'Не удалось авторизоваться. Сообщение: {{message}}',
+    'Failed to authenticate. Message: {{message}}',
   'Authenticated successfully with {{authType}} credentials.':
-    'Успешно авторизовано с учетными данными {{authType}}.',
-  'Invalid QWEN_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}':
-    'Неверное значение QWEN_DEFAULT_AUTH_TYPE: "{{value}}". Допустимые значения: {{validValues}}',
-  'OpenAI Configuration Required': 'Требуется конфигурация OpenAI',
+    'Authenticated successfully with {{authType}} credentials.',
+  'Invalid TRAM_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}':
+    'Invalid TRAM_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}',
+  'OpenAI Configuration Required': 'OpenAI Configuration Required',
   'Please enter your OpenAI configuration. You can get an API key from':
-    'Пожалуйста, введите конфигурацию OpenAI. Вы можете получить ключ API на',
-  'API Key:': 'Ключ API:',
+    'Please enter your OpenAI configuration. You can get an API key from',
+  'API Key:': 'API Key:',
   'Invalid credentials: {{errorMessage}}':
-    'Неверные учетные данные: {{errorMessage}}',
-  'Failed to validate credentials': 'Не удалось проверить учетные данные',
-  'Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel':
-    'Enter для продолжения, Tab/↑↓ для навигации, Esc для отмены',
+    'Invalid credentials: {{errorMessage}}',
+  'Failed to validate credentials': 'Failed to validate credentials',
+  'Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel':
+    'Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel',
 
   // ============================================================================
-  // Диалоги - Модель
+  // Dialogs - Model
   // ============================================================================
-  'Select Model': 'Выбрать модель',
-  '(Press Esc to close)': '(Нажмите Esc для закрытия)',
-  'Current (effective) configuration': 'Текущая (фактическая) конфигурация',
-  AuthType: 'Тип авторизации',
-  'API Key': 'API-ключ',
-  unset: 'не задано',
-  '(default)': '(по умолчанию)',
-  '(set)': '(установлено)',
-  '(not set)': '(не задано)',
-  Modality: 'Модальность',
-  'Context Window': 'Контекстное окно',
-  text: 'текст',
-  'text-only': 'только текст',
-  image: 'изображение',
-  pdf: 'PDF',
-  audio: 'аудио',
-  video: 'видео',
-  'not set': 'не задано',
-  none: 'нет',
-  unknown: 'неизвестно',
+  'Select Model': 'Select Model',
+  '(Press Esc to close)': '(Press Esc to close)',
+  'Current (effective) configuration': 'Current (effective) configuration',
+  AuthType: 'AuthType',
+  'API Key': 'API Key',
+  unset: 'unset',
+  '(default)': '(default)',
+  '(set)': '(set)',
+  '(not set)': '(not set)',
+  Modality: 'Modality',
+  'Context Window': 'Context Window',
+  text: 'text',
+  'text-only': 'text-only',
+  image: 'image',
+  pdf: 'pdf',
+  audio: 'audio',
+  video: 'video',
+  'not set': 'not set',
+  none: 'none',
+  unknown: 'unknown',
   "Failed to switch model to '{{modelId}}'.\n\n{{error}}":
-    "Не удалось переключиться на модель '{{modelId}}'.\n\n{{error}}",
-  'Qwen 3.5 Plus — efficient hybrid model with leading coding performance':
-    'Qwen 3.5 Plus — эффективная гибридная модель с лидирующей производительностью в программировании',
-  'The latest Qwen Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
-    'Последняя модель Qwen Vision от Alibaba Cloud ModelStudio (версия: qwen3-vl-plus-2025-09-23)',
+    "Failed to switch model to '{{modelId}}'.\n\n{{error}}",
+  'Tram 3.5 Plus 闂?efficient hybrid model with leading coding performance':
+    'Tram 3.5 Plus 闂?efficient hybrid model with leading coding performance',
+  'The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
+    'The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)',
 
   // ============================================================================
-  // Диалоги - Разрешения
+  // Dialogs - Permissions
   // ============================================================================
-  'Manage folder trust settings': 'Управление настройками доверия к папкам',
+  'Manage folder trust settings': 'Manage folder trust settings',
 
   // ============================================================================
-  // Строка состояния
+  // Status Bar
   // ============================================================================
-  'Using:': 'Используется:',
-  '{{count}} open file': '{{count}} открытый файл',
-  '{{count}} open files': '{{count}} открытых файла(ов)',
-  '(ctrl+g to view)': '(ctrl+g для просмотра)',
-  '{{count}} {{name}} file': '{{count}} файл {{name}}',
-  '{{count}} {{name}} files': '{{count}} файла(ов) {{name}}',
-  '{{count}} MCP server': '{{count}} MCP-сервер',
-  '{{count}} MCP servers': '{{count}} MCP-сервера(ов)',
-  '{{count}} Blocked': '{{count}} заблокирован(о)',
-  '(ctrl+t to view)': '(ctrl+t для просмотра)',
-  '(ctrl+t to toggle)': '(ctrl+t для переключения)',
-  'Press Ctrl+C again to exit.': 'Нажмите Ctrl+C снова для выхода.',
-  'Press Ctrl+D again to exit.': 'Нажмите Ctrl+D снова для выхода.',
-  'Press Esc again to clear.': 'Нажмите Esc снова для очистки.',
+  'Using:': 'Using:',
+  '{{count}} open file': '{{count}} open file',
+  '{{count}} open files': '{{count}} open files',
+  '(ctrl+g to view)': '(ctrl+g to view)',
+  '{{count}} {{name}} file': '{{count}} {{name}} file',
+  '{{count}} {{name}} files': '{{count}} {{name}} files',
+  '{{count}} MCP server': '{{count}} MCP server',
+  '{{count}} MCP servers': '{{count}} MCP servers',
+  '{{count}} Blocked': '{{count}} Blocked',
+  '(ctrl+t to view)': '(ctrl+t to view)',
+  '(ctrl+t to toggle)': '(ctrl+t to toggle)',
+  'Press Ctrl+C again to exit.': 'Press Ctrl+C again to exit.',
+  'Press Ctrl+D again to exit.': 'Press Ctrl+D again to exit.',
+  'Press Esc again to clear.': 'Press Esc again to clear.',
 
   // ============================================================================
-  // Статус MCP
+  // MCP Status
   // ============================================================================
-  'No MCP servers configured.': 'Не настроено MCP-серверов.',
-  '⏳ MCP servers are starting up ({{count}} initializing)...':
-    '⏳ MCP-серверы запускаются ({{count}} инициализируется)...',
+  'No MCP servers configured.': 'No MCP servers configured.',
+  '闂?MCP servers are starting up ({{count}} initializing)...':
+    '闂?MCP servers are starting up ({{count}} initializing)...',
   'Note: First startup may take longer. Tool availability will update automatically.':
-    'Примечание: Первый запуск может занять больше времени. Доступность инструментов обновится автоматически.',
-  'Configured MCP servers:': 'Настроенные MCP-серверы:',
-  Ready: 'Готов',
+    'Note: First startup may take longer. Tool availability will update automatically.',
+  'Configured MCP servers:': 'Configured MCP servers:',
+  Ready: 'Ready',
   'Starting... (first startup may take longer)':
-    'Запуск... (первый запуск может занять больше времени)',
-  Disconnected: 'Отключен',
-  '{{count}} tool': '{{count}} инструмент',
-  '{{count}} tools': '{{count}} инструмента(ов)',
-  '{{count}} prompt': '{{count}} промпт',
-  '{{count}} prompts': '{{count}} промпта(ов)',
-  '(from {{extensionName}})': '(от {{extensionName}})',
+    'Starting... (first startup may take longer)',
+  Disconnected: 'Disconnected',
+  '{{count}} tool': '{{count}} tool',
+  '{{count}} tools': '{{count}} tools',
+  '{{count}} prompt': '{{count}} prompt',
+  '{{count}} prompts': '{{count}} prompts',
+  '(from {{extensionName}})': '(from {{extensionName}})',
   OAuth: 'OAuth',
-  'OAuth expired': 'OAuth истек',
-  'OAuth not authenticated': 'OAuth не авторизован',
+  'OAuth expired': 'OAuth expired',
+  'OAuth not authenticated': 'OAuth not authenticated',
   'tools and prompts will appear when ready':
-    'инструменты и промпты появятся, когда будут готовы',
-  '{{count}} tools cached': '{{count}} инструмента(ов) в кэше',
-  'Tools:': 'Инструменты:',
-  'Parameters:': 'Параметры:',
-  'Prompts:': 'Промпты:',
-  Blocked: 'Заблокировано',
-  '💡 Tips:': '💡 Подсказки:',
-  Use: 'Используйте',
+    'tools and prompts will appear when ready',
+  '{{count}} tools cached': '{{count}} tools cached',
+  'Tools:': 'Tools:',
+  'Parameters:': 'Parameters:',
+  'Prompts:': 'Prompts:',
+  Blocked: 'Blocked',
+  '濡絽鍟€?Tips:': '濡絽鍟€?Tips:',
+  Use: 'Use',
   'to show server and tool descriptions':
-    'для показа описаний сервера и инструментов',
-  'to show tool parameter schemas': 'для показа схем параметров инструментов',
-  'to hide descriptions': 'для скрытия описаний',
+    'to show server and tool descriptions',
+  'to show tool parameter schemas': 'to show tool parameter schemas',
+  'to hide descriptions': 'to hide descriptions',
   'to authenticate with OAuth-enabled servers':
-    'для авторизации на серверах с поддержкой OAuth',
-  Press: 'Нажмите',
-  'to toggle tool descriptions on/off':
-    'для переключения описаний инструментов',
+    'to authenticate with OAuth-enabled servers',
+  Press: 'Press',
+  'to toggle tool descriptions on/off': 'to toggle tool descriptions on/off',
   "Starting OAuth authentication for MCP server '{{name}}'...":
-    "Начало авторизации OAuth для MCP-сервера '{{name}}'...",
-  'Restarting MCP servers...': 'Перезапуск MCP-серверов...',
+    "Starting OAuth authentication for MCP server '{{name}}'...",
+  'Restarting MCP servers...': 'Restarting MCP servers...',
 
   // ============================================================================
-  // Подсказки при запуске
+  // Startup Tips
   // ============================================================================
-  'Tips for getting started:': 'Подсказки для начала работы:',
-  '1. Ask questions, edit files, or run commands.':
-    '1. Задавайте вопросы, редактируйте файлы или выполняйте команды.',
-  '2. Be specific for the best results.':
-    '2. Будьте конкретны для лучших результатов.',
-  'files to customize your interactions with Qwen Code.':
-    'файлы для настройки взаимодействия с Qwen Code.',
-  'for more information.': 'для получения дополнительной информации.',
+  'Tips:': 'Tips:',
+  'Use /compress when the conversation gets long to summarize history and free up context.':
+    'Use /compress when the conversation gets long to summarize history and free up context.',
+  'Start a fresh idea with /clear or /new; the previous session stays available in history.':
+    'Start a fresh idea with /clear or /new; the previous session stays available in history.',
+  'Use /bug to submit issues to the maintainers when something goes off.':
+    'Use /bug to submit issues to the maintainers when something goes off.',
+  'Switch auth type quickly with /auth.':
+    'Switch auth type quickly with /auth.',
+  'You can run any shell commands from TRAM using ! (e.g. !ls).':
+    'You can run any shell commands from TRAM using ! (e.g. !ls).',
+  'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.':
+    'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.',
+  'You can resume a previous conversation by running tram --continue or tram --resume.':
+    'You can resume a previous conversation by running tram --continue or tram --resume.',
+  'You can switch permission mode quickly with Shift+Tab or /approval-mode.':
+    'You can switch permission mode quickly with Shift+Tab or /approval-mode.',
+  'You can switch permission mode quickly with Tab or /approval-mode.':
+    'You can switch permission mode quickly with Tab or /approval-mode.',
+  'Try /insight to generate personalized insights from your chat history.':
+    'Try /insight to generate personalized insights from your chat history.',
 
   // ============================================================================
-  // Экран выхода / Статистика
+  // Exit Screen / Stats
   // ============================================================================
-  'Agent powering down. Goodbye!': 'Агент завершает работу. До свидания!',
-  'To continue this session, run': 'Для продолжения этой сессии, выполните',
-  'Interaction Summary': 'Сводка взаимодействия',
-  'Session ID:': 'ID сессии:',
-  'Tool Calls:': 'Вызовы инструментов:',
-  'Success Rate:': 'Процент успеха:',
-  'User Agreement:': 'Согласие пользователя:',
-  reviewed: 'проверено',
-  'Code Changes:': 'Изменения кода:',
-  Performance: 'Производительность',
-  'Wall Time:': 'Общее время:',
-  'Agent Active:': 'Активность агента:',
-  'API Time:': 'Время API:',
-  'Tool Time:': 'Время инструментов:',
-  'Session Stats': 'Статистика сессии',
-  'Model Usage': 'Использование модели',
-  Reqs: 'Запросов',
-  'Input Tokens': 'Входных токенов',
-  'Output Tokens': 'Выходных токенов',
-  'Savings Highlight:': 'Экономия:',
+  'Agent powering down. Goodbye!': 'Agent powering down. Goodbye!',
+  'To continue this session, run': 'To continue this session, run',
+  'Interaction Summary': 'Interaction Summary',
+  'Session ID:': 'Session ID:',
+  'Tool Calls:': 'Tool Calls:',
+  'Success Rate:': 'Success Rate:',
+  'User Agreement:': 'User Agreement:',
+  reviewed: 'reviewed',
+  'Code Changes:': 'Code Changes:',
+  Performance: 'Performance',
+  'Wall Time:': 'Wall Time:',
+  'Agent Active:': 'Agent Active:',
+  'API Time:': 'API Time:',
+  'Tool Time:': 'Tool Time:',
+  'Session Stats': 'Session Stats',
+  'Model Usage': 'Model Usage',
+  Reqs: 'Reqs',
+  'Input Tokens': 'Input Tokens',
+  'Output Tokens': 'Output Tokens',
+  'Savings Highlight:': 'Savings Highlight:',
   'of input tokens were served from the cache, reducing costs.':
-    'входных токенов обслужено из кэша, снижая затраты.',
+    'of input tokens were served from the cache, reducing costs.',
   'Tip: For a full token breakdown, run `/stats model`.':
-    'Подсказка: Для полной разбивки токенов выполните `/stats model`.',
-  'Model Stats For Nerds': 'Статистика модели для гиков',
-  'Tool Stats For Nerds': 'Статистика инструментов для гиков',
-  Metric: 'Метрика',
+    'Tip: For a full token breakdown, run `/stats model`.',
+  'Model Stats For Nerds': 'Model Stats For Nerds',
+  'Tool Stats For Nerds': 'Tool Stats For Nerds',
+  Metric: 'Metric',
   API: 'API',
-  Requests: 'Запросы',
-  Errors: 'Ошибки',
-  'Avg Latency': 'Средняя задержка',
-  Tokens: 'Токены',
-  Total: 'Всего',
-  Prompt: 'Промпт',
-  Cached: 'Кэшировано',
-  Thoughts: 'Размышления',
-  Tool: 'Инструмент',
-  Output: 'Вывод',
+  Requests: 'Requests',
+  Errors: 'Errors',
+  'Avg Latency': 'Avg Latency',
+  Tokens: 'Tokens',
+  Total: 'Total',
+  Prompt: 'Prompt',
+  Cached: 'Cached',
+  Thoughts: 'Thoughts',
+  Tool: 'Tool',
+  Output: 'Output',
   'No API calls have been made in this session.':
-    'В этой сессии не было вызовов API.',
-  'Tool Name': 'Имя инструмента',
-  Calls: 'Вызовы',
-  'Success Rate': 'Процент успеха',
-  'Avg Duration': 'Средняя длительность',
-  'User Decision Summary': 'Сводка решений пользователя',
-  'Total Reviewed Suggestions:': 'Всего проверено предложений:',
-  ' » Accepted:': ' » Принято:',
-  ' » Rejected:': ' » Отклонено:',
-  ' » Modified:': ' » Изменено:',
-  ' Overall Agreement Rate:': ' Общий процент согласия:',
+    'No API calls have been made in this session.',
+  'Tool Name': 'Tool Name',
+  Calls: 'Calls',
+  'Success Rate': 'Success Rate',
+  'Avg Duration': 'Avg Duration',
+  'User Decision Summary': 'User Decision Summary',
+  'Total Reviewed Suggestions:': 'Total Reviewed Suggestions:',
+  ' 缂?Accepted:': ' 缂?Accepted:',
+  ' 缂?Rejected:': ' 缂?Rejected:',
+  ' 缂?Modified:': ' 缂?Modified:',
+  ' Overall Agreement Rate:': ' Overall Agreement Rate:',
   'No tool calls have been made in this session.':
-    'В этой сессии не было вызовов инструментов.',
+    'No tool calls have been made in this session.',
   'Session start time is unavailable, cannot calculate stats.':
-    'Время начала сессии недоступно, невозможно рассчитать статистику.',
+    'Session start time is unavailable, cannot calculate stats.',
 
   // ============================================================================
   // Command Format Migration
   // ============================================================================
-  'Command Format Migration': 'Миграция формата команд',
-  'Found {{count}} TOML command file:': 'Найден {{count}} файл команд TOML:',
-  'Found {{count}} TOML command files:':
-    'Найдено {{count}} файлов команд TOML:',
-  '... and {{count}} more': '... и ещё {{count}}',
+  'Command Format Migration': 'Command Format Migration',
+  'Found {{count}} TOML command file:': 'Found {{count}} TOML command file:',
+  'Found {{count}} TOML command files:': 'Found {{count}} TOML command files:',
+  '... and {{count}} more': '... and {{count}} more',
   'The TOML format is deprecated. Would you like to migrate them to Markdown format?':
-    'Формат TOML устарел. Хотите перенести их в формат Markdown?',
+    'The TOML format is deprecated. Would you like to migrate them to Markdown format?',
   '(Backups will be created and original files will be preserved)':
-    '(Будут созданы резервные копии, исходные файлы будут сохранены)',
+    '(Backups will be created and original files will be preserved)',
 
   // ============================================================================
   // Loading Phrases
   // ============================================================================
-  'Waiting for user confirmation...':
-    'Ожидание подтверждения от пользователя...',
-  '(esc to cancel, {{time}})': '(esc для отмены, {{time}})',
-
-  // ============================================================================
+  'Waiting for user confirmation...': 'Waiting for user confirmation...',
+  '(esc to cancel, {{time}})': '(esc to cancel, {{time}})',
 
   // ============================================================================
   // Loading Phrases
   // ============================================================================
   WITTY_LOADING_PHRASES: [
-    'Мне повезёт!',
-    'Доставляем крутизну... ',
-    'Рисуем засечки на буквах...',
-    'Пробираемся через слизевиков..',
-    'Советуемся с цифровыми духами...',
-    'Сглаживание сплайнов...',
-    'Разогреваем ИИ-хомячков...',
-    'Спрашиваем волшебную ракушку...',
-    'Генерируем остроумный ответ...',
-    'Полируем алгоритмы...',
-    'Не торопите совершенство (или мой код)...',
-    'Завариваем свежие байты...',
-    'Пересчитываем электроны...',
-    'Задействуем когнитивные процессоры...',
-    'Ищем синтаксические ошибки во вселенной...',
-    'Секундочку, оптимизируем юмор...',
-    'Перетасовываем панчлайны...',
-    'Распутаваем нейросети...',
-    'Компилируем гениальность...',
-    'Загружаем yumor.exe...',
-    'Призываем облако мудрости...',
-    'Готовим остроумный ответ...',
-    'Секунду, идёт отладка реальности...',
-    'Запутываем варианты...',
-    'Настраиваем космические частоты...',
-    'Создаем ответ, достойный вашего терпения...',
-    'Компилируем единички и нолики...',
-    'Разрешаем зависимости... и экзистенциальные кризисы...',
-    'Дефрагментация памяти... и оперативной, и личной...',
-    'Перезагрузка модуля юмора...',
-    'Кэшируем самое важное (в основном мемы с котиками)...',
-    'Оптимизация для безумной скорости',
-    'Меняем биты... только байтам не говорите...',
-    'Сборка мусора... скоро вернусь...',
-    'Сборка интернетов...',
-    'Превращаем кофе в код...',
-    'Обновляем синтаксис реальности...',
-    'Переподключаем синапсы...',
-    'Ищем лишнюю точку с запятой...',
-    'Смазываем шестерёнки машины...',
-    'Разогреваем серверы...',
-    'Калибруем потоковый накопитель...',
-    'Включаем двигатель невероятности...',
-    'Направляем Силу...',
-    'Выравниваем звёзды для оптимального ответа...',
-    'Так скажем мы все...',
-    'Загрузка следующей великой идеи...',
-    'Минутку, я в потоке...',
-    'Готовлюсь ослепить вас гениальностью...',
-    'Секунду, полирую остроумие...',
-    'Держитесь, создаю шедевр...',
-    'Мигом, отлаживаю вселенную...',
-    'Момент, выравниваю пиксели...',
-    'Секунду, оптимизирую юмор...',
-    'Момент, настраиваю алгоритмы...',
-    'Варп-прыжок активирован...',
-    'Добываем кристаллы дилития...',
-    'Без паники...',
-    'Следуем за белым кроликом...',
-    'Истина где-то здесь... внутри...',
-    'Продуваем картридж...',
-    'Загрузка... Сделай бочку!',
-    'Ждем респауна...',
-    'Делаем Дугу Кесселя менее чем за 12 парсеков...',
-    'Тортик — не ложь, он просто ещё грузится...',
-    'Возимся с экраном создания персонажа...',
-    'Минутку, ищу подходящий мем...',
-    "Нажимаем 'A' для продолжения...",
-    'Пасём цифровых котов...',
-    'Полируем пиксели...',
-    'Ищем подходящий каламбур для экрана загрузки...',
-    'Отвлекаем вас этой остроумной фразой...',
-    'Почти готово... вроде...',
-    'Наши хомячки работают изо всех сил...',
-    'Гладим Облачко по голове...',
-    'Гладим кота...',
-    'Рикроллим начальника...',
+    "I'm Feeling Lucky",
+    'Shipping awesomeness... ',
+    'Painting the serifs back on...',
+    'Navigating the slime mold...',
+    'Consulting the digital spirits...',
+    'Reticulating splines...',
+    'Warming up the AI hamsters...',
+    'Asking the magic conch shell...',
+    'Generating witty retort...',
+    'Polishing the algorithms...',
+    "Don't rush perfection (or my code)...",
+    'Brewing fresh bytes...',
+    'Counting electrons...',
+    'Engaging cognitive processors...',
+    'Checking for syntax errors in the universe...',
+    'One moment, optimizing humor...',
+    'Shuffling punchlines...',
+    'Untangling neural nets...',
+    'Compiling brilliance...',
+    'Loading wit.exe...',
+    'Summoning the cloud of wisdom...',
+    'Preparing a witty response...',
+    "Just a sec, I'm debugging reality...",
+    'Confuzzling the options...',
+    'Tuning the cosmic frequencies...',
+    'Crafting a response worthy of your patience...',
+    'Compiling the 1s and 0s...',
+    'Resolving dependencies... and existential crises...',
+    'Defragmenting memories... both RAM and personal...',
+    'Rebooting the humor module...',
+    'Caching the essentials (mostly cat memes)...',
+    'Optimizing for ludicrous speed',
+    "Swapping bits... don't tell the bytes...",
+    'Garbage collecting... be right back...',
+    'Assembling the interwebs...',
+    'Converting coffee into code...',
+    'Updating the syntax for reality...',
+    'Rewiring the synapses...',
+    'Looking for a misplaced semicolon...',
+    "Greasin' the cogs of the machine...",
+    'Pre-heating the servers...',
+    'Calibrating the flux capacitor...',
+    'Engaging the improbability drive...',
+    'Channeling the Force...',
+    'Aligning the stars for optimal response...',
+    'So say we all...',
+    'Loading the next great idea...',
+    "Just a moment, I'm in the zone...",
+    'Preparing to dazzle you with brilliance...',
+    "Just a tick, I'm polishing my wit...",
+    "Hold tight, I'm crafting a masterpiece...",
+    "Just a jiffy, I'm debugging the universe...",
+    "Just a moment, I'm aligning the pixels...",
+    "Just a sec, I'm optimizing the humor...",
+    "Just a moment, I'm tuning the algorithms...",
+    'Warp speed engaged...',
+    'Mining for more Dilithium crystals...',
+    "Don't panic...",
+    'Following the white rabbit...',
+    'The truth is in here... somewhere...',
+    'Blowing on the cartridge...',
+    'Loading... Do a barrel roll!',
+    'Waiting for the respawn...',
+    'Finishing the Kessel Run in less than 12 parsecs...',
+    "The cake is not a lie, it's just still loading...",
+    'Fiddling with the character creation screen...',
+    "Just a moment, I'm finding the right meme...",
+    "Pressing 'A' to continue...",
+    'Herding digital cats...',
+    'Polishing the pixels...',
+    'Finding a suitable loading screen pun...',
+    'Distracting you with this witty phrase...',
+    'Almost there... probably...',
+    'Our hamsters are working as fast as they can...',
+    'Giving Cloudy a pat on the head...',
+    'Petting the cat...',
+    'Rickrolling my boss...',
     'Never gonna give you up, never gonna let you down...',
-    'Лабаем бас-гитару...',
-    'Пробуем снузберри на вкус...',
-    'Иду до конца, иду на скорость...',
+    'Slapping the bass...',
+    'Tasting the snozberries...',
+    "I'm going the distance, I'm going for speed...",
     'Is this the real life? Is this just fantasy?...',
-    'У меня хорошее предчувствие...',
-    'Дразним медведя... (Не лезь...)',
-    'Изучаем свежие мемы...',
-    'Думаем, как сделать это остроумнее...',
-    'Хмм... дайте подумать...',
-    'Как называется бумеранг, который не возвращается? Палка...',
-    'Почему компьютер простудился? Потому что оставил окна открытыми...',
-    'Почему программисты не любят гулять на улице? Там среда не настроена...',
-    'Почему программисты предпочитают тёмную тему? Потому что в темноте не видно багов...',
-    'Почему разработчик разорился? Потому что потратил весь свой кэш...',
-    'Что можно делать со сломанным карандашом? Ничего — он тупой...',
-    'Провожу настройку методом тыка...',
-    'Ищем, какой стороной вставлять флешку...',
-    'Следим, чтобы волшебный дым не вышел из проводов...',
-    'Пытаемся выйти из Vim...',
-    'Раскручиваем колесо для хомяка...',
-    'Это не баг, а фича...',
-    'Поехали!',
-    'Я вернусь... с ответом.',
-    'Мой другой процесс — это ТАРДИС...',
-    'Общаемся с духом машины...',
-    'Даем мыслям замариноваться...',
-    'Только что вспомнил, куда положил ключи...',
-    'Размышляю над сферой...',
-    'Я видел такое, что вам, людям, и не снилось... пользователя, читающего эти сообщения.',
-    'Инициируем задумчивый взгляд...',
-    'Что сервер заказывает в баре? Пинг-коладу.',
-    'Почему Java-разработчики не убираются дома? Они ждут сборщик мусора...',
-    'Заряжаем лазер... пиу-пиу!',
-    'Делим на ноль... шучу!',
-    'Ищу взрослых для присмот... в смысле, обрабатываю.',
-    'Делаем бип-буп.',
-    'Буферизация... даже ИИ нужно время подумать.',
-    'Запутываем квантовые частицы для быстрого ответа...',
-    'Полируем хром... на алгоритмах.',
-    'Вы ещё не развлеклись?! Разве вы не за этим сюда пришли?!',
-    'Призываем гремлинов кода... для помощи, конечно же.',
-    'Ждем, пока закончится звук dial-up модема...',
-    'Перекалибровка юморометра.',
-    'Мой другой экран загрузки ещё смешнее.',
-    'Кажется, где-то по клавиатуре гуляет кот...',
-    'Улучшаем... Ещё улучшаем... Всё ещё грузится.',
-    'Это не баг, это фича... экрана загрузки.',
-    'Пробовали выключить и включить снова? (Экран загрузки, не меня!)',
-    'Нужно построить больше пилонов...',
+    "I've got a good feeling about this...",
+    'Poking the bear...',
+    'Doing research on the latest memes...',
+    'Figuring out how to make this more witty...',
+    'Hmmm... let me think...',
+    'What do you call a fish with no eyes? A fsh...',
+    'Why did the computer go to therapy? It had too many bytes...',
+    "Why don't programmers like nature? It has too many bugs...",
+    'Why do programmers prefer dark mode? Because light attracts bugs...',
+    'Why did the developer go broke? Because they used up all their cache...',
+    "What can you do with a broken pencil? Nothing, it's pointless...",
+    'Applying percussive maintenance...',
+    'Searching for the correct USB orientation...',
+    'Ensuring the magic smoke stays inside the wires...',
+    'Trying to exit Vim...',
+    'Spinning up the hamster wheel...',
+    "That's not a bug, it's an undocumented feature...",
+    'Engage.',
+    "I'll be back... with an answer.",
+    'My other process is a TARDIS...',
+    'Communing with the machine spirit...',
+    'Letting the thoughts marinate...',
+    'Just remembered where I put my keys...',
+    'Pondering the orb...',
+    "I've seen things you people wouldn't believe... like a user who reads loading messages.",
+    'Initiating thoughtful gaze...',
+    "What's a computer's favorite snack? Microchips.",
+    "Why do Java developers wear glasses? Because they don't C#.",
+    'Charging the laser... pew pew!',
+    'Dividing by zero... just kidding!',
+    'Looking for an adult superviso... I mean, processing.',
+    'Making it go beep boop.',
+    'Buffering... because even AIs need a moment.',
+    'Entangling quantum particles for a faster response...',
+    'Polishing the chrome... on the algorithms.',
+    'Are you not entertained? (Working on it!)',
+    'Summoning the code gremlins... to help, of course.',
+    'Just waiting for the dial-up tone to finish...',
+    'Recalibrating the humor-o-meter.',
+    'My other loading screen is even funnier.',
+    "Pretty sure there's a cat walking on the keyboard somewhere...",
+    'Enhancing... Enhancing... Still loading.',
+    "It's not a bug, it's a feature... of this loading screen.",
+    'Have you tried turning it off and on again? (The loading screen, not me.)',
+    'Constructing additional pylons...',
   ],
 
   // ============================================================================
   // Extension Settings Input
   // ============================================================================
-  'Enter value...': 'Введите значение...',
-  'Enter sensitive value...': 'Введите секретное значение...',
+  'Enter value...': 'Enter value...',
+  'Enter sensitive value...': 'Enter sensitive value...',
   'Press Enter to submit, Escape to cancel':
-    'Нажмите Enter для отправки, Escape для отмены',
+    'Press Enter to submit, Escape to cancel',
 
   // ============================================================================
   // Command Migration Tool
   // ============================================================================
   'Markdown file already exists: {{filename}}':
-    'Markdown-файл уже существует: {{filename}}',
+    'Markdown file already exists: {{filename}}',
   'TOML Command Format Deprecation Notice':
-    'Уведомление об устаревании формата TOML',
+    'TOML Command Format Deprecation Notice',
   'Found {{count}} command file(s) in TOML format:':
-    'Найдено {{count}} файл(ов) команд в формате TOML:',
+    'Found {{count}} command file(s) in TOML format:',
   'The TOML format for commands is being deprecated in favor of Markdown format.':
-    'Формат TOML для команд устаревает в пользу формата Markdown.',
+    'The TOML format for commands is being deprecated in favor of Markdown format.',
   'Markdown format is more readable and easier to edit.':
-    'Формат Markdown более читаемый и простой для редактирования.',
+    'Markdown format is more readable and easier to edit.',
   'You can migrate these files automatically using:':
-    'Вы можете автоматически мигрировать эти файлы с помощью:',
-  'Or manually convert each file:': 'Или вручную конвертировать каждый файл:',
+    'You can migrate these files automatically using:',
+  'Or manually convert each file:': 'Or manually convert each file:',
   'TOML: prompt = "..." / description = "..."':
     'TOML: prompt = "..." / description = "..."',
   'Markdown: YAML frontmatter + content':
-    'Markdown: YAML frontmatter + содержимое',
-  'The migration tool will:': 'Инструмент миграции:',
-  'Convert TOML files to Markdown': 'Конвертирует TOML-файлы в Markdown',
-  'Create backups of original files': 'Создаёт резервные копии исходных файлов',
-  'Preserve all command functionality': 'Сохраняет всю функциональность команд',
+    'Markdown: YAML frontmatter + content',
+  'The migration tool will:': 'The migration tool will:',
+  'Convert TOML files to Markdown': 'Convert TOML files to Markdown',
+  'Create backups of original files': 'Create backups of original files',
+  'Preserve all command functionality': 'Preserve all command functionality',
   'TOML format will continue to work for now, but migration is recommended.':
-    'Формат TOML пока продолжит работать, но миграция рекомендуется.',
+    'TOML format will continue to work for now, but migration is recommended.',
 
   // ============================================================================
   // Extensions - Explore Command
   // ============================================================================
   'Open extensions page in your browser':
-    'Открыть страницу расширений в браузере',
+    'Open extensions page in your browser',
   'Unknown extensions source: {{source}}.':
-    'Неизвестный источник расширений: {{source}}.',
+    'Unknown extensions source: {{source}}.',
   'Would open extensions page in your browser: {{url}} (skipped in test environment)':
-    'Страница расширений была бы открыта в браузере: {{url}} (пропущено в тестовой среде)',
+    'Would open extensions page in your browser: {{url}} (skipped in test environment)',
   'View available extensions at {{url}}':
-    'Посмотреть доступные расширения на {{url}}',
+    'View available extensions at {{url}}',
   'Opening extensions page in your browser: {{url}}':
-    'Открываем страницу расширений в браузере: {{url}}',
+    'Opening extensions page in your browser: {{url}}',
   'Failed to open browser. Check out the extensions gallery at {{url}}':
-    'Не удалось открыть браузер. Посетите галерею расширений по адресу {{url}}',
-  'Use /compress when the conversation gets long to summarize history and free up context.':
-    'Используйте /compress, когда разговор становится длинным, чтобы подвести итог и освободить контекст.',
-  'Start a fresh idea with /clear or /new; the previous session stays available in history.':
-    'Начните новую идею с /clear или /new; предыдущая сессия останется в истории.',
-  'Use /bug to submit issues to the maintainers when something goes off.':
-    'Используйте /bug, чтобы сообщить о проблемах разработчикам.',
-  'Switch auth type quickly with /auth.':
-    'Быстро переключите тип аутентификации с помощью /auth.',
-  'You can run any shell commands from Qwen Code using ! (e.g. !ls).':
-    'Вы можете выполнять любые shell-команды в Qwen Code с помощью ! (например, !ls).',
-  'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.':
-    'Введите /, чтобы открыть меню команд; Tab автодополняет слэш-команды и сохранённые промпты.',
-  'You can resume a previous conversation by running qwen --continue or qwen --resume.':
-    'Вы можете продолжить предыдущий разговор, запустив qwen --continue или qwen --resume.',
-  'You can switch permission mode quickly with Shift+Tab or /approval-mode.':
-    'Вы можете быстро переключать режим разрешений с помощью Shift+Tab или /approval-mode.',
-  'You can switch permission mode quickly with Tab or /approval-mode.':
-    'Вы можете быстро переключать режим разрешений с помощью Tab или /approval-mode.',
-  'Try /insight to generate personalized insights from your chat history.':
-    'Попробуйте /insight, чтобы получить персонализированные выводы из истории чатов.',
+    'Failed to open browser. Check out the extensions gallery at {{url}}',
+
+  // ============================================================================
+  // Retry / Rate Limit
+  // ============================================================================
+  'Rate limit error: {{reason}}': 'Rate limit error: {{reason}}',
+  'Retrying in {{seconds}} seconds闂?(attempt {{attempt}}/{{maxRetries}})':
+    'Retrying in {{seconds}} seconds闂?(attempt {{attempt}}/{{maxRetries}})',
+  'Press Ctrl+Y to retry': 'Press Ctrl+Y to retry',
+  'No failed request to retry.': 'No failed request to retry.',
+  'to retry last request': 'to retry last request',
+
+  // ============================================================================
+  // Coding Plan Authentication
+  // ============================================================================
+  'API key cannot be empty.': 'API key cannot be empty.',
+  'You can get your Coding Plan API key here':
+    'You can get your Coding Plan API key here',
+  'API key is stored in settings.env. You can migrate it to a .env file for better security.':
+    'API key is stored in settings.env. You can migrate it to a .env file for better security.',
+  'New model configurations are available for Alibaba Cloud Coding Plan. Update now?':
+    'New model configurations are available for Alibaba Cloud Coding Plan. Update now?',
+  'Coding Plan configuration updated successfully. New models are now available.':
+    'Coding Plan configuration updated successfully. New models are now available.',
+  'Coding Plan API key not found. Please re-authenticate with Coding Plan.':
+    'Coding Plan API key not found. Please re-authenticate with Coding Plan.',
+  'Failed to update Coding Plan configuration: {{message}}':
+    'Failed to update Coding Plan configuration: {{message}}',
 
   // ============================================================================
   // Custom API Key Configuration
   // ============================================================================
   'You can configure your API key and models in settings.json':
-    'Вы можете настроить API-ключ и модели в settings.json',
+    'You can configure your API key and models in settings.json',
   'Refer to the documentation for setup instructions':
-    'Инструкции по настройке см. в документации',
-
-  // ============================================================================
-  // Coding Plan Authentication
-  // ============================================================================
-  'API key cannot be empty.': 'API-ключ не может быть пустым.',
-  'You can get your Coding Plan API key here':
-    'Вы можете получить API-ключ Coding Plan здесь',
-  'New model configurations are available for Alibaba Cloud Coding Plan. Update now?':
-    'Доступны новые конфигурации моделей для Alibaba Cloud Coding Plan. Обновить сейчас?',
-  'Coding Plan configuration updated successfully. New models are now available.':
-    'Конфигурация Coding Plan успешно обновлена. Новые модели теперь доступны.',
-  'Coding Plan API key not found. Please re-authenticate with Coding Plan.':
-    'API-ключ Coding Plan не найден. Пожалуйста, повторно авторизуйтесь с Coding Plan.',
-  'Failed to update Coding Plan configuration: {{message}}':
-    'Не удалось обновить конфигурацию Coding Plan: {{message}}',
+    'Refer to the documentation for setup instructions',
 
   // ============================================================================
   // Auth Dialog - View Titles and Labels
   // ============================================================================
   'Coding Plan': 'Coding Plan',
   "Paste your api key of Bailian Coding Plan and you're all set!":
-    'Вставьте ваш API-ключ Bailian Coding Plan и всё готово!',
-  Custom: 'Пользовательский',
+    "Paste your api key of Bailian Coding Plan and you're all set!",
+  Custom: 'Custom',
   'More instructions about configuring `modelProviders` manually.':
-    'Дополнительные инструкции по ручной настройке `modelProviders`.',
-  'Select API-KEY configuration mode:': 'Выберите режим конфигурации API-KEY:',
-  '(Press Escape to go back)': '(Нажмите Escape для возврата)',
+    'More instructions about configuring `modelProviders` manually.',
+  'Select API-KEY configuration mode:': 'Select API-KEY configuration mode:',
+  '(Press Escape to go back)': '(Press Escape to go back)',
   '(Press Enter to submit, Escape to cancel)':
-    '(Нажмите Enter для отправки, Escape для отмены)',
-  'More instructions please check:': 'Дополнительные инструкции см.:',
-  'Select Region for Coding Plan': 'Выберите регион Coding Plan',
+    '(Press Enter to submit, Escape to cancel)',
+  'Select Region for Coding Plan': 'Select Region for Coding Plan',
   'Choose based on where your account is registered':
-    'Выберите в зависимости от места регистрации вашего аккаунта',
-  'Enter Coding Plan API Key': 'Введите API-ключ Coding Plan',
+    'Choose based on where your account is registered',
+  'Enter Coding Plan API Key': 'Enter Coding Plan API Key',
 
   // ============================================================================
   // Coding Plan International Updates
   // ============================================================================
   'New model configurations are available for {{region}}. Update now?':
-    'Доступны новые конфигурации моделей для {{region}}. Обновить сейчас?',
+    'New model configurations are available for {{region}}. Update now?',
   '{{region}} configuration updated successfully. Model switched to "{{model}}".':
-    'Конфигурация {{region}} успешно обновлена. Модель переключена на "{{model}}".',
-  'Authenticated successfully with {{region}}. API key and model configs saved to settings.json (backed up).':
-    'Успешная аутентификация с {{region}}. API-ключ и конфигурации моделей сохранены в settings.json (резервная копия создана).',
-
-  // ============================================================================
-  // MCP Management Dialog
-  // ============================================================================
-  'MCP Management': 'Управление MCP',
-  'Server List': 'Список серверов',
-  'Server Detail': 'Детали сервера',
-  'Disable Server': 'Отключить сервер',
-  'Tool List': 'Список инструментов',
-  'Tool Detail': 'Детали инструмента',
-  'Loading...': 'Загрузка...',
-  'Unknown step': 'Неизвестный шаг',
-  'Esc to back': 'Esc для возврата',
-  '↑↓ to navigate · Enter to select · Esc to close':
-    '↑↓ навигация · Enter выбрать · Esc закрыть',
-  '↑↓ to navigate · Enter to select · Esc to back':
-    '↑↓ навигация · Enter выбрать · Esc назад',
-  '↑↓ to navigate · Enter to confirm · Esc to back':
-    '↑↓ навигация · Enter подтвердить · Esc назад',
-  'User Settings (global)': 'Настройки пользователя (глобальные)',
-  'Workspace Settings (project-specific)':
-    'Настройки рабочего пространства (проектные)',
-  'Disable server:': 'Отключить сервер:',
-  'Select where to add the server to the exclude list:':
-    'Выберите, где добавить сервер в список исключений:',
-  'Press Enter to confirm, Esc to cancel':
-    'Enter для подтверждения, Esc для отмены',
-  'Status:': 'Статус:',
-  'Command:': 'Команда:',
-  'Working Directory:': 'Рабочий каталог:',
-  'Capabilities:': 'Возможности:',
-  'No server selected': 'Сервер не выбран',
-
-  // MCP Server List
-  'User MCPs': 'MCP пользователя',
-  'Project MCPs': 'MCP проекта',
-  'Extension MCPs': 'MCP расширений',
-  server: 'сервер',
-  servers: 'серверов',
-  'Add MCP servers to your settings to get started.':
-    'Добавьте серверы MCP в настройки, чтобы начать.',
-  'Run qwen --debug to see error logs':
-    'Запустите qwen --debug для просмотра журналов ошибок',
-
-  // MCP OAuth Authentication
-  'OAuth Authentication': 'OAuth-аутентификация',
-  'Press Enter to start authentication, Esc to go back':
-    'Нажмите Enter для начала аутентификации, Esc для возврата',
-  'Authenticating... Please complete the login in your browser.':
-    'Аутентификация... Пожалуйста, завершите вход в браузере.',
-  'Press Enter or Esc to go back': 'Нажмите Enter или Esc для возврата',
-
-  // MCP Tool List
-  'No tools available for this server.':
-    'Для этого сервера нет доступных инструментов.',
-  destructive: 'деструктивный',
-  'read-only': 'только чтение',
-  'open-world': 'открытый мир',
-  idempotent: 'идемпотентный',
-  'Tools for {{name}}': 'Инструменты для {{name}}',
-  'Tools for {{serverName}}': 'Инструменты для {{serverName}}',
-  '{{current}}/{{total}}': '{{current}}/{{total}}',
-
-  // MCP Tool Detail
-  required: 'обязательный',
-  Type: 'Тип',
-  Enum: 'Перечисление',
-  Parameters: 'Параметры',
-  'No tool selected': 'Инструмент не выбран',
-  Annotations: 'Аннотации',
-  Title: 'Заголовок',
-  'Read Only': 'Только чтение',
-  Destructive: 'Деструктивный',
-  Idempotent: 'Идемпотентный',
-  'Open World': 'Открытый мир',
-  Server: 'Сервер',
+    '{{region}} configuration updated successfully. Model switched to "{{model}}".',
   '{{region}} configuration updated successfully.':
-    'Конфигурация {{region}} успешно обновлена.',
+    '{{region}} configuration updated successfully.',
   'Authenticated successfully with {{region}}. API key and model configs saved to settings.json.':
-    'Успешная аутентификация с {{region}}. API-ключ и конфигурации моделей сохранены в settings.json.',
+    'Authenticated successfully with {{region}}. API key and model configs saved to settings.json.',
   'Tip: Use /model to switch between available Coding Plan models.':
-    'Совет: Используйте /model для переключения между доступными моделями Coding Plan.',
+    'Tip: Use /model to switch between available Coding Plan models.',
+
+  // ============================================================================
+  // Service Command
+  // ============================================================================
+  'Manage persistent background services.':
+    'Manage persistent background services.',
+  'Tip: Recommended Alt+L to open the ask flow quickly. You can also type /service alert <name>.':
+    'Tip: Recommended Alt+L to open the ask flow quickly. You can also type /service alert <name>.',
+  'Tip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    'Tip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.',
+  'No services registered. Use /service register ... to add one.\nCurrent max running services: {{maxRunningServices}}':
+    'No services registered. Use /service register ... to add one.\nCurrent max running services: {{maxRunningServices}}',
+  '- {{runningStatus}} {{name}} | autoStart={{autoStart}} | pid={{pid}} | follow={{follow}} | notify={{notify}} | alert={{alert}} | cwd={{cwd}} | cmd={{command}}':
+    '- {{runningStatus}} {{name}} | autoStart={{autoStart}} | pid={{pid}} | follow={{follow}} | notify={{notify}} | alert={{alert}} | cwd={{cwd}} | cmd={{command}}',
+  'Registered services ({{count}})\nMax running services: {{maxRunningServices}}\nTo change the limit manually, edit services.json in project storage.\n\n{{listLines}}':
+    'Registered services ({{count}})\nMax running services: {{maxRunningServices}}\nTo change the limit manually, edit services.json in project storage.\n\n{{listLines}}',
+  'Unknown option: {{option}}': 'Unknown option: {{option}}',
+  'Service "{{name}}" registered and started.\nautoStart={{autoStart}}, watch={{watchPatterns}}':
+    'Service "{{name}}" registered and started.\nautoStart={{autoStart}}, watch={{watchPatterns}}',
+  'Service name is required for /service {{action}}.':
+    'Service name is required for /service {{action}}.',
+  'Service "{{name}}" started.': 'Service "{{name}}" started.',
+  'Service "{{name}}" stopped.': 'Service "{{name}}" stopped.',
+  'Service "{{name}}" restarted.': 'Service "{{name}}" restarted.',
+  'Service "{{name}}" removed.': 'Service "{{name}}" removed.',
+  'Service "{{name}}" not found.': 'Service "{{name}}" not found.',
+  'Service "{{name}}" realtime notifications enabled.':
+    'Service "{{name}}" realtime notifications enabled.',
+  'Service "{{name}}" realtime notifications muted.\nErrors are still buffered. Use /service alert {{name}} to inspect buffered logs.':
+    'Service "{{name}}" realtime notifications muted.\nErrors are still buffered. Use /service alert {{name}} to inspect buffered logs.',
+  'Unknown option for log: {{option}}': 'Unknown option for log: {{option}}',
+  'Service {{name}} ({{runningStatus}}, pid={{pid}})\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}':
+    'Service {{name}} ({{runningStatus}}, pid={{pid}})\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}',
+  'No pending alert buffer for service "{{name}}".':
+    'No pending alert buffer for service "{{name}}".',
+  'Service {{name}} has alerts. Choose the next action.\nStart line: {{startLine}}, buffered lines: {{bufferedLines}}, error lines: {{errorLines}}\nRecommended: press Alt+L to open ask flow quickly; command input is also supported.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    'Service {{name}} has alerts. Choose the next action.\nStart line: {{startLine}}, buffered lines: {{bufferedLines}}, error lines: {{errorLines}}\nRecommended: press Alt+L to open ask flow quickly; command input is also supported.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.',
+  'Analyze logs only': 'Analyze logs only',
+  'Alert handling': 'Alert handling',
+  'Analyze logs without entering repair flow (equivalent: /service analyze {{name}} all)':
+    'Analyze logs without entering repair flow (equivalent: /service analyze {{name}} all)',
+  'Analyze then fix issue (Recommended)':
+    'Analyze then fix issue (Recommended)',
+  'Analyze logs and continue to fix. You can run /service analyze {{name}} all first, then ask the model to directly repair in follow-up prompts.':
+    'Analyze logs and continue to fix. You can run /service analyze {{name}} all first, then ask the model to directly repair in follow-up prompts.',
+  'Handle later': 'Handle later',
+  'Do not process now; continue buffering subsequent logs in background.':
+    'Do not process now; continue buffering subsequent logs in background.',
+  'No pending alert logs for service "{{name}}".':
+    'No pending alert logs for service "{{name}}".',
+  'No logs available in selected mode ({{mode}}) for service "{{name}}".':
+    'No logs available in selected mode ({{mode}}) for service "{{name}}".',
+  'Please analyze the following service logs for service "{{name}}".\nMode: {{mode}}.\nProvide: root cause, confidence, immediate mitigation, and next checks.\n\n':
+    'Please analyze the following service logs for service "{{name}}".\nMode: {{mode}}.\nProvide: root cause, confidence, immediate mitigation, and next checks.\n\n',
+  'No log patterns configured for service "{{name}}".':
+    'No log patterns configured for service "{{name}}".',
+  '- [{{id}}] Pattern: `{{pattern}}` | Action: {{action}} | Description: {{description}}':
+    '- [{{id}}] Pattern: `{{pattern}}` | Action: {{action}} | Description: {{description}}',
+  'Log patterns for service "{{name}}":\n{{listText}}':
+    'Log patterns for service "{{name}}":\n{{listText}}',
+  'To add log patterns for service "{{name}}", LM will use the request_log_pattern tool.':
+    'To add log patterns for service "{{name}}", LM will use the request_log_pattern tool.',
+  'Removed pattern rule "{{ruleId}}" from service "{{name}}".':
+    'Removed pattern rule "{{ruleId}}" from service "{{name}}".',
+  'Pattern rule "{{ruleId}}" not found in service "{{name}}".':
+    'Pattern rule "{{ruleId}}" not found in service "{{name}}".',
+  'Sent input to service "{{name}}".': 'Sent input to service "{{name}}".',
+  'Unknown subcommand: {{subcommand}}\n\n{{helpText}}':
+    'Unknown subcommand: {{subcommand}}\n\n{{helpText}}',
+  '[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    '[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.',
 
   // ============================================================================
   // Ask User Question Tool
   // ============================================================================
   'Please answer the following question(s):':
-    'Пожалуйста, ответьте на следующий(ие) вопрос(ы):',
+    'Please answer the following question(s):',
   'Cannot ask user questions in non-interactive mode. Please run in interactive mode to use this tool.':
-    'Невозможно задавать вопросы пользователю в неинтерактивном режиме. Пожалуйста, запустите в интерактивном режиме для использования этого инструмента.',
+    'Cannot ask user questions in non-interactive mode. Please run in interactive mode to use this tool.',
   'User declined to answer the questions.':
-    'Пользователь отказался отвечать на вопросы.',
+    'User declined to answer the questions.',
   'User has provided the following answers:':
-    'Пользователь предоставил следующие ответы:',
-  'Failed to process user answers:':
-    'Не удалось обработать ответы пользователя:',
-  'Type something...': 'Введите что-то...',
-  Submit: 'Отправить',
-  'Submit answers': 'Отправить ответы',
-  Cancel: 'Отмена',
-  'Your answers:': 'Ваши ответы:',
-  '(not answered)': '(не отвечено)',
-  'Ready to submit your answers?': 'Готовы отправить свои ответы?',
-  '↑/↓: Navigate | ←/→: Switch tabs | Enter: Select':
-    '↑/↓: Навигация | ←/→: Переключение вкладок | Enter: Выбор',
-  '↑/↓: Navigate | ←/→: Switch tabs | Space/Enter: Toggle | Esc: Cancel':
-    '↑/↓: Навигация | ←/→: Переключение вкладок | Space/Enter: Переключить | Esc: Отмена',
-  '↑/↓: Navigate | Space/Enter: Toggle | Esc: Cancel':
-    '↑/↓: Навигация | Space/Enter: Переключить | Esc: Отмена',
-  '↑/↓: Navigate | Enter: Select | Esc: Cancel':
-    '↑/↓: Навигация | Enter: Выбор | Esc: Отмена',
+    'User has provided the following answers:',
+  'Failed to process user answers:': 'Failed to process user answers:',
+  'Type something...': 'Type something...',
+  Submit: 'Submit',
+  'Submit answers': 'Submit answers',
+  Cancel: 'Cancel',
+  'Your answers:': 'Your answers:',
+  '(not answered)': '(not answered)',
+  'Ready to submit your answers?': 'Ready to submit your answers?',
+  '闂?闂? Navigate | 闂?闂? Switch tabs | Enter: Select':
+    '闂?闂? Navigate | 闂?闂? Switch tabs | Enter: Select',
+  '闂?闂? Navigate | 闂?闂? Switch tabs | Space/Enter: Toggle | Esc: Cancel':
+    '闂?闂? Navigate | 闂?闂? Switch tabs | Space/Enter: Toggle | Esc: Cancel',
+  '闂?闂? Navigate | Space/Enter: Toggle | Esc: Cancel':
+    '闂?闂? Navigate | Space/Enter: Toggle | Esc: Cancel',
+  '闂?闂? Navigate | Enter: Select | Esc: Cancel':
+    '闂?闂? Navigate | Enter: Select | Esc: Cancel',
+  
+  // ============================================================================
+  // Context Usage Display
+  // ============================================================================
+  '% used': '% used',
+  '% context used': '% context used',
+  
+  // ============================================================================
+  // Context Usage Display
+  // ============================================================================
+  '% used': '% used',
+  '% context used': '% context used',
 };

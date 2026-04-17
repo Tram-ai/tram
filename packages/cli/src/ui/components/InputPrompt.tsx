@@ -21,17 +21,18 @@ import type { Key } from '../hooks/useKeypress.js';
 import { useKeypress } from '../hooks/useKeypress.js';
 import { keyMatchers, Command } from '../keyMatchers.js';
 import type { CommandContext, SlashCommand } from '../commands/types.js';
-import type { Config } from '@qwen-code/qwen-code-core';
+import type { Config } from '@tram-ai/tram-core';
 import {
   ApprovalMode,
   Storage,
   createDebugLogger,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import {
   parseInputForHighlighting,
   buildSegmentsForVisualSlice,
 } from '../utils/highlight.js';
 import { t } from '../../i18n/index.js';
+import { ServiceRuntimeManager } from '@tram-ai/tram-core';
 import {
   clipboardHasImage,
   saveClipboardImage,
@@ -44,6 +45,7 @@ import { useUIState } from '../contexts/UIStateContext.js';
 import { useUIActions } from '../contexts/UIActionsContext.js';
 import { useKeypressContext } from '../contexts/KeypressContext.js';
 import { FEEDBACK_DIALOG_KEYS } from '../FeedbackDialog.js';
+import { YoloBorderBox } from './YoloBorderBox.js';
 
 /**
  * Represents an attachment (e.g., pasted image) displayed above the input prompt
@@ -117,6 +119,7 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
   commandContext,
   placeholder,
   focus = true,
+  inputWidth,
   suggestionsWidth,
   shellModeActive,
   setShellModeActive,
@@ -137,6 +140,8 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
   const [showEscapePrompt, setShowEscapePrompt] = useState(false);
   const escapeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [recentPasteTime, setRecentPasteTime] = useState<number | null>(null);
+  const serviceLogViewActiveRef = useRef(false);
+  const autoAlertSubmitInFlightRef = useRef(false);
   const pasteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Attachment state for clipboard images
@@ -351,6 +356,36 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
     onChange: customSetTextAndResetCompletionSignal,
   });
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (autoAlertSubmitInFlightRef.current) {
+        return;
+      }
+
+      if (buffer.text.trim().length > 0) {
+        return;
+      }
+
+      autoAlertSubmitInFlightRef.current = true;
+      void (async () => {
+        const manager = ServiceRuntimeManager.forConfig(config);
+        await manager.initialize();
+        const serviceName = manager.consumePendingAlertPromptServiceName();
+        if (!serviceName) {
+          return;
+        }
+
+        handleSubmitAndClear(`/service alert ${serviceName}`);
+      })().finally(() => {
+        autoAlertSubmitInFlightRef.current = false;
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [buffer, config, handleSubmitAndClear]);
+
   // Effect to reset completion if history navigation just occurred and set the text
   useEffect(() => {
     if (justNavigatedHistory) {
@@ -485,6 +520,49 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
         }
       }
 
+      // Alt+L: trigger /service alert for the latest pending alert service.
+      if (key.meta && !key.ctrl && !key.shift && key.name === 'l') {
+        void (async () => {
+          const manager = ServiceRuntimeManager.forConfig(config);
+          await manager.initialize();
+          const latestAlertService = manager.getLatestAlertServiceName();
+          if (!latestAlertService) {
+            return;
+          }
+          handleSubmitAndClear(`/service alert ${latestAlertService}`);
+        })();
+        return;
+      }
+
+      // Tab (when buffer is empty and no suggestions): switch to latest service logs view
+      if (
+        key.name === 'tab' &&
+        !key.ctrl &&
+        !key.meta &&
+        !key.shift &&
+        buffer.text.trim().length === 0 &&
+        !completion.showSuggestions
+      ) {
+        void (async () => {
+          const manager = ServiceRuntimeManager.forConfig(config);
+          await manager.initialize();
+          const latestAlertService = manager.getLatestAlertServiceName();
+          if (!latestAlertService) {
+            return;
+          }
+
+          if (!serviceLogViewActiveRef.current) {
+            handleSubmitAndClear(
+              `/service log ${latestAlertService} --tail 200 --follow`,
+            );
+            serviceLogViewActiveRef.current = true;
+          } else {
+            serviceLogViewActiveRef.current = false;
+          }
+        })();
+        return;
+      }
+
       if (
         key.sequence === '!' &&
         buffer.text === '' &&
@@ -506,8 +584,15 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
         !completion.showSuggestions &&
         onToggleShortcuts
       ) {
+        if (showShortcuts) {
+          // Shortcuts already visible — toggle off without inserting '?'
+          onToggleShortcuts();
+          return;
+        }
+        // Show shortcuts but also let '?' be inserted as normal text
+        // so that messages starting with '?' are not swallowed
         onToggleShortcuts();
-        return;
+        // Fall through to buffer.handleInput(key) below
       }
 
       // Hide shortcuts on any other key press
@@ -931,6 +1016,7 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
     [
       focus,
       buffer,
+      config,
       completion,
       shellModeActive,
       setShellModeActive,
@@ -1032,13 +1118,10 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
           ))}
         </Box>
       )}
-      <Box
-        borderStyle="single"
-        borderTop={true}
-        borderBottom={true}
-        borderLeft={false}
-        borderRight={false}
-        borderColor={borderColor}
+      <YoloBorderBox
+        active={showYoloStyling}
+        baseBorderColor={borderColor}
+        width={inputWidth}
       >
         <Text
           color={statusColor ?? theme.text.accent}
@@ -1167,7 +1250,7 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
             })
           )}
         </Box>
-      </Box>
+      </YoloBorderBox>
       {shouldShowSuggestions && (
         <Box marginLeft={2} marginRight={2}>
           <SuggestionsDisplay

@@ -6,7 +6,7 @@
 
 import type React from 'react';
 import { useState } from 'react';
-import { AuthType } from '@qwen-code/qwen-code-core';
+import { AuthType } from '@tram-ai/tram-core';
 import { Box, Text } from 'ink';
 import Link from 'ink-link';
 import { theme } from '../semantic-colors.js';
@@ -23,7 +23,7 @@ import {
 } from '../../constants/codingPlan.js';
 
 const MODEL_PROVIDERS_DOCUMENTATION_URL =
-  'https://qwenlm.github.io/qwen-code-docs/en/users/configuration/model-providers/';
+  'https://tram-ai.github.io/docs/en/users/configuration/model-providers/';
 
 function parseDefaultAuthType(
   defaultAuthType: string | undefined,
@@ -38,7 +38,7 @@ function parseDefaultAuthType(
 }
 
 // Main menu option type
-type MainOption = typeof AuthType.QWEN_OAUTH | 'CODING_PLAN' | 'API_KEY';
+type MainOption = typeof AuthType.TRAM_OAUTH | 'CODING_PLAN' | 'API_KEY';
 
 // View level for navigation
 type ViewLevel = 'main' | 'region-select' | 'api-key-input' | 'custom-info';
@@ -62,13 +62,13 @@ export function AuthDialog(): React.JSX.Element {
   // Main authentication entries (flat three-option layout)
   const mainItems = [
     {
-      key: AuthType.QWEN_OAUTH,
-      title: t('Qwen OAuth'),
-      label: t('Qwen OAuth'),
+      key: AuthType.TRAM_OAUTH,
+      title: t('TRAM OAuth'),
+      label: t('TRAM OAuth'),
       description: t(
-        'Free \u00B7 Up to 1,000 requests/day \u00B7 Qwen latest models',
+        'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models',
       ),
-      value: AuthType.QWEN_OAUTH as MainOption,
+      value: AuthType.TRAM_OAUTH as MainOption,
     },
     {
       key: 'CODING_PLAN',
@@ -125,7 +125,7 @@ export function AuthDialog(): React.JSX.Element {
   ];
 
   // Map an AuthType to the corresponding main menu option.
-  // QWEN_OAUTH maps directly; any other auth type maps to CODING_PLAN only
+  // TRAM_OAUTH maps directly; any other auth type maps to CODING_PLAN only
   // if the current config actually uses a Coding Plan baseUrl+envKey,
   // otherwise it maps to API_KEY.
   const contentGenConfig = config.getContentGeneratorConfig();
@@ -136,7 +136,7 @@ export function AuthDialog(): React.JSX.Element {
     ) !== false;
 
   const authTypeToMainOption = (authType: AuthType): MainOption => {
-    if (authType === AuthType.QWEN_OAUTH) return AuthType.QWEN_OAUTH;
+    if (authType === AuthType.TRAM_OAUTH) return AuthType.TRAM_OAUTH;
     if (authType === AuthType.USE_OPENAI && isCurrentlyCodingPlan)
       return 'CODING_PLAN';
     return 'API_KEY';
@@ -156,16 +156,16 @@ export function AuthDialog(): React.JSX.Element {
         return item.value === authTypeToMainOption(currentAuthType);
       }
 
-      // Priority 3: QWEN_DEFAULT_AUTH_TYPE env var
+      // Priority 3: TRAM_DEFAULT_AUTH_TYPE env var
       const defaultAuthType = parseDefaultAuthType(
-        process.env['QWEN_DEFAULT_AUTH_TYPE'],
+        process.env['TRAM_DEFAULT_AUTH_TYPE'],
       );
       if (defaultAuthType) {
         return item.value === authTypeToMainOption(defaultAuthType);
       }
 
-      // Priority 4: default to QWEN_OAUTH
-      return item.value === AuthType.QWEN_OAUTH;
+      // Priority 4: default to TRAM_OAUTH
+      return item.value === AuthType.TRAM_OAUTH;
     }),
   );
 
@@ -185,7 +185,7 @@ export function AuthDialog(): React.JSX.Element {
       return;
     }
 
-    // For Qwen OAuth, proceed directly
+    // For TRAM OAuth, proceed directly
     await onAuthSelect(value);
   };
 
@@ -345,7 +345,7 @@ export function AuthDialog(): React.JSX.Element {
 
   return (
     <Box
-      borderStyle="single"
+      borderStyle="round"
       borderColor={theme?.border?.default}
       flexDirection="column"
       padding={1}
@@ -381,11 +381,11 @@ export function AuthDialog(): React.JSX.Element {
           </Box>
           <Box>
             <Link
-              url="https://qwenlm.github.io/qwen-code-docs/en/users/support/tos-privacy/"
+              url="https://tram-ai.github.io/docs/en/users/support/tos-privacy/"
               fallback={false}
             >
               <Text color={theme.text.secondary} underline>
-                https://qwenlm.github.io/qwen-code-docs/en/users/support/tos-privacy/
+                https://tram-ai.github.io/docs/en/users/support/tos-privacy/
               </Text>
             </Link>
           </Box>

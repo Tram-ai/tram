@@ -111,7 +111,7 @@ export class McpClient {
     private readonly sendSdkMcpMessage?: SendSdkMcpMessage,
   ) {
     this.client = new Client({
-      name: `qwen-cli-mcp-client-${this.serverName}`,
+      name: `tram-cli-mcp-client-${this.serverName}`,
       version: '0.0.1',
     });
   }
@@ -200,6 +200,13 @@ export class McpClient {
     return this.status;
   }
 
+  /**
+   * Returns whether this server is marked as hidden (auto-injected internal server).
+   */
+  isHidden(): boolean {
+    return this.serverConfig.hidden === true;
+  }
+
   async readResource(
     uri: string,
     options?: { signal?: AbortSignal },
@@ -244,7 +251,7 @@ export class McpClient {
   }
 
   private async discoverPrompts(): Promise<Prompt[]> {
-    return discoverPrompts(this.serverName, this.client, this.promptRegistry);
+    return discoverPrompts(this.serverName, this.client, this.promptRegistry, this.serverConfig);
   }
 }
 
@@ -578,6 +585,7 @@ export async function connectAndDiscover(
       mcpServerName,
       mcpClient,
       promptRegistry,
+      mcpServerConfig,
     );
     const tools = await discoverTools(
       mcpServerName,
@@ -714,8 +722,16 @@ export async function discoverPrompts(
   mcpServerName: string,
   mcpClient: Client,
   promptRegistry: PromptRegistry,
+  mcpServerConfig?: MCPServerConfig,
 ): Promise<Prompt[]> {
   try {
+    // If includeTools is set, the user explicitly restricted this server to
+    // specific tools only — skip prompt discovery entirely so that prompts
+    // don't bypass the tool whitelist.
+    if (mcpServerConfig?.includeTools && mcpServerConfig.includeTools.length > 0) {
+      return [];
+    }
+
     // Only request prompts if the server supports them.
     if (mcpClient.getServerCapabilities()?.prompts == null) return [];
 
@@ -822,7 +838,7 @@ export async function connectToMcpServer(
   sendSdkMcpMessage?: SendSdkMcpMessage,
 ): Promise<Client> {
   const mcpClient = new Client({
-    name: 'qwen-code-mcp-client',
+    name: 'tram-mcp-client',
     version: '0.0.1',
   });
 

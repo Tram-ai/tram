@@ -94,33 +94,16 @@ export class SkillTool extends BaseDeclarativeTool<SkillParams, ToolResult> {
    * Updates the tool's description and schema based on available skills.
    */
   private updateDescriptionAndSchema(): void {
-    let skillDescriptions = '';
-    if (this.availableSkills.length === 0) {
-      skillDescriptions =
-        'No skills are currently configured. Skills can be created by adding directories with SKILL.md files to .qwen/skills/ or ~/.qwen/skills/.';
-    } else {
-      skillDescriptions = this.availableSkills
-        .map(
-          (skill) => `<skill>
-<name>
-${skill.name}
-</name>
-<description>
-${skill.description} (${skill.level})
-</description>
-<location>
-${skill.level}
-</location>
-</skill>`,
-        )
-        .join('\n');
-    }
+    const skillCount = this.availableSkills.length;
+    const statusLine = skillCount === 0
+      ? 'No skills are currently configured. Skills can be created by adding directories with SKILL.md files to .tram/skills/ or ~/.tram/skills/.'
+      : `${skillCount} skill(s) available. Call this tool with a skill name to execute it.`;
 
-    const baseDescription = `Execute a skill within the main conversation
+    const baseDescription = `Execute a skill within the main conversation.
+
+${statusLine}
 
 <skills_instructions>
-When users ask you to perform tasks, check if any of the available skills below can help complete the task more effectively. Skills provide specialized capabilities and domain knowledge.
-
 How to invoke:
 - Use this tool with the skill name only (no arguments)
 - Examples:
@@ -132,18 +115,11 @@ Important:
 - When a skill is relevant, you must invoke this tool IMMEDIATELY as your first action
 - NEVER just announce or mention a skill in your text response without actually calling this tool
 - This is a BLOCKING REQUIREMENT: invoke the relevant Skill tool BEFORE generating any other response about the task
-- Only use skills listed in <available_skills> below
 - Do not invoke a skill that is already running
 - Do not use this tool for built-in CLI commands (like /help, /clear, etc.)
-- When executing scripts or loading referenced files, ALWAYS resolve absolute paths from skill's base directory. Examples:
-  - \`bash scripts/init.sh\` -> \`bash /path/to/skill/scripts/init.sh\`
-  - \`python scripts/helper.py\` -> \`python /path/to/skill/scripts/helper.py\`
-  - \`reference.md\` -> \`/path/to/skill/reference.md\`
+- When executing scripts or loading referenced files, ALWAYS resolve absolute paths from skill's base directory
+- If unsure which skill to use, invoke with an approximate name; the validation will suggest available options
 </skills_instructions>
-
-<available_skills>
-${skillDescriptions}
-</available_skills>
 `;
     // Update description using object property assignment
     (this as { description: string }).description = baseDescription;

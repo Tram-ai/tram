@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen Team
+ * Copyright 2025 TRAM Contributors Team
  * SPDX-License-Identifier: Apache-2.0
  *
  * Shared utilities for handling diff operations in the webview

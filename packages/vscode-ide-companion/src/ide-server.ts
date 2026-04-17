@@ -9,8 +9,8 @@ import {
   CloseDiffRequestSchema,
   IdeContextNotificationSchema,
   OpenDiffRequestSchema,
-} from '@qwen-code/qwen-code-core/src/ide/types.js';
-import { detectIdeFromEnv } from '@qwen-code/qwen-code-core/src/ide/detect-ide.js';
+} from '@tram-ai/tram-core/src/ide/types.js';
+import { detectIdeFromEnv } from '@tram-ai/tram-core/src/ide/detect-ide.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -38,17 +38,17 @@ class CORSError extends Error {
 }
 
 const MCP_SESSION_ID_HEADER = 'mcp-session-id';
-const IDE_SERVER_PORT_ENV_VAR = 'QWEN_CODE_IDE_SERVER_PORT';
-const IDE_WORKSPACE_PATH_ENV_VAR = 'QWEN_CODE_IDE_WORKSPACE_PATH';
-const QWEN_DIR = '.qwen';
+const IDE_SERVER_PORT_ENV_VAR = 'TRAM_CODE_IDE_SERVER_PORT';
+const IDE_WORKSPACE_PATH_ENV_VAR = 'TRAM_CODE_IDE_WORKSPACE_PATH';
+const TRAM_DIR = '.tram';
 const IDE_DIR = 'ide';
 
 async function getGlobalIdeDir(): Promise<string> {
   const homeDir = os.homedir();
   // Prefer home dir, but fall back to tmpdir if unavailable (matches core Storage behavior).
   const baseDir = homeDir
-    ? path.join(homeDir, QWEN_DIR)
-    : path.join(os.tmpdir(), QWEN_DIR);
+    ? path.join(homeDir, TRAM_DIR)
+    : path.join(os.tmpdir(), TRAM_DIR);
   const ideDir = path.join(baseDir, IDE_DIR);
   await fs.mkdir(ideDir, { recursive: true });
   return ideDir;
@@ -430,7 +430,7 @@ export class IDEServer {
 const createMcpServer = (diffManager: DiffManager) => {
   const server = new McpServer(
     {
-      name: 'qwen-code-companion-mcp-server',
+      name: 'tram-companion-mcp-server',
       version: '1.0.0',
     },
     { capabilities: { logging: {} } },

@@ -33,21 +33,14 @@ export const modelCommand: SlashCommand = {
       };
     }
 
-    const contentGeneratorConfig = config.getContentGeneratorConfig();
-    if (!contentGeneratorConfig) {
+    const configuredModels = config.getAllConfiguredModels();
+    if (!configuredModels || configuredModels.length === 0) {
       return {
         type: 'message',
         messageType: 'error',
-        content: t('Content generator configuration not available.'),
-      };
-    }
-
-    const authType = contentGeneratorConfig.authType;
-    if (!authType) {
-      return {
-        type: 'message',
-        messageType: 'error',
-        content: t('Authentication type not available.'),
+        content: t(
+          'Please run tram --initialize to configure providers and authentication.',
+        ),
       };
     }
 

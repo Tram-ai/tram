@@ -11,13 +11,13 @@ import {
   ShellTool,
   EditTool,
   WriteFileTool,
-  DEFAULT_QWEN_MODEL,
+  DEFAULT_TRAM_MODEL,
   OutputFormat,
   NativeLspService,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import { loadCliConfig, parseArguments, type CliArgs } from './config.js';
 import type { Settings } from './settings.js';
-import * as ServerConfig from '@qwen-code/qwen-code-core';
+import * as ServerConfig from '@tram-ai/tram-core';
 import { isWorkspaceTrusted } from './trustedFolders.js';
 
 const mockWriteStderrLine = vi.hoisted(() => vi.fn());
@@ -114,7 +114,7 @@ vi.mock('read-package-up', () => ({
   ),
 }));
 
-vi.mock('@qwen-code/qwen-code-core', async (importOriginal) => {
+vi.mock('@tram-ai/tram-core', async (importOriginal) => {
   const actualServer = await importOriginal<typeof ServerConfig>();
   const SkillManagerMock = vi.fn();
   SkillManagerMock.prototype.startWatching = vi
@@ -147,11 +147,11 @@ vi.mock('@qwen-code/qwen-code-core', async (importOriginal) => {
     ),
     DEFAULT_MEMORY_FILE_FILTERING_OPTIONS: {
       respectGitIgnore: false,
-      respectQwenIgnore: true,
+      respectTramIgnore: true,
     },
     DEFAULT_FILE_FILTERING_OPTIONS: {
       respectGitIgnore: true,
-      respectQwenIgnore: true,
+      respectTramIgnore: true,
     },
   };
 });
@@ -548,7 +548,7 @@ describe('loadCliConfig', () => {
     vi.restoreAllMocks();
   });
 
-  it('should reset context file names to QWEN.md and AGENTS.md by default', async () => {
+  it('should reset context file names to TRAM.md and AGENTS.md by default', async () => {
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = {};
@@ -608,7 +608,7 @@ describe('loadCliConfig', () => {
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = {};
-    const defaultContextFiles = ['QWEN.md', 'AGENTS.md'];
+    const defaultContextFiles = ['TRAM.md', 'AGENTS.md'];
     const getAllSpy = vi
       .spyOn(ServerConfig, 'getAllGeminiMdFilenames')
       .mockReturnValue(defaultContextFiles);
@@ -740,6 +740,66 @@ describe('loadCliConfig', () => {
       const settings: Settings = {};
       const config = await loadCliConfig(settings, argv);
       expect(config.getProxy()).toBe('http://localhost:7890');
+    });
+
+    it('should use system proxy env when advanced.proxy.mode is system', async () => {
+      vi.stubEnv('HTTPS_PROXY', 'http://localhost:7892');
+      process.argv = ['node', 'script.js'];
+      const argv = await parseArguments();
+      const settings: Settings = {
+        advanced: {
+          proxy: {
+            mode: 'system',
+          },
+        },
+      };
+      const config = await loadCliConfig(settings, argv);
+      expect(config.getProxy()).toBe('http://localhost:7892');
+    });
+
+    it('should use custom proxy when advanced.proxy.mode is custom', async () => {
+      vi.stubEnv('HTTPS_PROXY', 'http://localhost:7892');
+      process.argv = ['node', 'script.js'];
+      const argv = await parseArguments();
+      const settings: Settings = {
+        advanced: {
+          proxy: {
+            mode: 'custom',
+            customUrl: 'http://localhost:7893',
+          },
+        },
+      };
+      const config = await loadCliConfig(settings, argv);
+      expect(config.getProxy()).toBe('http://localhost:7893');
+    });
+
+    it('should disable proxy when advanced.proxy.mode is off', async () => {
+      vi.stubEnv('HTTPS_PROXY', 'http://localhost:7892');
+      process.argv = ['node', 'script.js'];
+      const argv = await parseArguments();
+      const settings: Settings = {
+        advanced: {
+          proxy: {
+            mode: 'off',
+          },
+        },
+      };
+      const config = await loadCliConfig(settings, argv);
+      expect(config.getProxy()).toBeUndefined();
+    });
+
+    it('should prioritize CLI flag over advanced.proxy.mode off', async () => {
+      process.argv = ['node', 'script.js', '--proxy', 'http://localhost:7894'];
+      const argv = await parseArguments();
+      const settings: Settings = {
+        advanced: {
+          proxy: {
+            mode: 'off',
+          },
+        },
+      };
+      const config = await loadCliConfig(settings, argv);
+      expect(config.getProxy()).toBe('http://localhost:7894');
     });
   });
 });
@@ -1438,7 +1498,7 @@ describe('loadCliConfig model selection', () => {
       [],
     );
 
-    expect(config.getModel()).toBe(DEFAULT_QWEN_MODEL);
+    expect(config.getModel()).toBe(DEFAULT_TRAM_MODEL);
   });
 
   it('always prefers model from argvs', async () => {
@@ -2123,13 +2183,13 @@ describe('loadCliConfig fileFiltering', () => {
       value: false,
     },
     {
-      property: 'respectQwenIgnore',
-      getter: (c) => c.getFileFilteringRespectQwenIgnore(),
+      property: 'respectTramIgnore',
+      getter: (c) => c.getFileFilteringRespectTramIgnore(),
       value: true,
     },
     {
-      property: 'respectQwenIgnore',
-      getter: (c) => c.getFileFilteringRespectQwenIgnore(),
+      property: 'respectTramIgnore',
+      getter: (c) => c.getFileFilteringRespectTramIgnore(),
       value: false,
     },
     {
@@ -2255,8 +2315,8 @@ describe('parseArguments with positional prompt', () => {
 });
 
 describe('Telemetry configuration via environment variables', () => {
-  it('should prioritize QWEN_TELEMETRY_ENABLED over settings', async () => {
-    vi.stubEnv('QWEN_TELEMETRY_ENABLED', 'true');
+  it('should prioritize TRAM_TELEMETRY_ENABLED over settings', async () => {
+    vi.stubEnv('TRAM_TELEMETRY_ENABLED', 'true');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = { telemetry: { enabled: false } };
@@ -2264,8 +2324,8 @@ describe('Telemetry configuration via environment variables', () => {
     expect(config.getTelemetryEnabled()).toBe(true);
   });
 
-  it('should prioritize QWEN_TELEMETRY_TARGET over settings', async () => {
-    vi.stubEnv('QWEN_TELEMETRY_TARGET', 'gcp');
+  it('should prioritize TRAM_TELEMETRY_TARGET over settings', async () => {
+    vi.stubEnv('TRAM_TELEMETRY_TARGET', 'gcp');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = {
@@ -2275,8 +2335,8 @@ describe('Telemetry configuration via environment variables', () => {
     expect(config.getTelemetryTarget()).toBe('gcp');
   });
 
-  it('should throw when QWEN_TELEMETRY_TARGET is invalid', async () => {
-    vi.stubEnv('QWEN_TELEMETRY_TARGET', 'bogus');
+  it('should throw when TRAM_TELEMETRY_TARGET is invalid', async () => {
+    vi.stubEnv('TRAM_TELEMETRY_TARGET', 'bogus');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = {
@@ -2288,9 +2348,9 @@ describe('Telemetry configuration via environment variables', () => {
     vi.unstubAllEnvs();
   });
 
-  it('should prioritize QWEN_TELEMETRY_OTLP_ENDPOINT over settings and default env var', async () => {
+  it('should prioritize TRAM_TELEMETRY_OTLP_ENDPOINT over settings and default env var', async () => {
     vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://default.env.com');
-    vi.stubEnv('QWEN_TELEMETRY_OTLP_ENDPOINT', 'http://gemini.env.com');
+    vi.stubEnv('TRAM_TELEMETRY_OTLP_ENDPOINT', 'http://gemini.env.com');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = {
@@ -2300,8 +2360,8 @@ describe('Telemetry configuration via environment variables', () => {
     expect(config.getTelemetryOtlpEndpoint()).toBe('http://gemini.env.com');
   });
 
-  it('should prioritize QWEN_TELEMETRY_OTLP_PROTOCOL over settings', async () => {
-    vi.stubEnv('QWEN_TELEMETRY_OTLP_PROTOCOL', 'http');
+  it('should prioritize TRAM_TELEMETRY_OTLP_PROTOCOL over settings', async () => {
+    vi.stubEnv('TRAM_TELEMETRY_OTLP_PROTOCOL', 'http');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = { telemetry: { otlpProtocol: 'grpc' } };
@@ -2309,8 +2369,8 @@ describe('Telemetry configuration via environment variables', () => {
     expect(config.getTelemetryOtlpProtocol()).toBe('http');
   });
 
-  it('should prioritize QWEN_TELEMETRY_LOG_PROMPTS over settings', async () => {
-    vi.stubEnv('QWEN_TELEMETRY_LOG_PROMPTS', 'false');
+  it('should prioritize TRAM_TELEMETRY_LOG_PROMPTS over settings', async () => {
+    vi.stubEnv('TRAM_TELEMETRY_LOG_PROMPTS', 'false');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = { telemetry: { logPrompts: true } };
@@ -2318,8 +2378,8 @@ describe('Telemetry configuration via environment variables', () => {
     expect(config.getTelemetryLogPromptsEnabled()).toBe(false);
   });
 
-  it('should prioritize QWEN_TELEMETRY_OUTFILE over settings', async () => {
-    vi.stubEnv('QWEN_TELEMETRY_OUTFILE', '/gemini/env/telemetry.log');
+  it('should prioritize TRAM_TELEMETRY_OUTFILE over settings', async () => {
+    vi.stubEnv('TRAM_TELEMETRY_OUTFILE', '/gemini/env/telemetry.log');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = {
@@ -2329,8 +2389,8 @@ describe('Telemetry configuration via environment variables', () => {
     expect(config.getTelemetryOutfile()).toBe('/gemini/env/telemetry.log');
   });
 
-  it('should prioritize QWEN_TELEMETRY_USE_COLLECTOR over settings', async () => {
-    vi.stubEnv('QWEN_TELEMETRY_USE_COLLECTOR', 'true');
+  it('should prioritize TRAM_TELEMETRY_USE_COLLECTOR over settings', async () => {
+    vi.stubEnv('TRAM_TELEMETRY_USE_COLLECTOR', 'true');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = { telemetry: { useCollector: false } };
@@ -2338,8 +2398,8 @@ describe('Telemetry configuration via environment variables', () => {
     expect(config.getTelemetryUseCollector()).toBe(true);
   });
 
-  it('should use settings value when QWEN_TELEMETRY_ENABLED is not set', async () => {
-    vi.stubEnv('QWEN_TELEMETRY_ENABLED', undefined);
+  it('should use settings value when TRAM_TELEMETRY_ENABLED is not set', async () => {
+    vi.stubEnv('TRAM_TELEMETRY_ENABLED', undefined);
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = { telemetry: { enabled: true } };
@@ -2347,8 +2407,8 @@ describe('Telemetry configuration via environment variables', () => {
     expect(config.getTelemetryEnabled()).toBe(true);
   });
 
-  it('should use settings value when QWEN_TELEMETRY_TARGET is not set', async () => {
-    vi.stubEnv('QWEN_TELEMETRY_TARGET', undefined);
+  it('should use settings value when TRAM_TELEMETRY_TARGET is not set', async () => {
+    vi.stubEnv('TRAM_TELEMETRY_TARGET', undefined);
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const settings: Settings = {
@@ -2358,16 +2418,16 @@ describe('Telemetry configuration via environment variables', () => {
     expect(config.getTelemetryTarget()).toBe('local');
   });
 
-  it("should treat QWEN_TELEMETRY_ENABLED='1' as true", async () => {
-    vi.stubEnv('QWEN_TELEMETRY_ENABLED', '1');
+  it("should treat TRAM_TELEMETRY_ENABLED='1' as true", async () => {
+    vi.stubEnv('TRAM_TELEMETRY_ENABLED', '1');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const config = await loadCliConfig({}, argv, undefined, []);
     expect(config.getTelemetryEnabled()).toBe(true);
   });
 
-  it("should treat QWEN_TELEMETRY_ENABLED='0' as false", async () => {
-    vi.stubEnv('QWEN_TELEMETRY_ENABLED', '0');
+  it("should treat TRAM_TELEMETRY_ENABLED='0' as false", async () => {
+    vi.stubEnv('TRAM_TELEMETRY_ENABLED', '0');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const config = await loadCliConfig(
@@ -2379,16 +2439,16 @@ describe('Telemetry configuration via environment variables', () => {
     expect(config.getTelemetryEnabled()).toBe(false);
   });
 
-  it("should treat QWEN_TELEMETRY_LOG_PROMPTS='1' as true", async () => {
-    vi.stubEnv('QWEN_TELEMETRY_LOG_PROMPTS', '1');
+  it("should treat TRAM_TELEMETRY_LOG_PROMPTS='1' as true", async () => {
+    vi.stubEnv('TRAM_TELEMETRY_LOG_PROMPTS', '1');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const config = await loadCliConfig({}, argv, undefined, []);
     expect(config.getTelemetryLogPromptsEnabled()).toBe(true);
   });
 
-  it("should treat QWEN_TELEMETRY_LOG_PROMPTS='false' as false", async () => {
-    vi.stubEnv('QWEN_TELEMETRY_LOG_PROMPTS', 'false');
+  it("should treat TRAM_TELEMETRY_LOG_PROMPTS='false' as false", async () => {
+    vi.stubEnv('TRAM_TELEMETRY_LOG_PROMPTS', 'false');
     process.argv = ['node', 'script.js'];
     const argv = await parseArguments();
     const config = await loadCliConfig(

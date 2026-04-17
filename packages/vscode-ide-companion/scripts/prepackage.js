@@ -27,7 +27,7 @@ const __dirname = path.dirname(__filename);
 
 const extensionRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(extensionRoot, '..', '..');
-const bundledCliDir = path.join(extensionRoot, 'dist', 'qwen-cli');
+const bundledCliDir = path.join(extensionRoot, 'dist', 'tram-cli');
 
 function npmBin() {
   return process.platform === 'win32' ? 'npm.cmd' : 'npm';
@@ -214,7 +214,7 @@ function main() {
   const isUniversalBuild = process.env.UNIVERSAL_BUILD === 'true';
 
   console.log(
-    '[prepackage] Installing production deps into extension dist/qwen-cli...',
+    '[prepackage] Installing production deps into extension dist/tram-cli...',
   );
 
   const installArgs = [

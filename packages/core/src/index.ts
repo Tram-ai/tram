@@ -12,11 +12,14 @@
 export * from './config/config.js';
 export { Storage } from './config/storage.js';
 
+// i18n for core tools
+export * from './i18n/index.js';
+
 // Model configuration
 export {
-  DEFAULT_QWEN_MODEL,
-  DEFAULT_QWEN_FLASH_MODEL,
-  DEFAULT_QWEN_EMBEDDING_MODEL,
+  DEFAULT_TRAM_MODEL,
+  DEFAULT_TRAM_FLASH_MODEL,
+  DEFAULT_TRAM_EMBEDDING_MODEL,
   MAINLINE_CODER_MODEL,
 } from './config/models.js';
 export {
@@ -35,7 +38,7 @@ export {
   type ModelProvidersConfig,
   type ModelSwitchMetadata,
   type OnModelChangeCallback,
-  QWEN_OAUTH_MODELS,
+  TRAM_OAUTH_MODELS,
   resolveModelConfig,
   type ResolvedModelConfig,
   validateModelConfig,
@@ -81,16 +84,23 @@ export * from './tools/mcp-client.js';
 export * from './tools/mcp-client-manager.js';
 export * from './tools/mcp-tool.js';
 export * from './tools/memoryTool.js';
+export * from './tools/openapi-link-list.js';
 export * from './tools/read-file.js';
 export * from './tools/ripGrep.js';
 export * from './tools/sdk-control-client-transport.js';
 export * from './tools/shell.js';
 export * from './tools/skill.js';
+export * from './tools/sublm.js';
 export * from './tools/task.js';
 export * from './tools/todoWrite.js';
 export * from './tools/web-fetch.js';
-export * from './tools/web-search/index.js';
 export * from './tools/write-file.js';
+export * from './tools/mod-search.js';
+export * from './tools/mod-hash-lookup.js';
+export * from './tools/bilibili-video-info.js';
+export * from './tools/scheduled-task.js';
+
+export * from './tools/minecraft-server-info.js';
 
 // ============================================================================
 // Services
@@ -100,6 +110,7 @@ export * from './services/chatRecordingService.js';
 export * from './services/fileDiscoveryService.js';
 export * from './services/fileSystemService.js';
 export * from './services/gitService.js';
+export * from './services/modCacheService.js';
 export * from './services/sessionService.js';
 export * from './services/shellExecutionService.js';
 
@@ -154,7 +165,7 @@ export type {
 // Telemetry
 // ============================================================================
 
-export { QwenLogger } from './telemetry/qwen-logger/qwen-logger.js';
+export { TramLogger } from './telemetry/tram-logger/tram-logger.js';
 export * from './telemetry/index.js';
 export {
   logAuth,
@@ -231,7 +242,7 @@ export * from './utils/yaml-parser.js';
 // OAuth & Authentication
 // ============================================================================
 
-export * from './qwen/qwenOAuth2.js';
+export * from './tram/tramOAuth2.js';
 
 // ============================================================================
 // Testing Utilities
@@ -247,3 +258,5 @@ export * from './test-utils/index.js';
 export * from './hooks/types.js';
 export { HookSystem, HookRegistry } from './hooks/index.js';
 export type { HookRegistryEntry } from './hooks/index.js';
+
+export * from './services/serviceRuntimeManager.js';

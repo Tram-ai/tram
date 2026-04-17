@@ -230,7 +230,7 @@ export function ThemeDialog({
                 ) || DEFAULT_THEME;
               return (
                 <Box
-                  borderStyle="single"
+                  borderStyle="round"
                   borderColor={theme.border.default}
                   paddingTop={includePadding ? 1 : 0}
                   paddingBottom={includePadding ? 1 : 0}

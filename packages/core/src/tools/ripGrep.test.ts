@@ -248,9 +248,9 @@ describe('RipGrepTool', () => {
       expect(result.returnDisplay).toBe('Found 1 match');
     });
 
-    it('should pass .qwenignore to ripgrep when respected', async () => {
+    it('should pass .tramignore to ripgrep when respected', async () => {
       await fs.writeFile(
-        path.join(tempRootDir, '.qwenignore'),
+        path.join(tempRootDir, '.tramignore'),
         'ignored.txt\n',
       );
       (runRipgrep as Mock).mockResolvedValue({
@@ -268,13 +268,13 @@ describe('RipGrepTool', () => {
       expect(result.returnDisplay).toBe('No matches found');
     });
 
-    it('should include .qwenignore matches when disabled in config', async () => {
-      await fs.writeFile(path.join(tempRootDir, '.qwenignore'), 'kept.txt\n');
+    it('should include .tramignore matches when disabled in config', async () => {
+      await fs.writeFile(path.join(tempRootDir, '.tramignore'), 'kept.txt\n');
       await fs.writeFile(path.join(tempRootDir, 'kept.txt'), 'keep me');
       Object.assign(mockConfig, {
         getFileFilteringOptions: () => ({
           respectGitIgnore: true,
-          respectQwenIgnore: false,
+          respectTramIgnore: false,
         }),
       });
 
@@ -298,7 +298,7 @@ describe('RipGrepTool', () => {
       Object.assign(mockConfig, {
         getFileFilteringOptions: () => ({
           respectGitIgnore: false,
-          respectQwenIgnore: true,
+          respectTramIgnore: true,
         }),
       });
 

@@ -17,16 +17,19 @@ vi.mock('fs', async (importOriginal) => {
   const existsSync = vi.fn();
   const writeFileSync = vi.fn();
   const readFileSync = vi.fn();
+  const mkdirSync = vi.fn();
   return {
     ...actual,
     existsSync,
     writeFileSync,
     readFileSync,
+    mkdirSync,
     default: {
       ...(actual as unknown as Record<string, unknown>),
       existsSync,
       writeFileSync,
       readFileSync,
+      mkdirSync,
     },
   } as unknown as typeof import('fs');
 });
@@ -34,8 +37,8 @@ vi.mock('fs', async (importOriginal) => {
 describe('initCommand', () => {
   let mockContext: CommandContext;
   const targetDir = '/test/dir';
-  const DEFAULT_CONTEXT_FILENAME = 'QWEN.md';
-  const geminiMdPath = path.join(targetDir, DEFAULT_CONTEXT_FILENAME);
+  const DEFAULT_CONTEXT_FILENAME = 'TRAM.md';
+  const geminiMdPath = path.join(targetDir, '.tram', DEFAULT_CONTEXT_FILENAME);
 
   beforeEach(() => {
     // Create a fresh mock context for each test
@@ -51,6 +54,16 @@ describe('initCommand', () => {
   afterEach(() => {
     // Clear all mocks after each test
     vi.clearAllMocks();
+  });
+
+  it('should create .tram directory before writing context file', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(false);
+
+    await initCommand.action!(mockContext, '');
+
+    expect(fs.mkdirSync).toHaveBeenCalledWith(path.join(targetDir, '.tram'), {
+      recursive: true,
+    });
   });
 
   it(`should ask for confirmation if ${DEFAULT_CONTEXT_FILENAME} already exists and is non-empty`, async () => {
@@ -97,7 +110,7 @@ describe('initCommand', () => {
       expect.objectContaining({
         type: 'submit_prompt',
         content: expect.stringContaining(
-          'You are Qwen Code, an interactive CLI agent',
+          'You are TRAM, an interactive CLI agent',
         ),
       }),
     );
@@ -143,7 +156,7 @@ describe('initCommand', () => {
       expect.objectContaining({
         type: 'submit_prompt',
         content: expect.stringContaining(
-          'You are Qwen Code, an interactive CLI agent',
+          'You are TRAM, an interactive CLI agent',
         ),
       }),
     );

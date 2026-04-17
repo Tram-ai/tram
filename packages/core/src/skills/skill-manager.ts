@@ -25,7 +25,7 @@ import { normalizeContent } from '../utils/textUtils.js';
 
 const debugLogger = createDebugLogger('SKILL_MANAGER');
 
-const QWEN_CONFIG_DIR = '.qwen';
+const TRAM_CONFIG_DIR = '.tram';
 const SKILLS_CONFIG_DIR = 'skills';
 const SKILL_MANIFEST_FILE = 'SKILL.md';
 
@@ -435,11 +435,11 @@ export class SkillManager {
       case 'project':
         return path.join(
           this.config.getProjectRoot(),
-          QWEN_CONFIG_DIR,
+          TRAM_CONFIG_DIR,
           SKILLS_CONFIG_DIR,
         );
       case 'user':
-        return path.join(os.homedir(), QWEN_CONFIG_DIR, SKILLS_CONFIG_DIR);
+        return path.join(os.homedir(), TRAM_CONFIG_DIR, SKILLS_CONFIG_DIR);
       case 'bundled':
         return this.bundledSkillsDir;
       case 'extension':

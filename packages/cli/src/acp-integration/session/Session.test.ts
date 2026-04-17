@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen
+ * Copyright 2025 Tram
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -9,9 +9,9 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { Session } from './Session.js';
-import type { Config, GeminiChat } from '@qwen-code/qwen-code-core';
-import { ApprovalMode, AuthType } from '@qwen-code/qwen-code-core';
-import * as core from '@qwen-code/qwen-code-core';
+import type { Config, GeminiChat } from '@tram-ai/tram-core';
+import { ApprovalMode, AuthType } from '@tram-ai/tram-core';
+import * as core from '@tram-ai/tram-core';
 import type {
   AgentSideConnection,
   PromptRequest,
@@ -199,7 +199,7 @@ describe('Session', () => {
   describe('prompt', () => {
     it('passes resolved paths to read_many_files tool', async () => {
       const tempDir = await fs.mkdtemp(
-        path.join(os.tmpdir(), 'qwen-acp-session-'),
+        path.join(os.tmpdir(), 'tram-acp-session-'),
       );
       const fileName = 'README.md';
       const filePath = path.join(tempDir, fileName);

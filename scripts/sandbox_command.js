@@ -32,10 +32,10 @@ const argv = yargs(hideBin(process.argv)).option('q', {
   default: false,
 }).argv;
 
-let qwenSandbox = process.env.QWEN_SANDBOX;
+let qwenSandbox = process.env.tram_SANDBOX;
 
 if (!qwenSandbox) {
-  const userSettingsFile = join(os.homedir(), '.qwen', 'settings.json');
+  const userSettingsFile = join(os.homedir(), '.tram', 'settings.json');
   if (existsSync(userSettingsFile)) {
     const settings = JSON.parse(
       stripJsonComments(readFileSync(userSettingsFile, 'utf-8')),
@@ -49,7 +49,7 @@ if (!qwenSandbox) {
 if (!qwenSandbox) {
   let currentDir = process.cwd();
   while (true) {
-    const qwenEnv = join(currentDir, '.qwen', '.env');
+    const qwenEnv = join(currentDir, '.tram', '.env');
     const regularEnv = join(currentDir, '.env');
     if (existsSync(qwenEnv)) {
       dotenv.config({ path: qwenEnv, quiet: true });
@@ -64,7 +64,7 @@ if (!qwenSandbox) {
     }
     currentDir = parentDir;
   }
-  qwenSandbox = process.env.QWEN_SANDBOX;
+  qwenSandbox = process.env.tram_SANDBOX;
 }
 
 qwenSandbox = (qwenSandbox || '').toLowerCase();

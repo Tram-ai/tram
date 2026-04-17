@@ -17,7 +17,7 @@ import {
   SlashCommandStatus,
   ToolConfirmationOutcome,
   IdeClient,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import { useSessionStats } from '../contexts/SessionContext.js';
 import type {
   Message,
@@ -41,6 +41,7 @@ import {
   type ExtensionUpdateAction,
   type ExtensionUpdateStatus,
 } from '../state/extensions.js';
+import { ServiceRuntimeManager } from '@tram-ai/tram-core';
 
 type SerializableHistoryItem = Record<string, unknown>;
 const debugLogger = createDebugLogger('SLASH_COMMAND_PROCESSOR');
@@ -81,6 +82,7 @@ interface SlashCommandProcessorActions {
   openAgentsManagerDialog: () => void;
   openExtensionsManagerDialog: () => void;
   openMcpDialog: () => void;
+  openInitializeDialog: () => void;
 }
 
 /**
@@ -289,6 +291,36 @@ export const useSlashCommandProcessor = (
       return;
     }
 
+    const manager = ServiceRuntimeManager.forConfig(config);
+    manager.attachNotifier((event) => {
+      const type =
+        event.level === 'error'
+          ? MessageType.ERROR
+          : event.level === 'warning'
+            ? MessageType.WARNING
+            : MessageType.INFO;
+
+      addItem(
+        {
+          type,
+          text: event.message,
+        },
+        Date.now(),
+      );
+    });
+
+    void manager.initialize();
+
+    return () => {
+      manager.attachNotifier(undefined);
+    };
+  }, [config, addItem]);
+
+  useEffect(() => {
+    if (!config) {
+      return;
+    }
+
     const listener = () => {
       reloadCommands();
     };
@@ -453,7 +485,10 @@ export const useSlashCommandProcessor = (
                       timestamp: new Date(),
                     });
                   }
-                  return { type: 'handled' };
+                  return {
+                    type: 'handled',
+                    output: typeof result.content === 'string' ? result.content : undefined,
+                  };
                 case 'dialog':
                   switch (result.dialog) {
                     case 'auth':
@@ -491,6 +526,9 @@ export const useSlashCommandProcessor = (
                       return { type: 'handled' };
                     case 'extensions_manage':
                       actions.openExtensionsManagerDialog();
+                      return { type: 'handled' };
+                    case 'initialize':
+                      actions.openInitializeDialog();
                       return { type: 'handled' };
                     case 'help':
                       return { type: 'handled' };

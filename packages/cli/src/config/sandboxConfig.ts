@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { SandboxConfig } from '@qwen-code/qwen-code-core';
-import { FatalSandboxError } from '@qwen-code/qwen-code-core';
+import type { SandboxConfig } from '@tram-ai/tram-core';
+import { FatalSandboxError } from '@tram-ai/tram-core';
 import commandExists from 'command-exists';
 import * as os from 'node:os';
 import { getPackageJson } from '../utils/package.js';
@@ -38,7 +38,7 @@ function getSandboxCommand(
 
   // note environment variable takes precedence over argument (from command line or settings)
   const environmentConfiguredSandbox =
-    process.env['QWEN_SANDBOX']?.toLowerCase().trim() ?? '';
+    process.env['TRAM_SANDBOX']?.toLowerCase().trim() ?? '';
   sandbox =
     environmentConfiguredSandbox?.length > 0
       ? environmentConfiguredSandbox
@@ -63,7 +63,7 @@ function getSandboxCommand(
       return sandbox;
     }
     throw new FatalSandboxError(
-      `Missing sandbox command '${sandbox}' (from QWEN_SANDBOX)`,
+      `Missing sandbox command '${sandbox}' (from TRAM_SANDBOX)`,
     );
   }
 
@@ -80,8 +80,8 @@ function getSandboxCommand(
   // throw an error if user requested sandbox but no command was found
   if (sandbox === true) {
     throw new FatalSandboxError(
-      'QWEN_SANDBOX is true but failed to determine command for sandbox; ' +
-        'install docker or podman or specify command in QWEN_SANDBOX',
+      'TRAM_SANDBOX is true but failed to determine command for sandbox; ' +
+        'install docker or podman or specify command in TRAM_SANDBOX',
     );
   }
 
@@ -98,7 +98,7 @@ export async function loadSandboxConfig(
   const packageJson = await getPackageJson();
   const image =
     argv.sandboxImage ??
-    process.env['QWEN_SANDBOX_IMAGE'] ??
+    process.env['TRAM_SANDBOX_IMAGE'] ??
     packageJson?.config?.sandboxImageUri;
 
   return command && image ? { command, image } : undefined;

@@ -191,6 +191,31 @@ describe('ModelsConfig', () => {
     expect(gc.apiKeyEnvKey).toBe('API_KEY_SHARED');
   });
 
+  it('should keep local model id and set requestModel from upstreamModelId', async () => {
+    const modelProvidersConfig: ModelProvidersConfig = {
+      openai: [
+        {
+          id: 'gpt-4o-groqabc123',
+          upstreamModelId: 'gpt-4o',
+          name: 'gpt-4o',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          envKey: 'GROQ_API_KEY_TEST',
+        },
+      ],
+    };
+
+    const modelsConfig = new ModelsConfig({
+      initialAuthType: AuthType.USE_OPENAI,
+      modelProvidersConfig,
+    });
+
+    await modelsConfig.switchModel(AuthType.USE_OPENAI, 'gpt-4o-groqabc123');
+
+    const gc = currentGenerationConfig(modelsConfig);
+    expect(gc.model).toBe('gpt-4o-groqabc123');
+    expect(gc.requestModel).toBe('gpt-4o');
+  });
+
   it('should use provider config when modelId exists in registry even after updateCredentials', () => {
     const modelProvidersConfig: ModelProvidersConfig = {
       openai: [
@@ -444,20 +469,20 @@ describe('ModelsConfig', () => {
     // it should be re-resolved by other layers in refreshAuth
   });
 
-  it('should always force Qwen OAuth apiKey placeholder when applying model defaults', async () => {
+  it('should always force TRAM OAuth apiKey placeholder when applying model defaults', async () => {
     // Simulate a stale/explicit apiKey existing before switching models.
     const modelsConfig = new ModelsConfig({
-      initialAuthType: AuthType.QWEN_OAUTH,
+      initialAuthType: AuthType.TRAM_OAUTH,
       generationConfig: {
         apiKey: 'manual-key-should-not-leak',
       },
     });
 
-    // Switching within qwen-oauth triggers applyResolvedModelDefaults().
-    await modelsConfig.switchModel(AuthType.QWEN_OAUTH, 'coder-model');
+    // Switching within tram-oauth triggers applyResolvedModelDefaults().
+    await modelsConfig.switchModel(AuthType.TRAM_OAUTH, 'coder-model');
 
     const gc = currentGenerationConfig(modelsConfig);
-    expect(gc.apiKey).toBe('QWEN_OAUTH_DYNAMIC_TOKEN');
+    expect(gc.apiKey).toBe('TRAM_OAUTH_DYNAMIC_TOKEN');
     expect(gc.apiKeyEnvKey).toBeUndefined();
   });
 
@@ -496,19 +521,19 @@ describe('ModelsConfig', () => {
     expect(sources['customHeaders']?.kind).toBe('modelProviders');
   });
 
-  it('should apply Qwen OAuth apiKey placeholder during syncAfterAuthRefresh for fresh users', () => {
+  it('should apply TRAM OAuth apiKey placeholder during syncAfterAuthRefresh for fresh users', () => {
     // Fresh user: authType not selected yet (currentAuthType undefined).
     const modelsConfig = new ModelsConfig();
 
-    // Config.refreshAuth passes modelId from modelsConfig.getModel(), which falls back to DEFAULT_QWEN_MODEL.
+    // Config.refreshAuth passes modelId from modelsConfig.getModel(), which falls back to DEFAULT_TRAM_MODEL.
     modelsConfig.syncAfterAuthRefresh(
-      AuthType.QWEN_OAUTH,
+      AuthType.TRAM_OAUTH,
       modelsConfig.getModel(),
     );
 
     const gc = currentGenerationConfig(modelsConfig);
     expect(gc.model).toBe('coder-model');
-    expect(gc.apiKey).toBe('QWEN_OAUTH_DYNAMIC_TOKEN');
+    expect(gc.apiKey).toBe('TRAM_OAUTH_DYNAMIC_TOKEN');
     expect(gc.apiKeyEnvKey).toBeUndefined();
   });
 
@@ -522,19 +547,19 @@ describe('ModelsConfig', () => {
       },
     });
 
-    // User switches to qwen-oauth via AuthDialog
+    // User switches to tram-oauth via AuthDialog
     // refreshAuth calls syncAfterAuthRefresh with the current model (gpt-4o)
-    // which doesn't exist in qwen-oauth registry, so it should use default
-    modelsConfig.syncAfterAuthRefresh(AuthType.QWEN_OAUTH, 'gpt-4o');
+    // which doesn't exist in tram-oauth registry, so it should use default
+    modelsConfig.syncAfterAuthRefresh(AuthType.TRAM_OAUTH, 'gpt-4o');
 
     const gc = currentGenerationConfig(modelsConfig);
-    // Should use default qwen-oauth model (coder-model), not the OPENAI model
+    // Should use default tram-oauth model (coder-model), not the OPENAI model
     expect(gc.model).toBe('coder-model');
-    expect(gc.apiKey).toBe('QWEN_OAUTH_DYNAMIC_TOKEN');
+    expect(gc.apiKey).toBe('TRAM_OAUTH_DYNAMIC_TOKEN');
     expect(gc.apiKeyEnvKey).toBeUndefined();
   });
 
-  it('should clear manual credentials when switching from USE_OPENAI to QWEN_OAUTH', () => {
+  it('should clear manual credentials when switching from USE_OPENAI to TRAM_OAUTH', () => {
     // User manually set credentials for OpenAI
     const modelsConfig = new ModelsConfig({
       initialAuthType: AuthType.USE_OPENAI,
@@ -552,17 +577,17 @@ describe('ModelsConfig', () => {
       model: 'gpt-4o',
     });
 
-    // User switches to qwen-oauth
+    // User switches to tram-oauth
     // Since authType is not USE_OPENAI, manual credentials should be cleared
-    // and default qwen-oauth model should be applied
-    modelsConfig.syncAfterAuthRefresh(AuthType.QWEN_OAUTH, 'gpt-4o');
+    // and default tram-oauth model should be applied
+    modelsConfig.syncAfterAuthRefresh(AuthType.TRAM_OAUTH, 'gpt-4o');
 
     const gc = currentGenerationConfig(modelsConfig);
-    // Should use default qwen-oauth model, not preserve manual OpenAI credentials
+    // Should use default tram-oauth model, not preserve manual OpenAI credentials
     expect(gc.model).toBe('coder-model');
-    expect(gc.apiKey).toBe('QWEN_OAUTH_DYNAMIC_TOKEN');
-    // baseUrl should be set to qwen-oauth default, not preserved from manual OpenAI config
-    expect(gc.baseUrl).toBe('DYNAMIC_QWEN_OAUTH_BASE_URL');
+    expect(gc.apiKey).toBe('TRAM_OAUTH_DYNAMIC_TOKEN');
+    // baseUrl should be set to tram-oauth default, not preserved from manual OpenAI config
+    expect(gc.baseUrl).toBe('DYNAMIC_TRAM_OAUTH_BASE_URL');
     expect(gc.apiKeyEnvKey).toBeUndefined();
   });
 
@@ -638,7 +663,7 @@ describe('ModelsConfig', () => {
       modelProvidersConfig,
       generationConfig: {},
     });
-    expect(config3.getModel()).toBe('coder-model'); // Falls back to DEFAULT_QWEN_MODEL
+    expect(config3.getModel()).toBe('coder-model'); // Falls back to DEFAULT_TRAM_MODEL
     expect(config3.getGenerationConfig().model).toBeUndefined();
   });
 
@@ -715,7 +740,7 @@ describe('ModelsConfig', () => {
   });
 
   describe('getAllConfiguredModels', () => {
-    it('should return all models across all authTypes and put qwen-oauth first', () => {
+    it('should return all models across all authTypes and put tram-oauth first', () => {
       const modelProvidersConfig: ModelProvidersConfig = {
         openai: [
           {
@@ -755,27 +780,27 @@ describe('ModelsConfig', () => {
 
       const allModels = modelsConfig.getAllConfiguredModels();
 
-      // qwen-oauth models should be ordered first
-      const firstNonQwenIndex = allModels.findIndex(
-        (m) => m.authType !== AuthType.QWEN_OAUTH,
+      // tram-oauth models should be ordered first
+      const firstNonTramIndex = allModels.findIndex(
+        (m) => m.authType !== AuthType.TRAM_OAUTH,
       );
-      expect(firstNonQwenIndex).toBeGreaterThan(0);
+      expect(firstNonTramIndex).toBeGreaterThan(0);
       expect(
         allModels
-          .slice(0, firstNonQwenIndex)
-          .every((m) => m.authType === AuthType.QWEN_OAUTH),
+          .slice(0, firstNonTramIndex)
+          .every((m) => m.authType === AuthType.TRAM_OAUTH),
       ).toBe(true);
       expect(
         allModels
-          .slice(firstNonQwenIndex)
-          .every((m) => m.authType !== AuthType.QWEN_OAUTH),
+          .slice(firstNonTramIndex)
+          .every((m) => m.authType !== AuthType.TRAM_OAUTH),
       ).toBe(true);
 
-      // Should include qwen-oauth models (hard-coded)
-      const qwenModels = allModels.filter(
-        (m) => m.authType === AuthType.QWEN_OAUTH,
+      // Should include tram-oauth models (hard-coded)
+      const tramModels = allModels.filter(
+        (m) => m.authType === AuthType.TRAM_OAUTH,
       );
-      expect(qwenModels.length).toBeGreaterThan(0);
+      expect(tramModels.length).toBeGreaterThan(0);
 
       // Should include openai models
       const openaiModels = allModels.filter(
@@ -805,12 +830,12 @@ describe('ModelsConfig', () => {
 
       const allModels = modelsConfig.getAllConfiguredModels();
 
-      // Should still include qwen-oauth models (hard-coded)
+      // Should still include tram-oauth models (hard-coded)
       expect(allModels.length).toBeGreaterThan(0);
-      const qwenModels = allModels.filter(
-        (m) => m.authType === AuthType.QWEN_OAUTH,
+      const tramModels = allModels.filter(
+        (m) => m.authType === AuthType.TRAM_OAUTH,
       );
-      expect(qwenModels.length).toBeGreaterThan(0);
+      expect(tramModels.length).toBeGreaterThan(0);
     });
 
     it('should return models with correct structure', () => {
@@ -845,7 +870,7 @@ describe('ModelsConfig', () => {
       expect(testModel?.capabilities?.vision).toBe(true);
     });
 
-    it('should support filtering by authTypes and still put qwen-oauth first when included', () => {
+    it('should support filtering by authTypes and still put tram-oauth first when included', () => {
       const modelProvidersConfig: ModelProvidersConfig = {
         openai: [
           {
@@ -869,7 +894,7 @@ describe('ModelsConfig', () => {
         modelProvidersConfig,
       });
 
-      // Filter: OpenAI only (should not include qwen-oauth)
+      // Filter: OpenAI only (should not include tram-oauth)
       const openaiOnly = modelsConfig.getAllConfiguredModels([
         AuthType.USE_OPENAI,
       ]);
@@ -878,21 +903,21 @@ describe('ModelsConfig', () => {
       );
       expect(openaiOnly.map((m) => m.id)).toContain('openai-model-1');
 
-      // Filter: include qwen-oauth but request it later -> still ordered first
-      const withQwen = modelsConfig.getAllConfiguredModels([
+      // Filter: include tram-oauth but request it later -> still ordered first
+      const withTram = modelsConfig.getAllConfiguredModels([
         AuthType.USE_OPENAI,
-        AuthType.QWEN_OAUTH,
+        AuthType.TRAM_OAUTH,
         AuthType.USE_ANTHROPIC,
       ]);
-      expect(withQwen.length).toBeGreaterThan(0);
-      const firstNonQwenIndex = withQwen.findIndex(
-        (m) => m.authType !== AuthType.QWEN_OAUTH,
+      expect(withTram.length).toBeGreaterThan(0);
+      const firstNonTramIndex = withTram.findIndex(
+        (m) => m.authType !== AuthType.TRAM_OAUTH,
       );
-      expect(firstNonQwenIndex).toBeGreaterThan(0);
+      expect(firstNonTramIndex).toBeGreaterThan(0);
       expect(
-        withQwen
-          .slice(0, firstNonQwenIndex)
-          .every((m) => m.authType === AuthType.QWEN_OAUTH),
+        withTram
+          .slice(0, firstNonTramIndex)
+          .every((m) => m.authType === AuthType.TRAM_OAUTH),
       ).toBe(true);
     });
   });
@@ -1389,37 +1414,37 @@ describe('ModelsConfig', () => {
       expect(
         modelsConfig
           .getAllConfiguredModels()
-          .filter((m) => m.authType !== 'qwen-oauth').length,
+          .filter((m) => m.authType !== 'tram-oauth').length,
       ).toBeGreaterThan(0);
 
       // Reload with empty config
       modelsConfig.reloadModelProvidersConfig({});
 
-      // Only qwen-oauth models should remain
+      // Only tram-oauth models should remain
       const models = modelsConfig.getAllConfiguredModels();
-      expect(models.every((m) => m.authType === 'qwen-oauth')).toBe(true);
+      expect(models.every((m) => m.authType === 'tram-oauth')).toBe(true);
     });
 
-    it('should preserve qwen-oauth models after reload', () => {
+    it('should preserve tram-oauth models after reload', () => {
       const modelsConfig = new ModelsConfig({
         modelProvidersConfig: {
           openai: [{ id: 'gpt-4', name: 'GPT-4' }],
         },
       });
 
-      const initialQwenModels = modelsConfig
+      const initialTramModels = modelsConfig
         .getAllConfiguredModels()
-        .filter((m) => m.authType === 'qwen-oauth');
+        .filter((m) => m.authType === 'tram-oauth');
 
       modelsConfig.reloadModelProvidersConfig({
         gemini: [{ id: 'gemini-pro', name: 'Gemini Pro' }],
       });
 
-      // qwen-oauth models should still exist
-      const qwenModelsAfterReload = modelsConfig
+      // tram-oauth models should still exist
+      const tramModelsAfterReload = modelsConfig
         .getAllConfiguredModels()
-        .filter((m) => m.authType === 'qwen-oauth');
-      expect(qwenModelsAfterReload.length).toBe(initialQwenModels.length);
+        .filter((m) => m.authType === 'tram-oauth');
+      expect(tramModelsAfterReload.length).toBe(initialTramModels.length);
     });
 
     it('should handle reload with undefined config', () => {

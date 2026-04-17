@@ -1,5 +1,5 @@
 @echo off
-REM Script to install Node.js and Qwen Code with source information
+REM Script to install Node.js and TRAM with source information
 REM This script handles the installation process and sets the installation source
 REM
 REM Usage: install-qwen-with-source.bat --source <source>
@@ -35,7 +35,7 @@ goto parse_args
 :end_parse
 
 echo ===========================================
-echo Qwen Code Installation Script with Source Tracking
+echo TRAM Installation Script with Source Tracking
 echo ===========================================
 echo.
 echo INFO: Installation source: %SOURCE%
@@ -61,7 +61,7 @@ if !ERRORLEVEL! EQU 0 (
         echo INFO: Installing Node.js 20+
         call :InstallNodeJSDirectly
         if !ERRORLEVEL! NEQ 0 (
-            echo ERROR: Failed to install Node.js. Cannot continue with Qwen Code installation.
+            echo ERROR: Failed to install Node.js. Cannot continue with TRAM installation.
             exit /b 1
         )
     )
@@ -69,14 +69,14 @@ if !ERRORLEVEL! EQU 0 (
     echo INFO: Node.js not found. Installing Node.js 20+
     call :InstallNodeJSDirectly
     if !ERRORLEVEL! NEQ 0 (
-        echo ERROR: Failed to install Node.js. Cannot continue with Qwen Code installation.
+        echo ERROR: Failed to install Node.js. Cannot continue with TRAM installation.
         exit /b 1
     )
 )
 
 :InstallQwenCode
 
-REM Verify npm is available before installing Qwen Code
+REM Verify npm is available before installing TRAM
 REM Always use full path to npm to avoid local node_modules conflicts
 set "NODEJS_PATH=C:\Program Files\nodejs"
 set "NODEJS_PATH_X86=C:\Program Files (x86)\nodejs"
@@ -98,23 +98,23 @@ if exist "!NODEJS_PATH!\npm.cmd" (
     set "NPM_CMD=npm"
 )
 
-REM Install Qwen Code with source information
-echo INFO: Installing Qwen Code with source: %SOURCE%
-echo INFO: Running: %NPM_CMD% install -g @qwen-code/qwen-code@latest --registry https://registry.npmmirror.com
-call "%NPM_CMD%" install -g @qwen-code/qwen-code@latest --registry https://registry.npmmirror.com
+REM Install TRAM with source information
+echo INFO: Installing TRAM with source: %SOURCE%
+echo INFO: Running: %NPM_CMD% install -g @tram-ai/tram@latest --registry https://registry.npmmirror.com
+call "%NPM_CMD%" install -g @tram-ai/tram@latest --registry https://registry.npmmirror.com
 
 if %ERRORLEVEL% EQU 0 (
-    echo SUCCESS: Qwen Code installed successfully!
+    echo SUCCESS: TRAM installed successfully!
 ) else (
-    echo ERROR: Failed to install Qwen Code.
+    echo ERROR: Failed to install TRAM.
     exit /b 1
 )
 
 REM Create source.json only if --source or -s was explicitly provided
 if not "!SOURCE!"=="unknown" (
-    echo INFO: Creating source.json in %USERPROFILE%\.qwen...
+    echo INFO: Creating source.json in %USERPROFILE%\.tram...
 
-    set "QWEN_DIR=%USERPROFILE%\.qwen"
+    set "QWEN_DIR=%USERPROFILE%\.tram"
     if not exist "!QWEN_DIR!" (
         mkdir "!QWEN_DIR!"
     )
@@ -126,24 +126,24 @@ if not "!SOURCE!"=="unknown" (
     echo }
     ) > "!QWEN_DIR!\source.json"
 
-    echo SUCCESS: Installation source saved to %USERPROFILE%\.qwen\source.json
+    echo SUCCESS: Installation source saved to %USERPROFILE%\.tram\source.json
 )
 
 REM Verify installation
 call :CheckCommandExists qwen
 if %ERRORLEVEL% EQU 0 (
-    echo SUCCESS: Qwen Code is available as 'qwen' command.
+    echo SUCCESS: TRAM is available as 'qwen' command.
     call qwen --version
     echo.
-    echo INFO: Starting Qwen Code...
+    echo INFO: Starting TRAM...
     echo.
     call qwen
 ) else (
-    echo WARNING: Qwen Code may not be in PATH. Please check your npm global bin directory.
+    echo WARNING: TRAM may not be in PATH. Please check your npm global bin directory.
     echo.
     echo ===========================================
     echo SUCCESS: Installation completed!
-    echo The source information is stored in %USERPROFILE%\.qwen\source.json
+    echo The source information is stored in %USERPROFILE%\.tram\source.json
     echo.
     echo ===========================================
 )

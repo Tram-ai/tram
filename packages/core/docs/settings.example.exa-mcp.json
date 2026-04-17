@@ -1,0 +1,14 @@
+{
+  "// NOTE": "Built-in web search providers (Tavily, Google, DashScope) are now disabled.",
+  "// USE EXA MCP INSTEAD": "Uncomment the mcpServers section below to enable EXA MCP for web search.",
+  "// DOCUMENTATION": "See packages/core/docs/EXA-MCP-INTEGRATION.md for complete setup guide.",
+  "mcpServers": {
+    "exa": {
+      "url": "https://mcp.exa.ai/mcp"
+    }
+  },
+  "// OPTIONAL SETTINGS": {
+    "timeout": "Request timeout in milliseconds (default: 30000)",
+    "maxRetries": "Number of retries on failure (default: 3)"
+  }
+}

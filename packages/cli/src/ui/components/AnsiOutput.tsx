@@ -10,7 +10,7 @@ import type {
   AnsiLine,
   AnsiOutput,
   AnsiToken,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 
 const DEFAULT_HEIGHT = 24;
 

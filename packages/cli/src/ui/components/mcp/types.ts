@@ -7,7 +7,7 @@
 import type {
   MCPServerConfig,
   MCPServerStatus,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 
 /**
  * MCP管理步骤定义

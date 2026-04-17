@@ -15,17 +15,19 @@ import {
 
 type Logger = (message: string) => void;
 
-export const runQwenCodeCommand = 'qwen-code.runQwenCode';
-export const showDiffCommand = 'qwenCode.showDiff';
-export const openChatCommand = 'qwen-code.openChat';
-export const openNewChatTabCommand = 'qwenCode.openNewChatTab';
-export const loginCommand = 'qwen-code.login';
-export const focusChatCommand = 'qwen-code.focusChat';
-export const newConversationCommand = 'qwen-code.newConversation';
-export const showLogsCommand = 'qwen-code.showLogs';
+export const runTramCommand = 'tram.runTram';
+export const showDiffCommand = 'tramCode.showDiff';
+export const openChatCommand = 'tram.openChat';
+export const openNewChatTabCommand = 'tramCode.openNewChatTab';
+export const loginCommand = 'tram.login';
+export const focusChatCommand = 'tram.focusChat';
+export const newConversationCommand = 'tram.newConversation';
+export const showLogsCommand = 'tram.showLogs';
+export const toggleChatLogsCommand = 'tram.toggleChatLogs';
+export const quickServiceAlertCommand = 'tram.quickServiceAlert';
 
 /**
- * Register all Qwen Code chat-related commands.
+ * Register all TRAM chat-related commands.
  *
  * `openChat` and `newConversation` always open an editor tab, while
  * `focusChat` focuses the secondary sidebar (preferred) or primary sidebar.
@@ -48,6 +50,15 @@ export function registerNewCommands(
   supportsSecondarySidebar = true,
 ): void {
   const disposables: vscode.Disposable[] = [];
+  let logsVisible = false;
+
+  const sendToLatestProvider = async (text: string) => {
+    const providers = getWebViewProviders();
+    const provider =
+      providers.length > 0 ? providers[providers.length - 1] : createWebViewProvider();
+    await provider.show();
+    await provider.submitMessage(text);
+  };
 
   // Open Chat: show the most recent editor tab or create a new one
   disposables.push(
@@ -103,7 +114,7 @@ export function registerNewCommands(
         await providers[providers.length - 1].forceReLogin();
       } else {
         vscode.window.showInformationMessage(
-          'Please open Qwen Code chat first before logging in.',
+          'Please open TRAM chat first before logging in.',
         );
       }
     }),
@@ -134,11 +145,44 @@ export function registerNewCommands(
     vscode.commands.registerCommand(showLogsCommand, async () => {
       if (outputChannel) {
         outputChannel.show(true);
+        logsVisible = true;
       } else {
         vscode.window.showWarningMessage(
-          'Qwen Code Companion log channel is not available.',
+          'TRAM Companion log channel is not available.',
         );
       }
+    }),
+  );
+
+  // Toggle between logs and chat focus
+  disposables.push(
+    vscode.commands.registerCommand(toggleChatLogsCommand, async () => {
+      if (!logsVisible) {
+        await vscode.commands.executeCommand(showLogsCommand);
+        return;
+      }
+
+      await vscode.commands.executeCommand(focusChatCommand);
+      logsVisible = false;
+    }),
+  );
+
+  // Alt+L quick action to trigger /service alert command directly
+  disposables.push(
+    vscode.commands.registerCommand(quickServiceAlertCommand, async () => {
+      const serviceName = await vscode.window.showInputBox({
+        prompt: 'Enter service name for alert handling',
+        placeHolder: 'api',
+        ignoreFocusOut: true,
+      });
+
+      const normalized = serviceName?.trim();
+      if (!normalized) {
+        return;
+      }
+
+      await vscode.commands.executeCommand(focusChatCommand);
+      await sendToLatestProvider(`/service alert ${normalized}`);
     }),
   );
 

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Google LLC
+ * Copyright 2025 TRAM Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -37,5 +37,28 @@ describe('createGeminiContentGenerator', () => {
 
     expect(GeminiContentGenerator).toHaveBeenCalled();
     expect(generator).toBeDefined();
+  });
+
+  it('should forward custom baseUrl to Gemini httpOptions', () => {
+    const config = {
+      model: 'gemini-1.5-flash',
+      apiKey: 'test-key',
+      baseUrl:
+        'https://gateway.ai.cloudflare.com/v1/account-id/gateway-id/google-ai-studio',
+      authType: AuthType.USE_GEMINI,
+    };
+
+    createGeminiContentGenerator(config, mockConfig);
+
+    expect(GeminiContentGenerator).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apiKey: 'test-key',
+        httpOptions: expect.objectContaining({
+          baseUrl:
+            'https://gateway.ai.cloudflare.com/v1/account-id/gateway-id/google-ai-studio',
+        }),
+      }),
+      config,
+    );
   });
 });

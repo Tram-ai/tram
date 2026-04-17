@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Google LLC
+ * Copyright 2025 TRAM Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -15,6 +15,7 @@ import type {
   ThinkingLevel,
   Content,
   Part,
+  HttpOptions,
 } from '@google/genai';
 import { GoogleGenAI } from '@google/genai';
 import type {
@@ -33,7 +34,7 @@ export class GeminiContentGenerator implements ContentGenerator {
     options: {
       apiKey?: string;
       vertexai?: boolean;
-      httpOptions?: { headers: Record<string, string> };
+      httpOptions?: HttpOptions;
     },
     contentGeneratorConfig?: ContentGeneratorConfig,
   ) {
@@ -84,7 +85,7 @@ export class GeminiContentGenerator implements ContentGenerator {
       temperature: getParameterValue<number>(
         configSamplingParams?.temperature,
         'temperature',
-        1,
+        0,
       ),
       topP: getParameterValue<number>(
         configSamplingParams?.top_p,

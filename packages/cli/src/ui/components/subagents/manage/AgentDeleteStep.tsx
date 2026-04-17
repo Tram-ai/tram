@@ -5,8 +5,8 @@
  */
 
 import { Box, Text } from 'ink';
-import { type SubagentConfig } from '@qwen-code/qwen-code-core';
-import { createDebugLogger } from '@qwen-code/qwen-code-core';
+import { type SubagentConfig } from '@tram-ai/tram-core';
+import { createDebugLogger } from '@tram-ai/tram-core';
 import type { StepNavigationProps } from '../types.js';
 import { theme } from '../../../semantic-colors.js';
 import { useKeypress } from '../../../hooks/useKeypress.js';

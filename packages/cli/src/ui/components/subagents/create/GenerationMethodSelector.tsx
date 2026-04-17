@@ -11,15 +11,15 @@ import { t } from '../../../../i18n/index.js';
 
 interface GenerationOption {
   label: string;
-  value: 'qwen' | 'manual';
+  value: 'tram' | 'manual';
 }
 
 const generationOptions: GenerationOption[] = [
   {
     get label() {
-      return t('Generate with Qwen Code (Recommended)');
+      return t('Generate with TRAM (Recommended)');
     },
-    value: 'qwen',
+    value: 'tram',
   },
   {
     get label() {
@@ -39,7 +39,7 @@ export function GenerationMethodSelector({
   onPrevious: _onPrevious,
 }: WizardStepProps) {
   const handleSelect = (selectedValue: string) => {
-    const method = selectedValue as 'qwen' | 'manual';
+    const method = selectedValue as 'tram' | 'manual';
     dispatch({ type: 'SET_GENERATION_METHOD', method });
     onNext();
   };

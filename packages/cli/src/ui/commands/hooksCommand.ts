@@ -12,7 +12,7 @@ import type {
 } from './types.js';
 import { CommandKind } from './types.js';
 import { t } from '../../i18n/index.js';
-import type { HookRegistryEntry } from '@qwen-code/qwen-code-core';
+import type { HookRegistryEntry } from '@tram-ai/tram-core';
 
 /**
  * Format hook source for display
@@ -255,7 +255,7 @@ const disableCommand: SlashCommand = {
 export const hooksCommand: SlashCommand = {
   name: 'hooks',
   get description() {
-    return t('Manage Qwen Code hooks');
+    return t('Manage TRAM hooks');
   },
   kind: CommandKind.BUILT_IN,
   subCommands: [listCommand, enableCommand, disableCommand],

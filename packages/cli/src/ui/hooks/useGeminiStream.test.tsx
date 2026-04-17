@@ -23,7 +23,7 @@ import type {
   EditorType,
   GeminiClient,
   AnyToolInvocation,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import {
   ApprovalMode,
   AuthType,
@@ -31,7 +31,7 @@ import {
   SendMessageType,
   ToolErrorType,
   ToolConfirmationOutcome,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import type { Part, PartListUnion } from '@google/genai';
 import type { UseHistoryManagerReturn } from './useHistoryManager.js';
 import type { HistoryItem, SlashCommandProcessorResult } from '../types.js';
@@ -75,7 +75,7 @@ const mockParseAndFormatApiError = vi.hoisted(() =>
 );
 const mockLogApiCancel = vi.hoisted(() => vi.fn());
 
-vi.mock('@qwen-code/qwen-code-core', async (importOriginal) => {
+vi.mock('@tram-ai/tram-core', async (importOriginal) => {
   const actualCoreModule = (await importOriginal()) as any;
   return {
     ...actualCoreModule,
@@ -234,7 +234,7 @@ describe('useGeminiStream', () => {
   const mockLoadedSettings: LoadedSettings = {
     merged: { preferredEditor: 'vscode' },
     user: { path: '/user/settings.json', settings: {} },
-    workspace: { path: '/workspace/.qwen/settings.json', settings: {} },
+    workspace: { path: '/workspace/.tram/settings.json', settings: {} },
     errors: [],
     forScope: vi.fn(),
     setValue: vi.fn(),
@@ -1267,6 +1267,97 @@ describe('useGeminiStream', () => {
 
       await waitFor(() => {
         expect(mockPerformMemoryRefresh).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('should submit client-initiated ask_user_question output back to Gemini', async () => {
+      const completedToolCall: TrackedCompletedToolCall = {
+        request: {
+          callId: 'ask-user-question-call-1',
+          name: 'ask_user_question',
+          args: { questions: [] },
+          isClientInitiated: true,
+          prompt_id: 'prompt-id-ask-1',
+        },
+        status: 'success',
+        responseSubmittedToGemini: false,
+        response: {
+          callId: 'ask-user-question-call-1',
+          responseParts: [
+            {
+              functionResponse: {
+                id: 'ask-user-question-call-1',
+                name: 'ask_user_question',
+                response: {
+                  output:
+                    'User has provided the following answers:\n\n**告警处置**: 仅分析日志',
+                },
+              },
+            },
+          ],
+          resultDisplay: 'User has provided the following answers',
+          error: undefined,
+          errorType: undefined,
+        },
+        tool: {
+          name: 'ask_user_question',
+          displayName: 'ask_user_question',
+          description: 'Ask user question',
+          build: vi.fn(),
+        } as any,
+        invocation: {
+          getDescription: () => 'Ask user question',
+        } as unknown as AnyToolInvocation,
+      };
+
+      let capturedOnComplete:
+        | ((completedTools: TrackedToolCall[]) => Promise<void>)
+        | null = null;
+
+      mockUseReactToolScheduler.mockImplementation((onComplete) => {
+        capturedOnComplete = onComplete;
+        return [[], mockScheduleToolCalls, mockMarkToolsAsSubmitted];
+      });
+
+      renderHook(() =>
+        useGeminiStream(
+          new MockedGeminiClientClass(mockConfig),
+          [],
+          mockAddItem,
+          mockConfig,
+          mockLoadedSettings,
+          mockOnDebugMessage,
+          mockHandleSlashCommand,
+          false,
+          () => 'vscode' as EditorType,
+          () => {},
+          () => Promise.resolve(),
+          false,
+          () => {},
+          () => {},
+          () => {},
+          () => {},
+          80,
+          24,
+        ),
+      );
+
+      await act(async () => {
+        if (capturedOnComplete) {
+          await capturedOnComplete([completedToolCall]);
+        }
+      });
+
+      await waitFor(() => {
+        expect(mockMarkToolsAsSubmitted).toHaveBeenCalledWith([
+          'ask-user-question-call-1',
+        ]);
+        expect(mockSendMessageStream).toHaveBeenCalledWith(
+          expect.stringContaining('User has provided the following answers'),
+          expect.any(AbortSignal),
+          'prompt-id-ask-1',
+          { type: SendMessageType.ToolResult },
+        );
       });
     });
   });

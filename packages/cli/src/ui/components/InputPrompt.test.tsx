@@ -9,8 +9,8 @@ import { waitFor, act } from '@testing-library/react';
 import type { InputPromptProps } from './InputPrompt.js';
 import { InputPrompt } from './InputPrompt.js';
 import type { TextBuffer } from './shared/text-buffer.js';
-import type { Config } from '@qwen-code/qwen-code-core';
-import { ApprovalMode } from '@qwen-code/qwen-code-core';
+import type { Config } from '@tram-ai/tram-core';
+import { ApprovalMode } from '@tram-ai/tram-core';
 import * as path from 'node:path';
 import type { CommandContext, SlashCommand } from '../commands/types.js';
 import { CommandKind } from '../commands/types.js';
@@ -388,7 +388,7 @@ describe('InputPrompt', () => {
       async () => {
         vi.mocked(clipboardUtils.clipboardHasImage).mockResolvedValue(true);
         vi.mocked(clipboardUtils.saveClipboardImage).mockResolvedValue(
-          '/Users/mochi/.qwen/tmp/clipboard-123.png',
+          '/Users/mochi/.tram/tmp/clipboard-123.png',
         );
 
         const { stdin, unmount } = renderWithProviders(
@@ -411,7 +411,7 @@ describe('InputPrompt', () => {
     it('should handle Cmd+V when clipboard has an image', async () => {
       vi.mocked(clipboardUtils.clipboardHasImage).mockResolvedValue(true);
       vi.mocked(clipboardUtils.saveClipboardImage).mockResolvedValue(
-        '/Users/mochi/.qwen/tmp/clipboard-456.png',
+        '/Users/mochi/.tram/tmp/clipboard-456.png',
       );
 
       const { stdin, unmount } = renderWithProviders(
@@ -468,7 +468,7 @@ describe('InputPrompt', () => {
     });
 
     it('should insert image path at cursor position with proper spacing', async () => {
-      const imagePath = '/Users/mochi/.qwen/tmp/clipboard-456.png';
+      const imagePath = '/Users/mochi/.tram/tmp/clipboard-456.png';
       vi.mocked(clipboardUtils.clipboardHasImage).mockResolvedValue(true);
       vi.mocked(clipboardUtils.saveClipboardImage).mockResolvedValue(imagePath);
 
@@ -2568,6 +2568,85 @@ describe('InputPrompt', () => {
       // Note: In actual implementation, temporaryCloseFeedbackDialog would be called
 
       vi.doUnmock('../contexts/UIStateContext.js');
+      unmount();
+    });
+  });
+
+  describe('question mark input (regression)', () => {
+    it('should insert ? into buffer when buffer is empty', async () => {
+      props.onToggleShortcuts = vi.fn();
+      props.showShortcuts = false;
+
+      const { stdin, unmount } = renderWithProviders(
+        <InputPrompt {...props} />,
+      );
+      await wait();
+
+      stdin.write('?');
+      await wait();
+
+      // '?' must be forwarded to buffer.handleInput so it appears as typed text
+      expect(mockBuffer.handleInput).toHaveBeenCalledWith(
+        expect.objectContaining({ sequence: '?' }),
+      );
+      unmount();
+    });
+
+    it('should insert ? when it appears in the middle of text', async () => {
+      props.onToggleShortcuts = vi.fn();
+      props.showShortcuts = false;
+      mockBuffer.text = 'hello';
+      mockBuffer.lines = ['hello'];
+
+      const { stdin, unmount } = renderWithProviders(
+        <InputPrompt {...props} />,
+      );
+      await wait();
+
+      stdin.write('?');
+      await wait();
+
+      expect(mockBuffer.handleInput).toHaveBeenCalledWith(
+        expect.objectContaining({ sequence: '?' }),
+      );
+      unmount();
+    });
+
+    it('should toggle shortcuts off without inserting ? when shortcuts are already visible and buffer is empty', async () => {
+      props.onToggleShortcuts = vi.fn();
+      props.showShortcuts = true;
+
+      const { stdin, unmount } = renderWithProviders(
+        <InputPrompt {...props} />,
+      );
+      await wait();
+
+      stdin.write('?');
+      await wait();
+
+      expect(props.onToggleShortcuts).toHaveBeenCalled();
+      // '?' should NOT be forwarded to buffer when toggling shortcuts off
+      expect(mockBuffer.handleInput).not.toHaveBeenCalled();
+      unmount();
+    });
+
+    it('should also show shortcuts when ? is typed into empty buffer', async () => {
+      props.onToggleShortcuts = vi.fn();
+      props.showShortcuts = false;
+
+      const { stdin, unmount } = renderWithProviders(
+        <InputPrompt {...props} />,
+      );
+      await wait();
+
+      stdin.write('?');
+      await wait();
+
+      // Shortcuts should be toggled AND ? should be inserted
+      expect(props.onToggleShortcuts).toHaveBeenCalled();
+      expect(mockBuffer.handleInput).toHaveBeenCalledWith(
+        expect.objectContaining({ sequence: '?' }),
+      );
       unmount();
     });
   });

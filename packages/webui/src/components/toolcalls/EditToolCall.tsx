@@ -31,7 +31,7 @@ const EditToolCallContainer: React.FC<ToolCallContainerProps> = ({
   isLast = false,
 }) => (
   <div
-    className={`qwen-message message-item ${_className || ''} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
+    className={`tram-message message-item ${_className || ''} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
     data-first={isFirst}
     data-last={isLast}
   >
@@ -92,7 +92,7 @@ export const EditToolCall: React.FC<BaseToolCallProps> = ({
     const containerStatus = mapToolStatusToContainerStatus(toolCall.status);
     return (
       <div
-        className={`qwen-message message-item relative py-2 select-text toolcall-container toolcall-status-${containerStatus}`}
+        className={`tram-message message-item relative py-2 select-text toolcall-container toolcall-status-${containerStatus}`}
         data-first={isFirst}
         data-last={isLast}
       >
@@ -153,7 +153,7 @@ export const EditToolCall: React.FC<BaseToolCallProps> = ({
     const containerStatus = mapToolStatusToContainerStatus(toolCall.status);
     return (
       <div
-        className={`qwen-message message-item relative py-2 select-text toolcall-container toolcall-status-${containerStatus}`}
+        className={`tram-message message-item relative py-2 select-text toolcall-container toolcall-status-${containerStatus}`}
         data-first={isFirst}
         data-last={isLast}
       >

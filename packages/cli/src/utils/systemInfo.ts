@@ -9,7 +9,7 @@ import os from 'node:os';
 import { execSync } from 'node:child_process';
 import type { CommandContext } from '../ui/commands/types.js';
 import { getCliVersion } from './version.js';
-import { IdeClient, AuthType } from '@qwen-code/qwen-code-core';
+import { IdeClient, AuthType } from '@tram-ai/tram-core';
 import { formatMemoryUsage } from '../ui/utils/formatters.js';
 import { GIT_COMMIT_INFO } from '../generated/git-commit.js';
 
@@ -76,9 +76,9 @@ export async function getIdeClientName(
 /**
  * Gets the sandbox environment information.
  * Handles different sandbox types including sandbox-exec and custom sandbox environments.
- * For bug reports, removes 'qwen-' or 'qwen-code-' prefixes from sandbox names.
+ * For bug reports, removes 'tram-' prefix from sandbox names.
  *
- * @param stripPrefix - Whether to strip 'qwen-' prefix (used for bug reports)
+ * @param stripPrefix - Whether to strip 'tram-' prefix (used for bug reports)
  */
 export function getSandboxEnv(stripPrefix = false): string {
   const sandbox = process.env['SANDBOX'];
@@ -91,9 +91,9 @@ export function getSandboxEnv(stripPrefix = false): string {
     return 'no sandbox';
   }
 
-  // For bug reports, remove qwen- prefix
+  // For bug reports, remove tram- prefix
   if (stripPrefix) {
-    return sandbox.replace(/^qwen-(?:code-)?/, '');
+    return sandbox.replace(/^tram-(?:code-)?/, '');
   }
 
   return sandbox;

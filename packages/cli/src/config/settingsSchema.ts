@@ -11,12 +11,12 @@ import type {
   AuthType,
   ChatCompressionSettings,
   ModelProvidersConfig,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import {
   ApprovalMode,
   DEFAULT_TRUNCATE_TOOL_OUTPUT_LINES,
   DEFAULT_TRUNCATE_TOOL_OUTPUT_THRESHOLD,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import type { CustomTheme } from '../ui/themes/theme.js';
 import { getLanguageSettingsOptions } from '../i18n/languages.js';
 
@@ -170,6 +170,7 @@ const HOOK_DEFINITION_ITEMS: SettingItemDefinition = {
 
 export type MemoryImportFormat = 'tree' | 'flat';
 export type DnsResolutionOrder = 'ipv4first' | 'verbatim';
+export type ProxyMode = 'system' | 'custom' | 'off';
 
 /**
  * The canonical schema for all settings.
@@ -185,7 +186,7 @@ const SETTINGS_SCHEMA = {
     requiresRestart: true,
     default: {} as Record<string, MCPServerConfig>,
     description: 'Configuration for MCP servers.',
-    showInDialog: false,
+    showInDialog: true,
     mergeStrategy: MergeStrategy.SHALLOW_MERGE,
   },
 
@@ -247,6 +248,15 @@ const SETTINGS_SCHEMA = {
     description: 'General application settings.',
     showInDialog: false,
     properties: {
+      autoResume: {
+        type: 'boolean',
+        label: 'Auto Resume',
+        category: 'General',
+        requiresRestart: false,
+        default: true,
+        description: 'Automatically resume the previous session when opening in a directory with history.',
+        showInDialog: true,
+      },
       preferredEditor: {
         type: 'string',
         label: 'Preferred Editor',
@@ -282,7 +292,7 @@ const SETTINGS_SCHEMA = {
         requiresRestart: false,
         default: true,
         description:
-          'Automatically add a Co-authored-by trailer to git commit messages when commits are made through Qwen Code.',
+          'Automatically add a Co-authored-by trailer to git commit messages when commits are made through TRAM.',
         showInDialog: true,
       },
       checkpointing: {
@@ -323,7 +333,7 @@ const SETTINGS_SCHEMA = {
         description:
           'The language for the user interface. Use "auto" to detect from system settings. ' +
           'You can also use custom language codes (e.g., "es", "fr") by placing JS language files ' +
-          'in ~/.qwen/locales/ (e.g., ~/.qwen/locales/es.js).',
+          'in ~/.tram/locales/ (e.g., ~/.tram/locales/es.js).',
         showInDialog: true,
         options: [] as readonly SettingEnumOption[],
       },
@@ -372,6 +382,26 @@ const SETTINGS_SCHEMA = {
           { value: 'utf-8-bom', label: 'UTF-8 with BOM' },
         ],
       },
+      douyinMcpEndpoint: {
+        type: 'string',
+        label: 'Douyin MCP Endpoint',
+        category: 'General',
+        requiresRestart: true,
+        default: '',
+        description:
+          'MCP endpoint URL for Douyin (抖音) video download. Calls get_douyin_download_link via JSON-RPC. Leave empty to disable.',
+        showInDialog: false,
+      },
+      siliconFlowApiKey: {
+        type: 'string',
+        label: 'SiliconFlow API Key',
+        category: 'General',
+        requiresRestart: false,
+        default: '',
+        description:
+          'SiliconFlow API key for image OCR (DeepSeek-OCR) and audio transcription (SenseVoiceSmall) fallback. Used when the model does not support image/audio input natively.',
+        showInDialog: false,
+      },
     },
   },
   output: {
@@ -413,7 +443,7 @@ const SETTINGS_SCHEMA = {
         label: 'Theme',
         category: 'UI',
         requiresRestart: false,
-        default: 'Qwen Dark' as string,
+        default: 'TRAM Dark' as string,
         description: 'The color theme for the UI.',
         showInDialog: true,
       },
@@ -442,7 +472,7 @@ const SETTINGS_SCHEMA = {
         requiresRestart: false,
         default: false,
         description:
-          'Show Qwen Code status and thoughts in the terminal window title',
+          'Show TRAM status and thoughts in the terminal window title',
         showInDialog: false,
       },
       hideTips: {
@@ -498,7 +528,7 @@ const SETTINGS_SCHEMA = {
         requiresRestart: false,
         default: true,
         description:
-          'Show optional feedback dialog after conversations to help improve Qwen performance.',
+          'Show optional feedback dialog after conversations to help improve TRAM performance.',
         showInDialog: true,
       },
       accessibility: {
@@ -758,7 +788,7 @@ const SETTINGS_SCHEMA = {
             requiresRestart: false,
             default: undefined,
             description:
-              "Overrides the default context window size for the selected model. Use this setting when a provider's effective context limit differs from Qwen Code's default. This value defines the model's assumed maximum context capacity, not a per-request token limit.",
+              "Overrides the default context window size for the selected model. Use this setting when a provider's effective context limit differs from TRAM's default. This value defines the model's assumed maximum context capacity, not a per-request token limit.",
             parentKey: 'generationConfig',
             showInDialog: false,
           },
@@ -832,13 +862,13 @@ const SETTINGS_SCHEMA = {
             description: 'Respect .gitignore files when searching',
             showInDialog: true,
           },
-          respectQwenIgnore: {
+          respectTramIgnore: {
             type: 'boolean',
-            label: 'Respect .qwenignore',
+            label: 'Respect .tramignore',
             category: 'Context',
             requiresRestart: true,
             default: true,
-            description: 'Respect .qwenignore files when searching',
+            description: 'Respect .tramignore files when searching',
             showInDialog: true,
           },
           enableRecursiveFileSearch: {
@@ -1212,6 +1242,43 @@ const SETTINGS_SCHEMA = {
         default: undefined as BugCommandSettings | undefined,
         description: 'Configuration for the bug report command.',
         showInDialog: false,
+      },
+      proxy: {
+        type: 'object',
+        label: 'Proxy',
+        category: 'Advanced',
+        requiresRestart: true,
+        default: {},
+        description:
+          'Outbound network proxy configuration for the TRAM CLI.',
+        showInDialog: false,
+        properties: {
+          mode: {
+            type: 'enum',
+            label: 'Proxy Mode',
+            category: 'Advanced',
+            requiresRestart: true,
+            default: 'system' as ProxyMode,
+            description:
+              'Proxy mode: use environment/system proxy, custom proxy, or disable proxy.',
+            showInDialog: false,
+            options: [
+              { value: 'system', label: 'Follow System Proxy' },
+              { value: 'custom', label: 'Custom Proxy' },
+              { value: 'off', label: 'No Proxy' },
+            ],
+          },
+          customUrl: {
+            type: 'string',
+            label: 'Custom Proxy URL',
+            category: 'Advanced',
+            requiresRestart: true,
+            default: undefined as string | undefined,
+            description:
+              'Custom proxy URL used when advanced.proxy.mode is set to custom.',
+            showInDialog: false,
+          },
+        },
       },
       tavilyApiKey: {
         type: 'string',

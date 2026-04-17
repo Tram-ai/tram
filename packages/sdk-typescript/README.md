@@ -1,13 +1,13 @@
-# @qwen-code/sdk
+# @tram-ai/sdk
 
-A minimum experimental TypeScript SDK for programmatic access to Qwen Code.
+A minimum experimental TypeScript SDK for programmatic access to TRAM.
 
 Feel free to submit a feature request/issue/PR.
 
 ## Installation
 
 ```bash
-npm install @qwen-code/sdk
+npm install @tram-ai/sdk
 ```
 
 ## Requirements
@@ -19,7 +19,7 @@ npm install @qwen-code/sdk
 ## Quick Start
 
 ```typescript
-import { query } from '@qwen-code/sdk';
+import { query } from '@tram-ai/sdk';
 
 // Single-turn query
 const result = query({
@@ -43,7 +43,7 @@ for await (const message of result) {
 
 ### `query(config)`
 
-Creates a new query session with the Qwen Code.
+Creates a new query session with the TRAM.
 
 #### Parameters
 
@@ -56,10 +56,10 @@ Creates a new query session with the Qwen Code.
 | ------------------------ | ---------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `cwd`                    | `string`                                       | `process.cwd()`  | The working directory for the query session. Determines the context in which file operations and commands are executed.                                                                                                                                                                                                                                                                                                                                                               |
 | `model`                  | `string`                                       | -                | The AI model to use (e.g., `'qwen-max'`, `'qwen-plus'`, `'qwen-turbo'`). Takes precedence over `OPENAI_MODEL` and `QWEN_MODEL` environment variables.                                                                                                                                                                                                                                                                                                                                 |
-| `pathToQwenExecutable`   | `string`                                       | Auto-detected    | Path to the Qwen Code executable. Supports multiple formats: `'qwen'` (native binary from PATH), `'/path/to/qwen'` (explicit path), `'/path/to/cli.js'` (Node.js bundle), `'node:/path/to/cli.js'` (force Node.js runtime), `'bun:/path/to/cli.js'` (force Bun runtime). If not provided, auto-detects from: `QWEN_CODE_CLI_PATH` env var, `~/.volta/bin/qwen`, `~/.npm-global/bin/qwen`, `/usr/local/bin/qwen`, `~/.local/bin/qwen`, `~/node_modules/.bin/qwen`, `~/.yarn/bin/qwen`. |
+| `pathToQwenExecutable`   | `string`                                       | Auto-detected    | Path to the TRAM executable. Supports multiple formats: `'qwen'` (native binary from PATH), `'/path/to/qwen'` (explicit path), `'/path/to/cli.js'` (Node.js bundle), `'node:/path/to/cli.js'` (force Node.js runtime), `'bun:/path/to/cli.js'` (force Bun runtime). If not provided, auto-detects from: `QWEN_CODE_CLI_PATH` env var, `~/.volta/bin/qwen`, `~/.npm-global/bin/qwen`, `/usr/local/bin/qwen`, `~/.local/bin/qwen`, `~/node_modules/.bin/qwen`, `~/.yarn/bin/qwen`. |
 | `permissionMode`         | `'default' \| 'plan' \| 'auto-edit' \| 'yolo'` | `'default'`      | Permission mode controlling tool execution approval. See [Permission Modes](#permission-modes) for details.                                                                                                                                                                                                                                                                                                                                                                           |
 | `canUseTool`             | `CanUseTool`                                   | -                | Custom permission handler for tool execution approval. Invoked when a tool requires confirmation. Must respond within 60 seconds or the request will be auto-denied. See [Custom Permission Handler](#custom-permission-handler).                                                                                                                                                                                                                                                     |
-| `env`                    | `Record<string, string>`                       | -                | Environment variables to pass to the Qwen Code process. Merged with the current process environment.                                                                                                                                                                                                                                                                                                                                                                                  |
+| `env`                    | `Record<string, string>`                       | -                | Environment variables to pass to the TRAM process. Merged with the current process environment.                                                                                                                                                                                                                                                                                                                                                                                  |
 | `mcpServers`             | `Record<string, McpServerConfig>`              | -                | MCP (Model Context Protocol) servers to connect. Supports external servers (stdio/SSE/HTTP) and SDK-embedded servers. External servers are configured with transport options like `command`, `args`, `url`, `httpUrl`, etc. SDK servers use `{ type: 'sdk', name: string, instance: Server }`.                                                                                                                                                                                        |
 | `abortController`        | `AbortController`                              | -                | Controller to cancel the query session. Call `abortController.abort()` to terminate the session and cleanup resources.                                                                                                                                                                                                                                                                                                                                                                |
 | `debug`                  | `boolean`                                      | `false`          | Enable debug mode for verbose logging from the CLI process.                                                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -67,7 +67,7 @@ Creates a new query session with the Qwen Code.
 | `coreTools`              | `string[]`                                     | -                | Equivalent to `tool.core` in settings.json. If specified, only these tools will be available to the AI. Example: `['read_file', 'write_file', 'run_terminal_cmd']`.                                                                                                                                                                                                                                                                                                                   |
 | `excludeTools`           | `string[]`                                     | -                | Equivalent to `tool.exclude` in settings.json. Excluded tools return a permission error immediately. Takes highest priority over all other permission settings. Supports pattern matching: tool name (`'write_file'`), tool class (`'ShellTool'`), or shell command prefix (`'ShellTool(rm )'`).                                                                                                                                                                                      |
 | `allowedTools`           | `string[]`                                     | -                | Equivalent to `tool.allowed` in settings.json. Matching tools bypass `canUseTool` callback and execute automatically. Only applies when tool requires confirmation. Supports same pattern matching as `excludeTools`.                                                                                                                                                                                                                                                                 |
-| `authType`               | `'openai' \| 'qwen-oauth'`                     | `'openai'`       | Authentication type for the AI service. Using `'qwen-oauth'` in SDK is not recommended as credentials are stored in `~/.qwen` and may need periodic refresh.                                                                                                                                                                                                                                                                                                                          |
+| `authType`               | `'openai' \| 'qwen-oauth'`                     | `'openai'`       | Authentication type for the AI service. Using `'qwen-oauth'` in SDK is not recommended as credentials are stored in `~/.tram` and may need periodic refresh.                                                                                                                                                                                                                                                                                                                          |
 | `agents`                 | `SubagentConfig[]`                             | -                | Configuration for subagents that can be invoked during the session. Subagents are specialized AI agents for specific tasks or domains.                                                                                                                                                                                                                                                                                                                                                |
 | `includePartialMessages` | `boolean`                                      | `false`          | When `true`, the SDK emits incomplete messages as they are being generated, allowing real-time streaming of the AI's response.                                                                                                                                                                                                                                                                                                                                                        |
 | `resume`                 | `string`                                       | -                | Resume a previous session by providing its session ID. Equivalent to CLI's `--resume` flag.                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -108,7 +108,7 @@ import {
   isSDKSystemMessage,
   isSDKResultMessage,
   isSDKPartialAssistantMessage,
-} from '@qwen-code/sdk';
+} from '@tram-ai/sdk';
 
 for await (const message of result) {
   if (isSDKAssistantMessage(message)) {
@@ -168,7 +168,7 @@ The SDK supports different permission modes for controlling tool execution:
 ### Multi-turn Conversation
 
 ```typescript
-import { query, type SDKUserMessage } from '@qwen-code/sdk';
+import { query, type SDKUserMessage } from '@tram-ai/sdk';
 
 async function* generateMessages(): AsyncIterable<SDKUserMessage> {
   yield {
@@ -202,7 +202,7 @@ for await (const message of result) {
 ### Custom Permission Handler
 
 ```typescript
-import { query, type CanUseTool } from '@qwen-code/sdk';
+import { query, type CanUseTool } from '@tram-ai/sdk';
 
 const canUseTool: CanUseTool = async (toolName, input, { signal }) => {
   // Allow all read operations
@@ -231,7 +231,7 @@ const result = query({
 ### With External MCP Servers
 
 ```typescript
-import { query } from '@qwen-code/sdk';
+import { query } from '@tram-ai/sdk';
 
 const result = query({
   prompt: 'Use the custom tool from my MCP server',
@@ -291,7 +291,7 @@ Returns a `McpSdkServerConfigWithInstance` object that can be passed directly to
 
 ```typescript
 import { z } from 'zod';
-import { query, tool, createSdkMcpServer } from '@qwen-code/sdk';
+import { query, tool, createSdkMcpServer } from '@tram-ai/sdk';
 
 // Define a tool with Zod schema
 const calculatorTool = tool(
@@ -328,7 +328,7 @@ for await (const message of result) {
 ### Abort a Query
 
 ```typescript
-import { query, isAbortError } from '@qwen-code/sdk';
+import { query, isAbortError } from '@tram-ai/sdk';
 
 const abortController = new AbortController();
 
@@ -360,7 +360,7 @@ try {
 The SDK provides an `AbortError` class for handling aborted queries:
 
 ```typescript
-import { AbortError, isAbortError } from '@qwen-code/sdk';
+import { AbortError, isAbortError } from '@tram-ai/sdk';
 
 try {
   // ... query operations
@@ -379,16 +379,16 @@ try {
 
 If you're using SDK version **0.1.0**, please note the following requirements:
 
-#### Qwen Code Installation Required
+#### TRAM Installation Required
 
-Version 0.1.0 requires [Qwen Code](https://github.com/QwenLM/qwen-code) **>= 0.4.0** to be installed separately and accessible in your PATH.
+Version 0.1.0 requires [TRAM](https://github.com/tram-ai/tram) **>= 0.4.0** to be installed separately and accessible in your PATH.
 
 ```bash
-# Install Qwen Code globally
-npm install -g qwen-code@^0.4.0
+# Install TRAM globally
+npm install -g tram@^0.4.0
 ```
 
-**Note**: From version **0.1.1** onwards, the CLI is bundled with the SDK, so no separate Qwen Code installation is needed.
+**Note**: From version **0.1.1** onwards, the CLI is bundled with the SDK, so no separate TRAM installation is needed.
 
 ## License
 

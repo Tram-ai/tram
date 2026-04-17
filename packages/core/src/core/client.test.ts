@@ -32,7 +32,7 @@ import {
   type ChatCompressionInfo,
 } from './turn.js';
 import { getCoreSystemPrompt } from './prompts.js';
-import { DEFAULT_QWEN_FLASH_MODEL } from '../config/models.js';
+import { DEFAULT_TRAM_FLASH_MODEL } from '../config/models.js';
 import { FileDiscoveryService } from '../services/fileDiscoveryService.js';
 import { setSimulate429 } from '../utils/testUtils.js';
 import { ideContextStore } from '../ide/ideContext.js';
@@ -140,7 +140,7 @@ vi.mock('../telemetry/index.js', async (importOriginal) => {
     ...actual,
     uiTelemetryService: mockUiTelemetryService,
     // We keep the real implementations of logChatCompression, etc.
-    // but we can spy on QwenLogger if needed
+    // but we can spy on TramLogger if needed
   };
 });
 vi.mock('../ide/ideContext.js');
@@ -308,12 +308,14 @@ describe('Gemini Client (client.ts)', () => {
         .fn()
         .mockReturnValue(contentGeneratorConfig),
       getToolRegistry: vi.fn().mockReturnValue(mockToolRegistry),
+      getSkillManager: vi.fn().mockReturnValue(null),
       getModel: vi.fn().mockReturnValue('test-model'),
       getEmbeddingModel: vi.fn().mockReturnValue('test-embedding-model'),
       getApiKey: vi.fn().mockReturnValue('test-key'),
       getVertexAI: vi.fn().mockReturnValue(false),
       getUserAgent: vi.fn().mockReturnValue('test-agent'),
       getUserMemory: vi.fn().mockReturnValue(''),
+      refreshHierarchicalMemory: vi.fn().mockResolvedValue(undefined),
       getFullContext: vi.fn().mockReturnValue(false),
       getSessionId: vi.fn().mockReturnValue('test-session-id'),
       getProxy: vi.fn().mockReturnValue(undefined),
@@ -1014,6 +1016,43 @@ describe('Gemini Client (client.ts)', () => {
   });
 
   describe('sendMessageStream', () => {
+    it('refreshes hierarchical memory before processing user queries', async () => {
+      mockTurnRunFn.mockReturnValue(
+        (async function* () {
+          yield { type: 'content', value: 'Hello' };
+        })(),
+      );
+
+      const stream = client.sendMessageStream(
+        [{ text: 'Hi' }],
+        new AbortController().signal,
+        'prompt-id-refresh-memory',
+      );
+
+      await fromAsync(stream);
+
+      expect(mockConfig.refreshHierarchicalMemory).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not refresh hierarchical memory for retry messages', async () => {
+      mockTurnRunFn.mockReturnValue(
+        (async function* () {
+          yield { type: 'content', value: 'Hello again' };
+        })(),
+      );
+
+      const stream = client.sendMessageStream(
+        [{ text: 'Retry' }],
+        new AbortController().signal,
+        'prompt-id-retry-no-refresh',
+        { type: SendMessageType.Retry },
+      );
+
+      await fromAsync(stream);
+
+      expect(mockConfig.refreshHierarchicalMemory).not.toHaveBeenCalled();
+    });
+
     it('emits a compression event when the context was automatically compressed', async () => {
       // Arrange
       mockTurnRunFn.mockReturnValue(
@@ -2380,12 +2419,12 @@ Other open files:
         contents,
         generationConfig,
         abortSignal,
-        DEFAULT_QWEN_FLASH_MODEL,
+        DEFAULT_TRAM_FLASH_MODEL,
       );
 
       expect(mockContentGenerator.generateContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          model: DEFAULT_QWEN_FLASH_MODEL,
+          model: DEFAULT_TRAM_FLASH_MODEL,
           config: expect.objectContaining({
             abortSignal,
             systemInstruction: getCoreSystemPrompt(''),
@@ -2408,7 +2447,7 @@ Other open files:
         contents,
         {},
         new AbortController().signal,
-        DEFAULT_QWEN_FLASH_MODEL,
+        DEFAULT_TRAM_FLASH_MODEL,
       );
 
       expect(mockContentGenerator.generateContent).not.toHaveBeenCalledWith({
@@ -2418,7 +2457,7 @@ Other open files:
       });
       expect(mockContentGenerator.generateContent).toHaveBeenCalledWith(
         {
-          model: DEFAULT_QWEN_FLASH_MODEL,
+          model: DEFAULT_TRAM_FLASH_MODEL,
           config: expect.any(Object),
           contents,
         },

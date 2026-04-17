@@ -7,14 +7,14 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type { PartListUnion } from '@google/genai';
-import type { Config } from '@qwen-code/qwen-code-core';
+import type { Config } from '@tram-ai/tram-core';
 import {
   getErrorMessage,
   isNodeError,
   Storage,
   unescapePath,
   readManyFiles,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import type {
   HistoryItemToolGroup,
   HistoryItemWithoutId,
@@ -164,7 +164,7 @@ export async function handleAtCommand({
   const contentLabelsForDisplay: string[] = [];
   const ignoredByReason: Record<string, string[]> = {
     git: [],
-    qwen: [],
+    tram: [],
     both: [],
   };
 
@@ -203,25 +203,25 @@ export async function handleAtCommand({
       respectFileIgnore.respectGitIgnore &&
       fileDiscovery.shouldIgnoreFile(pathName, {
         respectGitIgnore: true,
-        respectQwenIgnore: false,
+        respectTramIgnore: false,
       });
-    const qwenIgnored =
-      respectFileIgnore.respectQwenIgnore &&
+    const tramIgnored =
+      respectFileIgnore.respectTramIgnore &&
       fileDiscovery.shouldIgnoreFile(pathName, {
         respectGitIgnore: false,
-        respectQwenIgnore: true,
+        respectTramIgnore: true,
       });
 
-    if (gitIgnored || qwenIgnored) {
+    if (gitIgnored || tramIgnored) {
       const reason =
-        gitIgnored && qwenIgnored ? 'both' : gitIgnored ? 'git' : 'qwen';
+        gitIgnored && tramIgnored ? 'both' : gitIgnored ? 'git' : 'tram';
       ignoredByReason[reason].push(pathName);
       const reasonText =
         reason === 'both'
-          ? 'ignored by both git and qwen'
+          ? 'ignored by both git and tram'
           : reason === 'git'
             ? 'git-ignored'
-            : 'qwen-ignored';
+            : 'tram-ignored';
       onDebugMessage(`Path ${pathName} is ${reasonText} and will be skipped.`);
       continue;
     }
@@ -310,7 +310,7 @@ export async function handleAtCommand({
   // Inform user about ignored paths
   const totalIgnored =
     ignoredByReason['git'].length +
-    ignoredByReason['qwen'].length +
+    ignoredByReason['tram'].length +
     ignoredByReason['both'].length;
 
   if (totalIgnored > 0) {
@@ -318,8 +318,8 @@ export async function handleAtCommand({
     if (ignoredByReason['git'].length) {
       messages.push(`Git-ignored: ${ignoredByReason['git'].join(', ')}`);
     }
-    if (ignoredByReason['qwen'].length) {
-      messages.push(`Qwen-ignored: ${ignoredByReason['qwen'].join(', ')}`);
+    if (ignoredByReason['tram'].length) {
+      messages.push(`TRAM-ignored: ${ignoredByReason['tram'].join(', ')}`);
     }
     if (ignoredByReason['both'].length) {
       messages.push(`Ignored by both: ${ignoredByReason['both'].join(', ')}`);

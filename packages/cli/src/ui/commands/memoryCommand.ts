@@ -8,8 +8,8 @@ import {
   getErrorMessage,
   getCurrentGeminiMdFilename,
   loadServerHierarchicalMemory,
-  QWEN_DIR,
-} from '@qwen-code/qwen-code-core';
+  TRAM_DIR,
+} from '@tram-ai/tram-core';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
@@ -109,7 +109,7 @@ export const memoryCommand: SlashCommand = {
             try {
               const globalMemoryPath = path.join(
                 os.homedir(),
-                QWEN_DIR,
+                TRAM_DIR,
                 getCurrentGeminiMdFilename(),
               );
               const globalMemoryContent = await fs.readFile(

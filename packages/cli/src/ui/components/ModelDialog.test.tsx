@@ -11,11 +11,11 @@ import { useKeypress } from '../hooks/useKeypress.js';
 import { DescriptiveRadioButtonSelect } from './shared/DescriptiveRadioButtonSelect.js';
 import { ConfigContext } from '../contexts/ConfigContext.js';
 import { SettingsContext } from '../contexts/SettingsContext.js';
-import type { Config } from '@qwen-code/qwen-code-core';
-import { AuthType, DEFAULT_QWEN_MODEL } from '@qwen-code/qwen-code-core';
+import type { Config } from '@tram-ai/tram-core';
+import { AuthType, DEFAULT_TRAM_MODEL } from '@tram-ai/tram-core';
 import type { LoadedSettings } from '../../config/settings.js';
 import { SettingScope } from '../../config/settings.js';
-import { getFilteredQwenModels } from '../models/availableModels.js';
+import { getFilteredTramModels } from '../models/availableModels.js';
 
 vi.mock('../hooks/useKeypress.js', () => ({
   useKeypress: vi.fn(),
@@ -29,11 +29,11 @@ vi.mock('./shared/DescriptiveRadioButtonSelect.js', () => ({
 // Helper to create getAvailableModelsForAuthType mock
 const createMockGetAvailableModelsForAuthType = () =>
   vi.fn((t: AuthType) => {
-    if (t === AuthType.QWEN_OAUTH) {
-      return getFilteredQwenModels().map((m) => ({
+    if (t === AuthType.TRAM_OAUTH) {
+      return getFilteredTramModels().map((m) => ({
         id: m.id,
         label: m.label,
-        authType: AuthType.QWEN_OAUTH,
+        authType: AuthType.TRAM_OAUTH,
       }));
     }
     return [];
@@ -58,16 +58,16 @@ const renderComponent = (
 
   const mockConfig = {
     // --- Functions used by ModelDialog ---
-    getModel: vi.fn(() => DEFAULT_QWEN_MODEL),
+    getModel: vi.fn(() => DEFAULT_TRAM_MODEL),
     setModel: vi.fn().mockResolvedValue(undefined),
     switchModel: vi.fn().mockResolvedValue(undefined),
-    getAuthType: vi.fn(() => 'qwen-oauth'),
+    getAuthType: vi.fn(() => 'tram-oauth'),
     getAllConfiguredModels: vi.fn(() =>
-      getFilteredQwenModels().map((m) => ({
+      getFilteredTramModels().map((m) => ({
         id: m.id,
         label: m.label,
         description: m.description || '',
-        authType: AuthType.QWEN_OAUTH,
+        authType: AuthType.TRAM_OAUTH,
       })),
     ),
 
@@ -76,8 +76,8 @@ const renderComponent = (
     getSessionId: vi.fn(() => 'mock-session-id'),
     getDebugMode: vi.fn(() => false),
     getContentGeneratorConfig: vi.fn(() => ({
-      authType: AuthType.QWEN_OAUTH,
-      model: DEFAULT_QWEN_MODEL,
+      authType: AuthType.TRAM_OAUTH,
+      model: DEFAULT_TRAM_MODEL,
     })),
     getUseModelRouter: vi.fn(() => false),
     getProxy: vi.fn(() => undefined),
@@ -124,16 +124,16 @@ describe('<ModelDialog />', () => {
     expect(mockedSelect).toHaveBeenCalledTimes(1);
 
     const props = mockedSelect.mock.calls[0][0];
-    expect(props.items).toHaveLength(getFilteredQwenModels().length);
+    expect(props.items).toHaveLength(getFilteredTramModels().length);
     // coder-model is the only model and it has vision capability
     expect(props.items[0].value).toBe(
-      `${AuthType.QWEN_OAUTH}::${DEFAULT_QWEN_MODEL}`,
+      `${AuthType.TRAM_OAUTH}::${DEFAULT_TRAM_MODEL}`,
     );
     expect(props.showNumbers).toBe(true);
   });
 
   it('initializes with the model from ConfigContext', () => {
-    const mockGetModel = vi.fn(() => DEFAULT_QWEN_MODEL);
+    const mockGetModel = vi.fn(() => DEFAULT_TRAM_MODEL);
     renderComponent(
       {},
       {
@@ -145,9 +145,9 @@ describe('<ModelDialog />', () => {
 
     expect(mockGetModel).toHaveBeenCalled();
     // Calculate expected index dynamically based on model list
-    const qwenModels = getFilteredQwenModels();
-    const expectedIndex = qwenModels.findIndex(
-      (m) => m.id === DEFAULT_QWEN_MODEL,
+    const tramModels = getFilteredTramModels();
+    const expectedIndex = tramModels.findIndex(
+      (m) => m.id === DEFAULT_TRAM_MODEL,
     );
     expect(mockedSelect).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -181,7 +181,7 @@ describe('<ModelDialog />', () => {
 
     expect(mockGetModel).toHaveBeenCalled();
 
-    // When getModel returns undefined, preferredModel falls back to DEFAULT_QWEN_MODEL
+    // When getModel returns undefined, preferredModel falls back to DEFAULT_TRAM_MODEL
     // which has index 0, so initialIndex should be 0
     expect(mockedSelect).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -197,11 +197,11 @@ describe('<ModelDialog />', () => {
       {},
       {
         getAvailableModelsForAuthType: vi.fn((t: AuthType) => {
-          if (t === AuthType.QWEN_OAUTH) {
-            return getFilteredQwenModels().map((m) => ({
+          if (t === AuthType.TRAM_OAUTH) {
+            return getFilteredTramModels().map((m) => ({
               id: m.id,
               label: m.label,
-              authType: AuthType.QWEN_OAUTH,
+              authType: AuthType.TRAM_OAUTH,
             }));
           }
           return [];
@@ -212,22 +212,22 @@ describe('<ModelDialog />', () => {
     const childOnSelect = mockedSelect.mock.calls[0][0].onSelect;
     expect(childOnSelect).toBeDefined();
 
-    await childOnSelect(`${AuthType.QWEN_OAUTH}::${DEFAULT_QWEN_MODEL}`);
+    await childOnSelect(`${AuthType.TRAM_OAUTH}::${DEFAULT_TRAM_MODEL}`);
 
     expect(mockConfig?.switchModel).toHaveBeenCalledWith(
-      AuthType.QWEN_OAUTH,
-      DEFAULT_QWEN_MODEL,
+      AuthType.TRAM_OAUTH,
+      DEFAULT_TRAM_MODEL,
       undefined,
     );
     expect(mockSettings.setValue).toHaveBeenCalledWith(
       SettingScope.User,
       'model.name',
-      DEFAULT_QWEN_MODEL,
+      DEFAULT_TRAM_MODEL,
     );
     expect(mockSettings.setValue).toHaveBeenCalledWith(
       SettingScope.User,
       'security.auth.selectedType',
-      AuthType.QWEN_OAUTH,
+      AuthType.TRAM_OAUTH,
     );
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
@@ -239,11 +239,11 @@ describe('<ModelDialog />', () => {
       if (t === AuthType.USE_OPENAI) {
         return [{ id: 'gpt-4', label: 'GPT-4', authType: t }];
       }
-      if (t === AuthType.QWEN_OAUTH) {
-        return getFilteredQwenModels().map((m) => ({
+      if (t === AuthType.TRAM_OAUTH) {
+        return getFilteredTramModels().map((m) => ({
           id: m.id,
           label: m.label,
-          authType: AuthType.QWEN_OAUTH,
+          authType: AuthType.TRAM_OAUTH,
         }));
       }
       return [];
@@ -253,8 +253,8 @@ describe('<ModelDialog />', () => {
       getAuthType,
       getModel: vi.fn(() => 'gpt-4'),
       getContentGeneratorConfig: vi.fn(() => ({
-        authType: AuthType.QWEN_OAUTH,
-        model: DEFAULT_QWEN_MODEL,
+        authType: AuthType.TRAM_OAUTH,
+        model: DEFAULT_TRAM_MODEL,
       })),
       // Add switchModel to the mock object (not the type)
       switchModel,
@@ -268,22 +268,22 @@ describe('<ModelDialog />', () => {
     );
 
     const childOnSelect = mockedSelect.mock.calls[0][0].onSelect;
-    await childOnSelect(`${AuthType.QWEN_OAUTH}::${DEFAULT_QWEN_MODEL}`);
+    await childOnSelect(`${AuthType.TRAM_OAUTH}::${DEFAULT_TRAM_MODEL}`);
 
     expect(switchModel).toHaveBeenCalledWith(
-      AuthType.QWEN_OAUTH,
-      DEFAULT_QWEN_MODEL,
+      AuthType.TRAM_OAUTH,
+      DEFAULT_TRAM_MODEL,
       { requireCachedCredentials: true },
     );
     expect(mockSettings.setValue).toHaveBeenCalledWith(
       SettingScope.User,
       'model.name',
-      DEFAULT_QWEN_MODEL,
+      DEFAULT_TRAM_MODEL,
     );
     expect(mockSettings.setValue).toHaveBeenCalledWith(
       SettingScope.User,
       'security.auth.selectedType',
-      AuthType.QWEN_OAUTH,
+      AuthType.TRAM_OAUTH,
     );
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
@@ -328,8 +328,8 @@ describe('<ModelDialog />', () => {
   });
 
   it('updates initialIndex when config context changes', () => {
-    const mockGetModel = vi.fn(() => DEFAULT_QWEN_MODEL);
-    const mockGetAuthType = vi.fn(() => 'qwen-oauth');
+    const mockGetModel = vi.fn(() => DEFAULT_TRAM_MODEL);
+    const mockGetAuthType = vi.fn(() => 'tram-oauth');
     const mockSettings = {
       isTrusted: true,
       user: { settings: {} },
@@ -346,11 +346,11 @@ describe('<ModelDialog />', () => {
               getAvailableModelsForAuthType:
                 createMockGetAvailableModelsForAuthType(),
               getAllConfiguredModels: vi.fn(() =>
-                getFilteredQwenModels().map((m) => ({
+                getFilteredTramModels().map((m) => ({
                   id: m.id,
                   label: m.label,
                   description: m.description || '',
-                  authType: AuthType.QWEN_OAUTH,
+                  authType: AuthType.TRAM_OAUTH,
                 })),
               ),
             } as unknown as Config
@@ -361,20 +361,20 @@ describe('<ModelDialog />', () => {
       </SettingsContext.Provider>,
     );
 
-    // DEFAULT_QWEN_MODEL (coder-model) is at index 0
+    // DEFAULT_TRAM_MODEL (coder-model) is at index 0
     expect(mockedSelect.mock.calls[0][0].initialIndex).toBe(0);
 
-    mockGetModel.mockReturnValue(DEFAULT_QWEN_MODEL);
+    mockGetModel.mockReturnValue(DEFAULT_TRAM_MODEL);
     const newMockConfig = {
       getModel: mockGetModel,
       getAuthType: mockGetAuthType,
       getAvailableModelsForAuthType: createMockGetAvailableModelsForAuthType(),
       getAllConfiguredModels: vi.fn(() =>
-        getFilteredQwenModels().map((m) => ({
+        getFilteredTramModels().map((m) => ({
           id: m.id,
           label: m.label,
           description: m.description || '',
-          authType: AuthType.QWEN_OAUTH,
+          authType: AuthType.TRAM_OAUTH,
         })),
       ),
     } as unknown as Config;
@@ -389,10 +389,10 @@ describe('<ModelDialog />', () => {
 
     // Should be called at least twice: initial render + re-render after context change
     expect(mockedSelect).toHaveBeenCalledTimes(2);
-    // Calculate expected index for DEFAULT_QWEN_MODEL dynamically
-    const qwenModels = getFilteredQwenModels();
-    const expectedCoderIndex = qwenModels.findIndex(
-      (m) => m.id === DEFAULT_QWEN_MODEL,
+    // Calculate expected index for DEFAULT_TRAM_MODEL dynamically
+    const tramModels = getFilteredTramModels();
+    const expectedCoderIndex = tramModels.findIndex(
+      (m) => m.id === DEFAULT_TRAM_MODEL,
     );
     expect(mockedSelect.mock.calls[1][0].initialIndex).toBe(expectedCoderIndex);
   });

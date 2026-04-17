@@ -7,18 +7,19 @@
 import type React from 'react';
 import { Box, Text } from 'ink';
 import Gradient from 'ink-gradient';
-import { shortenPath, tildeifyPath } from '@qwen-code/qwen-code-core';
+import { shortenPath, tildeifyPath } from '@tram-ai/tram-core';
 import { theme } from '../semantic-colors.js';
 import { shortAsciiLogo } from './AsciiArt.js';
 import { getAsciiArtWidth, getCachedStringWidth } from '../utils/textUtils.js';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';
+import { t } from '../../i18n/index.js';
 
 /**
  * Auth display type for the Header component.
  * Simplified representation of authentication method shown to users.
  */
 export enum AuthDisplayType {
-  QWEN_OAUTH = 'Qwen OAuth',
+  TRAM_OAUTH = 'TRAM OAuth',
   CODING_PLAN = 'Coding Plan',
   API_KEY = 'API Key',
   UNKNOWN = 'Unknown',
@@ -47,56 +48,67 @@ export const Header: React.FC<HeaderProps> = ({
 
   // Calculate available space properly:
   // First determine if logo can be shown, then use remaining space for path
-  const containerMarginX = 2; // marginLeft + marginRight on the outer container
+  const containerMarginLeft = 0;
+  const containerMarginRight = 2;
   const logoGap = 2; // Gap between logo and info panel
-  const infoPanelPaddingX = 1;
+  const infoPanelPaddingLeft = 1;
+  const infoPanelPaddingRight = 1;
   const infoPanelBorderWidth = 2; // left + right border
-  const infoPanelChromeWidth = infoPanelBorderWidth + infoPanelPaddingX * 2;
+  const infoPanelChromeWidth =
+    infoPanelBorderWidth + infoPanelPaddingLeft + infoPanelPaddingRight;
   const minPathLength = 40; // Minimum readable path length
   const minInfoPanelWidth = minPathLength + infoPanelChromeWidth;
 
   const availableTerminalWidth = Math.max(
     0,
-    terminalWidth - containerMarginX * 2,
+    terminalWidth - containerMarginLeft - containerMarginRight,
   );
 
   // Check if we have enough space for logo + gap + minimum info panel
-  const showLogo =
-    availableTerminalWidth >= logoWidth + logoGap + minInfoPanelWidth;
-
-  // Calculate available width for info panel (use all remaining space)
-  // Cap at 60 when in two-column layout (with logo)
-  const maxInfoPanelWidth = 60;
-  const availableInfoPanelWidth = showLogo
-    ? Math.min(availableTerminalWidth - logoWidth - logoGap, maxInfoPanelWidth)
-    : availableTerminalWidth;
-
-  // Calculate max path lengths (subtract padding/borders from available space)
-  const maxPathLength = Math.max(
-    0,
-    availableInfoPanelWidth - infoPanelChromeWidth,
+const autoShowLogo = availableTerminalWidth >= logoWidth + logoGap + minInfoPanelWidth;
+const showLogo = false && autoShowLogo;
+  
+  // Calculate info panel width based on content width (auto-shrink)
+  const tildeifiedPath = tildeifyPath(workingDirectory);
+  const authModelText =
+    formattedAuthType === AuthDisplayType.API_KEY ? model : `${formattedAuthType} | ${model}`;
+  const modelHintText = ` ${t('(/model to change)')}`;
+  
+  // Calculate widths of content
+  const pathWidth = getCachedStringWidth(tildeifiedPath);
+  const authModelWidth = getCachedStringWidth(authModelText + modelHintText);
+  const contentWidth = Math.max(pathWidth, authModelWidth);
+  
+  // Set info panel width based on content, with min/max bounds
+  const minInfoPanelWidth_auto = Math.min(40, contentWidth + infoPanelChromeWidth); // Minimum readable
+  const maxInfoPanelWidth = Math.min(80, availableTerminalWidth); // Maximum reasonable width
+  const contentBasedWidth = contentWidth + infoPanelChromeWidth;
+  
+  let availableInfoPanelWidth = Math.max(
+    minInfoPanelWidth_auto,
+    Math.min(contentBasedWidth, maxInfoPanelWidth),
   );
+  
+  if (showLogo) {
+    availableInfoPanelWidth = Math.min(
+      availableInfoPanelWidth,
+      availableTerminalWidth - logoWidth - logoGap,
+    );
+  }
 
+  // Calculate content display width based on info panel
   const infoPanelContentWidth = Math.max(
     0,
     availableInfoPanelWidth - infoPanelChromeWidth,
   );
-  const authModelText = `${formattedAuthType} | ${model}`;
-  const modelHintText = ' (/model to change)';
   const showModelHint =
     infoPanelContentWidth > 0 &&
     getCachedStringWidth(authModelText + modelHintText) <=
       infoPanelContentWidth;
 
-  // Now shorten the path to fit the available space
-  const tildeifiedPath = tildeifyPath(workingDirectory);
-  const shortenedPath = shortenPath(tildeifiedPath, Math.max(3, maxPathLength));
-  const displayPath =
-    maxPathLength <= 0
-      ? ''
-      : shortenedPath.length > maxPathLength
-        ? shortenedPath.slice(0, maxPathLength)
-        : shortenedPath;
+  // Shorten path if needed to fit
+  const shortenedPath = shortenPath(tildeifiedPath, Math.max(3, infoPanelContentWidth));
+  const displayPath = shortenedPath;
 
   // Use theme gradient colors if available, otherwise use text colors (excluding primary)
   const gradientColors = theme.ui.gradient || [
@@ -109,7 +121,8 @@ export const Header: React.FC<HeaderProps> = ({
     <Box
       flexDirection="row"
       alignItems="center"
-      marginX={containerMarginX}
+      marginLeft={containerMarginLeft}
+      marginRight={containerMarginRight}
       width={availableTerminalWidth}
     >
       {/* Left side: ASCII logo (only if enough space) */}
@@ -125,19 +138,19 @@ export const Header: React.FC<HeaderProps> = ({
         </>
       )}
 
-      {/* Right side: Info panel (flexible width, max 60 in two-column layout) */}
+      {/* Right side: Info panel (width based on content) */}
       <Box
         flexDirection="column"
-        borderStyle="single"
+        borderStyle="round"
         borderColor={theme.border.default}
-        paddingX={infoPanelPaddingX}
-        flexGrow={showLogo ? 0 : 1}
-        width={showLogo ? availableInfoPanelWidth : undefined}
+        paddingLeft={infoPanelPaddingLeft}
+        paddingRight={infoPanelPaddingRight}
+        width={availableInfoPanelWidth}
       >
-        {/* Title line: >_ Qwen Code (v{version}) */}
+        {/* Title line: >_ TRAM (v{version}) color={theme.text.accent} */ }
         <Text>
-          <Text bold color={theme.text.accent}>
-            &gt;_ Qwen Code
+          <Text bold >
+            &gt;_ TRAM Cli
           </Text>
           <Text color={theme.text.secondary}> (v{version})</Text>
         </Text>

@@ -57,7 +57,7 @@ import type { SubagentHooks } from './subagent-hooks.js';
 import { logSubagentExecution } from '../telemetry/loggers.js';
 import { SubagentExecutionEvent } from '../telemetry/types.js';
 import { TaskTool } from '../tools/task.js';
-import { DEFAULT_QWEN_MODEL } from '../config/models.js';
+import { DEFAULT_TRAM_MODEL } from '../config/models.js';
 
 /**
  * @fileoverview Defines the configuration interfaces for a subagent.
@@ -334,7 +334,7 @@ export class SubAgentScope {
         model:
           this.modelConfig.model ||
           this.runtimeContext.getModel() ||
-          DEFAULT_QWEN_MODEL,
+          DEFAULT_TRAM_MODEL,
         tools: (this.toolConfig?.tools || ['*']).map((t) =>
           typeof t === 'string' ? t : t.name,
         ),
@@ -385,7 +385,7 @@ export class SubAgentScope {
         const responseStream = await chat.sendMessageStream(
           this.modelConfig.model ||
             this.runtimeContext.getModel() ||
-            DEFAULT_QWEN_MODEL,
+            DEFAULT_TRAM_MODEL,
           messageParams,
           promptId,
         );
@@ -999,7 +999,7 @@ Important Rules:
  - Use tools only when necessary to obtain facts or make changes.
  - When the task is complete, return the final result as a normal model response (not a tool call) and stop.`;
 
-    // Append user memory (QWEN.md + output-language.md) to ensure subagent respects project conventions
+    // Append user memory (TRAM.md + output-language.md) to ensure subagent respects project conventions
     const userMemory = this.runtimeContext.getUserMemory();
     if (userMemory && userMemory.trim().length > 0) {
       finalPrompt += `\n\n---\n\n${userMemory.trim()}`;

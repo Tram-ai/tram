@@ -53,14 +53,14 @@ describe('SkillTool', () => {
       name: 'code-review',
       description: 'Specialized skill for reviewing code quality',
       level: 'project',
-      filePath: '/project/.qwen/skills/code-review/SKILL.md',
+      filePath: '/project/.tram/skills/code-review/SKILL.md',
       body: 'Review code for quality and best practices.',
     },
     {
       name: 'testing',
       description: 'Skill for writing and running tests',
       level: 'user',
-      filePath: '/home/user/.qwen/skills/testing/SKILL.md',
+      filePath: '/home/user/.tram/skills/testing/SKILL.md',
       body: 'Help write comprehensive tests.',
       allowedTools: ['read_file', 'write_file', 'shell'],
     },
@@ -129,15 +129,9 @@ describe('SkillTool', () => {
       expect(mockSkillManager.addChangeListener).toHaveBeenCalledTimes(1);
     });
 
-    it('should update description with available skills', () => {
-      expect(skillTool.description).toContain('code-review');
-      expect(skillTool.description).toContain(
-        'Specialized skill for reviewing code quality',
-      );
-      expect(skillTool.description).toContain('testing');
-      expect(skillTool.description).toContain(
-        'Skill for writing and running tests',
-      );
+    it('should update description with skill count', () => {
+      expect(skillTool.description).toContain('2 skill(s) available');
+      expect(skillTool.description).toContain('skills_instructions');
     });
 
     it('should handle empty skills list gracefully', async () => {
@@ -250,7 +244,7 @@ describe('SkillTool', () => {
           name: 'new-skill',
           description: 'A brand new skill',
           level: 'project',
-          filePath: '/project/.qwen/skills/new-skill/SKILL.md',
+          filePath: '/project/.tram/skills/new-skill/SKILL.md',
           body: 'New skill content.',
         },
       ];
@@ -263,8 +257,8 @@ describe('SkillTool', () => {
       listener?.();
       await vi.runAllTimersAsync();
 
-      expect(skillTool.description).toContain('new-skill');
-      expect(skillTool.description).toContain('A brand new skill');
+      expect(skillTool.description).toContain('1 skill(s) available');
+      expect(skillTool.description).not.toContain('No skills are currently configured');
     });
 
     it('should refresh available skills and update description', async () => {
@@ -273,7 +267,7 @@ describe('SkillTool', () => {
           name: 'test-skill',
           description: 'A test skill',
           level: 'project',
-          filePath: '/project/.qwen/skills/test-skill/SKILL.md',
+          filePath: '/project/.tram/skills/test-skill/SKILL.md',
           body: 'Test content.',
         },
       ];
@@ -282,8 +276,8 @@ describe('SkillTool', () => {
 
       await skillTool.refreshSkills();
 
-      expect(skillTool.description).toContain('test-skill');
-      expect(skillTool.description).toContain('A test skill');
+      expect(skillTool.description).toContain('1 skill(s) available');
+      expect(skillTool.description).not.toContain('No skills are currently configured');
     });
   });
 
@@ -314,7 +308,7 @@ describe('SkillTool', () => {
 
       const llmText = partToString(result.llmContent);
       expect(llmText).toContain(
-        'Base directory for this skill: /project/.qwen/skills/code-review',
+        'Base directory for this skill: /project/.tram/skills/code-review',
       );
       expect(llmText.trim()).toContain(
         'Review code for quality and best practices.',

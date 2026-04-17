@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "description": "Qwen Code settings configuration",
+  "description": "TRAM settings configuration",
   "properties": {
     "mcpServers": {
       "description": "Configuration for MCP servers.",
@@ -32,6 +32,11 @@
       "description": "General application settings.",
       "type": "object",
       "properties": {
+        "autoResume": {
+          "description": "Automatically resume the previous session when opening in a directory with history.",
+          "type": "boolean",
+          "default": true
+        },
         "preferredEditor": {
           "description": "The preferred editor to open files in.",
           "type": "string"
@@ -47,7 +52,7 @@
           "default": true
         },
         "gitCoAuthor": {
-          "description": "Automatically add a Co-authored-by trailer to git commit messages when commits are made through Qwen Code.",
+          "description": "Automatically add a Co-authored-by trailer to git commit messages when commits are made through TRAM.",
           "type": "boolean",
           "default": true
         },
@@ -68,7 +73,7 @@
           "default": false
         },
         "language": {
-          "description": "The language for the user interface. Use \"auto\" to detect from system settings. You can also use custom language codes (e.g., \"es\", \"fr\") by placing JS language files in ~/.qwen/locales/ (e.g., ~/.qwen/locales/es.js). Options: auto, en, zh, ru, de, ja, pt",
+          "description": "The language for the user interface. Use \"auto\" to detect from system settings. You can also use custom language codes (e.g., \"es\", \"fr\") by placing JS language files in ~/.tram/locales/ (e.g., ~/.tram/locales/es.js). Options: auto, en, zh, ru, de, ja, pt",
           "enum": [
             "auto",
             "en",
@@ -102,6 +107,16 @@
             "utf-8-bom"
           ],
           "default": "utf-8"
+        },
+        "douyinMcpEndpoint": {
+          "description": "MCP endpoint URL for Douyin (抖音) video download. Calls get_douyin_download_link via JSON-RPC. Leave empty to disable.",
+          "type": "string",
+          "default": ""
+        },
+        "siliconFlowApiKey": {
+          "description": "SiliconFlow API key for image OCR (DeepSeek-OCR) and audio transcription (SenseVoiceSmall) fallback. Used when the model does not support image/audio input natively.",
+          "type": "string",
+          "default": ""
         }
       }
     },
@@ -126,7 +141,7 @@
         "theme": {
           "description": "The color theme for the UI.",
           "type": "string",
-          "default": "Qwen Dark"
+          "default": "TRAM Dark"
         },
         "customThemes": {
           "description": "Custom theme definitions.",
@@ -139,7 +154,7 @@
           "default": false
         },
         "showStatusInTitle": {
-          "description": "Show Qwen Code status and thoughts in the terminal window title",
+          "description": "Show TRAM status and thoughts in the terminal window title",
           "type": "boolean",
           "default": false
         },
@@ -171,7 +186,7 @@
           "default": true
         },
         "enableUserFeedback": {
-          "description": "Show optional feedback dialog after conversations to help improve Qwen performance.",
+          "description": "Show optional feedback dialog after conversations to help improve TRAM performance.",
           "type": "boolean",
           "default": true
         },
@@ -301,7 +316,7 @@
               "default": "auto"
             },
             "contextWindowSize": {
-              "description": "Overrides the default context window size for the selected model. Use this setting when a provider's effective context limit differs from Qwen Code's default. This value defines the model's assumed maximum context capacity, not a per-request token limit.",
+              "description": "Overrides the default context window size for the selected model. Use this setting when a provider's effective context limit differs from TRAM's default. This value defines the model's assumed maximum context capacity, not a per-request token limit.",
               "type": "number"
             }
           }
@@ -342,8 +357,8 @@
               "type": "boolean",
               "default": true
             },
-            "respectQwenIgnore": {
-              "description": "Respect .qwenignore files when searching",
+            "respectTramIgnore": {
+              "description": "Respect .tramignore files when searching",
               "type": "boolean",
               "default": true
             },
@@ -552,6 +567,25 @@
           "description": "Configuration for the bug report command.",
           "type": "object",
           "additionalProperties": true
+        },
+        "proxy": {
+          "description": "Outbound network proxy configuration for the TRAM CLI.",
+          "type": "object",
+          "properties": {
+            "mode": {
+              "description": "Proxy mode: use environment/system proxy, custom proxy, or disable proxy. Options: system, custom, off",
+              "enum": [
+                "system",
+                "custom",
+                "off"
+              ],
+              "default": "system"
+            },
+            "customUrl": {
+              "description": "Custom proxy URL used when advanced.proxy.mode is set to custom.",
+              "type": "string"
+            }
+          }
         },
         "tavilyApiKey": {
           "description": "⚠️ DEPRECATED: Please use webSearch.provider configuration instead. Legacy API key for the Tavily API.",

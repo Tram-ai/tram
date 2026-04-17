@@ -9,7 +9,7 @@ import { CommandKind } from './types.js';
 import { MessageType } from '../types.js';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { loadServerHierarchicalMemory } from '@qwen-code/qwen-code-core';
+import { loadServerHierarchicalMemory } from '@tram-ai/tram-core';
 import { t } from '../../i18n/index.js';
 
 export function expandHomeDir(p: string): string {
@@ -127,7 +127,7 @@ export const directoryCommand: SlashCommand = {
             {
               type: MessageType.INFO,
               text: t(
-                'Successfully added QWEN.md files from the following directories if there are:\n- {{directories}}',
+                'Successfully added TRAM.md files from the following directories if there are:\n- {{directories}}',
                 {
                   directories: added.join('\n- '),
                 },

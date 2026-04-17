@@ -5,7 +5,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Config } from '@qwen-code/qwen-code-core';
+import type { Config } from '@tram-ai/tram-core';
 import { runNonInteractiveStreamJson } from './session.js';
 import type {
   CLIUserMessage,

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthType } from '@qwen-code/qwen-code-core';
+import { AuthType } from '@tram-ai/tram-core';
 import type { AuthMethod } from '@agentclientprotocol/sdk';
 
 export function buildAuthMethods(): AuthMethod[] {
@@ -19,13 +19,13 @@ export function buildAuthMethods(): AuthMethod[] {
       },
     },
     {
-      id: AuthType.QWEN_OAUTH,
-      name: 'Qwen OAuth',
+      id: AuthType.TRAM_OAUTH,
+      name: 'TRAM OAuth',
       description:
-        'OAuth authentication for Qwen models with free daily requests',
+        'OAuth authentication for TRAM with free daily requests',
       _meta: {
         type: 'terminal',
-        args: ['--auth-type=qwen-oauth'],
+        args: ['--auth-type=tram-oauth'],
       },
     },
   ];
@@ -43,8 +43,8 @@ export function pickAuthMethodsForDetails(details?: string): AuthMethod[] {
   if (!details) {
     return authMethods;
   }
-  if (details.includes('qwen-oauth') || details.includes('Qwen OAuth')) {
-    const narrowed = filterAuthMethodsById(authMethods, AuthType.QWEN_OAUTH);
+  if (details.includes('tram-oauth') || details.includes('TRAM OAuth')) {
+    const narrowed = filterAuthMethodsById(authMethods, AuthType.TRAM_OAUTH);
     return narrowed.length ? narrowed : authMethods;
   }
   return authMethods;

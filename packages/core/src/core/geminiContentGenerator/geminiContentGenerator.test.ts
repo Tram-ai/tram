@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Google LLC
+ * Copyright 2025 TRAM Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -46,6 +46,7 @@ describe('GeminiContentGenerator', () => {
       {
         apiKey: 'test-api-key',
         httpOptions: {
+          baseUrl: 'https://gateway.example.com/google-ai-studio',
           headers: {
             'X-Base': 'base',
             'X-Override': 'base',
@@ -65,6 +66,7 @@ describe('GeminiContentGenerator', () => {
     expect(vi.mocked(GoogleGenAI)).toHaveBeenCalledWith({
       apiKey: 'test-api-key',
       httpOptions: {
+        baseUrl: 'https://gateway.example.com/google-ai-studio',
         headers: {
           'X-Base': 'base',
           'X-Custom': 'custom',

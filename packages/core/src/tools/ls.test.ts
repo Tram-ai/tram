@@ -31,7 +31,7 @@ describe('LSTool', () => {
       tempSecondaryDir,
     ]);
 
-    const userSkillsBase = path.join(os.homedir(), '.qwen', 'skills');
+    const userSkillsBase = path.join(os.homedir(), '.tram', 'skills');
 
     mockConfig = {
       getTargetDir: () => tempRootDir,
@@ -39,7 +39,7 @@ describe('LSTool', () => {
       getFileService: () => new FileDiscoveryService(tempRootDir),
       getFileFilteringOptions: () => ({
         respectGitIgnore: true,
-        respectQwenIgnore: true,
+        respectTramIgnore: true,
       }),
       getTruncateToolOutputLines: () => 1000,
       storage: {
@@ -158,16 +158,16 @@ describe('LSTool', () => {
       expect(result.returnDisplay).toBe('Listed 2 item(s) (2 git-ignored)');
     });
 
-    it('should respect qwenignore patterns', async () => {
+    it('should respect tramignore patterns', async () => {
       await fs.writeFile(path.join(tempRootDir, 'file1.txt'), 'content1');
       await fs.writeFile(path.join(tempRootDir, 'file2.log'), 'content1');
-      await fs.writeFile(path.join(tempRootDir, '.qwenignore'), '*.log');
+      await fs.writeFile(path.join(tempRootDir, '.tramignore'), '*.log');
       const invocation = lsTool.build({ path: tempRootDir });
       const result = await invocation.execute(abortSignal);
 
       expect(result.llmContent).toContain('file1.txt');
       expect(result.llmContent).not.toContain('file2.log');
-      expect(result.returnDisplay).toBe('Listed 2 item(s) (1 qwen-ignored)');
+      expect(result.returnDisplay).toBe('Listed 2 item(s) (1 tram-ignored)');
     });
 
     it('should handle non-directory paths', async () => {

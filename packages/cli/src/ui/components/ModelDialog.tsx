@@ -15,7 +15,7 @@ import {
   type AvailableModel as CoreAvailableModel,
   type ContentGeneratorConfig,
   type InputModalities,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import { useKeypress } from '../hooks/useKeypress.js';
 import { theme } from '../semantic-colors.js';
 import { DescriptiveRadioButtonSelect } from './shared/DescriptiveRadioButtonSelect.js';
@@ -143,10 +143,24 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
 
   const availableModelEntries = useMemo(() => {
     const allModels = config ? config.getAllConfiguredModels() : [];
+    const selectedAuthType =
+      (settings.merged.security?.auth?.selectedType as AuthType | undefined) ||
+      undefined;
+    const shouldShowTramOauth =
+      authType === AuthType.TRAM_OAUTH ||
+      selectedAuthType === AuthType.TRAM_OAUTH;
 
     // Separate runtime models from registry models
-    const runtimeModels = allModels.filter((m) => m.isRuntimeModel);
-    const registryModels = allModels.filter((m) => !m.isRuntimeModel);
+    const runtimeModels = allModels.filter(
+      (m) =>
+        m.isRuntimeModel &&
+        (shouldShowTramOauth || m.authType !== AuthType.TRAM_OAUTH),
+    );
+    const registryModels = allModels.filter(
+      (m) =>
+        !m.isRuntimeModel &&
+        (shouldShowTramOauth || m.authType !== AuthType.TRAM_OAUTH),
+    );
 
     // Group registry models by authType
     const modelsByAuthTypeMap = new Map<AuthType, CoreAvailableModel[]>();
@@ -158,9 +172,9 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
       modelsByAuthTypeMap.get(authType)!.push(model);
     }
 
-    // Fixed order: qwen-oauth first, then others in a stable order
+    // Fixed order: tram-oauth first, then others in a stable order
     const authTypeOrder: AuthType[] = [
-      AuthType.QWEN_OAUTH,
+      AuthType.TRAM_OAUTH,
       AuthType.USE_OPENAI,
       AuthType.USE_ANTHROPIC,
       AuthType.USE_GEMINI,
@@ -199,7 +213,7 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
     }
 
     return result;
-  }, [config]);
+  }, [authType, config, settings.merged.security?.auth?.selectedType]);
 
   const MODEL_OPTIONS = useMemo(
     () =>
@@ -328,7 +342,7 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
           selectedAuthType,
           modelId,
           selectedAuthType !== authType &&
-            selectedAuthType === AuthType.QWEN_OAUTH
+            selectedAuthType === AuthType.TRAM_OAUTH
             ? { requireCachedCredentials: true }
             : undefined,
         );
@@ -410,7 +424,7 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
       {highlightedEntry && (
         <Box marginTop={1} flexDirection="column">
           <Box
-            borderStyle="single"
+            borderStyle="round"
             borderTop
             borderBottom={false}
             borderLeft={false}
@@ -427,7 +441,7 @@ export function ModelDialog({ onClose }: ModelDialogProps): React.JSX.Element {
               highlightedEntry.model.contextWindowSize,
             )}
           />
-          {highlightedEntry.authType !== AuthType.QWEN_OAUTH && (
+          {highlightedEntry.authType !== AuthType.TRAM_OAUTH && (
             <>
               <DetailRow
                 label="Base URL"

@@ -12,11 +12,11 @@ import {
   MCPDiscoveryState,
   getMCPServerStatus,
   getMCPDiscoveryState,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 
-vi.mock('@qwen-code/qwen-code-core', async (importOriginal) => {
+vi.mock('@tram-ai/tram-core', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@qwen-code/qwen-code-core')>();
+    await importOriginal<typeof import('@tram-ai/tram-core')>();
   const mockAuthenticate = vi.fn();
   return {
     ...actual,

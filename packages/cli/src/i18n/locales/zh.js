@@ -1,10 +1,10 @@
 /**
  * @license
- * Copyright 2025 Qwen
+ * Copyright 2025 Tram
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Chinese translations for Qwen Code CLI
+// Chinese translations for TRAM CLI
 
 export default {
   // ============================================================================
@@ -80,16 +80,121 @@ export default {
   'For a full list of shortcuts, see {{docPath}}':
     '完整快捷键列表，请参阅 {{docPath}}',
   'docs/keyboard-shortcuts.md': 'docs/keyboard-shortcuts.md',
-  'for help on Qwen Code': '获取 Qwen Code 帮助',
+  'for help on TRAM': '获取 TRAM 帮助',
   'show version info': '显示版本信息',
   'submit a bug report': '提交错误报告',
-  'About Qwen Code': '关于 Qwen Code',
+  'About TRAM': '关于 TRAM',
   Status: '状态',
+  '(/model to change)': '(输入 /model 切换模型)',
+
+  // 初始化向导
+  'TRAM Initialization Wizard': 'TRAM 初始化向导',
+  'Esc to cancel at any time.': '随时按 Esc 取消。',
+  'Esc to go back, Esc again at provider list to cancel.':
+    '按 Esc 返回上一步，在供应商列表页再次按 Esc 可取消。',
+  'Initialization: Select providers': '初始化：选择供应商',
+  'OpenAI (Custom)': 'OpenAI（自定义）',
+  'Anthropic Claude': 'Anthropic Claude（克劳德）',
+  'Google Gemini': 'Google Gemini（双子星）',
+  'Google Vertex AI': 'Google Vertex AI（顶点 AI）',
+  'Pollinations': 'Pollinations (自动获取 APIKey)',
+  SiliconFlow: 'SiliconFlow（硅基流动）',
+  Cerebras: 'Cerebras',
+  Groq: 'Groq',
+  'Initialization: Pollinations Authorization': '初始化：Pollinations 授权',
+  'Waiting for browser authorization...': '正在等待浏览器授权...',
+  'If the browser does not open automatically, please click [here]({{url}}).':
+    '如果浏览器没有自动打开，请点击[这里]({{url}})。',
+  'Authorization successful! Returning to wizard...': '授权成功！正在返回向导...',
+  'Authorization failed or timed out.': '授权失败或超时。',
+  'Use ↑↓←→ to move, Space to toggle, Enter to continue. You can configure multiple providers in one run.':
+    '使用 ↑↓←→ 移动，空格勾选，Enter 继续。一次可配置多个供应商。',
+  'Tip: after finishing one provider, you can return here to add more providers.':
+    '提示：完成一个供应商后，你可以回到这里继续添加供应商。',
+  'Select at least one provider.': '请至少选择一个供应商。',
+  'No new provider selected. Please select at least one unconfigured provider.':
+    '没有新增供应商，请至少选择一个尚未配置的供应商。',
+  'No provider selected.': '未选择供应商。',
+  Enabled: '已启用',
+  'Configure provider {{current}}/{{total}}: {{name}}':
+    '配置供应商 {{current}}/{{total}}：{{name}}',
+  'This provider uses OAuth. Press Enter to continue to model selection.':
+    '该供应商使用 OAuth。按 Enter 继续选择模型。',
+  'Use ↑↓←→ to choose a field. Enter to edit. Press N to continue to model selection.':
+    '使用 ↑↓←→ 选择字段，Enter 编辑，按 N 继续到模型选择。',
+  'Use ↑↓←→ to choose a field. Enter to edit inline. Press N to continue to model selection.':
+    '使用 ↑↓←→ 选择字段，Enter 在原位编辑，按 N 继续到模型选择。',
+  'API key env var': 'API 密钥环境变量',
+  'Local model list (comma separated)': '本地模型列表（逗号分隔）',
+  'Editing {{field}}: {{value}}': '正在编辑 {{field}}：{{value}}',
+  'Model selection: {{name}}': '模型选择：{{name}}',
+  'Try OpenAI-compatible /models list first. If unavailable or incomplete, choose custom model.':
+    '先尝试 OpenAI 兼容的 /models 列表；若不可用或不完整，可选自定义模型。',
+  'Use ↑↓←→ to move, Space to toggle model, Enter to continue. Try OpenAI-compatible /models first; use custom if needed.':
+    '使用 ↑↓←→ 移动，空格勾选模型，Enter 继续。优先尝试 OpenAI 兼容 /models，必要时使用自定义模型。',
+  'Continue adding models?': '是否继续添加模型？',
+  'You can keep adding custom models for this provider.': '你可以继续为当前供应商添加自定义模型。',
+  'Yes, add more models': '是，继续添加模型',
+  'No, continue': '否，继续下一步',
+  'Continue adding providers?': '是否继续添加供应商？',
+  'You can return to provider list and add additional providers now.':
+    '你现在可以返回供应商列表并继续添加更多供应商。',
+  'Yes, add another provider': '是，继续添加供应商',
+  'No, continue setup': '否，继续后续配置',
+  'Loading models...': '正在加载模型...',
+  'Select at least one model.': '请至少选择一个模型。',
+  'Custom model...': '自定义模型...',
+  'Enter custom model name': '输入自定义模型名',
+  'Press Enter to confirm.': '按 Enter 确认。',
+  'Press Enter to confirm and keep selecting models.': '按 Enter 确认并继续选择模型。',
+  'Model name cannot be empty.': '模型名不能为空。',
+  'Select approval mode': '选择审批模式',
+  'Recommended: YOLO': '推荐：YOLO',
+  'Plan only': '仅规划',
+  'Only generate plans, no execution. Best safety, lowest automation.':
+    '仅生成计划，不执行操作。最安全，自动化最低。',
+  'Ask every time': '每次询问',
+  'Every action requires confirmation. Safe but slower.':
+    '每个动作都需要确认。更安全但更慢。',
+  'Auto-approve edits': '自动批准编辑',
+  'Edit/write tools are auto-approved, others still ask.':
+    '编辑/写入工具自动批准，其他工具仍需确认。',
+  'YOLO (recommended)': 'YOLO（推荐）',
+  'Fastest workflow. Fully automated execution with higher risk.':
+    '速度最快，全自动执行，但风险更高。',
+  'Proxy configuration': '代理配置',
+  'Use ↑↓←→ to choose.': '使用 ↑↓←→ 选择。',
+  'Follow system proxy': '跟随系统代理',
+  'No proxy': '不使用代理',
+  'Custom proxy': '自定义代理',
+  'Enter custom proxy': '输入自定义代理',
+  'Example: http://127.0.0.1:7890': '示例：http://127.0.0.1:7890',
+  'Select theme': '选择主题',
+  'This list follows built-in /theme options.': '该列表与 /theme 内置选项一致。',
+  'Theme preview': '主题预览',
+  'Preview: info text': '预览：信息文本',
+  'Preview: success text': '预览：成功文本',
+  'Preview: error text': '预览：错误文本',
+  'Review configuration': '确认配置',
+  Providers: '供应商',
+  'Default provider': '默认供应商',
+  'Default model': '默认模型',
+  'Selected models': '已选模型',
+  'Approval mode': '审批模式',
+  'At least one provider must be configured.': '至少需要配置一个供应商。',
+  'Press Enter to save, Esc to cancel.': '按 Enter 保存，Esc 取消。',
+  'Initialization complete.': '初始化完成。',
+  'Settings were saved. Press Enter to continue.': '设置已保存，按 Enter 继续。',
+  'Authentication setup has moved to initialize wizard': '认证配置已迁移到初始化向导',
+  'Please run tram --initialize to configure providers and authentication.':
+    '请运行 tram --initialize 来配置供应商和认证。',
+  'Warning: security.auth.apiKey and security.auth.baseUrl are deprecated. Please migrate credentials to modelProviders with envKey.':
+    'Warning\n弃用 security.auth.apiKey 和 security.auth.baseUrl：\n在 settings.json 中通过 security.auth.apiKey 和 security.auth.baseUrl 直接配置 API 凭据的方式已被弃用。这两个字段将在后续版本中彻底删除。请将模型与凭据配置迁移至 modelProviders，并使用 envKey 引用环境变量以避免硬编码敏感信息。',
 
   // ============================================================================
   // System Information Fields
   // ============================================================================
-  'Qwen Code': 'Qwen Code',
+  'TRAM': 'TRAM',
   Runtime: '运行环境',
   OS: '操作系统',
   Auth: '认证',
@@ -112,12 +217,12 @@ export default {
   // ============================================================================
   // Commands - General
   // ============================================================================
-  'Analyzes the project and creates a tailored QWEN.md file.':
-    '分析项目并创建定制的 QWEN.md 文件',
-  'List available Qwen Code tools. Usage: /tools [desc]':
-    '列出可用的 Qwen Code 工具。用法：/tools [desc]',
+  'Analyzes the project and creates a tailored TRAM.md file.':
+    '分析项目并创建定制的 TRAM.md 文件',
+  'List available TRAM tools. Usage: /tools [desc]':
+    '列出可用的 TRAM 工具。用法：/tools [desc]',
   'List available skills.': '列出可用技能。',
-  'Available Qwen Code CLI tools:': '可用的 Qwen Code CLI 工具：',
+  'Available TRAM CLI tools:': '可用的 TRAM CLI 工具：',
   'No tools available': '没有可用工具',
   'View or change the approval mode for tool usage':
     '查看或更改工具使用的审批模式',
@@ -140,8 +245,8 @@ export default {
   'Clear conversation history and free up context': '清除对话历史并释放上下文',
   'Compresses the context by replacing it with a summary.':
     '通过摘要替换来压缩上下文',
-  'open full Qwen Code documentation in your browser':
-    '在浏览器中打开完整的 Qwen Code 文档',
+  'open full TRAM documentation in your browser':
+    '在浏览器中打开完整的 TRAM 文档',
   'Configuration not available.': '配置不可用',
   'change the auth method': '更改认证方法',
   'Configure authentication information for login': '配置登录认证信息',
@@ -205,8 +310,8 @@ export default {
   // ============================================================================
   // Agents - Creation Wizard
   // ============================================================================
-  'Project Level (.qwen/agents/)': '项目级 (.qwen/agents/)',
-  'User Level (~/.qwen/agents/)': '用户级 (~/.qwen/agents/)',
+  'Project Level (.tram/agents/)': '项目级 (.tram/agents/)',
+  'User Level (~/.tram/agents/)': '用户级 (~/.tram/agents/)',
   '✅ Subagent Created Successfully!': '✅ 子智能体创建成功！',
   'Subagent "{{name}}" has been saved to {{level}} level.':
     '子智能体 "{{name}}" 已保存到 {{level}} 级别。',
@@ -226,7 +331,7 @@ export default {
   // Agents - Creation Wizard Steps
   'Step {{n}}: Choose Location': '步骤 {{n}}: 选择位置',
   'Step {{n}}: Choose Generation Method': '步骤 {{n}}: 选择生成方式',
-  'Generate with Qwen Code (Recommended)': '使用 Qwen Code 生成（推荐）',
+  'Generate with TRAM (Recommended)': '使用 TRAM 生成（推荐）',
   'Manual Creation': '手动创建',
   'Describe what this subagent should do and when it should be used. (Be comprehensive for best results)':
     '描述此子智能体应该做什么以及何时使用它。（为了获得最佳效果，请全面描述）',
@@ -343,10 +448,10 @@ export default {
   // ============================================================================
   // Commands - General (continued)
   // ============================================================================
-  'View and edit Qwen Code settings': '查看和编辑 Qwen Code 设置',
+  'View and edit TRAM settings': '查看和编辑 TRAM 设置',
   Settings: '设置',
-  'To see changes, Qwen Code must be restarted. Press r to exit and apply changes now.':
-    '要查看更改，必须重启 Qwen Code。按 r 退出并立即应用更改。',
+  'To see changes, TRAM must be restarted. Press r to exit and apply changes now.':
+    '要查看更改，必须重启 TRAM。按 r 退出并立即应用更改。',
   'The command "/{{command}}" is not supported in non-interactive mode.':
     '不支持在非交互模式下使用命令 "/{{command}}"。',
   // ============================================================================
@@ -373,7 +478,7 @@ export default {
   'Custom Witty Phrases': '自定义诙谐短语',
   'Show Welcome Back Dialog': '显示欢迎回来对话框',
   'Enable User Feedback': '启用用户反馈',
-  'How is Qwen doing this session? (optional)': 'Qwen 这次表现如何？（可选）',
+  'How is TRAM doing this session? (optional)': 'TRAM 这次表现如何？（可选）',
   Bad: '不满意',
   Fine: '还行',
   Good: '满意',
@@ -395,7 +500,7 @@ export default {
   'Memory Discovery Max Dirs': '内存发现最大目录数',
   'Load Memory From Include Directories': '从包含目录加载内存',
   'Respect .gitignore': '遵守 .gitignore',
-  'Respect .qwenignore': '遵守 .qwenignore',
+  'Respect .tramignore': '遵守 .tramignore',
   'Enable Recursive File Search': '启用递归文件搜索',
   'Disable Fuzzy Search': '禁用模糊搜索',
   'Interactive Shell (PTY)': '交互式 Shell (PTY)',
@@ -484,16 +589,16 @@ export default {
   remote: '远程',
   'This extension will add the following commands: {{commands}}.':
     '此扩展将添加以下命令：{{commands}}。',
-  'This extension will append info to your QWEN.md context using {{fileName}}':
-    '此扩展将使用 {{fileName}} 向您的 QWEN.md 上下文追加信息',
+  'This extension will append info to your TRAM.md context using {{fileName}}':
+    '此扩展将使用 {{fileName}} 向您的 TRAM.md 上下文追加信息',
   'This extension will exclude the following core tools: {{tools}}':
     '此扩展将排除以下核心工具：{{tools}}',
   'This extension will install the following skills:': '此扩展将安装以下技能：',
   'This extension will install the following subagents:':
     '此扩展将安装以下子智能体：',
   'Installation cancelled for "{{name}}".': '已取消安装 "{{name}}"。',
-  'You are installing an extension from {{originSource}}. Some features may not work perfectly with Qwen Code.':
-    '您正在安装来自 {{originSource}} 的扩展。某些功能可能无法完美兼容 Qwen Code。',
+  'You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.':
+    '您正在安装来自 {{originSource}} 的扩展。某些功能可能无法完美兼容 TRAM。',
   '--ref and --auto-update are not applicable for marketplace extensions.':
     '--ref 和 --auto-update 不适用于市场扩展。',
   'Extension "{{name}}" installed successfully and enabled.':
@@ -595,8 +700,8 @@ export default {
     '安装 {{ideName}} 所需的 IDE 配套工具',
   'enable IDE integration': '启用 IDE 集成',
   'disable IDE integration': '禁用 IDE 集成',
-  'IDE integration is not supported in your current environment. To use this feature, run Qwen Code in one of these supported IDEs: VS Code or VS Code forks.':
-    '您当前环境不支持 IDE 集成。要使用此功能，请在以下支持的 IDE 之一中运行 Qwen Code：VS Code 或 VS Code 分支版本。',
+  'IDE integration is not supported in your current environment. To use this feature, run TRAM in one of these supported IDEs: VS Code or VS Code forks.':
+    '您当前环境不支持 IDE 集成。要使用此功能，请在以下支持的 IDE 之一中运行 TRAM：VS Code 或 VS Code 分支版本。',
   'Set up GitHub Actions': '设置 GitHub Actions',
   'Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)':
     '配置终端按键绑定以支持多行输入（VS Code、Cursor、Windsurf、Trae）',
@@ -628,7 +733,7 @@ export default {
   // ============================================================================
   // Commands - Hooks
   // ============================================================================
-  'Manage Qwen Code hooks': '管理 Qwen Code Hook',
+  'Manage TRAM hooks': '管理 TRAM Hook',
   'List all configured hooks': '列出所有已配置的 Hook',
   'Enable a disabled hook': '启用已禁用的 Hook',
   'Disable an active hook': '禁用已启用的 Hook',
@@ -856,7 +961,7 @@ export default {
   servers: '个服务器',
   'Add MCP servers to your settings to get started.':
     '请在设置中添加 MCP 服务器以开始使用。',
-  'Run qwen --debug to see error logs': '运行 qwen --debug 查看错误日志',
+  'Run tram --debug to see error logs': '运行 tram --debug 查看错误日志',
 
   // MCP OAuth Authentication
   'OAuth Authentication': 'OAuth 认证',
@@ -951,8 +1056,8 @@ export default {
   // ============================================================================
   // Commands - Summary
   // ============================================================================
-  'Generate a project summary and save it to .qwen/PROJECT_SUMMARY.md':
-    '生成项目摘要并保存到 .qwen/PROJECT_SUMMARY.md',
+  'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md':
+    '生成项目摘要并保存到 .tram/PROJECT_SUMMARY.md',
   'No chat client available to generate summary.':
     '没有可用的聊天客户端来生成摘要',
   'Already generating summary, wait for previous request to complete':
@@ -1009,8 +1114,8 @@ export default {
   'The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.':
     '/directory add 命令在限制性沙箱配置文件中不受支持。请改为在启动会话时使用 --include-directories。',
   "Error adding '{{path}}': {{error}}": "添加 '{{path}}' 时出错：{{error}}",
-  'Successfully added QWEN.md files from the following directories if there are:\n- {{directories}}':
-    '如果存在，已成功从以下目录添加 QWEN.md 文件：\n- {{directories}}',
+  'Successfully added TRAM.md files from the following directories if there are:\n- {{directories}}':
+    '如果存在，已成功从以下目录添加 TRAM.md 文件：\n- {{directories}}',
   'Error refreshing memory: {{error}}': '刷新内存时出错：{{error}}',
   'Successfully added directories:\n- {{directories}}':
     '成功添加目录：\n- {{directories}}',
@@ -1096,11 +1201,11 @@ export default {
   'You must select an auth method to proceed. Press Ctrl+C again to exit.':
     '您必须选择认证方法才能继续。再次按 Ctrl+C 退出',
   'Terms of Services and Privacy Notice': '服务条款和隐私声明',
-  'Qwen OAuth': 'Qwen OAuth (免费)',
-  'Free \u00B7 Up to 1,000 requests/day \u00B7 Qwen latest models':
-    '免费 \u00B7 每天最多 1,000 次请求 \u00B7 Qwen 最新模型',
-  'Login with QwenChat account to use daily free quota.':
-    '使用 QwenChat 账号登录，享受每日免费额度。',
+  'TRAM OAuth': 'TRAM OAuth (免费)',
+  'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models':
+    '免费 \u00B7 每天最多 1,000 次请求 \u00B7 TRAM 最新模型',
+  'Login with TramChat account to use daily free quota.':
+    '使用 TramChat 账号登录，享受每日免费额度。',
   'Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models':
     '付费 \u00B7 每 5 小时最多 6,000 次请求 \u00B7 支持阿里云百炼 Coding Plan 全部模型',
   'Alibaba Cloud Coding Plan': '阿里云百炼 Coding Plan',
@@ -1111,25 +1216,25 @@ export default {
   'Failed to login. Message: {{message}}': '登录失败。消息：{{message}}',
   'Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.':
     '认证方式被强制设置为 {{enforcedType}}，但您当前使用的是 {{currentType}}',
-  'Qwen OAuth authentication timed out. Please try again.':
-    'Qwen OAuth 认证超时。请重试',
-  'Qwen OAuth authentication cancelled.': 'Qwen OAuth 认证已取消',
-  'Qwen OAuth Authentication': 'Qwen OAuth 认证',
+  'TRAM OAuth authentication timed out. Please try again.':
+    'TRAM OAuth 认证超时。请重试',
+  'TRAM OAuth authentication cancelled.': 'TRAM OAuth 认证已取消',
+  'TRAM OAuth Authentication': 'TRAM OAuth 认证',
   'Please visit this URL to authorize:': '请访问此 URL 进行授权：',
   'Or scan the QR code below:': '或扫描下方的二维码：',
   'Waiting for authorization': '等待授权中',
   'Time remaining:': '剩余时间：',
   '(Press ESC or CTRL+C to cancel)': '（按 ESC 或 CTRL+C 取消）',
-  'Qwen OAuth Authentication Timeout': 'Qwen OAuth 认证超时',
+  'TRAM OAuth Authentication Timeout': 'TRAM OAuth 认证超时',
   'OAuth token expired (over {{seconds}} seconds). Please select authentication method again.':
     'OAuth 令牌已过期（超过 {{seconds}} 秒）。请重新选择认证方法',
   'Press any key to return to authentication type selection.':
     '按任意键返回认证类型选择',
-  'Waiting for Qwen OAuth authentication...': '正在等待 Qwen OAuth 认证...',
-  'Note: Your existing API key in settings.json will not be cleared when using Qwen OAuth. You can switch back to OpenAI authentication later if needed.':
-    '注意：使用 Qwen OAuth 时，settings.json 中现有的 API 密钥不会被清除。如果需要，您可以稍后切换回 OpenAI 认证。',
-  'Note: Your existing API key will not be cleared when using Qwen OAuth.':
-    '注意：使用 Qwen OAuth 时，现有的 API 密钥不会被清除。',
+  'Waiting for TRAM OAuth authentication...': '正在等待 TRAM OAuth 认证...',
+  'Note: Your existing API key in settings.json will not be cleared when using TRAM OAuth. You can switch back to OpenAI authentication later if needed.':
+    '注意：使用 TRAM OAuth 时，settings.json 中现有的 API 密钥不会被清除。如果需要，您可以稍后切换回 OpenAI 认证。',
+  'Note: Your existing API key will not be cleared when using TRAM OAuth.':
+    '注意：使用 TRAM OAuth 时，现有的 API 密钥不会被清除。',
   'Authentication timed out. Please try again.': '认证超时。请重试。',
   'Waiting for auth... (Press ESC or CTRL+C to cancel)':
     '正在等待认证...（按 ESC 或 CTRL+C 取消）',
@@ -1151,8 +1256,8 @@ export default {
   'Failed to authenticate. Message: {{message}}': '认证失败。消息：{{message}}',
   'Authenticated successfully with {{authType}} credentials.':
     '使用 {{authType}} 凭据成功认证。',
-  'Invalid QWEN_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}':
-    '无效的 QWEN_DEFAULT_AUTH_TYPE 值："{{value}}"。有效值为：{{validValues}}',
+  'Invalid TRAM_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}':
+    '无效的 TRAM_DEFAULT_AUTH_TYPE 值："{{value}}"。有效值为：{{validValues}}',
   'OpenAI Configuration Required': '需要配置 OpenAI',
   'Please enter your OpenAI configuration. You can get an API key from':
     '请输入您的 OpenAI 配置。您可以从以下地址获取 API 密钥：',
@@ -1187,10 +1292,10 @@ export default {
   unknown: '未知',
   "Failed to switch model to '{{modelId}}'.\n\n{{error}}":
     "无法切换到模型 '{{modelId}}'.\n\n{{error}}",
-  'Qwen 3.5 Plus — efficient hybrid model with leading coding performance':
-    'Qwen 3.5 Plus — 高效混合架构，编程性能业界领先',
-  'The latest Qwen Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
-    '来自阿里云 ModelStudio 的最新 Qwen Vision 模型（版本：qwen3-vl-plus-2025-09-23）',
+  'Tram 3.5 Plus — efficient hybrid model with leading coding performance':
+    'Tram 3.5 Plus — 高效混合架构，编程性能业界领先',
+  'The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
+    '来自阿里云 ModelStudio 的最新 Tram Vision 模型（版本：qwen3-vl-plus-2025-09-23）',
 
   // ============================================================================
   // Dialogs - Permissions
@@ -1266,12 +1371,12 @@ export default {
   'Use /bug to submit issues to the maintainers when something goes off.':
     '遇到问题时，用 /bug 将问题提交给维护者。',
   'Switch auth type quickly with /auth.': '用 /auth 快速切换认证方式。',
-  'You can run any shell commands from Qwen Code using ! (e.g. !ls).':
-    '在 Qwen Code 中使用 ! 可运行任意 shell 命令（例如 !ls）。',
+  'You can run any shell commands from TRAM using ! (e.g. !ls).':
+    '在 TRAM 中使用 ! 可运行任意 shell 命令（例如 !ls）。',
   'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.':
     '输入 / 打开命令弹窗；按 Tab 自动补全斜杠命令和保存的提示词。',
-  'You can resume a previous conversation by running qwen --continue or qwen --resume.':
-    '运行 qwen --continue 或 qwen --resume 可继续之前的会话。',
+  'You can resume a previous conversation by running tram --continue or tram --resume.':
+    '运行 tram --continue 或 tram --resume 可继续之前的会话。',
   'You can switch permission mode quickly with Shift+Tab or /approval-mode.':
     '按 Shift+Tab 或输入 /approval-mode 可快速切换权限模式。',
   'You can switch permission mode quickly with Tab or /approval-mode.':
@@ -1282,7 +1387,7 @@ export default {
   // ============================================================================
   // Exit Screen / Stats
   // ============================================================================
-  'Agent powering down. Goodbye!': 'Qwen Code 正在关闭，再见！',
+  'Agent powering down. Goodbye!': 'TRAM 正在关闭，再见！',
   'To continue this session, run': '要继续此会话，请运行',
   'Interaction Summary': '交互摘要',
   'Session ID:': '会话 ID：',
@@ -1355,6 +1460,7 @@ export default {
   'Waiting for user confirmation...': '等待用户确认...',
   '(esc to cancel, {{time}})': '（按 esc 取消，{{time}}）',
   WITTY_LOADING_PHRASES: [
+    /*
     // --- 职场搬砖系列 ---
     '正在努力搬砖，请稍候...',
     '老板在身后，快加载啊！',
@@ -1388,6 +1494,8 @@ export default {
     '愿你的代码永无 Bug，愿你的梦想终将成真...',
     '哪怕只有 0.1% 的进度，也是在向目标靠近...',
     '加载的是字节，承载的是对技术的热爱...',
+    */
+   '生成中'
   ],
 
   // ============================================================================
@@ -1503,6 +1611,75 @@ export default {
     '提示：使用 /model 切换可用的 Coding Plan 模型。',
 
   // ============================================================================
+  // Service Command
+  // ============================================================================
+  'Manage persistent background services.': '管理常驻后台服务。',
+  'Tip: Recommended Alt+L to open the ask flow quickly. You can also type /service alert <name>.':
+    '提示：推荐使用 Alt+L 快速打开询问流程，也可以手动输入 /service alert <name>。',
+  'Tip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    '提示：按 Ctrl+Tab 切换到 Servers Log，再按一次可切回 Chat。',
+  'No services registered. Use /service register ... to add one.\nCurrent max running services: {{maxRunningServices}}':
+    '当前没有已注册服务。使用 /service register ... 添加。\n当前最大并发服务数：{{maxRunningServices}}',
+  '- {{runningStatus}} {{name}} | autoStart={{autoStart}} | pid={{pid}} | follow={{follow}} | notify={{notify}} | alert={{alert}} | cwd={{cwd}} | cmd={{command}}':
+    '- {{runningStatus}} {{name}} | 自动启动={{autoStart}} | pid={{pid}} | 跟随={{follow}} | 通知={{notify}} | 告警={{alert}} | cwd={{cwd}} | 命令={{command}}',
+  'Registered services ({{count}})\nMax running services: {{maxRunningServices}}\nTo change the limit manually, edit services.json in project storage.\n\n{{listLines}}':
+    '已注册服务（{{count}}）\n最大并发服务数：{{maxRunningServices}}\n如需修改限制，请手动编辑项目存储中的 services.json。\n\n{{listLines}}',
+  'Unknown option: {{option}}': '未知选项：{{option}}',
+  'Service "{{name}}" registered and started.\nautoStart={{autoStart}}, watch={{watchPatterns}}':
+    '服务 "{{name}}" 已注册并启动。\n自动启动={{autoStart}}，监控={{watchPatterns}}',
+  'Service name is required for /service {{action}}.':
+    '/service {{action}} 需要服务名。',
+  'Service "{{name}}" started.': '服务 "{{name}}" 已启动。',
+  'Service "{{name}}" stopped.': '服务 "{{name}}" 已停止。',
+  'Service "{{name}}" restarted.': '服务 "{{name}}" 已重启。',
+  'Service "{{name}}" removed.': '服务 "{{name}}" 已移除。',
+  'Service "{{name}}" not found.': '未找到服务 "{{name}}"。',
+  'Service "{{name}}" realtime notifications enabled.':
+    '服务 "{{name}}" 的实时通知已开启。',
+  'Service "{{name}}" realtime notifications muted.\nErrors are still buffered. Use /service alert {{name}} to inspect buffered logs.':
+    '服务 "{{name}}" 的实时通知已静默。\n错误日志仍在缓冲中，可使用 /service alert {{name}} 查看缓冲日志。',
+  'Unknown option for log: {{option}}': 'log 子命令未知选项：{{option}}',
+  'Service {{name}} ({{runningStatus}}, pid={{pid}})\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}':
+    '服务 {{name}}（{{runningStatus}}，pid={{pid}}）\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}',
+  'No pending alert buffer for service "{{name}}".':
+    '服务 "{{name}}" 当前没有待处理告警缓冲。',
+  'Service {{name}} has alerts. Choose the next action.\nStart line: {{startLine}}, buffered lines: {{bufferedLines}}, error lines: {{errorLines}}\nRecommended: press Alt+L to open ask flow quickly; command input is also supported.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    '服务 {{name}} 出现告警，请选择下一步。\n起始行：{{startLine}}，缓冲行数：{{bufferedLines}}，错误行数：{{errorLines}}\n推荐：按 Alt+L 快速打开询问流程；也支持直接输入命令。\n提示：按 Ctrl+Tab 切换到 Servers Log，再按一次切回 Chat。',
+  'Analyze logs only': '仅分析日志',
+  'Alert handling': '告警处置',
+  'Analyze logs without entering repair flow (equivalent: /service analyze {{name}} all)':
+    '仅分析日志，不进入修复流程（等价于：/service analyze {{name}} all）',
+  'Analyze then fix issue (Recommended)': '分析后并修复问题（推荐）',
+  'Analyze logs and continue to fix. You can run /service analyze {{name}} all first, then ask the model to directly repair in follow-up prompts.':
+    '先分析日志再继续修复。可先执行 /service analyze {{name}} all，再在后续提示中要求模型直接修复。',
+  'Handle later': '稍后处理',
+  'Do not process now; continue buffering subsequent logs in background.':
+    '暂不处理，继续在后台缓冲后续日志。',
+  'No pending alert logs for service "{{name}}".':
+    '服务 "{{name}}" 当前没有待处理告警日志。',
+  'No logs available in selected mode ({{mode}}) for service "{{name}}".':
+    '服务 "{{name}}" 在当前模式（{{mode}}）下没有可用日志。',
+  'Please analyze the following service logs for service "{{name}}".\nMode: {{mode}}.\nProvide: root cause, confidence, immediate mitigation, and next checks.\n\n':
+    '请分析以下服务 "{{name}}" 的日志。\n模式：{{mode}}。\n请给出：根因、置信度、即时缓解方案、下一步检查项。\n\n',
+  'No log patterns configured for service "{{name}}".':
+    '服务 "{{name}}" 尚未配置日志模式规则。',
+  '- [{{id}}] Pattern: `{{pattern}}` | Action: {{action}} | Description: {{description}}':
+    '- [{{id}}] 模式：`{{pattern}}` | 动作：{{action}} | 描述：{{description}}',
+  'Log patterns for service "{{name}}":\n{{listText}}':
+    '服务 "{{name}}" 的日志模式：\n{{listText}}',
+  'To add log patterns for service "{{name}}", LM will use the request_log_pattern tool.':
+    '为服务 "{{name}}" 添加日志模式时，LM 会使用 request_log_pattern 工具。',
+  'Removed pattern rule "{{ruleId}}" from service "{{name}}".':
+    '已从服务 "{{name}}" 移除规则 "{{ruleId}}"。',
+  'Pattern rule "{{ruleId}}" not found in service "{{name}}".':
+    '服务 "{{name}}" 中未找到规则 "{{ruleId}}"。',
+  'Sent input to service "{{name}}".': '已向服务 "{{name}}" 发送输入。',
+  'Unknown subcommand: {{subcommand}}\n\n{{helpText}}':
+    '未知子命令：{{subcommand}}\n\n{{helpText}}',
+  '[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    '[service/{{name}}] 检测到错误信号：{{sourceLine}}\n日志已从此处开始缓冲。推荐按 Alt+L 快速打开询问流程；也可使用 /service alert {{name}} 查看并决定是否发送日志给 LM。\n随后可使用 /service analyze {{name}} all 或 /service analyze {{name}} errors。\n提示：按 Ctrl+Tab 切换到 Servers Log，再按一次切回 Chat。',
+
+  // ============================================================================
   // Ask User Question Tool
   // ============================================================================
   'Please answer the following question(s):': '请回答以下问题：',
@@ -1526,4 +1703,67 @@ export default {
     '↑/↓: 导航 | Space/Enter: 切换 | Esc: 取消',
   '↑/↓: Navigate | Enter: Select | Esc: Cancel':
     '↑/↓: 导航 | Enter: 选择 | Esc: 取消',
+      '% used': '% 已用',
+  '% context used': '% 上下文已用',
+
+  // ============================================================================
+  // 核心工具输出 i18n (service_manage 工具)
+  // ============================================================================
+  'Manage service action: {{action}}': '管理服务操作: {{action}}',
+  'No services registered.': '没有已注册的服务。',
+  'Service {{name}} registered successfully.': '服务 {{name}} 注册成功。',
+  'Service {{name}} start initiated.': '服务 {{name}} 启动中。',
+  'Service {{name}} stopped.': '服务 {{name}} 已停止。',
+  'Service {{name}} restarted.': '服务 {{name}} 已重启。',
+  'Service {{name}} removed.': '服务 {{name}} 已移除。',
+  'Now following logs for {{name}} in UI.': '正在 UI 中跟踪 {{name}} 的日志。',
+  'Unfollowed logs for {{name}}.': '已取消跟踪 {{name}} 的日志。',
+  '[No logs for {{name}}]': '[{{name}} 无日志]',
+  'No pending alert for service {{name}}.': '服务 {{name}} 没有待处理的告警。',
+  'Alert detected for {{name}}. Please use analyze action to read alert logs.': '检测到 {{name}} 的告警。请使用 analyze 操作查看告警日志。',
+  'No pending alerts for {{name}}.': '{{name}} 没有待处理的告警。',
+  'Active Alert Logs for {{name}} (mode: {{mode}}):': '{{name}} 的活跃告警日志 (模式: {{mode}}):',
+  'Sent input to {{name}}. Consider checking logs after a brief moment.': '已向 {{name}} 发送输入。请稍后查看日志。',
+  'Unknown action: {{action}}': '未知操作: {{action}}',
+  'Error executing action {{action}}: {{error}}': '执行操作 {{action}} 出错: {{error}}',
+  'name and command required': '需要名称和命令',
+  'name required': '需要名称',
+  'name and input required': '需要名称和输入',
+
+  // ============================================================================
+  // 日志过滤规则 (suppress/unsuppress/list-rules)
+  // ============================================================================
+  'name and pattern required': '需要名称和匹配模式',
+  'Added suppress rule for {{name}}: {{pattern}}': '已为 {{name}} 添加屏蔽规则: {{pattern}}',
+  'name and ruleId required': '需要名称和规则ID',
+  'Removed suppress rule {{ruleId}} for {{name}}.': '已移除 {{name}} 的屏蔽规则 {{ruleId}}。',
+  'Rule {{ruleId}} not found for {{name}}.': '未找到 {{name}} 的规则 {{ruleId}}。',
+  'No log pattern rules for {{name}}.': '{{name}} 没有日志过滤规则。',
+  'Log pattern rules for {{name}}:': '{{name}} 的日志过滤规则:',
+
+  // ============================================================================
+  // 终端模式切换 (Ctrl+Shift+L)
+  // ============================================================================
+  'Switched to service log mode': '已切换到服务日志模式',
+  'Switched to chat mode': '已切换到聊天模式',
+  'Toggle service log mode': '切换服务日志模式',
+  'Service Logs': '服务日志',
+  'Chat': '聊天',
+  'No services running. Register a service first.': '没有运行中的服务。请先注册一个服务。',
+
+  // ============================================================================
+  // Initialization / WebInitDisplay
+  // ============================================================================
+  'TRAM Configuration': 'TRAM 配置',
+  'Esc to cancel': 'Esc 取消',
+  'Configuration page': '配置页面',
+  'Browser opened. Waiting for configuration...': '浏览器已打开，等待配置...',
+  'Starting server...': '正在启动服务器...',
+  'Or paste JSON configuration and press Enter to save': '或粘贴 JSON 配置并按 Enter 保存',
+  'Esc to clear input': 'Esc 清除输入',
+  'Saving configuration...': '正在保存配置...',
+  'Configuration saved successfully!': '配置保存成功！',
+  'Unknown error': '未知错误',
+  'Failed to start configuration server': '配置服务器启动失败',
+  'Invalid JSON': '无效的 JSON',
 };

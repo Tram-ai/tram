@@ -6,9 +6,9 @@
  * VSCode IDE Companion - Theme Variables
  * 
  * This file ONLY contains CSS variable definitions that map VSCode design tokens
- * to the --app-* variables used by @qwen-code/webui components.
+ * to the --app-* variables used by @tram-ai/webui components.
  * 
- * Component styles are in @qwen-code/webui package and use these variables.
+ * Component styles are in @tram-ai/webui package and use these variables.
  * No class overrides needed - just set the variables correctly.
  */
 

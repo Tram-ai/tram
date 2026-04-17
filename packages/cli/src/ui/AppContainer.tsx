@@ -39,7 +39,7 @@ import {
   getAllGeminiMdFilenames,
   ShellExecutionService,
   Storage,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import { buildResumedHistoryItems } from './utils/resumeHistoryUtils.js';
 import { validateAuthMethod } from '../config/auth.js';
 import { loadHierarchicalGeminiMemory } from '../config/config.js';
@@ -84,6 +84,7 @@ import { migrateTomlCommands } from '../services/command-migration-tool.js';
 import { type UpdateObject } from './utils/updateCheck.js';
 import { setUpdateHandler } from '../utils/handleAutoUpdate.js';
 import { registerCleanup, runExitCleanup } from '../utils/cleanup.js';
+import { ServiceRuntimeManager } from '@tram-ai/tram-core';
 import { useMessageQueue } from './hooks/useMessageQueue.js';
 import { useAutoAcceptIndicator } from './hooks/useAutoAcceptIndicator.js';
 import { useSessionStats } from './contexts/SessionContext.js';
@@ -104,6 +105,7 @@ import { useSubagentCreateDialog } from './hooks/useSubagentCreateDialog.js';
 import { useAgentsManagerDialog } from './hooks/useAgentsManagerDialog.js';
 import { useExtensionsManagerDialog } from './hooks/useExtensionsManagerDialog.js';
 import { useMcpDialog } from './hooks/useMcpDialog.js';
+import { useInitializeDialog } from './hooks/useInitializeDialog.js';
 import { useAttentionNotifications } from './hooks/useAttentionNotifications.js';
 import {
   requestConsentInteractive,
@@ -247,7 +249,7 @@ export const AppContainer = (props: AppContainerProps) => {
   );
 
   // Helper to determine the current model (polled, since Config has no model-change event).
-  const getCurrentModel = useCallback(() => config.getModel(), [config]);
+  const getCurrentModel = useCallback(() => config.getModelName(), [config]);
 
   const [currentModel, setCurrentModel] = useState(getCurrentModel());
 
@@ -293,6 +295,18 @@ export const AppContainer = (props: AppContainerProps) => {
     registerCleanup(async () => {
       const ideClient = await IdeClient.getInstance();
       await ideClient.disconnect();
+    });
+    // Stop all running services on CLI exit
+    registerCleanup(async () => {
+      try {
+        const manager = ServiceRuntimeManager.forConfig(config);
+        const runningServices = manager.listServices().filter(s => s.running);
+        for (const svc of runningServices) {
+          await manager.stopService(svc.name);
+        }
+      } catch {
+        // Ignore errors during cleanup
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]);
@@ -404,7 +418,7 @@ export const AppContainer = (props: AppContainerProps) => {
     isAuthDialogOpen,
     isAuthenticating,
     pendingAuthType,
-    qwenAuthState,
+    TramAuthState,
     handleAuthSelect,
     handleCodingPlanSubmit,
     openAuthDialog,
@@ -501,6 +515,7 @@ export const AppContainer = (props: AppContainerProps) => {
     closeExtensionsManagerDialog,
   } = useExtensionsManagerDialog();
   const { isMcpDialogOpen, openMcpDialog, closeMcpDialog } = useMcpDialog();
+  const { isInitializeDialogOpen, openInitializeDialog, closeInitializeDialog } = useInitializeDialog();
 
   const slashCommandActions = useMemo(
     () => ({
@@ -525,6 +540,7 @@ export const AppContainer = (props: AppContainerProps) => {
       openAgentsManagerDialog,
       openExtensionsManagerDialog,
       openMcpDialog,
+      openInitializeDialog,
       openResumeDialog,
     }),
     [
@@ -542,6 +558,7 @@ export const AppContainer = (props: AppContainerProps) => {
       openAgentsManagerDialog,
       openExtensionsManagerDialog,
       openMcpDialog,
+      openInitializeDialog,
       openResumeDialog,
     ],
   );
@@ -582,7 +599,7 @@ export const AppContainer = (props: AppContainerProps) => {
     historyManager.addItem(
       {
         type: MessageType.INFO,
-        text: 'Refreshing hierarchical memory (QWEN.md or other context files)...',
+        text: 'Refreshing hierarchical memory (TRAM.md or other context files)...',
       },
       Date.now(),
     );
@@ -1246,12 +1263,13 @@ export const AppContainer = (props: AppContainerProps) => {
       embeddedShellFocused,
       settings.merged.general?.debugKeystrokeLogging,
       isAuthenticating,
+      historyManager,
     ],
   );
 
   useKeypress(handleGlobalKeypress, { isActive: true });
 
-  // Update terminal title with Qwen Code status and thoughts
+  // Update terminal title with TRAM status and thoughts
   useEffect(() => {
     // Respect both showStatusInTitle and hideWindowTitle settings
     if (
@@ -1278,7 +1296,7 @@ export const AppContainer = (props: AppContainerProps) => {
       lastTitleRef.current = paddedTitle;
       stdout.write(`\x1b]2;${paddedTitle}\x07`);
     }
-    // Note: We don't need to reset the window title on exit because Qwen Code is already doing that elsewhere
+    // Note: We don't need to reset the window title on exit because TRAM is already doing that elsewhere
   }, [
     streamingState,
     thought,
@@ -1312,6 +1330,7 @@ export const AppContainer = (props: AppContainerProps) => {
     isSubagentCreateDialogOpen ||
     isAgentsManagerDialogOpen ||
     isMcpDialogOpen ||
+    isInitializeDialogOpen ||
     isApprovalModeDialogOpen ||
     isResumeDialogOpen ||
     isExtensionsManagerDialogOpen;
@@ -1346,8 +1365,8 @@ export const AppContainer = (props: AppContainerProps) => {
       authError,
       isAuthDialogOpen,
       pendingAuthType,
-      // Qwen OAuth state
-      qwenAuthState,
+      // TRAM OAuth state
+      TramAuthState,
       editorError,
       isEditorDialogOpen,
       debugMessage,
@@ -1428,6 +1447,8 @@ export const AppContainer = (props: AppContainerProps) => {
       isExtensionsManagerDialogOpen,
       // MCP dialog
       isMcpDialogOpen,
+      // Initialize dialog
+      isInitializeDialogOpen,
       // Feedback dialog
       isFeedbackDialogOpen,
     }),
@@ -1439,8 +1460,8 @@ export const AppContainer = (props: AppContainerProps) => {
       authError,
       isAuthDialogOpen,
       pendingAuthType,
-      // Qwen OAuth state
-      qwenAuthState,
+      // TRAM OAuth state
+      TramAuthState,
       editorError,
       isEditorDialogOpen,
       debugMessage,
@@ -1522,6 +1543,8 @@ export const AppContainer = (props: AppContainerProps) => {
       isExtensionsManagerDialogOpen,
       // MCP dialog
       isMcpDialogOpen,
+      // Initialize dialog
+      isInitializeDialogOpen,
       // Feedback dialog
       isFeedbackDialogOpen,
     ],
@@ -1567,6 +1590,8 @@ export const AppContainer = (props: AppContainerProps) => {
       closeExtensionsManagerDialog,
       // MCP dialog
       closeMcpDialog,
+      // Initialize dialog
+      closeInitializeDialog,
       // Resume session dialog
       openResumeDialog,
       closeResumeDialog,
@@ -1614,6 +1639,8 @@ export const AppContainer = (props: AppContainerProps) => {
       closeExtensionsManagerDialog,
       // MCP dialog
       closeMcpDialog,
+      // Initialize dialog
+      closeInitializeDialog,
       // Resume session dialog
       openResumeDialog,
       closeResumeDialog,

@@ -9,7 +9,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { glob } from 'glob';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { dirname } from 'path';
 
 // Get __dirname for ESM modules
@@ -35,8 +35,10 @@ async function loadTranslationsFile(
   filePath: string,
 ): Promise<Record<string, string | string[]>> {
   try {
+    // Convert to file:// URL for cross-platform compatibility (especially Windows)
+    const fileUrl = pathToFileURL(filePath).href;
     // Dynamic import for ES modules
-    const module = await import(filePath);
+    const module = await import(fileUrl);
     return module.default || module;
   } catch (error) {
     // Fallback: try reading as JSON if JS import fails

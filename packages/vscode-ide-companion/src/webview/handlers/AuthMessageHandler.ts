@@ -63,9 +63,9 @@ export class AuthMessageHandler extends BaseMessageHandler {
         console.log('[AuthMessageHandler] Using fallback login method');
         // Fallback: show message and use command
         vscode.window.showInformationMessage(
-          'Please wait while we connect to Qwen Code...',
+          'Please wait while we connect to TRAM...',
         );
-        await vscode.commands.executeCommand('qwen-code.login');
+        await vscode.commands.executeCommand('tram.login');
       }
     } catch (error) {
       const errorMsg = getErrorMessage(error);

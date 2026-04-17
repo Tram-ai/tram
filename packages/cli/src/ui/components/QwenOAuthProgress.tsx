@@ -9,11 +9,11 @@ import { useState, useEffect } from 'react';
 import { Box, Text } from 'ink';
 import Link from 'ink-link';
 import { theme } from '../semantic-colors.js';
-import type { DeviceAuthorizationData } from '@qwen-code/qwen-code-core';
+import type { DeviceAuthorizationData } from '@tram-ai/tram-core';
 import { useKeypress } from '../hooks/useKeypress.js';
 import { t } from '../../i18n/index.js';
 
-interface QwenOAuthProgressProps {
+interface TramOAuthProgressProps {
   onTimeout: () => void;
   onCancel: () => void;
   deviceAuth?: DeviceAuthorizationData;
@@ -33,13 +33,13 @@ function formatTime(seconds: number): string {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-export function QwenOAuthProgress({
+export function TramOAuthProgress({
   onTimeout,
   onCancel,
   deviceAuth,
   authStatus,
   authMessage,
-}: QwenOAuthProgressProps): React.JSX.Element {
+}: TramOAuthProgressProps): React.JSX.Element {
   const defaultTimeout = deviceAuth?.expires_in || 300; // Default 5 minutes
   const [timeRemaining, setTimeRemaining] = useState<number>(defaultTimeout);
   const [dots, setDots] = useState<string>('...');
@@ -86,14 +86,14 @@ export function QwenOAuthProgress({
   if (authStatus === 'timeout') {
     return (
       <Box
-        borderStyle="single"
+        borderStyle="round"
         borderColor={theme.border.default}
         flexDirection="column"
         padding={1}
         width="100%"
       >
         <Text bold color={theme.status.error}>
-          {t('Qwen OAuth Authentication Timeout')}
+          {t('TRAM OAuth Authentication Timeout')}
         </Text>
 
         <Box marginTop={1}>
@@ -120,14 +120,14 @@ export function QwenOAuthProgress({
   if (authStatus === 'error') {
     return (
       <Box
-        borderStyle="single"
+        borderStyle="round"
         borderColor={theme.border.default}
         flexDirection="column"
         padding={1}
         width="100%"
       >
         <Text bold color={theme.status.error}>
-          {t('Qwen OAuth Authentication Error')}
+          {t('TRAM OAuth Authentication Error')}
         </Text>
 
         <Box marginTop={1}>
@@ -150,16 +150,16 @@ export function QwenOAuthProgress({
   if (!deviceAuth) {
     return (
       <Box
-        borderStyle="single"
+        borderStyle="round"
         borderColor={theme.border.default}
         flexDirection="column"
         padding={1}
         width="100%"
       >
-        <Text bold>{t('Qwen OAuth Authentication')}</Text>
+        <Text bold>{t('TRAM OAuth Authentication')}</Text>
 
         <Box marginTop={1} flexDirection="column">
-          <Text>{t('Waiting for Qwen OAuth authentication...')}</Text>
+          <Text>{t('Waiting for TRAM OAuth authentication...')}</Text>
           <Text>
             {t('Time remaining:')} {formatTime(timeRemaining)}
           </Text>
@@ -174,13 +174,13 @@ export function QwenOAuthProgress({
 
   return (
     <Box
-      borderStyle="single"
+      borderStyle="round"
       borderColor={theme.border.default}
       flexDirection="column"
       padding={1}
       width="100%"
     >
-      <Text bold>{t('Qwen OAuth Authentication')}</Text>
+      <Text bold>{t('TRAM OAuth Authentication')}</Text>
 
       <Box marginTop={1}>
         <Text>{t('Please visit this URL to authorize:')}</Text>

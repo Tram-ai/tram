@@ -72,6 +72,27 @@ if (existsSync(bundledSkillsDir)) {
   );
 }
 
+// Copy i18n locales so they are available at runtime.
+// In the esbuild bundle, import.meta.url resolves to dist/cli.js, so
+// i18n system looks for locales at dist/locales/.
+const localesDir = join(
+  root,
+  'packages',
+  'cli',
+  'src',
+  'i18n',
+  'locales',
+);
+if (existsSync(localesDir)) {
+  const destLocalesDir = join(distDir, 'locales');
+  copyRecursiveSync(localesDir, destLocalesDir);
+  console.log('Copied i18n locales to dist/locales/');
+} else {
+  console.warn(
+    `Warning: Locales directory not found at ${localesDir}`,
+  );
+}
+
 console.log('\n✅ All bundle assets copied to dist/');
 
 /**

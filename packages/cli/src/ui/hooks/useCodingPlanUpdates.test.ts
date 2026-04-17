@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen Team
+ * Copyright 2025 Tram Team
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,7 +12,7 @@ import {
   getCodingPlanConfig,
   CodingPlanRegion,
 } from '../../constants/codingPlan.js';
-import { AuthType } from '@qwen-code/qwen-code-core';
+import { AuthType } from '@tram-ai/tram-core';
 
 // Get region configs for testing
 const chinaConfig = getCodingPlanConfig(CodingPlanRegion.CHINA);
@@ -33,7 +33,7 @@ describe('useCodingPlanUpdates', () => {
   const mockConfig = {
     reloadModelProvidersConfig: vi.fn(),
     refreshAuth: vi.fn(),
-    getModel: vi.fn().mockReturnValue('qwen-max'),
+    getModel: vi.fn().mockReturnValue('tram-max'),
   };
 
   const mockAddItem = vi.fn();
@@ -534,7 +534,7 @@ describe('useCodingPlanUpdates', () => {
       );
 
       // Reset mock
-      mockConfig.getModel.mockReturnValue('qwen-max');
+      mockConfig.getModel.mockReturnValue('tram-max');
     });
 
     it('should show "model switched" message when current model is not in new template', async () => {
@@ -583,7 +583,7 @@ describe('useCodingPlanUpdates', () => {
       );
 
       // Reset mock
-      mockConfig.getModel.mockReturnValue('qwen-max');
+      mockConfig.getModel.mockReturnValue('tram-max');
     });
 
     it('should handle update errors gracefully', async () => {

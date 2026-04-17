@@ -11,7 +11,7 @@ import type {
   SlashCommand,
   SlashCommandActionReturn,
 } from './types.js';
-import { getCurrentGeminiMdFilename } from '@qwen-code/qwen-code-core';
+import { getCurrentGeminiMdFilename } from '@tram-ai/tram-core';
 import { CommandKind } from './types.js';
 import { Text } from 'ink';
 import React from 'react';
@@ -20,7 +20,7 @@ import { t } from '../../i18n/index.js';
 export const initCommand: SlashCommand = {
   name: 'init',
   get description() {
-    return t('Analyzes the project and creates a tailored QWEN.md file.');
+    return t('Analyzes the project and creates a tailored TRAM.md file.');
   },
   kind: CommandKind.BUILT_IN,
   action: async (
@@ -36,9 +36,12 @@ export const initCommand: SlashCommand = {
     }
     const targetDir = context.services.config.getTargetDir();
     const contextFileName = getCurrentGeminiMdFilename();
-    const contextFilePath = path.join(targetDir, contextFileName);
+    const contextFileDir = path.join(targetDir, '.tram');
+    const contextFilePath = path.join(contextFileDir, contextFileName);
 
     try {
+      fs.mkdirSync(contextFileDir, { recursive: true });
+
       if (fs.existsSync(contextFilePath)) {
         // If file exists but is empty (or whitespace), continue to initialize
         try {
@@ -95,39 +98,46 @@ export const initCommand: SlashCommand = {
     return {
       type: 'submit_prompt',
       content: `
-You are Qwen Code, an interactive CLI agent. Analyze the current directory and generate a comprehensive ${contextFileName} file to be used as instructional context for future interactions.
+  You are TRAM, an interactive CLI agent. Analyze the current directory and generate a comprehensive ${contextFileName} file to be used as instructional context for future interactions.
 
-**Analysis Process:**
+  CRITICAL: Prevent main-agent context pollution.
 
-1.  **Initial Exploration:**
-    *   Start by listing the files and directories to get a high-level overview of the structure.
-    *   Read the README file (e.g., \`README.md\`, \`README.txt\`) if it exists. This is often the best place to start.
+  You must execute /init with a subagent-first workflow:
+  1. The main agent acts as orchestrator and quality gate.
+  2. The main agent must delegate repository exploration and first-draft writing to the task tool with an available subagent type.
+  3. Prefer subagent_type = "general-purpose" when available.
+  4. The main agent must pass along relevant main-agent context in the task prompt, including:
+     - current user goals from this conversation,
+     - explicit constraints and preferences,
+     - important conventions already discovered,
+     - target output path: ${contextFilePath}.
+  5. After subagent completion, the main agent performs targeted review/fixes only.
 
-2.  **Iterative Deep Dive (up to 10 files):**
-    *   Based on your initial findings, select a few files that seem most important (e.g., configuration files, main source files, documentation).
-    *   Read them. As you learn more, refine your understanding and decide which files to read next. You don't need to decide all 10 files at once. Let your discoveries guide your exploration.
+  Subagent task requirements:
+  - Explore repository structure and key files (README, manifests, build scripts, test config, entrypoints).
+  - Infer project type and workflows using evidence, not guesses.
+  - Write the complete ${contextFileName} content to ${contextFilePath} in Markdown.
 
-3.  **Identify Project Type:**
-    *   **Code Project:** Look for clues like \`package.json\`, \`requirements.txt\`, \`pom.xml\`, \`go.mod\`, \`Cargo.toml\`, \`build.gradle\`, or a \`src\` directory. If you find them, this is likely a software project.
-    *   **Non-Code Project:** If you don't find code-related files, this might be a directory for documentation, research papers, notes, or something else.
+  ${contextFileName} content requirements:
 
-**${contextFileName} Content Generation:**
+  For code projects, include:
+  - Project overview (purpose, stack, architecture).
+  - Build/run/test commands with exact command lines when discoverable.
+  - Development conventions (style, testing patterns, contribution cues).
+  - Repository-specific operational guardrails.
 
-**For a Code Project:**
+  For non-code projects, include:
+  - Directory overview and primary purpose.
+  - Key files and what they contain.
+  - How the material should be used and maintained.
 
-*   **Project Overview:** Write a clear and concise summary of the project's purpose, main technologies, and architecture.
-*   **Building and Running:** Document the key commands for building, running, and testing the project. Infer these from the files you've read (e.g., \`scripts\` in \`package.json\`, \`Makefile\`, etc.). If you can't find explicit commands, provide a placeholder with a TODO.
-*   **Development Conventions:** Describe any coding styles, testing practices, or contribution guidelines you can infer from the codebase.
+  Quality rules:
+  - Do not hallucinate commands; use TODO markers when evidence is missing.
+  - Keep it concise but actionable.
+  - Do not dump the full document in chat unless asked.
 
-**For a Non-Code Project:**
-
-*   **Directory Overview:** Describe the purpose and contents of the directory. What is it for? What kind of information does it hold?
-*   **Key Files:** List the most important files and briefly explain what they contain.
-*   **Usage:** Explain how the contents of this directory are intended to be used.
-
-**Final Output:**
-
-Write the complete content to the \`${contextFileName}\` file. The output must be well-formatted Markdown.
+  Final step:
+  - Ensure ${contextFilePath} contains the final version of ${contextFileName}.
 `,
     };
   },

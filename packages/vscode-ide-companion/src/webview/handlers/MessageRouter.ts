@@ -5,7 +5,7 @@
  */
 
 import type { IMessageHandler } from './BaseMessageHandler.js';
-import type { QwenAgentManager } from '../../services/qwenAgentManager.js';
+import type { TramAgentManager } from '../../services/tramAgentManager.js';
 import type { ConversationStore } from '../../services/conversationStore.js';
 import type {
   PermissionResponseMessage,
@@ -33,7 +33,7 @@ export class MessageRouter {
     | null = null;
 
   constructor(
-    agentManager: QwenAgentManager,
+    agentManager: TramAgentManager,
     conversationStore: ConversationStore,
     currentConversationId: string | null,
     sendToWebView: (message: unknown) => void,

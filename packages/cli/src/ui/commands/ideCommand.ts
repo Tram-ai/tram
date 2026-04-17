@@ -11,13 +11,13 @@ import {
   logIdeConnection,
   IdeConnectionEvent,
   IdeConnectionType,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import {
-  QWEN_CODE_COMPANION_EXTENSION_NAME,
+  TRAM_CODE_COMPANION_EXTENSION_NAME,
   getIdeInstaller,
   IDEConnectionStatus,
   ideContextStore,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import path from 'node:path';
 import type {
   CommandContext,
@@ -148,7 +148,7 @@ export const ideCommand = async (): Promise<SlashCommand> => {
           type: 'message',
           messageType: 'error',
           content: t(
-            'IDE integration is not supported in your current environment. To use this feature, run Qwen Code in one of these supported IDEs: VS Code or VS Code forks.',
+            'IDE integration is not supported in your current environment. To use this feature, run TRAM in one of these supported IDEs: VS Code or VS Code forks.',
           ),
         }) as const,
     };
@@ -207,7 +207,7 @@ export const ideCommand = async (): Promise<SlashCommand> => {
         context.ui.addItem(
           {
             type: 'error',
-            text: `Automatic installation is not supported for ${ideName}. Please install the '${QWEN_CODE_COMPANION_EXTENSION_NAME}' extension manually from the marketplace.`,
+            text: `Automatic installation is not supported for ${ideName}. Please install the '${TRAM_CODE_COMPANION_EXTENSION_NAME}' extension manually from the marketplace.`,
           },
           Date.now(),
         );

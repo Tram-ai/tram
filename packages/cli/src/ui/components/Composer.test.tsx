@@ -21,7 +21,7 @@ vi.mock('../contexts/VimModeContext.js', () => ({
     vimMode: 'NORMAL',
   })),
 }));
-import { ApprovalMode } from '@qwen-code/qwen-code-core';
+import { ApprovalMode } from '@tram-ai/tram-core';
 import { StreamingState } from '../types.js';
 
 // Mock child components

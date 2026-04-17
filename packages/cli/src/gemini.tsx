@@ -11,7 +11,7 @@ import {
   Storage,
   type Config,
   createDebugLogger,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import { render } from 'ink';
 import dns from 'node:dns';
 import os from 'node:os';
@@ -21,7 +21,11 @@ import React from 'react';
 import { validateAuthMethod } from './config/auth.js';
 import * as cliConfig from './config/config.js';
 import { loadCliConfig, parseArguments } from './config/config.js';
-import type { DnsResolutionOrder, LoadedSettings } from './config/settings.js';
+import {
+  SettingScope,
+  type DnsResolutionOrder,
+  type LoadedSettings,
+} from './config/settings.js';
 import { getSettingsWarnings, loadSettings } from './config/settings.js';
 import {
   initializeApp,
@@ -60,8 +64,28 @@ import { computeWindowTitle } from './utils/windowTitle.js';
 import { validateNonInteractiveAuth } from './validateNonInterActiveAuth.js';
 import { showResumeSessionPicker } from './ui/components/StandaloneSessionPicker.js';
 import { initializeLlmOutputLanguage } from './utils/languageUtils.js';
+import { initializeI18n, type SupportedLanguage } from './i18n/index.js';
 
 const debugLogger = createDebugLogger('STARTUP');
+
+function hasAnyModelProviders(settings: LoadedSettings): boolean {
+  const modelProviders = settings.merged.modelProviders;
+  if (!modelProviders || typeof modelProviders !== 'object') {
+    return false;
+  }
+  return Object.values(modelProviders).some(
+    (models) => Array.isArray(models) && models.length > 0,
+  );
+}
+
+function hasAnyApiKeyEnv(): boolean {
+  return Boolean(
+    process.env['OPENAI_API_KEY'] ||
+      process.env['ANTHROPIC_API_KEY'] ||
+      process.env['GEMINI_API_KEY'] ||
+      process.env['GOOGLE_API_KEY'],
+  );
+}
 
 export function validateDnsResolutionOrder(
   order: string | undefined,
@@ -95,7 +119,7 @@ function getNodeMemoryArgs(isDebugMode: boolean): string[] {
     );
   }
 
-  if (process.env['QWEN_CODE_NO_RELAUNCH']) {
+  if (process.env['TRAM_CODE_NO_RELAUNCH']) {
     return [];
   }
 
@@ -213,12 +237,78 @@ export async function main() {
 
   let argv = await parseArguments();
 
+  // Handle auto-resume: if no session flags are provided in interactive mode, resume the last session for this directory
+  const isAutoResumeEnabled = settings.merged.general?.autoResume ?? true;
+  if (
+    isAutoResumeEnabled &&
+    argv.continue === undefined &&
+    !argv.resume &&
+    !argv.sessionId &&
+    !argv.prompt &&
+    !argv.query &&
+    argv.inputFormat !== "stream-json" &&
+    process.stdin.isTTY &&
+    process.stdout.isTTY
+  ) {
+    const { SessionService } = await import('@tram-ai/tram-core');
+    const sessionService = new SessionService(process.cwd());
+    const lastSession = await sessionService.loadLastSession();
+    if (lastSession) {
+      argv = { ...argv, continue: true };
+    }
+  }
+
   // Check for invalid input combinations early to prevent crashes
   if (argv.promptInteractive && !process.stdin.isTTY) {
     writeStderrLine(
       'Error: The --prompt-interactive flag cannot be used when input is piped from stdin.',
     );
     process.exit(1);
+  }
+
+  // Handle --initialize flag early
+  if (argv.initialize) {
+    const languageSetting =
+      process.env['TRAM_CODE_LANG'] ||
+      (settings.merged.general?.language as string) ||
+      'auto';
+    await initializeI18n(languageSetting as SupportedLanguage | 'auto');
+
+    const { runWebInitialization } = await import(
+      './initialization/WebInitDisplay.js'
+    );
+    const success = await runWebInitialization(settings);
+    process.exit(success ? 0 : 1);
+  }
+
+  const userSettingsFile = settings.forScope(SettingScope.User);
+  const isFirstRun = userSettingsFile.rawJson === undefined;
+  const hasProviders = hasAnyModelProviders(settings);
+  const hasSelectedAuth = Boolean(settings.merged.security?.auth?.selectedType);
+  const shouldAutoInitialize =
+    process.stdin.isTTY &&
+    process.stdout.isTTY &&
+    !argv.prompt &&
+    !argv.promptInteractive &&
+    !argv.query &&
+    argv.inputFormat !== InputFormat.STREAM_JSON &&
+    (isFirstRun || (!hasProviders && !hasSelectedAuth && !hasAnyApiKeyEnv()));
+
+  if (shouldAutoInitialize) {
+    const languageSetting =
+      process.env['TRAM_CODE_LANG'] ||
+      (settings.merged.general?.language as string) ||
+      'auto';
+    await initializeI18n(languageSetting as SupportedLanguage | 'auto');
+
+    const { runWebInitialization } = await import(
+      './initialization/WebInitDisplay.js'
+    );
+    const initialized = await runWebInitialization(settings);
+
+    if (!initialized) {
+      process.exit(1);
+    }
   }
 
   const isDebugMode = cliConfig.isDebugMode(argv);
@@ -336,7 +426,7 @@ export async function main() {
   }
 
   // We are now past the logic handling potentially launching a child process
-  // to run Qwen Code. It is now safe to perform expensive initialization that
+  // to run TRAM. It is now safe to perform expensive initialization that
   // may have side effects.
 
   // Initialize output language file before config loads to ensure it's included in context

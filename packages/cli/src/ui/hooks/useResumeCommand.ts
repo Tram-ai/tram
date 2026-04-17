@@ -1,11 +1,11 @@
 /**
  * @license
- * Copyright 2025 Qwen Code
+ * Copyright 2025 TRAM
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { useState, useCallback } from 'react';
-import { SessionService, type Config } from '@qwen-code/qwen-code-core';
+import { SessionService, type Config } from '@tram-ai/tram-core';
 import { buildResumedHistoryItems } from '../utils/resumeHistoryUtils.js';
 import type { UseHistoryManagerReturn } from './useHistoryManager.js';
 

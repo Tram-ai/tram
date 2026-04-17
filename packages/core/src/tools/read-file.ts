@@ -22,6 +22,7 @@ import { logFileOperation } from '../telemetry/loggers.js';
 import { FileOperationEvent } from '../telemetry/types.js';
 import { isSubpath } from '../utils/paths.js';
 import { Storage } from '../config/storage.js';
+import { resolveLogVariable } from '../services/serviceRuntimeManager.js';
 
 /**
  * Parameters for the ReadFile tool
@@ -174,6 +175,12 @@ export class ReadFileTool extends BaseDeclarativeTool<
   protected override validateToolParamValues(
     params: ReadFileToolParams,
   ): string | null {
+    // Resolve $LOG_xxx variable names to actual file paths
+    const resolved = resolveLogVariable(params.absolute_path, this.config.storage.getProjectTempDir());
+    if (resolved) {
+      params.absolute_path = resolved;
+    }
+
     const filePath = params.absolute_path;
     if (params.absolute_path.trim() === '') {
       return "The 'absolute_path' parameter must be non-empty.";
@@ -211,8 +218,8 @@ export class ReadFileTool extends BaseDeclarativeTool<
     }
 
     const fileService = this.config.getFileService();
-    if (fileService.shouldQwenIgnoreFile(params.absolute_path)) {
-      return `File path '${filePath}' is ignored by .qwenignore pattern(s).`;
+    if (fileService.shouldTramIgnoreFile(params.absolute_path)) {
+      return `File path '${filePath}' is ignored by .tramignore pattern(s).`;
     }
 
     return null;

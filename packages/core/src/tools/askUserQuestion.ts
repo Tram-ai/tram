@@ -17,6 +17,7 @@ import {
 } from './tools.js';
 import type { FunctionDeclaration } from '@google/genai';
 import type { Config } from '../config/config.js';
+import { ApprovalMode } from '../config/config.js';
 import { ToolDisplayNames, ToolNames } from './tool-names.js';
 import { createDebugLogger } from '../utils/debugLogger.js';
 import { InputFormat } from '../output/types.js';
@@ -39,6 +40,7 @@ export interface AskUserQuestionParams {
   questions: Question[];
   metadata?: {
     source?: string;
+    serviceName?: string;
   };
 }
 
@@ -52,8 +54,11 @@ Usage notes:
 - Users will always be able to select "Other" to provide custom text input
 - Use multiSelect: true to allow multiple answers to be selected for a question
 - If you recommend a specific option, make that the first option in the list and add "(Recommended)" at the end of the label
+- In YOLO mode, questions automatically accept the recommended option (marked with "(Recommended)") or the first option without user prompt
 
 Plan mode note: In plan mode, use this tool to clarify requirements or choose between approaches BEFORE finalizing your plan. Do NOT use this tool to ask "Is this plan ready?" or "Should I proceed?" - use ExitPlanMode for plan approval.
+
+Automatic decision-making: After receiving user answers, you (the AI) automatically decide on next steps based on the response (e.g., running analysis commands, executing fixes, scheduling tasks) without waiting for additional user input.
 `;
 
 const askUserQuestionToolSchemaData: FunctionDeclaration = {
@@ -157,6 +162,27 @@ class AskUserQuestionToolInvocation extends BaseToolInvocation<
   override async shouldConfirmExecute(
     _abortSignal: AbortSignal,
   ): Promise<ToolAskUserQuestionConfirmationDetails | false> {
+    // In YOLO mode, auto-accept recommended options without asking user
+    const approvalMode = this._config.getApprovalMode();
+    if (approvalMode === ApprovalMode.YOLO) {
+      // Auto-select recommended options or first option for each question
+      this.userAnswers = {};
+      for (let i = 0; i < this.params.questions.length; i++) {
+        const question = this.params.questions[i];
+        if (question && question.options && question.options.length > 0) {
+          // Find recommended option (contains "(Recommended)")
+          const recommendedOption = question.options.find(opt =>
+            opt.label.includes('(Recommended)') || opt.label.includes('(推荐)')
+          );
+          // Use recommended option if found, otherwise use first option
+          const selectedOption = recommendedOption || question.options[0];
+          this.userAnswers[String(i)] = selectedOption.label;
+        }
+      }
+      this.wasAnswered = true;
+      return false; // Skip the confirmation dialog
+    }
+
     // Check if we're in a mode that supports user interaction
     // ACP mode (VSCode extension, etc.) uses non-interactive mode but can still collect user input
     const isAcpMode =

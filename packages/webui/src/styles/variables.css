@@ -9,7 +9,7 @@
 @tailwind utilities;
 
 /**
- * Default CSS variables for @qwen-code/webui
+ * Default CSS variables for @tram-ai/webui
  * These provide fallback values when running outside of VSCode.
  * In VSCode, these will be overridden by VSCode's design tokens.
  */
@@ -75,7 +75,7 @@
   /* ===========================
      Brand Colors
      =========================== */
-  --app-qwen-ivory: #f5f5dc;
+  --app-tram-ivory: #f5f5dc;
 
   /* ===========================
      Border Radius

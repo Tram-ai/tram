@@ -13,12 +13,12 @@ import type {
   ServerGeminiStreamEvent,
   TaskResultDisplay,
   McpToolProgressData,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import {
   GeminiEventType,
   ToolErrorType,
   parseAndFormatApiError,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import type { Part, GenerateContentResponseUsageMetadata } from '@google/genai';
 import type {
   CLIAssistantMessage,

@@ -11,7 +11,7 @@ import {
   type ServerGeminiStreamEvent,
   type ToolCallRequestInfo,
   type TaskResultDisplay,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import type { Part, GenerateContentResponseUsageMetadata } from '@google/genai';
 import type {
   CLIMessage,

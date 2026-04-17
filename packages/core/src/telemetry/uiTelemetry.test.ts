@@ -293,6 +293,49 @@ describe('UiTelemetryService', () => {
       expect(metrics.models['gemini-2.5-flash'].api.totalRequests).toBe(1);
       expect(service.getLastPromptTokenCount()).toBe(0);
     });
+
+    it('should bucket SubLM calls separately from primary model calls', () => {
+      const primaryEvent = {
+        'event.name': EVENT_API_RESPONSE,
+        model: 'gemini-2.5-pro',
+        prompt_id: 'session-1',
+        duration_ms: 500,
+        input_token_count: 10,
+        output_token_count: 20,
+        total_token_count: 30,
+        cached_content_token_count: 0,
+        thoughts_token_count: 0,
+        tool_token_count: 0,
+      } as ApiResponseEvent & {
+        'event.name': typeof EVENT_API_RESPONSE;
+      };
+
+      const subLmEvent = {
+        'event.name': EVENT_API_RESPONSE,
+        model: 'gemini-2.5-pro',
+        prompt_id: 'session-1:sublm',
+        duration_ms: 250,
+        input_token_count: 4,
+        output_token_count: 6,
+        total_token_count: 10,
+        cached_content_token_count: 0,
+        thoughts_token_count: 0,
+        tool_token_count: 0,
+      } as ApiResponseEvent & {
+        'event.name': typeof EVENT_API_RESPONSE;
+      };
+
+      service.addEvent(primaryEvent);
+      service.addEvent(subLmEvent);
+
+      const metrics = service.getMetrics();
+      expect(metrics.models['gemini-2.5-pro']?.api.totalRequests).toBe(1);
+      expect(metrics.models['gemini-2.5-pro (SubLM)']?.api.totalRequests).toBe(
+        1,
+      );
+      expect(metrics.models['gemini-2.5-pro']?.tokens.total).toBe(30);
+      expect(metrics.models['gemini-2.5-pro (SubLM)']?.tokens.total).toBe(10);
+    });
   });
 
   describe('API Error Event Processing', () => {

@@ -15,7 +15,7 @@ import {
 } from './ChatWebviewViewProvider.js';
 
 const SECONDARY_SIDEBAR_CONTEXT_KEY =
-  'qwen-code:doesNotSupportSecondarySidebar';
+  'tram:doesNotSupportSecondarySidebar';
 
 export function detectSecondarySidebarSupport(vscodeVersion: string): boolean {
   const [major, minor] = vscodeVersion.split('.').map(Number);

@@ -54,7 +54,7 @@ export interface ContentGenerator {
 
 export enum AuthType {
   USE_OPENAI = 'openai',
-  QWEN_OAUTH = 'qwen-oauth',
+  TRAM_OAUTH = 'tram-oauth',
   USE_GEMINI = 'gemini',
   USE_VERTEX_AI = 'vertex-ai',
   USE_ANTHROPIC = 'anthropic',
@@ -73,6 +73,9 @@ export type InputModalities = {
 
 export type ContentGeneratorConfig = {
   model: string;
+  // Optional upstream model name sent to provider APIs.
+  // When omitted, `model` is used.
+  requestModel?: string;
   apiKey?: string;
   apiKeyEnvKey?: string;
   baseUrl?: string;
@@ -221,8 +224,8 @@ export function validateModelConfig(
 ): ModelConfigValidationResult {
   const errors: Error[] = [];
 
-  // Qwen OAuth doesn't need validation - it uses dynamic tokens
-  if (config.authType === AuthType.QWEN_OAUTH) {
+  // TRAM OAuth doesn't need validation - it uses dynamic tokens
+  if (config.authType === AuthType.TRAM_OAUTH) {
     return { valid: true, errors: [] };
   }
 
@@ -311,21 +314,21 @@ export async function createContentGenerator(
       './openaiContentGenerator/index.js'
     );
     baseGenerator = createOpenAIContentGenerator(generatorConfig, config);
-  } else if (authType === AuthType.QWEN_OAUTH) {
-    const { getQwenOAuthClient: getQwenOauthClient } = await import(
-      '../qwen/qwenOAuth2.js'
+  } else if (authType === AuthType.TRAM_OAUTH) {
+    const { getTramOAuthClient: getTramOauthClient } = await import(
+      '../tram/tramOAuth2.js'
     );
-    const { QwenContentGenerator } = await import(
-      '../qwen/qwenContentGenerator.js'
+    const { TramContentGenerator } = await import(
+      '../tram/tramContentGenerator.js'
     );
 
     try {
-      const qwenClient = await getQwenOauthClient(
+      const tramClient = await getTramOauthClient(
         config,
         isInitialAuth ? { requireCachedCredentials: true } : undefined,
       );
-      baseGenerator = new QwenContentGenerator(
-        qwenClient,
+      baseGenerator = new TramContentGenerator(
+        tramClient,
         generatorConfig,
         config,
       );

@@ -42,6 +42,8 @@ import { GitService } from '../services/gitService.js';
 
 // Tools
 import { AskUserQuestionTool } from '../tools/askUserQuestion.js';
+import { RequestLogPatternTool } from '../tools/requestLogPattern.js';
+import { ServiceManageTool } from '../tools/serviceManage.js';
 import { EditTool } from '../tools/edit.js';
 import { ExitPlanModeTool } from '../tools/exitPlanMode.js';
 import { GlobTool } from '../tools/glob.js';
@@ -58,9 +60,22 @@ import { TaskTool } from '../tools/task.js';
 import { TodoWriteTool } from '../tools/todoWrite.js';
 import { ToolRegistry } from '../tools/tool-registry.js';
 import { WebFetchTool } from '../tools/web-fetch.js';
-import { WebSearchTool } from '../tools/web-search/index.js';
+import { OpenApiLinkListTool } from '../tools/openapi-link-list.js';
+import { ModSearchTool } from '../tools/mod-search.js';
+import { ModHashLookupTool } from '../tools/mod-hash-lookup.js';
+import { MinecraftServerInfoTool } from '../tools/minecraft-server-info.js';
+import { DownloadFileTool } from '../tools/download-file.js';
+import { ShareLogTool } from '../tools/share-log.js';
+import { VideoToAudioTool } from '../tools/video-to-audio.js';
+import { MediaCompressTool } from '../tools/media-compress.js';
+import { ModpackServerPackTool } from '../tools/modpack-server-pack.js';
+import { SubLmTool } from '../tools/sublm.js';
 import { WriteFileTool } from '../tools/write-file.js';
 import { LspTool } from '../tools/lsp.js';
+import { InitProjectTool } from '../tools/init-project.js';
+import { BilibiliVideoInfoTool } from '../tools/bilibili-video-info.js';
+import { ScheduledTaskTool } from '../tools/scheduled-task.js';
+import { KnowledgeSearchTool } from '../tools/knowledge-search.js';
 import type { LspClient } from '../lsp/types.js';
 
 // Other modules
@@ -106,7 +121,7 @@ import {
   DEFAULT_FILE_FILTERING_OPTIONS,
   DEFAULT_MEMORY_FILE_FILTERING_OPTIONS,
 } from './constants.js';
-import { DEFAULT_QWEN_EMBEDDING_MODEL } from './models.js';
+import { DEFAULT_TRAM_EMBEDDING_MODEL } from './models.js';
 import { Storage } from './storage.js';
 import { ChatRecordingService } from '../services/chatRecordingService.js';
 import {
@@ -214,7 +229,7 @@ export interface GitCoAuthorSettings {
   email?: string;
 }
 
-export type ExtensionOriginSource = 'QwenCode' | 'Claude' | 'Gemini';
+export type ExtensionOriginSource = 'TramCode' | 'Claude' | 'Gemini';
 
 export interface ExtensionInstallMetadata {
   source: string;
@@ -263,6 +278,8 @@ export class MCPServerConfig {
     readonly targetServiceAccount?: string,
     // SDK MCP server type - 'sdk' indicates server runs in SDK process
     readonly type?: 'sdk',
+    // Hidden from MCP management UI (auto-injected servers)
+    readonly hidden?: boolean,
   ) {}
 }
 
@@ -314,7 +331,7 @@ export interface ConfigParameters {
   usageStatisticsEnabled?: boolean;
   fileFiltering?: {
     respectGitIgnore?: boolean;
-    respectQwenIgnore?: boolean;
+    respectTramIgnore?: boolean;
     enableRecursiveFileSearch?: boolean;
     enableFuzzySearch?: boolean;
   };
@@ -348,15 +365,7 @@ export interface ConfigParameters {
   loadMemoryFromIncludeDirectories?: boolean;
   importFormat?: 'tree' | 'flat';
   chatRecording?: boolean;
-  // Web search providers
-  webSearch?: {
-    provider: Array<{
-      type: 'tavily' | 'google' | 'dashscope';
-      apiKey?: string;
-      searchEngineId?: string;
-    }>;
-    default: string;
-  };
+
   chatCompression?: ChatCompressionSettings;
   interactive?: boolean;
   trustedFolder?: boolean;
@@ -387,6 +396,10 @@ export interface ConfigParameters {
   hooksConfig?: Record<string, unknown>;
   /** Warnings generated during configuration resolution */
   warnings?: string[];
+  /** MCP endpoint URL for Douyin video download */
+  douyinMcpEndpoint?: string;
+  /** SiliconFlow API key for OCR and audio transcription fallback */
+  siliconFlowApiKey?: string;
 }
 
 function normalizeConfigOutputFormat(
@@ -468,7 +481,7 @@ export class Config {
   private baseLlmClient!: BaseLlmClient;
   private readonly fileFiltering: {
     respectGitIgnore: boolean;
-    respectQwenIgnore: boolean;
+    respectTramIgnore: boolean;
     enableRecursiveFileSearch: boolean;
     enableFuzzySearch: boolean;
   };
@@ -496,14 +509,7 @@ export class Config {
   private readonly chatRecordingEnabled: boolean;
   private readonly loadMemoryFromIncludeDirectories: boolean = false;
   private readonly importFormat: 'tree' | 'flat';
-  private readonly webSearch?: {
-    provider: Array<{
-      type: 'tavily' | 'google' | 'dashscope';
-      apiKey?: string;
-      searchEngineId?: string;
-    }>;
-    default: string;
-  };
+
   private readonly chatCompression: ChatCompressionSettings | undefined;
   private readonly interactive: boolean;
   private readonly trustedFolder: boolean | undefined;
@@ -528,13 +534,15 @@ export class Config {
   private readonly hooksConfig?: Record<string, unknown>;
   private hookSystem?: HookSystem;
   private messageBus?: MessageBus;
+  private readonly douyinMcpEndpoint?: string;
+  private readonly siliconFlowApiKey?: string;
 
   constructor(params: ConfigParameters) {
     this.sessionId = params.sessionId ?? randomUUID();
     this.sessionData = params.sessionData;
     setDebugLogSession(this);
     this.debugLogger = createDebugLogger();
-    this.embeddingModel = params.embeddingModel ?? DEFAULT_QWEN_EMBEDDING_MODEL;
+    this.embeddingModel = params.embeddingModel ?? DEFAULT_TRAM_EMBEDDING_MODEL;
     this.fileSystemService = new StandardFileSystemService();
     this.sandbox = params.sandbox;
     this.targetDir = path.resolve(params.targetDir);
@@ -578,15 +586,15 @@ export class Config {
     };
     this.gitCoAuthor = {
       enabled: params.gitCoAuthor ?? true,
-      name: 'Qwen-Coder',
-      email: 'qwen-coder@alibabacloud.com',
+      name: 'Tram',
+      email: 'tramr@alibabacloud.com',
     };
     this.usageStatisticsEnabled = params.usageStatisticsEnabled ?? true;
     this.outputLanguageFilePath = params.outputLanguageFilePath;
 
     this.fileFiltering = {
       respectGitIgnore: params.fileFiltering?.respectGitIgnore ?? true,
-      respectQwenIgnore: params.fileFiltering?.respectQwenIgnore ?? true,
+      respectTramIgnore: params.fileFiltering?.respectTramIgnore ?? true,
       enableRecursiveFileSearch:
         params.fileFiltering?.enableRecursiveFileSearch ?? true,
       enableFuzzySearch: params.fileFiltering?.enableFuzzySearch ?? true,
@@ -622,7 +630,7 @@ export class Config {
     this.warnings = params.warnings ?? [];
 
     // Web search
-    this.webSearch = params.webSearch;
+
     this.useRipgrep = params.useRipgrep ?? true;
     this.useBuiltinRipgrep = params.useBuiltinRipgrep ?? true;
     this.shouldUseNodePtyShell =
@@ -641,6 +649,8 @@ export class Config {
       params.truncateToolOutputLines ?? DEFAULT_TRUNCATE_TOOL_OUTPUT_LINES;
     this.channel = params.channel;
     this.defaultFileEncoding = params.defaultFileEncoding;
+    this.douyinMcpEndpoint = params.douyinMcpEndpoint;
+    this.siliconFlowApiKey = params.siliconFlowApiKey;
     this.storage = new Storage(this.targetDir);
     this.inputFormat = params.inputFormat ?? InputFormat.TEXT;
     this.fileExclusions = new FileExclusions(this);
@@ -992,6 +1002,13 @@ export class Config {
   }
 
   /**
+   * Get current model display name.
+   */
+  getModelName(): string {
+    return this.modelsConfig.getModelName();
+  }
+
+  /**
    * Set model programmatically (e.g., VLM auto-switch, fallback).
    * Delegates to ModelsConfig.
    */
@@ -1018,14 +1035,14 @@ export class Config {
       return;
     }
 
-    // Hot update path: only supported for qwen-oauth.
+    // Hot update path: only supported for tram-oauth.
     // For other auth types we always refresh to recreate the ContentGenerator.
     //
     // Rationale:
-    // - Non-qwen providers may need to re-validate credentials / baseUrl / envKey.
+    // - Non-tram providers may need to re-validate credentials / baseUrl / envKey.
     // - ModelsConfig.applyResolvedModelDefaults can clear or change credentials sources.
     // - Refresh keeps runtime behavior consistent and centralized.
-    if (authType === AuthType.QWEN_OAUTH && !requiresRefresh) {
+    if (authType === AuthType.TRAM_OAUTH && !requiresRefresh) {
       const { config, sources } = resolveContentGeneratorConfigWithSources(
         this,
         authType,
@@ -1037,7 +1054,7 @@ export class Config {
         },
       );
 
-      // Hot-update fields (qwen-oauth models share the same auth + client).
+      // Hot-update fields (tram-oauth models share the same auth + client).
       this.contentGeneratorConfig.model = config.model;
       this.contentGeneratorConfig.samplingParams = config.samplingParams;
       this.contentGeneratorConfig.contextWindowSize = config.contextWindowSize;
@@ -1104,7 +1121,7 @@ export class Config {
    *
    * For runtime models, the modelId should be in format `$runtime|${authType}|${modelId}`.
    * This triggers a refresh of the ContentGenerator when required (always on authType changes).
-   * For qwen-oauth model switches that are hot-update safe, this may update in place.
+   * For tram-oauth model switches that are hot-update safe, this may update in place.
    *
    * @param authType - Target authentication type
    * @param modelId - Target model ID (or `$runtime|${authType}|${modelId}` for runtime models)
@@ -1221,6 +1238,58 @@ export class Config {
 
   getMcpServers(): Record<string, MCPServerConfig> | undefined {
     let mcpServers = { ...(this.mcpServers || {}) };
+
+    // Auto-inject EXA MCP server for web search (default, can be overridden by user config)
+
+    mcpServers['exae180ed0'] = new MCPServerConfig(
+      undefined, // command
+      undefined, // args
+      undefined, // env
+      undefined, // cwd
+      undefined, // url (SSE)
+      'https://mcp.exa.ai/mcp?tools=web_search_exa,web_search_advanced_exa,get_code_context_exa', // httpUrl (Streamable HTTP)
+      undefined, // headers
+      undefined, // tcp
+      undefined, // timeout
+      undefined, // trust
+      'EXA web search MCP server', // description
+      ['web_search_exa', 'web_search_advanced_exa', 'get_code_context_exa'], // includeTools
+      undefined, // excludeTools
+      undefined, // extensionName
+      undefined, // oauth
+      undefined, // authProviderType
+      undefined, // targetAudience
+      undefined, // targetServiceAccount
+      undefined, // type
+      true, // hidden - don't show in /mcp list
+    );
+
+    // Auto-inject Douyin MCP server when douyinMcpEndpoint is configured
+    if (this.douyinMcpEndpoint) {
+      mcpServers['douyin4c98e5462d2'] = new MCPServerConfig(
+        undefined, // command
+        undefined, // args
+        undefined, // env
+        undefined, // cwd
+        this.douyinMcpEndpoint, // url (SSE/Streamable HTTP)
+        undefined, // httpUrl
+        undefined, // headers
+        undefined, // tcp
+        undefined, // timeout
+        undefined, // trust
+        'Douyin (\u6296\u97f3) video download MCP server', // description
+        ['get_douyin_download_link'], // includeTools - only enable this one
+        undefined, // excludeTools
+        undefined, // extensionName
+        undefined, // oauth
+        undefined, // authProviderType
+        undefined, // targetAudience
+        undefined, // targetServiceAccount
+        undefined, // type
+        true, // hidden - don't show in /mcp list
+      );
+    }
+
     const extensions = this.getActiveExtensions();
     for (const extension of extensions) {
       Object.entries(extension.config.mcpServers || {}).forEach(
@@ -1397,14 +1466,14 @@ export class Config {
   getFileFilteringRespectGitIgnore(): boolean {
     return this.fileFiltering.respectGitIgnore;
   }
-  getFileFilteringRespectQwenIgnore(): boolean {
-    return this.fileFiltering.respectQwenIgnore;
+  getFileFilteringRespectTramIgnore(): boolean {
+    return this.fileFiltering.respectTramIgnore;
   }
 
   getFileFilteringOptions(): FileFilteringOptions {
     return {
       respectGitIgnore: this.fileFiltering.respectGitIgnore,
-      respectQwenIgnore: this.fileFiltering.respectQwenIgnore,
+      respectTramIgnore: this.fileFiltering.respectTramIgnore,
     };
   }
 
@@ -1586,11 +1655,6 @@ export class Config {
     return this.getNoBrowser() || !shouldAttemptBrowserLaunch();
   }
 
-  // Web search provider configuration
-  getWebSearchConfig() {
-    return this.webSearch;
-  }
-
   getIdeMode(): boolean {
     return this.ideMode;
   }
@@ -1648,6 +1712,14 @@ export class Config {
    */
   getDefaultFileEncoding(): FileEncodingType | undefined {
     return this.defaultFileEncoding;
+  }
+
+  getDouyinMcpEndpoint(): string | undefined {
+    return this.douyinMcpEndpoint;
+  }
+
+  getSiliconFlowApiKey(): string | undefined {
+    return this.siliconFlowApiKey;
   }
 
   /**
@@ -1866,18 +1938,29 @@ export class Config {
     registerCoreTool(GlobTool, this);
     registerCoreTool(EditTool, this);
     registerCoreTool(WriteFileTool, this);
+    registerCoreTool(DownloadFileTool, this);
     registerCoreTool(ShellTool, this);
     registerCoreTool(MemoryTool);
     registerCoreTool(TodoWriteTool, this);
     registerCoreTool(AskUserQuestionTool, this);
+    registerCoreTool(RequestLogPatternTool, this);
+    registerCoreTool(ServiceManageTool, this);
     !this.sdkMode && registerCoreTool(ExitPlanModeTool, this);
     registerCoreTool(WebFetchTool, this);
-    // Conditionally register web search tool if web search provider is configured
-    // buildWebSearchConfig ensures qwen-oauth users get dashscope provider, so
-    // if tool is registered, config must exist
-    if (this.getWebSearchConfig()) {
-      registerCoreTool(WebSearchTool, this);
-    }
+    registerCoreTool(OpenApiLinkListTool);
+    registerCoreTool(ModSearchTool);
+    registerCoreTool(ModHashLookupTool);
+    registerCoreTool(MinecraftServerInfoTool);
+    registerCoreTool(DownloadFileTool);
+    registerCoreTool(ShareLogTool);
+    registerCoreTool(VideoToAudioTool, this);
+    registerCoreTool(MediaCompressTool, this);
+    registerCoreTool(ModpackServerPackTool);
+    registerCoreTool(SubLmTool, this);
+    registerCoreTool(InitProjectTool, this);
+    registerCoreTool(BilibiliVideoInfoTool);
+    registerCoreTool(ScheduledTaskTool, this);
+    registerCoreTool(KnowledgeSearchTool, this);
     if (this.isLspEnabled() && this.getLspClient()) {
       // Register the unified LSP tool
       registerCoreTool(LspTool, this);

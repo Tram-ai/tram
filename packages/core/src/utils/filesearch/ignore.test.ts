@@ -6,7 +6,7 @@
 
 import { describe, it, expect, afterEach } from 'vitest';
 import { Ignore, loadIgnoreRules } from './ignore.js';
-import { createTmpDir, cleanupTmpDir } from '@qwen-code/qwen-code-test-utils';
+import { createTmpDir, cleanupTmpDir } from '@tram-ai/tram-test-utils';
 
 describe('Ignore', () => {
   describe('getDirectoryFilter', () => {
@@ -81,7 +81,7 @@ describe('loadIgnoreRules', () => {
     const ignore = loadIgnoreRules({
       projectRoot: tmpDir,
       useGitignore: true,
-      useQwenignore: false,
+      useTramignore: false,
       ignoreDirs: [],
     });
     const fileFilter = ignore.getFileFilter();
@@ -89,14 +89,14 @@ describe('loadIgnoreRules', () => {
     expect(fileFilter('test.txt')).toBe(false);
   });
 
-  it('should load rules from .qwenignore', async () => {
+  it('should load rules from .tramignore', async () => {
     tmpDir = await createTmpDir({
-      '.qwenignore': '*.log',
+      '.tramignore': '*.log',
     });
     const ignore = loadIgnoreRules({
       projectRoot: tmpDir,
       useGitignore: false,
-      useQwenignore: true,
+      useTramignore: true,
       ignoreDirs: [],
     });
     const fileFilter = ignore.getFileFilter();
@@ -104,15 +104,15 @@ describe('loadIgnoreRules', () => {
     expect(fileFilter('test.txt')).toBe(false);
   });
 
-  it('should combine rules from .gitignore and .qwenignore', async () => {
+  it('should combine rules from .gitignore and .tramignore', async () => {
     tmpDir = await createTmpDir({
       '.gitignore': '*.log',
-      '.qwenignore': '*.txt',
+      '.tramignore': '*.txt',
     });
     const ignore = loadIgnoreRules({
       projectRoot: tmpDir,
       useGitignore: true,
-      useQwenignore: true,
+      useTramignore: true,
       ignoreDirs: [],
     });
     const fileFilter = ignore.getFileFilter();
@@ -126,7 +126,7 @@ describe('loadIgnoreRules', () => {
     const ignore = loadIgnoreRules({
       projectRoot: tmpDir,
       useGitignore: false,
-      useQwenignore: false,
+      useTramignore: false,
       ignoreDirs: ['logs/'],
     });
     const dirFilter = ignore.getDirectoryFilter();
@@ -139,7 +139,7 @@ describe('loadIgnoreRules', () => {
     const ignore = loadIgnoreRules({
       projectRoot: tmpDir,
       useGitignore: true,
-      useQwenignore: true,
+      useTramignore: true,
       ignoreDirs: [],
     });
     const fileFilter = ignore.getFileFilter();
@@ -151,7 +151,7 @@ describe('loadIgnoreRules', () => {
     const ignore = loadIgnoreRules({
       projectRoot: tmpDir,
       useGitignore: false,
-      useQwenignore: false,
+      useTramignore: false,
       ignoreDirs: [],
     });
     const dirFilter = ignore.getDirectoryFilter();

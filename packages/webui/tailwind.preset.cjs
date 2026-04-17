@@ -5,17 +5,17 @@
  */
 
 /**
- * @qwen-code/webui Tailwind CSS Preset
+ * @tram-ai/webui Tailwind CSS Preset
  *
- * This preset provides shared theme configuration for all Qwen Code products.
+ * This preset provides shared theme configuration for all TRAM products.
  * Consumers should include this preset in their tailwind.config.js:
  *
  * @example
  * module.exports = {
- *   presets: [require('@qwen-code/webui/tailwind.preset')],
+ *   presets: [require('@tram-ai/webui/tailwind.preset')],
  *   content: [
  *     './src/**\/*.{ts,tsx}',
- *     './node_modules/@qwen-code/webui/dist/**\/*.js'
+ *     './node_modules/@tram-ai/webui/dist/**\/*.js'
  *   ]
  * }
  */

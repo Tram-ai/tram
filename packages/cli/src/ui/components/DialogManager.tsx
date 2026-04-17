@@ -15,7 +15,7 @@ import { SettingInputPrompt } from './SettingInputPrompt.js';
 import { PluginChoicePrompt } from './PluginChoicePrompt.js';
 import { ThemeDialog } from './ThemeDialog.js';
 import { SettingsDialog } from './SettingsDialog.js';
-import { QwenOAuthProgress } from './QwenOAuthProgress.js';
+import { TramOAuthProgress } from './QwenOAuthProgress.js';
 import { AuthDialog } from '../auth/AuthDialog.js';
 import { EditorSettingsDialog } from './EditorSettingsDialog.js';
 import { PermissionsModifyTrustDialog } from './PermissionsModifyTrustDialog.js';
@@ -27,7 +27,7 @@ import { useUIActions } from '../contexts/UIActionsContext.js';
 import { useConfig } from '../contexts/ConfigContext.js';
 import { useSettings } from '../contexts/SettingsContext.js';
 import { AuthState } from '../types.js';
-import { AuthType } from '@qwen-code/qwen-code-core';
+import { AuthType } from '@tram-ai/tram-core';
 import process from 'node:process';
 import { type UseHistoryManagerReturn } from '../hooks/useHistoryManager.js';
 import { IdeTrustChangeDialog } from './IdeTrustChangeDialog.js';
@@ -37,6 +37,7 @@ import { AgentsManagerDialog } from './subagents/manage/AgentsManagerDialog.js';
 import { ExtensionsManagerDialog } from './extensions/ExtensionsManagerDialog.js';
 import { MCPManagementDialog } from './mcp/MCPManagementDialog.js';
 import { SessionPicker } from './SessionPicker.js';
+import { InitializeDialog } from './InitializeDialog.js';
 
 interface DialogManagerProps {
   addItem: UseHistoryManagerReturn['addItem'];
@@ -247,15 +248,15 @@ export const DialogManager = ({
 
   if (uiState.isAuthenticating) {
     // OpenAI authentication now handled through AuthDialog with coding-plan/custom sub-modes
-    // Qwen OAuth remains as a separate flow
-    if (uiState.pendingAuthType === AuthType.QWEN_OAUTH) {
+    // TRAM OAuth remains as a separate flow
+    if (uiState.pendingAuthType === AuthType.TRAM_OAUTH) {
       return (
-        <QwenOAuthProgress
-          deviceAuth={uiState.qwenAuthState.deviceAuth || undefined}
-          authStatus={uiState.qwenAuthState.authStatus}
-          authMessage={uiState.qwenAuthState.authMessage}
+        <TramOAuthProgress
+          deviceAuth={uiState.TramAuthState.deviceAuth || undefined}
+          authStatus={uiState.TramAuthState.authStatus}
+          authMessage={uiState.TramAuthState.authMessage}
           onTimeout={() => {
-            uiActions.onAuthError('Qwen OAuth authentication timed out.');
+            uiActions.onAuthError('TRAM OAuth authentication timed out.');
             uiActions.cancelAuthentication();
             uiActions.setAuthState(AuthState.Updating);
           }}
@@ -304,6 +305,15 @@ export const DialogManager = ({
   }
   if (uiState.isMcpDialogOpen) {
     return <MCPManagementDialog onClose={uiActions.closeMcpDialog} />;
+  }
+
+  if (uiState.isInitializeDialogOpen) {
+    return (
+      <InitializeDialog
+        settings={settings}
+        onClose={uiActions.closeInitializeDialog}
+      />
+    );
   }
 
   if (uiState.isResumeDialogOpen) {

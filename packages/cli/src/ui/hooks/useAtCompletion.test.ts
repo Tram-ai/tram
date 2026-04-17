@@ -9,10 +9,10 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useAtCompletion } from './useAtCompletion.js';
-import type { Config, FileSearch } from '@qwen-code/qwen-code-core';
-import { FileSearchFactory } from '@qwen-code/qwen-code-core';
-import type { FileSystemStructure } from '@qwen-code/qwen-code-test-utils';
-import { createTmpDir, cleanupTmpDir } from '@qwen-code/qwen-code-test-utils';
+import type { Config, FileSearch } from '@tram-ai/tram-core';
+import { FileSearchFactory } from '@tram-ai/tram-core';
+import type { FileSystemStructure } from '@tram-ai/tram-test-utils';
+import { createTmpDir, cleanupTmpDir } from '@tram-ai/tram-test-utils';
 import { useState } from 'react';
 import type { Suggestion } from '../components/SuggestionsDisplay.js';
 
@@ -46,7 +46,7 @@ describe('useAtCompletion', () => {
     mockConfig = {
       getFileFilteringOptions: vi.fn(() => ({
         respectGitIgnore: true,
-        respectQwenIgnore: true,
+        respectTramIgnore: true,
       })),
       getEnableRecursiveFileSearch: () => true,
       getFileFilteringEnableFuzzySearch: () => true,
@@ -193,7 +193,7 @@ describe('useAtCompletion', () => {
         projectRoot: testRootDir,
         ignoreDirs: [],
         useGitignore: true,
-        useQwenignore: true,
+        useTramignore: true,
         cache: false,
         cacheTtl: 0,
         enableRecursiveFileSearch: true,
@@ -477,7 +477,7 @@ describe('useAtCompletion', () => {
         getEnableRecursiveFileSearch: () => false,
         getFileFilteringOptions: vi.fn(() => ({
           respectGitIgnore: true,
-          respectQwenIgnore: true,
+          respectTramIgnore: true,
         })),
         getFileFilteringEnableFuzzySearch: () => true,
       } as unknown as Config;

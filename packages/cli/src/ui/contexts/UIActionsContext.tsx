@@ -13,7 +13,7 @@ import {
   type AuthType,
   type EditorType,
   type ApprovalMode,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import { type SettingScope } from '../../config/settings.js';
 import { type CodingPlanRegion } from '../../constants/codingPlan.js';
 import type { AuthState } from '../types.js';
@@ -78,6 +78,8 @@ export interface UIActions {
   closeExtensionsManagerDialog: () => void;
   // MCP dialog
   closeMcpDialog: () => void;
+  // Initialize dialog
+  closeInitializeDialog: () => void;
   // Resume session dialog
   openResumeDialog: () => void;
   closeResumeDialog: () => void;

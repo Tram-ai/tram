@@ -57,7 +57,7 @@ describe('CLI Path Utilities', () => {
     it('should throw descriptive error when bundled CLI not found', () => {
       mockFs.existsSync.mockReturnValue(false);
 
-      expect(() => findBundledCliPath()).toThrow('Bundled qwen CLI not found');
+      expect(() => findBundledCliPath()).toThrow('Bundled tram CLI not found');
       expect(() => findBundledCliPath()).toThrow('Searched locations:');
     });
   });
@@ -84,44 +84,44 @@ describe('CLI Path Utilities', () => {
       it('should throw when bundled CLI not found', () => {
         mockFs.existsSync.mockReturnValue(false);
 
-        expect(() => prepareSpawnInfo()).toThrow('Bundled qwen CLI not found');
+        expect(() => prepareSpawnInfo()).toThrow('Bundled tram CLI not found');
       });
     });
 
     describe('command name detection', () => {
       it('should detect command names without path separators', () => {
-        const result = prepareSpawnInfo('qwen');
+        const result = prepareSpawnInfo('tram');
 
         expect(result).toEqual({
-          command: 'qwen',
+          command: 'tram',
           args: [],
           type: 'native',
-          originalInput: 'qwen',
+          originalInput: 'tram',
         });
       });
 
       it('should detect command names on Windows', () => {
-        const result = prepareSpawnInfo('qwen.exe');
+        const result = prepareSpawnInfo('tram.exe');
 
         expect(result).toEqual({
-          command: 'qwen.exe',
+          command: 'tram.exe',
           args: [],
           type: 'native',
-          originalInput: 'qwen.exe',
+          originalInput: 'tram.exe',
         });
       });
 
       it('should reject invalid command name characters', () => {
-        expect(() => prepareSpawnInfo('qwen@invalid')).toThrow(
-          "Invalid command name 'qwen@invalid'. Command names should only contain letters, numbers, dots, hyphens, and underscores.",
+        expect(() => prepareSpawnInfo('tram@invalid')).toThrow(
+          "Invalid command name 'tram@invalid'. Command names should only contain letters, numbers, dots, hyphens, and underscores.",
         );
       });
 
       it('should accept valid command names', () => {
-        expect(() => prepareSpawnInfo('qwen')).not.toThrow();
-        expect(() => prepareSpawnInfo('qwen-code')).not.toThrow();
-        expect(() => prepareSpawnInfo('qwen_code')).not.toThrow();
-        expect(() => prepareSpawnInfo('qwen.exe')).not.toThrow();
+        expect(() => prepareSpawnInfo('tram')).not.toThrow();
+        expect(() => prepareSpawnInfo('tram')).not.toThrow();
+        expect(() => prepareSpawnInfo('tram_code')).not.toThrow();
+        expect(() => prepareSpawnInfo('tram.exe')).not.toThrow();
         expect(() => prepareSpawnInfo('qwen123')).not.toThrow();
       });
     });
@@ -216,13 +216,13 @@ describe('CLI Path Utilities', () => {
       });
 
       it('should prepare spawn info for native binary path', () => {
-        const result = prepareSpawnInfo('/usr/local/bin/qwen');
+        const result = prepareSpawnInfo('/usr/local/bin/tram');
 
         expect(result).toEqual({
-          command: path.resolve('/usr/local/bin/qwen'),
+          command: path.resolve('/usr/local/bin/tram'),
           args: [],
           type: 'native',
-          originalInput: '/usr/local/bin/qwen',
+          originalInput: '/usr/local/bin/tram',
         });
       });
     });
@@ -231,9 +231,9 @@ describe('CLI Path Utilities', () => {
       it('should resolve absolute file paths', () => {
         mockFs.existsSync.mockReturnValue(true);
 
-        const result = prepareSpawnInfo('/absolute/path/to/qwen');
+        const result = prepareSpawnInfo('/absolute/path/to/tram');
 
-        expect(result.command).toBe(path.resolve('/absolute/path/to/qwen'));
+        expect(result.command).toBe(path.resolve('/absolute/path/to/tram'));
         expect(result.type).toBe('native');
       });
 
@@ -386,13 +386,13 @@ describe('CLI Path Utilities', () => {
     });
 
     it('should handle production native binary', () => {
-      const result = prepareSpawnInfo('qwen');
+      const result = prepareSpawnInfo('tram');
 
       expect(result).toEqual({
-        command: 'qwen',
+        command: 'tram',
         args: [],
         type: 'native',
-        originalInput: 'qwen',
+        originalInput: 'tram',
       });
     });
 

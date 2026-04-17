@@ -102,7 +102,7 @@ describe('SettingsSchema', () => {
       ).toBeDefined();
       expect(
         getSettingsSchema().context.properties.fileFiltering.properties
-          ?.respectQwenIgnore,
+          ?.respectTramIgnore,
       ).toBeDefined();
       expect(
         getSettingsSchema().context.properties.fileFiltering.properties
@@ -307,6 +307,23 @@ describe('SettingsSchema', () => {
         getSettingsSchema().general.properties.debugKeystrokeLogging
           .description,
       ).toBe('Enable debug logging of keystrokes to the console.');
+    });
+
+    it('should have advanced proxy settings in schema', () => {
+      expect(getSettingsSchema().advanced.properties.proxy).toBeDefined();
+      expect(getSettingsSchema().advanced.properties.proxy.type).toBe('object');
+      expect(
+        getSettingsSchema().advanced.properties.proxy.properties?.mode.type,
+      ).toBe('enum');
+      expect(
+        getSettingsSchema().advanced.properties.proxy.properties?.mode.default,
+      ).toBe('system');
+      expect(
+        getSettingsSchema().advanced.properties.proxy.properties?.customUrl.type,
+      ).toBe('string');
+      expect(getSettingsSchema().advanced.properties.proxy.showInDialog).toBe(
+        false,
+      );
     });
   });
 });

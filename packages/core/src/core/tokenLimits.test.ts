@@ -17,7 +17,7 @@ describe('normalize', () => {
   });
 
   it('should handle pipe and colon separators', () => {
-    expect(normalize('qwen|qwen2.5:qwen2.5-1m')).toBe('qwen2.5-1m');
+    expect(normalize('tram|qwen2.5:qwen2.5-1m')).toBe('qwen2.5-1m');
   });
 
   it('should collapse whitespace to a single hyphen', () => {
@@ -58,10 +58,10 @@ describe('normalize', () => {
     expect(normalize('gemini-2.0-flash-preview')).toBe('gemini-2.0-flash');
   });
 
-  it('should not remove "-latest" from specific Qwen model names', () => {
-    expect(normalize('qwen-plus-latest')).toBe('qwen-plus-latest');
-    expect(normalize('qwen-flash-latest')).toBe('qwen-flash-latest');
-    expect(normalize('qwen-vl-max-latest')).toBe('qwen-vl-max-latest');
+  it('should not remove "-latest" from specific Tram model names', () => {
+    expect(normalize('tram-plus-latest')).toBe('tram-plus-latest');
+    expect(normalize('tram-flash-latest')).toBe('tram-flash-latest');
+    expect(normalize('tram-vl-max-latest')).toBe('tram-vl-max-latest');
   });
 
   it('should preserve date suffixes for Kimi K2 models', () => {
@@ -140,7 +140,7 @@ describe('tokenLimit', () => {
     });
   });
 
-  describe('Alibaba Qwen', () => {
+  describe('Alibaba Tram', () => {
     it('should return 1M for commercial Qwen3 models', () => {
       expect(tokenLimit('qwen3-coder-plus')).toBe(1000000);
       expect(tokenLimit('qwen3-coder-plus-20250601')).toBe(1000000);
@@ -158,15 +158,15 @@ describe('tokenLimit', () => {
     });
 
     it('should return 1M for studio latest models', () => {
-      expect(tokenLimit('qwen-plus-latest')).toBe(1000000);
-      expect(tokenLimit('qwen-flash-latest')).toBe(1000000);
+      expect(tokenLimit('tram-plus-latest')).toBe(1000000);
+      expect(tokenLimit('tram-flash-latest')).toBe(1000000);
     });
 
-    it('should return 256K for Qwen fallback', () => {
-      expect(tokenLimit('qwen-plus')).toBe(262144);
-      expect(tokenLimit('qwen-turbo')).toBe(262144);
+    it('should return 256K for Tram fallback', () => {
+      expect(tokenLimit('tram-plus')).toBe(262144);
+      expect(tokenLimit('tram-turbo')).toBe(262144);
       expect(tokenLimit('qwen2.5')).toBe(262144);
-      expect(tokenLimit('qwen-vl-max-latest')).toBe(262144);
+      expect(tokenLimit('tram-vl-max-latest')).toBe(262144);
     });
   });
 
@@ -267,8 +267,8 @@ describe('tokenLimit with output type', () => {
     });
   });
 
-  describe('Qwen output limits', () => {
-    it('should return correct output limits for Qwen models', () => {
+  describe('Tram output limits', () => {
+    it('should return correct output limits for Tram models', () => {
       expect(tokenLimit('qwen3.5-plus', 'output')).toBe(65536);
       expect(tokenLimit('qwen3-max', 'output')).toBe(65536);
       expect(tokenLimit('qwen3-max-2026-01-23', 'output')).toBe(65536);
@@ -277,7 +277,7 @@ describe('tokenLimit with output type', () => {
       expect(tokenLimit('qwen3-coder-plus', 'output')).toBe(8192);
       expect(tokenLimit('qwen3-coder-next', 'output')).toBe(8192);
       expect(tokenLimit('qwen3-vl-plus', 'output')).toBe(8192);
-      expect(tokenLimit('qwen-vl-max-latest', 'output')).toBe(8192);
+      expect(tokenLimit('tram-vl-max-latest', 'output')).toBe(8192);
     });
   });
 

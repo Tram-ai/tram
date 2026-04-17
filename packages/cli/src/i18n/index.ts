@@ -34,12 +34,12 @@ const getBuiltinLocalesDir = (): string => {
 };
 
 const getUserLocalesDir = (): string =>
-  path.join(homedir(), '.qwen', 'locales');
+  path.join(homedir(), '.tram', 'locales');
 
 /**
  * Get the path to the user's custom locales directory.
  * Users can place custom language packs (e.g., es.js, fr.js) in this directory.
- * @returns The path to ~/.qwen/locales
+ * @returns The path to ~/.tram/locales
  */
 export function getUserLocalesDirectory(): string {
   return getUserLocalesDir();
@@ -55,7 +55,7 @@ const getLocalePath = (
 
 // Language detection
 export function detectSystemLanguage(): SupportedLanguage {
-  const envLang = process.env['QWEN_CODE_LANG'] || process.env['LANG'];
+  const envLang = process.env['TRAM_CODE_LANG'] || process.env['LANG'];
   if (envLang) {
     for (const lang of SUPPORTED_LANGUAGES) {
       if (envLang.startsWith(lang.code)) return lang.code;
@@ -250,8 +250,12 @@ export function ta(key: string): string[] {
   return [];
 }
 
+import { setCoreTranslations } from '@tram-ai/tram-core';
+
 export async function initializeI18n(
   lang?: SupportedLanguage | 'auto',
 ): Promise<void> {
   await setLanguageAsync(lang ?? 'auto');
+  // Sync translations to core package for tool output i18n
+  setCoreTranslations(translations as Record<string, string>);
 }

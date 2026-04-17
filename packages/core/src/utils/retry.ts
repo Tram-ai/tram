@@ -6,7 +6,7 @@
 
 import type { GenerateContentResponse } from '@google/genai';
 import { AuthType } from '../core/contentGenerator.js';
-import { isQwenQuotaExceededError } from './quotaErrorDetection.js';
+import { isTramQuotaExceededError } from './quotaErrorDetection.js';
 import { createDebugLogger } from './debugLogger.js';
 
 const debugLogger = createDebugLogger('RETRY');
@@ -107,11 +107,11 @@ export async function retryWithBackoff<T>(
     } catch (error) {
       const errorStatus = getErrorStatus(error);
 
-      // Check for Qwen OAuth quota exceeded error - throw immediately without retry
-      if (authType === AuthType.QWEN_OAUTH && isQwenQuotaExceededError(error)) {
+      // Check for TRAM OAuth quota exceeded error - throw immediately without retry
+      if (authType === AuthType.TRAM_OAUTH && isTramQuotaExceededError(error)) {
         throw new Error(
-          `Qwen OAuth quota exceeded: Your free daily quota has been reached.\n\n` +
-            `To continue using Qwen Code without waiting, upgrade to the Alibaba Cloud Coding Plan:\n` +
+          `TRAM OAuth quota exceeded: Your free daily quota has been reached.\n\n` +
+            `To continue using TRAM without waiting, upgrade to the Alibaba Cloud Coding Plan:\n` +
             `  China:       https://help.aliyun.com/zh/model-studio/coding-plan\n` +
             `  Global/Intl: https://www.alibabacloud.com/help/en/model-studio/coding-plan\n\n` +
             `After subscribing, run /auth to configure your Coding Plan API key.`,

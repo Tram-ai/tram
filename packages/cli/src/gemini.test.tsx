@@ -21,8 +21,8 @@ import {
 } from './gemini.js';
 import { type LoadedSettings } from './config/settings.js';
 import { appEvents, AppEvent } from './utils/events.js';
-import type { Config } from '@qwen-code/qwen-code-core';
-import { OutputFormat } from '@qwen-code/qwen-code-core';
+import type { Config } from '@tram-ai/tram-core';
+import { OutputFormat } from '@tram-ai/tram-core';
 
 const mockWriteStderrLine = vi.hoisted(() => vi.fn());
 
@@ -113,9 +113,9 @@ describe('gemini.tsx main function', () => {
 
   beforeEach(() => {
     // Store and clear sandbox-related env variables to ensure a consistent test environment
-    originalEnvGeminiSandbox = process.env['QWEN_SANDBOX'];
+    originalEnvGeminiSandbox = process.env['TRAM_SANDBOX'];
     originalEnvSandbox = process.env['SANDBOX'];
-    delete process.env['QWEN_SANDBOX'];
+    delete process.env['TRAM_SANDBOX'];
     delete process.env['SANDBOX'];
 
     initialUnhandledRejectionListeners =
@@ -125,9 +125,9 @@ describe('gemini.tsx main function', () => {
   afterEach(() => {
     // Restore original env variables
     if (originalEnvGeminiSandbox !== undefined) {
-      process.env['QWEN_SANDBOX'] = originalEnvGeminiSandbox;
+      process.env['TRAM_SANDBOX'] = originalEnvGeminiSandbox;
     } else {
-      delete process.env['QWEN_SANDBOX'];
+      delete process.env['TRAM_SANDBOX'];
     }
     if (originalEnvSandbox !== undefined) {
       process.env['SANDBOX'] = originalEnvSandbox;
@@ -328,6 +328,8 @@ describe('gemini.tsx main function', () => {
 
     vi.mocked(parseArguments).mockResolvedValue({
       extensions: [],
+      initialize: undefined,
+      initializeLocalModelList: undefined,
     } as never);
 
     const configStub = {
@@ -397,8 +399,8 @@ describe('gemini.tsx main function kitty protocol', () => {
 
   beforeEach(() => {
     // Set no relaunch in tests since process spawning causing issues in tests
-    originalEnvNoRelaunch = process.env['QWEN_CODE_NO_RELAUNCH'];
-    process.env['QWEN_CODE_NO_RELAUNCH'] = 'true';
+    originalEnvNoRelaunch = process.env['TRAM_CODE_NO_RELAUNCH'];
+    process.env['TRAM_CODE_NO_RELAUNCH'] = 'true';
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!(process.stdin as any).setRawMode) {
@@ -420,9 +422,9 @@ describe('gemini.tsx main function kitty protocol', () => {
   afterEach(() => {
     // Restore original env variables
     if (originalEnvNoRelaunch !== undefined) {
-      process.env['QWEN_CODE_NO_RELAUNCH'] = originalEnvNoRelaunch;
+      process.env['TRAM_CODE_NO_RELAUNCH'] = originalEnvNoRelaunch;
     } else {
-      delete process.env['QWEN_CODE_NO_RELAUNCH'];
+      delete process.env['TRAM_CODE_NO_RELAUNCH'];
     }
   });
 
@@ -508,6 +510,8 @@ describe('gemini.tsx main function kitty protocol', () => {
       channel: undefined,
       chatRecording: undefined,
       sessionId: undefined,
+      initialize: undefined,
+      initializeLocalModelList: undefined,
     });
 
     await main();

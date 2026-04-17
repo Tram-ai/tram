@@ -10,7 +10,7 @@ import {
   getErrorMessage,
   logAuth,
   AuthEvent,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 
 /**
  * Handles the initial authentication flow.

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DEFAULT_QWEN_MODEL, MAINLINE_CODER_MODEL } from '../config/models.js';
+import { DEFAULT_TRAM_MODEL, MAINLINE_CODER_MODEL } from '../config/models.js';
 
 import type { ModelConfig } from './types.js';
 
@@ -38,6 +38,7 @@ export const MODEL_GENERATION_CONFIG_FIELDS = [
  */
 export const CREDENTIAL_FIELDS = [
   'model',
+  'requestModel',
   'apiKey',
   'apiKeyEnvKey',
   'baseUrl',
@@ -65,7 +66,7 @@ export const AUTH_ENV_MAPPINGS = {
   openai: {
     apiKey: ['OPENAI_API_KEY'],
     baseUrl: ['OPENAI_BASE_URL'],
-    model: ['OPENAI_MODEL', 'QWEN_MODEL'],
+    model: ['OPENAI_MODEL', 'TRAM_MODEL'],
   },
   anthropic: {
     apiKey: ['ANTHROPIC_API_KEY'],
@@ -82,7 +83,7 @@ export const AUTH_ENV_MAPPINGS = {
     baseUrl: [],
     model: ['GOOGLE_MODEL'],
   },
-  'qwen-oauth': {
+  'tram-oauth': {
     apiKey: [],
     baseUrl: [],
     model: [],
@@ -91,27 +92,27 @@ export const AUTH_ENV_MAPPINGS = {
 
 export const DEFAULT_MODELS = {
   openai: MAINLINE_CODER_MODEL,
-  'qwen-oauth': DEFAULT_QWEN_MODEL,
+  'tram-oauth': DEFAULT_TRAM_MODEL,
 } as Partial<Record<AuthType, string>>;
 
 /**
- * Hard-coded Qwen OAuth models that are always available.
+ * Hard-coded TRAM OAuth models that are always available.
  * These cannot be overridden by user configuration.
  */
-export const QWEN_OAUTH_MODELS: ModelConfig[] = [
+export const TRAM_OAUTH_MODELS: ModelConfig[] = [
   {
     id: 'coder-model',
     name: 'coder-model',
     description:
-      'Qwen 3.5 Plus — efficient hybrid model with leading coding performance',
+      'TRAM (Qwen 3.5 Plus) — efficient hybrid model with leading coding performance',
     capabilities: { vision: true },
   },
 ];
 
 /**
- * Derive allowed models from QWEN_OAUTH_MODELS for authorization.
+ * Derive allowed models from TRAM_OAUTH_MODELS for authorization.
  * This ensures single source of truth (SSOT).
  */
-export const QWEN_OAUTH_ALLOWED_MODELS = QWEN_OAUTH_MODELS.map(
+export const TRAM_OAUTH_ALLOWED_MODELS = TRAM_OAUTH_MODELS.map(
   (model) => model.id,
 ) as readonly string[];

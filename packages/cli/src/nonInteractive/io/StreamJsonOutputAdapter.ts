@@ -9,7 +9,7 @@ import type {
   Config,
   ToolCallRequestInfo,
   McpToolProgressData,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import type {
   CLIAssistantMessage,
   CLIMessage,

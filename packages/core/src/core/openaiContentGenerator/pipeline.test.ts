@@ -111,6 +111,51 @@ describe('ContentGenerationPipeline', () => {
   });
 
   describe('execute', () => {
+    it('should send requestModel when configured', async () => {
+      // Arrange
+      mockContentGeneratorConfig.requestModel = 'gpt-4o';
+      pipeline = new ContentGenerationPipeline(mockConfig);
+
+      const request: GenerateContentParameters = {
+        model: 'test-model',
+        contents: [{ parts: [{ text: 'Hello' }], role: 'user' }],
+      };
+
+      const mockMessages = [
+        { role: 'user', content: 'Hello' },
+      ] as OpenAI.Chat.ChatCompletionMessageParam[];
+      const mockOpenAIResponse = {
+        id: 'response-id',
+        choices: [
+          { message: { content: 'Hello response' }, finish_reason: 'stop' },
+        ],
+        created: Date.now(),
+        model: 'gpt-4o',
+      } as OpenAI.Chat.ChatCompletion;
+
+      (mockConverter.convertGeminiRequestToOpenAI as Mock).mockReturnValue(
+        mockMessages,
+      );
+      (mockConverter.convertOpenAIResponseToGemini as Mock).mockReturnValue(
+        new GenerateContentResponse(),
+      );
+      (mockClient.chat.completions.create as Mock).mockResolvedValue(
+        mockOpenAIResponse,
+      );
+
+      // Act
+      await pipeline.execute(request, 'test-prompt-id');
+
+      // Assert
+      expect(
+        (mockConverter as unknown as { setModel: Mock }).setModel,
+      ).toHaveBeenCalledWith('gpt-4o');
+      expect(mockClient.chat.completions.create).toHaveBeenCalledWith(
+        expect.objectContaining({ model: 'gpt-4o' }),
+        expect.any(Object),
+      );
+    });
+
     it('should successfully execute non-streaming request', async () => {
       // Arrange
       const request: GenerateContentParameters = {

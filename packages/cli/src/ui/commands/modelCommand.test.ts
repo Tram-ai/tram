@@ -11,15 +11,18 @@ import { createMockCommandContext } from '../../test-utils/mockCommandContext.js
 import {
   AuthType,
   type ContentGeneratorConfig,
+  type AvailableModel,
   type Config,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 
 // Helper function to create a mock config
 function createMockConfig(
   contentGeneratorConfig: ContentGeneratorConfig | null,
+  configuredModels: AvailableModel[] = [],
 ): Partial<Config> {
   return {
     getContentGeneratorConfig: vi.fn().mockReturnValue(contentGeneratorConfig),
+    getAllConfiguredModels: vi.fn().mockReturnValue(configuredModels),
   };
 }
 
@@ -48,7 +51,7 @@ describe('modelCommand', () => {
     });
   });
 
-  it('should return error when content generator config is not available', async () => {
+  it('should return initialize hint when no model is configured', async () => {
     const mockConfig = createMockConfig(null);
     mockContext.services.config = mockConfig as Config;
 
@@ -57,31 +60,44 @@ describe('modelCommand', () => {
     expect(result).toEqual({
       type: 'message',
       messageType: 'error',
-      content: 'Content generator configuration not available.',
+      content:
+        'Please run tram --initialize to configure providers and authentication.',
     });
   });
 
-  it('should return error when auth type is not available', async () => {
+  it('should open dialog when models exist even if content generator config is not ready', async () => {
+    const models = [
+      {
+        id: 'test-model',
+        label: 'test-model',
+        authType: AuthType.USE_OPENAI,
+      },
+    ] as AvailableModel[];
     const mockConfig = createMockConfig({
       model: 'test-model',
       authType: undefined,
-    });
+    }, models);
     mockContext.services.config = mockConfig as Config;
 
     const result = await modelCommand.action!(mockContext, '');
 
     expect(result).toEqual({
-      type: 'message',
-      messageType: 'error',
-      content: 'Authentication type not available.',
+      type: 'dialog',
+      dialog: 'model',
     });
   });
 
-  it('should return dialog action for QWEN_OAUTH auth type', async () => {
+  it('should return dialog action for TRAM_OAUTH auth type', async () => {
     const mockConfig = createMockConfig({
       model: 'test-model',
-      authType: AuthType.QWEN_OAUTH,
-    });
+      authType: AuthType.TRAM_OAUTH,
+    }, [
+      {
+        id: 'test-model',
+        label: 'test-model',
+        authType: AuthType.TRAM_OAUTH,
+      },
+    ] as AvailableModel[]);
     mockContext.services.config = mockConfig as Config;
 
     const result = await modelCommand.action!(mockContext, '');
@@ -96,7 +112,13 @@ describe('modelCommand', () => {
     const mockConfig = createMockConfig({
       model: 'test-model',
       authType: AuthType.USE_OPENAI,
-    });
+    }, [
+      {
+        id: 'test-model',
+        label: 'test-model',
+        authType: AuthType.USE_OPENAI,
+      },
+    ] as AvailableModel[]);
     mockContext.services.config = mockConfig as Config;
 
     const result = await modelCommand.action!(mockContext, '');
@@ -111,7 +133,13 @@ describe('modelCommand', () => {
     const mockConfig = createMockConfig({
       model: 'test-model',
       authType: 'UNSUPPORTED_AUTH_TYPE' as AuthType,
-    });
+    }, [
+      {
+        id: 'test-model',
+        label: 'test-model',
+        authType: AuthType.USE_OPENAI,
+      },
+    ] as AvailableModel[]);
     mockContext.services.config = mockConfig as Config;
 
     const result = await modelCommand.action!(mockContext, '');
@@ -122,19 +150,25 @@ describe('modelCommand', () => {
     });
   });
 
-  it('should handle undefined auth type', async () => {
+  it('should handle undefined auth type when models exist', async () => {
+    const models = [
+      {
+        id: 'test-model',
+        label: 'test-model',
+        authType: AuthType.USE_OPENAI,
+      },
+    ] as AvailableModel[];
     const mockConfig = createMockConfig({
       model: 'test-model',
       authType: undefined,
-    });
+    }, models);
     mockContext.services.config = mockConfig as Config;
 
     const result = await modelCommand.action!(mockContext, '');
 
     expect(result).toEqual({
-      type: 'message',
-      messageType: 'error',
-      content: 'Authentication type not available.',
+      type: 'dialog',
+      dialog: 'model',
     });
   });
 });

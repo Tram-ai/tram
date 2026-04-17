@@ -13,7 +13,7 @@ import {
 import type {
   ExtensionConfig,
   ClaudeMarketplaceConfig,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import prompts from 'prompts';
 
 vi.mock('../../i18n/index.js', () => ({
@@ -210,7 +210,7 @@ describe('requestConsentOrFail', () => {
 
     await requestConsentOrFail(mockRequestConsent, {
       extensionConfig: { name: 'test-extension', version: '1.0.0' },
-      originSource: 'QwenCode',
+      originSource: 'TramCode',
     });
 
     expect(mockRequestConsent).toHaveBeenCalled();
@@ -222,7 +222,7 @@ describe('requestConsentOrFail', () => {
     await expect(
       requestConsentOrFail(mockRequestConsent, {
         extensionConfig: { name: 'test-extension', version: '1.0.0' },
-        originSource: 'QwenCode',
+        originSource: 'TramCode',
       }),
     ).rejects.toThrow('Installation cancelled for "test-extension".');
   });
@@ -236,7 +236,7 @@ describe('requestConsentOrFail', () => {
     await requestConsentOrFail(mockRequestConsent, {
       extensionConfig,
       previousExtensionConfig: extensionConfig,
-      originSource: 'QwenCode',
+      originSource: 'TramCode',
     });
 
     expect(mockRequestConsent).not.toHaveBeenCalled();
@@ -250,7 +250,7 @@ describe('requestConsentOrFail', () => {
       commands: ['command1'],
       previousExtensionConfig: { name: 'test-extension', version: '1.0.0' },
       previousCommands: [],
-      originSource: 'QwenCode',
+      originSource: 'TramCode',
     });
 
     expect(mockRequestConsent).toHaveBeenCalled();

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen Code
+ * Copyright 2025 TRAM
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,7 +14,7 @@ import type {
   InsightProgressCallback,
 } from '../types/StaticInsightTypes.js';
 
-import { updateSymlink, type Config } from '@qwen-code/qwen-code-core';
+import { updateSymlink, type Config } from '@tram-ai/tram-core';
 
 export class StaticInsightGenerator {
   private dataProcessor: DataProcessor;
@@ -27,7 +27,7 @@ export class StaticInsightGenerator {
 
   // Ensure the output directory exists
   private async ensureOutputDirectory(): Promise<string> {
-    const outputDir = path.join(os.homedir(), '.qwen', 'insights');
+    const outputDir = path.join(os.homedir(), '.tram', 'insights');
     await fs.mkdir(outputDir, { recursive: true });
     return outputDir;
   }

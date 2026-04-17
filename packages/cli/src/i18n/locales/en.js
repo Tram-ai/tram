@@ -1,10 +1,10 @@
 /**
  * @license
- * Copyright 2025 Qwen
+ * Copyright 2025 Tram
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// English translations for Qwen Code CLI
+// English translations for TRAM CLI
 // The key serves as both the translation key and the default English text
 
 export default {
@@ -12,9 +12,9 @@ export default {
   // Help / UI Components
   // ============================================================================
   // Attachment hints
-  '↑ to manage attachments': '↑ to manage attachments',
-  '← → select, Delete to remove, ↓ to exit':
-    '← → select, Delete to remove, ↓ to exit',
+  '闂?to manage attachments': '闂?to manage attachments',
+  '闂?闂?select, Delete to remove, 闂?to exit':
+    '闂?闂?select, Delete to remove, 闂?to exit',
   'Attachments: ': 'Attachments: ',
 
   'Basics:': 'Basics:',
@@ -82,16 +82,78 @@ export default {
   'For a full list of shortcuts, see {{docPath}}':
     'For a full list of shortcuts, see {{docPath}}',
   'docs/keyboard-shortcuts.md': 'docs/keyboard-shortcuts.md',
-  'for help on Qwen Code': 'for help on Qwen Code',
+  'for help on TRAM': 'for help on TRAM',
   'show version info': 'show version info',
   'submit a bug report': 'submit a bug report',
-  'About Qwen Code': 'About Qwen Code',
+  'About TRAM': 'About TRAM',
   Status: 'Status',
+  '(/model to change)': '(/model to change)',
+
+  // Initialization wizard
+  'TRAM Initialization Wizard': 'TRAM Initialization Wizard',
+  'Esc to cancel at any time.': 'Esc to cancel at any time.',
+  'Initialization: Select providers': 'Initialization: Select providers',
+  'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to move, Space to toggle, Enter to continue. You can configure multiple providers in one run.':
+    'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to move, Space to toggle, Enter to continue. You can configure multiple providers in one run.',
+  'Select at least one provider.': 'Select at least one provider.',
+  'No provider selected.': 'No provider selected.',
+  Enabled: 'Enabled',
+  'Configure provider {{current}}/{{total}}: {{name}}':
+    'Configure provider {{current}}/{{total}}: {{name}}',
+  'This provider uses OAuth. Press Enter to continue to model selection.':
+    'This provider uses OAuth. Press Enter to continue to model selection.',
+  'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose a field. Enter to edit. Press N to continue to model selection.':
+    'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose a field. Enter to edit. Press N to continue to model selection.',
+  'Editing {{field}}: {{value}}': 'Editing {{field}}: {{value}}',
+  'Model selection: {{name}}': 'Model selection: {{name}}',
+  'Try OpenAI-compatible /models list first. If unavailable or incomplete, choose custom model.':
+    'Try OpenAI-compatible /models list first. If unavailable or incomplete, choose custom model.',
+  'Loading models...': 'Loading models...',
+  'Custom model...': 'Custom model...',
+  'Enter custom model name': 'Enter custom model name',
+  'Press Enter to confirm.': 'Press Enter to confirm.',
+  'Model name cannot be empty.': 'Model name cannot be empty.',
+  'Select approval mode': 'Select approval mode',
+  'Recommended: YOLO': 'Recommended: YOLO',
+  'Plan only': 'Plan only',
+  'Only generate plans, no execution. Best safety, lowest automation.':
+    'Only generate plans, no execution. Best safety, lowest automation.',
+  'Ask every time': 'Ask every time',
+  'Every action requires confirmation. Safe but slower.':
+    'Every action requires confirmation. Safe but slower.',
+  'Auto-approve edits': 'Auto-approve edits',
+  'Edit/write tools are auto-approved, others still ask.':
+    'Edit/write tools are auto-approved, others still ask.',
+  'YOLO (recommended)': 'YOLO (recommended)',
+  'Fastest workflow. Fully automated execution with higher risk.':
+    'Fastest workflow. Fully automated execution with higher risk.',
+  'Proxy configuration': 'Proxy configuration',
+  'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose.': 'Use 闂佹剚鍋呴崹鐔煎疮瀹€鍕劶闁硅埇鍔岄弲?to choose.',
+  'Follow system proxy': 'Follow system proxy',
+  'No proxy': 'No proxy',
+  'Custom proxy': 'Custom proxy',
+  'Enter custom proxy': 'Enter custom proxy',
+  'Example: http://127.0.0.1:7890': 'Example: http://127.0.0.1:7890',
+  'Select theme': 'Select theme',
+  'This list follows built-in /theme options.':
+    'This list follows built-in /theme options.',
+  'Review configuration': 'Review configuration',
+  Providers: 'Providers',
+  'Default provider': 'Default provider',
+  'Default model': 'Default model',
+  'Approval mode': 'Approval mode',
+  'At least one provider must be configured.':
+    'At least one provider must be configured.',
+  'Press Enter to save, Esc to cancel.':
+    'Press Enter to save, Esc to cancel.',
+  'Initialization complete.': 'Initialization complete.',
+  'Settings were saved. Press Enter to continue.':
+    'Settings were saved. Press Enter to continue.',
 
   // ============================================================================
   // System Information Fields
   // ============================================================================
-  'Qwen Code': 'Qwen Code',
+  'TRAM': 'TRAM',
   Runtime: 'Runtime',
   OS: 'OS',
   Auth: 'Auth',
@@ -114,12 +176,12 @@ export default {
   // ============================================================================
   // Commands - General
   // ============================================================================
-  'Analyzes the project and creates a tailored QWEN.md file.':
-    'Analyzes the project and creates a tailored QWEN.md file.',
-  'List available Qwen Code tools. Usage: /tools [desc]':
-    'List available Qwen Code tools. Usage: /tools [desc]',
+  'Analyzes the project and creates a tailored TRAM.md file.':
+    'Analyzes the project and creates a tailored TRAM.md file.',
+  'List available TRAM tools. Usage: /tools [desc]':
+    'List available TRAM tools. Usage: /tools [desc]',
   'List available skills.': 'List available skills.',
-  'Available Qwen Code CLI tools:': 'Available Qwen Code CLI tools:',
+  'Available TRAM CLI tools:': 'Available TRAM CLI tools:',
   'No tools available': 'No tools available',
   'View or change the approval mode for tool usage':
     'View or change the approval mode for tool usage',
@@ -143,8 +205,8 @@ export default {
     'Clear conversation history and free up context',
   'Compresses the context by replacing it with a summary.':
     'Compresses the context by replacing it with a summary.',
-  'open full Qwen Code documentation in your browser':
-    'open full Qwen Code documentation in your browser',
+  'open full TRAM documentation in your browser':
+    'open full TRAM documentation in your browser',
   'Configuration not available.': 'Configuration not available.',
   'change the auth method': 'change the auth method',
   'Configure authentication information for login':
@@ -173,12 +235,12 @@ export default {
   'Delete {{name}}': 'Delete {{name}}',
   'Unknown Step': 'Unknown Step',
   'Esc to close': 'Esc to close',
-  'Enter to select, ↑↓ to navigate, Esc to close':
-    'Enter to select, ↑↓ to navigate, Esc to close',
+  'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to close':
+    'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to close',
   'Esc to go back': 'Esc to go back',
   'Enter to confirm, Esc to cancel': 'Enter to confirm, Esc to cancel',
-  'Enter to select, ↑↓ to navigate, Esc to go back':
-    'Enter to select, ↑↓ to navigate, Esc to go back',
+  'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to go back':
+    'Enter to select, 闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to go back',
   'Enter to submit, Esc to go back': 'Enter to submit, Esc to go back',
   'Invalid step: {{step}}': 'Invalid step: {{step}}',
   'No subagents found.': 'No subagents found.',
@@ -204,20 +266,20 @@ export default {
   'Open in editor': 'Open in editor',
   'Edit tools': 'Edit tools',
   'Edit color': 'Edit color',
-  '❌ Error:': '❌ Error:',
+  '闂?Error:': '闂?Error:',
   'Are you sure you want to delete agent "{{name}}"?':
     'Are you sure you want to delete agent "{{name}}"?',
   // ============================================================================
   // Agents - Creation Wizard
   // ============================================================================
-  'Project Level (.qwen/agents/)': 'Project Level (.qwen/agents/)',
-  'User Level (~/.qwen/agents/)': 'User Level (~/.qwen/agents/)',
-  '✅ Subagent Created Successfully!': '✅ Subagent Created Successfully!',
+  'Project Level (.tram/agents/)': 'Project Level (.tram/agents/)',
+  'User Level (~/.tram/agents/)': 'User Level (~/.tram/agents/)',
+  '闂?Subagent Created Successfully!': '闂?Subagent Created Successfully!',
   'Subagent "{{name}}" has been saved to {{level}} level.':
     'Subagent "{{name}}" has been saved to {{level}} level.',
   'Name: ': 'Name: ',
   'Location: ': 'Location: ',
-  '❌ Error saving subagent:': '❌ Error saving subagent:',
+  '闂?Error saving subagent:': '闂?Error saving subagent:',
   'Warnings:': 'Warnings:',
   'Name "{{name}}" already exists at {{level}} level - will overwrite existing subagent':
     'Name "{{name}}" already exists at {{level}} level - will overwrite existing subagent',
@@ -233,8 +295,8 @@ export default {
   'Step {{n}}: Choose Location': 'Step {{n}}: Choose Location',
   'Step {{n}}: Choose Generation Method':
     'Step {{n}}: Choose Generation Method',
-  'Generate with Qwen Code (Recommended)':
-    'Generate with Qwen Code (Recommended)',
+  'Generate with TRAM (Recommended)':
+    'Generate with TRAM (Recommended)',
   'Manual Creation': 'Manual Creation',
   'Describe what this subagent should do and when it should be used. (Be comprehensive for best results)':
     'Describe what this subagent should do and when it should be used. (Be comprehensive for best results)',
@@ -271,7 +333,7 @@ export default {
     'Press Enter to continue, {{navigation}}Esc to {{action}}',
   cancel: 'cancel',
   'go back': 'go back',
-  '↑↓ to navigate, ': '↑↓ to navigate, ',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate, ': '闂佹剚鍋呴崹鐔煎疮?to navigate, ',
   'Enter a clear, unique name for this subagent.':
     'Enter a clear, unique name for this subagent.',
   'e.g., Code Reviewer': 'e.g., Code Reviewer',
@@ -360,10 +422,10 @@ export default {
   // ============================================================================
   // Commands - General (continued)
   // ============================================================================
-  'View and edit Qwen Code settings': 'View and edit Qwen Code settings',
+  'View and edit TRAM settings': 'View and edit TRAM settings',
   Settings: 'Settings',
-  'To see changes, Qwen Code must be restarted. Press r to exit and apply changes now.':
-    'To see changes, Qwen Code must be restarted. Press r to exit and apply changes now.',
+  'To see changes, TRAM must be restarted. Press r to exit and apply changes now.':
+    'To see changes, TRAM must be restarted. Press r to exit and apply changes now.',
   'The command "/{{command}}" is not supported in non-interactive mode.':
     'The command "/{{command}}" is not supported in non-interactive mode.',
   // ============================================================================
@@ -390,8 +452,8 @@ export default {
   'Custom Witty Phrases': 'Custom Witty Phrases',
   'Show Welcome Back Dialog': 'Show Welcome Back Dialog',
   'Enable User Feedback': 'Enable User Feedback',
-  'How is Qwen doing this session? (optional)':
-    'How is Qwen doing this session? (optional)',
+  'How is TRAM doing this session? (optional)':
+    'How is TRAM doing this session? (optional)',
   Bad: 'Bad',
   Fine: 'Fine',
   Good: 'Good',
@@ -414,7 +476,7 @@ export default {
   'Load Memory From Include Directories':
     'Load Memory From Include Directories',
   'Respect .gitignore': 'Respect .gitignore',
-  'Respect .qwenignore': 'Respect .qwenignore',
+  'Respect .tramignore': 'Respect .tramignore',
   'Enable Recursive File Search': 'Enable Recursive File Search',
   'Disable Fuzzy Search': 'Disable Fuzzy Search',
   'Interactive Shell (PTY)': 'Interactive Shell (PTY)',
@@ -508,8 +570,8 @@ export default {
   remote: 'remote',
   'This extension will add the following commands: {{commands}}.':
     'This extension will add the following commands: {{commands}}.',
-  'This extension will append info to your QWEN.md context using {{fileName}}':
-    'This extension will append info to your QWEN.md context using {{fileName}}',
+  'This extension will append info to your TRAM.md context using {{fileName}}':
+    'This extension will append info to your TRAM.md context using {{fileName}}',
   'This extension will exclude the following core tools: {{tools}}':
     'This extension will exclude the following core tools: {{tools}}',
   'This extension will install the following skills:':
@@ -518,8 +580,8 @@ export default {
     'This extension will install the following subagents:',
   'Installation cancelled for "{{name}}".':
     'Installation cancelled for "{{name}}".',
-  'You are installing an extension from {{originSource}}. Some features may not work perfectly with Qwen Code.':
-    'You are installing an extension from {{originSource}}. Some features may not work perfectly with Qwen Code.',
+  'You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.':
+    'You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.',
   '--ref and --auto-update are not applicable for marketplace extensions.':
     '--ref and --auto-update are not applicable for marketplace extensions.',
   'Extension "{{name}}" installed successfully and enabled.':
@@ -562,8 +624,8 @@ export default {
     'The scope to disable the extenison in.',
   'Extension "{{name}}" successfully disabled for scope "{{scope}}".':
     'Extension "{{name}}" successfully disabled for scope "{{scope}}".',
-  'Extension "{{name}}" successfully updated: {{oldVersion}} → {{newVersion}}.':
-    'Extension "{{name}}" successfully updated: {{oldVersion}} → {{newVersion}}.',
+  'Extension "{{name}}" successfully updated: {{oldVersion}} 闂?{{newVersion}}.':
+    'Extension "{{name}}" successfully updated: {{oldVersion}} 闂?{{newVersion}}.',
   'Unable to install extension "{{name}}" due to missing install metadata':
     'Unable to install extension "{{name}}" due to missing install metadata',
   'Extension "{{name}}" is already up to date.':
@@ -619,8 +681,8 @@ export default {
     'Select a plugin to install from marketplace "{{name}}":',
   'Plugin selection cancelled.': 'Plugin selection cancelled.',
   'Select a plugin from "{{name}}"': 'Select a plugin from "{{name}}"',
-  'Use ↑↓ or j/k to navigate, Enter to select, Escape to cancel':
-    'Use ↑↓ or j/k to navigate, Enter to select, Escape to cancel',
+  'Use 闂佹剚鍋呴崹鐔煎疮?or j/k to navigate, Enter to select, Escape to cancel':
+    'Use 闂佹剚鍋呴崹鐔煎疮?or j/k to navigate, Enter to select, Escape to cancel',
   '{{count}} more above': '{{count}} more above',
   '{{count}} more below': '{{count}} more below',
   'manage IDE integration': 'manage IDE integration',
@@ -629,8 +691,8 @@ export default {
     'install required IDE companion for {{ideName}}',
   'enable IDE integration': 'enable IDE integration',
   'disable IDE integration': 'disable IDE integration',
-  'IDE integration is not supported in your current environment. To use this feature, run Qwen Code in one of these supported IDEs: VS Code or VS Code forks.':
-    'IDE integration is not supported in your current environment. To use this feature, run Qwen Code in one of these supported IDEs: VS Code or VS Code forks.',
+  'IDE integration is not supported in your current environment. To use this feature, run TRAM in one of these supported IDEs: VS Code or VS Code forks.':
+    'IDE integration is not supported in your current environment. To use this feature, run TRAM in one of these supported IDEs: VS Code or VS Code forks.',
   'Set up GitHub Actions': 'Set up GitHub Actions',
   'Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)':
     'Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)',
@@ -664,7 +726,7 @@ export default {
   // ============================================================================
   // Commands - Hooks
   // ============================================================================
-  'Manage Qwen Code hooks': 'Manage Qwen Code hooks',
+  'Manage TRAM hooks': 'Manage TRAM hooks',
   'List all configured hooks': 'List all configured hooks',
   'Enable a disabled hook': 'Enable a disabled hook',
   'Disable an active hook': 'Disable an active hook',
@@ -712,10 +774,10 @@ export default {
   'Set LLM output language': 'Set LLM output language',
   'Usage: /language ui [{{options}}]': 'Usage: /language ui [{{options}}]',
   'Usage: /language output <language>': 'Usage: /language output <language>',
-  'Example: /language output 中文': 'Example: /language output 中文',
+  'Example: /language output Chinese': 'Example: /language output Chinese',
   'Example: /language output English': 'Example: /language output English',
-  'Example: /language output 日本語': 'Example: /language output 日本語',
-  'Example: /language output Português': 'Example: /language output Português',
+  'Example: /language output Russian': 'Example: /language output Russian',
+  'Example: /language output Portuguese': 'Example: /language output Portuguese',
   'UI language changed to {{lang}}': 'UI language changed to {{lang}}',
   'LLM output language set to {{lang}}': 'LLM output language set to {{lang}}',
   'LLM output language rule file generated at {{path}}':
@@ -866,12 +928,12 @@ export default {
   'Loading...': 'Loading...',
   'Unknown step': 'Unknown step',
   'Esc to back': 'Esc to back',
-  '↑↓ to navigate · Enter to select · Esc to close':
-    '↑↓ to navigate · Enter to select · Esc to close',
-  '↑↓ to navigate · Enter to select · Esc to back':
-    '↑↓ to navigate · Enter to select · Esc to back',
-  '↑↓ to navigate · Enter to confirm · Esc to back':
-    '↑↓ to navigate · Enter to confirm · Esc to back',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to close':
+    '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to close',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to back':
+    '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to select 閻?Esc to back',
+  '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to confirm 閻?Esc to back':
+    '闂佹剚鍋呴崹鐔煎疮?to navigate 閻?Enter to confirm 閻?Esc to back',
   'User Settings (global)': 'User Settings (global)',
   'Workspace Settings (project-specific)':
     'Workspace Settings (project-specific)',
@@ -910,7 +972,7 @@ export default {
   servers: 'servers',
   'Add MCP servers to your settings to get started.':
     'Add MCP servers to your settings to get started.',
-  'Run qwen --debug to see error logs': 'Run qwen --debug to see error logs',
+  'Run tram --debug to see error logs': 'Run tram --debug to see error logs',
 
   // MCP OAuth Authentication
   'OAuth Authentication': 'OAuth Authentication',
@@ -1005,8 +1067,8 @@ export default {
   // ============================================================================
   // Commands - Summary
   // ============================================================================
-  'Generate a project summary and save it to .qwen/PROJECT_SUMMARY.md':
-    'Generate a project summary and save it to .qwen/PROJECT_SUMMARY.md',
+  'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md':
+    'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md',
   'No chat client available to generate summary.':
     'No chat client available to generate summary.',
   'Already generating summary, wait for previous request to complete':
@@ -1067,8 +1129,8 @@ export default {
   'The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.':
     'The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.',
   "Error adding '{{path}}': {{error}}": "Error adding '{{path}}': {{error}}",
-  'Successfully added QWEN.md files from the following directories if there are:\n- {{directories}}':
-    'Successfully added QWEN.md files from the following directories if there are:\n- {{directories}}',
+  'Successfully added TRAM.md files from the following directories if there are:\n- {{directories}}':
+    'Successfully added TRAM.md files from the following directories if there are:\n- {{directories}}',
   'Error refreshing memory: {{error}}': 'Error refreshing memory: {{error}}',
   'Successfully added directories:\n- {{directories}}':
     'Successfully added directories:\n- {{directories}}',
@@ -1144,9 +1206,9 @@ export default {
     'Choose how to proceed with your session:',
   'Start new chat session': 'Start new chat session',
   'Continue previous conversation': 'Continue previous conversation',
-  '👋 Welcome back! (Last updated: {{timeAgo}})':
-    '👋 Welcome back! (Last updated: {{timeAgo}})',
-  '🎯 Overall Goal:': '🎯 Overall Goal:',
+  '濡絽鍟崯?Welcome back! (Last updated: {{timeAgo}})':
+    '濡絽鍟崯?Welcome back! (Last updated: {{timeAgo}})',
+  '濡絽鍟粻?Overall Goal:': '濡絽鍟粻?Overall Goal:',
 
   // ============================================================================
   // Dialogs - Auth
@@ -1159,11 +1221,11 @@ export default {
     'You must select an auth method to proceed. Press Ctrl+C again to exit.',
   'Terms of Services and Privacy Notice':
     'Terms of Services and Privacy Notice',
-  'Qwen OAuth': 'Qwen OAuth',
-  'Free \u00B7 Up to 1,000 requests/day \u00B7 Qwen latest models':
-    'Free \u00B7 Up to 1,000 requests/day \u00B7 Qwen latest models',
-  'Login with QwenChat account to use daily free quota.':
-    'Login with QwenChat account to use daily free quota.',
+  'TRAM OAuth': 'TRAM OAuth',
+  'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models':
+    'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models',
+  'Login with TramChat account to use daily free quota.':
+    'Login with TramChat account to use daily free quota.',
   'Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models':
     'Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models',
   'Alibaba Cloud Coding Plan': 'Alibaba Cloud Coding Plan',
@@ -1176,27 +1238,27 @@ export default {
     'Failed to login. Message: {{message}}',
   'Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.':
     'Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.',
-  'Qwen OAuth authentication timed out. Please try again.':
-    'Qwen OAuth authentication timed out. Please try again.',
-  'Qwen OAuth authentication cancelled.':
-    'Qwen OAuth authentication cancelled.',
-  'Qwen OAuth Authentication': 'Qwen OAuth Authentication',
+  'TRAM OAuth authentication timed out. Please try again.':
+    'TRAM OAuth authentication timed out. Please try again.',
+  'TRAM OAuth authentication cancelled.':
+    'TRAM OAuth authentication cancelled.',
+  'TRAM OAuth Authentication': 'TRAM OAuth Authentication',
   'Please visit this URL to authorize:': 'Please visit this URL to authorize:',
   'Or scan the QR code below:': 'Or scan the QR code below:',
   'Waiting for authorization': 'Waiting for authorization',
   'Time remaining:': 'Time remaining:',
   '(Press ESC or CTRL+C to cancel)': '(Press ESC or CTRL+C to cancel)',
-  'Qwen OAuth Authentication Timeout': 'Qwen OAuth Authentication Timeout',
+  'TRAM OAuth Authentication Timeout': 'TRAM OAuth Authentication Timeout',
   'OAuth token expired (over {{seconds}} seconds). Please select authentication method again.':
     'OAuth token expired (over {{seconds}} seconds). Please select authentication method again.',
   'Press any key to return to authentication type selection.':
     'Press any key to return to authentication type selection.',
-  'Waiting for Qwen OAuth authentication...':
-    'Waiting for Qwen OAuth authentication...',
-  'Note: Your existing API key in settings.json will not be cleared when using Qwen OAuth. You can switch back to OpenAI authentication later if needed.':
-    'Note: Your existing API key in settings.json will not be cleared when using Qwen OAuth. You can switch back to OpenAI authentication later if needed.',
-  'Note: Your existing API key will not be cleared when using Qwen OAuth.':
-    'Note: Your existing API key will not be cleared when using Qwen OAuth.',
+  'Waiting for TRAM OAuth authentication...':
+    'Waiting for TRAM OAuth authentication...',
+  'Note: Your existing API key in settings.json will not be cleared when using TRAM OAuth. You can switch back to OpenAI authentication later if needed.':
+    'Note: Your existing API key in settings.json will not be cleared when using TRAM OAuth. You can switch back to OpenAI authentication later if needed.',
+  'Note: Your existing API key will not be cleared when using TRAM OAuth.':
+    'Note: Your existing API key will not be cleared when using TRAM OAuth.',
   'Authentication timed out. Please try again.':
     'Authentication timed out. Please try again.',
   'Waiting for auth... (Press ESC or CTRL+C to cancel)':
@@ -1220,8 +1282,8 @@ export default {
     'Failed to authenticate. Message: {{message}}',
   'Authenticated successfully with {{authType}} credentials.':
     'Authenticated successfully with {{authType}} credentials.',
-  'Invalid QWEN_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}':
-    'Invalid QWEN_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}',
+  'Invalid TRAM_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}':
+    'Invalid TRAM_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}',
   'OpenAI Configuration Required': 'OpenAI Configuration Required',
   'Please enter your OpenAI configuration. You can get an API key from':
     'Please enter your OpenAI configuration. You can get an API key from',
@@ -1229,8 +1291,8 @@ export default {
   'Invalid credentials: {{errorMessage}}':
     'Invalid credentials: {{errorMessage}}',
   'Failed to validate credentials': 'Failed to validate credentials',
-  'Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel':
-    'Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel',
+  'Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel':
+    'Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel',
 
   // ============================================================================
   // Dialogs - Model
@@ -1257,10 +1319,10 @@ export default {
   unknown: 'unknown',
   "Failed to switch model to '{{modelId}}'.\n\n{{error}}":
     "Failed to switch model to '{{modelId}}'.\n\n{{error}}",
-  'Qwen 3.5 Plus — efficient hybrid model with leading coding performance':
-    'Qwen 3.5 Plus — efficient hybrid model with leading coding performance',
-  'The latest Qwen Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
-    'The latest Qwen Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)',
+  'Tram 3.5 Plus 闂?efficient hybrid model with leading coding performance':
+    'Tram 3.5 Plus 闂?efficient hybrid model with leading coding performance',
+  'The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
+    'The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)',
 
   // ============================================================================
   // Dialogs - Permissions
@@ -1289,8 +1351,8 @@ export default {
   // MCP Status
   // ============================================================================
   'No MCP servers configured.': 'No MCP servers configured.',
-  '⏳ MCP servers are starting up ({{count}} initializing)...':
-    '⏳ MCP servers are starting up ({{count}} initializing)...',
+  '闂?MCP servers are starting up ({{count}} initializing)...':
+    '闂?MCP servers are starting up ({{count}} initializing)...',
   'Note: First startup may take longer. Tool availability will update automatically.':
     'Note: First startup may take longer. Tool availability will update automatically.',
   'Configured MCP servers:': 'Configured MCP servers:',
@@ -1313,7 +1375,7 @@ export default {
   'Parameters:': 'Parameters:',
   'Prompts:': 'Prompts:',
   Blocked: 'Blocked',
-  '💡 Tips:': '💡 Tips:',
+  '濡絽鍟€?Tips:': '濡絽鍟€?Tips:',
   Use: 'Use',
   'to show server and tool descriptions':
     'to show server and tool descriptions',
@@ -1339,12 +1401,12 @@ export default {
     'Use /bug to submit issues to the maintainers when something goes off.',
   'Switch auth type quickly with /auth.':
     'Switch auth type quickly with /auth.',
-  'You can run any shell commands from Qwen Code using ! (e.g. !ls).':
-    'You can run any shell commands from Qwen Code using ! (e.g. !ls).',
+  'You can run any shell commands from TRAM using ! (e.g. !ls).':
+    'You can run any shell commands from TRAM using ! (e.g. !ls).',
   'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.':
     'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.',
-  'You can resume a previous conversation by running qwen --continue or qwen --resume.':
-    'You can resume a previous conversation by running qwen --continue or qwen --resume.',
+  'You can resume a previous conversation by running tram --continue or tram --resume.':
+    'You can resume a previous conversation by running tram --continue or tram --resume.',
   'You can switch permission mode quickly with Shift+Tab or /approval-mode.':
     'You can switch permission mode quickly with Shift+Tab or /approval-mode.',
   'You can switch permission mode quickly with Tab or /approval-mode.':
@@ -1401,9 +1463,9 @@ export default {
   'Avg Duration': 'Avg Duration',
   'User Decision Summary': 'User Decision Summary',
   'Total Reviewed Suggestions:': 'Total Reviewed Suggestions:',
-  ' » Accepted:': ' » Accepted:',
-  ' » Rejected:': ' » Rejected:',
-  ' » Modified:': ' » Modified:',
+  ' 缂?Accepted:': ' 缂?Accepted:',
+  ' 缂?Rejected:': ' 缂?Rejected:',
+  ' 缂?Modified:': ' 缂?Modified:',
   ' Overall Agreement Rate:': ' Overall Agreement Rate:',
   'No tool calls have been made in this session.':
     'No tool calls have been made in this session.',
@@ -1616,8 +1678,8 @@ export default {
   // Retry / Rate Limit
   // ============================================================================
   'Rate limit error: {{reason}}': 'Rate limit error: {{reason}}',
-  'Retrying in {{seconds}} seconds… (attempt {{attempt}}/{{maxRetries}})':
-    'Retrying in {{seconds}} seconds… (attempt {{attempt}}/{{maxRetries}})',
+  'Retrying in {{seconds}} seconds闂?(attempt {{attempt}}/{{maxRetries}})':
+    'Retrying in {{seconds}} seconds闂?(attempt {{attempt}}/{{maxRetries}})',
   'Press Ctrl+Y to retry': 'Press Ctrl+Y to retry',
   'No failed request to retry.': 'No failed request to retry.',
   'to retry last request': 'to retry last request',
@@ -1680,6 +1742,77 @@ export default {
     'Tip: Use /model to switch between available Coding Plan models.',
 
   // ============================================================================
+  // Service Command
+  // ============================================================================
+  'Manage persistent background services.':
+    'Manage persistent background services.',
+  'Tip: Recommended Alt+L to open the ask flow quickly. You can also type /service alert <name>.':
+    'Tip: Recommended Alt+L to open the ask flow quickly. You can also type /service alert <name>.',
+  'Tip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    'Tip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.',
+  'No services registered. Use /service register ... to add one.\nCurrent max running services: {{maxRunningServices}}':
+    'No services registered. Use /service register ... to add one.\nCurrent max running services: {{maxRunningServices}}',
+  '- {{runningStatus}} {{name}} | autoStart={{autoStart}} | pid={{pid}} | follow={{follow}} | notify={{notify}} | alert={{alert}} | cwd={{cwd}} | cmd={{command}}':
+    '- {{runningStatus}} {{name}} | autoStart={{autoStart}} | pid={{pid}} | follow={{follow}} | notify={{notify}} | alert={{alert}} | cwd={{cwd}} | cmd={{command}}',
+  'Registered services ({{count}})\nMax running services: {{maxRunningServices}}\nTo change the limit manually, edit services.json in project storage.\n\n{{listLines}}':
+    'Registered services ({{count}})\nMax running services: {{maxRunningServices}}\nTo change the limit manually, edit services.json in project storage.\n\n{{listLines}}',
+  'Unknown option: {{option}}': 'Unknown option: {{option}}',
+  'Service "{{name}}" registered and started.\nautoStart={{autoStart}}, watch={{watchPatterns}}':
+    'Service "{{name}}" registered and started.\nautoStart={{autoStart}}, watch={{watchPatterns}}',
+  'Service name is required for /service {{action}}.':
+    'Service name is required for /service {{action}}.',
+  'Service "{{name}}" started.': 'Service "{{name}}" started.',
+  'Service "{{name}}" stopped.': 'Service "{{name}}" stopped.',
+  'Service "{{name}}" restarted.': 'Service "{{name}}" restarted.',
+  'Service "{{name}}" removed.': 'Service "{{name}}" removed.',
+  'Service "{{name}}" not found.': 'Service "{{name}}" not found.',
+  'Service "{{name}}" realtime notifications enabled.':
+    'Service "{{name}}" realtime notifications enabled.',
+  'Service "{{name}}" realtime notifications muted.\nErrors are still buffered. Use /service alert {{name}} to inspect buffered logs.':
+    'Service "{{name}}" realtime notifications muted.\nErrors are still buffered. Use /service alert {{name}} to inspect buffered logs.',
+  'Unknown option for log: {{option}}': 'Unknown option for log: {{option}}',
+  'Service {{name}} ({{runningStatus}}, pid={{pid}})\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}':
+    'Service {{name}} ({{runningStatus}}, pid={{pid}})\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}',
+  'No pending alert buffer for service "{{name}}".':
+    'No pending alert buffer for service "{{name}}".',
+  'Service {{name}} has alerts. Choose the next action.\nStart line: {{startLine}}, buffered lines: {{bufferedLines}}, error lines: {{errorLines}}\nRecommended: press Alt+L to open ask flow quickly; command input is also supported.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    'Service {{name}} has alerts. Choose the next action.\nStart line: {{startLine}}, buffered lines: {{bufferedLines}}, error lines: {{errorLines}}\nRecommended: press Alt+L to open ask flow quickly; command input is also supported.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.',
+  'Analyze logs only': 'Analyze logs only',
+  'Alert handling': 'Alert handling',
+  'Analyze logs without entering repair flow (equivalent: /service analyze {{name}} all)':
+    'Analyze logs without entering repair flow (equivalent: /service analyze {{name}} all)',
+  'Analyze then fix issue (Recommended)':
+    'Analyze then fix issue (Recommended)',
+  'Analyze logs and continue to fix. You can run /service analyze {{name}} all first, then ask the model to directly repair in follow-up prompts.':
+    'Analyze logs and continue to fix. You can run /service analyze {{name}} all first, then ask the model to directly repair in follow-up prompts.',
+  'Handle later': 'Handle later',
+  'Do not process now; continue buffering subsequent logs in background.':
+    'Do not process now; continue buffering subsequent logs in background.',
+  'No pending alert logs for service "{{name}}".':
+    'No pending alert logs for service "{{name}}".',
+  'No logs available in selected mode ({{mode}}) for service "{{name}}".':
+    'No logs available in selected mode ({{mode}}) for service "{{name}}".',
+  'Please analyze the following service logs for service "{{name}}".\nMode: {{mode}}.\nProvide: root cause, confidence, immediate mitigation, and next checks.\n\n':
+    'Please analyze the following service logs for service "{{name}}".\nMode: {{mode}}.\nProvide: root cause, confidence, immediate mitigation, and next checks.\n\n',
+  'No log patterns configured for service "{{name}}".':
+    'No log patterns configured for service "{{name}}".',
+  '- [{{id}}] Pattern: `{{pattern}}` | Action: {{action}} | Description: {{description}}':
+    '- [{{id}}] Pattern: `{{pattern}}` | Action: {{action}} | Description: {{description}}',
+  'Log patterns for service "{{name}}":\n{{listText}}':
+    'Log patterns for service "{{name}}":\n{{listText}}',
+  'To add log patterns for service "{{name}}", LM will use the request_log_pattern tool.':
+    'To add log patterns for service "{{name}}", LM will use the request_log_pattern tool.',
+  'Removed pattern rule "{{ruleId}}" from service "{{name}}".':
+    'Removed pattern rule "{{ruleId}}" from service "{{name}}".',
+  'Pattern rule "{{ruleId}}" not found in service "{{name}}".':
+    'Pattern rule "{{ruleId}}" not found in service "{{name}}".',
+  'Sent input to service "{{name}}".': 'Sent input to service "{{name}}".',
+  'Unknown subcommand: {{subcommand}}\n\n{{helpText}}':
+    'Unknown subcommand: {{subcommand}}\n\n{{helpText}}',
+  '[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
+    '[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.',
+
+  // ============================================================================
   // Ask User Question Tool
   // ============================================================================
   'Please answer the following question(s):':
@@ -1698,12 +1831,69 @@ export default {
   'Your answers:': 'Your answers:',
   '(not answered)': '(not answered)',
   'Ready to submit your answers?': 'Ready to submit your answers?',
-  '↑/↓: Navigate | ←/→: Switch tabs | Enter: Select':
-    '↑/↓: Navigate | ←/→: Switch tabs | Enter: Select',
-  '↑/↓: Navigate | ←/→: Switch tabs | Space/Enter: Toggle | Esc: Cancel':
-    '↑/↓: Navigate | ←/→: Switch tabs | Space/Enter: Toggle | Esc: Cancel',
-  '↑/↓: Navigate | Space/Enter: Toggle | Esc: Cancel':
-    '↑/↓: Navigate | Space/Enter: Toggle | Esc: Cancel',
-  '↑/↓: Navigate | Enter: Select | Esc: Cancel':
-    '↑/↓: Navigate | Enter: Select | Esc: Cancel',
+  '闂?闂? Navigate | 闂?闂? Switch tabs | Enter: Select':
+    '闂?闂? Navigate | 闂?闂? Switch tabs | Enter: Select',
+  '闂?闂? Navigate | 闂?闂? Switch tabs | Space/Enter: Toggle | Esc: Cancel':
+    '闂?闂? Navigate | 闂?闂? Switch tabs | Space/Enter: Toggle | Esc: Cancel',
+  '闂?闂? Navigate | Space/Enter: Toggle | Esc: Cancel':
+    '闂?闂? Navigate | Space/Enter: Toggle | Esc: Cancel',
+  '闂?闂? Navigate | Enter: Select | Esc: Cancel':
+    '闂?闂? Navigate | Enter: Select | Esc: Cancel',
+  
+  // ============================================================================
+  // Context Usage Display
+  // ============================================================================
+  '% used': '% used',
+  '% context used': '% context used',
+  
+  // ============================================================================
+  // Context Usage Display
+  // ============================================================================
+  '% used': '% used',
+  '% context used': '% context used',
+
+  // ============================================================================
+  // Core Tool Output i18n (service_manage tool)
+  // ============================================================================
+  'Manage service action: {{action}}': 'Manage service action: {{action}}',
+  'No services registered.': 'No services registered.',
+  'Service {{name}} registered successfully.': 'Service {{name}} registered successfully.',
+  'Service {{name}} start initiated.': 'Service {{name}} start initiated.',
+  'Service {{name}} stopped.': 'Service {{name}} stopped.',
+  'Service {{name}} restarted.': 'Service {{name}} restarted.',
+  'Service {{name}} removed.': 'Service {{name}} removed.',
+  'Now following logs for {{name}} in UI.': 'Now following logs for {{name}} in UI.',
+  'Unfollowed logs for {{name}}.': 'Unfollowed logs for {{name}}.',
+  '[No logs for {{name}}]': '[No logs for {{name}}]',
+  'No pending alert for service {{name}}.': 'No pending alert for service {{name}}.',
+  'Alert detected for {{name}}. Please use analyze action to read alert logs.': 'Alert detected for {{name}}. Please use analyze action to read alert logs.',
+  'No pending alerts for {{name}}.': 'No pending alerts for {{name}}.',
+  'Active Alert Logs for {{name}} (mode: {{mode}}):': 'Active Alert Logs for {{name}} (mode: {{mode}}):',
+  'Sent input to {{name}}. Consider checking logs after a brief moment.': 'Sent input to {{name}}. Consider checking logs after a brief moment.',
+  'Unknown action: {{action}}': 'Unknown action: {{action}}',
+  'Error executing action {{action}}: {{error}}': 'Error executing action {{action}}: {{error}}',
+  'name and command required': 'name and command required',
+  'name required': 'name required',
+  'name and input required': 'name and input required',
+
+  // ============================================================================
+  // Log Pattern Rules (suppress/unsuppress/list-rules)
+  // ============================================================================
+  'name and pattern required': 'name and pattern required',
+  'Added suppress rule for {{name}}: {{pattern}}': 'Added suppress rule for {{name}}: {{pattern}}',
+  'name and ruleId required': 'name and ruleId required',
+  'Removed suppress rule {{ruleId}} for {{name}}.': 'Removed suppress rule {{ruleId}} for {{name}}.',
+  'Rule {{ruleId}} not found for {{name}}.': 'Rule {{ruleId}} not found for {{name}}.',
+  'No log pattern rules for {{name}}.': 'No log pattern rules for {{name}}.',
+  'Log pattern rules for {{name}}:': 'Log pattern rules for {{name}}:',
+
+  // ============================================================================
+  // Terminal Mode Toggle (Ctrl+Shift+L)
+  // ============================================================================
+  'Switched to service log mode': 'Switched to service log mode',
+  'Switched to chat mode': 'Switched to chat mode',
+  'Toggle service log mode': 'Toggle service log mode',
+  'Service Logs': 'Service Logs',
+  'Chat': 'Chat',
+  'No services running. Register a service first.': 'No services running. Register a service first.',
 };

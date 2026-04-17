@@ -16,17 +16,17 @@ import {
 import { renderHook, act } from '@testing-library/react';
 import { useAutoAcceptIndicator } from './useAutoAcceptIndicator.js';
 
-import { Config, ApprovalMode } from '@qwen-code/qwen-code-core';
-import type { Config as ActualConfigType } from '@qwen-code/qwen-code-core';
+import { Config, ApprovalMode } from '@tram-ai/tram-core';
+import type { Config as ActualConfigType } from '@tram-ai/tram-core';
 import type { Key } from './useKeypress.js';
 import { useKeypress } from './useKeypress.js';
 import { MessageType } from '../types.js';
 
 vi.mock('./useKeypress.js');
 
-vi.mock('@qwen-code/qwen-code-core', async () => {
+vi.mock('@tram-ai/tram-core', async () => {
   const actualServerModule = (await vi.importActual(
-    '@qwen-code/qwen-code-core',
+    '@tram-ai/tram-core',
   )) as Record<string, unknown>;
   return {
     ...actualServerModule,

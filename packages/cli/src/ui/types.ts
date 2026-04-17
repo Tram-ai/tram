@@ -11,7 +11,7 @@ import type {
   ToolCallConfirmationDetails,
   ToolConfirmationOutcome,
   ToolResultDisplay,
-} from '@qwen-code/qwen-code-core';
+} from '@tram-ai/tram-core';
 import type { PartListUnion } from '@google/genai';
 import { type ReactNode } from 'react';
 
@@ -421,6 +421,7 @@ export type SlashCommandProcessorResult =
     }
   | {
       type: 'handled'; // Indicates the command was processed and no further action is needed.
+      output?: string;
     }
   | SubmitPromptResult;
 

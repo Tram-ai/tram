@@ -5,7 +5,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { QwenAgentManager } from '../../services/qwenAgentManager.js';
+import type { TramAgentManager } from '../../services/tramAgentManager.js';
 import type { ConversationStore } from '../../services/conversationStore.js';
 import { FileMessageHandler } from './FileMessageHandler.js';
 import * as vscode from 'vscode';
@@ -41,7 +41,7 @@ const vscodeMock = vi.hoisted(() => {
 
 vi.mock('vscode', () => vscodeMock);
 vi.mock(
-  '@qwen-code/qwen-code-core/src/services/fileDiscoveryService.js',
+  '@tram-ai/tram-core/src/services/fileDiscoveryService.js',
   () => ({
     FileDiscoveryService: class {
       shouldIgnoreFile(filePath: string, options?: unknown) {
@@ -78,7 +78,7 @@ describe('FileMessageHandler', () => {
 
     const sendToWebView = vi.fn();
     const handler = new FileMessageHandler(
-      {} as QwenAgentManager,
+      {} as TramAgentManager,
       {} as ConversationStore,
       null,
       sendToWebView,
@@ -96,7 +96,7 @@ describe('FileMessageHandler', () => {
     );
     expect(shouldIgnoreFileMock).toHaveBeenCalledWith(ignoredPath, {
       respectGitIgnore: true,
-      respectQwenIgnore: false,
+      respectTramIgnore: false,
     });
 
     expect(sendToWebView).toHaveBeenCalledTimes(1);

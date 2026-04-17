@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen Team
+ * Copyright 2025 TRAM Contributors Team
  * SPDX-License-Identifier: Apache-2.0
  *
  * Completion item types for autocomplete menus

@@ -125,7 +125,7 @@ export const ModelStatsDisplay: React.FC<ModelStatsDisplayProps> = ({
 
       {/* Divider */}
       <Box
-        borderStyle="single"
+        borderStyle="round"
         borderBottom={true}
         borderTop={false}
         borderLeft={false}
