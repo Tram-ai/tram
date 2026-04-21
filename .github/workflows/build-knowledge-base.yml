@@ -1,6 +1,14 @@
 name: "Build Knowledge Base"
 
 on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "knowledge/**/*.md"
+      - "scripts/build-knowledge-base.js"
+      - "package.json"
+      - ".github/workflows/build-knowledge-base.yml"
   workflow_dispatch:
 
 jobs:
