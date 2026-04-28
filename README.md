@@ -34,5 +34,5 @@ tram
 
 本项目基于以下优秀的开源项目进行修改和二次开发，在此表示诚挚的感谢：
 
-- [TRAM](https://github.com/QwenLM/Qwen3-Coder)
+- [QwenCode](https://github.com/QwenLM/qwen-code)
 - [Gemini CLI](https://github.com/google-gemini/gemini-cli)
