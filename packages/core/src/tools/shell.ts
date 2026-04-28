@@ -4,10 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from "node:fs";
 import path from "node:path";
-import os, { EOL } from "node:os";
-import crypto from "node:crypto";
+import os from "node:os";
 import type { Config } from "../config/config.js";
 import { ToolNames, ToolDisplayNames } from "./tool-names.js";
 import { ToolErrorType } from "./tool-error.js";
@@ -48,13 +46,73 @@ const debugLogger = createDebugLogger("SHELL");
 
 export const OUTPUT_UPDATE_INTERVAL_MS = 1000;
 const DEFAULT_FOREGROUND_TIMEOUT_MS = 120000;
+const DEFAULT_BACKGROUND_OUTPUT_TAIL_LINES = 200;
+const MAX_BACKGROUND_OUTPUT_LINES = 2000;
+
+type ShellAction = "start" | "stop" | "output" | "input" | "list";
+
+interface BackgroundShellSession {
+  pid: number;
+  command: string;
+  directory: string;
+  startedAt: number;
+  updatedAt: number;
+  outputLines: string[];
+  running: boolean;
+  exitCode: number | null;
+  signal: number | null;
+  errorMessage: string | null;
+  abortController: AbortController;
+}
+
+const backgroundSessions = new Map<number, BackgroundShellSession>();
+
+function normalizeShellAction(action?: string): ShellAction {
+  switch (action) {
+    case "stop":
+    case "output":
+    case "input":
+    case "list":
+      return action;
+    case "start":
+    default:
+      return "start";
+  }
+}
+
+function ansiOutputToText(output: AnsiOutput): string {
+  return output
+    .map((line) => line.map((segment) => segment.text).join(""))
+    .join("\n");
+}
+
+function appendOutput(session: BackgroundShellSession, chunk: string): void {
+  if (!chunk) {
+    return;
+  }
+
+  const normalized = chunk.replace(/\r\n/g, "\n");
+  const lines = normalized.split("\n");
+  session.outputLines.push(...lines);
+  if (session.outputLines.length > MAX_BACKGROUND_OUTPUT_LINES) {
+    session.outputLines.splice(
+      0,
+      session.outputLines.length - MAX_BACKGROUND_OUTPUT_LINES,
+    );
+  }
+  session.updatedAt = Date.now();
+}
 
 export interface ShellToolParams {
-  command: string;
-  is_background: boolean;
+  action?: ShellAction;
+  command?: string;
+  is_background?: boolean;
   timeout?: number;
   description?: string;
   directory?: string;
+  pid?: number;
+  input?: string;
+  tail_lines?: number;
 }
 
 export class ShellToolInvocation extends BaseToolInvocation<
@@ -69,24 +127,34 @@ export class ShellToolInvocation extends BaseToolInvocation<
   }
 
   getDescription(): string {
-    let description = `${this.params.command}`;
-    // append optional [in directory]
-    // note description is needed even if validation fails due to absolute path
+    const action = normalizeShellAction(this.params.action);
+
+    if (action === "list") {
+      return "list background shell sessions";
+    }
+    if (action === "stop") {
+      return `stop background shell session [pid: ${this.params.pid ?? "?"}]`;
+    }
+    if (action === "output") {
+      return `read background shell output [pid: ${this.params.pid ?? "?"}]`;
+    }
+    if (action === "input") {
+      return `send input to background shell [pid: ${this.params.pid ?? "?"}]`;
+    }
+
+    let description = `${this.params.command ?? ""}`;
     if (this.params.directory) {
       description += ` [in ${this.params.directory}]`;
     }
-    // append background indicator
     if (this.params.is_background) {
-      description += ` [background]`;
+      description += " [background]";
     } else if (this.params.timeout) {
-      // append timeout for foreground commands
       description += ` [timeout: ${this.params.timeout}ms]`;
     }
-    // append optional (description), replacing any line breaks with spaces
     if (this.params.description) {
       description += ` (${this.params.description.replace(/\n/g, " ")})`;
     }
-    return description;
+    return description.trim();
   }
 
   /**
@@ -95,7 +163,17 @@ export class ShellToolInvocation extends BaseToolInvocation<
    * - All other commands → 'ask'
    */
   override async getDefaultPermission(): Promise<PermissionDecision> {
-    const command = stripShellWrapper(this.params.command);
+    const action = normalizeShellAction(this.params.action);
+
+    if (action === "list" || action === "output" || action === "input") {
+      return "allow";
+    }
+
+    if (action === "stop") {
+      return "ask";
+    }
+
+    const command = stripShellWrapper(this.params.command ?? "");
 
     // AST-based read-only detection
     try {
@@ -119,7 +197,24 @@ export class ShellToolInvocation extends BaseToolInvocation<
   override async getConfirmationDetails(
     _abortSignal: AbortSignal,
   ): Promise<ToolCallConfirmationDetails> {
-    const command = stripShellWrapper(this.params.command);
+    const action = normalizeShellAction(this.params.action);
+    if (action === "stop") {
+      return {
+        type: "exec",
+        title: "Confirm Background Shell Stop",
+        command: `stop pid ${this.params.pid}`,
+        rootCommand: "kill",
+        permissionRules: ["Bash(kill *)"],
+        onConfirm: async (
+          _outcome: ToolConfirmationOutcome,
+          _payload?: ToolConfirmationPayload,
+        ) => {
+          // No-op: persistence is handled by coreToolScheduler via PM rules
+        },
+      };
+    }
+
+    const command = stripShellWrapper(this.params.command ?? "");
     const pm = this.config.getPermissionManager?.();
 
     // Split compound command and filter out already-allowed (read-only) sub-commands
@@ -180,7 +275,7 @@ export class ShellToolInvocation extends BaseToolInvocation<
     const confirmationDetails: ToolExecuteConfirmationDetails = {
       type: "exec",
       title: "Confirm Shell Command",
-      command: this.params.command,
+      command: this.params.command ?? "",
       rootCommand: rootCommands.join(", "),
       permissionRules,
       onConfirm: async (
@@ -199,7 +294,22 @@ export class ShellToolInvocation extends BaseToolInvocation<
     shellExecutionConfig?: ShellExecutionConfig,
     setPidCallback?: (pid: number) => void,
   ): Promise<ToolResult> {
-    const strippedCommand = stripShellWrapper(this.params.command);
+    const action = normalizeShellAction(this.params.action);
+
+    if (action === "list") {
+      return this.listBackgroundSessions();
+    }
+    if (action === "output") {
+      return this.readBackgroundOutput();
+    }
+    if (action === "input") {
+      return this.sendInputToBackgroundSession();
+    }
+    if (action === "stop") {
+      return this.stopBackgroundSession();
+    }
+
+    const strippedCommand = stripShellWrapper(this.params.command ?? "");
 
     if (signal.aborted) {
       return {
@@ -208,7 +318,8 @@ export class ShellToolInvocation extends BaseToolInvocation<
       };
     }
 
-    const effectiveTimeout = this.params.is_background
+    const shouldRunInBackground = Boolean(this.params.is_background);
+    const effectiveTimeout = shouldRunInBackground
       ? undefined
       : (this.params.timeout ?? DEFAULT_FOREGROUND_TIMEOUT_MS);
 
@@ -219,269 +330,348 @@ export class ShellToolInvocation extends BaseToolInvocation<
       combinedSignal = AbortSignal.any([signal, timeoutSignal]);
     }
 
-    const isWindows = os.platform() === "win32";
-    const tempFileName = `shell_pgrep_${crypto
-      .randomBytes(6)
-      .toString("hex")}.tmp`;
-    const tempFilePath = path.join(os.tmpdir(), tempFileName);
+    // Add co-author to git commit commands
+    const processedCommand = this.addCoAuthorToGitCommit(strippedCommand);
+    const commandToExecute = shouldRunInBackground
+      ? processedCommand.trim().replace(/&+$/, "").trim()
+      : processedCommand;
+    const cwd = this.params.directory || this.config.getTargetDir();
+    let activeBackgroundSession: BackgroundShellSession | undefined;
 
-    try {
-      // Add co-author to git commit commands
-      const processedCommand = this.addCoAuthorToGitCommit(strippedCommand);
+    let cumulativeOutput: string | AnsiOutput = "";
+    let lastUpdateTime = Date.now();
+    let isBinaryStream = false;
 
-      const shouldRunInBackground = this.params.is_background;
-      let finalCommand = processedCommand;
+    const onOutputEvent = (event: ShellOutputEvent) => {
+      let shouldUpdate = false;
 
-      // On non-Windows, use & to run in background.
-      // On Windows, we don't use start /B because it creates a detached process that
-      // doesn't die when the parent dies. Instead, we rely on the race logic below
-      // to return early while keeping the process attached (detached: false).
-      if (
-        !isWindows &&
-        shouldRunInBackground &&
-        !finalCommand.trim().endsWith("&")
-      ) {
-        finalCommand = finalCommand.trim() + " &";
+      switch (event.type) {
+        case "data":
+          if (isBinaryStream) break;
+          cumulativeOutput = event.chunk;
+          if (shouldRunInBackground && activeBackgroundSession) {
+            appendOutput(
+              activeBackgroundSession,
+              typeof event.chunk === "string"
+                ? event.chunk
+                : ansiOutputToText(event.chunk),
+            );
+          }
+          shouldUpdate = true;
+          break;
+        case "binary_detected":
+          isBinaryStream = true;
+          cumulativeOutput = "[Binary output detected. Halting stream...]";
+          if (shouldRunInBackground && activeBackgroundSession) {
+            appendOutput(activeBackgroundSession, cumulativeOutput);
+          }
+          shouldUpdate = true;
+          break;
+        case "binary_progress":
+          isBinaryStream = true;
+          cumulativeOutput = `[Receiving binary output... ${formatMemoryUsage(
+            event.bytesReceived,
+          )} received]`;
+          if (shouldRunInBackground && activeBackgroundSession) {
+            appendOutput(activeBackgroundSession, cumulativeOutput);
+          }
+          if (Date.now() - lastUpdateTime > OUTPUT_UPDATE_INTERVAL_MS) {
+            shouldUpdate = true;
+          }
+          break;
+        default: {
+          throw new Error("An unhandled ShellOutputEvent was found.");
+        }
       }
 
-      // On Windows, we rely on the race logic below to handle background tasks.
-      // We just ensure the command string is clean.
-      if (isWindows && shouldRunInBackground) {
-        finalCommand = finalCommand.trim().replace(/&+$/, "").trim();
+      if (shouldUpdate && updateOutput) {
+        updateOutput(
+          typeof cumulativeOutput === "string"
+            ? cumulativeOutput
+            : { ansiOutput: cumulativeOutput },
+        );
+        lastUpdateTime = Date.now();
       }
+    };
 
-      // On non-Windows background commands, wrap with pgrep to capture
-      // subprocess PIDs so we can report them to the user.
-      const commandToExecute =
-        !isWindows && shouldRunInBackground
-          ? (() => {
-              let command = finalCommand.trim();
-              if (!command.endsWith("&")) command += ";";
-              return `{ ${command} }; __code=$?; pgrep -g 0 >${tempFilePath} 2>&1; exit $__code;`;
-            })()
-          : finalCommand;
+    const { result: resultPromise, pid } = await ShellExecutionService.execute(
+      commandToExecute,
+      cwd,
+      onOutputEvent,
+      combinedSignal,
+      shouldRunInBackground
+        ? true
+        : this.config.getShouldUseNodePtyShell(),
+      shellExecutionConfig ?? {},
+    );
 
-      const cwd = this.params.directory || this.config.getTargetDir();
+    if (pid && setPidCallback) {
+      setPidCallback(pid);
+    }
 
-      let cumulativeOutput: string | AnsiOutput = "";
-      let lastUpdateTime = Date.now();
-      let isBinaryStream = false;
-
-      const { result: resultPromise, pid } =
-        await ShellExecutionService.execute(
-          commandToExecute,
-          cwd,
-          (event: ShellOutputEvent) => {
-            let shouldUpdate = false;
-
-            switch (event.type) {
-              case "data":
-                if (isBinaryStream) break;
-                cumulativeOutput = event.chunk;
-                shouldUpdate = true;
-                break;
-              case "binary_detected":
-                isBinaryStream = true;
-                cumulativeOutput =
-                  "[Binary output detected. Halting stream...]";
-                shouldUpdate = true;
-                break;
-              case "binary_progress":
-                isBinaryStream = true;
-                cumulativeOutput = `[Receiving binary output... ${formatMemoryUsage(
-                  event.bytesReceived,
-                )} received]`;
-                if (Date.now() - lastUpdateTime > OUTPUT_UPDATE_INTERVAL_MS) {
-                  shouldUpdate = true;
-                }
-                break;
-              default: {
-                throw new Error("An unhandled ShellOutputEvent was found.");
-              }
-            }
-
-            if (shouldUpdate && updateOutput) {
-              updateOutput(
-                typeof cumulativeOutput === "string"
-                  ? cumulativeOutput
-                  : { ansiOutput: cumulativeOutput },
-              );
-              lastUpdateTime = Date.now();
-            }
+    if (shouldRunInBackground) {
+      if (!pid) {
+        return {
+          llmContent: "Failed to start background command: no PID was returned.",
+          returnDisplay:
+            "Failed to start background command: no PID was returned.",
+          error: {
+            message: "Background command did not return a PID.",
+            type: ToolErrorType.SHELL_EXECUTE_ERROR,
           },
-          combinedSignal,
-          shouldRunInBackground
-            ? false
-            : this.config.getShouldUseNodePtyShell(),
-          shellExecutionConfig ?? {},
-        );
-
-      if (pid && setPidCallback) {
-        setPidCallback(pid);
-      }
-
-      // On Windows, background commands rely on early return since there's
-      // no & backgrounding or pgrep. Awaiting would block until completion.
-      if (shouldRunInBackground && isWindows) {
-        const pidMsg = pid ? ` PID: ${pid}` : "";
-        const killHint = " (Use taskkill /F /T /PID <pid> to stop)";
-
-        return {
-          llmContent: `Background command started.${pidMsg}${killHint}`,
-          returnDisplay: `Background command started.${pidMsg}${killHint}`,
         };
       }
 
-      const result = await resultPromise;
+      const abortController = new AbortController();
+      const session: BackgroundShellSession = {
+        pid,
+        command: this.params.command ?? commandToExecute,
+        directory: cwd,
+        startedAt: Date.now(),
+        updatedAt: Date.now(),
+        outputLines: [],
+        running: true,
+        exitCode: null,
+        signal: null,
+        errorMessage: null,
+        abortController,
+      };
+      backgroundSessions.set(pid, session);
+      activeBackgroundSession = session;
 
-      if (shouldRunInBackground) {
-        // Read subprocess PIDs captured by the pgrep wrapper (non-Windows only)
-        const backgroundPIDs: number[] = [];
-        if (!isWindows) {
-          if (fs.existsSync(tempFilePath)) {
-            const pgrepLines = fs
-              .readFileSync(tempFilePath, "utf8")
-              .split(EOL)
-              .filter(Boolean);
-            for (const line of pgrepLines) {
-              if (!/^\d+$/.test(line)) {
-                debugLogger.warn(`pgrep: ${line}`);
-                continue;
-              }
-              const bgPid = Number(line);
-              if (bgPid !== result.pid) {
-                backgroundPIDs.push(bgPid);
-              }
-            }
-          } else if (!signal.aborted) {
-            debugLogger.warn("missing pgrep output");
-          }
-        }
-
-        const bgPidMsg =
-          backgroundPIDs.length > 0
-            ? ` PIDs: ${backgroundPIDs.join(", ")}`
-            : pid
-              ? ` PID: ${pid}`
-              : "";
-        const killHint = " (Use kill <pid> to stop)";
-
-        return {
-          llmContent: `Background command started.${bgPidMsg}${killHint}`,
-          returnDisplay: `Background command started.${bgPidMsg}${killHint}`,
-        };
-      }
-
-      let llmContent = "";
-      if (result.aborted) {
-        // Check if it was a timeout or user cancellation
-        const wasTimeout =
-          !this.params.is_background &&
-          effectiveTimeout &&
-          combinedSignal.aborted &&
-          !signal.aborted;
-
-        if (wasTimeout) {
-          llmContent = `Command timed out after ${effectiveTimeout}ms before it could complete.`;
-          if (result.output.trim()) {
-            llmContent += ` Below is the output before it timed out:\n${result.output}`;
-          } else {
-            llmContent += " There was no output before it timed out.";
-          }
-        } else {
-          llmContent =
-            "Command was cancelled by user before it could complete.";
-          if (result.output.trim()) {
-            llmContent += ` Below is the output before it was cancelled:\n${result.output}`;
-          } else {
-            llmContent += " There was no output before it was cancelled.";
-          }
-        }
-      } else {
-        // Create a formatted error string for display, replacing the wrapper command
-        // with the user-facing command.
-        const finalError = result.error
-          ? result.error.message.replace(commandToExecute, this.params.command)
-          : "(none)";
-
-        llmContent = [
-          `Command: ${this.params.command}`,
-          `Directory: ${this.params.directory || "(root)"}`,
-          `Output: ${result.output || "(empty)"}`,
-          `Error: ${finalError}`, // Use the cleaned error string.
-          `Exit Code: ${result.exitCode ?? "(none)"}`,
-          `Signal: ${result.signal ?? "(none)"}`,
-          `Process Group PGID: ${result.pid ?? "(none)"}`,
-        ].join("\n");
-      }
-
-      let returnDisplayMessage = "";
-      if (this.config.getDebugMode()) {
-        returnDisplayMessage = llmContent;
-      } else {
+      void resultPromise.then((result) => {
+        session.running = false;
+        session.exitCode = result.exitCode;
+        session.signal = result.signal;
+        session.errorMessage = result.error?.message ?? null;
         if (result.output.trim()) {
-          returnDisplayMessage = result.output;
-        } else {
-          if (result.aborted) {
-            // Check if it was a timeout or user cancellation
-            const wasTimeout =
-              !this.params.is_background &&
-              effectiveTimeout &&
-              combinedSignal.aborted &&
-              !signal.aborted;
-
-            returnDisplayMessage = wasTimeout
-              ? `Command timed out after ${effectiveTimeout}ms.`
-              : "Command cancelled by user.";
-          } else if (result.signal) {
-            returnDisplayMessage = `Command terminated by signal: ${result.signal}`;
-          } else if (result.error) {
-            returnDisplayMessage = `Command failed: ${getErrorMessage(
-              result.error,
-            )}`;
-          } else if (result.exitCode !== null && result.exitCode !== 0) {
-            returnDisplayMessage = `Command exited with code: ${result.exitCode}`;
-          }
-          // If output is empty and command succeeded (code 0, no error/signal/abort),
-          // returnDisplayMessage will remain empty, which is fine.
+          session.outputLines = [];
+          appendOutput(session, result.output);
         }
-      }
+      });
 
-      // Truncate large output and save full content to a temp file.
-      if (typeof llmContent === "string") {
-        const truncatedResult = await truncateToolOutput(
-          this.config,
-          ShellTool.Name,
-          llmContent,
-        );
-
-        if (truncatedResult.outputFile) {
-          llmContent = truncatedResult.content;
-          returnDisplayMessage +=
-            (returnDisplayMessage ? "\n" : "") +
-            `Output too long and was saved to: ${truncatedResult.outputFile}`;
+      // Use internal abort signal to terminate the running command later.
+      abortController.signal.addEventListener("abort", () => {
+        if (ShellExecutionService.isPtyActive(pid)) {
+          ShellExecutionService.writeToPty(pid, "\u0003");
         }
-      }
+      });
 
-      const executionError = result.error
-        ? {
-            error: {
-              message: result.error.message,
-              type: ToolErrorType.SHELL_EXECUTE_ERROR,
-            },
-          }
-        : {};
+      const started = [
+        `Background command started. PID: ${pid}`,
+        `Use action=list to see sessions, action=output with pid=${pid} to read output, action=input with pid=${pid} to send input, action=stop with pid=${pid} to terminate.`,
+      ].join("\n");
 
       return {
-        llmContent,
-        returnDisplay: returnDisplayMessage,
-        ...executionError,
+        llmContent: started,
+        returnDisplay: `Background command started. PID: ${pid}`,
       };
-    } finally {
-      if (fs.existsSync(tempFilePath)) {
-        fs.unlinkSync(tempFilePath);
+    }
+
+    const result = await resultPromise;
+
+    let llmContent = "";
+    if (result.aborted) {
+      const wasTimeout =
+        !shouldRunInBackground &&
+        effectiveTimeout &&
+        combinedSignal.aborted &&
+        !signal.aborted;
+
+      if (wasTimeout) {
+        llmContent = `Command timed out after ${effectiveTimeout}ms before it could complete.`;
+        if (result.output.trim()) {
+          llmContent += ` Below is the output before it timed out:\n${result.output}`;
+        } else {
+          llmContent += " There was no output before it timed out.";
+        }
+      } else {
+        llmContent = "Command was cancelled by user before it could complete.";
+        if (result.output.trim()) {
+          llmContent += ` Below is the output before it was cancelled:\n${result.output}`;
+        } else {
+          llmContent += " There was no output before it was cancelled.";
+        }
+      }
+    } else {
+      const finalError = result.error
+        ? result.error.message.replace(commandToExecute, this.params.command ?? "")
+        : "(none)";
+
+      llmContent = [
+        `Command: ${this.params.command}`,
+        `Directory: ${this.params.directory || "(root)"}`,
+        `Output: ${result.output || "(empty)"}`,
+        `Error: ${finalError}`,
+        `Exit Code: ${result.exitCode ?? "(none)"}`,
+        `Signal: ${result.signal ?? "(none)"}`,
+        `Process Group PGID: ${result.pid ?? "(none)"}`,
+      ].join("\n");
+    }
+
+    let returnDisplayMessage = "";
+    if (this.config.getDebugMode()) {
+      returnDisplayMessage = llmContent;
+    } else {
+      if (result.output.trim()) {
+        returnDisplayMessage = result.output;
+      } else {
+        if (result.aborted) {
+          const wasTimeout =
+            !shouldRunInBackground &&
+            effectiveTimeout &&
+            combinedSignal.aborted &&
+            !signal.aborted;
+
+          returnDisplayMessage = wasTimeout
+            ? `Command timed out after ${effectiveTimeout}ms.`
+            : "Command cancelled by user.";
+        } else if (result.signal) {
+          returnDisplayMessage = `Command terminated by signal: ${result.signal}`;
+        } else if (result.error) {
+          returnDisplayMessage = `Command failed: ${getErrorMessage(
+            result.error,
+          )}`;
+        } else if (result.exitCode !== null && result.exitCode !== 0) {
+          returnDisplayMessage = `Command exited with code: ${result.exitCode}`;
+        }
       }
     }
+
+    if (typeof llmContent === "string") {
+      const truncatedResult = await truncateToolOutput(
+        this.config,
+        ShellTool.Name,
+        llmContent,
+      );
+
+      if (truncatedResult.outputFile) {
+        llmContent = truncatedResult.content;
+        returnDisplayMessage +=
+          (returnDisplayMessage ? "\n" : "") +
+          `Output too long and was saved to: ${truncatedResult.outputFile}`;
+      }
+    }
+
+    const executionError = result.error
+      ? {
+          error: {
+            message: result.error.message,
+            type: ToolErrorType.SHELL_EXECUTE_ERROR,
+          },
+        }
+      : {};
+
+    return {
+      llmContent,
+      returnDisplay: returnDisplayMessage,
+      ...executionError,
+    };
+  }
+
+  private listBackgroundSessions(): ToolResult {
+    const sessions = [...backgroundSessions.values()]
+      .filter((session) => session.running)
+      .sort((a, b) => a.startedAt - b.startedAt);
+    if (sessions.length === 0) {
+      return {
+        llmContent: "No running background shell sessions found.",
+        returnDisplay: "No running background shell sessions found.",
+      };
+    }
+
+    const lines = sessions.map((session) => {
+      const status = session.running ? "running" : "exited";
+      const exitText = session.running
+        ? ""
+        : `, exit=${session.exitCode ?? "none"}, signal=${session.signal ?? "none"}`;
+      return `PID=${session.pid}, status=${status}, cwd=${session.directory}, command=${session.command}${exitText}`;
+    });
+
+    const content = lines.join("\n");
+    return {
+      llmContent: content,
+      returnDisplay: content,
+    };
+  }
+
+  private readBackgroundOutput(): ToolResult {
+    const pid = this.params.pid ?? -1;
+    const session = backgroundSessions.get(pid);
+    if (!session) {
+      return {
+        llmContent: `No background shell session found for PID ${pid}.`,
+        returnDisplay: `No background shell session found for PID ${pid}.`,
+      };
+    }
+
+    const tailLines =
+      this.params.tail_lines ?? DEFAULT_BACKGROUND_OUTPUT_TAIL_LINES;
+    const lines = session.outputLines.slice(-tailLines);
+    const output = lines.join("\n").trim();
+    const status = session.running ? "running" : "exited";
+    const header = `PID: ${pid}\nStatus: ${status}\nCommand: ${session.command}`;
+    const body = output ? `Output:\n${output}` : "Output: (empty)";
+
+    return {
+      llmContent: `${header}\n${body}`,
+      returnDisplay: output || "(empty)",
+    };
+  }
+
+  private sendInputToBackgroundSession(): ToolResult {
+    const pid = this.params.pid ?? -1;
+    const session = backgroundSessions.get(pid);
+    if (!session) {
+      return {
+        llmContent: `No background shell session found for PID ${pid}.`,
+        returnDisplay: `No background shell session found for PID ${pid}.`,
+      };
+    }
+
+    if (!session.running || !ShellExecutionService.isPtyActive(pid)) {
+      session.running = false;
+      return {
+        llmContent: `Background shell session PID ${pid} is not running.`,
+        returnDisplay: `Background shell session PID ${pid} is not running.`,
+      };
+    }
+
+    const input = this.params.input ?? "";
+    ShellExecutionService.writeToPty(pid, input);
+    appendOutput(session, `[stdin] ${input}`);
+
+    return {
+      llmContent: `Sent input to PID ${pid}.`,
+      returnDisplay: `Sent input to PID ${pid}.`,
+    };
+  }
+
+  private stopBackgroundSession(): ToolResult {
+    const pid = this.params.pid ?? -1;
+    const session = backgroundSessions.get(pid);
+    if (!session) {
+      return {
+        llmContent: `No background shell session found for PID ${pid}.`,
+        returnDisplay: `No background shell session found for PID ${pid}.`,
+      };
+    }
+
+    if (!session.running || !ShellExecutionService.isPtyActive(pid)) {
+      session.running = false;
+      return {
+        llmContent: `Background shell session PID ${pid} is already stopped.`,
+        returnDisplay: `Background shell session PID ${pid} is already stopped.`,
+      };
+    }
+
+    session.abortController.abort();
+    session.running = false;
+
+    return {
+      llmContent: `Stop signal sent to background shell session PID ${pid}.`,
+      returnDisplay: `Stop signal sent to PID ${pid}.`,
+    };
   }
 
   private addCoAuthorToGitCommit(command: string): string {
@@ -548,7 +738,8 @@ function getShellToolDescription(): string {
 IMPORTANT: This tool is for terminal operations like git, npm, docker, etc. DO NOT use it for file operations (reading, writing, editing, searching, finding files) - use the specialized tools for this instead.
 
 **Usage notes**:
-- The command argument is required.
+- Default action is \'start\'. You can also use action=\'list\'|\'output\'|\'input\'|\'stop\' to manage background sessions by PID.
+- For action=start, the command argument is required.
 - You can specify an optional timeout in milliseconds (up to 600000ms / 10 minutes). If not specified, commands will timeout after 120000ms (2 minutes).
 - It is very helpful if you write a clear, concise description of what this command does in 5-10 words.
 
@@ -613,6 +804,12 @@ export class ShellTool extends BaseDeclarativeTool<
       {
         type: "object",
         properties: {
+          action: {
+            type: "string",
+            enum: ["start", "list", "output", "input", "stop"],
+            description:
+              "Optional action. Defaults to 'start'. Use 'list' to show background sessions, 'output' to read output by pid, 'input' to send input by pid, and 'stop' to terminate by pid.",
+          },
           command: {
             type: "string",
             description: getCommandDescription(),
@@ -636,8 +833,23 @@ export class ShellTool extends BaseDeclarativeTool<
             description:
               "(OPTIONAL) The absolute path of the directory to run the command in. If not provided, the project root directory is used. Must be a directory within the workspace and must already exist.",
           },
+          pid: {
+            type: "number",
+            description:
+              "PID of a background shell session. Required for action=output|input|stop.",
+          },
+          input: {
+            type: "string",
+            description:
+              "Text to send to a background shell session for action=input.",
+          },
+          tail_lines: {
+            type: "number",
+            description:
+              "Number of trailing lines to read for action=output. Defaults to 200.",
+          },
         },
-        required: ["command"],
+        required: [],
       },
       false, // output is not markdown
       true, // output can be updated
@@ -647,10 +859,57 @@ export class ShellTool extends BaseDeclarativeTool<
   protected override validateToolParamValues(
     params: ShellToolParams,
   ): string | null {
+    if (
+      params.action !== undefined &&
+      !["start", "list", "output", "input", "stop"].includes(
+        params.action,
+      )
+    ) {
+      return "action must be one of: start, list, output, input, stop.";
+    }
+
+    const action = normalizeShellAction(params.action);
+
+    if (params.pid !== undefined) {
+      if (!Number.isInteger(params.pid) || params.pid <= 0) {
+        return "pid must be a positive integer.";
+      }
+    }
+
+    if (params.tail_lines !== undefined) {
+      if (!Number.isInteger(params.tail_lines) || params.tail_lines <= 0) {
+        return "tail_lines must be a positive integer.";
+      }
+      if (params.tail_lines > MAX_BACKGROUND_OUTPUT_LINES) {
+        return `tail_lines cannot exceed ${MAX_BACKGROUND_OUTPUT_LINES}.`;
+      }
+    }
+
+    if (action === "list") {
+      return null;
+    }
+
+    if (action === "output" || action === "stop") {
+      if (params.pid === undefined) {
+        return `pid is required for action=${action}.`;
+      }
+      return null;
+    }
+
+    if (action === "input") {
+      if (params.pid === undefined) {
+        return "pid is required for action=input.";
+      }
+      if (typeof params.input !== "string") {
+        return "input is required for action=input.";
+      }
+      return null;
+    }
+
     // NOTE: Permission checks (read-only detection, PM rules) are handled at
     // L3 (getDefaultPermission) and L4 (PM override) in coreToolScheduler.
     // This method only performs pure parameter validation.
-    if (!params.command.trim()) {
+    if (!params.command?.trim()) {
       return "Command cannot be empty.";
     }
     if (getCommandRoots(params.command).length === 0) {

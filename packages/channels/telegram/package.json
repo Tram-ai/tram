@@ -1,6 +1,6 @@
 {
-  "name": "@qwen-code/channel-telegram",
-  "version": "0.0.9-U0145",
+  "name": "@tram-ai/channel-telegram",
+  "version": "0.1.0-U0145",
   "description": "Telegram channel adapter for TRAM",
   "type": "module",
   "main": "dist/index.js",
@@ -18,7 +18,7 @@
     "build": "tsc --build"
   },
   "dependencies": {
-    "@qwen-code/channel-base": "file:../base",
+    "@tram-ai/channel-base": "file:../base",
     "grammy": "^1.41.1",
     "https-proxy-agent": "^7.0.6",
     "telegram-markdown-formatter": "^0.1.2"

@@ -1,6 +1,6 @@
 {
   "name": "@tram-ai/channel-sse",
-  "version": "0.0.9-U0145",
+  "version": "0.1.0-U0145",
   "description": "Server-Sent Events (SSE) channel adapter for TRAM",
   "type": "module",
   "main": "dist/index.js",
@@ -18,7 +18,7 @@
     "build": "tsc --build"
   },
   "dependencies": {
-    "@qwen-code/channel-base": "file:../base"
+    "@tram-ai/channel-base": "file:../base"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

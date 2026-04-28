@@ -44,7 +44,7 @@
     "@tram-ai/channel-telegram": "file:../channels/telegram",
     "@tram-ai/channel-weixin": "file:../channels/weixin",
     "@tram-ai/channel-dingtalk": "file:../channels/dingtalk",
-    "@qwen-code/channel-plugin-example": "file:../channels/plugin-example",
+    "@tram-ai/channel-plugin-example": "file:../channels/plugin-example",
     "@tram-ai/tram-core": "file:../core",
     "@tram-ai/web-templates": "file:../web-templates",
     "@types/update-notifier": "^6.0.8",

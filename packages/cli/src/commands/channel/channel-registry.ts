@@ -10,14 +10,13 @@ let extensionsPromise: Promise<void> | null = null;
 function ensureBuiltins(): Promise<void> {
   if (!builtinsPromise) {
     builtinsPromise = (async () => {
-      const [telegram, weixin, dingtalk, pluginExample] = await Promise.all([
+      const [telegram, weixin, dingtalk] = await Promise.all([
         import("@tram-ai/channel-telegram"),
         import("@tram-ai/channel-weixin"),
         import("@tram-ai/channel-dingtalk"),
-        import("@qwen-code/channel-plugin-example"),
       ]);
 
-      for (const mod of [telegram, weixin, dingtalk, pluginExample]) {
+      for (const mod of [telegram, weixin, dingtalk]) {
         registry.set(mod.plugin.channelType, mod.plugin);
       }
     })();

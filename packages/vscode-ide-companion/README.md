@@ -68,7 +68,7 @@ By installing this extension, you agree to the [Terms of Service](https://github
 =======
 By installing this extension, you agree to the [Terms of Service](https://qwenlm.github.io/qwen-code-docs/en/users/support/tos-privacy/).
 
-> > > > > > > v0.0.9-U0145
+> > > > > > > v0.1.0-U0145
 
 ## License
 

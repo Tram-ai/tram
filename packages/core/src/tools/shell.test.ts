@@ -15,12 +15,24 @@ import {
 } from "vitest";
 
 const mockShellExecutionService = vi.hoisted(() => vi.fn());
+const mockWriteToPty = vi.hoisted(() => vi.fn());
+const mockIsPtyActive = vi.hoisted(() => vi.fn());
 vi.mock("../services/shellExecutionService.js", () => ({
-  ShellExecutionService: { execute: mockShellExecutionService },
+  ShellExecutionService: {
+    execute: mockShellExecutionService,
+    writeToPty: mockWriteToPty,
+    isPtyActive: mockIsPtyActive,
+  },
 }));
-vi.mock("fs");
-vi.mock("os");
-vi.mock("crypto");
+vi.mock("os", async () => {
+  const actual = await vi.importActual<typeof import("node:os")>("node:os");
+  return {
+    ...actual,
+    platform: vi.fn(() => "linux"),
+    tmpdir: vi.fn(() => "/tmp"),
+    homedir: vi.fn(() => "/home/test"),
+  };
+});
 
 import { isCommandAllowed } from "../utils/shell-utils.js";
 import { ShellTool } from "./shell.js";
@@ -29,11 +41,7 @@ import {
   type ShellExecutionResult,
   type ShellOutputEvent,
 } from "../services/shellExecutionService.js";
-import * as fs from "node:fs";
 import * as os from "node:os";
-import { EOL } from "node:os";
-import * as path from "node:path";
-import * as crypto from "node:crypto";
 import { ToolErrorType } from "./tool-error.js";
 import { OUTPUT_UPDATE_INTERVAL_MS } from "./shell.js";
 import { createMockWorkspaceContext } from "../test-utils/mockWorkspaceContext.js";
@@ -47,6 +55,7 @@ describe("ShellTool", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockIsPtyActive.mockReturnValue(true);
 
     mockConfig = {
       getCoreTools: vi.fn().mockReturnValue([]),
@@ -78,9 +87,7 @@ describe("ShellTool", () => {
 
     vi.mocked(os.platform).mockReturnValue("linux");
     vi.mocked(os.tmpdir).mockReturnValue("/tmp");
-    (vi.mocked(crypto.randomBytes) as Mock).mockReturnValue(
-      Buffer.from("abcdef", "hex"),
-    );
+    vi.mocked(os.homedir).mockReturnValue("/home/test");
 
     // Capture the output callback to simulate streaming events from the service
     mockShellExecutionService.mockImplementation((_cmd, _cwd, callback) => {
@@ -271,7 +278,7 @@ describe("ShellTool", () => {
       resolveExecutionPromise(fullResult);
     };
 
-    it("should wrap background command on linux and parse pgrep output", async () => {
+    it("should start a managed background session with pid", async () => {
       const invocation = shellTool.build({
         command: "my-command",
         is_background: true,
@@ -279,51 +286,19 @@ describe("ShellTool", () => {
       const promise = invocation.execute(mockAbortSignal);
       resolveShellExecution({ pid: 54321 });
 
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(`54321${EOL}54322${EOL}`); // Service PID and background PID
-
       const result = await promise;
-
-      const tmpFile = path.join(os.tmpdir(), "shell_pgrep_abcdef.tmp");
-      const wrappedCommand = `{ my-command & }; __code=$?; pgrep -g 0 >${tmpFile} 2>&1; exit $__code;`;
       expect(mockShellExecutionService).toHaveBeenCalledWith(
-        wrappedCommand,
+        "my-command",
         "/test/dir",
         expect.any(Function),
         expect.any(AbortSignal),
-        false,
+        true,
         {},
       );
-      expect(result.llmContent).toContain("PIDs: 54322");
-      expect(vi.mocked(fs.unlinkSync)).toHaveBeenCalledWith(tmpFile);
+      expect(result.llmContent).toContain("PID: 12345");
     });
 
-    it("should add ampersand to command when is_background is true and command does not end with &", async () => {
-      const invocation = shellTool.build({
-        command: "npm start",
-        is_background: true,
-      });
-      const promise = invocation.execute(mockAbortSignal);
-      resolveShellExecution({ pid: 54321 });
-
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue("54321\n54322\n");
-
-      await promise;
-
-      const tmpFile = path.join(os.tmpdir(), "shell_pgrep_abcdef.tmp");
-      const wrappedCommand = `{ npm start & }; __code=$?; pgrep -g 0 >${tmpFile} 2>&1; exit $__code;`;
-      expect(mockShellExecutionService).toHaveBeenCalledWith(
-        wrappedCommand,
-        expect.any(String),
-        expect.any(Function),
-        expect.any(AbortSignal),
-        false,
-        {},
-      );
-    });
-
-    it("should not add extra ampersand when is_background is true and command already ends with &", async () => {
+    it("should strip trailing ampersand for background session", async () => {
       const invocation = shellTool.build({
         command: "npm start &",
         is_background: true,
@@ -331,21 +306,89 @@ describe("ShellTool", () => {
       const promise = invocation.execute(mockAbortSignal);
       resolveShellExecution({ pid: 54321 });
 
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue("54321\n54322\n");
-
       await promise;
 
-      const tmpFile = path.join(os.tmpdir(), "shell_pgrep_abcdef.tmp");
-      const wrappedCommand = `{ npm start & }; __code=$?; pgrep -g 0 >${tmpFile} 2>&1; exit $__code;`;
       expect(mockShellExecutionService).toHaveBeenCalledWith(
-        wrappedCommand,
+        "npm start",
         expect.any(String),
         expect.any(Function),
         expect.any(AbortSignal),
-        false,
+        true,
         {},
       );
+    });
+
+    it("should support listing running background sessions", async () => {
+      const startInvocation = shellTool.build({
+        command: "npm run dev",
+        is_background: true,
+      });
+      await startInvocation.execute(mockAbortSignal);
+
+      const invocation = shellTool.build({
+        action: "list",
+      });
+
+      const result = await invocation.execute(mockAbortSignal);
+      expect(result.llmContent).toContain("running");
+    });
+
+    it("should support sending input to background session by pid", async () => {
+      const startInvocation = shellTool.build({
+        command: "npm run dev",
+        is_background: true,
+      });
+      const startResult = await startInvocation.execute(mockAbortSignal);
+      expect(startResult.llmContent).toContain("PID: 12345");
+
+      const inputInvocation = shellTool.build({
+        action: "input",
+        pid: 12345,
+        input: "status\n",
+      });
+      const inputResult = await inputInvocation.execute(mockAbortSignal);
+
+      expect(inputResult.llmContent).toContain("Sent input to PID 12345");
+      expect(mockWriteToPty).toHaveBeenCalledWith(12345, "status\n");
+    });
+
+    it("should support reading output from background session by pid", async () => {
+      const startInvocation = shellTool.build({
+        command: "npm run dev",
+        is_background: true,
+      });
+      await startInvocation.execute(mockAbortSignal);
+
+      mockShellOutputCallback({
+        type: "data",
+        chunk: "server started\nready",
+      });
+
+      const outputInvocation = shellTool.build({
+        action: "output",
+        pid: 12345,
+      });
+      const outputResult = await outputInvocation.execute(mockAbortSignal);
+
+      expect(outputResult.llmContent).toContain("server started");
+      expect(outputResult.llmContent).toContain("ready");
+    });
+
+    it("should support stopping background session by pid", async () => {
+      const startInvocation = shellTool.build({
+        command: "npm run dev",
+        is_background: true,
+      });
+      await startInvocation.execute(mockAbortSignal);
+
+      const stopInvocation = shellTool.build({
+        action: "stop",
+        pid: 12345,
+      });
+      const stopResult = await stopInvocation.execute(mockAbortSignal);
+
+      expect(stopResult.llmContent).toContain("Stop signal sent");
+      expect(mockWriteToPty).toHaveBeenCalledWith(12345, "\u0003");
     });
 
     it("should not add ampersand when is_background is false", async () => {
@@ -358,7 +401,6 @@ describe("ShellTool", () => {
 
       await promise;
 
-      // Foreground commands should not be wrapped with pgrep
       expect(mockShellExecutionService).toHaveBeenCalledWith(
         "npm test",
         expect.any(String),
@@ -382,7 +424,6 @@ describe("ShellTool", () => {
       resolveShellExecution();
       await promise;
 
-      // Foreground commands should not be wrapped with pgrep
       expect(mockShellExecutionService).toHaveBeenCalledWith(
         "ls",
         "/test/dir/subdir",
@@ -479,21 +520,17 @@ describe("ShellTool", () => {
       ).toThrow("Directory must be an absolute path.");
     });
 
-    it("should clean up the temp file on synchronous execution error", async () => {
+    it("should surface synchronous execution errors", async () => {
       const error = new Error("sync spawn error");
       mockShellExecutionService.mockImplementation(() => {
         throw error;
       });
-      vi.mocked(fs.existsSync).mockReturnValue(true); // Pretend the file exists
 
       const invocation = shellTool.build({
         command: "a-command",
         is_background: false,
       });
       await expect(invocation.execute(mockAbortSignal)).rejects.toThrow(error);
-
-      const tmpFile = path.join(os.tmpdir(), "shell_pgrep_abcdef.tmp");
-      expect(vi.mocked(fs.unlinkSync)).toHaveBeenCalledWith(tmpFile);
     });
 
     describe("Streaming to `updateOutput`", () => {
@@ -1047,7 +1084,7 @@ describe("ShellTool", () => {
         expect.any(String),
         expect.any(Function),
         expect.any(AbortSignal),
-        false,
+        true,
         {},
       );
     });
@@ -1206,7 +1243,7 @@ describe("ShellTool", () => {
         expect.any(String),
         expect.any(Function),
         mockAbortSignal,
-        false,
+        true,
         {},
       );
     });

@@ -1,6 +1,6 @@
 {
-  "name": "@qwen-code/channel-dingtalk",
-  "version": "0.0.9-U0145",
+  "name": "@tram-ai/channel-dingtalk",
+  "version": "0.1.0-U0145",
   "description": "DingTalk channel adapter for TRAM",
   "type": "module",
   "main": "dist/index.js",
@@ -18,7 +18,7 @@
     "build": "tsc --build"
   },
   "dependencies": {
-    "@qwen-code/channel-base": "file:../base",
+    "@tram-ai/channel-base": "file:../base",
     "dingtalk-stream-sdk-nodejs": "^2.0.4"
   },
   "devDependencies": {

@@ -22,7 +22,7 @@ vi.mock(
   () => createPlugin("dingtalk", "DingTalk")
 );
 vi.mock(
-  "@qwen-code/channel-plugin-example",
+  "@tram-ai/channel-plugin-example",
   () => createPlugin("plugin-example", "Plugin Example"),
 );
 

@@ -378,7 +378,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}"
 
-      - name: "Publish @qwen-code/channel-base"
+      - name: "Publish @tram-ai/channel-base"
         working-directory: "packages/channels/base"
         run: |-
           npm publish --access public --tag=${{ needs.prepare.outputs.npm_tag }} ${{ needs.prepare.outputs.is_dry_run == 'true' && '--dry-run' || '' }}
