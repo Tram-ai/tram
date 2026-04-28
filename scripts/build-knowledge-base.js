@@ -11,7 +11,7 @@
  *                           (only generated when SILICONFLOW_API_KEY is set)
  *
  * Environment variables:
- *   DOCS_DIR             — source directory (default: "docs")
+ *   DOCS_DIR             — source directory (default: "knowledge")
  *   SILICONFLOW_API_KEY  — if set, embeddings are generated
  *   OUTPUT_DIR           — output directory (default: "knowledge-base-output")
  *   EMBED_MIN_INTERVAL_MS      — minimum spacing between embedding requests
@@ -22,8 +22,8 @@
  *   EMBED_RETRY_MAX_DELAY_MS   — maximum retry backoff delay (default: 60000)
  */
 
-import fs from "node:fs";
-import path from "node:path";
+const fs = require("fs");
+const path = require("path");
 
 function readPositiveIntEnv(name, fallback) {
   const raw = process.env[name];
@@ -36,9 +36,9 @@ function readPositiveIntEnv(name, fallback) {
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const DOCS_DIR = process.env.DOCS_DIR || "docs";
+const DOCS_DIR = process.env.DOCS_DIR || "knowledge";
 const OUTPUT_DIR = process.env.OUTPUT_DIR || "knowledge-base-output";
-const API_KEY = process.env.SILICONFLOW_API_KEY || "";
+const API_KEY = process.env.SILICONFLOW_API_KEY || "sk-ycwqerwvhazoynbtbnslaijicnrndseggticxcfskimkaway";
 const EMBEDDING_MODEL = "BAAI/bge-m3";
 const EMBEDDING_DIM = 1024;
 const SILICONFLOW_BASE = "https://api.siliconflow.cn/v1";
