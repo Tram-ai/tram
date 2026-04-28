@@ -10,11 +10,11 @@
  * branch in a bordered info panel.
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { shortenPath, tildeifyPath } from '@qwen-code/qwen-code-core';
-import { theme } from '../../semantic-colors.js';
-import { useTerminalSize } from '../../hooks/useTerminalSize.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { shortenPath, tildeifyPath } from "@tram-ai/tram-core";
+import { theme } from "../../semantic-colors.js";
+import { useTerminalSize } from "../../hooks/useTerminalSize.js";
 
 interface AgentHeaderProps {
   modelId: string;
@@ -34,7 +34,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
   const displayPath = shortenPath(tildeifyPath(workingDirectory), maxPathLen);
 
   const modelText =
-    modelName && modelName !== modelId ? `${modelId} (${modelName})` : modelId;
+    modelName && modelName !== modelId ? `${modelName}` : modelId;
 
   return (
     <Box
@@ -46,16 +46,16 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
       paddingX={1}
     >
       <Text>
-        <Text color={theme.text.secondary}>{'Model:  '}</Text>
+        <Text color={theme.text.secondary}>{"Model:  "}</Text>
         <Text color={theme.text.primary}>{modelText}</Text>
       </Text>
       <Text>
-        <Text color={theme.text.secondary}>{'Path:   '}</Text>
+        <Text color={theme.text.secondary}>{"Path:   "}</Text>
         <Text color={theme.text.primary}>{displayPath}</Text>
       </Text>
       {gitBranch && (
         <Text>
-          <Text color={theme.text.secondary}>{'Branch: '}</Text>
+          <Text color={theme.text.secondary}>{"Branch: "}</Text>
           <Text color={theme.text.primary}>{gitBranch}</Text>
         </Text>
       )}

@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import { type SubagentConfig } from '@tram-ai/tram-core';
-import { createDebugLogger } from '@tram-ai/tram-core';
-import type { StepNavigationProps } from '../types.js';
-import { theme } from '../../../semantic-colors.js';
-import { useKeypress } from '../../../hooks/useKeypress.js';
-import { t } from '../../../../i18n/index.js';
+import { Box, Text } from "ink";
+import { type SubagentConfig } from "@tram-ai/tram-core";
+import { createDebugLogger } from "@tram-ai/tram-core";
+import type { StepNavigationProps } from "../types.js";
+import { theme } from "../../../semantic-colors.js";
+import { useKeypress } from "../../../hooks/useKeypress.js";
+import { t } from "../../../../i18n/index.js";
 
 interface AgentDeleteStepProps extends StepNavigationProps {
   selectedAgent: SubagentConfig | null;
   onDelete: (agent: SubagentConfig) => Promise<void>;
 }
 
-const debugLogger = createDebugLogger('AGENT_DELETE_STEP');
+const debugLogger = createDebugLogger("AGENT_DELETE_STEP");
 
 export function AgentDeleteStep({
   selectedAgent,
@@ -28,14 +28,14 @@ export function AgentDeleteStep({
     async (key) => {
       if (!selectedAgent) return;
 
-      if (key.name === 'y' || key.name === 'return') {
+      if (key.name === "y" || key.name === "return") {
         try {
           await onDelete(selectedAgent);
           // Navigation will be handled by the parent component after successful deletion
         } catch (error) {
-          debugLogger.error('Failed to delete agent:', error);
+          debugLogger.error("Failed to delete agent:", error);
         }
-      } else if (key.name === 'n') {
+      } else if (key.name === "n") {
         onNavigateBack();
       }
     },
@@ -45,7 +45,7 @@ export function AgentDeleteStep({
   if (!selectedAgent) {
     return (
       <Box>
-        <Text color={theme.status.error}>{t('No agent selected')}</Text>
+        <Text color={theme.status.error}>{t("No agent selected")}</Text>
       </Box>
     );
   }

@@ -1,5 +1,5 @@
-import type { SenderPolicy } from './types.js';
-import type { PairingStore } from './PairingStore.js';
+import type { SenderPolicy } from "./types.js";
+import type { PairingStore } from "./PairingStore.js";
 
 export interface SenderCheckResult {
   allowed: boolean;
@@ -23,11 +23,11 @@ export class SenderGate {
 
   check(senderId: string, senderName?: string): SenderCheckResult {
     switch (this.policy) {
-      case 'open':
+      case "open":
         return { allowed: true };
-      case 'allowlist':
+      case "allowlist":
         return { allowed: this.allowedUsers.has(senderId) };
-      case 'pairing': {
+      case "pairing": {
         // Check static allowlist first
         if (this.allowedUsers.has(senderId)) {
           return { allowed: true };

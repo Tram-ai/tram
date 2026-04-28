@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { formatDuration } from '../utils/formatters.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import { formatDuration } from "../utils/formatters.js";
 import {
   calculateAverageLatency,
   calculateCacheHitRate,
   calculateErrorRate,
-} from '../utils/computeStats.js';
-import type { ModelMetrics } from '../contexts/SessionContext.js';
-import { useSessionStats } from '../contexts/SessionContext.js';
-import { t } from '../../i18n/index.js';
+} from "../utils/computeStats.js";
+import type { ModelMetrics } from "../contexts/SessionContext.js";
+import { useSessionStats } from "../contexts/SessionContext.js";
+import { t } from "../../i18n/index.js";
 
 const METRIC_COL_WIDTH = 28;
 const MODEL_COL_WIDTH = 22;
@@ -73,7 +73,7 @@ export const ModelStatsDisplay: React.FC<ModelStatsDisplayProps> = ({
         width={width}
       >
         <Text color={theme.text.primary}>
-          {t('No API calls have been made in this session.')}
+          {t("No API calls have been made in this session.")}
         </Text>
       </Box>
     );
@@ -103,7 +103,7 @@ export const ModelStatsDisplay: React.FC<ModelStatsDisplayProps> = ({
       width={width}
     >
       <Text bold color={theme.text.accent}>
-        {t('Model Stats For Nerds')}
+        {t("Model Stats For Nerds")}
       </Text>
       <Box height={1} />
 
@@ -111,7 +111,7 @@ export const ModelStatsDisplay: React.FC<ModelStatsDisplayProps> = ({
       <Box>
         <Box width={METRIC_COL_WIDTH}>
           <Text bold color={theme.text.primary}>
-            {t('Metric')}
+            {t("Metric")}
           </Text>
         </Box>
         {modelNames.map((name) => (
@@ -134,13 +134,13 @@ export const ModelStatsDisplay: React.FC<ModelStatsDisplayProps> = ({
       />
 
       {/* API Section */}
-      <StatRow title={t('API')} values={[]} isSection />
+      <StatRow title={t("API")} values={[]} isSection />
       <StatRow
-        title={t('Requests')}
+        title={t("Requests")}
         values={getModelValues((m) => m.api.totalRequests.toLocaleString())}
       />
       <StatRow
-        title={t('Errors')}
+        title={t("Errors")}
         values={getModelValues((m) => {
           const errorRate = calculateErrorRate(m);
           return (
@@ -155,7 +155,7 @@ export const ModelStatsDisplay: React.FC<ModelStatsDisplayProps> = ({
         })}
       />
       <StatRow
-        title={t('Avg Latency')}
+        title={t("Avg Latency")}
         values={getModelValues((m) => {
           const avgLatency = calculateAverageLatency(m);
           return formatDuration(avgLatency);
@@ -165,9 +165,9 @@ export const ModelStatsDisplay: React.FC<ModelStatsDisplayProps> = ({
       <Box height={1} />
 
       {/* Tokens Section */}
-      <StatRow title={t('Tokens')} values={[]} isSection />
+      <StatRow title={t("Tokens")} values={[]} isSection />
       <StatRow
-        title={t('Total')}
+        title={t("Total")}
         values={getModelValues((m) => (
           <Text color={theme.status.warning}>
             {m.tokens.total.toLocaleString()}
@@ -175,13 +175,13 @@ export const ModelStatsDisplay: React.FC<ModelStatsDisplayProps> = ({
         ))}
       />
       <StatRow
-        title={t('Prompt')}
+        title={t("Prompt")}
         isSubtle
         values={getModelValues((m) => m.tokens.prompt.toLocaleString())}
       />
       {hasCached && (
         <StatRow
-          title={t('Cached')}
+          title={t("Cached")}
           isSubtle
           values={getModelValues((m) => {
             const cacheHitRate = calculateCacheHitRate(m);
@@ -195,20 +195,20 @@ export const ModelStatsDisplay: React.FC<ModelStatsDisplayProps> = ({
       )}
       {hasThoughts && (
         <StatRow
-          title={t('Thoughts')}
+          title={t("Thoughts")}
           isSubtle
           values={getModelValues((m) => m.tokens.thoughts.toLocaleString())}
         />
       )}
       {hasTool && (
         <StatRow
-          title={t('Tool')}
+          title={t("Tool")}
           isSubtle
           values={getModelValues((m) => m.tokens.tool.toLocaleString())}
         />
       )}
       <StatRow
-        title={t('Output')}
+        title={t("Output")}
         isSubtle
         values={getModelValues((m) => m.tokens.candidates.toLocaleString())}
       />

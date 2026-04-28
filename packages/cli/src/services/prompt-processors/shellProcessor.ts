@@ -12,16 +12,16 @@ import {
   ShellExecutionService,
   flatMapTextParts,
   checkArgumentSafety,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 
-import type { CommandContext } from '../../ui/commands/types.js';
-import type { IPromptProcessor, PromptPipelineContent } from './types.js';
+import type { CommandContext } from "../../ui/commands/types.js";
+import type { IPromptProcessor, PromptPipelineContent } from "./types.js";
 import {
   SHELL_INJECTION_TRIGGER,
   SHORTHAND_ARGS_PLACEHOLDER,
-} from './types.js';
-import { extractInjections, type Injection } from './injectionParser.js';
-import { themeManager } from '../../ui/themes/theme-manager.js';
+} from "./types.js";
+import { extractInjections, type Injection } from "./injectionParser.js";
+import { themeManager } from "../../ui/themes/theme-manager.js";
 
 export class ConfirmationRequiredError extends Error {
   constructor(
@@ -29,7 +29,7 @@ export class ConfirmationRequiredError extends Error {
     public commandsToConfirm: string[],
   ) {
     super(message);
-    this.name = 'ConfirmationRequiredError';
+    this.name = "ConfirmationRequiredError";
   }
 }
 
@@ -68,7 +68,7 @@ export class ShellProcessor implements IPromptProcessor {
     prompt: string,
     context: CommandContext,
   ): Promise<PromptPipelineContent> {
-    const userArgsRaw = context.invocation?.args || '';
+    const userArgsRaw = context.invocation?.args || "";
 
     if (!prompt.includes(SHELL_INJECTION_TRIGGER)) {
       return [
@@ -103,7 +103,7 @@ export class ShellProcessor implements IPromptProcessor {
     // Check safety of the value that will be used for $ARGUMENTS (after removing outer quotes)
     let userArgsForArgumentsPlaceholder = userArgsRaw.replace(
       /^'([\s\S]*?)'$/,
-      '$1',
+      "$1",
     );
     const argumentSafety = checkArgumentSafety(userArgsForArgumentsPlaceholder);
     if (!argumentSafety.isSafe) {
@@ -114,13 +114,13 @@ export class ShellProcessor implements IPromptProcessor {
       (injection) => {
         const command = injection.content;
 
-        if (command === '') {
+        if (command === "") {
           return { ...injection, resolvedCommand: undefined };
         }
 
         const resolvedCommand = command
           .replaceAll(SHORTHAND_ARGS_PLACEHOLDER, userArgsEscaped) // Replace {{args}}
-          .replaceAll('$ARGUMENTS', userArgsForArgumentsPlaceholder);
+          .replaceAll("$ARGUMENTS", userArgsForArgumentsPlaceholder);
         return { ...injection, resolvedCommand };
       },
     );
@@ -138,13 +138,13 @@ export class ShellProcessor implements IPromptProcessor {
       // Determine if this command is explicitly auto-approved via PermissionManager
       const pm = config.getPermissionManager?.();
       const isAllowedBySettings = pm
-        ? (await pm.isCommandAllowed(command)) === 'allow'
+        ? (await pm.isCommandAllowed(command)) === "allow"
         : false;
 
       if (!allAllowed) {
         if (isHardDenial) {
           throw new Error(
-            `${this.commandName} cannot be run. Blocked command: "${command}". Reason: ${blockReason || 'Blocked by configuration.'}`,
+            `${this.commandName} cannot be run. Blocked command: "${command}". Reason: ${blockReason || "Blocked by configuration."}`,
           );
         }
 
@@ -165,12 +165,12 @@ export class ShellProcessor implements IPromptProcessor {
     // Handle confirmation requirements.
     if (commandsToConfirm.size > 0) {
       throw new ConfirmationRequiredError(
-        'Shell command confirmation required',
+        "Shell command confirmation required",
         Array.from(commandsToConfirm),
       );
     }
 
-    let processedPrompt = '';
+    let processedPrompt = "";
     let lastIndex = 0;
 
     for (const injection of resolvedInjections) {

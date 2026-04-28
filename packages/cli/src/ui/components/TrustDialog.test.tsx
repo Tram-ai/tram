@@ -6,14 +6,14 @@
 
 /// <reference types="vitest/globals" />
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { Mock } from 'vitest';
-import { renderWithProviders } from '../../test-utils/render.js';
-import { TrustDialog } from './TrustDialog.js';
-import { TrustLevel } from '../../config/trustedFolders.js';
-import { waitFor, act } from '@testing-library/react';
-import * as processUtils from '../../utils/processUtils.js';
-import { useTrustModify } from '../hooks/useTrustModify.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import type { Mock } from "vitest";
+import { renderWithProviders } from "../../test-utils/render.js";
+import { TrustDialog } from "./TrustDialog.js";
+import { TrustLevel } from "../../config/trustedFolders.js";
+import { waitFor, act } from "@testing-library/react";
+import * as processUtils from "../../utils/processUtils.js";
+import { useTrustModify } from "../hooks/useTrustModify.js";
 
 // Hoist mocks for dependencies of the useTrustModify hook
 const mockedCwd = vi.hoisted(() => vi.fn());
@@ -21,27 +21,27 @@ const mockedLoadTrustedFolders = vi.hoisted(() => vi.fn());
 const mockedIsWorkspaceTrusted = vi.hoisted(() => vi.fn());
 
 // Mock the modules themselves
-vi.mock('node:process', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('node:process')>();
+vi.mock("node:process", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:process")>();
   return {
     ...actual,
     cwd: mockedCwd,
   };
 });
 
-vi.mock('../../config/trustedFolders.js', () => ({
+vi.mock("../../config/trustedFolders.js", () => ({
   loadTrustedFolders: mockedLoadTrustedFolders,
   isWorkspaceTrusted: mockedIsWorkspaceTrusted,
   TrustLevel: {
-    TRUST_FOLDER: 'TRUST_FOLDER',
-    TRUST_PARENT: 'TRUST_PARENT',
-    DO_NOT_TRUST: 'DO_NOT_TRUST',
+    TRUST_FOLDER: "TRUST_FOLDER",
+    TRUST_PARENT: "TRUST_PARENT",
+    DO_NOT_TRUST: "DO_NOT_TRUST",
   },
 }));
 
-vi.mock('../hooks/useTrustModify.js');
+vi.mock("../hooks/useTrustModify.js");
 
-describe('TrustDialog', () => {
+describe("TrustDialog", () => {
   let mockUpdateTrustLevel: Mock;
   let mockCommitTrustLevelChange: Mock;
 
@@ -49,7 +49,7 @@ describe('TrustDialog', () => {
     mockUpdateTrustLevel = vi.fn();
     mockCommitTrustLevelChange = vi.fn();
     vi.mocked(useTrustModify).mockReturnValue({
-      cwd: '/test/dir',
+      cwd: "/test/dir",
       currentTrustLevel: TrustLevel.DO_NOT_TRUST,
       isInheritedTrustFromParent: false,
       isInheritedTrustFromIde: false,
@@ -64,21 +64,21 @@ describe('TrustDialog', () => {
     vi.resetAllMocks();
   });
 
-  it('should render the main dialog with current trust level', async () => {
+  it("should render the main dialog with current trust level", async () => {
     const { lastFrame } = renderWithProviders(
       <TrustDialog onExit={vi.fn()} addItem={vi.fn()} />,
     );
 
     await waitFor(() => {
-      expect(lastFrame()).toContain('Modify Trust Level');
-      expect(lastFrame()).toContain('Folder: /test/dir');
-      expect(lastFrame()).toContain('Current Level: DO_NOT_TRUST');
+      expect(lastFrame()).toContain("Modify Trust Level");
+      expect(lastFrame()).toContain("Folder: /test/dir");
+      expect(lastFrame()).toContain("Current Level: DO_NOT_TRUST");
     });
   });
 
-  it('should display the inherited trust note from parent', async () => {
+  it("should display the inherited trust note from parent", async () => {
     vi.mocked(useTrustModify).mockReturnValue({
-      cwd: '/test/dir',
+      cwd: "/test/dir",
       currentTrustLevel: TrustLevel.DO_NOT_TRUST,
       isInheritedTrustFromParent: true,
       isInheritedTrustFromIde: false,
@@ -93,14 +93,14 @@ describe('TrustDialog', () => {
 
     await waitFor(() => {
       expect(lastFrame()).toContain(
-        'Note: This folder behaves as a trusted folder because one of the parent folders is trusted.',
+        "Note: This folder behaves as a trusted folder because one of the parent folders is trusted.",
       );
     });
   });
 
-  it('should display the inherited trust note from IDE', async () => {
+  it("should display the inherited trust note from IDE", async () => {
     vi.mocked(useTrustModify).mockReturnValue({
-      cwd: '/test/dir',
+      cwd: "/test/dir",
       currentTrustLevel: TrustLevel.DO_NOT_TRUST,
       isInheritedTrustFromParent: false,
       isInheritedTrustFromIde: true,
@@ -115,21 +115,21 @@ describe('TrustDialog', () => {
 
     await waitFor(() => {
       expect(lastFrame()).toContain(
-        'Note: This folder behaves as a trusted folder because the connected IDE workspace is trusted.',
+        "Note: This folder behaves as a trusted folder because the connected IDE workspace is trusted.",
       );
     });
   });
 
-  it('should call onExit when escape is pressed', async () => {
+  it("should call onExit when escape is pressed", async () => {
     const onExit = vi.fn();
     const { stdin, lastFrame } = renderWithProviders(
       <TrustDialog onExit={onExit} addItem={vi.fn()} />,
     );
 
-    await waitFor(() => expect(lastFrame()).not.toContain('Loading...'));
+    await waitFor(() => expect(lastFrame()).not.toContain("Loading..."));
 
     act(() => {
-      stdin.write('\x1b'); // escape key
+      stdin.write("\x1b"); // escape key
     });
 
     await waitFor(() => {
@@ -137,12 +137,12 @@ describe('TrustDialog', () => {
     });
   });
 
-  it('should commit, restart, and exit on `r` keypress', async () => {
+  it("should commit, restart, and exit on `r` keypress", async () => {
     const mockRelaunchApp = vi
-      .spyOn(processUtils, 'relaunchApp')
+      .spyOn(processUtils, "relaunchApp")
       .mockResolvedValue(undefined);
     vi.mocked(useTrustModify).mockReturnValue({
-      cwd: '/test/dir',
+      cwd: "/test/dir",
       currentTrustLevel: TrustLevel.DO_NOT_TRUST,
       isInheritedTrustFromParent: false,
       isInheritedTrustFromIde: false,
@@ -157,9 +157,9 @@ describe('TrustDialog', () => {
       <TrustDialog onExit={onExit} addItem={vi.fn()} />,
     );
 
-    await waitFor(() => expect(lastFrame()).not.toContain('Loading...'));
+    await waitFor(() => expect(lastFrame()).not.toContain("Loading..."));
 
-    act(() => stdin.write('r')); // Press 'r' to restart
+    act(() => stdin.write("r")); // Press 'r' to restart
 
     await waitFor(() => {
       expect(mockCommitTrustLevelChange).toHaveBeenCalled();
@@ -170,9 +170,9 @@ describe('TrustDialog', () => {
     mockRelaunchApp.mockRestore();
   });
 
-  it('should not commit when escape is pressed during restart prompt', async () => {
+  it("should not commit when escape is pressed during restart prompt", async () => {
     vi.mocked(useTrustModify).mockReturnValue({
-      cwd: '/test/dir',
+      cwd: "/test/dir",
       currentTrustLevel: TrustLevel.DO_NOT_TRUST,
       isInheritedTrustFromParent: false,
       isInheritedTrustFromIde: false,
@@ -187,9 +187,9 @@ describe('TrustDialog', () => {
       <TrustDialog onExit={onExit} addItem={vi.fn()} />,
     );
 
-    await waitFor(() => expect(lastFrame()).not.toContain('Loading...'));
+    await waitFor(() => expect(lastFrame()).not.toContain("Loading..."));
 
-    act(() => stdin.write('\x1b')); // Press escape
+    act(() => stdin.write("\x1b")); // Press escape
 
     await waitFor(() => {
       expect(mockCommitTrustLevelChange).not.toHaveBeenCalled();

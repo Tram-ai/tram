@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import type { RadioSelectItem } from './shared/RadioButtonSelect.js';
-import { RadioButtonSelect } from './shared/RadioButtonSelect.js';
-import { useKeypress } from '../hooks/useKeypress.js';
-import { theme } from '../semantic-colors.js';
+import { Box, Text } from "ink";
+import type { RadioSelectItem } from "./shared/RadioButtonSelect.js";
+import { RadioButtonSelect } from "./shared/RadioButtonSelect.js";
+import { useKeypress } from "../hooks/useKeypress.js";
+import { theme } from "../semantic-colors.js";
 
 export type LoopDetectionConfirmationResult = {
-  userSelection: 'disable' | 'keep';
+  userSelection: "disable" | "keep";
 };
 
 interface LoopDetectionConfirmationProps {
@@ -23,9 +23,9 @@ export function LoopDetectionConfirmation({
 }: LoopDetectionConfirmationProps) {
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         onComplete({
-          userSelection: 'keep',
+          userSelection: "keep",
         });
       }
     },
@@ -34,18 +34,18 @@ export function LoopDetectionConfirmation({
 
   const OPTIONS: Array<RadioSelectItem<LoopDetectionConfirmationResult>> = [
     {
-      label: 'Keep loop detection enabled (esc)',
+      label: "Keep loop detection enabled (esc)",
       value: {
-        userSelection: 'keep',
+        userSelection: "keep",
       },
-      key: 'Keep loop detection enabled (esc)',
+      key: "Keep loop detection enabled (esc)",
     },
     {
-      label: 'Disable loop detection for this session',
+      label: "Disable loop detection for this session",
       value: {
-        userSelection: 'disable',
+        userSelection: "disable",
       },
-      key: 'Disable loop detection for this session',
+      key: "Disable loop detection for this session",
     },
   ];
 
@@ -68,7 +68,7 @@ export function LoopDetectionConfirmation({
             <Text wrap="truncate-end">
               <Text color={theme.text.primary} bold>
                 A potential loop was detected
-              </Text>{' '}
+              </Text>{" "}
             </Text>
           </Box>
         </Box>

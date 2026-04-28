@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'fs/promises';
-import path from 'path';
-import { DataProcessor } from './DataProcessor.js';
-import { TemplateRenderer } from './TemplateRenderer.js';
+import fs from "fs/promises";
+import path from "path";
+import { DataProcessor } from "./DataProcessor.js";
+import { TemplateRenderer } from "./TemplateRenderer.js";
 import type {
   InsightData,
   InsightProgressCallback,
-} from '../types/StaticInsightTypes.js';
+} from "../types/StaticInsightTypes.js";
 
-import { updateSymlink, Storage, type Config } from '@tram-ai/tram-core';
+import { updateSymlink, Storage, type Config } from "@tram-ai/tram-core";
 
 export class StaticInsightGenerator {
   private dataProcessor: DataProcessor;
@@ -26,7 +26,7 @@ export class StaticInsightGenerator {
 
   // Ensure the output directory exists
   private async ensureOutputDirectory(): Promise<string> {
-    const outputDir = path.join(Storage.getRuntimeBaseDir(), 'insights');
+    const outputDir = path.join(Storage.getRuntimeBaseDir(), "insights");
     await fs.mkdir(outputDir, { recursive: true });
     return outputDir;
   }
@@ -34,8 +34,8 @@ export class StaticInsightGenerator {
   // Generate timestamped filename with collision detection
   private async generateOutputPath(outputDir: string): Promise<string> {
     const now = new Date();
-    const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    const time = now.toTimeString().slice(0, 8).replace(/:/g, ''); // HHMMSS
+    const date = now.toISOString().split("T")[0]; // YYYY-MM-DD
+    const time = now.toTimeString().slice(0, 8).replace(/:/g, ""); // HHMMSS
 
     let outputPath = path.join(outputDir, `insight-${date}.html`);
 
@@ -55,7 +55,7 @@ export class StaticInsightGenerator {
     outputDir: string,
     targetPath: string,
   ): Promise<void> {
-    const latestPath = path.join(outputDir, 'insight.html');
+    const latestPath = path.join(outputDir, "insight.html");
     await updateSymlink(latestPath, targetPath);
   }
 
@@ -66,7 +66,7 @@ export class StaticInsightGenerator {
   ): Promise<string> {
     // Ensure output directory exists
     const outputDir = await this.ensureOutputDirectory();
-    const facetsDir = path.join(outputDir, 'facets');
+    const facetsDir = path.join(outputDir, "facets");
     await fs.mkdir(facetsDir, { recursive: true });
 
     // Process data
@@ -83,7 +83,7 @@ export class StaticInsightGenerator {
     const outputPath = await this.generateOutputPath(outputDir);
 
     // Write the HTML file
-    await fs.writeFile(outputPath, html, 'utf-8');
+    await fs.writeFile(outputPath, html, "utf-8");
 
     await this.updateInsightSymlink(outputDir, outputPath);
 

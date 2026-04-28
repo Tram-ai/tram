@@ -4,23 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import type {
-  Config,
-  ServerGeminiStreamEvent,
-} from '@tram-ai/tram-core';
-import { GeminiEventType } from '@tram-ai/tram-core';
-import type { Part } from '@google/genai';
-import { StreamJsonOutputAdapter } from './StreamJsonOutputAdapter.js';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import type { Config, ServerGeminiStreamEvent } from "@tram-ai/tram-core";
+import { GeminiEventType } from "@tram-ai/tram-core";
+import type { Part } from "@google/genai";
+import { StreamJsonOutputAdapter } from "./StreamJsonOutputAdapter.js";
 
 function createMockConfig(): Config {
   return {
-    getSessionId: vi.fn().mockReturnValue('test-session-id'),
-    getModel: vi.fn().mockReturnValue('test-model'),
+    getSessionId: vi.fn().mockReturnValue("test-session-id"),
+    getModel: vi.fn().mockReturnValue("test-model"),
   } as unknown as Config;
 }
 
-describe('StreamJsonOutputAdapter', () => {
+describe("StreamJsonOutputAdapter", () => {
   let adapter: StreamJsonOutputAdapter;
   let mockConfig: Config;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -29,7 +26,7 @@ describe('StreamJsonOutputAdapter', () => {
   beforeEach(() => {
     mockConfig = createMockConfig();
     stdoutWriteSpy = vi
-      .spyOn(process.stdout, 'write')
+      .spyOn(process.stdout, "write")
       .mockImplementation(() => true);
   });
 
@@ -37,43 +34,43 @@ describe('StreamJsonOutputAdapter', () => {
     stdoutWriteSpy.mockRestore();
   });
 
-  describe('with partial messages enabled', () => {
+  describe("with partial messages enabled", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, true);
     });
 
-    describe('startAssistantMessage', () => {
-      it('should reset state for new message', () => {
+    describe("startAssistantMessage", () => {
+      it("should reset state for new message", () => {
         adapter.startAssistantMessage();
         adapter.processEvent({
           type: GeminiEventType.Content,
-          value: 'First',
+          value: "First",
         });
         adapter.finalizeAssistantMessage();
 
         adapter.startAssistantMessage();
         adapter.processEvent({
           type: GeminiEventType.Content,
-          value: 'Second',
+          value: "Second",
         });
 
         const message = adapter.finalizeAssistantMessage();
         expect(message.message.content[0]).toMatchObject({
-          type: 'text',
-          text: 'Second',
+          type: "text",
+          text: "Second",
         });
       });
     });
 
-    describe('processEvent with stream events', () => {
+    describe("processEvent with stream events", () => {
       beforeEach(() => {
         adapter.startAssistantMessage();
       });
 
-      it('should emit stream events for text deltas', () => {
+      it("should emit stream events for text deltas", () => {
         adapter.processEvent({
           type: GeminiEventType.Content,
-          value: 'Hello',
+          value: "Hello",
         });
 
         const calls = stdoutWriteSpy.mock.calls;
@@ -83,8 +80,8 @@ describe('StreamJsonOutputAdapter', () => {
           try {
             const parsed = JSON.parse(call[0] as string);
             return (
-              parsed.type === 'stream_event' &&
-              parsed.event.type === 'content_block_delta'
+              parsed.type === "stream_event" &&
+              parsed.event.type === "content_block_delta"
             );
           } catch {
             return false;
@@ -93,17 +90,17 @@ describe('StreamJsonOutputAdapter', () => {
 
         expect(deltaEventCall).toBeDefined();
         const parsed = JSON.parse(deltaEventCall![0] as string);
-        expect(parsed.event.type).toBe('content_block_delta');
+        expect(parsed.event.type).toBe("content_block_delta");
         expect(parsed.event.delta).toMatchObject({
-          type: 'text_delta',
-          text: 'Hello',
+          type: "text_delta",
+          text: "Hello",
         });
       });
 
-      it('should emit message_start event on first content', () => {
+      it("should emit message_start event on first content", () => {
         adapter.processEvent({
           type: GeminiEventType.Content,
-          value: 'First',
+          value: "First",
         });
 
         const calls = stdoutWriteSpy.mock.calls;
@@ -111,8 +108,8 @@ describe('StreamJsonOutputAdapter', () => {
           try {
             const parsed = JSON.parse(call[0] as string);
             return (
-              parsed.type === 'stream_event' &&
-              parsed.event.type === 'message_start'
+              parsed.type === "stream_event" &&
+              parsed.event.type === "message_start"
             );
           } catch {
             return false;
@@ -122,10 +119,10 @@ describe('StreamJsonOutputAdapter', () => {
         expect(messageStartCall).toBeDefined();
       });
 
-      it('should emit content_block_start for new blocks', () => {
+      it("should emit content_block_start for new blocks", () => {
         adapter.processEvent({
           type: GeminiEventType.Content,
-          value: 'Text',
+          value: "Text",
         });
 
         const calls = stdoutWriteSpy.mock.calls;
@@ -133,8 +130,8 @@ describe('StreamJsonOutputAdapter', () => {
           try {
             const parsed = JSON.parse(call[0] as string);
             return (
-              parsed.type === 'stream_event' &&
-              parsed.event.type === 'content_block_start'
+              parsed.type === "stream_event" &&
+              parsed.event.type === "content_block_start"
             );
           } catch {
             return false;
@@ -144,12 +141,12 @@ describe('StreamJsonOutputAdapter', () => {
         expect(blockStartCall).toBeDefined();
       });
 
-      it('should emit thinking delta events', () => {
+      it("should emit thinking delta events", () => {
         adapter.processEvent({
           type: GeminiEventType.Thought,
           value: {
-            subject: 'Planning',
-            description: 'Thinking',
+            subject: "Planning",
+            description: "Thinking",
           },
         });
 
@@ -158,9 +155,9 @@ describe('StreamJsonOutputAdapter', () => {
           try {
             const parsed = JSON.parse(call[0] as string);
             return (
-              parsed.type === 'stream_event' &&
-              parsed.event.type === 'content_block_delta' &&
-              parsed.event.delta.type === 'thinking_delta'
+              parsed.type === "stream_event" &&
+              parsed.event.type === "content_block_delta" &&
+              parsed.event.delta.type === "thinking_delta"
             );
           } catch {
             return false;
@@ -170,10 +167,10 @@ describe('StreamJsonOutputAdapter', () => {
         expect(deltaCall).toBeDefined();
       });
 
-      it('should emit message_stop on finalization', () => {
+      it("should emit message_stop on finalization", () => {
         adapter.processEvent({
           type: GeminiEventType.Content,
-          value: 'Text',
+          value: "Text",
         });
         adapter.finalizeAssistantMessage();
 
@@ -182,8 +179,8 @@ describe('StreamJsonOutputAdapter', () => {
           try {
             const parsed = JSON.parse(call[0] as string);
             return (
-              parsed.type === 'stream_event' &&
-              parsed.event.type === 'message_stop'
+              parsed.type === "stream_event" &&
+              parsed.event.type === "message_stop"
             );
           } catch {
             return false;
@@ -195,23 +192,23 @@ describe('StreamJsonOutputAdapter', () => {
     });
   });
 
-  describe('with partial messages disabled', () => {
+  describe("with partial messages disabled", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
     });
 
-    it('should not emit stream events', () => {
+    it("should not emit stream events", () => {
       adapter.startAssistantMessage();
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Text',
+        value: "Text",
       });
 
       const calls = stdoutWriteSpy.mock.calls;
       const streamEventCall = calls.find((call: unknown[]) => {
         try {
           const parsed = JSON.parse(call[0] as string);
-          return parsed.type === 'stream_event';
+          return parsed.type === "stream_event";
         } catch {
           return false;
         }
@@ -220,11 +217,11 @@ describe('StreamJsonOutputAdapter', () => {
       expect(streamEventCall).toBeUndefined();
     });
 
-    it('should still emit final assistant message', () => {
+    it("should still emit final assistant message", () => {
       adapter.startAssistantMessage();
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Text',
+        value: "Text",
       });
       adapter.finalizeAssistantMessage();
 
@@ -232,7 +229,7 @@ describe('StreamJsonOutputAdapter', () => {
       const assistantCall = calls.find((call: unknown[]) => {
         try {
           const parsed = JSON.parse(call[0] as string);
-          return parsed.type === 'assistant';
+          return parsed.type === "assistant";
         } catch {
           return false;
         }
@@ -242,44 +239,44 @@ describe('StreamJsonOutputAdapter', () => {
     });
   });
 
-  describe('processEvent', () => {
+  describe("processEvent", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
       adapter.startAssistantMessage();
     });
 
-    it('should append text content from Content events', () => {
+    it("should append text content from Content events", () => {
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Hello',
+        value: "Hello",
       });
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: ' World',
+        value: " World",
       });
 
       const message = adapter.finalizeAssistantMessage();
       expect(message.message.content).toHaveLength(1);
       expect(message.message.content[0]).toMatchObject({
-        type: 'text',
-        text: 'Hello World',
+        type: "text",
+        text: "Hello World",
       });
     });
 
-    it('should append citation content from Citation events', () => {
+    it("should append citation content from Citation events", () => {
       adapter.processEvent({
         type: GeminiEventType.Citation,
-        value: 'Citation text',
+        value: "Citation text",
       });
 
       const message = adapter.finalizeAssistantMessage();
       expect(message.message.content[0]).toMatchObject({
-        type: 'text',
-        text: expect.stringContaining('Citation text'),
+        type: "text",
+        text: expect.stringContaining("Citation text"),
       });
     });
 
-    it('should ignore non-string citation values', () => {
+    it("should ignore non-string citation values", () => {
       adapter.processEvent({
         type: GeminiEventType.Citation,
         value: 123,
@@ -289,45 +286,45 @@ describe('StreamJsonOutputAdapter', () => {
       expect(message.message.content).toHaveLength(0);
     });
 
-    it('should append thinking from Thought events', () => {
+    it("should append thinking from Thought events", () => {
       adapter.processEvent({
         type: GeminiEventType.Thought,
         value: {
-          subject: 'Planning',
-          description: 'Thinking about the task',
+          subject: "Planning",
+          description: "Thinking about the task",
         },
       });
 
       const message = adapter.finalizeAssistantMessage();
       expect(message.message.content).toHaveLength(1);
       expect(message.message.content[0]).toMatchObject({
-        type: 'thinking',
-        thinking: 'Planning: Thinking about the task',
-        signature: 'Planning',
+        type: "thinking",
+        thinking: "Planning: Thinking about the task",
+        signature: "Planning",
       });
     });
 
-    it('should handle thinking with only subject', () => {
+    it("should handle thinking with only subject", () => {
       adapter.processEvent({
         type: GeminiEventType.Thought,
         value: {
-          subject: 'Planning',
-          description: '',
+          subject: "Planning",
+          description: "",
         },
       });
 
       const message = adapter.finalizeAssistantMessage();
       expect(message.message.content[0]).toMatchObject({
-        type: 'thinking',
-        signature: 'Planning',
+        type: "thinking",
+        signature: "Planning",
       });
     });
 
-    it('should preserve whitespace in thinking content (issue #1356)', () => {
+    it("should preserve whitespace in thinking content (issue #1356)", () => {
       adapter.processEvent({
         type: GeminiEventType.Thought,
         value: {
-          subject: '',
+          subject: "",
           description: 'The user just said "Hello"',
         },
       });
@@ -338,34 +335,34 @@ describe('StreamJsonOutputAdapter', () => {
         type: string;
         thinking: string;
       };
-      expect(block.type).toBe('thinking');
+      expect(block.type).toBe("thinking");
       expect(block.thinking).toBe('The user just said "Hello"');
       // Verify spaces are preserved
-      expect(block.thinking).toContain('user just');
-      expect(block.thinking).not.toContain('userjust');
+      expect(block.thinking).toContain("user just");
+      expect(block.thinking).not.toContain("userjust");
     });
 
-    it('should preserve whitespace when streaming multiple thinking fragments (issue #1356)', () => {
+    it("should preserve whitespace when streaming multiple thinking fragments (issue #1356)", () => {
       // Simulate streaming thinking content in multiple events
       adapter.processEvent({
         type: GeminiEventType.Thought,
         value: {
-          subject: '',
-          description: 'The user just',
+          subject: "",
+          description: "The user just",
         },
       });
       adapter.processEvent({
         type: GeminiEventType.Thought,
         value: {
-          subject: '',
+          subject: "",
           description: ' said "Hello"',
         },
       });
       adapter.processEvent({
         type: GeminiEventType.Thought,
         value: {
-          subject: '',
-          description: '. This is a simple greeting',
+          subject: "",
+          description: ". This is a simple greeting",
         },
       });
 
@@ -379,66 +376,66 @@ describe('StreamJsonOutputAdapter', () => {
         'The user just said "Hello". This is a simple greeting',
       );
       // Verify specific spaces are preserved
-      expect(block.thinking).toContain('user just ');
-      expect(block.thinking).toContain(' said');
-      expect(block.thinking).not.toContain('userjust');
-      expect(block.thinking).not.toContain('justsaid');
+      expect(block.thinking).toContain("user just ");
+      expect(block.thinking).toContain(" said");
+      expect(block.thinking).not.toContain("userjust");
+      expect(block.thinking).not.toContain("justsaid");
     });
 
-    it('should append tool use from ToolCallRequest events', () => {
+    it("should append tool use from ToolCallRequest events", () => {
       adapter.processEvent({
         type: GeminiEventType.ToolCallRequest,
         value: {
-          callId: 'tool-call-1',
-          name: 'test_tool',
-          args: { param1: 'value1' },
+          callId: "tool-call-1",
+          name: "test_tool",
+          args: { param1: "value1" },
           isClientInitiated: false,
-          prompt_id: 'prompt-1',
+          prompt_id: "prompt-1",
         },
       });
 
       const message = adapter.finalizeAssistantMessage();
       expect(message.message.content).toHaveLength(1);
       expect(message.message.content[0]).toMatchObject({
-        type: 'tool_use',
-        id: 'tool-call-1',
-        name: 'test_tool',
-        input: { param1: 'value1' },
+        type: "tool_use",
+        id: "tool-call-1",
+        name: "test_tool",
+        input: { param1: "value1" },
       });
     });
 
-    it('should set stop_reason to tool_use when message contains only tool_use blocks', () => {
+    it("should set stop_reason to tool_use when message contains only tool_use blocks", () => {
       adapter.processEvent({
         type: GeminiEventType.ToolCallRequest,
         value: {
-          callId: 'tool-call-1',
-          name: 'test_tool',
-          args: { param1: 'value1' },
+          callId: "tool-call-1",
+          name: "test_tool",
+          args: { param1: "value1" },
           isClientInitiated: false,
-          prompt_id: 'prompt-1',
+          prompt_id: "prompt-1",
         },
       });
 
       const message = adapter.finalizeAssistantMessage();
-      expect(message.message.stop_reason).toBe('tool_use');
+      expect(message.message.stop_reason).toBe("tool_use");
     });
 
-    it('should set stop_reason to null when message contains text blocks', () => {
+    it("should set stop_reason to null when message contains text blocks", () => {
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Some text',
+        value: "Some text",
       });
 
       const message = adapter.finalizeAssistantMessage();
       expect(message.message.stop_reason).toBeNull();
     });
 
-    it('should set stop_reason to null when message contains thinking blocks', () => {
+    it("should set stop_reason to null when message contains thinking blocks", () => {
       adapter.processEvent({
         type: GeminiEventType.Thought,
         value: {
-          subject: 'Planning',
-          description: 'Thinking about the task',
+          subject: "Planning",
+          description: "Thinking about the task",
         },
       });
 
@@ -446,37 +443,37 @@ describe('StreamJsonOutputAdapter', () => {
       expect(message.message.stop_reason).toBeNull();
     });
 
-    it('should set stop_reason to tool_use when message contains multiple tool_use blocks', () => {
+    it("should set stop_reason to tool_use when message contains multiple tool_use blocks", () => {
       adapter.processEvent({
         type: GeminiEventType.ToolCallRequest,
         value: {
-          callId: 'tool-call-1',
-          name: 'test_tool_1',
-          args: { param1: 'value1' },
+          callId: "tool-call-1",
+          name: "test_tool_1",
+          args: { param1: "value1" },
           isClientInitiated: false,
-          prompt_id: 'prompt-1',
+          prompt_id: "prompt-1",
         },
       });
       adapter.processEvent({
         type: GeminiEventType.ToolCallRequest,
         value: {
-          callId: 'tool-call-2',
-          name: 'test_tool_2',
-          args: { param2: 'value2' },
+          callId: "tool-call-2",
+          name: "test_tool_2",
+          args: { param2: "value2" },
           isClientInitiated: false,
-          prompt_id: 'prompt-1',
+          prompt_id: "prompt-1",
         },
       });
 
       const message = adapter.finalizeAssistantMessage();
       expect(message.message.content).toHaveLength(2);
       expect(
-        message.message.content.every((block) => block.type === 'tool_use'),
+        message.message.content.every((block) => block.type === "tool_use"),
       ).toBe(true);
-      expect(message.message.stop_reason).toBe('tool_use');
+      expect(message.message.stop_reason).toBe("tool_use");
     });
 
-    it('should update usage from Finished event', () => {
+    it("should update usage from Finished event", () => {
       const usageMetadata = {
         promptTokenCount: 100,
         candidatesTokenCount: 50,
@@ -500,14 +497,14 @@ describe('StreamJsonOutputAdapter', () => {
       });
     });
 
-    it('should ignore events after finalization', () => {
+    it("should ignore events after finalization", () => {
       adapter.finalizeAssistantMessage();
       const originalContent =
         adapter.finalizeAssistantMessage().message.content;
 
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Should be ignored',
+        value: "Should be ignored",
       });
 
       const message = adapter.finalizeAssistantMessage();
@@ -515,33 +512,33 @@ describe('StreamJsonOutputAdapter', () => {
     });
   });
 
-  describe('finalizeAssistantMessage', () => {
+  describe("finalizeAssistantMessage", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
       adapter.startAssistantMessage();
     });
 
-    it('should build and emit a complete assistant message', () => {
+    it("should build and emit a complete assistant message", () => {
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Test response',
+        value: "Test response",
       });
 
       const message = adapter.finalizeAssistantMessage();
 
-      expect(message.type).toBe('assistant');
+      expect(message.type).toBe("assistant");
       expect(message.uuid).toBeTruthy();
-      expect(message.session_id).toBe('test-session-id');
+      expect(message.session_id).toBe("test-session-id");
       expect(message.parent_tool_use_id).toBeNull();
-      expect(message.message.role).toBe('assistant');
-      expect(message.message.model).toBe('test-model');
+      expect(message.message.role).toBe("assistant");
+      expect(message.message.model).toBe("test-model");
       expect(message.message.content).toHaveLength(1);
     });
 
-    it('should emit message to stdout immediately', () => {
+    it("should emit message to stdout immediately", () => {
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Test',
+        value: "Test",
       });
 
       stdoutWriteSpy.mockClear();
@@ -550,13 +547,13 @@ describe('StreamJsonOutputAdapter', () => {
       expect(stdoutWriteSpy).toHaveBeenCalled();
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
       const parsed = JSON.parse(output);
-      expect(parsed.type).toBe('assistant');
+      expect(parsed.type).toBe("assistant");
     });
 
-    it('should store message in lastAssistantMessage', () => {
+    it("should store message in lastAssistantMessage", () => {
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Test',
+        value: "Test",
       });
 
       const message = adapter.finalizeAssistantMessage();
@@ -565,10 +562,10 @@ describe('StreamJsonOutputAdapter', () => {
       expect((adapter as any).lastAssistantMessage).toEqual(message);
     });
 
-    it('should return same message on subsequent calls', () => {
+    it("should return same message on subsequent calls", () => {
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Test',
+        value: "Test",
       });
 
       const message1 = adapter.finalizeAssistantMessage();
@@ -577,20 +574,20 @@ describe('StreamJsonOutputAdapter', () => {
       expect(message1).toEqual(message2);
     });
 
-    it('should split different block types into separate assistant messages', () => {
+    it("should split different block types into separate assistant messages", () => {
       stdoutWriteSpy.mockClear();
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Text',
+        value: "Text",
       });
       adapter.processEvent({
         type: GeminiEventType.Thought,
-        value: { subject: 'Thinking', description: 'Thought' },
+        value: { subject: "Thinking", description: "Thought" },
       });
 
       const message = adapter.finalizeAssistantMessage();
       expect(message.message.content).toHaveLength(1);
-      expect(message.message.content[0].type).toBe('thinking');
+      expect(message.message.content[0].type).toBe("thinking");
 
       const assistantMessages = stdoutWriteSpy.mock.calls
         .map((call: unknown[]) => JSON.parse(call[0] as string))
@@ -602,19 +599,19 @@ describe('StreamJsonOutputAdapter', () => {
             message: { content: Array<{ type: string }> };
           } => {
             if (
-              typeof payload !== 'object' ||
+              typeof payload !== "object" ||
               payload === null ||
-              !('type' in payload) ||
-              (payload as { type?: string }).type !== 'assistant' ||
-              !('message' in payload)
+              !("type" in payload) ||
+              (payload as { type?: string }).type !== "assistant" ||
+              !("message" in payload)
             ) {
               return false;
             }
             const message = (payload as { message?: unknown }).message;
             if (
-              typeof message !== 'object' ||
+              typeof message !== "object" ||
               message === null ||
-              !('content' in message)
+              !("content" in message)
             ) {
               return false;
             }
@@ -624,9 +621,9 @@ describe('StreamJsonOutputAdapter', () => {
               content.length > 0 &&
               content.every(
                 (block: unknown) =>
-                  typeof block === 'object' &&
+                  typeof block === "object" &&
                   block !== null &&
-                  'type' in block,
+                  "type" in block,
               )
             );
           },
@@ -637,9 +634,9 @@ describe('StreamJsonOutputAdapter', () => {
         (payload: {
           type: string;
           message: { content: Array<{ type: string }> };
-        }) => payload.message.content[0]?.type ?? '',
+        }) => payload.message.content[0]?.type ?? "",
       );
-      expect(observedTypes).toEqual(['text', 'thinking']);
+      expect(observedTypes).toEqual(["text", "thinking"]);
       for (const payload of assistantMessages) {
         const uniqueTypes = new Set(
           payload.message.content.map((block: { type: string }) => block.type),
@@ -648,14 +645,14 @@ describe('StreamJsonOutputAdapter', () => {
       }
     });
 
-    it('should throw if message not started', () => {
+    it("should throw if message not started", () => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
       expect(() => adapter.finalizeAssistantMessage()).toThrow(
-        'Message not started',
+        "Message not started",
       );
     });
 
-    it('should not emit empty assistant message when started but no content processed', () => {
+    it("should not emit empty assistant message when started but no content processed", () => {
       stdoutWriteSpy.mockClear();
       adapter.finalizeAssistantMessage();
 
@@ -663,7 +660,7 @@ describe('StreamJsonOutputAdapter', () => {
         (call: unknown[]) => {
           try {
             const parsed = JSON.parse(call[0] as string);
-            return parsed.type === 'assistant';
+            return parsed.type === "assistant";
           } catch {
             return false;
           }
@@ -674,18 +671,18 @@ describe('StreamJsonOutputAdapter', () => {
     });
   });
 
-  describe('emitResult', () => {
+  describe("emitResult", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
       adapter.startAssistantMessage();
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Response text',
+        value: "Response text",
       });
       adapter.finalizeAssistantMessage();
     });
 
-    it('should emit success result immediately', () => {
+    it("should emit success result immediately", () => {
       stdoutWriteSpy.mockClear();
       adapter.emitResult({
         isError: false,
@@ -698,19 +695,19 @@ describe('StreamJsonOutputAdapter', () => {
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
       const parsed = JSON.parse(output);
 
-      expect(parsed.type).toBe('result');
+      expect(parsed.type).toBe("result");
       expect(parsed.is_error).toBe(false);
-      expect(parsed.subtype).toBe('success');
-      expect(parsed.result).toBe('Response text');
+      expect(parsed.subtype).toBe("success");
+      expect(parsed.result).toBe("Response text");
       expect(parsed.duration_ms).toBe(1000);
       expect(parsed.num_turns).toBe(1);
     });
 
-    it('should emit error result', () => {
+    it("should emit error result", () => {
       stdoutWriteSpy.mockClear();
       adapter.emitResult({
         isError: true,
-        errorMessage: 'Test error',
+        errorMessage: "Test error",
         durationMs: 500,
         apiDurationMs: 300,
         numTurns: 1,
@@ -720,15 +717,15 @@ describe('StreamJsonOutputAdapter', () => {
       const parsed = JSON.parse(output);
 
       expect(parsed.is_error).toBe(true);
-      expect(parsed.subtype).toBe('error_during_execution');
-      expect(parsed.error?.message).toBe('Test error');
+      expect(parsed.subtype).toBe("error_during_execution");
+      expect(parsed.error?.message).toBe("Test error");
     });
 
-    it('should use provided summary over extracted text', () => {
+    it("should use provided summary over extracted text", () => {
       stdoutWriteSpy.mockClear();
       adapter.emitResult({
         isError: false,
-        summary: 'Custom summary',
+        summary: "Custom summary",
         durationMs: 1000,
         apiDurationMs: 800,
         numTurns: 1,
@@ -737,10 +734,10 @@ describe('StreamJsonOutputAdapter', () => {
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
       const parsed = JSON.parse(output);
 
-      expect(parsed.result).toBe('Custom summary');
+      expect(parsed.result).toBe("Custom summary");
     });
 
-    it('should include usage information', () => {
+    it("should include usage information", () => {
       const usage = {
         input_tokens: 100,
         output_tokens: 50,
@@ -762,7 +759,7 @@ describe('StreamJsonOutputAdapter', () => {
       expect(parsed.usage).toEqual(usage);
     });
 
-    it('should handle result without assistant message', () => {
+    it("should handle result without assistant message", () => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
       stdoutWriteSpy.mockClear();
       adapter.emitResult({
@@ -775,37 +772,37 @@ describe('StreamJsonOutputAdapter', () => {
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
       const parsed = JSON.parse(output);
 
-      expect(parsed.result).toBe('');
+      expect(parsed.result).toBe("");
     });
   });
 
-  describe('emitUserMessage', () => {
+  describe("emitUserMessage", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
     });
 
-    it('should emit user message immediately', () => {
+    it("should emit user message immediately", () => {
       stdoutWriteSpy.mockClear();
-      const parts: Part[] = [{ text: 'Hello user' }];
+      const parts: Part[] = [{ text: "Hello user" }];
       adapter.emitUserMessage(parts);
 
       expect(stdoutWriteSpy).toHaveBeenCalled();
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
       const parsed = JSON.parse(output);
 
-      expect(parsed.type).toBe('user');
+      expect(parsed.type).toBe("user");
       expect(Array.isArray(parsed.message.content)).toBe(true);
       if (Array.isArray(parsed.message.content)) {
         expect(parsed.message.content).toHaveLength(1);
         expect(parsed.message.content[0]).toEqual({
-          type: 'text',
-          text: 'Hello user',
+          type: "text",
+          text: "Hello user",
         });
       }
     });
 
-    it('should handle parent_tool_use_id', () => {
-      const parts: Part[] = [{ text: 'Tool response' }];
+    it("should handle parent_tool_use_id", () => {
+      const parts: Part[] = [{ text: "Tool response" }];
       adapter.emitUserMessage(parts);
 
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
@@ -816,24 +813,24 @@ describe('StreamJsonOutputAdapter', () => {
     });
   });
 
-  describe('emitToolResult', () => {
+  describe("emitToolResult", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
     });
 
-    it('should emit tool result message immediately', () => {
+    it("should emit tool result message immediately", () => {
       stdoutWriteSpy.mockClear();
       const request = {
-        callId: 'tool-1',
-        name: 'test_tool',
+        callId: "tool-1",
+        name: "test_tool",
         args: {},
         isClientInitiated: false,
-        prompt_id: 'prompt-1',
+        prompt_id: "prompt-1",
       };
       const response = {
-        callId: 'tool-1',
+        callId: "tool-1",
         responseParts: [],
-        resultDisplay: 'Tool executed successfully',
+        resultDisplay: "Tool executed successfully",
         error: undefined,
         errorType: undefined,
       };
@@ -844,30 +841,30 @@ describe('StreamJsonOutputAdapter', () => {
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
       const parsed = JSON.parse(output);
 
-      expect(parsed.type).toBe('user');
+      expect(parsed.type).toBe("user");
       expect(parsed.parent_tool_use_id).toBeNull();
       const block = parsed.message.content[0];
       expect(block).toMatchObject({
-        type: 'tool_result',
-        tool_use_id: 'tool-1',
-        content: 'Tool executed successfully',
+        type: "tool_result",
+        tool_use_id: "tool-1",
+        content: "Tool executed successfully",
         is_error: false,
       });
     });
 
-    it('should mark error tool results', () => {
+    it("should mark error tool results", () => {
       const request = {
-        callId: 'tool-1',
-        name: 'test_tool',
+        callId: "tool-1",
+        name: "test_tool",
         args: {},
         isClientInitiated: false,
-        prompt_id: 'prompt-1',
+        prompt_id: "prompt-1",
       };
       const response = {
-        callId: 'tool-1',
+        callId: "tool-1",
         responseParts: [],
         resultDisplay: undefined,
-        error: new Error('Tool failed'),
+        error: new Error("Tool failed"),
         errorType: undefined,
       };
 
@@ -881,100 +878,100 @@ describe('StreamJsonOutputAdapter', () => {
     });
   });
 
-  describe('emitSystemMessage', () => {
+  describe("emitSystemMessage", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
     });
 
-    it('should emit system message immediately', () => {
+    it("should emit system message immediately", () => {
       stdoutWriteSpy.mockClear();
-      adapter.emitSystemMessage('test_subtype', { data: 'value' });
+      adapter.emitSystemMessage("test_subtype", { data: "value" });
 
       expect(stdoutWriteSpy).toHaveBeenCalled();
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
       const parsed = JSON.parse(output);
 
-      expect(parsed.type).toBe('system');
-      expect(parsed.subtype).toBe('test_subtype');
-      expect(parsed.data).toEqual({ data: 'value' });
+      expect(parsed.type).toBe("system");
+      expect(parsed.subtype).toBe("test_subtype");
+      expect(parsed.data).toEqual({ data: "value" });
     });
   });
 
-  describe('emitToolProgress', () => {
+  describe("emitToolProgress", () => {
     const mockRequest = {
-      callId: 'tool-call-1',
-      name: 'mcp__echo-test__echo',
+      callId: "tool-call-1",
+      name: "mcp__echo-test__echo",
       args: {},
       isClientInitiated: false,
-      prompt_id: '',
+      prompt_id: "",
     };
 
-    it('should emit tool_progress stream event when includePartialMessages is true', () => {
+    it("should emit tool_progress stream event when includePartialMessages is true", () => {
       adapter = new StreamJsonOutputAdapter(mockConfig, true);
       stdoutWriteSpy.mockClear();
 
       adapter.emitToolProgress(mockRequest, {
-        type: 'mcp_tool_progress',
+        type: "mcp_tool_progress",
         progress: 1,
         total: 10,
-        message: 'Echo: 1',
+        message: "Echo: 1",
       });
 
       expect(stdoutWriteSpy).toHaveBeenCalledTimes(1);
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
       const parsed = JSON.parse(output);
 
-      expect(parsed.type).toBe('stream_event');
+      expect(parsed.type).toBe("stream_event");
       expect(parsed.parent_tool_use_id).toBeNull();
-      expect(parsed.session_id).toBe('test-session-id');
+      expect(parsed.session_id).toBe("test-session-id");
       expect(parsed.uuid).toBeDefined();
       expect(parsed.event).toEqual({
-        type: 'tool_progress',
-        tool_use_id: 'tool-call-1',
+        type: "tool_progress",
+        tool_use_id: "tool-call-1",
         content: {
-          type: 'mcp_tool_progress',
+          type: "mcp_tool_progress",
           progress: 1,
           total: 10,
-          message: 'Echo: 1',
+          message: "Echo: 1",
         },
       });
     });
 
-    it('should not emit tool_progress when includePartialMessages is false', () => {
+    it("should not emit tool_progress when includePartialMessages is false", () => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
       stdoutWriteSpy.mockClear();
 
       adapter.emitToolProgress(mockRequest, {
-        type: 'mcp_tool_progress',
+        type: "mcp_tool_progress",
         progress: 1,
         total: 10,
-        message: 'Echo: 1',
+        message: "Echo: 1",
       });
 
       expect(stdoutWriteSpy).not.toHaveBeenCalled();
     });
 
-    it('should emit multiple tool_progress events for sequential progress updates', () => {
+    it("should emit multiple tool_progress events for sequential progress updates", () => {
       adapter = new StreamJsonOutputAdapter(mockConfig, true);
       stdoutWriteSpy.mockClear();
 
       adapter.emitToolProgress(mockRequest, {
-        type: 'mcp_tool_progress',
+        type: "mcp_tool_progress",
         progress: 1,
         total: 3,
-        message: 'Echo: 1',
+        message: "Echo: 1",
       });
       adapter.emitToolProgress(mockRequest, {
-        type: 'mcp_tool_progress',
+        type: "mcp_tool_progress",
         progress: 2,
         total: 3,
-        message: 'Echo: 1, 2',
+        message: "Echo: 1, 2",
       });
       adapter.emitToolProgress(mockRequest, {
-        type: 'mcp_tool_progress',
+        type: "mcp_tool_progress",
         progress: 3,
         total: 3,
-        message: 'Echo: 1, 2, 3',
+        message: "Echo: 1, 2, 3",
       });
 
       expect(stdoutWriteSpy).toHaveBeenCalledTimes(3);
@@ -983,62 +980,62 @@ describe('StreamJsonOutputAdapter', () => {
         (call: unknown[]) => JSON.parse(call[0] as string).event,
       );
       expect(events[0].content).toEqual({
-        type: 'mcp_tool_progress',
+        type: "mcp_tool_progress",
         progress: 1,
         total: 3,
-        message: 'Echo: 1',
+        message: "Echo: 1",
       });
       expect(events[1].content).toEqual({
-        type: 'mcp_tool_progress',
+        type: "mcp_tool_progress",
         progress: 2,
         total: 3,
-        message: 'Echo: 1, 2',
+        message: "Echo: 1, 2",
       });
       expect(events[2].content).toEqual({
-        type: 'mcp_tool_progress',
+        type: "mcp_tool_progress",
         progress: 3,
         total: 3,
-        message: 'Echo: 1, 2, 3',
+        message: "Echo: 1, 2, 3",
       });
 
       // All events should share the same tool_use_id
       for (const event of events) {
-        expect(event.type).toBe('tool_progress');
-        expect(event.tool_use_id).toBe('tool-call-1');
+        expect(event.type).toBe("tool_progress");
+        expect(event.tool_use_id).toBe("tool-call-1");
       }
     });
   });
 
-  describe('getSessionId and getModel', () => {
+  describe("getSessionId and getModel", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
     });
 
-    it('should return session ID from config', () => {
-      expect(adapter.getSessionId()).toBe('test-session-id');
+    it("should return session ID from config", () => {
+      expect(adapter.getSessionId()).toBe("test-session-id");
       expect(mockConfig.getSessionId).toHaveBeenCalled();
     });
 
-    it('should return model from config', () => {
-      expect(adapter.getModel()).toBe('test-model');
+    it("should return model from config", () => {
+      expect(adapter.getModel()).toBe("test-model");
       expect(mockConfig.getModel).toHaveBeenCalled();
     });
   });
 
-  describe('content_block event identification', () => {
+  describe("content_block event identification", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, true);
       adapter.startAssistantMessage();
     });
 
-    it('should not include message_id in content_block events', () => {
+    it("should not include message_id in content_block events", () => {
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Text',
+        value: "Text",
       });
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'More',
+        value: "More",
       });
 
       const calls = stdoutWriteSpy.mock.calls;
@@ -1046,10 +1043,10 @@ describe('StreamJsonOutputAdapter', () => {
         try {
           const parsed = JSON.parse(call[0] as string);
           return (
-            parsed.type === 'stream_event' &&
-            (parsed.event.type === 'content_block_start' ||
-              parsed.event.type === 'content_block_delta' ||
-              parsed.event.type === 'content_block_stop')
+            parsed.type === "stream_event" &&
+            (parsed.event.type === "content_block_start" ||
+              parsed.event.type === "content_block_delta" ||
+              parsed.event.type === "content_block_stop")
           );
         } catch {
           return false;
@@ -1063,10 +1060,10 @@ describe('StreamJsonOutputAdapter', () => {
       }
     });
 
-    it('should identify content_block events by session_id and index', () => {
+    it("should identify content_block events by session_id and index", () => {
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Text',
+        value: "Text",
       });
 
       const calls = stdoutWriteSpy.mock.calls;
@@ -1074,8 +1071,8 @@ describe('StreamJsonOutputAdapter', () => {
         try {
           const parsed = JSON.parse(call[0] as string);
           return (
-            parsed.type === 'stream_event' &&
-            parsed.event.type === 'content_block_start'
+            parsed.type === "stream_event" &&
+            parsed.event.type === "content_block_start"
           );
         } catch {
           return false;
@@ -1084,37 +1081,37 @@ describe('StreamJsonOutputAdapter', () => {
 
       expect(blockStartCall).toBeDefined();
       const parsed = JSON.parse((blockStartCall as unknown[])[0] as string);
-      expect(parsed.session_id).toBe('test-session-id');
-      expect(typeof parsed.event.index).toBe('number');
+      expect(parsed.session_id).toBe("test-session-id");
+      expect(typeof parsed.event.index).toBe("number");
     });
   });
 
-  describe('multiple text blocks', () => {
+  describe("multiple text blocks", () => {
     beforeEach(() => {
       adapter = new StreamJsonOutputAdapter(mockConfig, false);
       adapter.startAssistantMessage();
     });
 
-    it('should split assistant messages when block types change repeatedly', () => {
+    it("should split assistant messages when block types change repeatedly", () => {
       stdoutWriteSpy.mockClear();
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Text content',
+        value: "Text content",
       });
       adapter.processEvent({
         type: GeminiEventType.Thought,
-        value: { subject: 'Thinking', description: 'Thought' },
+        value: { subject: "Thinking", description: "Thought" },
       });
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'More text',
+        value: "More text",
       });
 
       const message = adapter.finalizeAssistantMessage();
       expect(message.message.content).toHaveLength(1);
       expect(message.message.content[0]).toMatchObject({
-        type: 'text',
-        text: 'More text',
+        type: "text",
+        text: "More text",
       });
 
       const assistantMessages = stdoutWriteSpy.mock.calls
@@ -1127,19 +1124,19 @@ describe('StreamJsonOutputAdapter', () => {
             message: { content: Array<{ type: string; text?: string }> };
           } => {
             if (
-              typeof payload !== 'object' ||
+              typeof payload !== "object" ||
               payload === null ||
-              !('type' in payload) ||
-              (payload as { type?: string }).type !== 'assistant' ||
-              !('message' in payload)
+              !("type" in payload) ||
+              (payload as { type?: string }).type !== "assistant" ||
+              !("message" in payload)
             ) {
               return false;
             }
             const message = (payload as { message?: unknown }).message;
             if (
-              typeof message !== 'object' ||
+              typeof message !== "object" ||
               message === null ||
-              !('content' in message)
+              !("content" in message)
             ) {
               return false;
             }
@@ -1149,9 +1146,9 @@ describe('StreamJsonOutputAdapter', () => {
               content.length > 0 &&
               content.every(
                 (block: unknown) =>
-                  typeof block === 'object' &&
+                  typeof block === "object" &&
                   block !== null &&
-                  'type' in block,
+                  "type" in block,
               )
             );
           },
@@ -1162,9 +1159,9 @@ describe('StreamJsonOutputAdapter', () => {
         (msg: {
           type: string;
           message: { content: Array<{ type: string; text?: string }> };
-        }) => msg.message.content[0]?.type ?? '',
+        }) => msg.message.content[0]?.type ?? "",
       );
-      expect(observedTypes).toEqual(['text', 'thinking', 'text']);
+      expect(observedTypes).toEqual(["text", "thinking", "text"]);
       for (const msg of assistantMessages) {
         const uniqueTypes = new Set(
           msg.message.content.map((block: { type: string }) => block.type),
@@ -1173,25 +1170,25 @@ describe('StreamJsonOutputAdapter', () => {
       }
     });
 
-    it('should merge consecutive text fragments', () => {
+    it("should merge consecutive text fragments", () => {
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'Hello',
+        value: "Hello",
       });
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: ' ',
+        value: " ",
       });
       adapter.processEvent({
         type: GeminiEventType.Content,
-        value: 'World',
+        value: "World",
       });
 
       const message = adapter.finalizeAssistantMessage();
       expect(message.message.content).toHaveLength(1);
       expect(message.message.content[0]).toMatchObject({
-        type: 'text',
-        text: 'Hello World',
+        type: "text",
+        text: "Hello World",
       });
     });
   });

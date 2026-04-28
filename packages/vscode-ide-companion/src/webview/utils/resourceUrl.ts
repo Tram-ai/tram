@@ -22,7 +22,7 @@ function getExtensionUri(): string | undefined {
   }
 
   // Then try to get from body data attribute (CSP-compliant method)
-  const bodyUri = document.body?.getAttribute('data-extension-uri');
+  const bodyUri = document.body?.getAttribute("data-extension-uri");
   if (bodyUri) {
     // Cache it in window for future use
     window.__EXTENSION_URI__ = bodyUri;
@@ -43,10 +43,10 @@ function isValidWebviewUrl(url: string): boolean {
   try {
     // Valid protocols for VS Code webview resource URLs
     const allowedProtocols = [
-      'vscode-webview-resource:',
-      'https-vscode-webview-resource:',
-      'vscode-file:',
-      'https:',
+      "vscode-webview-resource:",
+      "https-vscode-webview-resource:",
+      "vscode-file:",
+      "https:",
     ];
 
     // Check if it starts with a valid protocol
@@ -72,26 +72,26 @@ export function generateResourceUrl(relativePath: string): string {
   const extensionUri = getExtensionUri();
 
   if (!extensionUri) {
-    console.warn('[resourceUrl] Extension URI not found in window or body');
-    return '';
+    console.warn("[resourceUrl] Extension URI not found in window or body");
+    return "";
   }
 
   // Validate if extensionUri is a secure URL
   if (!isValidWebviewUrl(extensionUri)) {
     console.error(
-      '[resourceUrl] Invalid extension URI - possible security risk:',
+      "[resourceUrl] Invalid extension URI - possible security risk:",
       extensionUri,
     );
-    return '';
+    return "";
   }
 
   // Remove leading slash if present
-  const cleanPath = relativePath.startsWith('/')
+  const cleanPath = relativePath.startsWith("/")
     ? relativePath.slice(1)
     : relativePath;
 
   // Ensure extension URI has trailing slash
-  const baseUri = extensionUri.endsWith('/')
+  const baseUri = extensionUri.endsWith("/")
     ? extensionUri
     : `${extensionUri}/`;
 
@@ -99,8 +99,8 @@ export function generateResourceUrl(relativePath: string): string {
 
   // Validate if the final generated URL is secure
   if (!isValidWebviewUrl(fullUrl)) {
-    console.error('[resourceUrl] Generated URL failed validation:', fullUrl);
-    return '';
+    console.error("[resourceUrl] Generated URL failed validation:", fullUrl);
+    return "";
   }
 
   return fullUrl;

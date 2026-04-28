@@ -8,9 +8,9 @@
  * Tip history tracking — in-session cooldown and cross-session persistence.
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { Storage } from '@qwen-code/qwen-code-core';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { Storage } from "@tram-ai/tram-core";
 
 interface TipHistoryEntry {
   totalShown: number;
@@ -75,18 +75,18 @@ export class TipHistory {
    * Normalize a persisted tip entry so corrupted values cannot crash mutations.
    */
   private normalizeEntry(raw: unknown): TipHistoryEntry {
-    if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
       return { totalShown: 0, lastSessionTimestamp: 0 };
     }
     const candidate = raw as Partial<TipHistoryEntry>;
     return {
       totalShown:
-        typeof candidate.totalShown === 'number' &&
+        typeof candidate.totalShown === "number" &&
         Number.isFinite(candidate.totalShown)
           ? candidate.totalShown
           : 0,
       lastSessionTimestamp:
-        typeof candidate.lastSessionTimestamp === 'number' &&
+        typeof candidate.lastSessionTimestamp === "number" &&
         Number.isFinite(candidate.lastSessionTimestamp)
           ? candidate.lastSessionTimestamp
           : 0,
@@ -126,16 +126,16 @@ export class TipHistory {
    * Load history from disk, incrementing session count.
    */
   static load(): TipHistory {
-    const filePath = path.join(Storage.getGlobalQwenDir(), 'tip_history.json');
+    const filePath = path.join(Storage.getGlobalQwenDir(), "tip_history.json");
     let data: TipHistoryData = { sessionCount: 0, tips: {} };
     try {
       if (fs.existsSync(filePath)) {
-        const raw = fs.readFileSync(filePath, 'utf-8');
+        const raw = fs.readFileSync(filePath, "utf-8");
         const parsed = JSON.parse(raw);
         if (
-          typeof parsed === 'object' &&
+          typeof parsed === "object" &&
           parsed !== null &&
-          typeof parsed.sessionCount === 'number'
+          typeof parsed.sessionCount === "number"
         ) {
           data = {
             sessionCount:
@@ -153,7 +153,7 @@ export class TipHistory {
     // Increment session count for this startup
     data.sessionCount++;
     data.tips =
-      typeof data.tips === 'object' &&
+      typeof data.tips === "object" &&
       data.tips !== null &&
       !Array.isArray(data.tips)
         ? data.tips

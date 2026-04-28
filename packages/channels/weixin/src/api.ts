@@ -10,15 +10,15 @@ import type {
   SendTypingReq,
   SendTypingResp,
   BaseInfo,
-} from './types.js';
+} from "./types.js";
 
 // iLink Bot API protocol version we are compatible with.
 // Used both in the request body (base_info.channel_version) and in the
 // iLink-App-ClientVersion header (encoded as 0x00MMNNPP).
-const ILINK_PROTOCOL_VERSION = '2.1.3';
+const ILINK_PROTOCOL_VERSION = "2.1.3";
 
 function buildClientVersion(version: string): number {
-  const parts = version.split('.').map((p) => parseInt(p, 10));
+  const parts = version.split(".").map((p) => parseInt(p, 10));
   const major = parts[0] ?? 0;
   const minor = parts[1] ?? 0;
   const patch = parts[2] ?? 0;
@@ -37,16 +37,16 @@ function randomUin(): string {
 
 export function buildHeaders(token?: string): Record<string, string> {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'X-WECHAT-UIN': randomUin(),
-    'iLink-App-Id': 'bot',
-    'iLink-App-ClientVersion': String(
+    "Content-Type": "application/json",
+    "X-WECHAT-UIN": randomUin(),
+    "iLink-App-Id": "bot",
+    "iLink-App-ClientVersion": String(
       buildClientVersion(ILINK_PROTOCOL_VERSION),
     ),
   };
   if (token) {
-    headers['AuthorizationType'] = 'ilink_bot_token';
-    headers['Authorization'] = `Bearer ${token}`;
+    headers["AuthorizationType"] = "ilink_bot_token";
+    headers["Authorization"] = `Bearer ${token}`;
   }
   return headers;
 }
@@ -63,12 +63,12 @@ async function post<T>(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   if (signal) {
-    signal.addEventListener('abort', () => controller.abort(), { once: true });
+    signal.addEventListener("abort", () => controller.abort(), { once: true });
   }
 
   try {
     const resp = await fetch(`${baseUrl}${path}`, {
-      method: 'POST',
+      method: "POST",
       headers: buildHeaders(token),
       body: JSON.stringify(body),
       signal: controller.signal,
@@ -96,14 +96,14 @@ export async function getUpdates(
   try {
     return await post<GetUpdatesResp>(
       baseUrl,
-      '/ilink/bot/getupdates',
+      "/ilink/bot/getupdates",
       body,
       token,
       timeoutMs,
       signal,
     );
   } catch (err: unknown) {
-    if (err instanceof Error && err.name === 'AbortError') {
+    if (err instanceof Error && err.name === "AbortError") {
       return { ret: 0, msgs: [], get_updates_buf: getUpdatesBuf };
     }
     throw err;
@@ -113,10 +113,10 @@ export async function getUpdates(
 export async function sendMessage(
   baseUrl: string,
   token: string,
-  msg: SendMessageReq['msg'],
+  msg: SendMessageReq["msg"],
 ): Promise<void> {
   const body: SendMessageReq = { msg, base_info: baseInfo() };
-  await post(baseUrl, '/ilink/bot/sendmessage', body, token);
+  await post(baseUrl, "/ilink/bot/sendmessage", body, token);
 }
 
 export async function getConfig(
@@ -130,14 +130,14 @@ export async function getConfig(
     context_token: contextToken,
     base_info: baseInfo(),
   };
-  return post<GetConfigResp>(baseUrl, '/ilink/bot/getconfig', body, token);
+  return post<GetConfigResp>(baseUrl, "/ilink/bot/getconfig", body, token);
 }
 
 export async function sendTyping(
   baseUrl: string,
   token: string,
-  req: Omit<SendTypingReq, 'base_info'>,
+  req: Omit<SendTypingReq, "base_info">,
 ): Promise<SendTypingResp> {
   const body: SendTypingReq = { ...req, base_info: baseInfo() };
-  return post<SendTypingResp>(baseUrl, '/ilink/bot/sendtyping', body, token);
+  return post<SendTypingResp>(baseUrl, "/ilink/bot/sendtyping", body, token);
 }

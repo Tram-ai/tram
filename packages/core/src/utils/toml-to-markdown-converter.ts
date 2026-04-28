@@ -8,7 +8,7 @@
  * Converts TOML command files to Markdown format.
  */
 
-import toml from '@iarna/toml';
+import toml from "@iarna/toml";
 
 export interface TomlCommandFormat {
   prompt: string;
@@ -31,19 +31,19 @@ export function convertTomlToMarkdown(tomlContent: string): string {
     );
   }
 
-  if (typeof parsed !== 'object' || parsed === null) {
-    throw new Error('TOML content must be an object');
+  if (typeof parsed !== "object" || parsed === null) {
+    throw new Error("TOML content must be an object");
   }
 
   const obj = parsed as Record<string, unknown>;
 
-  if (typeof obj['prompt'] !== 'string') {
+  if (typeof obj["prompt"] !== "string") {
     throw new Error('TOML must contain a "prompt" field');
   }
 
-  const prompt = obj['prompt'];
+  const prompt = obj["prompt"];
   const description =
-    typeof obj['description'] === 'string' ? obj['description'] : undefined;
+    typeof obj["description"] === "string" ? obj["description"] : undefined;
 
   // Generate Markdown
   if (description) {

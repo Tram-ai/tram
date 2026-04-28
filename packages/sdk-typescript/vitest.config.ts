@@ -1,23 +1,23 @@
-import { defineConfig } from 'vitest/config';
-import * as path from 'path';
+import { defineConfig } from "vitest/config";
+import * as path from "path";
 
-const timeoutMinutes = Number(process.env['E2E_TIMEOUT_MINUTES'] || '3');
+const timeoutMinutes = Number(process.env["E2E_TIMEOUT_MINUTES"] || "3");
 const testTimeoutMs = timeoutMinutes * 60 * 1000;
 
 export default defineConfig({
   test: {
     globals: false,
-    environment: 'node',
+    environment: "node",
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      provider: "v8",
+      reporter: ["text", "json", "html"],
       exclude: [
-        'node_modules/',
-        'dist/',
-        'test/',
-        '**/*.d.ts',
-        '**/*.config.*',
-        '**/index.ts', // Export-only files
+        "node_modules/",
+        "dist/",
+        "test/",
+        "**/*.d.ts",
+        "**/*.config.*",
+        "**/index.ts", // Export-only files
       ],
       thresholds: {
         lines: 80,
@@ -26,8 +26,8 @@ export default defineConfig({
         statements: 80,
       },
     },
-    include: ['test/**/*.test.ts'],
-    exclude: ['node_modules/', 'dist/'],
+    include: ["test/**/*.test.ts"],
+    exclude: ["node_modules/", "dist/"],
     retry: 2,
     fileParallelism: true,
     poolOptions: {
@@ -41,7 +41,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
 });

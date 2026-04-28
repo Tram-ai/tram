@@ -4,25 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import Gradient from 'ink-gradient';
-import { shortenPath, tildeifyPath } from '@tram-ai/tram-core';
-import { theme } from '../semantic-colors.js';
-import { shortAsciiLogo } from './AsciiArt.js';
-import { getAsciiArtWidth, getCachedStringWidth } from '../utils/textUtils.js';
-import { useTerminalSize } from '../hooks/useTerminalSize.js';
-import { t } from '../../i18n/index.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import Gradient from "ink-gradient";
+import { shortenPath, tildeifyPath } from "@tram-ai/tram-core";
+import { theme } from "../semantic-colors.js";
+import { shortAsciiLogo } from "./AsciiArt.js";
+import { getAsciiArtWidth, getCachedStringWidth } from "../utils/textUtils.js";
+import { useTerminalSize } from "../hooks/useTerminalSize.js";
+import { t } from "../../i18n/index.js";
 
 /**
  * Auth display type for the Header component.
  * Simplified representation of authentication method shown to users.
  */
 export enum AuthDisplayType {
-  TRAM_OAUTH = 'TRAM OAuth',
-  CODING_PLAN = 'Coding Plan',
-  API_KEY = 'API Key',
-  UNKNOWN = 'Unknown',
+  TRAM_OAUTH = "TRAM OAuth",
+  CODING_PLAN = "Coding Plan",
+  API_KEY = "API Key",
+  UNKNOWN = "Unknown",
 }
 
 interface HeaderProps {
@@ -65,30 +65,36 @@ export const Header: React.FC<HeaderProps> = ({
   );
 
   // Check if we have enough space for logo + gap + minimum info panel
-const autoShowLogo = availableTerminalWidth >= logoWidth + logoGap + minInfoPanelWidth;
-const showLogo = false && autoShowLogo;
-  
+  const autoShowLogo =
+    availableTerminalWidth >= logoWidth + logoGap + minInfoPanelWidth;
+  const showLogo = false && autoShowLogo;
+
   // Calculate info panel width based on content width (auto-shrink)
   const tildeifiedPath = tildeifyPath(workingDirectory);
   const authModelText =
-    formattedAuthType === AuthDisplayType.API_KEY ? model : `${formattedAuthType} | ${model}`;
-  const modelHintText = ` ${t('(/model to change)')}`;
-  
+    formattedAuthType === AuthDisplayType.API_KEY
+      ? model
+      : `${formattedAuthType} | ${model}`;
+  const modelHintText = ` ${t("(/model to change)")}`;
+
   // Calculate widths of content
   const pathWidth = getCachedStringWidth(tildeifiedPath);
   const authModelWidth = getCachedStringWidth(authModelText + modelHintText);
   const contentWidth = Math.max(pathWidth, authModelWidth);
-  
+
   // Set info panel width based on content, with min/max bounds
-  const minInfoPanelWidth_auto = Math.min(40, contentWidth + infoPanelChromeWidth); // Minimum readable
+  const minInfoPanelWidth_auto = Math.min(
+    40,
+    contentWidth + infoPanelChromeWidth,
+  ); // Minimum readable
   const maxInfoPanelWidth = Math.min(80, availableTerminalWidth); // Maximum reasonable width
   const contentBasedWidth = contentWidth + infoPanelChromeWidth;
-  
+
   let availableInfoPanelWidth = Math.max(
     minInfoPanelWidth_auto,
     Math.min(contentBasedWidth, maxInfoPanelWidth),
   );
-  
+
   if (showLogo) {
     availableInfoPanelWidth = Math.min(
       availableInfoPanelWidth,
@@ -107,7 +113,10 @@ const showLogo = false && autoShowLogo;
       infoPanelContentWidth;
 
   // Shorten path if needed to fit
-  const shortenedPath = shortenPath(tildeifiedPath, Math.max(3, infoPanelContentWidth));
+  const shortenedPath = shortenPath(
+    tildeifiedPath,
+    Math.max(3, infoPanelContentWidth),
+  );
   const displayPath = shortenedPath;
 
   // Use theme gradient colors if available, otherwise use text colors (excluding primary)
@@ -147,11 +156,9 @@ const showLogo = false && autoShowLogo;
         paddingRight={infoPanelPaddingRight}
         width={availableInfoPanelWidth}
       >
-        {/* Title line: >_ TRAM (v{version}) color={theme.text.accent} */ }
+        {/* Title line: >_ TRAM (v{version}) color={theme.text.accent} */}
         <Text>
-          <Text bold >
-            &gt;_ TRAM Cli
-          </Text>
+          <Text bold>&gt;_ TRAM Cli</Text>
           <Text color={theme.text.secondary}> (v{version})</Text>
         </Text>
         {/* Empty line for spacing */}

@@ -4,53 +4,53 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { SessionSelector } from './SessionSelector.js';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { SessionSelector } from "./SessionSelector.js";
 
 /**
  * SessionSelector component displays a session list dropdown.
  * Shows sessions grouped by date with search and infinite scroll support.
  */
 const meta: Meta<typeof SessionSelector> = {
-  title: 'Layout/SessionSelector',
+  title: "Layout/SessionSelector",
   component: SessionSelector,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     visible: {
-      control: 'boolean',
-      description: 'Whether the selector is visible',
+      control: "boolean",
+      description: "Whether the selector is visible",
     },
     currentSessionId: {
-      control: 'text',
-      description: 'Currently selected session ID',
+      control: "text",
+      description: "Currently selected session ID",
     },
     searchQuery: {
-      control: 'text',
-      description: 'Current search query',
+      control: "text",
+      description: "Current search query",
     },
     hasMore: {
-      control: 'boolean',
-      description: 'Whether there are more sessions to load',
+      control: "boolean",
+      description: "Whether there are more sessions to load",
     },
     isLoading: {
-      control: 'boolean',
-      description: 'Whether loading is in progress',
+      control: "boolean",
+      description: "Whether loading is in progress",
     },
-    onSearchChange: { action: 'searchChanged' },
-    onSelectSession: { action: 'sessionSelected' },
-    onClose: { action: 'closed' },
-    onLoadMore: { action: 'loadMore' },
+    onSearchChange: { action: "searchChanged" },
+    onSelectSession: { action: "sessionSelected" },
+    onClose: { action: "closed" },
+    onLoadMore: { action: "loadMore" },
   },
   decorators: [
     (Story) => (
       <div
         style={{
-          height: '600px',
-          background: 'var(--app-background, #1e1e1e)',
-          position: 'relative',
+          height: "600px",
+          background: "var(--app-background, #1e1e1e)",
+          position: "relative",
         }}
       >
         <Story />
@@ -71,20 +71,20 @@ const lastWeek = new Date(
 const older = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
 const mockSessions = [
-  { id: '1', title: 'Debugging React hooks', lastUpdated: today },
-  { id: '2', title: 'API integration discussion', lastUpdated: today },
-  { id: '3', title: 'Code review feedback', lastUpdated: yesterday },
-  { id: '4', title: 'Project planning', lastUpdated: lastWeek },
-  { id: '5', title: 'Feature brainstorming', lastUpdated: lastWeek },
-  { id: '6', title: 'Old conversation', lastUpdated: older },
+  { id: "1", title: "Debugging React hooks", lastUpdated: today },
+  { id: "2", title: "API integration discussion", lastUpdated: today },
+  { id: "3", title: "Code review feedback", lastUpdated: yesterday },
+  { id: "4", title: "Project planning", lastUpdated: lastWeek },
+  { id: "5", title: "Feature brainstorming", lastUpdated: lastWeek },
+  { id: "6", title: "Old conversation", lastUpdated: older },
 ];
 
 export const Default: Story = {
   args: {
     visible: true,
     sessions: mockSessions,
-    currentSessionId: '1',
-    searchQuery: '',
+    currentSessionId: "1",
+    searchQuery: "",
   },
 };
 
@@ -92,10 +92,10 @@ export const WithSearch: Story = {
   args: {
     visible: true,
     sessions: mockSessions.filter((s) =>
-      s.title.toLowerCase().includes('debug'),
+      s.title.toLowerCase().includes("debug"),
     ),
     currentSessionId: null,
-    searchQuery: 'debug',
+    searchQuery: "debug",
   },
 };
 
@@ -104,7 +104,7 @@ export const Empty: Story = {
     visible: true,
     sessions: [],
     currentSessionId: null,
-    searchQuery: '',
+    searchQuery: "",
   },
 };
 
@@ -113,7 +113,7 @@ export const NoSearchResults: Story = {
     visible: true,
     sessions: [],
     currentSessionId: null,
-    searchQuery: 'nonexistent',
+    searchQuery: "nonexistent",
   },
 };
 
@@ -121,8 +121,8 @@ export const Loading: Story = {
   args: {
     visible: true,
     sessions: mockSessions,
-    currentSessionId: '1',
-    searchQuery: '',
+    currentSessionId: "1",
+    searchQuery: "",
     hasMore: true,
     isLoading: true,
   },
@@ -132,8 +132,8 @@ export const Hidden: Story = {
   args: {
     visible: false,
     sessions: mockSessions,
-    currentSessionId: '1',
-    searchQuery: '',
+    currentSessionId: "1",
+    searchQuery: "",
   },
 };
 
@@ -147,8 +147,8 @@ export const ManySessions: Story = {
         now.getTime() - i * 24 * 60 * 60 * 1000,
       ).toISOString(),
     })),
-    currentSessionId: '5',
-    searchQuery: '',
+    currentSessionId: "5",
+    searchQuery: "",
     hasMore: true,
   },
 };

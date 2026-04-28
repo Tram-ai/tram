@@ -7,9 +7,9 @@
  * Platform-agnostic version using webui components
  */
 
-import type { FC } from 'react';
-import { FileLink } from '../../layout/FileLink.js';
-import './LayoutComponents.css';
+import type { FC } from "react";
+import { FileLink } from "../../layout/FileLink.js";
+import "./LayoutComponents.css";
 
 /**
  * Props for ToolCallContainer
@@ -18,7 +18,7 @@ export interface ToolCallContainerProps {
   /** Operation label (e.g., "Read", "Write", "Search") */
   label: string;
   /** Status for bullet color: 'success' | 'error' | 'warning' | 'loading' | 'default' */
-  status?: 'success' | 'error' | 'warning' | 'loading' | 'default';
+  status?: "success" | "error" | "warning" | "loading" | "default";
   /** Main content to display (optional - some tool calls only show title) */
   children?: React.ReactNode;
   /** Tool call ID for debugging */
@@ -39,7 +39,7 @@ export interface ToolCallContainerProps {
  */
 export const ToolCallContainer: FC<ToolCallContainerProps> = ({
   label,
-  status = 'success',
+  status = "success",
   children,
   toolCallId: _toolCallId,
   labelSuffix,
@@ -48,7 +48,7 @@ export const ToolCallContainer: FC<ToolCallContainerProps> = ({
   isLast = false,
 }) => (
   <div
-    className={`tram-message message-item ${_className || ''} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
+    className={`tram-message message-item ${_className || ""} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
     data-first={isFirst}
     data-last={isLast}
   >
@@ -114,7 +114,7 @@ export const ToolCallRow: FC<ToolCallRowProps> = ({ label, children }) => (
  * Props for StatusIndicator
  */
 interface StatusIndicatorProps {
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  status: "pending" | "in_progress" | "completed" | "failed";
   text: string;
 }
 
@@ -122,19 +122,19 @@ interface StatusIndicatorProps {
  * Get status color class for StatusIndicator
  */
 const getStatusColorClass = (
-  status: 'pending' | 'in_progress' | 'completed' | 'failed',
+  status: "pending" | "in_progress" | "completed" | "failed",
 ): string => {
   switch (status) {
-    case 'pending':
-      return 'bg-[#ffc107]';
-    case 'in_progress':
-      return 'bg-[#2196f3]';
-    case 'completed':
-      return 'bg-[#4caf50]';
-    case 'failed':
-      return 'bg-[#f44336]';
+    case "pending":
+      return "bg-[#ffc107]";
+    case "in_progress":
+      return "bg-[#2196f3]";
+    case "completed":
+      return "bg-[#4caf50]";
+    case "failed":
+      return "bg-[#f44336]";
     default:
-      return 'bg-gray-500';
+      return "bg-gray-500";
   }
 };
 

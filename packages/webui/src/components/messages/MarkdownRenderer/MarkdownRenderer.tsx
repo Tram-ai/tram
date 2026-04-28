@@ -6,11 +6,11 @@
  * MarkdownRenderer component - renders markdown content with syntax highlighting and clickable file paths
  */
 
-import type { FC } from 'react';
-import { useMemo, useCallback } from 'react';
-import MarkdownIt from 'markdown-it';
-import type { Options as MarkdownItOptions } from 'markdown-it';
-import './MarkdownRenderer.css';
+import type { FC } from "react";
+import { useMemo, useCallback } from "react";
+import MarkdownIt from "markdown-it";
+import type { Options as MarkdownItOptions } from "markdown-it";
+import "./MarkdownRenderer.css";
 
 export interface MarkdownRendererProps {
   content: string;
@@ -38,11 +38,11 @@ const KNOWN_FILE_EXTENSIONS =
  */
 const escapeHtml = (unsafe: string): string =>
   unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
 /**
  * Create a cached MarkdownIt instance
@@ -72,30 +72,30 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
    */
   const processFilePaths = (html: string): string => {
     // If DOM is not available, bail out to avoid breaking SSR
-    if (typeof document === 'undefined') {
+    if (typeof document === "undefined") {
       return html;
     }
 
     // Build non-global variants to avoid .test() statefulness
     const FILE_PATH_NO_G = new RegExp(
       FILE_PATH_REGEX.source,
-      FILE_PATH_REGEX.flags.replace('g', ''),
+      FILE_PATH_REGEX.flags.replace("g", ""),
     );
     const FILE_PATH_WITH_LINES_NO_G = new RegExp(
       FILE_PATH_WITH_LINES_REGEX.source,
-      FILE_PATH_WITH_LINES_REGEX.flags.replace('g', ''),
+      FILE_PATH_WITH_LINES_REGEX.flags.replace("g", ""),
     );
     // Match a bare file name like README.md (no leading slash)
     const BARE_FILE_REGEX =
       /[\w\-. ]+\.(tsx?|jsx?|css|scss|json|md|py|java|go|rs|c|cpp|h|hpp|sh|ya?ml|toml|xml|html|vue|svelte)/i;
 
     // Parse HTML into a DOM tree so we don't replace inside attributes
-    const container = document.createElement('div');
+    const container = document.createElement("div");
     container.innerHTML = html;
 
     const union = new RegExp(
       `${FILE_PATH_WITH_LINES_REGEX.source}|${FILE_PATH_REGEX.source}|${BARE_FILE_REGEX.source}`,
-      'gi',
+      "gi",
     );
 
     // Convert a "path#fragment" into VS Code friendly "path:line"
@@ -104,7 +104,7 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
     ): { displayText: string; dataPath: string } => {
       const displayText = raw;
       let base = raw;
-      const hashIndex = raw.indexOf('#');
+      const hashIndex = raw.indexOf("#");
       if (hashIndex >= 0) {
         const frag = raw.slice(hashIndex + 1);
         const m = frag.match(/^L?(\d+)(?:-\d+)?$/i);
@@ -118,13 +118,13 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
     };
 
     const makeLink = (text: string) => {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       const { dataPath } = normalizePathAndLine(text);
-      link.className = 'file-path-link';
+      link.className = "file-path-link";
       link.textContent = text;
-      link.setAttribute('href', '#');
-      link.setAttribute('title', `Open ${text}`);
-      link.setAttribute('data-file-path', dataPath);
+      link.setAttribute("href", "#");
+      link.setAttribute("title", `Open ${text}`);
+      link.setAttribute("data-file-path", dataPath);
       return link;
     };
 
@@ -141,16 +141,16 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
     };
 
     const upgradeAnchorIfFilePath = (a: HTMLAnchorElement) => {
-      const href = a.getAttribute('href') || '';
-      const text = (a.textContent || '').trim();
+      const href = a.getAttribute("href") || "";
+      const text = (a.textContent || "").trim();
 
       const httpMatch = href.match(/^https?:\/\/(.+)$/i);
       if (httpMatch) {
         try {
           const url = new URL(href);
-          const host = url.hostname || '';
-          const pathname = url.pathname || '';
-          const noPath = pathname === '' || pathname === '/';
+          const host = url.hostname || "";
+          const pathname = url.pathname || "";
+          const noPath = pathname === "" || pathname === "/";
 
           if (
             noPath &&
@@ -158,19 +158,19 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
             host.toLowerCase() === text.toLowerCase()
           ) {
             const { dataPath } = normalizePathAndLine(text);
-            a.classList.add('file-path-link');
-            a.setAttribute('href', '#');
-            a.setAttribute('title', `Open ${text}`);
-            a.setAttribute('data-file-path', dataPath);
+            a.classList.add("file-path-link");
+            a.setAttribute("href", "#");
+            a.setAttribute("title", `Open ${text}`);
+            a.setAttribute("data-file-path", dataPath);
             return;
           }
 
           if (noPath && BARE_FILE_REGEX.test(host)) {
             const { dataPath } = normalizePathAndLine(host);
-            a.classList.add('file-path-link');
-            a.setAttribute('href', '#');
-            a.setAttribute('title', `Open ${text || host}`);
-            a.setAttribute('data-file-path', dataPath);
+            a.classList.add("file-path-link");
+            a.setAttribute("href", "#");
+            a.setAttribute("title", `Open ${text || host}`);
+            a.setAttribute("data-file-path", dataPath);
             return;
           }
         } catch {
@@ -193,31 +193,31 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
         FILE_PATH_NO_G.test(candidate)
       ) {
         const { dataPath } = normalizePathAndLine(candidate);
-        a.classList.add('file-path-link');
-        a.setAttribute('href', '#');
-        a.setAttribute('title', `Open ${text || href}`);
-        a.setAttribute('data-file-path', dataPath);
+        a.classList.add("file-path-link");
+        a.setAttribute("href", "#");
+        a.setAttribute("title", `Open ${text || href}`);
+        a.setAttribute("data-file-path", dataPath);
         return;
       }
 
       if (BARE_FILE_REGEX.test(candidate)) {
         const { dataPath } = normalizePathAndLine(candidate);
-        a.classList.add('file-path-link');
-        a.setAttribute('href', '#');
-        a.setAttribute('title', `Open ${text || href}`);
-        a.setAttribute('data-file-path', dataPath);
+        a.classList.add("file-path-link");
+        a.setAttribute("href", "#");
+        a.setAttribute("title", `Open ${text || href}`);
+        a.setAttribute("data-file-path", dataPath);
       }
     };
 
     const walk = (node: Node) => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as HTMLElement;
-        if (el.tagName.toLowerCase() === 'a') {
+        if (el.tagName.toLowerCase() === "a") {
           upgradeAnchorIfFilePath(el as HTMLAnchorElement);
           return;
         }
         const tag = el.tagName.toLowerCase();
-        if (tag === 'code' || tag === 'pre') {
+        if (tag === "code" || tag === "pre") {
           return;
         }
       }
@@ -225,7 +225,7 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
       for (let child = node.firstChild; child; ) {
         const next = child.nextSibling;
         if (child.nodeType === Node.TEXT_NODE) {
-          const text = child.nodeValue || '';
+          const text = child.nodeValue || "";
           union.lastIndex = 0;
           const hasMatch = union.test(text);
           union.lastIndex = 0;
@@ -285,7 +285,7 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
 
       return html;
     } catch (error) {
-      console.error('Error rendering markdown:', error);
+      console.error("Error rendering markdown:", error);
       return escapeHtml(content);
     }
   }, [content, enableFileLinks, md]);
@@ -302,9 +302,9 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
       }
 
       const anchor = (target.closest &&
-        target.closest('a.file-path-link')) as HTMLAnchorElement | null;
+        target.closest("a.file-path-link")) as HTMLAnchorElement | null;
       if (anchor) {
-        const filePath = anchor.getAttribute('data-file-path');
+        const filePath = anchor.getAttribute("data-file-path");
         if (!filePath) {
           return;
         }
@@ -315,24 +315,24 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
       }
 
       const anyAnchor = (target.closest &&
-        target.closest('a')) as HTMLAnchorElement | null;
+        target.closest("a")) as HTMLAnchorElement | null;
       if (!anyAnchor) {
         return;
       }
 
-      const href = anyAnchor.getAttribute('href') || '';
+      const href = anyAnchor.getAttribute("href") || "";
       if (!/^https?:\/\//i.test(href)) {
         return;
       }
       try {
         const url = new URL(href);
-        const host = url.hostname || '';
-        const path = url.pathname || '';
-        const noPath = path === '' || path === '/';
+        const host = url.hostname || "";
+        const path = url.pathname || "";
+        const noPath = path === "" || path === "/";
 
         // Only treat as file if host has a known file extension
         if (noPath && KNOWN_FILE_EXTENSIONS.test(host)) {
-          const text = (anyAnchor.textContent || '').trim();
+          const text = (anyAnchor.textContent || "").trim();
           const candidate = KNOWN_FILE_EXTENSIONS.test(text) ? text : host;
           e.preventDefault();
           e.stopPropagation();
@@ -351,9 +351,9 @@ export const MarkdownRenderer: FC<MarkdownRendererProps> = ({
       onClick={handleContainerClick}
       dangerouslySetInnerHTML={{ __html: renderedHtml }}
       style={{
-        wordWrap: 'break-word',
-        overflowWrap: 'break-word',
-        whiteSpace: 'normal',
+        wordWrap: "break-word",
+        overflowWrap: "break-word",
+        whiteSpace: "normal",
       }}
     />
   );

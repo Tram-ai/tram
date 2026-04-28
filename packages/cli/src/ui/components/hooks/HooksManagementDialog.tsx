@@ -4,48 +4,48 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../../semantic-colors.js';
-import { useTerminalSize } from '../../hooks/useTerminalSize.js';
-import { useKeypress } from '../../hooks/useKeypress.js';
-import { useConfig } from '../../contexts/ConfigContext.js';
-import { loadSettings, SettingScope } from '../../../config/settings.js';
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { Box, Text } from "ink";
+import { theme } from "../../semantic-colors.js";
+import { useTerminalSize } from "../../hooks/useTerminalSize.js";
+import { useKeypress } from "../../hooks/useKeypress.js";
+import { useConfig } from "../../contexts/ConfigContext.js";
+import { loadSettings, SettingScope } from "../../../config/settings.js";
 import {
   HooksConfigSource,
   type HookDefinition,
   type HookConfig,
   createDebugLogger,
   HOOKS_CONFIG_FIELDS,
-} from '@qwen-code/qwen-code-core';
+} from "@tram-ai/tram-core";
 import type {
   HooksManagementDialogProps,
   HookEventDisplayInfo,
-} from './types.js';
-import { HOOKS_MANAGEMENT_STEPS } from './types.js';
-import { HooksListStep } from './HooksListStep.js';
-import { HookDetailStep } from './HookDetailStep.js';
-import { HookConfigDetailStep } from './HookConfigDetailStep.js';
-import { HooksDisabledStep } from './HooksDisabledStep.js';
+} from "./types.js";
+import { HOOKS_MANAGEMENT_STEPS } from "./types.js";
+import { HooksListStep } from "./HooksListStep.js";
+import { HookDetailStep } from "./HookDetailStep.js";
+import { HookConfigDetailStep } from "./HookConfigDetailStep.js";
+import { HooksDisabledStep } from "./HooksDisabledStep.js";
 import {
   DISPLAY_HOOK_EVENTS,
   getTranslatedSourceDisplayMap,
   createEmptyHookEventInfo,
-} from './constants.js';
-import { t } from '../../../i18n/index.js';
+} from "./constants.js";
+import { t } from "../../../i18n/index.js";
 
-const debugLogger = createDebugLogger('HOOKS_DIALOG');
+const debugLogger = createDebugLogger("HOOKS_DIALOG");
 
 /**
  * Type guard to check if a value is a valid HookConfig
  */
 function isValidHookConfig(config: unknown): config is HookConfig {
   return (
-    typeof config === 'object' &&
+    typeof config === "object" &&
     config !== null &&
-    'type' in config &&
-    'command' in config &&
-    typeof (config as HookConfig).command === 'string'
+    "type" in config &&
+    "command" in config &&
+    typeof (config as HookConfig).command === "string"
   );
 }
 
@@ -53,26 +53,26 @@ function isValidHookConfig(config: unknown): config is HookConfig {
  * Type guard to check if a value is a valid HookDefinition
  */
 function isValidHookDefinition(def: unknown): def is HookDefinition {
-  if (typeof def !== 'object' || def === null) {
+  if (typeof def !== "object" || def === null) {
     return false;
   }
   const obj = def as Record<string, unknown>;
   // hooks array is required
-  if (!('hooks' in obj) || !Array.isArray(obj['hooks'])) {
+  if (!("hooks" in obj) || !Array.isArray(obj["hooks"])) {
     return false;
   }
   // Validate each hook config in the array
-  for (const hook of obj['hooks']) {
+  for (const hook of obj["hooks"]) {
     if (!isValidHookConfig(hook)) {
       return false;
     }
   }
   // matcher is optional but must be a string if present
-  if ('matcher' in obj && typeof obj['matcher'] !== 'string') {
+  if ("matcher" in obj && typeof obj["matcher"] !== "string") {
     return false;
   }
   // sequential is optional but must be a boolean if present
-  if ('sequential' in obj && typeof obj['sequential'] !== 'boolean') {
+  if ("sequential" in obj && typeof obj["sequential"] !== "boolean") {
     return false;
   }
   return true;
@@ -84,7 +84,7 @@ function isValidHookDefinition(def: unknown): def is HookDefinition {
 function isValidHooksRecord(
   hooks: unknown,
 ): hooks is Record<string, HookDefinition[]> {
-  if (typeof hooks !== 'object' || hooks === null) {
+  if (typeof hooks !== "object" || hooks === null) {
     return false;
   }
   const record = hooks as Record<string, unknown>;
@@ -151,7 +151,7 @@ export function HooksManagementDialog({
     (key) => {
       if (isLoading || loadError) {
         // Allow Escape to close even during loading/error states
-        if (key.name === 'escape') {
+        if (key.name === "escape") {
           onClose();
         }
         return;
@@ -159,19 +159,19 @@ export function HooksManagementDialog({
 
       switch (currentStep) {
         case HOOKS_MANAGEMENT_STEPS.HOOKS_DISABLED:
-          if (key.name === 'escape') {
+          if (key.name === "escape") {
             onClose();
           }
           break;
 
         case HOOKS_MANAGEMENT_STEPS.HOOKS_LIST:
-          if (key.name === 'up') {
+          if (key.name === "up") {
             setListSelectedIndex((prev) => Math.max(0, prev - 1));
-          } else if (key.name === 'down') {
+          } else if (key.name === "down") {
             setListSelectedIndex((prev) =>
               Math.min(hooks.length - 1, prev + 1),
             );
-          } else if (key.name === 'return') {
+          } else if (key.name === "return") {
             if (hooks.length > 0 && listSelectedIndex >= 0) {
               setSelectedHookIndex(listSelectedIndex);
               setSelectedConfigIndex(-1);
@@ -181,22 +181,22 @@ export function HooksManagementDialog({
                 HOOKS_MANAGEMENT_STEPS.HOOK_DETAIL,
               ]);
             }
-          } else if (key.name === 'escape') {
+          } else if (key.name === "escape") {
             onClose();
           }
           break;
 
         case HOOKS_MANAGEMENT_STEPS.HOOK_DETAIL:
-          if (key.name === 'escape') {
+          if (key.name === "escape") {
             handleNavigateBack();
           } else if (selectedHook && selectedHook.configs.length > 0) {
-            if (key.name === 'up') {
+            if (key.name === "up") {
               setDetailSelectedIndex((prev) => Math.max(0, prev - 1));
-            } else if (key.name === 'down') {
+            } else if (key.name === "down") {
               setDetailSelectedIndex((prev) =>
                 Math.min(selectedHook.configs.length - 1, prev + 1),
               );
-            } else if (key.name === 'return') {
+            } else if (key.name === "return") {
               setSelectedConfigIndex(detailSelectedIndex);
               setNavigationStack((prev) => [
                 ...prev,
@@ -207,7 +207,7 @@ export function HooksManagementDialog({
           break;
 
         case HOOKS_MANAGEMENT_STEPS.HOOK_CONFIG_DETAIL:
-          if (key.name === 'escape') {
+          if (key.name === "escape") {
             handleNavigateBack();
           }
           break;
@@ -240,7 +240,7 @@ export function HooksManagementDialog({
 
       // Get hooks from user settings (with type validation)
       const userSettingsRecord = userSettings as Record<string, unknown>;
-      const userHooksRaw = userSettingsRecord?.['hooks'];
+      const userHooksRaw = userSettingsRecord?.["hooks"];
       if (isValidHooksRecord(userHooksRaw) && userHooksRaw[eventName]) {
         for (const def of userHooksRaw[eventName]) {
           for (const hookConfig of def.hooks) {
@@ -259,7 +259,7 @@ export function HooksManagementDialog({
         string,
         unknown
       >;
-      const workspaceHooksRaw = workspaceSettingsRecord?.['hooks'];
+      const workspaceHooksRaw = workspaceSettingsRecord?.["hooks"];
       if (
         isValidHooksRecord(workspaceHooksRaw) &&
         workspaceHooksRaw[eventName]
@@ -317,9 +317,9 @@ export function HooksManagementDialog({
       }
     } catch (error) {
       if (!cancelled) {
-        debugLogger.error('Error loading hooks:', error);
+        debugLogger.error("Error loading hooks:", error);
         setLoadError(
-          error instanceof Error ? error.message : 'Failed to load hooks',
+          error instanceof Error ? error.message : "Failed to load hooks",
         );
       }
     } finally {
@@ -371,7 +371,7 @@ export function HooksManagementDialog({
     if (isLoading) {
       return (
         <Box flexDirection="column" paddingX={1}>
-          <Text color={theme.text.secondary}>{t('Loading hooks...')}</Text>
+          <Text color={theme.text.secondary}>{t("Loading hooks...")}</Text>
         </Box>
       );
     }
@@ -379,11 +379,11 @@ export function HooksManagementDialog({
     if (loadError) {
       return (
         <Box flexDirection="column" paddingX={1}>
-          <Text color={theme.status.error}>{t('Error loading hooks:')}</Text>
+          <Text color={theme.status.error}>{t("Error loading hooks:")}</Text>
           <Text color={theme.text.secondary}>{loadError}</Text>
           <Box marginTop={1}>
             <Text color={theme.text.secondary}>
-              {t('Press Escape to close')}
+              {t("Press Escape to close")}
             </Text>
           </Box>
         </Box>
@@ -407,7 +407,7 @@ export function HooksManagementDialog({
         }
         return (
           <Box flexDirection="column" paddingX={1}>
-            <Text color={theme.text.secondary}>{t('No hook selected')}</Text>
+            <Text color={theme.text.secondary}>{t("No hook selected")}</Text>
           </Box>
         );
 
@@ -423,7 +423,7 @@ export function HooksManagementDialog({
         return (
           <Box flexDirection="column" paddingX={1}>
             <Text color={theme.text.secondary}>
-              {t('No hook config selected')}
+              {t("No hook config selected")}
             </Text>
           </Box>
         );

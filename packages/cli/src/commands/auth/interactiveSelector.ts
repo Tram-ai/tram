@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { stdin, stdout } from 'node:process';
-import { t } from '../../i18n/index.js';
+import { stdin, stdout } from "node:process";
+import { t } from "../../i18n/index.js";
 
 /**
  * Represents an option in the interactive selector
@@ -25,7 +25,7 @@ export class InteractiveSelector<T> {
 
   constructor(
     private options: Array<Option<T>>,
-    private prompt: string = t('Select an option:'),
+    private prompt: string = t("Select an option:"),
   ) {}
 
   /**
@@ -43,7 +43,7 @@ export class InteractiveSelector<T> {
         // Fallback to readline if raw mode is not available (e.g., when piped)
         reject(
           new Error(
-            t('Raw mode not available. Please run in an interactive terminal.'),
+            t("Raw mode not available. Please run in an interactive terminal."),
           ),
         );
         return;
@@ -52,25 +52,25 @@ export class InteractiveSelector<T> {
       const wasRaw = stdin.isRaw;
       stdin.setRawMode(true);
       stdin.resume();
-      stdin.setEncoding('utf8');
+      stdin.setEncoding("utf8");
 
       const onData = (chunk: string) => {
         if (!this.isListening) return;
 
         for (const char of chunk) {
           switch (char) {
-            case '\x03': // Ctrl+C
-              stdin.removeListener('data', onData);
+            case "\x03": // Ctrl+C
+              stdin.removeListener("data", onData);
               stdin.setRawMode(wasRaw);
-              reject(new Error('Interrupted'));
+              reject(new Error("Interrupted"));
               return;
-            case '\r': // Enter
-            case '\n': // Newline
-              stdin.removeListener('data', onData);
+            case "\r": // Enter
+            case "\n": // Newline
+              stdin.removeListener("data", onData);
               stdin.setRawMode(wasRaw);
               resolve(this.options[this.selectedIndex].value);
               return;
-            case '\x1B': // ESC sequence
+            case "\x1B": // ESC sequence
               // Next character will be [, then A, B, C, or D
               break;
             default:
@@ -80,24 +80,24 @@ export class InteractiveSelector<T> {
         }
 
         // Handle escape sequences
-        if (chunk.startsWith('\x1B')) {
-          if (chunk === '\x1B[A') {
+        if (chunk.startsWith("\x1B")) {
+          if (chunk === "\x1B[A") {
             // Arrow up
             this.moveUp();
-          } else if (chunk === '\x1B[B') {
+          } else if (chunk === "\x1B[B") {
             // Arrow down
             this.moveDown();
-          } else if (chunk === '\x1B[C') {
+          } else if (chunk === "\x1B[C") {
             // Arrow right
             // Do nothing for now
-          } else if (chunk === '\x1B[D') {
+          } else if (chunk === "\x1B[D") {
             // Arrow left
             // Do nothing for now
           }
         }
       };
 
-      stdin.on('data', onData);
+      stdin.on("data", onData);
     });
   }
 
@@ -119,9 +119,9 @@ export class InteractiveSelector<T> {
     // Write each option - combine label and description on same line
     this.options.forEach((option, index) => {
       const isSelected = index === this.selectedIndex;
-      const indicator = isSelected ? '> ' : '  ';
-      const color = isSelected ? '\x1B[36m' : '\x1B[0m'; // Cyan for selected, default for others
-      const reset = '\x1B[0m';
+      const indicator = isSelected ? "> " : "  ";
+      const color = isSelected ? "\x1B[36m" : "\x1B[0m"; // Cyan for selected, default for others
+      const reset = "\x1B[0m";
 
       // Combine label and description in one line
       let line = `${indicator}${color}${option.label}`;
@@ -135,7 +135,7 @@ export class InteractiveSelector<T> {
 
     // Add instructions
     stdout.write(
-      `\n${t('(Use ↑ ↓ arrows to navigate, Enter to select, Ctrl+C to exit)\n')}`,
+      `\n${t("(Use ↑ ↓ arrows to navigate, Enter to select, Ctrl+C to exit)\n")}`,
     );
   }
 

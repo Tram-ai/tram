@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
-import { Box } from 'ink';
-import { RadioButtonSelect } from '../../shared/RadioButtonSelect.js';
-import { MANAGEMENT_STEPS } from '../types.js';
-import { type SubagentConfig } from '@tram-ai/tram-core';
-import { t } from '../../../../i18n/index.js';
+import { useState } from "react";
+import { Box } from "ink";
+import { RadioButtonSelect } from "../../shared/RadioButtonSelect.js";
+import { MANAGEMENT_STEPS } from "../types.js";
+import { type SubagentConfig } from "@tram-ai/tram-core";
+import { t } from "../../../../i18n/index.js";
 
 interface ActionSelectionStepProps {
   selectedAgent: SubagentConfig | null;
@@ -23,53 +23,53 @@ export const ActionSelectionStep = ({
   onNavigateBack,
 }: ActionSelectionStepProps) => {
   const [selectedAction, setSelectedAction] = useState<
-    'view' | 'edit' | 'delete' | null
+    "view" | "edit" | "delete" | null
   >(null);
 
   // Filter actions based on whether the agent is built-in
   const allActions = [
     {
-      key: 'view',
+      key: "view",
       get label() {
-        return t('View Agent');
+        return t("View Agent");
       },
-      value: 'view' as const,
+      value: "view" as const,
     },
     {
-      key: 'edit',
+      key: "edit",
       get label() {
-        return t('Edit Agent');
+        return t("Edit Agent");
       },
-      value: 'edit' as const,
+      value: "edit" as const,
     },
     {
-      key: 'delete',
+      key: "delete",
       get label() {
-        return t('Delete Agent');
+        return t("Delete Agent");
       },
-      value: 'delete' as const,
+      value: "delete" as const,
     },
     {
-      key: 'back',
+      key: "back",
       get label() {
-        return t('Back');
+        return t("Back");
       },
-      value: 'back' as const,
+      value: "back" as const,
     },
   ];
 
   // Extension-level agents are also read-only (like builtin)
   const isReadOnly =
-    selectedAgent?.isBuiltin || selectedAgent?.level === 'extension';
+    selectedAgent?.isBuiltin || selectedAgent?.level === "extension";
 
   const actions = isReadOnly
     ? allActions.filter(
-        (action) => action.value === 'view' || action.value === 'back',
+        (action) => action.value === "view" || action.value === "back",
       )
     : allActions;
 
-  const handleActionSelect = (value: 'view' | 'edit' | 'delete' | 'back') => {
-    if (value === 'back') {
+  const handleActionSelect = (value: "view" | "edit" | "delete" | "back") => {
+    if (value === "back") {
       onNavigateBack();
       return;
     }
@@ -77,11 +77,11 @@ export const ActionSelectionStep = ({
     setSelectedAction(value);
 
     // Navigate to appropriate step based on action
-    if (value === 'view') {
+    if (value === "view") {
       onNavigateToStep(MANAGEMENT_STEPS.AGENT_VIEWER);
-    } else if (value === 'edit') {
+    } else if (value === "edit") {
       onNavigateToStep(MANAGEMENT_STEPS.EDIT_OPTIONS);
-    } else if (value === 'delete') {
+    } else if (value === "delete") {
       onNavigateToStep(MANAGEMENT_STEPS.DELETE_CONFIRMATION);
     }
   };

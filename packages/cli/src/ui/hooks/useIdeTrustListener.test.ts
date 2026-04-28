@@ -6,23 +6,22 @@
 
 /** @vitest-environment jsdom */
 
-import { renderHook, act } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { renderHook, act } from "@testing-library/react";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import {
   IdeClient,
   IDEConnectionStatus,
   ideContextStore,
   type IDEConnectionState,
-} from '@tram-ai/tram-core';
-import { useIdeTrustListener } from './useIdeTrustListener.js';
-import * as trustedFolders from '../../config/trustedFolders.js';
-import { useSettings } from '../contexts/SettingsContext.js';
-import type { LoadedSettings } from '../../config/settings.js';
+} from "@tram-ai/tram-core";
+import { useIdeTrustListener } from "./useIdeTrustListener.js";
+import * as trustedFolders from "../../config/trustedFolders.js";
+import { useSettings } from "../contexts/SettingsContext.js";
+import type { LoadedSettings } from "../../config/settings.js";
 
 // Mock dependencies
-vi.mock('@tram-ai/tram-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('@tram-ai/tram-core')>();
+vi.mock("@tram-ai/tram-core", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@tram-ai/tram-core")>();
   const ideClientInstance = {
     addTrustChangeListener: vi.fn(),
     removeTrustChangeListener: vi.fn(),
@@ -44,10 +43,10 @@ vi.mock('@tram-ai/tram-core', async (importOriginal) => {
   };
 });
 
-vi.mock('../../config/trustedFolders.js');
-vi.mock('../contexts/SettingsContext.js');
+vi.mock("../../config/trustedFolders.js");
+vi.mock("../contexts/SettingsContext.js");
 
-describe('useIdeTrustListener', () => {
+describe("useIdeTrustListener", () => {
   let mockSettings: LoadedSettings;
   let mockIdeClient: Awaited<ReturnType<typeof IdeClient.getInstance>>;
   let trustChangeCallback: (isTrusted: boolean) => void;
@@ -79,7 +78,7 @@ describe('useIdeTrustListener', () => {
     );
   });
 
-  it('should initialize correctly with no trust information', () => {
+  it("should initialize correctly with no trust information", () => {
     vi.mocked(trustedFolders.isWorkspaceTrusted).mockReturnValue({
       isTrusted: undefined,
       source: undefined,
@@ -89,16 +88,16 @@ describe('useIdeTrustListener', () => {
 
     expect(result.current.isIdeTrusted).toBe(undefined);
     expect(result.current.needsRestart).toBe(false);
-    expect(result.current.restartReason).toBe('NONE');
+    expect(result.current.restartReason).toBe("NONE");
   });
 
-  it('should NOT set needsRestart when connecting for the first time', async () => {
+  it("should NOT set needsRestart when connecting for the first time", async () => {
     vi.mocked(mockIdeClient.getConnectionStatus).mockReturnValue({
       status: IDEConnectionStatus.Disconnected,
     });
     vi.mocked(trustedFolders.isWorkspaceTrusted).mockReturnValue({
       isTrusted: true,
-      source: 'ide',
+      source: "ide",
     });
     const { result } = renderHook(() => useIdeTrustListener());
 
@@ -119,10 +118,10 @@ describe('useIdeTrustListener', () => {
 
     expect(result.current.isIdeTrusted).toBe(true);
     expect(result.current.needsRestart).toBe(false);
-    expect(result.current.restartReason).toBe('CONNECTION_CHANGE');
+    expect(result.current.restartReason).toBe("CONNECTION_CHANGE");
   });
 
-  it('should set needsRestart when IDE trust changes', async () => {
+  it("should set needsRestart when IDE trust changes", async () => {
     vi.mocked(mockIdeClient.getConnectionStatus).mockReturnValue({
       status: IDEConnectionStatus.Connected,
     });
@@ -131,7 +130,7 @@ describe('useIdeTrustListener', () => {
     });
     vi.mocked(trustedFolders.isWorkspaceTrusted).mockReturnValue({
       isTrusted: true,
-      source: 'ide',
+      source: "ide",
     });
 
     const { result } = renderHook(() => useIdeTrustListener());
@@ -147,7 +146,7 @@ describe('useIdeTrustListener', () => {
     await act(async () => {
       vi.mocked(trustedFolders.isWorkspaceTrusted).mockReturnValue({
         isTrusted: false,
-        source: 'ide',
+        source: "ide",
       });
       vi.mocked(ideContextStore.get).mockReturnValue({
         workspaceState: { isTrusted: false },
@@ -157,10 +156,10 @@ describe('useIdeTrustListener', () => {
 
     expect(result.current.isIdeTrusted).toBe(false);
     expect(result.current.needsRestart).toBe(true);
-    expect(result.current.restartReason).toBe('TRUST_CHANGE');
+    expect(result.current.restartReason).toBe("TRUST_CHANGE");
   });
 
-  it('should set needsRestart when IDE disconnects', async () => {
+  it("should set needsRestart when IDE disconnects", async () => {
     vi.mocked(mockIdeClient.getConnectionStatus).mockReturnValue({
       status: IDEConnectionStatus.Connected,
     });
@@ -169,7 +168,7 @@ describe('useIdeTrustListener', () => {
     });
     vi.mocked(trustedFolders.isWorkspaceTrusted).mockReturnValue({
       isTrusted: true,
-      source: 'ide',
+      source: "ide",
     });
 
     const { result } = renderHook(() => useIdeTrustListener());
@@ -193,10 +192,10 @@ describe('useIdeTrustListener', () => {
 
     expect(result.current.isIdeTrusted).toBe(undefined);
     expect(result.current.needsRestart).toBe(true);
-    expect(result.current.restartReason).toBe('CONNECTION_CHANGE');
+    expect(result.current.restartReason).toBe("CONNECTION_CHANGE");
   });
 
-  it('should NOT set needsRestart if trust value does not change', async () => {
+  it("should NOT set needsRestart if trust value does not change", async () => {
     vi.mocked(mockIdeClient.getConnectionStatus).mockReturnValue({
       status: IDEConnectionStatus.Connected,
     });
@@ -205,7 +204,7 @@ describe('useIdeTrustListener', () => {
     });
     vi.mocked(trustedFolders.isWorkspaceTrusted).mockReturnValue({
       isTrusted: true,
-      source: 'ide',
+      source: "ide",
     });
 
     const { result, rerender } = renderHook(() => useIdeTrustListener());

@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
-import { HookAggregator } from './hookAggregator.js';
-import { HookEventName, HookType, createHookOutput } from './types.js';
+import { describe, it, expect } from "vitest";
+import { HookAggregator } from "./hookAggregator.js";
+import { HookEventName, HookType, createHookOutput } from "./types.js";
 import type {
   HookExecutionResult,
   HookOutput,
   PermissionRequestHookOutput,
-} from './types.js';
+} from "./types.js";
 
-describe('HookAggregator', () => {
+describe("HookAggregator", () => {
   const aggregator = new HookAggregator();
 
-  describe('aggregateResults', () => {
-    it('should return undefined finalOutput when no results', () => {
+  describe("aggregateResults", () => {
+    it("should return undefined finalOutput when no results", () => {
       const result = aggregator.aggregateResults([], HookEventName.PreToolUse);
       expect(result.success).toBe(true);
       expect(result.finalOutput).toBeUndefined();
@@ -25,10 +25,10 @@ describe('HookAggregator', () => {
       expect(result.errors).toEqual([]);
     });
 
-    it('should aggregate successful results', () => {
+    it("should aggregate successful results", () => {
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.PreToolUse,
           success: true,
           output: { continue: true },
@@ -44,13 +44,13 @@ describe('HookAggregator', () => {
       expect(result.finalOutput).toBeDefined();
     });
 
-    it('should set success false when there are errors', () => {
+    it("should set success false when there are errors", () => {
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.PreToolUse,
           success: false,
-          error: new Error('Hook failed'),
+          error: new Error("Hook failed"),
           duration: 100,
         },
       ];
@@ -63,16 +63,16 @@ describe('HookAggregator', () => {
       expect(result.errors).toHaveLength(1);
     });
 
-    it('should calculate total duration', () => {
+    it("should calculate total duration", () => {
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo 1' },
+          hookConfig: { type: HookType.Command, command: "echo 1" },
           eventName: HookEventName.PreToolUse,
           success: true,
           duration: 100,
         },
         {
-          hookConfig: { type: HookType.Command, command: 'echo 2' },
+          hookConfig: { type: HookType.Command, command: "echo 2" },
           eventName: HookEventName.PreToolUse,
           success: true,
           duration: 200,
@@ -87,15 +87,15 @@ describe('HookAggregator', () => {
     });
   });
 
-  describe('mergeWithOrLogic - PreToolUse', () => {
-    it('should concatenate reasons', () => {
+  describe("mergeWithOrLogic - PreToolUse", () => {
+    it("should concatenate reasons", () => {
       const outputs: HookOutput[] = [
-        { reason: 'first reason', decision: 'allow' },
-        { reason: 'second reason', decision: 'allow' },
+        { reason: "first reason", decision: "allow" },
+        { reason: "second reason", decision: "allow" },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PreToolUse,
         success: true,
         output,
@@ -106,17 +106,17 @@ describe('HookAggregator', () => {
         results,
         HookEventName.PreToolUse,
       );
-      expect(result.finalOutput?.reason).toBe('first reason\nsecond reason');
+      expect(result.finalOutput?.reason).toBe("first reason\nsecond reason");
     });
 
-    it('should block when any hook blocks', () => {
+    it("should block when any hook blocks", () => {
       const outputs: HookOutput[] = [
-        { reason: 'allowed', decision: 'allow' },
-        { reason: 'blocked', decision: 'block' },
+        { reason: "allowed", decision: "allow" },
+        { reason: "blocked", decision: "block" },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PreToolUse,
         success: true,
         output,
@@ -127,17 +127,17 @@ describe('HookAggregator', () => {
         results,
         HookEventName.PreToolUse,
       );
-      expect(result.finalOutput?.decision).toBe('block');
+      expect(result.finalOutput?.decision).toBe("block");
     });
 
-    it('should use last stopReason', () => {
+    it("should use last stopReason", () => {
       const outputs: HookOutput[] = [
-        { continue: false, stopReason: 'first stop' },
-        { continue: false, stopReason: 'second stop' },
+        { continue: false, stopReason: "first stop" },
+        { continue: false, stopReason: "second stop" },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.Stop,
         success: true,
         output,
@@ -145,17 +145,17 @@ describe('HookAggregator', () => {
       }));
 
       const result = aggregator.aggregateResults(results, HookEventName.Stop);
-      expect(result.finalOutput?.stopReason).toBe('second stop');
+      expect(result.finalOutput?.stopReason).toBe("second stop");
     });
 
-    it('should concatenate additionalContext', () => {
+    it("should concatenate additionalContext", () => {
       const outputs: HookOutput[] = [
-        { hookSpecificOutput: { additionalContext: 'context 1' } },
-        { hookSpecificOutput: { additionalContext: 'context 2' } },
+        { hookSpecificOutput: { additionalContext: "context 1" } },
+        { hookSpecificOutput: { additionalContext: "context 2" } },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PreToolUse,
         success: true,
         output,
@@ -167,32 +167,32 @@ describe('HookAggregator', () => {
         HookEventName.PreToolUse,
       );
       expect(
-        result.finalOutput?.hookSpecificOutput?.['additionalContext'],
-      ).toBe('context 1\ncontext 2');
+        result.finalOutput?.hookSpecificOutput?.["additionalContext"],
+      ).toBe("context 1\ncontext 2");
     });
 
-    it('should preserve other hookSpecificOutput fields', () => {
+    it("should preserve other hookSpecificOutput fields", () => {
       const outputs: HookOutput[] = [
         {
-          decision: 'allow',
-          reason: 'Test reason 1',
+          decision: "allow",
+          reason: "Test reason 1",
           hookSpecificOutput: {
-            hookEventName: 'PostToolUse',
-            additionalContext: 'ctx',
+            hookEventName: "PostToolUse",
+            additionalContext: "ctx",
           },
         },
         {
-          decision: 'allow',
-          reason: 'Test reason 2',
+          decision: "allow",
+          reason: "Test reason 2",
           hookSpecificOutput: {
-            hookEventName: 'PostToolUse',
-            additionalContext: 'ctx2',
+            hookEventName: "PostToolUse",
+            additionalContext: "ctx2",
           },
         },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PostToolUse,
         success: true,
         output,
@@ -204,20 +204,20 @@ describe('HookAggregator', () => {
         HookEventName.PostToolUse,
       );
       expect(
-        result.finalOutput?.hookSpecificOutput?.['additionalContext'],
-      ).toBe('ctx\nctx2');
+        result.finalOutput?.hookSpecificOutput?.["additionalContext"],
+      ).toBe("ctx\nctx2");
     });
   });
 
-  describe('mergePermissionRequestOutputs', () => {
-    it('should prioritize deny over allow', () => {
+  describe("mergePermissionRequestOutputs", () => {
+    it("should prioritize deny over allow", () => {
       const outputs: HookOutput[] = [
-        { hookSpecificOutput: { decision: { behavior: 'allow' } } },
-        { hookSpecificOutput: { decision: { behavior: 'deny' } } },
+        { hookSpecificOutput: { decision: { behavior: "allow" } } },
+        { hookSpecificOutput: { decision: { behavior: "deny" } } },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PermissionRequest,
         success: true,
         output,
@@ -237,22 +237,22 @@ describe('HookAggregator', () => {
       expect(hookOutput.isPermissionDenied()).toBe(true);
     });
 
-    it('should concatenate messages', () => {
+    it("should concatenate messages", () => {
       const outputs: HookOutput[] = [
         {
           hookSpecificOutput: {
-            decision: { message: 'msg1', behavior: 'allow' },
+            decision: { message: "msg1", behavior: "allow" },
           },
         },
         {
           hookSpecificOutput: {
-            decision: { message: 'msg2', behavior: 'allow' },
+            decision: { message: "msg2", behavior: "allow" },
           },
         },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PermissionRequest,
         success: true,
         output,
@@ -268,25 +268,25 @@ describe('HookAggregator', () => {
         HookEventName.PermissionRequest,
         result.finalOutput ?? {},
       ) as PermissionRequestHookOutput;
-      expect(hookOutput.getDenyMessage()).toBe('msg1\nmsg2');
+      expect(hookOutput.getDenyMessage()).toBe("msg1\nmsg2");
     });
 
-    it('should use last updatedInput', () => {
+    it("should use last updatedInput", () => {
       const outputs: HookOutput[] = [
         {
           hookSpecificOutput: {
-            decision: { updatedInput: { arg: '1' }, behavior: 'allow' },
+            decision: { updatedInput: { arg: "1" }, behavior: "allow" },
           },
         },
         {
           hookSpecificOutput: {
-            decision: { updatedInput: { arg: '2' }, behavior: 'allow' },
+            decision: { updatedInput: { arg: "2" }, behavior: "allow" },
           },
         },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PermissionRequest,
         success: true,
         output,
@@ -302,31 +302,31 @@ describe('HookAggregator', () => {
         HookEventName.PermissionRequest,
         result.finalOutput ?? {},
       ) as PermissionRequestHookOutput;
-      expect(hookOutput.getUpdatedToolInput()).toEqual({ arg: '2' });
+      expect(hookOutput.getUpdatedToolInput()).toEqual({ arg: "2" });
     });
 
-    it('should concatenate updatedPermissions', () => {
+    it("should concatenate updatedPermissions", () => {
       const outputs: HookOutput[] = [
         {
           hookSpecificOutput: {
             decision: {
-              updatedPermissions: [{ type: 'read' }],
-              behavior: 'allow',
+              updatedPermissions: [{ type: "read" }],
+              behavior: "allow",
             },
           },
         },
         {
           hookSpecificOutput: {
             decision: {
-              updatedPermissions: [{ type: 'write' }],
-              behavior: 'allow',
+              updatedPermissions: [{ type: "write" }],
+              behavior: "allow",
             },
           },
         },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PermissionRequest,
         success: true,
         output,
@@ -343,27 +343,27 @@ describe('HookAggregator', () => {
         result.finalOutput ?? {},
       ) as PermissionRequestHookOutput;
       expect(hookOutput.getUpdatedPermissions()).toEqual([
-        { type: 'read' },
-        { type: 'write' },
+        { type: "read" },
+        { type: "write" },
       ]);
     });
 
-    it('should set interrupt true if any hook sets it', () => {
+    it("should set interrupt true if any hook sets it", () => {
       const outputs: HookOutput[] = [
         {
           hookSpecificOutput: {
-            decision: { behavior: 'deny', interrupt: false },
+            decision: { behavior: "deny", interrupt: false },
           },
         },
         {
           hookSpecificOutput: {
-            decision: { behavior: 'deny', interrupt: true },
+            decision: { behavior: "deny", interrupt: true },
           },
         },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PermissionRequest,
         success: true,
         output,
@@ -382,30 +382,30 @@ describe('HookAggregator', () => {
       expect(hookOutput.shouldInterrupt()).toBe(true);
     });
 
-    it('should produce output consumable by PermissionRequestHookOutput accessors', () => {
+    it("should produce output consumable by PermissionRequestHookOutput accessors", () => {
       const outputs: HookOutput[] = [
         {
           hookSpecificOutput: {
             decision: {
-              behavior: 'allow',
-              message: 'first msg',
-              updatedInput: { arg: '1' },
+              behavior: "allow",
+              message: "first msg",
+              updatedInput: { arg: "1" },
             },
           },
         },
         {
           hookSpecificOutput: {
             decision: {
-              behavior: 'deny',
-              message: 'second msg',
-              updatedInput: { arg: '2' },
+              behavior: "deny",
+              message: "second msg",
+              updatedInput: { arg: "2" },
             },
           },
         },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PermissionRequest,
         success: true,
         output,
@@ -424,20 +424,20 @@ describe('HookAggregator', () => {
       ) as PermissionRequestHookOutput;
 
       expect(hookOutput.isPermissionDenied()).toBe(true);
-      expect(hookOutput.getUpdatedToolInput()).toEqual({ arg: '2' });
-      expect(hookOutput.getDenyMessage()).toBe('first msg\nsecond msg');
+      expect(hookOutput.getUpdatedToolInput()).toEqual({ arg: "2" });
+      expect(hookOutput.getDenyMessage()).toBe("first msg\nsecond msg");
     });
   });
 
-  describe('mergeSimple (default case)', () => {
-    it('should use later values for simple fields', () => {
+  describe("mergeSimple (default case)", () => {
+    it("should use later values for simple fields", () => {
       const outputs: HookOutput[] = [
-        { reason: 'first', continue: true },
-        { reason: 'second', continue: false },
+        { reason: "first", continue: true },
+        { reason: "second", continue: false },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.Notification,
         success: true,
         output,
@@ -448,23 +448,23 @@ describe('HookAggregator', () => {
         results,
         HookEventName.Notification,
       );
-      expect(result.finalOutput?.reason).toBe('second');
+      expect(result.finalOutput?.reason).toBe("second");
       expect(result.finalOutput?.continue).toBe(false);
     });
 
-    it('should concatenate additionalContext from multiple hooks', () => {
+    it("should concatenate additionalContext from multiple hooks", () => {
       const outputs: HookOutput[] = [
         {
           hookSpecificOutput: {
-            additionalContext: 'ctx1',
-            otherField: 'value1',
+            additionalContext: "ctx1",
+            otherField: "value1",
           },
         },
-        { hookSpecificOutput: { additionalContext: 'ctx2' } },
+        { hookSpecificOutput: { additionalContext: "ctx2" } },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.Notification,
         success: true,
         output,
@@ -477,21 +477,21 @@ describe('HookAggregator', () => {
       );
       // mergeSimple concatenates additionalContext with newlines
       expect(
-        result.finalOutput?.hookSpecificOutput?.['additionalContext'],
-      ).toBe('ctx1\nctx2');
+        result.finalOutput?.hookSpecificOutput?.["additionalContext"],
+      ).toBe("ctx1\nctx2");
       // otherField is overwritten (later value wins since it's not special-cased)
       expect(
-        result.finalOutput?.hookSpecificOutput?.['otherField'],
+        result.finalOutput?.hookSpecificOutput?.["otherField"],
       ).toBeUndefined();
     });
   });
 
-  describe('createSpecificHookOutput', () => {
-    it('should create PreToolUseHookOutput for PreToolUse', () => {
+  describe("createSpecificHookOutput", () => {
+    it("should create PreToolUseHookOutput for PreToolUse", () => {
       const output: HookOutput = { continue: true };
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.PreToolUse,
           success: true,
           output,
@@ -510,11 +510,11 @@ describe('HookAggregator', () => {
       );
     });
 
-    it('should create StopHookOutput for Stop', () => {
-      const output: HookOutput = { stopReason: 'test' };
+    it("should create StopHookOutput for Stop", () => {
+      const output: HookOutput = { stopReason: "test" };
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.Stop,
           success: true,
           output,
@@ -525,17 +525,17 @@ describe('HookAggregator', () => {
       const result = aggregator.aggregateResults(results, HookEventName.Stop);
       expect(result.finalOutput).toBeDefined();
       expect((result.finalOutput as { stopReason?: string }).stopReason).toBe(
-        'test',
+        "test",
       );
     });
 
-    it('should create PermissionRequestHookOutput for PermissionRequest', () => {
+    it("should create PermissionRequestHookOutput for PermissionRequest", () => {
       const output: HookOutput = {
-        hookSpecificOutput: { decision: { behavior: 'allow' } },
+        hookSpecificOutput: { decision: { behavior: "allow" } },
       };
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.PermissionRequest,
           success: true,
           output,
@@ -551,8 +551,8 @@ describe('HookAggregator', () => {
     });
   });
 
-  describe('edge cases', () => {
-    it('should handle empty outputs array', () => {
+  describe("edge cases", () => {
+    it("should handle empty outputs array", () => {
       const results: HookExecutionResult[] = [];
       const result = aggregator.aggregateResults(
         results,
@@ -561,11 +561,11 @@ describe('HookAggregator', () => {
       expect(result.finalOutput).toBeUndefined();
     });
 
-    it('should handle single output', () => {
-      const output: HookOutput = { decision: 'allow', reason: 'single' };
+    it("should handle single output", () => {
+      const output: HookOutput = { decision: "allow", reason: "single" };
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.PreToolUse,
           success: true,
           output,
@@ -577,15 +577,15 @@ describe('HookAggregator', () => {
         results,
         HookEventName.PreToolUse,
       );
-      expect(result.finalOutput?.decision).toBe('allow');
-      expect(result.finalOutput?.reason).toBe('single');
+      expect(result.finalOutput?.decision).toBe("allow");
+      expect(result.finalOutput?.reason).toBe("single");
     });
 
-    it('should handle outputs without hookSpecificOutput', () => {
-      const outputs: HookOutput[] = [{ decision: 'allow' }, { reason: 'test' }];
+    it("should handle outputs without hookSpecificOutput", () => {
+      const outputs: HookOutput[] = [{ decision: "allow" }, { reason: "test" }];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PreToolUse,
         success: true,
         output,
@@ -596,18 +596,18 @@ describe('HookAggregator', () => {
         results,
         HookEventName.PreToolUse,
       );
-      expect(result.finalOutput?.decision).toBe('allow');
-      expect(result.finalOutput?.reason).toBe('test');
+      expect(result.finalOutput?.decision).toBe("allow");
+      expect(result.finalOutput?.reason).toBe("test");
     });
 
-    it('should handle decision allow when no block', () => {
+    it("should handle decision allow when no block", () => {
       const outputs: HookOutput[] = [
-        { decision: 'allow' },
-        { decision: 'allow' },
+        { decision: "allow" },
+        { decision: "allow" },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PreToolUse,
         success: true,
         output,
@@ -618,19 +618,19 @@ describe('HookAggregator', () => {
         results,
         HookEventName.PreToolUse,
       );
-      expect(result.finalOutput?.decision).toBe('allow');
+      expect(result.finalOutput?.decision).toBe("allow");
     });
   });
 
-  describe('SubagentStop - mergeWithOrLogic', () => {
-    it('should use mergeWithOrLogic for SubagentStop event', () => {
+  describe("SubagentStop - mergeWithOrLogic", () => {
+    it("should use mergeWithOrLogic for SubagentStop event", () => {
       const outputs: HookOutput[] = [
-        { reason: 'first reason', decision: 'allow' },
-        { reason: 'second reason', decision: 'allow' },
+        { reason: "first reason", decision: "allow" },
+        { reason: "second reason", decision: "allow" },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.SubagentStop,
         success: true,
         output,
@@ -641,17 +641,17 @@ describe('HookAggregator', () => {
         results,
         HookEventName.SubagentStop,
       );
-      expect(result.finalOutput?.reason).toBe('first reason\nsecond reason');
+      expect(result.finalOutput?.reason).toBe("first reason\nsecond reason");
     });
 
-    it('should block when any SubagentStop hook blocks', () => {
+    it("should block when any SubagentStop hook blocks", () => {
       const outputs: HookOutput[] = [
-        { reason: 'output looks good', decision: 'allow' },
-        { reason: 'output too short', decision: 'block' },
+        { reason: "output looks good", decision: "allow" },
+        { reason: "output too short", decision: "block" },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.SubagentStop,
         success: true,
         output,
@@ -662,17 +662,17 @@ describe('HookAggregator', () => {
         results,
         HookEventName.SubagentStop,
       );
-      expect(result.finalOutput?.decision).toBe('block');
+      expect(result.finalOutput?.decision).toBe("block");
     });
 
-    it('should concatenate additionalContext for SubagentStop', () => {
+    it("should concatenate additionalContext for SubagentStop", () => {
       const outputs: HookOutput[] = [
-        { hookSpecificOutput: { additionalContext: 'context from hook 1' } },
-        { hookSpecificOutput: { additionalContext: 'context from hook 2' } },
+        { hookSpecificOutput: { additionalContext: "context from hook 1" } },
+        { hookSpecificOutput: { additionalContext: "context from hook 2" } },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.SubagentStop,
         success: true,
         output,
@@ -684,18 +684,18 @@ describe('HookAggregator', () => {
         HookEventName.SubagentStop,
       );
       expect(
-        result.finalOutput?.hookSpecificOutput?.['additionalContext'],
-      ).toBe('context from hook 1\ncontext from hook 2');
+        result.finalOutput?.hookSpecificOutput?.["additionalContext"],
+      ).toBe("context from hook 1\ncontext from hook 2");
     });
 
-    it('should handle continue=false for SubagentStop', () => {
+    it("should handle continue=false for SubagentStop", () => {
       const outputs: HookOutput[] = [
         { continue: true },
-        { continue: false, stopReason: 'subagent should stop' },
+        { continue: false, stopReason: "subagent should stop" },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.SubagentStop,
         success: true,
         output,
@@ -707,19 +707,19 @@ describe('HookAggregator', () => {
         HookEventName.SubagentStop,
       );
       expect(result.finalOutput?.continue).toBe(false);
-      expect(result.finalOutput?.stopReason).toBe('subagent should stop');
+      expect(result.finalOutput?.stopReason).toBe("subagent should stop");
     });
   });
 
-  describe('createSpecificHookOutput - SubagentStop', () => {
-    it('should create StopHookOutput for SubagentStop', () => {
+  describe("createSpecificHookOutput - SubagentStop", () => {
+    it("should create StopHookOutput for SubagentStop", () => {
       const output: HookOutput = {
-        decision: 'block',
-        reason: 'Output too short',
+        decision: "block",
+        reason: "Output too short",
       };
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.SubagentStop,
           success: true,
           output,
@@ -732,18 +732,18 @@ describe('HookAggregator', () => {
         HookEventName.SubagentStop,
       );
       expect(result.finalOutput).toBeDefined();
-      expect(result.finalOutput?.decision).toBe('block');
-      expect(result.finalOutput?.reason).toBe('Output too short');
+      expect(result.finalOutput?.decision).toBe("block");
+      expect(result.finalOutput?.reason).toBe("Output too short");
     });
 
-    it('should create StopHookOutput with isBlockingDecision for SubagentStop', () => {
+    it("should create StopHookOutput with isBlockingDecision for SubagentStop", () => {
       const output: HookOutput = {
-        decision: 'block',
-        reason: 'Continue working on the task',
+        decision: "block",
+        reason: "Continue working on the task",
       };
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.SubagentStop,
           success: true,
           output,
@@ -763,18 +763,18 @@ describe('HookAggregator', () => {
       );
       expect(hookOutput.isBlockingDecision()).toBe(true);
       expect(hookOutput.getEffectiveReason()).toBe(
-        'Continue working on the task',
+        "Continue working on the task",
       );
     });
 
-    it('should create StopHookOutput with allow decision for SubagentStop', () => {
+    it("should create StopHookOutput with allow decision for SubagentStop", () => {
       const output: HookOutput = {
-        decision: 'allow',
-        reason: 'Output looks complete',
+        decision: "allow",
+        reason: "Output looks complete",
       };
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.SubagentStop,
           success: true,
           output,
@@ -795,14 +795,14 @@ describe('HookAggregator', () => {
     });
   });
 
-  describe('StopFailure - fire-and-forget special handling', () => {
-    it('should always return success true for StopFailure', () => {
+  describe("StopFailure - fire-and-forget special handling", () => {
+    it("should always return success true for StopFailure", () => {
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.StopFailure,
           success: false,
-          error: new Error('Hook failed'),
+          error: new Error("Hook failed"),
           duration: 100,
         },
       ];
@@ -814,14 +814,14 @@ describe('HookAggregator', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should ignore all outputs for StopFailure', () => {
+    it("should ignore all outputs for StopFailure", () => {
       const outputs: HookOutput[] = [
-        { decision: 'block', reason: 'should be ignored' },
-        { continue: false, stopReason: 'also ignored' },
+        { decision: "block", reason: "should be ignored" },
+        { continue: false, stopReason: "also ignored" },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.StopFailure,
         success: true,
         output,
@@ -836,20 +836,20 @@ describe('HookAggregator', () => {
       expect(result.finalOutput).toBeUndefined();
     });
 
-    it('should ignore all errors for StopFailure', () => {
+    it("should ignore all errors for StopFailure", () => {
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'hook1.sh' },
+          hookConfig: { type: HookType.Command, command: "hook1.sh" },
           eventName: HookEventName.StopFailure,
           success: false,
-          error: new Error('First error'),
+          error: new Error("First error"),
           duration: 50,
         },
         {
-          hookConfig: { type: HookType.Command, command: 'hook2.sh' },
+          hookConfig: { type: HookType.Command, command: "hook2.sh" },
           eventName: HookEventName.StopFailure,
           success: false,
-          error: new Error('Second error'),
+          error: new Error("Second error"),
           duration: 75,
         },
       ];
@@ -862,16 +862,16 @@ describe('HookAggregator', () => {
       expect(result.errors).toEqual([]);
     });
 
-    it('should calculate total duration for StopFailure', () => {
+    it("should calculate total duration for StopFailure", () => {
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'hook1.sh' },
+          hookConfig: { type: HookType.Command, command: "hook1.sh" },
           eventName: HookEventName.StopFailure,
           success: true,
           duration: 100,
         },
         {
-          hookConfig: { type: HookType.Command, command: 'hook2.sh' },
+          hookConfig: { type: HookType.Command, command: "hook2.sh" },
           eventName: HookEventName.StopFailure,
           success: true,
           duration: 200,
@@ -885,7 +885,7 @@ describe('HookAggregator', () => {
       expect(result.totalDuration).toBe(300);
     });
 
-    it('should return empty result for StopFailure with no hooks', () => {
+    it("should return empty result for StopFailure with no hooks", () => {
       const result = aggregator.aggregateResults([], HookEventName.StopFailure);
       expect(result.success).toBe(true);
       expect(result.allOutputs).toEqual([]);
@@ -895,15 +895,15 @@ describe('HookAggregator', () => {
     });
   });
 
-  describe('PostCompact - mergeSimple', () => {
-    it('should use mergeSimple for PostCompact event', () => {
+  describe("PostCompact - mergeSimple", () => {
+    it("should use mergeSimple for PostCompact event", () => {
       const outputs: HookOutput[] = [
-        { reason: 'first', continue: true },
-        { reason: 'second', continue: false },
+        { reason: "first", continue: true },
+        { reason: "second", continue: false },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PostCompact,
         success: true,
         output,
@@ -915,18 +915,18 @@ describe('HookAggregator', () => {
         HookEventName.PostCompact,
       );
       // mergeSimple uses later values for simple fields
-      expect(result.finalOutput?.reason).toBe('second');
+      expect(result.finalOutput?.reason).toBe("second");
       expect(result.finalOutput?.continue).toBe(false);
     });
 
-    it('should concatenate additionalContext for PostCompact', () => {
+    it("should concatenate additionalContext for PostCompact", () => {
       const outputs: HookOutput[] = [
-        { hookSpecificOutput: { additionalContext: 'context 1' } },
-        { hookSpecificOutput: { additionalContext: 'context 2' } },
+        { hookSpecificOutput: { additionalContext: "context 1" } },
+        { hookSpecificOutput: { additionalContext: "context 2" } },
       ];
 
       const results: HookExecutionResult[] = outputs.map((output) => ({
-        hookConfig: { type: HookType.Command, command: 'echo test' },
+        hookConfig: { type: HookType.Command, command: "echo test" },
         eventName: HookEventName.PostCompact,
         success: true,
         output,
@@ -938,20 +938,20 @@ describe('HookAggregator', () => {
         HookEventName.PostCompact,
       );
       expect(
-        result.finalOutput?.hookSpecificOutput?.['additionalContext'],
-      ).toBe('context 1\ncontext 2');
+        result.finalOutput?.hookSpecificOutput?.["additionalContext"],
+      ).toBe("context 1\ncontext 2");
     });
 
-    it('should handle single output for PostCompact', () => {
+    it("should handle single output for PostCompact", () => {
       const output: HookOutput = {
         hookSpecificOutput: {
-          hookEventName: 'PostCompact',
-          additionalContext: 'single context',
+          hookEventName: "PostCompact",
+          additionalContext: "single context",
         },
       };
       const results: HookExecutionResult[] = [
         {
-          hookConfig: { type: HookType.Command, command: 'echo test' },
+          hookConfig: { type: HookType.Command, command: "echo test" },
           eventName: HookEventName.PostCompact,
           success: true,
           output,
@@ -965,8 +965,8 @@ describe('HookAggregator', () => {
       );
       expect(result.finalOutput).toBeDefined();
       expect(
-        result.finalOutput?.hookSpecificOutput?.['additionalContext'],
-      ).toBe('single context');
+        result.finalOutput?.hookSpecificOutput?.["additionalContext"],
+      ).toBe("single context");
     });
   });
 });

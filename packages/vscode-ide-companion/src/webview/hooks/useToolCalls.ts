@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
-import type { ToolCallData } from '../components/messages/toolcalls/ToolCall.js';
-import type { ToolCallUpdate } from '../../types/chatTypes.js';
+import { useState, useCallback } from "react";
+import type { ToolCallData } from "../components/messages/toolcalls/ToolCall.js";
+import type { ToolCallUpdate } from "../../types/chatTypes.js";
 
 /**
  * Tool call management Hook
@@ -26,13 +26,13 @@ export const useToolCalls = () => {
     existing?: ToolCallData,
   ): number => {
     if (
-      typeof existing?.timestamp === 'number' &&
+      typeof existing?.timestamp === "number" &&
       Number.isFinite(existing.timestamp)
     ) {
       return existing.timestamp;
     }
     if (
-      typeof update.timestamp === 'number' &&
+      typeof update.timestamp === "number" &&
       Number.isFinite(update.timestamp)
     ) {
       return update.timestamp;
@@ -50,34 +50,34 @@ export const useToolCalls = () => {
 
       // Helpers for todo/todos plan merging & content replacement
       const isTodoWrite = (kind?: string) =>
-        (kind || '').toLowerCase() === 'todo_write' ||
-        (kind || '').toLowerCase() === 'todowrite' ||
-        (kind || '').toLowerCase() === 'update_todos';
+        (kind || "").toLowerCase() === "todo_write" ||
+        (kind || "").toLowerCase() === "todowrite" ||
+        (kind || "").toLowerCase() === "update_todos";
 
       const normTitle = (t: unknown) =>
-        typeof t === 'string' ? t.trim().toLowerCase() : '';
+        typeof t === "string" ? t.trim().toLowerCase() : "";
 
       const isTodoTitleMergeable = (t?: unknown) => {
         const nt = normTitle(t);
-        return nt === 'updated plan' || nt === 'update todos';
+        return nt === "updated plan" || nt === "update todos";
       };
 
       const extractText = (
         content?: Array<{
-          type: 'content' | 'diff';
+          type: "content" | "diff";
           content?: { text?: string };
         }>,
       ): string => {
         if (!content || content.length === 0) {
-          return '';
+          return "";
         }
         const parts: string[] = [];
         for (const item of content) {
-          if (item.type === 'content' && item.content?.text) {
+          if (item.type === "content" && item.content?.text) {
             parts.push(String(item.content.text));
           }
         }
-        return parts.join('\n');
+        return parts.join("\n");
       };
 
       const normalizeTodoLines = (text: string): string[] => {
@@ -89,7 +89,7 @@ export const useToolCalls = () => {
           .map((l) => l.trim())
           .filter(Boolean);
         return lines.map((line) => {
-          const idx = line.indexOf('] ');
+          const idx = line.indexOf("] ");
           return idx >= 0 ? line.slice(idx + 2).trim() : line;
         });
       };
@@ -113,18 +113,18 @@ export const useToolCalls = () => {
       };
 
       const safeTitle = (title: unknown): string => {
-        if (typeof title === 'string') {
+        if (typeof title === "string") {
           return title;
         }
-        if (title && typeof title === 'object') {
+        if (title && typeof title === "object") {
           return JSON.stringify(title);
         }
-        return 'Tool Call';
+        return "Tool Call";
       };
 
-      if (update.type === 'tool_call') {
+      if (update.type === "tool_call") {
         const content = update.content?.map((item) => ({
-          type: item.type as 'content' | 'diff',
+          type: item.type as "content" | "diff",
           content: item.content,
           path: item.path,
           oldText: item.oldText,
@@ -137,13 +137,13 @@ export const useToolCalls = () => {
           const nextText = extractText(content);
           // Find the most recent card with todo_write + mergeable title
           let lastId: string | null = null;
-          let lastText = '';
+          let lastText = "";
           let lastTimestamp = 0;
           for (const tc of newMap.values()) {
             if (
               isTodoWrite(tc.kind) &&
               isTodoTitleMergeable(tc.title) &&
-              typeof tc.timestamp === 'number' &&
+              typeof tc.timestamp === "number" &&
               tc.timestamp >= lastTimestamp
             ) {
               lastId = tc.toolCallId;
@@ -176,18 +176,18 @@ export const useToolCalls = () => {
 
         newMap.set(update.toolCallId, {
           toolCallId: update.toolCallId,
-          kind: update.kind || 'other',
+          kind: update.kind || "other",
           title: safeTitle(update.title),
-          status: update.status || 'pending',
+          status: update.status || "pending",
           rawInput: update.rawInput as string | object | undefined,
           content,
           locations: update.locations,
           timestamp: resolveTimestamp(update),
         });
-      } else if (update.type === 'tool_call_update') {
+      } else if (update.type === "tool_call_update") {
         const updatedContent = update.content
           ? update.content.map((item) => ({
-              type: item.type as 'content' | 'diff',
+              type: item.type as "content" | "diff",
               content: item.content,
               path: item.path,
               oldText: item.oldText,
@@ -223,9 +223,9 @@ export const useToolCalls = () => {
         } else {
           newMap.set(update.toolCallId, {
             toolCallId: update.toolCallId,
-            kind: update.kind || 'other',
-            title: update.title ? safeTitle(update.title) : '',
-            status: update.status || 'pending',
+            kind: update.kind || "other",
+            title: update.title ? safeTitle(update.title) : "",
+            status: update.status || "pending",
             rawInput: update.rawInput as string | object | undefined,
             content: updatedContent,
             locations: update.locations,
@@ -250,7 +250,7 @@ export const useToolCalls = () => {
    */
   const inProgressToolCalls = Array.from(toolCalls.values()).filter(
     (toolCall) =>
-      toolCall.status === 'pending' || toolCall.status === 'in_progress',
+      toolCall.status === "pending" || toolCall.status === "in_progress",
   );
 
   /**
@@ -258,7 +258,7 @@ export const useToolCalls = () => {
    */
   const completedToolCalls = Array.from(toolCalls.values()).filter(
     (toolCall) =>
-      toolCall.status === 'completed' || toolCall.status === 'failed',
+      toolCall.status === "completed" || toolCall.status === "failed",
   );
 
   return {

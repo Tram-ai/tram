@@ -8,8 +8,8 @@
  * CLI → control_request (mcp_message) → Query → handleMessage() → MCP Server
  */
 
-import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
-import { SdkLogger } from '../utils/logger.js';
+import type { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
+import { SdkLogger } from "../utils/logger.js";
 
 export type SendToQueryCallback = (message: JSONRPCMessage) => Promise<void>;
 
@@ -38,7 +38,7 @@ export class SdkControlServerTransport {
 
   async start(): Promise<void> {
     this.started = true;
-    this.logger.debug('Transport started');
+    this.logger.debug("Transport started");
   }
 
   async send(message: JSONRPCMessage): Promise<void> {
@@ -49,10 +49,10 @@ export class SdkControlServerTransport {
     }
 
     try {
-      this.logger.debug('Sending message to Query', message);
+      this.logger.debug("Sending message to Query", message);
       await this.sendToQuery(message);
     } catch (error) {
-      this.logger.error('Error sending message:', error);
+      this.logger.error("Error sending message:", error);
       if (this.onerror) {
         this.onerror(error instanceof Error ? error : new Error(String(error)));
       }
@@ -66,7 +66,7 @@ export class SdkControlServerTransport {
     }
 
     this.started = false;
-    this.logger.debug('Transport closed');
+    this.logger.debug("Transport closed");
 
     // Notify MCP Server
     if (this.onclose) {
@@ -76,20 +76,20 @@ export class SdkControlServerTransport {
 
   handleMessage(message: JSONRPCMessage): void {
     if (!this.started) {
-      this.logger.warn('Received message for closed transport');
+      this.logger.warn("Received message for closed transport");
       return;
     }
 
-    this.logger.debug('Handling message from CLI', message);
+    this.logger.debug("Handling message from CLI", message);
     if (this.onmessage) {
       this.onmessage(message);
     } else {
-      this.logger.warn('No onmessage handler set');
+      this.logger.warn("No onmessage handler set");
     }
   }
 
   handleError(error: Error): void {
-    this.logger.error('Transport error:', error);
+    this.logger.error("Transport error:", error);
     if (this.onerror) {
       this.onerror(error);
     }

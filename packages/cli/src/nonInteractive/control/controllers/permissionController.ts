@@ -19,22 +19,19 @@ import type {
   ToolExecuteConfirmationDetails,
   ToolMcpConfirmationDetails,
   ApprovalMode,
-} from '@tram-ai/tram-core';
-import {
-  InputFormat,
-  ToolConfirmationOutcome,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
+import { InputFormat, ToolConfirmationOutcome } from "@tram-ai/tram-core";
 import type {
   CLIControlPermissionRequest,
   CLIControlSetPermissionModeRequest,
   ControlRequestPayload,
   PermissionMode,
   PermissionSuggestion,
-} from '../../types.js';
-import { BaseController } from './baseController.js';
+} from "../../types.js";
+import { BaseController } from "./baseController.js";
 
 // Import ToolCallConfirmationDetails types for type alignment
-type ToolConfirmationType = 'edit' | 'exec' | 'mcp' | 'info' | 'plan';
+type ToolConfirmationType = "edit" | "exec" | "mcp" | "info" | "plan";
 
 export class PermissionController extends BaseController {
   private pendingOutgoingRequests = new Set<string>();
@@ -47,17 +44,17 @@ export class PermissionController extends BaseController {
     signal: AbortSignal,
   ): Promise<Record<string, unknown>> {
     if (signal.aborted) {
-      throw new Error('Request aborted');
+      throw new Error("Request aborted");
     }
 
     switch (payload.subtype) {
-      case 'can_use_tool':
+      case "can_use_tool":
         return this.handleCanUseTool(
           payload as CLIControlPermissionRequest,
           signal,
         );
 
-      case 'set_permission_mode':
+      case "set_permission_mode":
         return this.handleSetPermissionMode(
           payload as CLIControlSetPermissionModeRequest,
           signal,
@@ -81,56 +78,56 @@ export class PermissionController extends BaseController {
     signal: AbortSignal,
   ): Promise<Record<string, unknown>> {
     if (signal.aborted) {
-      throw new Error('Request aborted');
+      throw new Error("Request aborted");
     }
 
     const toolName = payload.tool_name;
     if (
       !toolName ||
-      typeof toolName !== 'string' ||
+      typeof toolName !== "string" ||
       toolName.trim().length === 0
     ) {
       return {
-        subtype: 'can_use_tool',
-        behavior: 'deny',
-        message: 'Missing or invalid tool_name in can_use_tool request',
+        subtype: "can_use_tool",
+        behavior: "deny",
+        message: "Missing or invalid tool_name in can_use_tool request",
       };
     }
 
-    let behavior: 'allow' | 'deny' = 'allow';
+    let behavior: "allow" | "deny" = "allow";
     let message: string | undefined;
 
     try {
       // Check permission mode first
       const permissionResult = this.checkPermissionMode();
       if (!permissionResult.allowed) {
-        behavior = 'deny';
+        behavior = "deny";
         message = permissionResult.message;
       }
 
       // Check tool registry if permission mode allows
-      if (behavior === 'allow') {
+      if (behavior === "allow") {
         const registryResult = this.checkToolRegistry(toolName);
         if (!registryResult.allowed) {
-          behavior = 'deny';
+          behavior = "deny";
           message = registryResult.message;
         }
       }
     } catch (error) {
-      behavior = 'deny';
+      behavior = "deny";
       message =
         error instanceof Error
           ? `Failed to evaluate tool permission: ${error.message}`
-          : 'Failed to evaluate tool permission';
+          : "Failed to evaluate tool permission";
     }
 
     const response: Record<string, unknown> = {
-      subtype: 'can_use_tool',
+      subtype: "can_use_tool",
       behavior,
     };
 
     if (message) {
-      response['message'] = message;
+      response["message"] = message;
     }
 
     return response;
@@ -144,17 +141,17 @@ export class PermissionController extends BaseController {
 
     // Map permission modes to approval logic (aligned with VALID_APPROVAL_MODE_VALUES)
     switch (mode) {
-      case 'yolo': // Allow all tools
-      case 'auto-edit': // Auto-approve edit operations
-      case 'plan': // Auto-approve planning operations
+      case "yolo": // Allow all tools
+      case "auto-edit": // Auto-approve edit operations
+      case "plan": // Auto-approve planning operations
         return { allowed: true };
 
-      case 'default': // TODO: allow all tools for test
+      case "default": // TODO: allow all tools for test
       default:
         return {
           allowed: false,
           message:
-            'Tool execution requires manual approval. Update permission mode or approve via host.',
+            "Tool execution requires manual approval. Update permission mode or approve via host.",
         };
     }
   }
@@ -175,11 +172,11 @@ export class PermissionController extends BaseController {
         };
       };
 
-      if (typeof registryProvider.getToolRegistry === 'function') {
+      if (typeof registryProvider.getToolRegistry === "function") {
         const registry = registryProvider.getToolRegistry();
         if (
           registry &&
-          typeof registry.getTool === 'function' &&
+          typeof registry.getTool === "function" &&
           !registry.getTool(toolName)
         ) {
           return {
@@ -193,7 +190,7 @@ export class PermissionController extends BaseController {
     } catch (error) {
       return {
         allowed: false,
-        message: `Failed to check tool registry: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Failed to check tool registry: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   }
@@ -208,20 +205,20 @@ export class PermissionController extends BaseController {
     signal: AbortSignal,
   ): Promise<Record<string, unknown>> {
     if (signal.aborted) {
-      throw new Error('Request aborted');
+      throw new Error("Request aborted");
     }
 
     const mode = payload.mode;
     const validModes: PermissionMode[] = [
-      'default',
-      'plan',
-      'auto-edit',
-      'yolo',
+      "default",
+      "plan",
+      "auto-edit",
+      "yolo",
     ];
 
     if (!validModes.includes(mode)) {
       throw new Error(
-        `Invalid permission mode: ${mode}. Valid values are: ${validModes.join(', ')}`,
+        `Invalid permission mode: ${mode}. Valid values are: ${validModes.join(", ")}`,
       );
     }
 
@@ -232,7 +229,7 @@ export class PermissionController extends BaseController {
       `[PermissionController] Permission mode updated to: ${mode}`,
     );
 
-    return { status: 'updated', mode };
+    return { status: "updated", mode };
   }
 
   /**
@@ -246,93 +243,93 @@ export class PermissionController extends BaseController {
   ): PermissionSuggestion[] | null {
     if (
       !confirmationDetails ||
-      typeof confirmationDetails !== 'object' ||
-      !('type' in confirmationDetails)
+      typeof confirmationDetails !== "object" ||
+      !("type" in confirmationDetails)
     ) {
       return null;
     }
 
     const details = confirmationDetails as Record<string, unknown>;
-    const type = String(details['type'] ?? '');
+    const type = String(details["type"] ?? "");
     const title =
-      typeof details['title'] === 'string' ? details['title'] : undefined;
+      typeof details["title"] === "string" ? details["title"] : undefined;
 
     // Ensure type matches ToolCallConfirmationDetails union
     const confirmationType = type as ToolConfirmationType;
 
     switch (confirmationType) {
-      case 'exec': // ToolExecuteConfirmationDetails
+      case "exec": // ToolExecuteConfirmationDetails
         return [
           {
-            type: 'allow',
-            label: 'Allow Command',
-            description: `Execute: ${details['command']}`,
+            type: "allow",
+            label: "Allow Command",
+            description: `Execute: ${details["command"]}`,
           },
           {
-            type: 'deny',
-            label: 'Deny',
-            description: 'Block this command execution',
+            type: "deny",
+            label: "Deny",
+            description: "Block this command execution",
           },
         ];
 
-      case 'edit': // ToolEditConfirmationDetails
+      case "edit": // ToolEditConfirmationDetails
         return [
           {
-            type: 'allow',
-            label: 'Allow Edit',
-            description: `Edit file: ${details['fileName']}`,
+            type: "allow",
+            label: "Allow Edit",
+            description: `Edit file: ${details["fileName"]}`,
           },
           {
-            type: 'deny',
-            label: 'Deny',
-            description: 'Block this file edit',
+            type: "deny",
+            label: "Deny",
+            description: "Block this file edit",
           },
           {
-            type: 'modify',
-            label: 'Review Changes',
-            description: 'Review the proposed changes before applying',
+            type: "modify",
+            label: "Review Changes",
+            description: "Review the proposed changes before applying",
           },
         ];
 
-      case 'plan': // ToolPlanConfirmationDetails
+      case "plan": // ToolPlanConfirmationDetails
         return [
           {
-            type: 'allow',
-            label: 'Approve Plan',
-            description: title || 'Execute the proposed plan',
+            type: "allow",
+            label: "Approve Plan",
+            description: title || "Execute the proposed plan",
           },
           {
-            type: 'deny',
-            label: 'Reject Plan',
-            description: 'Do not execute this plan',
+            type: "deny",
+            label: "Reject Plan",
+            description: "Do not execute this plan",
           },
         ];
 
-      case 'mcp': // ToolMcpConfirmationDetails
+      case "mcp": // ToolMcpConfirmationDetails
         return [
           {
-            type: 'allow',
-            label: 'Allow MCP Call',
-            description: `${details['serverName']}: ${details['toolName']}`,
+            type: "allow",
+            label: "Allow MCP Call",
+            description: `${details["serverName"]}: ${details["toolName"]}`,
           },
           {
-            type: 'deny',
-            label: 'Deny',
-            description: 'Block this MCP server call',
+            type: "deny",
+            label: "Deny",
+            description: "Block this MCP server call",
           },
         ];
 
-      case 'info': // ToolInfoConfirmationDetails
+      case "info": // ToolInfoConfirmationDetails
         return [
           {
-            type: 'allow',
-            label: 'Allow Info Request',
-            description: title || 'Allow information request',
+            type: "allow",
+            label: "Allow Info Request",
+            description: title || "Allow information request",
           },
           {
-            type: 'deny',
-            label: 'Deny',
-            description: 'Block this information request',
+            type: "deny",
+            label: "Deny",
+            description: "Block this information request",
           },
         ];
 
@@ -340,13 +337,13 @@ export class PermissionController extends BaseController {
         // Fallback for unknown types
         return [
           {
-            type: 'allow',
-            label: 'Allow',
+            type: "allow",
+            label: "Allow",
             description: title || `Allow ${type} operation`,
           },
           {
-            type: 'deny',
-            label: 'Deny',
+            type: "deny",
+            label: "Deny",
             description: `Block ${type} operation`,
           },
         ];
@@ -362,12 +359,12 @@ export class PermissionController extends BaseController {
       for (const call of toolCalls) {
         if (
           call &&
-          typeof call === 'object' &&
-          (call as { status?: string }).status === 'awaiting_approval'
+          typeof call === "object" &&
+          (call as { status?: string }).status === "awaiting_approval"
         ) {
           const awaiting = call as WaitingToolCall;
           if (
-            typeof awaiting.confirmationDetails?.onConfirm === 'function' &&
+            typeof awaiting.confirmationDetails?.onConfirm === "function" &&
             !this.pendingOutgoingRequests.has(awaiting.request.callId)
           ) {
             this.pendingOutgoingRequests.add(awaiting.request.callId);
@@ -418,7 +415,7 @@ export class PermissionController extends BaseController {
 
       const response = await this.sendControlRequest(
         {
-          subtype: 'can_use_tool',
+          subtype: "can_use_tool",
           tool_name: toolCall.request.name,
           tool_use_id: toolCall.request.callId,
           input: toolCall.request.args,
@@ -429,7 +426,7 @@ export class PermissionController extends BaseController {
         this.context.abortSignal,
       );
 
-      if (response.subtype !== 'success') {
+      if (response.subtype !== "success") {
         await toolCall.confirmationDetails.onConfirm(
           ToolConfirmationOutcome.Cancel,
         );
@@ -437,12 +434,12 @@ export class PermissionController extends BaseController {
       }
 
       const payload = (response.response || {}) as Record<string, unknown>;
-      const behavior = String(payload['behavior'] || '').toLowerCase();
+      const behavior = String(payload["behavior"] || "").toLowerCase();
 
-      if (behavior === 'allow') {
+      if (behavior === "allow") {
         // Handle updated input if provided
-        const updatedInput = payload['updatedInput'];
-        if (updatedInput && typeof updatedInput === 'object') {
+        const updatedInput = payload["updatedInput"];
+        if (updatedInput && typeof updatedInput === "object") {
           toolCall.request.args = updatedInput as Record<string, unknown>;
         }
         await toolCall.confirmationDetails.onConfirm(
@@ -451,8 +448,8 @@ export class PermissionController extends BaseController {
       } else {
         // Extract cancel message from response if available
         const cancelMessage =
-          typeof payload['message'] === 'string'
-            ? payload['message']
+          typeof payload["message"] === "string"
+            ? payload["message"]
             : undefined;
 
         await toolCall.confirmationDetails.onConfirm(
@@ -462,7 +459,7 @@ export class PermissionController extends BaseController {
       }
     } catch (error) {
       this.debugLogger.error(
-        '[PermissionController] Outgoing permission failed:',
+        "[PermissionController] Outgoing permission failed:",
         error,
       );
 
@@ -473,7 +470,7 @@ export class PermissionController extends BaseController {
       // On error, pass error message as cancel message
       // Only pass payload for exec and mcp types that support it
       const confirmationType = toolCall.confirmationDetails.type;
-      if (['edit', 'exec', 'mcp'].includes(confirmationType)) {
+      if (["edit", "exec", "mcp"].includes(confirmationType)) {
         const execOrMcpDetails = toolCall.confirmationDetails as
           | ToolExecuteConfirmationDetails
           | ToolMcpConfirmationDetails;

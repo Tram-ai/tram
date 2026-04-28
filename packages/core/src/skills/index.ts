@@ -27,9 +27,9 @@ export type {
   SkillValidationResult,
   ListSkillsOptions,
   SkillErrorCode,
-} from './types.js';
+} from "./types.js";
 
-export { SkillError } from './types.js';
+export { SkillError } from "./types.js";
 
 // Main management class
-export { SkillManager } from './skill-manager.js';
+export { SkillManager } from "./skill-manager.js";

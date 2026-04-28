@@ -4,9 +4,9 @@ import {
   writeFileSync,
   mkdirSync,
   unlinkSync,
-} from 'node:fs';
-import * as path from 'node:path';
-import * as os from 'node:os';
+} from "node:fs";
+import * as path from "node:path";
+import * as os from "node:os";
 
 export interface ServiceInfo {
   pid: number;
@@ -15,7 +15,7 @@ export interface ServiceInfo {
 }
 
 function pidFilePath(): string {
-  return path.join(os.homedir(), '.qwen', 'channels', 'service.pid');
+  return path.join(os.homedir(), ".tram", "channels", "service.pid");
 }
 
 /** Check if a process is alive. */
@@ -39,7 +39,7 @@ export function readServiceInfo(): ServiceInfo | null {
 
   let info: ServiceInfo;
   try {
-    info = JSON.parse(readFileSync(filePath, 'utf-8'));
+    info = JSON.parse(readFileSync(filePath, "utf-8"));
   } catch {
     // Corrupt file — clean up
     try {
@@ -77,7 +77,7 @@ export function writeServiceInfo(channels: string[]): void {
     channels,
   };
 
-  writeFileSync(filePath, JSON.stringify(info, null, 2), 'utf-8');
+  writeFileSync(filePath, JSON.stringify(info, null, 2), "utf-8");
 }
 
 /** Delete the PID file. */
@@ -98,7 +98,7 @@ export function removeServiceInfo(): void {
  */
 export function signalService(
   pid: number,
-  signal: NodeJS.Signals = 'SIGTERM',
+  signal: NodeJS.Signals = "SIGTERM",
 ): boolean {
   try {
     process.kill(pid, signal);

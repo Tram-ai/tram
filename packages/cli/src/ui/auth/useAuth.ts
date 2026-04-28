@@ -9,45 +9,46 @@ import type {
   ContentGeneratorConfig,
   ModelProvidersConfig,
   ProviderModelConfig,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import {
   AuthEvent,
   AuthType,
   getErrorMessage,
   logAuth,
-} from '@tram-ai/tram-core';
-import { useCallback, useEffect, useState } from 'react';
-import type { LoadedSettings } from '../../config/settings.js';
-import { getPersistScopeForModelSelection } from '../../config/modelProvidersScope.js';
+} from "@tram-ai/tram-core";
+import { useCallback, useEffect, useState } from "react";
+import type { LoadedSettings } from "../../config/settings.js";
+import { getPersistScopeForModelSelection } from "../../config/modelProvidersScope.js";
 // OpenAICredentials type (previously imported from OpenAIKeyPrompt)
 export interface OpenAICredentials {
   apiKey: string;
   baseUrl?: string;
   model?: string;
 }
-import { useTramAuth } from '../hooks/useTramAuth.js';
-import { AuthState, MessageType } from '../types.js';
-import type { HistoryItem } from '../types.js';
-import { t } from '../../i18n/index.js';
+import { useTramAuth } from "../hooks/useTramAuth.js";
+import { AuthState, MessageType } from "../types.js";
+import type { HistoryItem } from "../types.js";
+import { t } from "../../i18n/index.js";
 import {
   getCodingPlanConfig,
   isCodingPlanConfig,
   CodingPlanRegion,
   CODING_PLAN_ENV_KEY,
-} from '../../constants/codingPlan.js';
-import { backupSettingsFile } from '../../utils/settingsUtils.js';
+} from "../../constants/codingPlan.js";
+import { backupSettingsFile } from "../../utils/settingsUtils.js";
 import {
   ALIBABA_STANDARD_API_KEY_ENDPOINTS,
   DASHSCOPE_STANDARD_API_KEY_ENV_KEY,
   type AlibabaStandardRegion,
-} from '../../constants/alibabaStandardApiKey.js';
+} from "../../constants/alibabaStandardApiKey.js";
+import { normalizeModelsForAuthType } from "../../utils/modelProviderIds.js";
 
-export type { TramAuthState } from '../hooks/useTramAuth.js';
+export type { TramAuthState } from "../hooks/useTramAuth.js";
 
 export const useAuthCommand = (
   settings: LoadedSettings,
   config: Config,
-  addItem: (item: Omit<HistoryItem, 'id'>, timestamp: number) => void,
+  addItem: (item: Omit<HistoryItem, "id">, timestamp: number) => void,
   onAuthChange?: () => void,
 ) => {
   const unAuthenticated = config.getAuthType() === undefined;
@@ -83,7 +84,7 @@ export const useAuthCommand = (
   const handleAuthFailure = useCallback(
     (error: unknown) => {
       setIsAuthenticating(false);
-      const errorMessage = t('Failed to authenticate. Message: {{message}}', {
+      const errorMessage = t("Failed to authenticate. Message: {{message}}", {
         message: getErrorMessage(error),
       });
       onAuthError(errorMessage);
@@ -92,8 +93,8 @@ export const useAuthCommand = (
       if (pendingAuthType) {
         const authEvent = new AuthEvent(
           pendingAuthType,
-          'manual',
-          'error',
+          "manual",
+          "error",
           errorMessage,
         );
         logAuth(config, authEvent);
@@ -110,7 +111,7 @@ export const useAuthCommand = (
         // Persist authType
         settings.setValue(
           authTypeScope,
-          'security.auth.selectedType',
+          "security.auth.selectedType",
           authType,
         );
 
@@ -121,7 +122,7 @@ export const useAuthCommand = (
         if (contentGeneratorConfig?.model) {
           settings.setValue(
             authTypeScope,
-            'model.name',
+            "model.name",
             contentGeneratorConfig.model,
           );
         }
@@ -132,14 +133,14 @@ export const useAuthCommand = (
           if (credentials?.apiKey != null) {
             settings.setValue(
               authTypeScope,
-              'security.auth.apiKey',
+              "security.auth.apiKey",
               credentials.apiKey,
             );
           }
           if (credentials?.baseUrl != null) {
             settings.setValue(
               authTypeScope,
-              'security.auth.baseUrl',
+              "security.auth.baseUrl",
               credentials.baseUrl,
             );
           }
@@ -162,7 +163,7 @@ export const useAuthCommand = (
       addItem(
         {
           type: MessageType.INFO,
-          text: t('Authenticated successfully with {{authType}} credentials.', {
+          text: t("Authenticated successfully with {{authType}} credentials.", {
             authType,
           }),
         },
@@ -170,7 +171,7 @@ export const useAuthCommand = (
       );
 
       // Log authentication success
-      const authEvent = new AuthEvent(authType, 'manual', 'success');
+      const authEvent = new AuthEvent(authType, "manual", "success");
       logAuth(config, authEvent);
     },
     [settings, handleAuthFailure, config, addItem, onAuthChange],
@@ -273,7 +274,9 @@ export const useAuthCommand = (
     addItem(
       {
         type: MessageType.INFO,
-        text: t('Please run tram --initialize to configure providers and authentication.'),
+        text: t(
+          "Please run tram --initialize to configure providers and authentication.",
+        ),
       },
       Date.now(),
     );
@@ -287,7 +290,7 @@ export const useAuthCommand = (
 
     // Log authentication cancellation
     if (isAuthenticating && pendingAuthType) {
-      const authEvent = new AuthEvent(pendingAuthType, 'manual', 'cancelled');
+      const authEvent = new AuthEvent(pendingAuthType, "manual", "cancelled");
       logAuth(config, authEvent);
     }
 
@@ -347,7 +350,10 @@ export const useAuthCommand = (
         );
 
         // Add new Coding Plan configs at the beginning
-        const updatedConfigs = [...newConfigs, ...nonCodingPlanConfigs];
+        const updatedConfigs = normalizeModelsForAuthType(AuthType.USE_OPENAI, [
+          ...newConfigs,
+          ...nonCodingPlanConfigs,
+        ]);
 
         // Persist to modelProviders
         settings.setValue(
@@ -359,19 +365,19 @@ export const useAuthCommand = (
         // Also persist authType
         settings.setValue(
           persistScope,
-          'security.auth.selectedType',
+          "security.auth.selectedType",
           AuthType.USE_OPENAI,
         );
 
         // Persist coding plan region
-        settings.setValue(persistScope, 'codingPlan.region', region);
+        settings.setValue(persistScope, "codingPlan.region", region);
 
         // Persist coding plan version (single field for backward compatibility)
-        settings.setValue(persistScope, 'codingPlan.version', version);
+        settings.setValue(persistScope, "codingPlan.version", version);
 
         // If there are configs, use the first one as the model
         if (updatedConfigs.length > 0 && updatedConfigs[0]?.id) {
-          settings.setValue(persistScope, 'model.name', updatedConfigs[0].id);
+          settings.setValue(persistScope, "model.name", updatedConfigs[0].id);
         }
 
         // Hot-reload model providers configuration before refreshAuth
@@ -401,8 +407,8 @@ export const useAuthCommand = (
           {
             type: MessageType.INFO,
             text: t(
-              'Authenticated successfully with {{region}}. API key and model configs saved to settings.json.',
-              { region: t('Alibaba Cloud Coding Plan') },
+              "Authenticated successfully with {{region}}. API key and model configs saved to settings.json.",
+              { region: t("Alibaba Cloud Coding Plan") },
             ),
           },
           Date.now(),
@@ -413,7 +419,7 @@ export const useAuthCommand = (
           {
             type: MessageType.INFO,
             text: t(
-              'Tip: Use /model to switch between available Coding Plan models.',
+              "Tip: Use /model to switch between available Coding Plan models.",
             ),
           },
           Date.now(),
@@ -422,8 +428,8 @@ export const useAuthCommand = (
         // Log success
         const authEvent = new AuthEvent(
           AuthType.USE_OPENAI,
-          'coding-plan',
-          'success',
+          "coding-plan",
+          "success",
         );
         logAuth(config, authEvent);
       } catch (error) {
@@ -449,16 +455,16 @@ export const useAuthCommand = (
 
         const trimmedApiKey = apiKey.trim();
         const modelIds = modelIdsInput
-          .split(',')
+          .split(",")
           .map((id) => id.trim())
           .filter(
             (id, index, array) => id.length > 0 && array.indexOf(id) === index,
           );
         if (!trimmedApiKey) {
-          throw new Error(t('API key cannot be empty.'));
+          throw new Error(t("API key cannot be empty."));
         }
         if (modelIds.length === 0) {
-          throw new Error(t('Model IDs cannot be empty.'));
+          throw new Error(t("Model IDs cannot be empty."));
         }
 
         const baseUrl = ALIBABA_STANDARD_API_KEY_ENDPOINTS[region];
@@ -490,14 +496,17 @@ export const useAuthCommand = (
           (existing) =>
             !(
               existing.envKey === DASHSCOPE_STANDARD_API_KEY_ENV_KEY &&
-              typeof existing.baseUrl === 'string' &&
+              typeof existing.baseUrl === "string" &&
               Object.values(ALIBABA_STANDARD_API_KEY_ENDPOINTS).includes(
                 existing.baseUrl,
               )
             ),
         );
 
-        const updatedConfigs = [...newConfigs, ...nonAlibabaStandardConfigs];
+        const updatedConfigs = normalizeModelsForAuthType(AuthType.USE_OPENAI, [
+          ...newConfigs,
+          ...nonAlibabaStandardConfigs,
+        ]);
 
         settings.setValue(
           persistScope,
@@ -506,10 +515,12 @@ export const useAuthCommand = (
         );
         settings.setValue(
           persistScope,
-          'security.auth.selectedType',
+          "security.auth.selectedType",
           AuthType.USE_OPENAI,
         );
-        settings.setValue(persistScope, 'model.name', modelIds[0]);
+        if (updatedConfigs.length > 0 && updatedConfigs[0]?.id) {
+          settings.setValue(persistScope, "model.name", updatedConfigs[0].id);
+        }
 
         const updatedModelProviders: ModelProvidersConfig = {
           ...(settings.merged.modelProviders as
@@ -531,7 +542,7 @@ export const useAuthCommand = (
           {
             type: MessageType.INFO,
             text: t(
-              'Alibaba Cloud ModelStudio Standard API Key successfully entered. Settings updated with env.DASHSCOPE_API_KEY and {{modelCount}} model(s).',
+              "Alibaba Cloud ModelStudio Standard API Key successfully entered. Settings updated with env.DASHSCOPE_API_KEY and {{modelCount}} model(s).",
               { modelCount: String(modelIds.length) },
             ),
           },
@@ -542,7 +553,7 @@ export const useAuthCommand = (
           {
             type: MessageType.INFO,
             text: t(
-              'You can use /model to see new ModelStudio Standard models and switch between them.',
+              "You can use /model to see new ModelStudio Standard models and switch between them.",
             ),
           },
           Date.now(),
@@ -550,8 +561,8 @@ export const useAuthCommand = (
 
         const authEvent = new AuthEvent(
           AuthType.USE_OPENAI,
-          'manual',
-          'success',
+          "manual",
+          "success",
         );
         logAuth(config, authEvent);
       } catch (error) {
@@ -572,7 +583,7 @@ export const useAuthCommand = (
     * or broken authentication cycles.
     */
   useEffect(() => {
-    const defaultAuthType = process.env['TRAM_DEFAULT_AUTH_TYPE'];
+    const defaultAuthType = process.env["TRAM_DEFAULT_AUTH_TYPE"];
     if (
       defaultAuthType &&
       ![
@@ -594,7 +605,7 @@ export const useAuthCommand = (
               AuthType.USE_ANTHROPIC,
               AuthType.USE_GEMINI,
               AuthType.USE_VERTEX_AI,
-            ].join(', '),
+            ].join(", "),
           },
         ),
       );

@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useRef } from 'react';
-import { Box, Text } from 'ink';
-import { t } from '../../i18n/index.js';
+import { useRef } from "react";
+import { Box, Text } from "ink";
+import { t } from "../../i18n/index.js";
 
 const MAX_DISPLAYED_QUEUED_MESSAGES = 3;
 const NUM_TIMES_QUEUE_HINT_SHOWN = 3;
@@ -42,7 +42,7 @@ export const QueuedMessageDisplay = ({
       {messageQueue
         .slice(0, MAX_DISPLAYED_QUEUED_MESSAGES)
         .map((message, index) => {
-          const preview = message.replace(/\s+/g, ' ');
+          const preview = message.replace(/\s+/g, " ");
 
           return (
             <Box key={index} paddingLeft={2} width="100%">
@@ -63,7 +63,7 @@ export const QueuedMessageDisplay = ({
       {showHint && (
         <Box paddingLeft={2}>
           <Text dimColor italic>
-            {t('Press ↑ to edit queued messages')}
+            {t("Press ↑ to edit queued messages")}
           </Text>
         </Box>
       )}

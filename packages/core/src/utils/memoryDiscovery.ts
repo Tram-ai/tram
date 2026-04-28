@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs/promises';
-import * as fsSync from 'node:fs';
-import * as path from 'node:path';
-import { homedir } from 'node:os';
-import { getAllGeminiMdFilenames } from '../tools/memoryTool.js';
-import type { FileDiscoveryService } from '../services/fileDiscoveryService.js';
-import { processImports } from './memoryImportProcessor.js';
-import { TRAM_DIR } from './paths.js';
-import { createDebugLogger } from './debugLogger.js';
+import * as fs from "node:fs/promises";
+import * as fsSync from "node:fs";
+import * as path from "node:path";
+import { homedir } from "node:os";
+import { getAllGeminiMdFilenames } from "../tools/memoryTool.js";
+import type { FileDiscoveryService } from "../services/fileDiscoveryService.js";
+import { processImports } from "./memoryImportProcessor.js";
+import { TRAM_DIR } from "./paths.js";
+import { createDebugLogger } from "./debugLogger.js";
 
-const logger = createDebugLogger('MEMORY_DISCOVERY');
+const logger = createDebugLogger("MEMORY_DISCOVERY");
 
 interface GeminiFileContent {
   filePath: string;
@@ -24,7 +24,7 @@ interface GeminiFileContent {
 async function findProjectRoot(startDir: string): Promise<string | null> {
   let currentDir = path.resolve(startDir);
   while (true) {
-    const gitPath = path.join(currentDir, '.git');
+    const gitPath = path.join(currentDir, ".git");
     try {
       const stats = await fs.lstat(gitPath);
       if (stats.isDirectory()) {
@@ -34,18 +34,18 @@ async function findProjectRoot(startDir: string): Promise<string | null> {
       // Don't log ENOENT errors as they're expected when .git doesn't exist
       // Also don't log errors in test environments, which often have mocked fs
       const isENOENT =
-        typeof error === 'object' &&
+        typeof error === "object" &&
         error !== null &&
-        'code' in error &&
-        (error as { code: string }).code === 'ENOENT';
+        "code" in error &&
+        (error as { code: string }).code === "ENOENT";
 
       // Only log unexpected errors in non-test environments
       // process.env['NODE_ENV'] === 'test' or VITEST are common test indicators
       const isTestEnv =
-        process.env['NODE_ENV'] === 'test' || process.env['VITEST'];
+        process.env["NODE_ENV"] === "test" || process.env["VITEST"];
 
       if (!isENOENT && !isTestEnv) {
-        if (typeof error === 'object' && error !== null && 'code' in error) {
+        if (typeof error === "object" && error !== null && "code" in error) {
           const fsError = error as { code: string; message: string };
           logger.warn(
             `Error checking for .git directory at ${gitPath}: ${fsError.message}`,
@@ -98,7 +98,7 @@ async function getGeminiMdFilePathsInternal(
     const batchResults = await Promise.allSettled(batchPromises);
 
     for (const result of batchResults) {
-      if (result.status === 'fulfilled') {
+      if (result.status === "fulfilled") {
         pathsArrays.push(result.value);
       } else {
         const error = result.reason;
@@ -169,7 +169,7 @@ async function getGeminiMdFilePathsInternalForEachDir(
       );
 
       const projectRoot = await findProjectRoot(resolvedCwd);
-      logger.debug(`Determined project root: ${projectRoot ?? 'None'}`);
+      logger.debug(`Determined project root: ${projectRoot ?? "None"}`);
 
       const upwardPaths: string[] = [];
       let currentDir = resolvedCwd;
@@ -219,7 +219,7 @@ async function getGeminiMdFilePathsInternalForEachDir(
 
 async function readGeminiMdFiles(
   filePaths: string[],
-  importFormat: 'flat' | 'tree' = 'tree',
+  importFormat: "flat" | "tree" = "tree",
 ): Promise<GeminiFileContent[]> {
   // Process files in parallel with concurrency limit to prevent EMFILE errors
   const CONCURRENT_LIMIT = 20; // Higher limit for file reads as they're typically faster
@@ -230,7 +230,7 @@ async function readGeminiMdFiles(
     const batchPromises = batch.map(
       async (filePath): Promise<GeminiFileContent> => {
         try {
-          const content = await fs.readFile(filePath, 'utf-8');
+          const content = await fs.readFile(filePath, "utf-8");
 
           // Process imports in the content
           const processedResult = await processImports(
@@ -247,7 +247,7 @@ async function readGeminiMdFiles(
           return { filePath, content: processedResult.content };
         } catch (error: unknown) {
           const isTestEnv =
-            process.env['NODE_ENV'] === 'test' || process.env['VITEST'];
+            process.env["NODE_ENV"] === "test" || process.env["VITEST"];
           if (!isTestEnv) {
             const message =
               error instanceof Error ? error.message : String(error);
@@ -264,7 +264,7 @@ async function readGeminiMdFiles(
     const batchResults = await Promise.allSettled(batchPromises);
 
     for (const result of batchResults) {
-      if (result.status === 'fulfilled') {
+      if (result.status === "fulfilled") {
         results.push(result.value);
       } else {
         // This case shouldn't happen since we catch all errors above,
@@ -285,7 +285,7 @@ function concatenateInstructions(
   currentWorkingDirectoryForDisplay: string,
 ): string {
   return instructionContents
-    .filter((item) => typeof item.content === 'string')
+    .filter((item) => typeof item.content === "string")
     .map((item) => {
       const trimmedContent = (item.content as string).trim();
       if (trimmedContent.length === 0) {
@@ -297,7 +297,7 @@ function concatenateInstructions(
       return `--- Context from: ${displayPath} ---\n${trimmedContent}\n--- End of Context from: ${displayPath} ---`;
     })
     .filter((block): block is string => block !== null)
-    .join('\n\n');
+    .join("\n\n");
 }
 
 export interface LoadServerHierarchicalMemoryResponse {
@@ -315,7 +315,7 @@ export async function loadServerHierarchicalMemory(
   fileService: FileDiscoveryService,
   extensionContextFilePaths: string[] = [],
   folderTrust: boolean,
-  importFormat: 'flat' | 'tree' = 'tree',
+  importFormat: "flat" | "tree" = "tree",
 ): Promise<LoadServerHierarchicalMemoryResponse> {
   logger.debug(
     `Loading server hierarchical memory for CWD: ${currentWorkingDirectory} (importFormat: ${importFormat})`,
@@ -333,8 +333,8 @@ export async function loadServerHierarchicalMemory(
     folderTrust,
   );
   if (filePaths.length === 0) {
-    logger.debug('No TRAM.md files found in hierarchy.');
-    return { memoryContent: '', fileCount: 0 };
+    logger.debug("No TRAM.md files found in hierarchy.");
+    return { memoryContent: "", fileCount: 0 };
   }
   const contentsWithPaths = await readGeminiMdFiles(filePaths, importFormat);
   // Pass CWD for relative path display in concatenated content

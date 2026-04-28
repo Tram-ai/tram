@@ -4,29 +4,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { type Config } from '../config/config.js';
-import path from 'node:path';
-import fs from 'node:fs';
-import { randomUUID } from 'node:crypto';
+import { type Config } from "../config/config.js";
+import path from "node:path";
+import fs from "node:fs";
+import { randomUUID } from "node:crypto";
 import {
   type PartListUnion,
   type Content,
   type GenerateContentResponseUsageMetadata,
   createUserContent,
   createModelContent,
-} from '@google/genai';
-import * as jsonl from '../utils/jsonl-utils.js';
-import { getGitBranch } from '../utils/gitUtils.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "@google/genai";
+import * as jsonl from "../utils/jsonl-utils.js";
+import { getGitBranch } from "../utils/gitUtils.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('CHAT_RECORDING');
+const debugLogger = createDebugLogger("CHAT_RECORDING");
 import type {
   ChatCompressionInfo,
   ToolCallResponseInfo,
-} from '../core/turn.js';
-import type { Status } from '../core/coreToolScheduler.js';
-import type { AgentResultDisplay } from '../tools/tools.js';
-import type { UiEvent } from '../telemetry/uiTelemetry.js';
+} from "../core/turn.js";
+import type { Status } from "../core/coreToolScheduler.js";
+import type { AgentResultDisplay } from "../tools/tools.js";
+import type { UiEvent } from "../telemetry/uiTelemetry.js";
 
 /**
  * A single record stored in the JSONL file.
@@ -51,13 +51,13 @@ export interface ChatRecord {
    * System records are append-only events that can alter how history is reconstructed
    * (e.g., chat compression checkpoints) while keeping the original UI history intact.
    */
-  type: 'user' | 'assistant' | 'tool_result' | 'system';
+  type: "user" | "assistant" | "tool_result" | "system";
   /** Optional system subtype for distinguishing system behaviors */
   subtype?:
-    | 'chat_compression'
-    | 'slash_command'
-    | 'ui_telemetry'
-    | 'at_command';
+    | "chat_compression"
+    | "slash_command"
+    | "ui_telemetry"
+    | "at_command";
   /** Working directory at time of message */
   cwd: string;
   /** CLI version for compatibility tracking */
@@ -117,7 +117,7 @@ export interface ChatCompressionRecordPayload {
 
 export interface SlashCommandRecordPayload {
   /** Whether this record represents the invocation or the resulting output. */
-  phase: 'invocation' | 'result';
+  phase: "invocation" | "result";
   /** Raw user-entered slash command (e.g., "/about"). */
   rawCommand: string;
   /**
@@ -134,7 +134,7 @@ export interface AtCommandRecordPayload {
   /** Files that were read for this @-command. */
   filesRead: string[];
   /** Status for UI reconstruction. */
-  status: 'success' | 'error';
+  status: "success" | "error";
   /** Optional result message for UI reconstruction. */
   message?: string;
   /** Raw user-entered @-command query (optional for legacy records). */
@@ -198,7 +198,7 @@ export class ChatRecordingService {
    */
   private ensureChatsDir(): string {
     const projectDir = this.config.storage.getProjectDir();
-    const chatsDir = path.join(projectDir, 'chats');
+    const chatsDir = path.join(projectDir, "chats");
 
     try {
       fs.mkdirSync(chatsDir, { recursive: true });
@@ -228,11 +228,11 @@ export class ChatRecordingService {
     try {
       // Use 'wx' flag for exclusive creation - atomic operation that fails if file exists
       // This avoids the TOCTOU race condition of existsSync + writeFileSync
-      fs.writeFileSync(conversationFile, '', { flag: 'wx', encoding: 'utf8' });
+      fs.writeFileSync(conversationFile, "", { flag: "wx", encoding: "utf8" });
     } catch (error) {
       const nodeError = error as NodeJS.ErrnoException;
       // EEXIST means file already exists, which is expected and fine
-      if (nodeError.code !== 'EEXIST') {
+      if (nodeError.code !== "EEXIST") {
         const message = error instanceof Error ? error.message : String(error);
         throw new Error(
           `Failed to create conversation file at ${conversationFile}: ${message}`,
@@ -247,8 +247,8 @@ export class ChatRecordingService {
    * Creates base fields for a ChatRecord.
    */
   private createBaseRecord(
-    type: ChatRecord['type'],
-  ): Omit<ChatRecord, 'message' | 'tokens' | 'model' | 'toolCallsMetadata'> {
+    type: ChatRecord["type"],
+  ): Omit<ChatRecord, "message" | "tokens" | "model" | "toolCallsMetadata"> {
     return {
       uuid: randomUUID(),
       parentUuid: this.lastRecordUuid,
@@ -256,7 +256,7 @@ export class ChatRecordingService {
       timestamp: new Date().toISOString(),
       type,
       cwd: this.config.getProjectRoot(),
-      version: this.config.getCliVersion() || 'unknown',
+      version: this.config.getCliVersion() || "unknown",
       gitBranch: getGitBranch(this.config.getProjectRoot()),
     };
   }
@@ -271,7 +271,7 @@ export class ChatRecordingService {
       jsonl.writeLineSync(conversationFile, record);
       this.lastRecordUuid = record.uuid;
     } catch (error) {
-      debugLogger.error('Error appending record:', error);
+      debugLogger.error("Error appending record:", error);
       throw error;
     }
   }
@@ -285,12 +285,12 @@ export class ChatRecordingService {
   recordUserMessage(message: PartListUnion): void {
     try {
       const record: ChatRecord = {
-        ...this.createBaseRecord('user'),
+        ...this.createBaseRecord("user"),
         message: createUserContent(message),
       };
       this.appendRecord(record);
     } catch (error) {
-      debugLogger.error('Error saving user message:', error);
+      debugLogger.error("Error saving user message:", error);
     }
   }
 
@@ -312,7 +312,7 @@ export class ChatRecordingService {
   }): void {
     try {
       const record: ChatRecord = {
-        ...this.createBaseRecord('assistant'),
+        ...this.createBaseRecord("assistant"),
         model: data.model,
       };
 
@@ -330,7 +330,7 @@ export class ChatRecordingService {
 
       this.appendRecord(record);
     } catch (error) {
-      debugLogger.error('Error saving assistant turn:', error);
+      debugLogger.error("Error saving assistant turn:", error);
     }
   }
 
@@ -347,17 +347,17 @@ export class ChatRecordingService {
   ): void {
     try {
       const record: ChatRecord = {
-        ...this.createBaseRecord('tool_result'),
+        ...this.createBaseRecord("tool_result"),
         message: createUserContent(message),
       };
 
       if (toolCallResult) {
         // special case for task executions - we don't want to record the tool calls
         if (
-          typeof toolCallResult.resultDisplay === 'object' &&
+          typeof toolCallResult.resultDisplay === "object" &&
           toolCallResult.resultDisplay !== null &&
-          'type' in toolCallResult.resultDisplay &&
-          toolCallResult.resultDisplay.type === 'task_execution'
+          "type" in toolCallResult.resultDisplay &&
+          toolCallResult.resultDisplay.type === "task_execution"
         ) {
           const taskResult = toolCallResult.resultDisplay as AgentResultDisplay;
           record.toolCallResult = {
@@ -374,7 +374,7 @@ export class ChatRecordingService {
 
       this.appendRecord(record);
     } catch (error) {
-      debugLogger.error('Error saving tool result:', error);
+      debugLogger.error("Error saving tool result:", error);
     }
   }
 
@@ -386,15 +386,15 @@ export class ChatRecordingService {
   recordSlashCommand(payload: SlashCommandRecordPayload): void {
     try {
       const record: ChatRecord = {
-        ...this.createBaseRecord('system'),
-        type: 'system',
-        subtype: 'slash_command',
+        ...this.createBaseRecord("system"),
+        type: "system",
+        subtype: "slash_command",
         systemPayload: payload,
       };
 
       this.appendRecord(record);
     } catch (error) {
-      debugLogger.error('Error saving slash command record:', error);
+      debugLogger.error("Error saving slash command record:", error);
     }
   }
 
@@ -406,15 +406,15 @@ export class ChatRecordingService {
   recordChatCompression(payload: ChatCompressionRecordPayload): void {
     try {
       const record: ChatRecord = {
-        ...this.createBaseRecord('system'),
-        type: 'system',
-        subtype: 'chat_compression',
+        ...this.createBaseRecord("system"),
+        type: "system",
+        subtype: "chat_compression",
         systemPayload: payload,
       };
 
       this.appendRecord(record);
     } catch (error) {
-      debugLogger.error('Error saving chat compression record:', error);
+      debugLogger.error("Error saving chat compression record:", error);
     }
   }
 
@@ -424,15 +424,15 @@ export class ChatRecordingService {
   recordUiTelemetryEvent(uiEvent: UiEvent): void {
     try {
       const record: ChatRecord = {
-        ...this.createBaseRecord('system'),
-        type: 'system',
-        subtype: 'ui_telemetry',
+        ...this.createBaseRecord("system"),
+        type: "system",
+        subtype: "ui_telemetry",
         systemPayload: { uiEvent },
       };
 
       this.appendRecord(record);
     } catch (error) {
-      debugLogger.error('Error saving ui telemetry record:', error);
+      debugLogger.error("Error saving ui telemetry record:", error);
     }
   }
 
@@ -442,15 +442,15 @@ export class ChatRecordingService {
   recordAtCommand(payload: AtCommandRecordPayload): void {
     try {
       const record: ChatRecord = {
-        ...this.createBaseRecord('system'),
-        type: 'system',
-        subtype: 'at_command',
+        ...this.createBaseRecord("system"),
+        type: "system",
+        subtype: "at_command",
         systemPayload: payload,
       };
 
       this.appendRecord(record);
     } catch (error) {
-      debugLogger.error('Error saving @-command record:', error);
+      debugLogger.error("Error saving @-command record:", error);
     }
   }
 }

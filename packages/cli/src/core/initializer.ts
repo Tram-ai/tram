@@ -10,11 +10,11 @@ import {
   IdeConnectionType,
   logIdeConnection,
   type Config,
-} from '@tram-ai/tram-core';
-import { type LoadedSettings } from '../config/settings.js';
-import { performInitialAuth } from './auth.js';
-import { validateTheme } from './theme.js';
-import { initializeI18n, type SupportedLanguage } from '../i18n/index.js';
+} from "@tram-ai/tram-core";
+import { type LoadedSettings } from "../config/settings.js";
+import { performInitialAuth } from "./auth.js";
+import { validateTheme } from "./theme.js";
+import { initializeI18n, type SupportedLanguage } from "../i18n/index.js";
 
 export interface InitializationResult {
   authError: string | null;
@@ -36,10 +36,10 @@ export async function initializeApp(
 ): Promise<InitializationResult> {
   // Initialize i18n system
   const languageSetting =
-    process.env['TRAM_CODE_LANG'] ||
+    process.env["TRAM_CODE_LANG"] ||
     (settings.merged.general?.language as string) ||
-    'auto';
-  await initializeI18n(languageSetting as SupportedLanguage | 'auto');
+    "auto";
+  await initializeI18n(languageSetting as SupportedLanguage | "auto");
 
   // Use authType from modelsConfig which respects CLI --auth-type argument
   // over settings.security.auth.selectedType

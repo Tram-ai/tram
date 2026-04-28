@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import { describe, it, expect, vi } from 'vitest';
-import { ExtensionListStep } from './ExtensionListStep.js';
-import { KeypressProvider } from '../../../contexts/KeypressContext.js';
-import type { Extension } from '@tram-ai/tram-core';
-import { ExtensionUpdateState } from '../../../state/extensions.js';
+import { render } from "ink-testing-library";
+import { describe, it, expect, vi } from "vitest";
+import { ExtensionListStep } from "./ExtensionListStep.js";
+import { KeypressProvider } from "../../../contexts/KeypressContext.js";
+import type { Extension } from "@tram-ai/tram-core";
+import { ExtensionUpdateState } from "../../../state/extensions.js";
 
 const createMockExtension = (
   name: string,
   isActive = true,
-  version = '1.0.0',
+  version = "1.0.0",
 ): Extension =>
   ({
     id: name,
@@ -23,7 +23,7 @@ const createMockExtension = (
     path: `/home/user/.tram/extensions/${name}`,
     isActive,
     installMetadata: {
-      type: 'git',
+      type: "git",
       source: `github:user/${name}`,
     },
     mcpServers: {},
@@ -35,12 +35,12 @@ const createMockExtension = (
     contextFiles: [],
   }) as unknown as Extension;
 
-describe('ExtensionListStep Snapshots', () => {
+describe("ExtensionListStep Snapshots", () => {
   const baseProps = {
     onExtensionSelect: vi.fn(),
   };
 
-  it('should render empty state', () => {
+  it("should render empty state", () => {
     const { lastFrame } = render(
       <KeypressProvider kittyProtocolEnabled={false}>
         <ExtensionListStep
@@ -54,8 +54,8 @@ describe('ExtensionListStep Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render list with single extension', () => {
-    const extensions = [createMockExtension('test-extension', true)];
+  it("should render list with single extension", () => {
+    const extensions = [createMockExtension("test-extension", true)];
     const { lastFrame } = render(
       <KeypressProvider kittyProtocolEnabled={false}>
         <ExtensionListStep
@@ -69,16 +69,16 @@ describe('ExtensionListStep Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render list with multiple extensions', () => {
+  it("should render list with multiple extensions", () => {
     const extensions = [
-      createMockExtension('active-extension', true),
-      createMockExtension('disabled-extension', false),
-      createMockExtension('update-available', true),
+      createMockExtension("active-extension", true),
+      createMockExtension("disabled-extension", false),
+      createMockExtension("update-available", true),
     ];
     const updateState = new Map([
-      ['active-extension', ExtensionUpdateState.UP_TO_DATE],
-      ['disabled-extension', ExtensionUpdateState.NOT_UPDATABLE],
-      ['update-available', ExtensionUpdateState.UPDATE_AVAILABLE],
+      ["active-extension", ExtensionUpdateState.UP_TO_DATE],
+      ["disabled-extension", ExtensionUpdateState.NOT_UPDATABLE],
+      ["update-available", ExtensionUpdateState.UPDATE_AVAILABLE],
     ]);
 
     const { lastFrame } = render(
@@ -94,10 +94,10 @@ describe('ExtensionListStep Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render with checking status', () => {
-    const extensions = [createMockExtension('checking-extension', true)];
+  it("should render with checking status", () => {
+    const extensions = [createMockExtension("checking-extension", true)];
     const updateState = new Map([
-      ['checking-extension', ExtensionUpdateState.CHECKING_FOR_UPDATES],
+      ["checking-extension", ExtensionUpdateState.CHECKING_FOR_UPDATES],
     ]);
 
     const { lastFrame } = render(
@@ -113,10 +113,10 @@ describe('ExtensionListStep Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render with error status', () => {
-    const extensions = [createMockExtension('error-extension', true)];
+  it("should render with error status", () => {
+    const extensions = [createMockExtension("error-extension", true)];
     const updateState = new Map([
-      ['error-extension', ExtensionUpdateState.ERROR],
+      ["error-extension", ExtensionUpdateState.ERROR],
     ]);
 
     const { lastFrame } = render(

@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
 
 /**
- * Base class for messages in the Qwen Code protocol.
+ * Base class for messages in the TRAM protocol.
  *
  * @author skyfire
  * @version $Id: 0.0.1

@@ -11,14 +11,14 @@ import type {
   EmbedContentResponse,
   GenerateContentParameters,
   GenerateContentResponse,
-} from '@google/genai';
-import type { Config } from '../config/config.js';
-import { LoggingContentGenerator } from './loggingContentGenerator/index.js';
+} from "@google/genai";
+import type { Config } from "../config/config.js";
+import { LoggingContentGenerator } from "./loggingContentGenerator/index.js";
 import type {
   ConfigSource,
   ConfigSourceKind,
   ConfigSources,
-} from '../utils/configResolver.js';
+} from "../utils/configResolver.js";
 import {
   getDefaultApiKeyEnvVar,
   getDefaultModelEnvVar,
@@ -28,8 +28,8 @@ import {
   MissingModelError,
   StrictMissingCredentialsError,
   StrictMissingModelIdError,
-} from '../models/modelConfigErrors.js';
-import { PROVIDER_SOURCED_FIELDS } from '../models/modelsConfig.js';
+} from "../models/modelConfigErrors.js";
+import { PROVIDER_SOURCED_FIELDS } from "../models/modelsConfig.js";
 
 /**
  * Interface abstracting the core functionalities for generating content and counting tokens.
@@ -53,11 +53,11 @@ export interface ContentGenerator {
 }
 
 export enum AuthType {
-  USE_OPENAI = 'openai',
-  TRAM_OAUTH = 'tram-oauth',
-  USE_GEMINI = 'gemini',
-  USE_VERTEX_AI = 'vertex-ai',
-  USE_ANTHROPIC = 'anthropic',
+  USE_OPENAI = "openai",
+  TRAM_OAUTH = "tram-oauth",
+  USE_GEMINI = "gemini",
+  USE_VERTEX_AI = "vertex-ai",
+  USE_ANTHROPIC = "anthropic",
 }
 
 /**
@@ -73,8 +73,8 @@ export type InputModalities = {
 
 export type ContentGeneratorConfig = {
   model: string;
-  // Optional upstream model name sent to provider APIs.
-  // When omitted, `model` is used.
+  // Upstream model name sent to provider APIs.
+  // Set from upstreamModelId in modelsConfig, or falls back to model.
   requestModel?: string;
   apiKey?: string;
   apiKeyEnvKey?: string;
@@ -99,13 +99,13 @@ export type ContentGeneratorConfig = {
   reasoning?:
     | false
     | {
-        effort?: 'low' | 'medium' | 'high';
+        effort?: "low" | "medium" | "high";
         budget_tokens?: number;
       };
   proxy?: string | undefined;
   userAgent?: string;
   // Schema compliance mode for tool definitions
-  schemaCompliance?: 'auto' | 'openapi_30';
+  schemaCompliance?: "auto" | "openapi_30";
   // Context window size override. If set to a positive number, it will override
   // the automatic detection. Leave undefined to use automatic detection.
   contextWindowSize?: number;
@@ -172,20 +172,20 @@ export function resolveContentGeneratorConfigWithSources(
   };
 
   // Set sources for computed fields
-  setSource(sources, 'authType', {
-    kind: 'computed',
-    detail: 'provided by caller',
+  setSource(sources, "authType", {
+    kind: "computed",
+    detail: "provided by caller",
   });
   if (config?.getProxy()) {
-    setSource(sources, 'proxy', {
-      kind: 'computed',
-      detail: 'Config.getProxy()',
+    setSource(sources, "proxy", {
+      kind: "computed",
+      detail: "Config.getProxy()",
     });
   }
 
   // Preserve seed sources for fields that were passed in
   const seedOrUnknown = (path: string): ContentGeneratorConfigSource =>
-    getSeedSource(seedSources, path) ?? { kind: 'unknown' };
+    getSeedSource(seedSources, path) ?? { kind: "unknown" };
 
   for (const field of PROVIDER_SOURCED_FIELDS) {
     if (generationConfig && field in generationConfig && !sources[field]) {
@@ -200,7 +200,7 @@ export function resolveContentGeneratorConfigWithSources(
     strictModelProvider,
   );
   if (!validation.valid) {
-    throw new Error(validation.errors.map((e) => e.message).join('\n'));
+    throw new Error(validation.errors.map((e) => e.message).join("\n"));
   }
 
   return {
@@ -299,27 +299,27 @@ export async function createContentGenerator(
 ): Promise<ContentGenerator> {
   const validation = validateModelConfig(generatorConfig, false);
   if (!validation.valid) {
-    throw new Error(validation.errors.map((e) => e.message).join('\n'));
+    throw new Error(validation.errors.map((e) => e.message).join("\n"));
   }
 
   const authType = generatorConfig.authType;
   if (!authType) {
-    throw new Error('ContentGeneratorConfig must have an authType');
+    throw new Error("ContentGeneratorConfig must have an authType");
   }
 
   let baseGenerator: ContentGenerator;
 
   if (authType === AuthType.USE_OPENAI) {
     const { createOpenAIContentGenerator } = await import(
-      './openaiContentGenerator/index.js'
+      "./openaiContentGenerator/index.js"
     );
     baseGenerator = createOpenAIContentGenerator(generatorConfig, config);
   } else if (authType === AuthType.TRAM_OAUTH) {
     const { getTramOAuthClient: getTramOauthClient } = await import(
-      '../tram/tramOAuth2.js'
+      "../tram/tramOAuth2.js"
     );
     const { TramContentGenerator } = await import(
-      '../tram/tramContentGenerator.js'
+      "../tram/tramContentGenerator.js"
     );
 
     try {
@@ -339,7 +339,7 @@ export async function createContentGenerator(
     }
   } else if (authType === AuthType.USE_ANTHROPIC) {
     const { createAnthropicContentGenerator } = await import(
-      './anthropicContentGenerator/index.js'
+      "./anthropicContentGenerator/index.js"
     );
     baseGenerator = createAnthropicContentGenerator(generatorConfig, config);
   } else if (
@@ -347,7 +347,7 @@ export async function createContentGenerator(
     authType === AuthType.USE_VERTEX_AI
   ) {
     const { createGeminiContentGenerator } = await import(
-      './geminiContentGenerator/index.js'
+      "./geminiContentGenerator/index.js"
     );
     baseGenerator = createGeminiContentGenerator(generatorConfig, config);
   } else {

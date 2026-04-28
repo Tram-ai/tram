@@ -2,24 +2,24 @@
  * Factory function for creating Query instances.
  */
 
-import type { SDKUserMessage } from '../types/protocol.js';
-import { serializeJsonLine } from '../utils/jsonLines.js';
-import { ProcessTransport } from '../transport/ProcessTransport.js';
-import { prepareSpawnInfo, type SpawnInfo } from '../utils/cliPath.js';
-import { Query } from './Query.js';
+import type { SDKUserMessage } from "../types/protocol.js";
+import { serializeJsonLine } from "../utils/jsonLines.js";
+import { ProcessTransport } from "../transport/ProcessTransport.js";
+import { prepareSpawnInfo, type SpawnInfo } from "../utils/cliPath.js";
+import { Query } from "./Query.js";
 import type {
   QueryOptions,
   QuerySystemPrompt,
   TransportOptions,
-} from '../types/types.js';
-import { QueryOptionsSchema } from '../types/queryOptionsSchema.js';
-import { SdkLogger } from '../utils/logger.js';
-import { randomUUID } from 'node:crypto';
-import { validateSessionId } from '../utils/validation.js';
+} from "../types/types.js";
+import { QueryOptionsSchema } from "../types/queryOptionsSchema.js";
+import { SdkLogger } from "../utils/logger.js";
+import { randomUUID } from "node:crypto";
+import { validateSessionId } from "../utils/validation.js";
 
 export type { QueryOptions };
 
-const logger = SdkLogger.createLogger('createQuery');
+const logger = SdkLogger.createLogger("createQuery");
 
 export function query({
   prompt,
@@ -40,7 +40,7 @@ export function query({
 }): Query {
   const spawnInfo = validateOptions(options);
 
-  const isSingleTurn = typeof prompt === 'string';
+  const isSingleTurn = typeof prompt === "string";
 
   const pathToTramExecutable = options.pathToTramExecutable;
 
@@ -83,10 +83,10 @@ export function query({
   if (isSingleTurn) {
     const stringPrompt = prompt as string;
     const message: SDKUserMessage = {
-      type: 'user',
+      type: "user",
       session_id: queryInstance.getSessionId(),
       message: {
-        role: 'user',
+        role: "user",
         content: stringPrompt,
       },
       parent_tool_use_id: null,
@@ -103,7 +103,7 @@ export function query({
       } catch (err) {
         // Only log error if it's not due to transport already being closed
         if (!transport.exitError) {
-          logger.error('Error sending single-turn prompt:', err);
+          logger.error("Error sending single-turn prompt:", err);
         }
       }
     })();
@@ -111,7 +111,7 @@ export function query({
     queryInstance
       .streamInput(prompt as AsyncIterable<SDKUserMessage>)
       .catch((err) => {
-        logger.error('Error streaming input:', err);
+        logger.error("Error streaming input:", err);
       });
   }
 
@@ -120,12 +120,12 @@ export function query({
 
 function resolveSystemPromptOption(
   systemPrompt: QuerySystemPrompt | undefined,
-): Pick<TransportOptions, 'systemPrompt' | 'appendSystemPrompt'> {
+): Pick<TransportOptions, "systemPrompt" | "appendSystemPrompt"> {
   if (!systemPrompt) {
     return {};
   }
 
-  if (typeof systemPrompt === 'string') {
+  if (typeof systemPrompt === "string") {
     return { systemPrompt };
   }
 
@@ -136,19 +136,19 @@ function validateOptions(options: QueryOptions): SpawnInfo | undefined {
   const validationResult = QueryOptionsSchema.safeParse(options);
   if (!validationResult.success) {
     const errors = validationResult.error.errors
-      .map((err) => `${err.path.join('.')}: ${err.message}`)
-      .join('; ');
+      .map((err) => `${err.path.join(".")}: ${err.message}`)
+      .join("; ");
     throw new Error(`Invalid QueryOptions: ${errors}`);
   }
 
   // Validate sessionId format if provided
   if (options.sessionId) {
-    validateSessionId(options.sessionId, 'sessionId');
+    validateSessionId(options.sessionId, "sessionId");
   }
 
   // Validate resume format if provided
   if (options.resume) {
-    validateSessionId(options.resume, 'resume');
+    validateSessionId(options.resume, "resume");
   }
 
   try {

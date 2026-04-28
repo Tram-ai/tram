@@ -4,30 +4,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FunctionDeclaration } from '@google/genai';
+import type { FunctionDeclaration } from "@google/genai";
 import type {
   AnyDeclarativeTool,
   ToolResult,
   ToolResultDisplay,
   ToolInvocation,
-} from './tools.js';
-import { Kind, BaseDeclarativeTool, BaseToolInvocation } from './tools.js';
-import type { Config } from '../config/config.js';
-import { spawn } from 'node:child_process';
-import { StringDecoder } from 'node:string_decoder';
-import type { SendSdkMcpMessage } from './mcp-client.js';
-import { McpClientManager } from './mcp-client-manager.js';
-import { DiscoveredMCPTool } from './mcp-tool.js';
-import { parse } from 'shell-quote';
-import { ToolErrorType } from './tool-error.js';
-import { safeJsonStringify } from '../utils/safeJsonStringify.js';
-import type { EventEmitter } from 'node:events';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import type { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
+} from "./tools.js";
+import { Kind, BaseDeclarativeTool, BaseToolInvocation } from "./tools.js";
+import type { Config } from "../config/config.js";
+import { spawn } from "node:child_process";
+import { StringDecoder } from "node:string_decoder";
+import type { SendSdkMcpMessage } from "./mcp-client.js";
+import { McpClientManager } from "./mcp-client-manager.js";
+import { DiscoveredMCPTool } from "./mcp-tool.js";
+import { parse } from "shell-quote";
+import { ToolErrorType } from "./tool-error.js";
+import { safeJsonStringify } from "../utils/safeJsonStringify.js";
+import type { EventEmitter } from "node:events";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import type { ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
 
 type ToolParams = Record<string, unknown>;
 
-const debugLogger = createDebugLogger('TOOL_REGISTRY');
+const debugLogger = createDebugLogger("TOOL_REGISTRY");
 
 class DiscoveredToolInvocation extends BaseToolInvocation<
   ToolParams,
@@ -54,8 +54,8 @@ class DiscoveredToolInvocation extends BaseToolInvocation<
     child.stdin.write(JSON.stringify(this.params));
     child.stdin.end();
 
-    let stdout = '';
-    let stderr = '';
+    let stdout = "";
+    let stderr = "";
     let error: Error | null = null;
     let code: number | null = null;
     let signal: NodeJS.Signals | null = null;
@@ -84,30 +84,30 @@ class DiscoveredToolInvocation extends BaseToolInvocation<
       };
 
       const cleanup = () => {
-        child.stdout.removeListener('data', onStdout);
-        child.stderr.removeListener('data', onStderr);
-        child.removeListener('error', onError);
-        child.removeListener('close', onClose);
+        child.stdout.removeListener("data", onStdout);
+        child.stderr.removeListener("data", onStderr);
+        child.removeListener("error", onError);
+        child.removeListener("close", onClose);
         if (child.connected) {
           child.disconnect();
         }
       };
 
-      child.stdout.on('data', onStdout);
-      child.stderr.on('data', onStderr);
-      child.on('error', onError);
-      child.on('close', onClose);
+      child.stdout.on("data", onStdout);
+      child.stderr.on("data", onStderr);
+      child.on("error", onError);
+      child.on("close", onClose);
     });
 
     // if there is any error, non-zero exit code, signal, or stderr, return error details instead of stdout
     if (error || code !== 0 || signal || stderr) {
       const llmContent = [
-        `Stdout: ${stdout || '(empty)'}`,
-        `Stderr: ${stderr || '(empty)'}`,
-        `Error: ${error ?? '(none)'}`,
-        `Exit Code: ${code ?? '(none)'}`,
-        `Signal: ${signal ?? '(none)'}`,
-      ].join('\n');
+        `Stdout: ${stdout || "(empty)"}`,
+        `Stderr: ${stderr || "(empty)"}`,
+        `Error: ${error ?? "(none)"}`,
+        `Exit Code: ${code ?? "(none)"}`,
+        `Signal: ${signal ?? "(none)"}`,
+      ].join("\n");
       return {
         llmContent,
         returnDisplay: llmContent,
@@ -352,14 +352,14 @@ export class ToolRegistry {
       const cmdParts = parse(discoveryCmd);
       if (cmdParts.length === 0) {
         throw new Error(
-          'Tool discovery command is empty or contains only whitespace.',
+          "Tool discovery command is empty or contains only whitespace.",
         );
       }
       const proc = spawn(cmdParts[0] as string, cmdParts.slice(1) as string[]);
-      let stdout = '';
-      const stdoutDecoder = new StringDecoder('utf8');
-      let stderr = '';
-      const stderrDecoder = new StringDecoder('utf8');
+      let stdout = "";
+      const stdoutDecoder = new StringDecoder("utf8");
+      let stderr = "";
+      const stderrDecoder = new StringDecoder("utf8");
       let sizeLimitExceeded = false;
       const MAX_STDOUT_SIZE = 10 * 1024 * 1024; // 10MB limit
       const MAX_STDERR_SIZE = 10 * 1024 * 1024; // 10MB limit
@@ -367,7 +367,7 @@ export class ToolRegistry {
       let stdoutByteLength = 0;
       let stderrByteLength = 0;
 
-      proc.stdout.on('data', (data) => {
+      proc.stdout.on("data", (data) => {
         if (sizeLimitExceeded) return;
         if (stdoutByteLength + data.length > MAX_STDOUT_SIZE) {
           sizeLimitExceeded = true;
@@ -378,7 +378,7 @@ export class ToolRegistry {
         stdout += stdoutDecoder.write(data);
       });
 
-      proc.stderr.on('data', (data) => {
+      proc.stderr.on("data", (data) => {
         if (sizeLimitExceeded) return;
         if (stderrByteLength + data.length > MAX_STDERR_SIZE) {
           sizeLimitExceeded = true;
@@ -390,8 +390,8 @@ export class ToolRegistry {
       });
 
       await new Promise<void>((resolve, reject) => {
-        proc.on('error', reject);
-        proc.on('close', (code) => {
+        proc.on("error", reject);
+        proc.on("close", (code) => {
           stdout += stdoutDecoder.end();
           stderr += stderrDecoder.end();
 
@@ -422,17 +422,17 @@ export class ToolRegistry {
 
       if (!discoveredItems || !Array.isArray(discoveredItems)) {
         throw new Error(
-          'Tool discovery command did not return a JSON array of tools.',
+          "Tool discovery command did not return a JSON array of tools.",
         );
       }
 
       for (const tool of discoveredItems) {
-        if (tool && typeof tool === 'object') {
-          if (Array.isArray(tool['function_declarations'])) {
-            functions.push(...tool['function_declarations']);
-          } else if (Array.isArray(tool['functionDeclarations'])) {
-            functions.push(...tool['functionDeclarations']);
-          } else if (tool['name']) {
+        if (tool && typeof tool === "object") {
+          if (Array.isArray(tool["function_declarations"])) {
+            functions.push(...tool["function_declarations"]);
+          } else if (Array.isArray(tool["functionDeclarations"])) {
+            functions.push(...tool["functionDeclarations"]);
+          } else if (tool["name"]) {
             functions.push(tool as FunctionDeclaration);
           }
         }
@@ -440,12 +440,12 @@ export class ToolRegistry {
       // register each function as a tool
       for (const func of functions) {
         if (!func.name) {
-          debugLogger.warn('Discovered a tool with no name. Skipping.');
+          debugLogger.warn("Discovered a tool with no name. Skipping.");
           continue;
         }
         const parameters =
           func.parametersJsonSchema &&
-          typeof func.parametersJsonSchema === 'object' &&
+          typeof func.parametersJsonSchema === "object" &&
           !Array.isArray(func.parametersJsonSchema)
             ? func.parametersJsonSchema
             : {};
@@ -453,7 +453,7 @@ export class ToolRegistry {
           new DiscoveredTool(
             this.config,
             func.name,
-            func.description ?? '',
+            func.description ?? "",
             parameters as Record<string, unknown>,
           ),
         );
@@ -536,7 +536,7 @@ export class ToolRegistry {
     options?: { signal?: AbortSignal },
   ): Promise<ReadResourceResult> {
     if (!this.config.isTrustedFolder()) {
-      throw new Error('MCP resources are unavailable in untrusted folders.');
+      throw new Error("MCP resources are unavailable in untrusted folders.");
     }
 
     return this.mcpClientManager.readResource(serverName, uri, options);
@@ -548,7 +548,7 @@ export class ToolRegistry {
    */
   async stop(): Promise<void> {
     for (const tool of this.tools.values()) {
-      if ('dispose' in tool && typeof tool.dispose === 'function') {
+      if ("dispose" in tool && typeof tool.dispose === "function") {
         try {
           tool.dispose();
         } catch (error) {
@@ -561,7 +561,7 @@ export class ToolRegistry {
       await this.mcpClientManager.stop();
     } catch (error) {
       // Log but don't throw - cleanup should be best-effort
-      debugLogger.error('Error stopping MCP clients:', error);
+      debugLogger.error("Error stopping MCP clients:", error);
     }
   }
 }

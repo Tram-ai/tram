@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 
 const Main: FC = () => <main>Main Component Placeholder</main>;
 

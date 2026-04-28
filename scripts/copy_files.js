@@ -20,13 +20,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
-const sourceDir = path.join('src');
-const targetDir = path.join('dist', 'src');
+const sourceDir = path.join("src");
+const targetDir = path.join("dist", "src");
 
-const extensionsToCopy = ['.md', '.json', '.sb'];
+const extensionsToCopy = [".md", ".json", ".sb"];
 
 function copyFilesRecursive(source, target, rootSourceDir) {
   if (!fs.existsSync(target)) {
@@ -46,9 +46,9 @@ function copyFilesRecursive(source, target, rootSourceDir) {
       // Copy standard extensions, or .js files in i18n/locales directory
       // Use path.relative for precise matching to avoid false positives
       const relativePath = path.relative(rootSourceDir, sourcePath);
-      const normalizedPath = relativePath.replace(/\\/g, '/');
+      const normalizedPath = relativePath.replace(/\\/g, "/");
       const isLocaleJs =
-        ext === '.js' && normalizedPath.startsWith('i18n/locales/');
+        ext === ".js" && normalizedPath.startsWith("i18n/locales/");
       if (extensionsToCopy.includes(ext) || isLocaleJs) {
         fs.copyFileSync(sourcePath, targetPath);
       }
@@ -65,22 +65,22 @@ copyFilesRecursive(sourceDir, targetDir, sourceDir);
 
 // Copy example extensions into the bundle.
 const packageName = path.basename(process.cwd());
-if (packageName === 'cli') {
+if (packageName === "cli") {
   const examplesSource = path.join(
     sourceDir,
-    'commands',
-    'extensions',
-    'examples',
+    "commands",
+    "extensions",
+    "examples",
   );
   const examplesTarget = path.join(
     targetDir,
-    'commands',
-    'extensions',
-    'examples',
+    "commands",
+    "extensions",
+    "examples",
   );
   if (fs.existsSync(examplesSource)) {
     fs.cpSync(examplesSource, examplesTarget, { recursive: true });
   }
 }
 
-console.log('Successfully copied files.');
+console.log("Successfully copied files.");

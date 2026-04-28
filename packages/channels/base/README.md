@@ -1,6 +1,6 @@
 # @qwen-code/channel-base
 
-Base infrastructure for building Qwen Code channel adapters. Provides the abstract base class, access control, session routing, and the ACP bridge that communicates with the agent.
+Base infrastructure for building TRAM channel adapters. Provides the abstract base class, access control, session routing, and the ACP bridge that communicates with the agent.
 
 If you're building a channel plugin, this is your only dependency.
 
@@ -15,12 +15,12 @@ npm install @qwen-code/channel-base
 Subclass `ChannelBase` and implement three methods:
 
 ```typescript
-import { ChannelBase } from '@qwen-code/channel-base';
+import { ChannelBase } from "@qwen-code/channel-base";
 import type {
   ChannelConfig,
   Envelope,
   AcpBridge,
-} from '@qwen-code/channel-base';
+} from "@qwen-code/channel-base";
 
 class MyChannel extends ChannelBase {
   async connect(): Promise<void> {
@@ -42,12 +42,12 @@ class MyChannel extends ChannelBase {
 Export a `ChannelPlugin` object so the extension loader can discover it:
 
 ```typescript
-import type { ChannelPlugin } from '@qwen-code/channel-base';
+import type { ChannelPlugin } from "@qwen-code/channel-base";
 
 export const plugin: ChannelPlugin = {
-  channelType: 'my-platform',
-  displayName: 'My Platform',
-  requiredConfigFields: ['apiKey'],
+  channelType: "my-platform",
+  displayName: "My Platform",
+  requiredConfigFields: ["apiKey"],
   createChannel: (name, config, bridge, options) =>
     new MyChannel(name, config, bridge, options),
 };
@@ -257,7 +257,7 @@ interface Envelope {
 }
 
 interface Attachment {
-  type: 'image' | 'file' | 'audio' | 'video';
+  type: "image" | "file" | "audio" | "video";
   data?: string; // base64-encoded data (images, small files)
   filePath?: string; // absolute path to local file (large files)
   mimeType: string; // e.g. 'application/pdf', 'image/jpeg'

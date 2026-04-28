@@ -15,13 +15,13 @@
  * write tools hit boundary — no silent writes without user consent.
  */
 
-import { ToolNames } from '../tools/tool-names.js';
-import { isShellCommandReadOnlyAST } from '../utils/shellAstParser.js';
-import { ApprovalMode } from '../config/config.js';
-import type { OverlayFs } from './overlayFs.js';
+import { ToolNames } from "../tools/tool-names.js";
+import { isShellCommandReadOnlyAST } from "../utils/shellAstParser.js";
+import { ApprovalMode } from "../config/config.js";
+import type { OverlayFs } from "./overlayFs.js";
 
 export interface ToolGateResult {
-  action: 'allow' | 'redirect' | 'boundary';
+  action: "allow" | "redirect" | "boundary";
   reason?: string;
 }
 
@@ -70,7 +70,7 @@ export async function evaluateToolCall(
   if (SAFE_READ_ONLY_TOOLS.has(toolName)) {
     // Rewrite read paths to overlay if file was previously written there
     await resolveReadPaths(args, overlayFs);
-    return { action: 'allow' };
+    return { action: "allow" };
   }
 
   // Write tools — only redirect to overlay if approval mode permits auto-edits
@@ -79,34 +79,34 @@ export async function evaluateToolCall(
       approvalMode === ApprovalMode.AUTO_EDIT ||
       approvalMode === ApprovalMode.YOLO
     ) {
-      return { action: 'redirect', reason: `write_tool:${toolName}` };
+      return { action: "redirect", reason: `write_tool:${toolName}` };
     }
     // In default/plan mode, writes are a boundary — don't silently edit
     return {
-      action: 'boundary',
+      action: "boundary",
       reason: `write_tool_no_auto:${toolName}`,
     };
   }
 
   // Shell — use AST parser for accurate read-only detection
   if (toolName === ToolNames.SHELL) {
-    const command = typeof args['command'] === 'string' ? args['command'] : '';
+    const command = typeof args["command"] === "string" ? args["command"] : "";
     if (command && (await isShellCommandReadOnlyAST(command))) {
-      return { action: 'allow' };
+      return { action: "allow" };
     }
     return {
-      action: 'boundary',
-      reason: `shell:${command.slice(0, 50) || 'empty'}`,
+      action: "boundary",
+      reason: `shell:${command.slice(0, 50) || "empty"}`,
     };
   }
 
   // Known boundary tools
   if (BOUNDARY_TOOLS.has(toolName)) {
-    return { action: 'boundary', reason: `denied_tool:${toolName}` };
+    return { action: "boundary", reason: `denied_tool:${toolName}` };
   }
 
   // Unknown tools (including MCP/discovered) — boundary for safety
-  return { action: 'boundary', reason: `unknown_tool:${toolName}` };
+  return { action: "boundary", reason: `unknown_tool:${toolName}` };
 }
 
 /**
@@ -118,9 +118,9 @@ async function resolveReadPaths(
   args: Record<string, unknown>,
   overlayFs: OverlayFs,
 ): Promise<void> {
-  const pathKeys = ['file_path', 'filePath', 'path', 'notebook_path'];
+  const pathKeys = ["file_path", "filePath", "path", "notebook_path"];
   for (const key of pathKeys) {
-    if (typeof args[key] === 'string') {
+    if (typeof args[key] === "string") {
       args[key] = overlayFs.resolveReadPath(args[key] as string);
       return;
     }
@@ -136,9 +136,9 @@ export async function rewritePathArgs(
   overlayFs: OverlayFs,
 ): Promise<void> {
   // Common path argument names used by Edit and WriteFile tools
-  const pathKeys = ['file_path', 'filePath', 'path', 'notebook_path'];
+  const pathKeys = ["file_path", "filePath", "path", "notebook_path"];
   for (const key of pathKeys) {
-    if (typeof args[key] === 'string') {
+    if (typeof args[key] === "string") {
       args[key] = await overlayFs.redirectWrite(args[key] as string);
       return;
     }

@@ -1,14 +1,14 @@
-import './styles.css';
-import logoSvg from './favicon.svg';
-import { TempFileModal } from './components/TempFileModal.js';
-import { usePlatformContext } from './components/hooks.js';
-import { MetadataSidebar } from './components/MetadataSidebar.js';
-import { parseChatData, isChatViewerMessage } from './components/utils.js';
+import "./styles.css";
+import logoSvg from "./favicon.svg";
+import { TempFileModal } from "./components/TempFileModal.js";
+import { usePlatformContext } from "./components/hooks.js";
+import { MetadataSidebar } from "./components/MetadataSidebar.js";
+import { parseChatData, isChatViewerMessage } from "./components/utils.js";
 
 declare global {
   interface Window {
-    React: typeof import('react');
-    ReactDOM: typeof import('react-dom/client');
+    React: typeof import("react");
+    ReactDOM: typeof import("react-dom/client");
   }
 }
 
@@ -47,7 +47,7 @@ const App = () => {
   const rawMessages = Array.isArray(chatData.messages) ? chatData.messages : [];
   const messages = rawMessages
     .filter(isChatViewerMessage)
-    .filter((record) => record.type !== 'system');
+    .filter((record) => record.type !== "system");
   const metadata = chatData.metadata;
   const { platformContext, modalState, closeModal } = usePlatformContext();
 
@@ -80,9 +80,9 @@ const App = () => {
   );
 };
 
-const rootElement = document.getElementById('app');
+const rootElement = document.getElementById("app");
 if (!rootElement) {
-  console.error('App container not found.');
+  console.error("App container not found.");
 } else {
   ReactDOM.createRoot(rootElement).render(<App />);
 }

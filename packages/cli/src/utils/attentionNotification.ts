@@ -4,21 +4,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import process from 'node:process';
-import { createDebugLogger } from '@tram-ai/tram-core';
+import process from "node:process";
+import notifier from "node-notifier";
+import { createDebugLogger } from "@tram-ai/tram-core";
 
 export enum AttentionNotificationReason {
-  ToolApproval = 'tool_approval',
-  LongTaskComplete = 'long_task_complete',
+  ToolApproval = "tool_approval",
+  LongTaskComplete = "long_task_complete",
 }
 
 export interface TerminalNotificationOptions {
-  stream?: Pick<NodeJS.WriteStream, 'write' | 'isTTY'>;
+  stream?: Pick<NodeJS.WriteStream, "write" | "isTTY">;
   enabled?: boolean;
 }
 
-const TERMINAL_BELL = '\u0007';
-const debugLogger = createDebugLogger('ATTENTION_NOTIFICATION');
+export interface DesktopNotificationOptions {
+  enabled?: boolean;
+}
+
+const TERMINAL_BELL = "\u0007";
+const debugLogger = createDebugLogger("ATTENTION_NOTIFICATION");
 
 /**
  * Grabs the user's attention by emitting the terminal bell character.
@@ -45,7 +50,41 @@ export function notifyTerminalAttention(
     stream.write(TERMINAL_BELL);
     return true;
   } catch (error) {
-    debugLogger.warn('Failed to send terminal bell:', error);
+    debugLogger.warn("Failed to send terminal bell:", error);
     return false;
+  }
+}
+
+const NOTIFICATION_TITLES: Record<AttentionNotificationReason, string> = {
+  [AttentionNotificationReason.ToolApproval]: "TRAM - 需要确认",
+  [AttentionNotificationReason.LongTaskComplete]: "TRAM - 任务完成",
+};
+
+const NOTIFICATION_MESSAGES: Record<AttentionNotificationReason, string> = {
+  [AttentionNotificationReason.ToolApproval]: "有工具调用等待您的审批。",
+  [AttentionNotificationReason.LongTaskComplete]:
+    "对话已完成，正在等待您的输入。",
+};
+
+/**
+ * Sends a desktop notification using node-notifier to alert the user.
+ * Works across Windows, macOS, and Linux.
+ */
+export function notifyDesktop(
+  reason: AttentionNotificationReason,
+  options: DesktopNotificationOptions = {},
+): void {
+  if (options.enabled === false) {
+    return;
+  }
+
+  try {
+    notifier.notify({
+      title: NOTIFICATION_TITLES[reason],
+      message: NOTIFICATION_MESSAGES[reason],
+      sound: true,
+    });
+  } catch (error) {
+    debugLogger.warn("Failed to send desktop notification:", error);
   }
 }

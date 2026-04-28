@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockCreateImagePathResolver,
@@ -14,7 +14,7 @@ const {
   mockOnDidChangeTextEditorSelection,
 } = vi.hoisted(() => ({
   mockCreateImagePathResolver: vi.fn(),
-  mockGetGlobalTempDir: vi.fn(() => '/global-temp'),
+  mockGetGlobalTempDir: vi.fn(() => "/global-temp"),
   mockGetPanel: vi.fn<() => { webview: { postMessage: unknown } } | null>(
     () => null,
   ),
@@ -22,16 +22,16 @@ const {
   mockOnDidChangeTextEditorSelection: vi.fn(() => ({ dispose: vi.fn() })),
 }));
 
-vi.mock('@qwen-code/qwen-code-core', () => ({
+vi.mock("@tram-ai/tram-core", () => ({
   Storage: {
     getGlobalTempDir: mockGetGlobalTempDir,
   },
 }));
 
-vi.mock('vscode', () => ({
+vi.mock("vscode", () => ({
   Uri: {
     joinPath: vi.fn((base: { fsPath?: string }, ...parts: string[]) => ({
-      fsPath: `${base.fsPath ?? ''}/${parts.join('/')}`.replace(/\/+/g, '/'),
+      fsPath: `${base.fsPath ?? ""}/${parts.join("/")}`.replace(/\/+/g, "/"),
     })),
     file: vi.fn((filePath: string) => ({ fsPath: filePath })),
   },
@@ -41,15 +41,15 @@ vi.mock('vscode', () => ({
     activeTextEditor: undefined,
   },
   workspace: {
-    workspaceFolders: [{ uri: { fsPath: '/workspace-root' } }],
+    workspaceFolders: [{ uri: { fsPath: "/workspace-root" } }],
   },
   commands: {
     executeCommand: vi.fn(),
   },
 }));
 
-vi.mock('../../services/qwenAgentManager.js', () => ({
-  QwenAgentManager: class {
+vi.mock("../../services/tramAgentManager.js", () => ({
+  TramAgentManager: class {
     isConnected = false;
     currentSessionId = null;
     connect = vi.fn();
@@ -75,18 +75,18 @@ vi.mock('../../services/qwenAgentManager.js', () => ({
   },
 }));
 
-vi.mock('../../services/conversationStore.js', () => ({
+vi.mock("../../services/conversationStore.js", () => ({
   ConversationStore: class {
     constructor(_context: unknown) {}
     createConversation = vi.fn().mockResolvedValue({
-      id: 'conversation-1',
+      id: "conversation-1",
       messages: [],
     });
   },
 }));
 
-vi.mock('./PanelManager.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('./PanelManager.js')>();
+vi.mock("./PanelManager.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./PanelManager.js")>();
 
   return {
     ...actual,
@@ -100,7 +100,7 @@ vi.mock('./PanelManager.js', async (importOriginal) => {
   };
 });
 
-vi.mock('./MessageHandler.js', () => ({
+vi.mock("./MessageHandler.js", () => ({
   MessageHandler: class {
     constructor(
       _agentManager: unknown,
@@ -119,31 +119,31 @@ vi.mock('./MessageHandler.js', () => ({
   },
 }));
 
-vi.mock('./WebViewContent.js', () => ({
+vi.mock("./WebViewContent.js", () => ({
   WebViewContent: {
-    generate: vi.fn(() => '<html />'),
+    generate: vi.fn(() => "<html />"),
   },
 }));
 
-vi.mock('../utils/imageHandler.js', () => ({
+vi.mock("../utils/imageHandler.js", () => ({
   createImagePathResolver: mockCreateImagePathResolver,
 }));
 
-vi.mock('../../utils/authErrors.js', () => ({
+vi.mock("../../utils/authErrors.js", () => ({
   isAuthenticationRequiredError: vi.fn(() => false),
 }));
 
-vi.mock('../../utils/errorMessage.js', () => ({
+vi.mock("../../utils/errorMessage.js", () => ({
   getErrorMessage: vi.fn((error: unknown) => String(error)),
 }));
 
-import { WebViewProvider } from './WebViewProvider.js';
+import { WebViewProvider } from "./WebViewProvider.js";
 import {
   truncatePanelTitle,
   MAX_PANEL_TITLE_LENGTH,
-} from '../utils/panelTitleUtils.js';
+} from "../utils/panelTitleUtils.js";
 
-describe('WebViewProvider.attachToView', () => {
+describe("WebViewProvider.attachToView", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetPanel.mockReturnValue(null);
@@ -157,11 +157,11 @@ describe('WebViewProvider.attachToView', () => {
       WebViewProvider.prototype as unknown as {
         initializeAgentConnection: () => Promise<void>;
       },
-      'initializeAgentConnection',
+      "initializeAgentConnection",
     ).mockResolvedValue(undefined);
   });
 
-  it('configures sidebar views with workspace/temp roots and resolves image paths through the attached webview', async () => {
+  it("configures sidebar views with workspace/temp roots and resolves image paths through the attached webview", async () => {
     let messageHandler:
       | ((message: { type: string; data?: unknown }) => Promise<void>)
       | undefined;
@@ -169,7 +169,7 @@ describe('WebViewProvider.attachToView', () => {
     const postMessage = vi.fn();
     const webview = {
       options: undefined as unknown,
-      html: '',
+      html: "",
       postMessage,
       asWebviewUri: vi.fn((uri: { fsPath: string }) => ({
         toString: () => `webview:${uri.fsPath}`,
@@ -186,7 +186,7 @@ describe('WebViewProvider.attachToView', () => {
 
     const provider = new WebViewProvider(
       { subscriptions: [] } as never,
-      { fsPath: '/extension-root' } as never,
+      { fsPath: "/extension-root" } as never,
     );
 
     await provider.attachToView(
@@ -196,7 +196,7 @@ describe('WebViewProvider.attachToView', () => {
         onDidChangeVisibility: vi.fn(() => ({ dispose: vi.fn() })),
         onDidDispose: vi.fn(() => ({ dispose: vi.fn() })),
       } as never,
-      'qwen-code.chatView.sidebar',
+      "tram.chatView.sidebar",
     );
 
     const roots = (
@@ -204,33 +204,33 @@ describe('WebViewProvider.attachToView', () => {
     ).localResourceRoots;
     expect(roots).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ fsPath: '/extension-root/dist' }),
-        expect.objectContaining({ fsPath: '/extension-root/assets' }),
-        expect.objectContaining({ fsPath: '/global-temp' }),
-        expect.objectContaining({ fsPath: '/workspace-root' }),
+        expect.objectContaining({ fsPath: "/extension-root/dist" }),
+        expect.objectContaining({ fsPath: "/extension-root/assets" }),
+        expect.objectContaining({ fsPath: "/global-temp" }),
+        expect.objectContaining({ fsPath: "/workspace-root" }),
       ]),
     );
 
-    expect(messageHandler).toBeTypeOf('function');
+    expect(messageHandler).toBeTypeOf("function");
 
     await messageHandler?.({
-      type: 'resolveImagePaths',
-      data: { paths: ['clipboard/example.png'], requestId: 7 },
+      type: "resolveImagePaths",
+      data: { paths: ["clipboard/example.png"], requestId: 7 },
     });
 
     expect(mockCreateImagePathResolver).toHaveBeenCalledWith(
       expect.objectContaining({
-        workspaceRoots: ['/workspace-root'],
+        workspaceRoots: ["/workspace-root"],
         toWebviewUri: expect.any(Function),
       }),
     );
     expect(postMessage).toHaveBeenCalledWith({
-      type: 'imagePathsResolved',
+      type: "imagePathsResolved",
       data: {
         resolved: [
           {
-            path: 'clipboard/example.png',
-            src: 'webview:clipboard/example.png',
+            path: "clipboard/example.png",
+            src: "webview:clipboard/example.png",
           },
         ],
         requestId: 7,
@@ -238,7 +238,7 @@ describe('WebViewProvider.attachToView', () => {
     });
   });
 
-  it('routes resolved image paths back to the requesting attached webview even when a panel exists', async () => {
+  it("routes resolved image paths back to the requesting attached webview even when a panel exists", async () => {
     let messageHandler:
       | ((message: { type: string; data?: unknown }) => Promise<void>)
       | undefined;
@@ -253,7 +253,7 @@ describe('WebViewProvider.attachToView', () => {
 
     const webview = {
       options: undefined as unknown,
-      html: '',
+      html: "",
       postMessage: attachedPostMessage,
       asWebviewUri: vi.fn((uri: { fsPath: string }) => ({
         toString: () => `attached:${uri.fsPath}`,
@@ -270,7 +270,7 @@ describe('WebViewProvider.attachToView', () => {
 
     const provider = new WebViewProvider(
       { subscriptions: [] } as never,
-      { fsPath: '/extension-root' } as never,
+      { fsPath: "/extension-root" } as never,
     );
 
     await provider.attachToView(
@@ -280,21 +280,21 @@ describe('WebViewProvider.attachToView', () => {
         onDidChangeVisibility: vi.fn(() => ({ dispose: vi.fn() })),
         onDidDispose: vi.fn(() => ({ dispose: vi.fn() })),
       } as never,
-      'qwen-code.chatView.sidebar',
+      "tram.chatView.sidebar",
     );
 
     await messageHandler?.({
-      type: 'resolveImagePaths',
-      data: { paths: ['/global-temp/clipboard/example.png'], requestId: 8 },
+      type: "resolveImagePaths",
+      data: { paths: ["/global-temp/clipboard/example.png"], requestId: 8 },
     });
 
     expect(attachedPostMessage).toHaveBeenCalledWith({
-      type: 'imagePathsResolved',
+      type: "imagePathsResolved",
       data: {
         resolved: [
           {
-            path: '/global-temp/clipboard/example.png',
-            src: 'webview:/global-temp/clipboard/example.png',
+            path: "/global-temp/clipboard/example.png",
+            src: "webview:/global-temp/clipboard/example.png",
           },
         ],
         requestId: 8,
@@ -304,11 +304,11 @@ describe('WebViewProvider.attachToView', () => {
   });
 });
 
-describe('WebViewProvider.createNewSession', () => {
-  it('forces a fresh ACP session for the sidebar new-session action', async () => {
+describe("WebViewProvider.createNewSession", () => {
+  it("forces a fresh ACP session for the sidebar new-session action", async () => {
     const provider = new WebViewProvider(
       { subscriptions: [] } as never,
-      { fsPath: '/extension-root' } as never,
+      { fsPath: "/extension-root" } as never,
     );
     const agentManager = (
       provider as unknown as {
@@ -328,65 +328,65 @@ describe('WebViewProvider.createNewSession', () => {
     await provider.createNewSession();
 
     expect(agentManager.createNewSession).toHaveBeenCalledWith(
-      '/workspace-root',
+      "/workspace-root",
       { forceNew: true },
     );
     expect(messageHandler.setCurrentConversationId).toHaveBeenCalledWith(null);
   });
 });
 
-describe('truncatePanelTitle', () => {
-  it('passes through a short title unchanged', () => {
-    expect(truncatePanelTitle('Short title')).toBe('Short title');
+describe("truncatePanelTitle", () => {
+  it("passes through a short title unchanged", () => {
+    expect(truncatePanelTitle("Short title")).toBe("Short title");
   });
 
-  it('passes through an empty string unchanged', () => {
-    expect(truncatePanelTitle('')).toBe('');
+  it("passes through an empty string unchanged", () => {
+    expect(truncatePanelTitle("")).toBe("");
   });
 
   it(`passes through a title of exactly ${MAX_PANEL_TITLE_LENGTH} code points unchanged`, () => {
-    const title = 'a'.repeat(MAX_PANEL_TITLE_LENGTH);
+    const title = "a".repeat(MAX_PANEL_TITLE_LENGTH);
     expect(truncatePanelTitle(title)).toBe(title);
   });
 
-  it('truncates a title of MAX+1 characters to MAX content chars + ellipsis', () => {
-    const title = 'a'.repeat(MAX_PANEL_TITLE_LENGTH + 1);
+  it("truncates a title of MAX+1 characters to MAX content chars + ellipsis", () => {
+    const title = "a".repeat(MAX_PANEL_TITLE_LENGTH + 1);
     const result = truncatePanelTitle(title);
-    expect(result).toBe('a'.repeat(MAX_PANEL_TITLE_LENGTH) + '…');
+    expect(result).toBe("a".repeat(MAX_PANEL_TITLE_LENGTH) + "…");
     expect([...result].length).toBe(MAX_PANEL_TITLE_LENGTH + 1);
   });
 
-  it('truncates a very long title to MAX content code points + ellipsis', () => {
-    const title = 'a'.repeat(200);
+  it("truncates a very long title to MAX content code points + ellipsis", () => {
+    const title = "a".repeat(200);
     const result = truncatePanelTitle(title);
-    expect(result).toBe('a'.repeat(MAX_PANEL_TITLE_LENGTH) + '…');
+    expect(result).toBe("a".repeat(MAX_PANEL_TITLE_LENGTH) + "…");
     expect([...result].length).toBe(MAX_PANEL_TITLE_LENGTH + 1);
   });
 
-  it('does not split a surrogate pair (emoji) at the truncation boundary', () => {
+  it("does not split a surrogate pair (emoji) at the truncation boundary", () => {
     // 49 ASCII chars + emoji (1 code point, 2 UTF-16 code units) + trailing text
     // Total: 49 + 1 + 5 = 55 code points → needs truncation
-    const emoji = '😀';
-    const title = 'a'.repeat(MAX_PANEL_TITLE_LENGTH - 1) + emoji + 'extra';
+    const emoji = "😀";
+    const title = "a".repeat(MAX_PANEL_TITLE_LENGTH - 1) + emoji + "extra";
     const result = truncatePanelTitle(title);
     // First 50 code points: 49 'a's + emoji, then '…' — emoji is not split
-    expect(result).toBe('a'.repeat(MAX_PANEL_TITLE_LENGTH - 1) + emoji + '…');
+    expect(result).toBe("a".repeat(MAX_PANEL_TITLE_LENGTH - 1) + emoji + "…");
     expect([...result].length).toBe(MAX_PANEL_TITLE_LENGTH + 1);
   });
 });
 
-describe('WebViewProvider initial model inheritance', () => {
+describe("WebViewProvider initial model inheritance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetPanel.mockReturnValue(null);
   });
 
-  it('applies the requested initial model after creating a new session', async () => {
+  it("applies the requested initial model after creating a new session", async () => {
     const provider = new WebViewProvider(
       { subscriptions: [] } as never,
-      { fsPath: '/extension-root' } as never,
+      { fsPath: "/extension-root" } as never,
     );
-    provider.setInitialModelId('glm-5');
+    provider.setInitialModelId("glm-5");
 
     const agentManager = (
       provider as unknown as {
@@ -397,10 +397,10 @@ describe('WebViewProvider initial model inheritance', () => {
         };
       }
     ).agentManager;
-    agentManager.createNewSession.mockResolvedValue('session-1');
+    agentManager.createNewSession.mockResolvedValue("session-1");
     agentManager.setModelFromUi.mockResolvedValue({
-      modelId: 'glm-5',
-      name: 'GLM-5',
+      modelId: "glm-5",
+      name: "GLM-5",
     });
 
     await (
@@ -412,9 +412,9 @@ describe('WebViewProvider initial model inheritance', () => {
     ).loadCurrentSessionMessages();
 
     expect(agentManager.createNewSession).toHaveBeenCalledWith(
-      '/workspace-root',
+      "/workspace-root",
       { autoAuthenticate: true },
     );
-    expect(agentManager.setModelFromUi).toHaveBeenCalledWith('glm-5');
+    expect(agentManager.setModelFromUi).toHaveBeenCalledWith("glm-5");
   });
 });

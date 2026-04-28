@@ -8,14 +8,14 @@ export {
   AGENT_METHODS,
   CLIENT_METHODS,
   PROTOCOL_VERSION,
-} from '@agentclientprotocol/sdk';
+} from "@agentclientprotocol/sdk";
 
-export { RequestError } from '@agentclientprotocol/sdk';
+export { RequestError } from "@agentclientprotocol/sdk";
 
 // Local extension: authenticate/update is not part of the ACP spec.
 // It is routed as an extension notification by our CLI.
 export const EXT_CLIENT_METHODS = {
-  authenticate_update: 'authenticate/update',
+  authenticate_update: "authenticate/update",
 } as const;
 
 // Re-export error codes in the shape that existing consumers expect.

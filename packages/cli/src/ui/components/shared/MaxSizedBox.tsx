@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { Fragment, useEffect, useId } from 'react';
-import { Box, Text } from 'ink';
-import stringWidth from 'string-width';
-import { theme } from '../../semantic-colors.js';
-import { toCodePoints } from '../../utils/textUtils.js';
-import { useOverflowActions } from '../../contexts/OverflowContext.js';
-import { createDebugLogger } from '@tram-ai/tram-core';
+import React, { Fragment, useEffect, useId } from "react";
+import { Box, Text } from "ink";
+import stringWidth from "string-width";
+import { theme } from "../../semantic-colors.js";
+import { toCodePoints } from "../../utils/textUtils.js";
+import { useOverflowActions } from "../../contexts/OverflowContext.js";
+import { createDebugLogger } from "@tram-ai/tram-core";
 
 let enableDebugLog = false;
-const debugLogger = createDebugLogger('MAX_SIZED_BOX');
+const debugLogger = createDebugLogger("MAX_SIZED_BOX");
 
 /**
  * Minimum height for the MaxSizedBox component.
@@ -37,16 +37,16 @@ function debugReportError(message: string, element: React.ReactNode) {
     return;
   }
 
-  let sourceMessage = '<Unknown file>';
+  let sourceMessage = "<Unknown file>";
   try {
     const elementWithSource = element as {
       _source?: { fileName?: string; lineNumber?: number };
     };
     const fileName = elementWithSource._source?.fileName;
     const lineNumber = elementWithSource._source?.lineNumber;
-    sourceMessage = fileName ? `${fileName}:${lineNumber}` : '<Unknown file>';
+    sourceMessage = fileName ? `${fileName}:${lineNumber}` : "<Unknown file>";
   } catch (error) {
-    debugLogger.error('Error while trying to get file name:', error);
+    debugLogger.error("Error while trying to get file name:", error);
   }
 
   debugLogger.error(
@@ -58,7 +58,7 @@ interface MaxSizedBoxProps {
   children?: React.ReactNode;
   maxWidth?: number;
   maxHeight: number | undefined;
-  overflowDirection?: 'top' | 'bottom';
+  overflowDirection?: "top" | "bottom";
   additionalHiddenLinesCount?: number;
 }
 
@@ -105,7 +105,7 @@ export const MaxSizedBox: React.FC<MaxSizedBoxProps> = ({
   children,
   maxWidth,
   maxHeight,
-  overflowDirection = 'top',
+  overflowDirection = "top",
   additionalHiddenLinesCount = 0,
 }) => {
   const id = useId();
@@ -118,7 +118,7 @@ export const MaxSizedBox: React.FC<MaxSizedBoxProps> = ({
   );
 
   if (maxWidth === undefined) {
-    throw new Error('maxWidth must be defined when maxHeight is set.');
+    throw new Error("maxWidth must be defined when maxHeight is set.");
   }
   function visitRows(element: React.ReactNode) {
     if (!React.isValidElement<{ children?: React.ReactNode }>(element)) {
@@ -135,7 +135,7 @@ export const MaxSizedBox: React.FC<MaxSizedBoxProps> = ({
       return;
     }
 
-    debugReportError('MaxSizedBox children must be <Box> elements', element);
+    debugReportError("MaxSizedBox children must be <Box> elements", element);
   }
 
   React.Children.forEach(children, visitRows);
@@ -169,7 +169,7 @@ export const MaxSizedBox: React.FC<MaxSizedBoxProps> = ({
 
   const visibleStyledText =
     hiddenLinesCount > 0
-      ? overflowDirection === 'top'
+      ? overflowDirection === "top"
         ? laidOutStyledText.slice(hiddenLinesCount, laidOutStyledText.length)
         : laidOutStyledText.slice(0, visibleContentHeight)
       : laidOutStyledText;
@@ -190,16 +190,16 @@ export const MaxSizedBox: React.FC<MaxSizedBoxProps> = ({
 
   return (
     <Box flexDirection="column" width={maxWidth} flexShrink={0}>
-      {totalHiddenLines > 0 && overflowDirection === 'top' && (
+      {totalHiddenLines > 0 && overflowDirection === "top" && (
         <Text color={theme.text.secondary} wrap="truncate">
-          ... first {totalHiddenLines} line{totalHiddenLines === 1 ? '' : 's'}{' '}
+          ... first {totalHiddenLines} line{totalHiddenLines === 1 ? "" : "s"}{" "}
           hidden ...
         </Text>
       )}
       {visibleLines}
-      {totalHiddenLines > 0 && overflowDirection === 'bottom' && (
+      {totalHiddenLines > 0 && overflowDirection === "bottom" && (
         <Text color={theme.text.secondary} wrap="truncate">
-          ... last {totalHiddenLines} line{totalHiddenLines === 1 ? '' : 's'}{' '}
+          ... last {totalHiddenLines} line{totalHiddenLines === 1 ? "" : "s"}{" "}
           hidden ...
         </Text>
       )}
@@ -262,7 +262,7 @@ function visitBoxRow(element: React.ReactNode): Row {
       element,
     );
     return {
-      noWrapSegments: [{ text: '<ERROR>', props: {} }],
+      noWrapSegments: [{ text: "<ERROR>", props: {} }],
       segments: [],
     };
   }
@@ -271,10 +271,10 @@ function visitBoxRow(element: React.ReactNode): Row {
     const boxProps = element.props as {
       children?: React.ReactNode;
       readonly flexDirection?:
-        | 'row'
-        | 'column'
-        | 'row-reverse'
-        | 'column-reverse';
+        | "row"
+        | "column"
+        | "row-reverse"
+        | "column-reverse";
     };
     // Ensure the Box has no props other than the default ones and key.
     let maxExpectedProps = 4;
@@ -284,7 +284,7 @@ function visitBoxRow(element: React.ReactNode): Row {
     }
     if (
       boxProps.flexDirection !== undefined &&
-      boxProps.flexDirection !== 'row'
+      boxProps.flexDirection !== "row"
     ) {
       debugReportError(
         'MaxSizedBox children must have flexDirection="row".',
@@ -295,7 +295,7 @@ function visitBoxRow(element: React.ReactNode): Row {
       debugReportError(
         `Boxes inside MaxSizedBox must not have additional props. ${Object.keys(
           boxProps,
-        ).join(', ')}`,
+        ).join(", ")}`,
         element,
       );
     }
@@ -315,7 +315,7 @@ function visitBoxRow(element: React.ReactNode): Row {
     if (element === null) {
       return;
     }
-    if (typeof element === 'string' || typeof element === 'number') {
+    if (typeof element === "string" || typeof element === "number") {
       const text = String(element);
       // Ignore empty strings as they don't need to be rendered.
       if (!text) {
@@ -325,7 +325,7 @@ function visitBoxRow(element: React.ReactNode): Row {
       const segment: StyledText = { text, props: parentProps ?? {} };
 
       // Check the 'wrap' property from the merged props to decide the segment type.
-      if (parentProps === undefined || parentProps['wrap'] === 'wrap') {
+      if (parentProps === undefined || parentProps["wrap"] === "wrap") {
         hasSeenWrapped = true;
         row.segments.push(segment);
       } else {
@@ -335,7 +335,7 @@ function visitBoxRow(element: React.ReactNode): Row {
           // put in the wrapped segment as the row is already stuck in wrapped mode.
           row.segments.push(segment);
           debugReportError(
-            'Text elements without wrapping cannot appear after elements with wrapping in the same row.',
+            "Text elements without wrapping cannot appear after elements with wrapping in the same row.",
             element,
           );
         }
@@ -344,7 +344,7 @@ function visitBoxRow(element: React.ReactNode): Row {
     }
 
     if (!React.isValidElement<{ children?: React.ReactNode }>(element)) {
-      debugReportError('Invalid element.', element);
+      debugReportError("Invalid element.", element);
       return;
     }
 
@@ -357,7 +357,7 @@ function visitBoxRow(element: React.ReactNode): Row {
 
     if (element.type !== Text) {
       debugReportError(
-        'Children of a row Box must be <Text> elements.',
+        "Children of a row Box must be <Text> elements.",
         element,
       );
       return;
@@ -409,7 +409,7 @@ function layoutInkElementAsStyledText(
     const lines: StyledText[][] = [];
     let currentLine: StyledText[] = [];
     nonWrappingContent.forEach((segment) => {
-      const textLines = segment.text.split('\n');
+      const textLines = segment.text.split("\n");
       textLines.forEach((text, index) => {
         if (index > 0) {
           lines.push(currentLine);
@@ -423,7 +423,7 @@ function layoutInkElementAsStyledText(
     if (
       currentLine.length > 0 ||
       (nonWrappingContent.length > 0 &&
-        nonWrappingContent[nonWrappingContent.length - 1].text.endsWith('\n'))
+        nonWrappingContent[nonWrappingContent.length - 1].text.endsWith("\n"))
     ) {
       lines.push(currentLine);
     }
@@ -445,7 +445,7 @@ function layoutInkElementAsStyledText(
     let currentLineWidth = 0;
 
     for (const segment of nonWrappingContent) {
-      const textLines = segment.text.split('\n');
+      const textLines = segment.text.split("\n");
       textLines.forEach((text, index) => {
         if (index > 0) {
           // New line encountered, finish current line and start new one
@@ -461,11 +461,11 @@ function layoutInkElementAsStyledText(
           // For lines after the first line break, show only ellipsis if the text would be truncated
           if (index > 0 && textWidth > 0) {
             // This is content after a line break - just show ellipsis to indicate truncation
-            currentLine.push({ text: '…', props: {} });
-            currentLineWidth = stringWidth('…');
+            currentLine.push({ text: "…", props: {} });
+            currentLineWidth = stringWidth("…");
           } else {
             // This is the first line or a continuation, try to fit what we can
-            const maxContentWidth = Math.max(0, maxWidth - stringWidth('…'));
+            const maxContentWidth = Math.max(0, maxWidth - stringWidth("…"));
 
             if (textWidth <= maxContentWidth && currentLineWidth === 0) {
               // Text fits completely on this line
@@ -486,12 +486,12 @@ function layoutInkElementAsStyledText(
                 sliceEndIndex++;
               }
 
-              const slice = codePoints.slice(0, sliceEndIndex).join('');
+              const slice = codePoints.slice(0, sliceEndIndex).join("");
               if (slice) {
                 currentLine.push({ text: slice, props: segment.props });
               }
-              currentLine.push({ text: '…', props: {} });
-              currentLineWidth = truncatedWidth + stringWidth('…');
+              currentLine.push({ text: "…", props: {} });
+              currentLineWidth = truncatedWidth + stringWidth("…");
             }
           }
         }
@@ -502,14 +502,14 @@ function layoutInkElementAsStyledText(
     if (
       currentLine.length > 0 ||
       (nonWrappingContent.length > 0 &&
-        nonWrappingContent[nonWrappingContent.length - 1].text.endsWith('\n'))
+        nonWrappingContent[nonWrappingContent.length - 1].text.endsWith("\n"))
     ) {
       lines.push(currentLine);
     }
 
     // If we don't have any lines yet, add an ellipsis line
     if (lines.length === 0) {
-      lines.push([{ text: '…', props: {} }]);
+      lines.push([{ text: "…", props: {} }]);
     }
 
     for (const line of lines) {
@@ -528,7 +528,7 @@ function layoutInkElementAsStyledText(
     } else {
       if (noWrappingWidth > 0) {
         lines.push([
-          ...[{ text: ' '.repeat(noWrappingWidth), props: {} }],
+          ...[{ text: " ".repeat(noWrappingWidth), props: {} }],
           ...wrappingPart,
         ]);
       } else {
@@ -551,7 +551,7 @@ function layoutInkElementAsStyledText(
   }
 
   row.segments.forEach((segment) => {
-    const linesFromSegment = segment.text.split('\n');
+    const linesFromSegment = segment.text.split("\n");
 
     linesFromSegment.forEach((lineText, lineIndex) => {
       if (lineIndex > 0) {
@@ -596,7 +596,7 @@ function layoutInkElementAsStyledText(
             if (splitIndex > 0) {
               const part = remainingWordAsCodePoints
                 .slice(0, splitIndex)
-                .join('');
+                .join("");
               addToWrappingPart(part, segment.props);
               wrappingPartWidth += stringWidth(part);
               remainingWordAsCodePoints =
@@ -614,7 +614,7 @@ function layoutInkElementAsStyledText(
       });
     });
     // Split omits a trailing newline, so we need to handle it here
-    if (segment.text.endsWith('\n')) {
+    if (segment.text.endsWith("\n")) {
       addWrappingPartToLines();
     }
   });

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState } from "react";
 
 export const useLocalStorage = <T>(key: string, initialValue: T) => {
   // Get value from localStorage or use initial value

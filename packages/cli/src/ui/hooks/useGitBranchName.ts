@@ -4,33 +4,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { isCommandAvailable, execCommand } from '@tram-ai/tram-core';
-import fs from 'node:fs';
-import fsPromises from 'node:fs/promises';
-import path from 'node:path';
+import { useState, useEffect, useCallback } from "react";
+import { isCommandAvailable, execCommand } from "@tram-ai/tram-core";
+import fs from "node:fs";
+import fsPromises from "node:fs/promises";
+import path from "node:path";
 
 export function useGitBranchName(cwd: string): string | undefined {
   const [branchName, setBranchName] = useState<string | undefined>(undefined);
 
   const fetchBranchName = useCallback(async () => {
     try {
-      if (!isCommandAvailable('git').available) {
+      if (!isCommandAvailable("git").available) {
         return;
       }
 
       const { stdout } = await execCommand(
-        'git',
-        ['rev-parse', '--abbrev-ref', 'HEAD'],
+        "git",
+        ["rev-parse", "--abbrev-ref", "HEAD"],
         { cwd },
       );
       const branch = stdout.toString().trim();
-      if (branch && branch !== 'HEAD') {
+      if (branch && branch !== "HEAD") {
         setBranchName(branch);
       } else {
         const { stdout: hashStdout } = await execCommand(
-          'git',
-          ['rev-parse', '--short', 'HEAD'],
+          "git",
+          ["rev-parse", "--short", "HEAD"],
           { cwd },
         );
         setBranchName(hashStdout.toString().trim());
@@ -43,7 +43,7 @@ export function useGitBranchName(cwd: string): string | undefined {
   useEffect(() => {
     fetchBranchName(); // Initial fetch
 
-    const gitLogsHeadPath = path.join(cwd, '.git', 'logs', 'HEAD');
+    const gitLogsHeadPath = path.join(cwd, ".git", "logs", "HEAD");
     let watcher: fs.FSWatcher | undefined;
 
     const setupWatcher = async () => {
@@ -52,7 +52,7 @@ export function useGitBranchName(cwd: string): string | undefined {
         await fsPromises.access(gitLogsHeadPath, fs.constants.F_OK);
         watcher = fs.watch(gitLogsHeadPath, (eventType: string) => {
           // Changes to .git/logs/HEAD (appends) indicate HEAD has likely changed
-          if (eventType === 'change' || eventType === 'rename') {
+          if (eventType === "change" || eventType === "rename") {
             // Handle rename just in case
             fetchBranchName();
           }

@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React from 'react';
-import type { InsightData } from './types';
+import React from "react";
+import type { InsightData } from "./types";
 
 // Header Component
 export function Header({
@@ -20,7 +20,7 @@ export function Header({
       <p className="text-sm text-slate-600">
         {totalMessages
           ? `${totalMessages} messages across ${totalSessions} sessions`
-          : 'Your personalized coding journey and patterns'}
+          : "Your personalized coding journey and patterns"}
         {dateRangeStr && ` | ${dateRangeStr}`}
       </p>
     </header>

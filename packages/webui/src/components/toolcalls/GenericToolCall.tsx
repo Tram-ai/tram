@@ -6,7 +6,7 @@
  * Generic tool call component - handles all tool call types as fallback
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 import {
   ToolCallContainer,
   ToolCallCard,
@@ -14,9 +14,9 @@ import {
   LocationsList,
   safeTitle,
   groupContent,
-} from './shared/index.js';
-import type { BaseToolCallProps } from './shared/index.js';
-import { getToolDisplayLabel } from './labelUtils.js';
+} from "./shared/index.js";
+import type { BaseToolCallProps } from "./shared/index.js";
+import { getToolDisplayLabel } from "./labelUtils.js";
 
 /**
  * Generic tool call component that can display any tool call type
@@ -43,7 +43,7 @@ export const GenericToolCall: FC<BaseToolCallProps> = ({
           <div>{operationText}</div>
         </ToolCallRow>
         <ToolCallRow label="Error">
-          <div className="text-[#c74e39] font-medium">{errors.join('\n')}</div>
+          <div className="text-[#c74e39] font-medium">{errors.join("\n")}</div>
         </ToolCallRow>
       </ToolCallCard>
     );
@@ -51,12 +51,12 @@ export const GenericToolCall: FC<BaseToolCallProps> = ({
 
   // Success with output: use card for long output, compact for short
   if (textOutputs.length > 0) {
-    const output = textOutputs.join('\n');
+    const output = textOutputs.join("\n");
     const isLong = output.length > 150;
 
     if (isLong) {
       const truncatedOutput =
-        output.length > 300 ? output.substring(0, 300) + '...' : output;
+        output.length > 300 ? output.substring(0, 300) + "..." : output;
 
       return (
         <ToolCallCard icon="🔧">
@@ -73,10 +73,10 @@ export const GenericToolCall: FC<BaseToolCallProps> = ({
     }
 
     // Short output - compact format
-    const statusFlag: 'success' | 'error' | 'warning' | 'loading' | 'default' =
-      toolCall.status === 'in_progress' || toolCall.status === 'pending'
-        ? 'loading'
-        : 'success';
+    const statusFlag: "success" | "error" | "warning" | "loading" | "default" =
+      toolCall.status === "in_progress" || toolCall.status === "pending"
+        ? "loading"
+        : "success";
     return (
       <ToolCallContainer
         label={displayLabel}
@@ -92,10 +92,10 @@ export const GenericToolCall: FC<BaseToolCallProps> = ({
 
   // Success with files: show operation + file list in compact format
   if (locations && locations.length > 0) {
-    const statusFlag: 'success' | 'error' | 'warning' | 'loading' | 'default' =
-      toolCall.status === 'in_progress' || toolCall.status === 'pending'
-        ? 'loading'
-        : 'success';
+    const statusFlag: "success" | "error" | "warning" | "loading" | "default" =
+      toolCall.status === "in_progress" || toolCall.status === "pending"
+        ? "loading"
+        : "success";
     return (
       <ToolCallContainer
         label={displayLabel}
@@ -111,10 +111,10 @@ export const GenericToolCall: FC<BaseToolCallProps> = ({
 
   // No output - show just the operation
   if (operationText) {
-    const statusFlag: 'success' | 'error' | 'warning' | 'loading' | 'default' =
-      toolCall.status === 'in_progress' || toolCall.status === 'pending'
-        ? 'loading'
-        : 'success';
+    const statusFlag: "success" | "error" | "warning" | "loading" | "default" =
+      toolCall.status === "in_progress" || toolCall.status === "pending"
+        ? "loading"
+        : "success";
     return (
       <ToolCallContainer
         label={displayLabel}

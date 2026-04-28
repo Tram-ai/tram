@@ -9,7 +9,7 @@ import type {
   FunctionCall,
   GenerateContentResponseUsageMetadata,
   Part,
-} from '@google/genai';
+} from "@google/genai";
 import type {
   Config,
   GeminiChat,
@@ -17,7 +17,8 @@ import type {
   ToolResult,
   ChatRecord,
   AgentEventEmitter,
-} from '@tram-ai/tram-core';
+  CronJob,
+} from "@tram-ai/tram-core";
 import {
   AuthType,
   ApprovalMode,
@@ -32,6 +33,7 @@ import {
   UserPromptEvent,
   TodoWriteTool,
   ExitPlanModeTool,
+  AgentTool,
   readManyFiles,
   Storage,
   ToolNames,
@@ -42,9 +44,11 @@ import {
   injectPermissionRulesIfMissing,
   NotificationType,
   persistPermissionOutcome,
-} from '@tram-ai/tram-core';
+  executeCronServiceAction,
+  isCronPromptAction,
+} from "@tram-ai/tram-core";
 
-import { RequestError } from '@agentclientprotocol/sdk';
+import { RequestError } from "@agentclientprotocol/sdk";
 import type {
   AvailableCommand,
   ContentBlock,
@@ -60,39 +64,39 @@ import type {
   SetSessionModelRequest,
   SetSessionModelResponse,
   AgentSideConnection,
-} from '@agentclientprotocol/sdk';
-import type { LoadedSettings } from '../../config/settings.js';
-import { z } from 'zod';
-import { normalizePartList } from '../../utils/nonInteractiveHelpers.js';
+} from "@agentclientprotocol/sdk";
+import type { LoadedSettings } from "../../config/settings.js";
+import { z } from "zod";
+import { normalizePartList } from "../../utils/nonInteractiveHelpers.js";
 import {
   handleSlashCommand,
   getAvailableCommands,
   type NonInteractiveSlashCommandResult,
-} from '../../nonInteractiveCliCommands.js';
-import { isSlashCommand } from '../../ui/utils/commandUtils.js';
-import { parseAcpModelOption } from '../../utils/acpModelUtils.js';
+} from "../../nonInteractiveCliCommands.js";
+import { isSlashCommand } from "../../ui/utils/commandUtils.js";
+import { parseAcpModelOption } from "../../utils/acpModelUtils.js";
 
 // Import modular session components
 import type {
   ApprovalModeValue,
   SessionContext,
   ToolCallStartParams,
-} from './types.js';
-import { HistoryReplayer } from './HistoryReplayer.js';
-import { ToolCallEmitter } from './emitters/ToolCallEmitter.js';
-import { PlanEmitter } from './emitters/PlanEmitter.js';
-import { MessageEmitter } from './emitters/MessageEmitter.js';
-import { SubAgentTracker } from './SubAgentTracker.js';
+} from "./types.js";
+import { HistoryReplayer } from "./HistoryReplayer.js";
+import { ToolCallEmitter } from "./emitters/ToolCallEmitter.js";
+import { PlanEmitter } from "./emitters/PlanEmitter.js";
+import { MessageEmitter } from "./emitters/MessageEmitter.js";
+import { SubAgentTracker } from "./SubAgentTracker.js";
 import {
   buildPermissionRequestContent,
   toPermissionOptions,
-} from './permissionUtils.js';
+} from "./permissionUtils.js";
 import {
   MessageRewriteMiddleware,
   loadRewriteConfig,
-} from './rewrite/index.js';
+} from "./rewrite/index.js";
 
-const debugLogger = createDebugLogger('SESSION');
+const debugLogger = createDebugLogger("SESSION");
 
 /**
  * Session represents an active conversation session with the AI model.
@@ -116,7 +120,7 @@ export class Session implements SessionContext {
   private readonly runtimeBaseDir: string;
 
   // Cron scheduling state
-  private cronQueue: string[] = [];
+  private cronQueue: CronJob[] = [];
   private cronProcessing = false;
   private cronAbortController: AbortController | null = null;
   private cronCompletion: Promise<void> | null = null;
@@ -165,7 +169,7 @@ export class Session implements SessionContext {
   installRewriter(): void {
     const rewriteConfig = loadRewriteConfig(this.settings);
     if (rewriteConfig?.enabled) {
-      debugLogger.info('Message rewrite middleware enabled');
+      debugLogger.info("Message rewrite middleware enabled");
       this.messageRewriter = new MessageRewriteMiddleware(
         this.config,
         rewriteConfig,
@@ -187,7 +191,7 @@ export class Session implements SessionContext {
     const hadCron = !!this.cronAbortController;
 
     if (!hadPrompt && !hadCron) {
-      throw new Error('Not currently generating');
+      throw new Error("Not currently generating");
     }
 
     if (this.pendingPrompt) {
@@ -250,7 +254,7 @@ export class Session implements SessionContext {
 
     // Cancelled while waiting for the previous prompt to finish.
     if (pendingSend.signal.aborted) {
-      return { stopReason: 'cancelled' };
+      return { stopReason: "cancelled" };
     }
 
     // Track this prompt's completion for the next prompt to await
@@ -283,13 +287,13 @@ export class Session implements SessionContext {
         this.turn += 1;
 
         const chat = this.chat;
-        const promptId = this.config.getSessionId() + '########' + this.turn;
+        const promptId = this.config.getSessionId() + "########" + this.turn;
 
         // Extract text from all text blocks to construct the full prompt text for logging
         const promptText = params.prompt
-          .filter((block) => block.type === 'text')
-          .map((block) => (block.type === 'text' ? block.text : ''))
-          .join(' ');
+          .filter((block) => block.type === "text")
+          .map((block) => (block.type === "text" ? block.text : ""))
+          .join(" ");
 
         // Log user prompt
         logUserPrompt(
@@ -308,9 +312,9 @@ export class Session implements SessionContext {
         // Check if the input contains a slash command
         // Extract text from the first text block if present
         const firstTextBlock = params.prompt.find(
-          (block) => block.type === 'text',
+          (block) => block.type === "text",
         );
-        const inputText = firstTextBlock?.text || '';
+        const inputText = firstTextBlock?.text || "";
 
         let parts: Part[] | null;
 
@@ -331,19 +335,19 @@ export class Session implements SessionContext {
           // If parts is null, the command was fully handled (e.g., /summary completed)
           // Return early without sending to the model
           if (parts === null) {
-            return { stopReason: 'end_turn' };
+            return { stopReason: "end_turn" };
           }
         } else {
           // Normal processing for non-slash commands
           parts = await this.#resolvePrompt(params.prompt, pendingSend.signal);
         }
 
-        let nextMessage: Content | null = { role: 'user', parts };
+        let nextMessage: Content | null = { role: "user", parts };
 
         while (nextMessage !== null) {
           if (pendingSend.signal.aborted) {
             chat.addHistory(nextMessage);
-            return { stopReason: 'cancelled' };
+            return { stopReason: "cancelled" };
           }
 
           const functionCalls: FunctionCall[] = [];
@@ -365,7 +369,7 @@ export class Session implements SessionContext {
 
             for await (const resp of responseStream) {
               if (pendingSend.signal.aborted) {
-                return { stopReason: 'cancelled' };
+                return { stopReason: "cancelled" };
               }
 
               if (
@@ -381,7 +385,7 @@ export class Session implements SessionContext {
 
                   this.messageEmitter.emitMessage(
                     part.text,
-                    'assistant',
+                    "assistant",
                     part.thought,
                   );
                 }
@@ -405,7 +409,7 @@ export class Session implements SessionContext {
             if (getErrorStatus(error) === 429) {
               throw new RequestError(
                 429,
-                'Rate limit exceeded. Try again later.',
+                "Rate limit exceeded. Try again later.",
               );
             }
 
@@ -421,7 +425,7 @@ export class Session implements SessionContext {
             const durationMs = Date.now() - streamStartTime;
             await this.messageEmitter.emitUsageMetadata(
               usageMetadata,
-              '',
+              "",
               durationMs,
             );
           }
@@ -438,14 +442,14 @@ export class Session implements SessionContext {
               toolResponseParts.push(...response);
             }
 
-            nextMessage = { role: 'user', parts: toolResponseParts };
+            nextMessage = { role: "user", parts: toolResponseParts };
           }
         }
         // Wait for any pending rewrite before returning
         if (this.messageRewriter) {
           await this.messageRewriter.waitForPendingRewrites();
         }
-        return { stopReason: 'end_turn' };
+        return { stopReason: "end_turn" };
       },
     );
   }
@@ -461,7 +465,7 @@ export class Session implements SessionContext {
 
   /**
    * Starts the cron scheduler if cron is enabled and jobs exist.
-   * The scheduler runs in the background, pushing fired prompts into
+   * The scheduler runs in the background, pushing fired jobs into
    * `cronQueue` and triggering `#drainCronQueue`.
    */
   #startCronSchedulerIfNeeded(): void {
@@ -469,14 +473,14 @@ export class Session implements SessionContext {
     const scheduler = this.config.getCronScheduler();
     if (scheduler.size === 0) return;
 
-    scheduler.start((job: { prompt: string }) => {
-      this.cronQueue.push(job.prompt);
+    scheduler.start((job) => {
+      this.cronQueue.push(job);
       void this.#drainCronQueue();
     });
   }
 
   /**
-   * Processes queued cron prompts one at a time. Uses `cronProcessing`
+   * Processes queued cron jobs one at a time. Uses `cronProcessing`
    * as a mutex to prevent concurrent access to the chat.
    */
   async #drainCronQueue(): Promise<void> {
@@ -493,8 +497,12 @@ export class Session implements SessionContext {
 
     try {
       while (this.cronQueue.length > 0) {
-        const prompt = this.cronQueue.shift()!;
-        await this.#executeCronPrompt(prompt);
+        const job = this.cronQueue.shift()!;
+        if (isCronPromptAction(job.action)) {
+          await this.#executeCronPrompt(job.action.prompt);
+        } else {
+          await executeCronServiceAction(this.config, job.action);
+        }
       }
     } finally {
       this.cronProcessing = false;
@@ -523,18 +531,18 @@ export class Session implements SessionContext {
         const ac = new AbortController();
         this.cronAbortController = ac;
         const promptId =
-          this.config.getSessionId() + '########cron' + Date.now();
+          this.config.getSessionId() + "########cron" + Date.now();
 
         try {
           // Echo the cron prompt as a user message so the client sees it
           await this.sendUpdate({
-            sessionUpdate: 'user_message_chunk',
-            content: { type: 'text', text: prompt },
-            _meta: { source: 'cron' },
+            sessionUpdate: "user_message_chunk",
+            content: { type: "text", text: prompt },
+            _meta: { source: "cron" },
           });
 
           let nextMessage: Content | null = {
-            role: 'user',
+            role: "user",
             parts: [{ text: prompt }],
           };
 
@@ -569,7 +577,7 @@ export class Session implements SessionContext {
                   if (!part.text) continue;
                   this.messageEmitter.emitMessage(
                     part.text,
-                    'assistant',
+                    "assistant",
                     part.thought,
                   );
                 }
@@ -598,7 +606,7 @@ export class Session implements SessionContext {
               const durationMs = Date.now() - streamStartTime;
               await this.messageEmitter.emitUsageMetadata(
                 usageMetadata,
-                '',
+                "",
                 durationMs,
               );
             }
@@ -609,12 +617,12 @@ export class Session implements SessionContext {
                 const response = await this.runTool(ac.signal, promptId, fc);
                 toolResponseParts.push(...response);
               }
-              nextMessage = { role: 'user', parts: toolResponseParts };
+              nextMessage = { role: "user", parts: toolResponseParts };
             }
           }
         } catch (error) {
           if (ac.signal.aborted) return;
-          debugLogger.error('Error processing cron prompt:', error);
+          debugLogger.error("Error processing cron prompt:", error);
           const msg = error instanceof Error ? error.message : String(error);
           await this.messageEmitter.emitAgentMessage(`[cron error] ${msg}`);
         } finally {
@@ -645,14 +653,14 @@ export class Session implements SessionContext {
       );
 
       const update: SessionUpdate = {
-        sessionUpdate: 'available_commands_update',
+        sessionUpdate: "available_commands_update",
         availableCommands,
       };
 
       await this.sendUpdate(update);
     } catch (error) {
       // Log error but don't fail session creation
-      debugLogger.error('Error sending available commands update:', error);
+      debugLogger.error("Error sending available commands update:", error);
     }
   }
 
@@ -676,7 +684,7 @@ export class Session implements SessionContext {
     const modeMap: Record<ApprovalModeValue, ApprovalMode> = {
       plan: ApprovalMode.PLAN,
       default: ApprovalMode.DEFAULT,
-      'auto-edit': ApprovalMode.AUTO_EDIT,
+      "auto-edit": ApprovalMode.AUTO_EDIT,
       yolo: ApprovalMode.YOLO,
     };
 
@@ -694,7 +702,7 @@ export class Session implements SessionContext {
     const rawModelId = params.modelId.trim();
 
     if (!rawModelId) {
-      throw RequestError.invalidParams(undefined, 'modelId cannot be empty');
+      throw RequestError.invalidParams(undefined, "modelId cannot be empty");
     }
 
     const parsed = parseAcpModelOption(rawModelId);
@@ -730,7 +738,7 @@ export class Session implements SessionContext {
     let newModeId: ApprovalModeValue;
     switch (outcome) {
       case ToolConfirmationOutcome.ProceedAlways:
-        newModeId = 'auto-edit';
+        newModeId = "auto-edit";
         break;
       case ToolConfirmationOutcome.RestorePrevious:
         // onConfirm has already restored the mode; read the actual current mode
@@ -738,12 +746,12 @@ export class Session implements SessionContext {
         break;
       case ToolConfirmationOutcome.ProceedOnce:
       default:
-        newModeId = 'default';
+        newModeId = "default";
         break;
     }
 
     const update: SessionUpdate = {
-      sessionUpdate: 'current_mode_update',
+      sessionUpdate: "current_mode_update",
       currentModeId: newModeId,
     };
 
@@ -763,26 +771,26 @@ export class Session implements SessionContext {
     const errorResponse = (error: Error) => {
       const durationMs = Date.now() - startTime;
       logToolCall(this.config, {
-        'event.name': 'tool_call',
-        'event.timestamp': new Date().toISOString(),
+        "event.name": "tool_call",
+        "event.timestamp": new Date().toISOString(),
         prompt_id: promptId,
-        function_name: fc.name ?? '',
+        function_name: fc.name ?? "",
         function_args: args,
         duration_ms: durationMs,
-        status: 'error',
+        status: "error",
         success: false,
         error: error.message,
         tool_type:
-          typeof tool !== 'undefined' && tool instanceof DiscoveredMCPTool
-            ? 'mcp'
-            : 'native',
+          typeof tool !== "undefined" && tool instanceof DiscoveredMCPTool
+            ? "mcp"
+            : "native",
       });
 
       return [
         {
           functionResponse: {
             id: callId,
-            name: fc.name ?? '',
+            name: fc.name ?? "",
             response: { error: error.message },
           },
         },
@@ -791,7 +799,7 @@ export class Session implements SessionContext {
 
     const earlyErrorResponse = async (
       error: Error,
-      toolName = fc.name ?? 'unknown_tool',
+      toolName = fc.name ?? "unknown_tool",
     ) => {
       if (toolName !== TodoWriteTool.Name) {
         await this.toolCallEmitter.emitError(callId, toolName, error);
@@ -800,7 +808,7 @@ export class Session implements SessionContext {
       const errorParts = errorResponse(error);
       this.config.getChatRecordingService()?.recordToolResult(errorParts, {
         callId,
-        status: 'error',
+        status: "error",
         resultDisplay: undefined,
         error,
         errorType: undefined,
@@ -809,7 +817,7 @@ export class Session implements SessionContext {
     };
 
     if (!fc.name) {
-      return earlyErrorResponse(new Error('Missing function name'));
+      return earlyErrorResponse(new Error("Missing function name"));
     }
 
     const toolRegistry = this.config.getToolRegistry();
@@ -826,7 +834,7 @@ export class Session implements SessionContext {
     if (pm && !(await pm.isToolEnabled(fc.name as string))) {
       return earlyErrorResponse(
         new Error(
-          `Qwen Code requires permission to use "${fc.name}", but that permission was declined.`,
+          `TRAM requires permission to use "${fc.name}", but that permission was declined.`,
         ),
         fc.name,
       );
@@ -843,7 +851,7 @@ export class Session implements SessionContext {
     try {
       const invocation = tool.build(args);
 
-      if (isAgentTool && 'eventEmitter' in invocation) {
+      if (isAgentTool && "eventEmitter" in invocation) {
         // Access eventEmitter from AgentTool invocation
         const taskEventEmitter = (
           invocation as {
@@ -853,7 +861,7 @@ export class Session implements SessionContext {
 
         // Extract subagent metadata from AgentTool call
         const parentToolCallId = callId;
-        const subagentType = (args['subagent_type'] as string) ?? '';
+        const subagentType = (args["subagent_type"] as string) ?? "";
 
         // Create a SubAgentTracker for this tool execution
         const subSubAgentTracker = new SubAgentTracker(
@@ -886,14 +894,14 @@ export class Session implements SessionContext {
         this.config.getApprovalMode() !== ApprovalMode.YOLO ||
         isAskUserQuestionTool
           ? await invocation.getDefaultPermission()
-          : 'allow';
+          : "allow";
 
       // ---- L4: PermissionManager override (if relevant rules exist) ----
       const toolParams = invocation.params as Record<string, unknown>;
       const pmCtx = buildPermissionCheckContext(
         fc.name,
         toolParams,
-        this.config.getTargetDir?.() ?? '',
+        this.config.getTargetDir?.() ?? "",
       );
       const { finalPermission, pmForcedAsk } = await evaluatePermissionRules(
         pm,
@@ -901,16 +909,16 @@ export class Session implements SessionContext {
         pmCtx,
       );
 
-      const needsConfirmation = finalPermission === 'ask';
+      const needsConfirmation = finalPermission === "ask";
 
       // ---- L5: ApprovalMode overrides ----
       const approvalMode = this.config.getApprovalMode();
       const isPlanMode = approvalMode === ApprovalMode.PLAN;
 
-      if (finalPermission === 'deny') {
+      if (finalPermission === "deny") {
         return earlyErrorResponse(
           new Error(
-            defaultPermission === 'deny'
+            defaultPermission === "deny"
               ? `Tool "${fc.name}" is denied: command substitution is not allowed for security reasons.`
               : `Tool "${fc.name}" is denied by permission rules.`,
           ),
@@ -932,12 +940,12 @@ export class Session implements SessionContext {
           isPlanMode &&
           !isExitPlanModeTool &&
           !isAskUserQuestionTool &&
-          confirmationDetails.type !== 'info'
+          confirmationDetails.type !== "info"
         ) {
           return earlyErrorResponse(
             new Error(
               `Plan mode is active. The tool "${fc.name}" cannot be executed because it modifies the system. ` +
-                'Please use the exit_plan_mode tool to present your plan and exit plan mode before making changes.',
+                "Please use the exit_plan_mode tool to present your plan and exit plan mode before making changes.",
             ),
             fc.name,
           );
@@ -983,8 +991,8 @@ export class Session implements SessionContext {
         // (same as coreToolScheduler L5 — NOT delegated to the extension)
         if (
           approvalMode === ApprovalMode.AUTO_EDIT &&
-          (confirmationDetails.type === 'edit' ||
-            confirmationDetails.type === 'info')
+          (confirmationDetails.type === "edit" ||
+            confirmationDetails.type === "info")
         ) {
           // Auto-approve, skip requestPermission.
           // didRequestPermission stays false → emitStart below.
@@ -1002,9 +1010,9 @@ export class Session implements SessionContext {
           if (hooksEnabled && messageBus) {
             void fireNotificationHook(
               messageBus,
-              `Qwen Code needs your permission to use ${fc.name}`,
+              `TRAM needs your permission to use ${fc.name}`,
               NotificationType.PermissionPrompt,
-              'Permission needed',
+              "Permission needed",
             );
           }
 
@@ -1013,7 +1021,7 @@ export class Session implements SessionContext {
             options: toPermissionOptions(confirmationDetails, pmForcedAsk),
             toolCall: {
               toolCallId: callId,
-              status: 'pending',
+              status: "pending",
               title: invocation.getDescription(),
               content,
               locations: invocation.toolLocations(),
@@ -1028,7 +1036,7 @@ export class Session implements SessionContext {
             answers?: Record<string, string>;
           };
           const outcome =
-            output.outcome.outcome === 'cancelled'
+            output.outcome.outcome === "cancelled"
               ? ToolConfirmationOutcome.Cancel
               : z
                   .nativeEnum(ToolConfirmationOutcome)
@@ -1066,7 +1074,7 @@ export class Session implements SessionContext {
 
           // After edit tool ProceedAlways, notify the client about mode change
           if (
-            confirmationDetails.type === 'edit' &&
+            confirmationDetails.type === "edit" &&
             outcome === ToolConfirmationOutcome.ProceedAlways
           ) {
             await this.sendCurrentModeUpdateNotification(outcome);
@@ -1101,7 +1109,7 @@ export class Session implements SessionContext {
           callId,
           toolName: fc.name,
           args,
-          status: 'in_progress',
+          status: "in_progress",
         };
         await this.toolCallEmitter.emitStart(startParams);
       }
@@ -1126,7 +1134,7 @@ export class Session implements SessionContext {
         );
 
         // Match original logic: emit plan if todos.length > 0 OR if args had todos
-        if ((todos && todos.length > 0) || Array.isArray(args['todos'])) {
+        if ((todos && todos.length > 0) || Array.isArray(args["todos"])) {
           await this.planEmitter.emitPlan(todos ?? []);
         }
 
@@ -1152,24 +1160,24 @@ export class Session implements SessionContext {
 
       const durationMs = Date.now() - startTime;
       logToolCall(this.config, {
-        'event.name': 'tool_call',
-        'event.timestamp': new Date().toISOString(),
+        "event.name": "tool_call",
+        "event.timestamp": new Date().toISOString(),
         function_name: fc.name,
         function_args: args,
         duration_ms: durationMs,
-        status: 'success',
+        status: "success",
         success: true,
         prompt_id: promptId,
         tool_type:
-          typeof tool !== 'undefined' && tool instanceof DiscoveredMCPTool
-            ? 'mcp'
-            : 'native',
+          typeof tool !== "undefined" && tool instanceof DiscoveredMCPTool
+            ? "mcp"
+            : "native",
       });
 
       // Record tool result for session management
       this.config.getChatRecordingService()?.recordToolResult(responseParts, {
         callId,
-        status: 'success',
+        status: "success",
         resultDisplay: toolResult.returnDisplay,
         error: undefined,
         errorType: undefined,
@@ -1185,7 +1193,7 @@ export class Session implements SessionContext {
       // Use ToolCallEmitter for error handling
       await this.toolCallEmitter.emitError(
         callId,
-        fc.name ?? 'unknown_tool',
+        fc.name ?? "unknown_tool",
         error,
       );
 
@@ -1194,14 +1202,14 @@ export class Session implements SessionContext {
         {
           functionResponse: {
             id: callId,
-            name: fc.name ?? '',
+            name: fc.name ?? "",
             response: { error: error.message },
           },
         },
       ];
       this.config.getChatRecordingService()?.recordToolResult(errorParts, {
         callId,
-        status: 'error',
+        status: "error",
         resultDisplay: undefined,
         error,
         errorType: undefined,
@@ -1232,40 +1240,40 @@ export class Session implements SessionContext {
     originalPrompt: ContentBlock[],
   ): Promise<Part[] | null> {
     switch (result.type) {
-      case 'submit_prompt':
+      case "submit_prompt":
         // Command wants to submit a prompt to the model
         // Convert PartListUnion to Part[]
         return normalizePartList(result.content);
 
-      case 'message': {
-        await this.client.extNotification('_tramcode/slash_command', {
+      case "message": {
+        await this.client.extNotification("_tramcode/slash_command", {
           sessionId: this.sessionId,
           command: originalPrompt
-            .filter((block) => block.type === 'text')
-            .map((block) => (block.type === 'text' ? block.text : ''))
-            .join(' '),
+            .filter((block) => block.type === "text")
+            .map((block) => (block.type === "text" ? block.text : ""))
+            .join(" "),
           messageType: result.messageType,
-          message: result.content || '',
+          message: result.content || "",
         });
 
-        if (result.messageType === 'error') {
+        if (result.messageType === "error") {
           // Throw error to stop execution
-          throw new Error(result.content || 'Slash command failed.');
+          throw new Error(result.content || "Slash command failed.");
         }
         // For info messages, return null to indicate command was handled
         return null;
       }
 
-      case 'stream_messages': {
+      case "stream_messages": {
         // Command returns multiple messages via async generator (ACP-preferred)
         const command = originalPrompt
-          .filter((block) => block.type === 'text')
-          .map((block) => (block.type === 'text' ? block.text : ''))
-          .join(' ');
+          .filter((block) => block.type === "text")
+          .map((block) => (block.type === "text" ? block.text : ""))
+          .join(" ");
 
         // Stream all messages to the client
         for await (const msg of result.messages) {
-          await this.client.extNotification('_tramcode/slash_command', {
+          await this.client.extNotification("_tramcode/slash_command", {
             sessionId: this.sessionId,
             command,
             messageType: msg.messageType,
@@ -1273,8 +1281,8 @@ export class Session implements SessionContext {
           });
 
           // If we encounter an error message, throw after sending
-          if (msg.messageType === 'error') {
-            throw new Error(msg.content || 'Slash command failed.');
+          if (msg.messageType === "error") {
+            throw new Error(msg.content || "Slash command failed.");
           }
         }
 
@@ -1282,13 +1290,13 @@ export class Session implements SessionContext {
         return null;
       }
 
-      case 'unsupported': {
+      case "unsupported": {
         // Command returned an unsupported result type
         const unsupportedError = `Slash command not supported in ACP integration: ${result.reason}`;
         throw new Error(unsupportedError);
       }
 
-      case 'no_command':
+      case "no_command":
         // No command was found or executed, resolve the original prompt
         // through the standard path that handles all block types
         return this.#resolvePrompt(
@@ -1309,23 +1317,23 @@ export class Session implements SessionContext {
     message: ContentBlock[],
     abortSignal: AbortSignal,
   ): Promise<Part[]> {
-    const FILE_URI_SCHEME = 'file://';
+    const FILE_URI_SCHEME = "file://";
 
     const embeddedContext: EmbeddedResourceResource[] = [];
 
     const parts = message.map((part) => {
       switch (part.type) {
-        case 'text':
+        case "text":
           return { text: part.text };
-        case 'image':
-        case 'audio':
+        case "image":
+        case "audio":
           return {
             inlineData: {
               mimeType: part.mimeType,
               data: part.data,
             },
           };
-        case 'resource_link': {
+        case "resource_link": {
           if (part.uri.startsWith(FILE_URI_SCHEME)) {
             return {
               fileData: {
@@ -1338,7 +1346,7 @@ export class Session implements SessionContext {
             return { text: `@${part.uri}` };
           }
         }
-        case 'resource': {
+        case "resource": {
           embeddedContext.push(part.resource);
           return { text: `@${part.resource.uri}` };
         }
@@ -1349,7 +1357,7 @@ export class Session implements SessionContext {
       }
     });
 
-    const atPathCommandParts = parts.filter((part) => 'fileData' in part);
+    const atPathCommandParts = parts.filter((part) => "fileData" in part);
 
     if (atPathCommandParts.length === 0 && embeddedContext.length === 0) {
       return parts;
@@ -1362,19 +1370,19 @@ export class Session implements SessionContext {
     );
 
     // Construct the initial part of the query for the LLM
-    let initialQueryText = '';
+    let initialQueryText = "";
     for (let i = 0; i < parts.length; i++) {
       const chunk = parts[i];
-      if ('text' in chunk) {
+      if ("text" in chunk) {
         initialQueryText += chunk.text;
-      } else if ('fileData' in chunk) {
+      } else if ("fileData" in chunk) {
         const pathName = chunk.fileData!.fileUri;
         if (
           i > 0 &&
           initialQueryText.length > 0 &&
-          !initialQueryText.endsWith(' ')
+          !initialQueryText.endsWith(" ")
         ) {
-          initialQueryText += ' ';
+          initialQueryText += " ";
         }
         initialQueryText += `@${pathName}`;
       }
@@ -1398,7 +1406,7 @@ export class Session implements SessionContext {
 
       // Then add content parts (preserving binary files as inlineData)
       for (const part of contentParts) {
-        if (typeof part === 'string') {
+        if (typeof part === "string") {
           processedQueryParts.push({ text: part });
         } else {
           processedQueryParts.push(part);
@@ -1415,16 +1423,16 @@ export class Session implements SessionContext {
     // Process embedded context from resource blocks
     for (const contextPart of embeddedContext) {
       // Type guard for text resources
-      if ('text' in contextPart && contextPart.text) {
+      if ("text" in contextPart && contextPart.text) {
         processedQueryParts.push({
           text: `File: ${contextPart.uri}\n${contextPart.text}`,
         });
       }
       // Type guard for blob resources
-      if ('blob' in contextPart && contextPart.blob) {
+      if ("blob" in contextPart && contextPart.blob) {
         processedQueryParts.push({
           inlineData: {
-            mimeType: contextPart.mimeType ?? 'application/octet-stream',
+            mimeType: contextPart.mimeType ?? "application/octet-stream",
             data: contextPart.blob,
           },
         });

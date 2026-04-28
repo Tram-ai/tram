@@ -15,18 +15,18 @@
  * 4. User types → abortSpeculation() cleans up
  */
 
-import type { Content, Part } from '@google/genai';
-import type { Config } from '../config/config.js';
-import type { GeminiClient } from '../core/client.js';
-import { StreamEventType } from '../core/geminiChat.js';
-import { OverlayFs } from './overlayFs.js';
-import { evaluateToolCall, rewritePathArgs } from './speculationToolGate.js';
+import type { Content, Part } from "@google/genai";
+import type { Config } from "../config/config.js";
+import type { GeminiClient } from "../core/client.js";
+import { StreamEventType } from "../core/geminiChat.js";
+import { OverlayFs } from "./overlayFs.js";
+import { evaluateToolCall, rewritePathArgs } from "./speculationToolGate.js";
 import {
   getCacheSafeParams,
   createForkedChat,
   runForkedQuery,
-} from './forkedQuery.js';
-import { getFilterReason, SUGGESTION_PROMPT } from './suggestionGenerator.js';
+} from "./forkedQuery.js";
+import { getFilterReason, SUGGESTION_PROMPT } from "./suggestionGenerator.js";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -47,7 +47,7 @@ export interface BoundaryInfo {
 
 export interface SpeculationState {
   id: string;
-  status: 'idle' | 'running' | 'completed' | 'boundary' | 'aborted';
+  status: "idle" | "running" | "completed" | "boundary" | "aborted";
   suggestion: string;
   overlayFs: OverlayFs | null;
   abortController: AbortController | null;
@@ -67,9 +67,9 @@ export interface SpeculationResult {
 }
 
 export const IDLE_SPECULATION: Readonly<SpeculationState> = Object.freeze({
-  id: '',
-  status: 'idle' as const,
-  suggestion: '',
+  id: "",
+  status: "idle" as const,
+  suggestion: "",
   overlayFs: null,
   abortController: null,
   messages: [],
@@ -93,7 +93,7 @@ export async function startSpeculation(
 ): Promise<SpeculationState> {
   const cacheSafe = getCacheSafeParams();
   if (!cacheSafe) {
-    throw new Error('CacheSafeParams not available for speculation');
+    throw new Error("CacheSafeParams not available for speculation");
   }
 
   const abortController = new AbortController();
@@ -102,7 +102,7 @@ export async function startSpeculation(
   if (parentSignal?.aborted) {
     return {
       id: Math.random().toString(36).slice(2, 10),
-      status: 'aborted' as const,
+      status: "aborted" as const,
       suggestion,
       overlayFs: null,
       abortController,
@@ -116,7 +116,7 @@ export async function startSpeculation(
   let parentAbortHandler: (() => void) | undefined;
   if (parentSignal) {
     parentAbortHandler = () => abortController.abort();
-    parentSignal.addEventListener('abort', parentAbortHandler, { once: true });
+    parentSignal.addEventListener("abort", parentAbortHandler, { once: true });
   }
 
   const overlayFs = new OverlayFs(config.getCwd());
@@ -124,7 +124,7 @@ export async function startSpeculation(
 
   const state: SpeculationState = {
     id: Math.random().toString(36).slice(2, 10),
-    status: 'running',
+    status: "running",
     suggestion,
     overlayFs,
     abortController,
@@ -137,17 +137,17 @@ export async function startSpeculation(
   runSpeculativeLoop(config, state, cacheSafe, options?.model)
     .then(async (result) => {
       if (abortController.signal.aborted) {
-        state.status = 'aborted';
+        state.status = "aborted";
         await overlayFs.cleanup();
         return;
       }
-      if (state.status === 'running') {
+      if (state.status === "running") {
         state.messages = result.messages;
         if (result.boundary) {
           state.boundary = result.boundary;
-          state.status = 'boundary';
+          state.status = "boundary";
         } else {
-          state.status = 'completed';
+          state.status = "completed";
           // Generate pipelined suggestion for the next step
           if (!abortController.signal.aborted) {
             try {
@@ -158,7 +158,7 @@ export async function startSpeculation(
                 abortController.signal,
                 options?.model,
               );
-              if (next && state.status === 'completed') {
+              if (next && state.status === "completed") {
                 state.pipelinedSuggestion = next;
               }
             } catch {
@@ -170,15 +170,15 @@ export async function startSpeculation(
     })
     .catch(async () => {
       // Cleanup overlay on error (#16)
-      if (state.status === 'running') {
-        state.status = 'aborted';
+      if (state.status === "running") {
+        state.status = "aborted";
       }
       await overlayFs.cleanup();
     })
     .finally(() => {
       // Clean up parent signal listener (#20)
       if (parentSignal && parentAbortHandler) {
-        parentSignal.removeEventListener('abort', parentAbortHandler);
+        parentSignal.removeEventListener("abort", parentAbortHandler);
       }
     });
 
@@ -197,7 +197,7 @@ interface LoopResult {
 async function runSpeculativeLoop(
   config: Config,
   state: SpeculationState,
-  cacheSafe: import('./forkedQuery.js').CacheSafeParams,
+  cacheSafe: import("./forkedQuery.js").CacheSafeParams,
   modelOverride?: string,
 ): Promise<LoopResult> {
   const chat = createForkedChat(config, cacheSafe);
@@ -207,7 +207,7 @@ async function runSpeculativeLoop(
 
   // Add the suggestion as the initial user message
   const userMsg: Content = {
-    role: 'user',
+    role: "user",
     parts: [{ text: state.suggestion }],
   };
   messages.push(userMsg);
@@ -221,7 +221,7 @@ async function runSpeculativeLoop(
     const stream = await chat.sendMessageStream(
       model,
       { message: lastUserMsg.parts ?? [] },
-      'speculation',
+      "speculation",
     );
 
     const modelParts: Part[] = [];
@@ -232,7 +232,7 @@ async function runSpeculativeLoop(
       const parts = response.candidates?.[0]?.content?.parts ?? [];
       for (const part of parts) {
         // Skip thought/reasoning parts — only capture visible text + function calls
-        if (part.text && !(part as Record<string, unknown>)['thought']) {
+        if (part.text && !(part as Record<string, unknown>)["thought"]) {
           modelParts.push({ text: part.text });
         }
         if (part.functionCall && part.functionCall.name) {
@@ -249,12 +249,12 @@ async function runSpeculativeLoop(
     if (state.abortController?.signal.aborted) break;
     if (modelParts.length === 0) break;
 
-    const modelMsg: Content = { role: 'model', parts: modelParts };
+    const modelMsg: Content = { role: "model", parts: modelParts };
     messages.push(modelMsg);
 
     // Extract function calls from model response
     const functionCalls = modelParts.filter(
-      (p): p is Part & { functionCall: NonNullable<Part['functionCall']> } =>
+      (p): p is Part & { functionCall: NonNullable<Part["functionCall"]> } =>
         p.functionCall !== undefined,
     );
 
@@ -269,7 +269,7 @@ async function runSpeculativeLoop(
 
     for (const part of functionCalls) {
       const fc = part.functionCall;
-      const name = fc.name ?? '';
+      const name = fc.name ?? "";
       const args = (fc.args ?? {}) as Record<string, unknown>;
       const gate = await evaluateToolCall(
         name,
@@ -278,12 +278,12 @@ async function runSpeculativeLoop(
         approvalMode,
       );
 
-      if (gate.action === 'boundary') {
+      if (gate.action === "boundary") {
         hitBoundary = true;
         break;
       }
 
-      if (gate.action === 'redirect') {
+      if (gate.action === "redirect") {
         try {
           await rewritePathArgs(args, state.overlayFs!);
         } catch {
@@ -313,7 +313,7 @@ async function runSpeculativeLoop(
         state.toolUseCount++;
 
         const responseContent =
-          typeof result.llmContent === 'string'
+          typeof result.llmContent === "string"
             ? { output: result.llmContent }
             : { output: JSON.stringify(result.llmContent) };
         functionResponses.push({
@@ -327,7 +327,7 @@ async function runSpeculativeLoop(
               error:
                 error instanceof Error
                   ? error.message
-                  : 'Tool execution failed',
+                  : "Tool execution failed",
             },
           },
         });
@@ -352,11 +352,11 @@ async function runSpeculativeLoop(
         });
         if (keptModelParts.length > 0) {
           messages[messages.length - 1] = {
-            role: 'model',
+            role: "model",
             parts: keptModelParts,
           };
           // Add the tool results we have
-          messages.push({ role: 'user', parts: functionResponses });
+          messages.push({ role: "user", parts: functionResponses });
         } else {
           messages.pop();
         }
@@ -367,7 +367,7 @@ async function runSpeculativeLoop(
         );
         if (textOnlyParts.length > 0) {
           messages[messages.length - 1] = {
-            role: 'model',
+            role: "model",
             parts: textOnlyParts,
           };
         } else {
@@ -378,8 +378,8 @@ async function runSpeculativeLoop(
       return {
         messages,
         boundary: {
-          type: 'boundary',
-          detail: 'speculation_boundary',
+          type: "boundary",
+          detail: "speculation_boundary",
           completedAt: Date.now(),
         },
       };
@@ -387,7 +387,7 @@ async function runSpeculativeLoop(
 
     // Add tool results to history for next turn
     if (functionResponses.length > 0) {
-      const resultMsg: Content = { role: 'user', parts: functionResponses };
+      const resultMsg: Content = { role: "user", parts: functionResponses };
       messages.push(resultMsg);
     }
   }
@@ -425,7 +425,7 @@ export async function acceptSpeculation(
       await geminiClient.addHistory(msg);
     }
 
-    state.status = 'completed';
+    state.status = "completed";
 
     return {
       filesApplied,
@@ -451,7 +451,7 @@ export async function acceptSpeculation(
  */
 export async function abortSpeculation(state: SpeculationState): Promise<void> {
   state.abortController?.abort();
-  state.status = 'aborted';
+  state.status = "aborted";
   if (state.overlayFs) {
     await state.overlayFs.cleanup();
   }
@@ -473,7 +473,7 @@ export function ensureToolResultPairing(messages: Content[]): Content[] {
   const lastMsg = result[result.length - 1];
 
   // If last message is model with function calls but no following user response
-  if (lastMsg.role === 'model' && lastMsg.parts) {
+  if (lastMsg.role === "model" && lastMsg.parts) {
     const hasFunctionCalls = lastMsg.parts.some(
       (p) => p.functionCall !== undefined,
     );
@@ -482,7 +482,7 @@ export function ensureToolResultPairing(messages: Content[]): Content[] {
         (p) => p.functionCall === undefined,
       );
       if (textParts.length > 0) {
-        result[result.length - 1] = { role: 'model', parts: textParts };
+        result[result.length - 1] = { role: "model", parts: textParts };
       } else {
         result.pop();
       }
@@ -500,15 +500,15 @@ export function ensureToolResultPairing(messages: Content[]): Content[] {
 // to ensure pipelined suggestions have the same quality as initial suggestions.
 
 const PIPELINED_SCHEMA: Record<string, unknown> = {
-  type: 'object',
+  type: "object",
   properties: {
     suggestion: {
-      type: 'string',
+      type: "string",
       description:
-        'The predicted next user input (2-12 words), or empty string.',
+        "The predicted next user input (2-12 words), or empty string.",
     },
   },
-  required: ['suggestion'],
+  required: ["suggestion"],
 };
 
 /**
@@ -525,15 +525,15 @@ async function generatePipelinedSuggestion(
   try {
     // Build augmented prompt that includes the speculated context inline
     const speculatedSummary = speculatedMessages
-      .filter((m) => m.role === 'model')
+      .filter((m) => m.role === "model")
       .flatMap((m) => m.parts ?? [])
-      .map((p) => p.text ?? '')
+      .map((p) => p.text ?? "")
       .filter(Boolean)
-      .join('\n')
+      .join("\n")
       .slice(0, 500);
 
     const augmentedPrompt = `The user just said: "${suggestionText}"
-The assistant responded: ${speculatedSummary || '(tool calls executed)'}
+The assistant responded: ${speculatedSummary || "(tool calls executed)"}
 
 ${SUGGESTION_PROMPT}`;
 
@@ -547,8 +547,8 @@ ${SUGGESTION_PROMPT}`;
 
     let raw: string | null = null;
     if (result.jsonResult) {
-      const val = result.jsonResult['suggestion'];
-      raw = typeof val === 'string' ? val.trim() : null;
+      const val = result.jsonResult["suggestion"];
+      raw = typeof val === "string" ? val.trim() : null;
     } else if (result.text) {
       raw = result.text;
     }

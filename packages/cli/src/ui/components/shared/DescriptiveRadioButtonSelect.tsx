@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Text, Box } from 'ink';
-import { theme } from '../../semantic-colors.js';
-import { BaseSelectionList } from './BaseSelectionList.js';
-import type { SelectionListItem } from '../../hooks/useSelectionList.js';
+import type React from "react";
+import { Text, Box } from "ink";
+import { theme } from "../../semantic-colors.js";
+import { BaseSelectionList } from "./BaseSelectionList.js";
+import type { SelectionListItem } from "../../hooks/useSelectionList.js";
 
 export interface DescriptiveRadioSelectItem<T> extends SelectionListItem<T> {
   title: React.ReactNode;
@@ -66,7 +66,7 @@ export function DescriptiveRadioButtonSelect<T>({
       renderItem={(item, { titleColor }) => (
         <Box flexDirection="column" key={item.key}>
           <Text color={titleColor}>{item.title}</Text>
-          {typeof item.description === 'string' ? (
+          {typeof item.description === "string" ? (
             <Text color={theme.text.secondary}>{item.description}</Text>
           ) : (
             item.description

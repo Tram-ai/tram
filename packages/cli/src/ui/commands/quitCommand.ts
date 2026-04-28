@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { formatDuration } from '../utils/formatters.js';
-import { CommandKind, type SlashCommand } from './types.js';
-import { t } from '../../i18n/index.js';
+import { formatDuration } from "../utils/formatters.js";
+import { CommandKind, type SlashCommand } from "./types.js";
+import { t } from "../../i18n/index.js";
 
 export const quitCommand: SlashCommand = {
-  name: 'quit',
-  altNames: ['exit'],
+  name: "quit",
+  altNames: ["exit"],
   get description() {
-    return t('exit the cli');
+    return t("exit the cli");
   },
   kind: CommandKind.BUILT_IN,
   action: (context) => {
@@ -21,15 +21,15 @@ export const quitCommand: SlashCommand = {
     const wallDuration = now - sessionStartTime.getTime();
 
     return {
-      type: 'quit',
+      type: "quit",
       messages: [
         {
-          type: 'user',
+          type: "user",
           text: `/quit`, // Keep it consistent, even if /exit was used
           id: now - 1,
         },
         {
-          type: 'quit',
+          type: "quit",
           duration: formatDuration(wallDuration),
           id: now,
         },

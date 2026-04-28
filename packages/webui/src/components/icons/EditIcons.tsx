@@ -6,8 +6,8 @@
  * Edit mode related icons
  */
 
-import type { FC } from 'react';
-import type { IconProps } from './types.js';
+import type { FC } from "react";
+import type { IconProps } from "./types.js";
 
 /**
  * Edit pencil icon (16x16)

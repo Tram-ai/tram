@@ -10,7 +10,7 @@
  * Tool call content types
  */
 export interface ToolCallContent {
-  type: 'content' | 'diff';
+  type: "content" | "diff";
   // For content type
   content?: {
     type: string;
@@ -35,7 +35,7 @@ export interface ToolCallLocation {
 /**
  * Tool call status type
  */
-export type ToolCallStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
+export type ToolCallStatus = "pending" | "in_progress" | "completed" | "failed";
 
 /**
  * Base tool call data interface
@@ -75,16 +75,16 @@ export interface GroupedContent {
  * Container status type for styling
  */
 export type ContainerStatus =
-  | 'success'
-  | 'error'
-  | 'warning'
-  | 'loading'
-  | 'default';
+  | "success"
+  | "error"
+  | "warning"
+  | "loading"
+  | "default";
 
 /**
  * Plan entry status type
  */
-export type PlanEntryStatus = 'pending' | 'in_progress' | 'completed';
+export type PlanEntryStatus = "pending" | "in_progress" | "completed";
 
 /**
  * Plan entry interface for UpdatedPlanToolCall

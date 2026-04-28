@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { ContextUsageDisplay } from './ContextUsageDisplay.js';
-import { useTerminalSize } from '../hooks/useTerminalSize.js';
-import { AutoAcceptIndicator } from './AutoAcceptIndicator.js';
-import { ShellModeIndicator } from './ShellModeIndicator.js';
-import { isNarrowWidth } from '../utils/isNarrowWidth.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import { ContextUsageDisplay } from "./ContextUsageDisplay.js";
+import { useTerminalSize } from "../hooks/useTerminalSize.js";
+import { AutoAcceptIndicator } from "./AutoAcceptIndicator.js";
+import { ShellModeIndicator } from "./ShellModeIndicator.js";
+import { isNarrowWidth } from "../utils/isNarrowWidth.js";
 
-import { useStatusLine } from '../hooks/useStatusLine.js';
-import { useUIState } from '../contexts/UIStateContext.js';
-import { useConfig } from '../contexts/ConfigContext.js';
-import { useVimMode } from '../contexts/VimModeContext.js';
-import { useCompactMode } from '../contexts/CompactModeContext.js';
-import { ApprovalMode } from '@tram-ai/tram-core';
-import { t } from '../../i18n/index.js';
+import { useStatusLine } from "../hooks/useStatusLine.js";
+import { useUIState } from "../contexts/UIStateContext.js";
+import { useConfig } from "../contexts/ConfigContext.js";
+import { useVimMode } from "../contexts/VimModeContext.js";
+import { useCompactMode } from "../contexts/CompactModeContext.js";
+import { ApprovalMode } from "@tram-ai/tram-core";
+import { t } from "../../i18n/index.js";
 
 export const Footer: React.FC = () => {
   const uiState = useUIState();
@@ -37,12 +37,12 @@ export const Footer: React.FC = () => {
   const isNarrow = isNarrowWidth(terminalWidth);
 
   // Determine sandbox info from environment
-  const sandboxEnv = process.env['SANDBOX'];
+  const sandboxEnv = process.env["SANDBOX"];
   const sandboxInfo = sandboxEnv
-    ? sandboxEnv === 'sandbox-exec'
-      ? 'seatbelt'
-      : sandboxEnv.startsWith('tram')
-        ? 'docker'
+    ? sandboxEnv === "sandbox-exec"
+      ? "seatbelt"
+      : sandboxEnv.startsWith("tram")
+        ? "docker"
         : sandboxEnv
     : null;
 
@@ -58,12 +58,12 @@ export const Footer: React.FC = () => {
 
   // Left bottom row: high-priority messages > approval mode > hint.
   const leftBottomContent = uiState.ctrlCPressedOnce ? (
-    <Text color={theme.status.warning}>{t('Press Ctrl+C again to exit.')}</Text>
+    <Text color={theme.status.warning}>{t("Press Ctrl+C again to exit.")}</Text>
   ) : uiState.ctrlDPressedOnce ? (
-    <Text color={theme.status.warning}>{t('Press Ctrl+D again to exit.')}</Text>
+    <Text color={theme.status.warning}>{t("Press Ctrl+D again to exit.")}</Text>
   ) : uiState.showEscapePrompt ? (
-    <Text color={theme.text.secondary}>{t('Press Esc again to clear.')}</Text>
-  ) : vimEnabled && vimMode === 'INSERT' ? (
+    <Text color={theme.text.secondary}>{t("Press Esc again to clear.")}</Text>
+  ) : vimEnabled && vimMode === "INSERT" ? (
     <Text color={theme.text.secondary}>-- INSERT --</Text>
   ) : uiState.shellModeActive ? (
     <ShellModeIndicator />
@@ -71,25 +71,25 @@ export const Footer: React.FC = () => {
     showAutoAcceptIndicator !== ApprovalMode.DEFAULT ? (
     <AutoAcceptIndicator approvalMode={showAutoAcceptIndicator} />
   ) : suppressHint ? null : (
-    <Text color={theme.text.secondary}>{t('? for shortcuts')}</Text>
+    <Text color={theme.text.secondary}>{t("? for shortcuts")}</Text>
   );
 
   const rightItems: Array<{ key: string; node: React.ReactNode }> = [];
   if (sandboxInfo) {
     rightItems.push({
-      key: 'sandbox',
+      key: "sandbox",
       node: <Text color={theme.status.success}>🔒 {sandboxInfo}</Text>,
     });
   }
   if (debugMode) {
     rightItems.push({
-      key: 'debug',
+      key: "debug",
       node: <Text color={theme.status.warning}>Debug Mode</Text>,
     });
   }
   if (promptTokenCount > 0 && contextWindowSize) {
     rightItems.push({
-      key: 'context',
+      key: "context",
       node: (
         <Text color={theme.text.accent}>
           <ContextUsageDisplay
@@ -103,8 +103,8 @@ export const Footer: React.FC = () => {
   }
   if (compactMode) {
     rightItems.push({
-      key: 'compact',
-      node: <Text color={theme.text.accent}>{t('compact')}</Text>,
+      key: "compact",
+      node: <Text color={theme.text.accent}>{t("compact")}</Text>,
     });
   }
 
@@ -112,8 +112,8 @@ export const Footer: React.FC = () => {
   // (bottom), right section has indicators. Status line and hints coexist.
   return (
     <Box
-      flexDirection={isNarrow ? 'column' : 'row'}
-      justifyContent={isNarrow ? 'flex-start' : 'space-between'}
+      flexDirection={isNarrow ? "column" : "row"}
+      justifyContent={isNarrow ? "flex-start" : "space-between"}
       width="100%"
       paddingX={2}
       gap={isNarrow ? 0 : 1}

@@ -4,23 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ToolCallConfirmationDetails } from '@qwen-code/qwen-code-core';
-import { ToolConfirmationOutcome } from '@qwen-code/qwen-code-core';
+import type { ToolCallConfirmationDetails } from "@tram-ai/tram-core";
+import { ToolConfirmationOutcome } from "@tram-ai/tram-core";
 import type {
   PermissionOption,
   ToolCallContent,
-} from '@agentclientprotocol/sdk';
+} from "@agentclientprotocol/sdk";
 
 const basicPermissionOptions = [
   {
     optionId: ToolConfirmationOutcome.ProceedOnce,
-    name: 'Allow',
-    kind: 'allow_once',
+    name: "Allow",
+    kind: "allow_once",
   },
   {
     optionId: ToolConfirmationOutcome.Cancel,
-    name: 'Reject',
-    kind: 'reject_once',
+    name: "Reject",
+    kind: "reject_once",
   },
 ] as const satisfies readonly PermissionOption[];
 
@@ -28,9 +28,9 @@ function supportsHideAlwaysAllow(
   confirmation: ToolCallConfirmationDetails,
 ): confirmation is Exclude<
   ToolCallConfirmationDetails,
-  { type: 'ask_user_question' }
+  { type: "ask_user_question" }
 > {
-  return confirmation.type !== 'ask_user_question';
+  return confirmation.type !== "ask_user_question";
 }
 
 function filterAlwaysAllowOptions(
@@ -43,12 +43,12 @@ function filterAlwaysAllowOptions(
     (supportsHideAlwaysAllow(confirmation) &&
       confirmation.hideAlwaysAllow === true);
   return hideAlwaysAllow
-    ? options.filter((option) => option.kind !== 'allow_always')
+    ? options.filter((option) => option.kind !== "allow_always")
     : options;
 }
 
 function formatExecPermissionScopeLabel(
-  confirmation: Extract<ToolCallConfirmationDetails, { type: 'exec' }>,
+  confirmation: Extract<ToolCallConfirmationDetails, { type: "exec" }>,
 ): string {
   const permissionRules = confirmation.permissionRules ?? [];
   const bashRules = permissionRules
@@ -63,7 +63,7 @@ function formatExecPermissionScopeLabel(
     return uniqueRules[0];
   }
   if (uniqueRules.length > 1) {
-    return uniqueRules.join(', ');
+    return uniqueRules.join(", ");
   }
   return confirmation.rootCommand;
 }
@@ -73,20 +73,20 @@ export function buildPermissionRequestContent(
 ): ToolCallContent[] {
   const content: ToolCallContent[] = [];
 
-  if (confirmation.type === 'edit') {
+  if (confirmation.type === "edit") {
     content.push({
-      type: 'diff',
+      type: "diff",
       path: confirmation.filePath ?? confirmation.fileName,
-      oldText: confirmation.originalContent ?? '',
+      oldText: confirmation.originalContent ?? "",
       newText: confirmation.newContent,
     });
   }
 
-  if (confirmation.type === 'plan') {
+  if (confirmation.type === "plan") {
     content.push({
-      type: 'content',
+      type: "content",
       content: {
-        type: 'text',
+        type: "text",
         text: confirmation.plan,
       },
     });
@@ -100,20 +100,20 @@ export function toPermissionOptions(
   forceHideAlwaysAllow = false,
 ): PermissionOption[] {
   switch (confirmation.type) {
-    case 'edit':
+    case "edit":
       return filterAlwaysAllowOptions(
         confirmation,
         [
           {
             optionId: ToolConfirmationOutcome.ProceedAlways,
-            name: 'Allow All Edits',
-            kind: 'allow_always',
+            name: "Allow All Edits",
+            kind: "allow_always",
           },
           ...basicPermissionOptions,
         ],
         forceHideAlwaysAllow,
       );
-    case 'exec': {
+    case "exec": {
       const label = formatExecPermissionScopeLabel(confirmation);
       return filterAlwaysAllowOptions(
         confirmation,
@@ -121,88 +121,88 @@ export function toPermissionOptions(
           {
             optionId: ToolConfirmationOutcome.ProceedAlwaysProject,
             name: `Always Allow in project: ${label}`,
-            kind: 'allow_always',
+            kind: "allow_always",
           },
           {
             optionId: ToolConfirmationOutcome.ProceedAlwaysUser,
             name: `Always Allow for user: ${label}`,
-            kind: 'allow_always',
+            kind: "allow_always",
           },
           ...basicPermissionOptions,
         ],
         forceHideAlwaysAllow,
       );
     }
-    case 'mcp':
+    case "mcp":
       return filterAlwaysAllowOptions(
         confirmation,
         [
           {
             optionId: ToolConfirmationOutcome.ProceedAlwaysProject,
             name: `Always Allow in project: ${confirmation.toolName}`,
-            kind: 'allow_always',
+            kind: "allow_always",
           },
           {
             optionId: ToolConfirmationOutcome.ProceedAlwaysUser,
             name: `Always Allow for user: ${confirmation.toolName}`,
-            kind: 'allow_always',
+            kind: "allow_always",
           },
           ...basicPermissionOptions,
         ],
         forceHideAlwaysAllow,
       );
-    case 'info':
+    case "info":
       return filterAlwaysAllowOptions(
         confirmation,
         [
           {
             optionId: ToolConfirmationOutcome.ProceedAlwaysProject,
-            name: 'Always Allow in project',
-            kind: 'allow_always',
+            name: "Always Allow in project",
+            kind: "allow_always",
           },
           {
             optionId: ToolConfirmationOutcome.ProceedAlwaysUser,
-            name: 'Always Allow for user',
-            kind: 'allow_always',
+            name: "Always Allow for user",
+            kind: "allow_always",
           },
           ...basicPermissionOptions,
         ],
         forceHideAlwaysAllow,
       );
-    case 'plan':
+    case "plan":
       return [
         {
           optionId: ToolConfirmationOutcome.RestorePrevious,
-          name: `Yes, restore previous mode (${confirmation.prePlanMode ?? 'default'})`,
-          kind: 'allow_once',
+          name: `Yes, restore previous mode (${confirmation.prePlanMode ?? "default"})`,
+          kind: "allow_once",
         },
         {
           optionId: ToolConfirmationOutcome.ProceedAlways,
-          name: 'Yes, and auto-accept edits',
-          kind: 'allow_always',
+          name: "Yes, and auto-accept edits",
+          kind: "allow_always",
         },
         {
           optionId: ToolConfirmationOutcome.ProceedOnce,
-          name: 'Yes, and manually approve edits',
-          kind: 'allow_once',
+          name: "Yes, and manually approve edits",
+          kind: "allow_once",
         },
         {
           optionId: ToolConfirmationOutcome.Cancel,
-          name: 'No, keep planning (esc)',
-          kind: 'reject_once',
+          name: "No, keep planning (esc)",
+          kind: "reject_once",
         },
       ];
-    case 'ask_user_question':
+    case "ask_user_question":
       return [
         {
           optionId: ToolConfirmationOutcome.ProceedOnce,
-          name: 'Submit',
-          kind: 'allow_once',
+          name: "Submit",
+          kind: "allow_once",
         },
         {
           optionId: ToolConfirmationOutcome.Cancel,
-          name: 'Cancel',
-          kind: 'reject_once',
+          name: "Cancel",
+          kind: "reject_once",
         },
       ];
     default: {

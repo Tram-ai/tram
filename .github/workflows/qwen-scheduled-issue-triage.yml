@@ -1,38 +1,38 @@
-name: 'Qwen Scheduled Issue Triage'
+name: "Qwen Scheduled Issue Triage"
 
 on:
   schedule:
-    - cron: '0 * * * *' # Runs every hour
+    - cron: "0 * * * *" # Runs every hour
   workflow_dispatch:
 
 concurrency:
-  group: '${{ github.workflow }}'
+  group: "${{ github.workflow }}"
   cancel-in-progress: true
 
 defaults:
   run:
-    shell: 'bash'
+    shell: "bash"
 
 permissions:
-  id-token: 'write'
-  issues: 'write'
+  id-token: "write"
+  issues: "write"
 
 jobs:
   triage-issues:
     timeout-minutes: 10
     if: |-
       ${{ github.repository == 'QwenLM/qwen-code' }}
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     permissions:
-      contents: 'read'
-      id-token: 'write'
-      issues: 'write'
+      contents: "read"
+      id-token: "write"
+      issues: "write"
     steps:
-      - name: 'Find untriaged issues'
-        id: 'find_issues'
+      - name: "Find untriaged issues"
+        id: "find_issues"
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-          GITHUB_REPOSITORY: '${{ github.repository }}'
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_REPOSITORY: "${{ github.repository }}"
         run: |-
           echo "🔍 Finding issues without labels..."
           NO_LABEL_ISSUES=$(gh issue list --repo ${{ github.repository }} --search "is:open is:issue no:label" --json number,title,body)
@@ -51,18 +51,18 @@ jobs:
           echo '📝 Setting output for GitHub Actions...'
           echo "issues_to_triage=${ISSUES}" >> "${GITHUB_OUTPUT}"
 
-      - name: 'Run Qwen Issue Triage'
+      - name: "Run Qwen Issue Triage"
         if: |-
           ${{ steps.find_issues.outputs.issues_to_triage != '[]' }}
-        uses: 'QwenLM/qwen-code-action@5fd6818d04d64e87d255ee4d5f77995e32fbf4c2'
+        uses: "QwenLM/qwen-code-action@5fd6818d04d64e87d255ee4d5f77995e32fbf4c2"
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-          ISSUES_TO_TRIAGE: '${{ steps.find_issues.outputs.issues_to_triage }}'
-          REPOSITORY: '${{ github.repository }}'
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          ISSUES_TO_TRIAGE: "${{ steps.find_issues.outputs.issues_to_triage }}"
+          REPOSITORY: "${{ github.repository }}"
         with:
-          OPENAI_API_KEY: '${{ secrets.OPENAI_API_KEY }}'
-          OPENAI_BASE_URL: '${{ secrets.OPENAI_BASE_URL }}'
-          OPENAI_MODEL: '${{ secrets.OPENAI_MODEL }}'
+          OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
+          OPENAI_BASE_URL: "${{ secrets.OPENAI_BASE_URL }}"
+          OPENAI_MODEL: "${{ secrets.OPENAI_MODEL }}"
           settings_json: |-
             {
               "maxSessionTurns": 25,

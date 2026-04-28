@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import type { ToolInvocation, ToolResult } from './tools.js';
-import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
-import { ToolNames } from './tool-names.js';
-import { resolveAndValidatePath } from '../utils/paths.js';
-import { getErrorMessage } from '../utils/errors.js';
-import type { Config } from '../config/config.js';
-import { runRipgrep } from '../utils/ripgrepUtils.js';
-import { SchemaValidator } from '../utils/schemaValidator.js';
-import type { FileFilteringOptions } from '../config/constants.js';
-import { DEFAULT_FILE_FILTERING_OPTIONS } from '../config/constants.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import type { PermissionDecision } from '../permissions/types.js';
+import fs from "node:fs";
+import path from "node:path";
+import type { ToolInvocation, ToolResult } from "./tools.js";
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from "./tools.js";
+import { ToolNames } from "./tool-names.js";
+import { resolveAndValidatePath } from "../utils/paths.js";
+import { getErrorMessage } from "../utils/errors.js";
+import type { Config } from "../config/config.js";
+import { runRipgrep } from "../utils/ripgrepUtils.js";
+import { SchemaValidator } from "../utils/schemaValidator.js";
+import type { FileFilteringOptions } from "../config/constants.js";
+import { DEFAULT_FILE_FILTERING_OPTIONS } from "../config/constants.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import type { PermissionDecision } from "../permissions/types.js";
 
-const debugLogger = createDebugLogger('RIPGREP');
+const debugLogger = createDebugLogger("RIPGREP");
 
 /**
  * Parameters for the GrepTool (Simplified)
@@ -63,7 +63,7 @@ class GrepToolInvocation extends BaseToolInvocation<
    */
   override async getDefaultPermission(): Promise<PermissionDecision> {
     if (!this.params.path) {
-      return 'allow'; // Default workspace directory
+      return "allow"; // Default workspace directory
     }
     const workspaceContext = this.config.getWorkspaceContext();
     const resolvedPath = path.resolve(
@@ -71,9 +71,9 @@ class GrepToolInvocation extends BaseToolInvocation<
       this.params.path,
     );
     if (workspaceContext.isPathWithinWorkspace(resolvedPath)) {
-      return 'allow';
+      return "allow";
     }
-    return 'ask';
+    return "ask";
   }
 
   async execute(signal: AbortSignal): Promise<ToolResult> {
@@ -97,7 +97,7 @@ class GrepToolInvocation extends BaseToolInvocation<
           .getWorkspaceContext()
           .getDirectories();
         searchPaths.push(...workspaceDirs);
-        searchDirDisplay = '.';
+        searchDirDisplay = ".";
       }
 
       // Get raw ripgrep output
@@ -117,7 +117,7 @@ class GrepToolInvocation extends BaseToolInvocation<
 
       const filterDescription = this.params.glob
         ? ` (filter: "${this.params.glob}")`
-        : '';
+        : "";
 
       // Check if we have any matches
       if (!rawOutput.trim()) {
@@ -126,7 +126,7 @@ class GrepToolInvocation extends BaseToolInvocation<
       }
 
       // Split into lines and count total matches
-      let allLines = rawOutput.split('\n').filter((line) => line.trim());
+      let allLines = rawOutput.split("\n").filter((line) => line.trim());
 
       // Deduplicate lines from potentially overlapping workspace directories.
       // ripgrep reports the same file twice when given paths like /a and /a/sub.
@@ -134,9 +134,9 @@ class GrepToolInvocation extends BaseToolInvocation<
         const seen = new Set<string>();
         allLines = allLines.filter((line) => {
           // ripgrep output format: filepath:linenum:content
-          const firstColon = line.indexOf(':');
+          const firstColon = line.indexOf(":");
           if (firstColon !== -1) {
-            const secondColon = line.indexOf(':', firstColon + 1);
+            const secondColon = line.indexOf(":", firstColon + 1);
             if (secondColon !== -1) {
               const key = line.substring(0, secondColon);
               if (seen.has(key)) return false;
@@ -148,7 +148,7 @@ class GrepToolInvocation extends BaseToolInvocation<
       }
 
       const totalMatches = allLines.length;
-      const matchTerm = totalMatches === 1 ? 'match' : 'matches';
+      const matchTerm = totalMatches === 1 ? "match" : "matches";
 
       // Build header early to calculate available space
       const header = `Found ${totalMatches} ${matchTerm} for pattern "${this.params.pattern}" ${searchLocationDescription}${filterDescription}:\n---\n`;
@@ -168,7 +168,7 @@ class GrepToolInvocation extends BaseToolInvocation<
       }
 
       // Build output and track how many lines we include, respecting character limit
-      let grepOutput = '';
+      let grepOutput = "";
       let truncatedByCharLimit = false;
       let includedLines = 0;
       if (Number.isFinite(charLimit)) {
@@ -185,15 +185,15 @@ class GrepToolInvocation extends BaseToolInvocation<
             currentLength = projectedLength;
           } else {
             const remaining = Math.max(charLimit - currentLength - sep, 10);
-            parts.push(line.slice(0, remaining) + '...');
+            parts.push(line.slice(0, remaining) + "...");
             truncatedByCharLimit = true;
             break;
           }
         }
 
-        grepOutput = parts.join('\n');
+        grepOutput = parts.join("\n");
       } else {
-        grepOutput = linesToInclude.join('\n');
+        grepOutput = linesToInclude.join("\n");
         includedLines = linesToInclude.length;
       }
 
@@ -203,7 +203,7 @@ class GrepToolInvocation extends BaseToolInvocation<
       // Add truncation notice if needed
       if (truncatedByLineLimit || truncatedByCharLimit) {
         const omittedMatches = totalMatches - includedLines;
-        llmContent += `\n---\n[${omittedMatches} ${omittedMatches === 1 ? 'line' : 'lines'} truncated] ...`;
+        llmContent += `\n---\n[${omittedMatches} ${omittedMatches === 1 ? "line" : "lines"} truncated] ...`;
       }
 
       // Build display message (show real count, not truncated)
@@ -217,7 +217,7 @@ class GrepToolInvocation extends BaseToolInvocation<
         returnDisplay: displayMessage,
       };
     } catch (error) {
-      debugLogger.error('Error during ripgrep search operation:', error);
+      debugLogger.error("Error during ripgrep search operation:", error);
       const errorMessage = getErrorMessage(error);
       return {
         llmContent: `Error during grep search operation: ${errorMessage}`,
@@ -235,34 +235,34 @@ class GrepToolInvocation extends BaseToolInvocation<
     const { pattern, paths, glob } = options;
 
     const rgArgs: string[] = [
-      '--line-number',
-      '--no-heading',
-      '--with-filename',
-      '--ignore-case',
-      '--regexp',
+      "--line-number",
+      "--no-heading",
+      "--with-filename",
+      "--ignore-case",
+      "--regexp",
       pattern,
     ];
 
     // Add file exclusions from .gitignore and .tramignore
     const filteringOptions = this.getFileFilteringOptions();
     if (!filteringOptions.respectGitIgnore) {
-      rgArgs.push('--no-ignore-vcs');
+      rgArgs.push("--no-ignore-vcs");
     }
 
-    if (filteringOptions.respectQwenIgnore) {
-      // Load .qwenignore from each workspace directory, not just the primary one
+    if (filteringOptions.respectTramIgnore) {
+      // Load .tramignore from each workspace directory, not just the primary one
       const seenIgnoreFiles = new Set<string>();
       for (const searchPath of paths) {
         const dir =
           fs.existsSync(searchPath) && fs.statSync(searchPath).isDirectory()
             ? searchPath
             : path.dirname(searchPath);
-        const qwenIgnorePath = path.join(dir, '.qwenignore');
+        const qwenIgnorePath = path.join(dir, ".tramignore");
         if (
           !seenIgnoreFiles.has(qwenIgnorePath) &&
           fs.existsSync(qwenIgnorePath)
         ) {
-          rgArgs.push('--ignore-file', qwenIgnorePath);
+          rgArgs.push("--ignore-file", qwenIgnorePath);
           seenIgnoreFiles.add(qwenIgnorePath);
         }
       }
@@ -270,10 +270,10 @@ class GrepToolInvocation extends BaseToolInvocation<
 
     // Add glob pattern if provided
     if (glob) {
-      rgArgs.push('--glob', glob);
+      rgArgs.push("--glob", glob);
     }
 
-    rgArgs.push('--threads', '4');
+    rgArgs.push("--threads", "4");
     // Pass all search paths to ripgrep (it supports multiple paths natively)
     rgArgs.push(...paths);
 
@@ -326,34 +326,34 @@ export class RipGrepTool extends BaseDeclarativeTool<
   constructor(private readonly config: Config) {
     super(
       RipGrepTool.Name,
-      'Grep',
+      "Grep",
       'A powerful search tool built on ripgrep\n\n  Usage:\n  - ALWAYS use Grep for search tasks. NEVER invoke `grep` or `rg` as a Bash command. The Grep tool has been optimized for correct permissions and access.\n  - Supports full regex syntax (e.g., "log.*Error", "function\\s+\\w+")\n  - Filter files with glob parameter (e.g., "*.js", "**/*.tsx")\n  - Use Agent tool for open-ended searches requiring multiple rounds\n  - Pattern syntax: Uses ripgrep (not grep) - special regex characters need escaping (use `interface\\{\\}` to find `interface{}` in Go code)\n',
       Kind.Search,
       {
         properties: {
           pattern: {
-            type: 'string',
+            type: "string",
             description:
-              'The regular expression pattern to search for in file contents',
+              "The regular expression pattern to search for in file contents",
           },
           glob: {
-            type: 'string',
+            type: "string",
             description:
               'Glob pattern to filter files (e.g. "*.js", "*.{ts,tsx}") - maps to rg --glob',
           },
           path: {
-            type: 'string',
+            type: "string",
             description:
-              'File or directory to search in (rg PATH). Defaults to current working directory.',
+              "File or directory to search in (rg PATH). Defaults to current working directory.",
           },
           limit: {
-            type: 'number',
+            type: "number",
             description:
-              'Limit output to first N lines/entries. Optional - shows all matches if not specified.',
+              "Limit output to first N lines/entries. Optional - shows all matches if not specified.",
           },
         },
-        required: ['pattern'],
-        type: 'object',
+        required: ["pattern"],
+        type: "object",
       },
     );
   }

@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import stripAnsi from 'strip-ansi';
-import type { SessionMetrics } from '../telemetry/uiTelemetry.js';
-import type { JsonError, JsonOutput } from './types.js';
+import stripAnsi from "strip-ansi";
+import type { SessionMetrics } from "../telemetry/uiTelemetry.js";
+import type { JsonError, JsonOutput } from "./types.js";
 
 export class JsonFormatter {
   format(response?: string, stats?: SessionMetrics, error?: JsonError): string {

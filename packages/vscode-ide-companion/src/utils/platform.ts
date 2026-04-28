@@ -5,4 +5,4 @@
  */
 
 /** Whether the current platform is Windows */
-export const isWindows = process.platform === 'win32';
+export const isWindows = process.platform === "win32";

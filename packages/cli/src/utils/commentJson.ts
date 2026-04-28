@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import { parse, stringify } from 'comment-json';
-import { writeStderrLine } from './stdioHelpers.js';
+import * as fs from "node:fs";
+import { parse, stringify } from "comment-json";
+import { writeStderrLine } from "./stdioHelpers.js";
 
 /**
  * Updates a JSON file while preserving comments and formatting.
@@ -18,20 +18,20 @@ export function updateSettingsFilePreservingFormat(
   updates: Record<string, unknown>,
 ): boolean {
   if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify(updates, null, 2), 'utf-8');
+    fs.writeFileSync(filePath, JSON.stringify(updates, null, 2), "utf-8");
     return true;
   }
 
-  const originalContent = fs.readFileSync(filePath, 'utf-8');
+  const originalContent = fs.readFileSync(filePath, "utf-8");
 
   let parsed: Record<string, unknown>;
   try {
     parsed = parse(originalContent) as Record<string, unknown>;
   } catch (error) {
-    writeStderrLine('Error parsing settings file.');
+    writeStderrLine("Error parsing settings file.");
     writeStderrLine(error instanceof Error ? error.message : String(error));
     writeStderrLine(
-      'Settings file may be corrupted. Please check the JSON syntax.',
+      "Settings file may be corrupted. Please check the JSON syntax.",
     );
     return false;
   }
@@ -46,7 +46,7 @@ export function updateSettingsFilePreservingFormat(
     parse(updatedContent);
   } catch (validationError) {
     writeStderrLine(
-      'Error: Refusing to write settings file — the result would not be valid JSON.',
+      "Error: Refusing to write settings file — the result would not be valid JSON.",
     );
     writeStderrLine(
       validationError instanceof Error
@@ -56,7 +56,7 @@ export function updateSettingsFilePreservingFormat(
     return false;
   }
 
-  fs.writeFileSync(filePath, updatedContent, 'utf-8');
+  fs.writeFileSync(filePath, updatedContent, "utf-8");
   return true;
 }
 
@@ -69,11 +69,11 @@ export function applyUpdates(
   for (const key of Object.getOwnPropertyNames(updates)) {
     const value = updates[key];
     if (
-      typeof value === 'object' &&
+      typeof value === "object" &&
       value !== null &&
       !Array.isArray(value) &&
       Object.keys(value).length > 0 &&
-      typeof result[key] === 'object' &&
+      typeof result[key] === "object" &&
       result[key] !== null &&
       !Array.isArray(result[key])
     ) {

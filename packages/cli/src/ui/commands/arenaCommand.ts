@@ -11,8 +11,8 @@ import type {
   MessageActionReturn,
   OpenDialogActionReturn,
   SlashCommandActionReturn,
-} from './types.js';
-import { CommandKind } from './types.js';
+} from "./types.js";
+import { CommandKind } from "./types.js";
 import {
   ArenaManager,
   ArenaEventType,
@@ -31,12 +31,12 @@ import {
   type ArenaSessionErrorEvent,
   type ArenaSessionStartEvent,
   type ArenaSessionUpdateEvent,
-} from '@qwen-code/qwen-code-core';
+} from "@tram-ai/tram-core";
 import {
   MessageType,
   type ArenaAgentCardData,
   type HistoryItemWithoutId,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * Parsed model entry with optional auth type.
@@ -67,10 +67,10 @@ function parseArenaArgs(args: string): {
   let task = args;
 
   if (modelsMatch) {
-    const modelStrings = modelsMatch[1]!.split(',').filter(Boolean);
+    const modelStrings = modelsMatch[1]!.split(",").filter(Boolean);
     models = modelStrings.map((str) => {
       // Check for authType:modelId format
-      const colonIndex = str.indexOf(':');
+      const colonIndex = str.indexOf(":");
       if (colonIndex > 0) {
         return {
           authType: str.substring(0, colonIndex),
@@ -79,16 +79,16 @@ function parseArenaArgs(args: string): {
       }
       return { modelId: str };
     });
-    task = task.replace(/--models\s+\S+/, '').trim();
+    task = task.replace(/--models\s+\S+/, "").trim();
   }
 
   // Strip surrounding quotes from task
-  task = task.replace(/^["']|["']$/g, '').trim();
+  task = task.replace(/^["']|["']$/g, "").trim();
 
   return { models, task };
 }
 
-const debugLogger = createDebugLogger('ARENA_COMMAND');
+const debugLogger = createDebugLogger("ARENA_COMMAND");
 
 interface ArenaExecutionInput {
   task: string;
@@ -102,29 +102,29 @@ function buildArenaExecutionInput(
 ): ArenaExecutionInput | MessageActionReturn {
   if (!parsed.task) {
     return {
-      type: 'message',
-      messageType: 'error',
+      type: "message",
+      messageType: "error",
       content:
-        'Usage: /arena start --models model1,model2 <task>\n' +
-        '\n' +
-        'Options:\n' +
-        '  --models [authType:]model1,[authType:]model2\n' +
-        '                            Models to compete (required, at least 2)\n' +
-        '                            Format: authType:modelId or just modelId\n' +
-        '\n' +
-        'Examples:\n' +
+        "Usage: /arena start --models model1,model2 <task>\n" +
+        "\n" +
+        "Options:\n" +
+        "  --models [authType:]model1,[authType:]model2\n" +
+        "                            Models to compete (required, at least 2)\n" +
+        "                            Format: authType:modelId or just modelId\n" +
+        "\n" +
+        "Examples:\n" +
         '  /arena start --models openai:gpt-4o,anthropic:claude-3 "implement sorting"\n' +
-        '  /arena start --models qwen-coder-plus,kimi-for-coding "fix the bug"',
+        '  /arena start --models tramr-plus,kimi-for-coding "fix the bug"',
     };
   }
 
   if (parsed.models.length < 2) {
     return {
-      type: 'message',
-      messageType: 'error',
+      type: "message",
+      messageType: "error",
       content:
-        'Arena requires at least 2 models. Use --models model1,model2 to specify.\n' +
-        'Format: [authType:]modelId (e.g., openai:gpt-4o or just gpt-4o)',
+        "Arena requires at least 2 models. Use --models model1,model2 to specify.\n" +
+        "Format: [authType:]modelId (e.g., openai:gpt-4o or just gpt-4o)",
     };
   }
 
@@ -166,18 +166,18 @@ function recordArenaItem(config: Config, item: HistoryItemWithoutId): void {
     const chatRecorder = config.getChatRecordingService();
     if (!chatRecorder) return;
     chatRecorder.recordSlashCommand({
-      phase: 'result',
-      rawCommand: '/arena',
+      phase: "result",
+      rawCommand: "/arena",
       outputHistoryItems: [{ ...item } as Record<string, unknown>],
     });
   } catch {
-    debugLogger.error('Failed to record arena history item');
+    debugLogger.error("Failed to record arena history item");
   }
 }
 
 function executeArenaCommand(
   config: Config,
-  ui: CommandContext['ui'],
+  ui: CommandContext["ui"],
   input: ArenaExecutionInput,
 ): void {
   // Capture the main session's chat history so arena agents start with
@@ -189,7 +189,7 @@ function executeArenaCommand(
     const fullHistory = config.getGeminiClient().getHistory();
     chatHistory = stripStartupContext(fullHistory);
   } catch {
-    debugLogger.debug('Could not retrieve chat history for arena agents');
+    debugLogger.debug("Could not retrieve chat history for arena agents");
   }
 
   const manager = new ArenaManager(config);
@@ -198,14 +198,14 @@ function executeArenaCommand(
   const agentLabels = new Map<string, string>();
 
   const addArenaMessage = (
-    type: 'info' | 'warning' | 'error' | 'success',
+    type: "info" | "warning" | "error" | "success",
     text: string,
   ) => {
     ui.addItem({ type, text }, Date.now());
   };
 
   const addAndRecordArenaMessage = (
-    type: 'info' | 'warning' | 'error' | 'success',
+    type: "info" | "warning" | "error" | "success",
     text: string,
   ) => {
     const item: HistoryItemWithoutId = { type, text };
@@ -216,7 +216,7 @@ function executeArenaCommand(
   const handleSessionStart = (event: ArenaSessionStartEvent) => {
     const modelList = event.models
       .map((model, index) => `  ${index + 1}. ${model.modelId}`)
-      .join('\n');
+      .join("\n");
     // SESSION_START fires synchronously before the first await in
     // ArenaManager.start(), so the slash command processor's finally
     // block already captures this item — no extra recording needed.
@@ -234,7 +234,7 @@ function executeArenaCommand(
   };
 
   const handleSessionUpdate = (event: ArenaSessionUpdateEvent) => {
-    const attachHintPrefix = 'To view agent panes, run: ';
+    const attachHintPrefix = "To view agent panes, run: ";
     if (event.message.startsWith(attachHintPrefix)) {
       const command = event.message.slice(attachHintPrefix.length).trim();
       addAndRecordArenaMessage(
@@ -244,9 +244,9 @@ function executeArenaCommand(
       return;
     }
 
-    if (event.type === 'success') {
+    if (event.type === "success") {
       addAndRecordArenaMessage(MessageType.SUCCESS, event.message);
-    } else if (event.type === 'info') {
+    } else if (event.type === "info") {
       addAndRecordArenaMessage(MessageType.INFO, event.message);
     } else {
       addAndRecordArenaMessage(MessageType.WARNING, event.message);
@@ -262,7 +262,7 @@ function executeArenaCommand(
   };
 
   const buildAgentCardData = (
-    result: ArenaAgentCompleteEvent['result'],
+    result: ArenaAgentCompleteEvent["result"],
   ): ArenaAgentCardData => ({
     label: result.model.modelId,
     status: result.status,
@@ -285,7 +285,7 @@ function executeArenaCommand(
 
     const agent = buildAgentCardData(event.result);
     const item = {
-      type: 'arena_agent_complete',
+      type: "arena_agent_complete",
       agent,
     } as HistoryItemWithoutId;
     ui.addItem(item, Date.now());
@@ -298,7 +298,7 @@ function executeArenaCommand(
 
   const handleSessionComplete = (event: ArenaSessionCompleteEvent) => {
     const item = {
-      type: 'arena_session_complete',
+      type: "arena_session_complete",
       sessionStatus: event.result.status,
       task: event.result.task,
       totalDurationMs: event.result.totalDurationMs ?? 0,
@@ -353,12 +353,12 @@ function executeArenaCommand(
     })
     .then(
       () => {
-        debugLogger.debug('Arena agents settled');
+        debugLogger.debug("Arena agents settled");
       },
       (error) => {
         const message = error instanceof Error ? error.message : String(error);
         addAndRecordArenaMessage(MessageType.ERROR, `${message}`);
-        debugLogger.error('Arena session failed:', error);
+        debugLogger.error("Arena session failed:", error);
 
         // Clear the stored manager so subsequent /arena start calls
         // are not blocked by the stale reference after a startup failure.
@@ -381,26 +381,26 @@ function executeArenaCommand(
 }
 
 export const arenaCommand: SlashCommand = {
-  name: 'arena',
-  description: 'Manage Arena sessions',
+  name: "arena",
+  description: "Manage Arena sessions",
   kind: CommandKind.BUILT_IN,
   subCommands: [
     {
-      name: 'start',
+      name: "start",
       description:
-        'Start an Arena session with multiple models competing on the same task',
+        "Start an Arena session with multiple models competing on the same task",
       kind: CommandKind.BUILT_IN,
       action: async (
         context: CommandContext,
         args: string,
       ): Promise<void | MessageActionReturn | OpenDialogActionReturn> => {
-        const executionMode = context.executionMode ?? 'interactive';
-        if (executionMode !== 'interactive') {
+        const executionMode = context.executionMode ?? "interactive";
+        if (executionMode !== "interactive") {
           return {
-            type: 'message',
-            messageType: 'error',
+            type: "message",
+            messageType: "error",
             content:
-              'Arena is not supported in non-interactive mode. Use interactive mode to start an Arena session.',
+              "Arena is not supported in non-interactive mode. Use interactive mode to start an Arena session.",
           };
         }
 
@@ -409,9 +409,9 @@ export const arenaCommand: SlashCommand = {
 
         if (!config) {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: 'Configuration not available.',
+            type: "message",
+            messageType: "error",
+            content: "Configuration not available.",
           };
         }
 
@@ -419,23 +419,23 @@ export const arenaCommand: SlashCommand = {
         const existingManager = config.getArenaManager();
         if (existingManager) {
           return {
-            type: 'message',
-            messageType: 'error',
+            type: "message",
+            messageType: "error",
             content:
-              'An Arena session exists. Use /arena stop or /arena select to end it before starting a new one.',
+              "An Arena session exists. Use /arena stop or /arena select to end it before starting a new one.",
           };
         }
 
         const parsed = parseArenaArgs(args);
         if (parsed.models.length === 0) {
           return {
-            type: 'dialog',
-            dialog: 'arena_start',
+            type: "dialog",
+            dialog: "arena_start",
           };
         }
 
         const executionInput = buildArenaExecutionInput(parsed, config);
-        if ('type' in executionInput) {
+        if ("type" in executionInput) {
           return executionInput;
         }
 
@@ -443,91 +443,91 @@ export const arenaCommand: SlashCommand = {
       },
     },
     {
-      name: 'stop',
-      description: 'Stop the current Arena session',
+      name: "stop",
+      description: "Stop the current Arena session",
       kind: CommandKind.BUILT_IN,
       action: async (
         context: CommandContext,
       ): Promise<void | SlashCommandActionReturn> => {
-        const executionMode = context.executionMode ?? 'interactive';
-        if (executionMode !== 'interactive') {
+        const executionMode = context.executionMode ?? "interactive";
+        if (executionMode !== "interactive") {
           return {
-            type: 'message',
-            messageType: 'error',
+            type: "message",
+            messageType: "error",
             content:
-              'Arena is not supported in non-interactive mode. Use interactive mode to stop an Arena session.',
+              "Arena is not supported in non-interactive mode. Use interactive mode to stop an Arena session.",
           };
         }
 
         const { config } = context.services;
         if (!config) {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: 'Configuration not available.',
+            type: "message",
+            messageType: "error",
+            content: "Configuration not available.",
           };
         }
 
         const manager = config.getArenaManager();
         if (!manager) {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: 'No running Arena session found.',
+            type: "message",
+            messageType: "error",
+            content: "No running Arena session found.",
           };
         }
 
         return {
-          type: 'dialog',
-          dialog: 'arena_stop',
+          type: "dialog",
+          dialog: "arena_stop",
         };
       },
     },
     {
-      name: 'status',
-      description: 'Show the current Arena session status',
+      name: "status",
+      description: "Show the current Arena session status",
       kind: CommandKind.BUILT_IN,
       action: async (
         context: CommandContext,
       ): Promise<void | SlashCommandActionReturn> => {
-        const executionMode = context.executionMode ?? 'interactive';
-        if (executionMode !== 'interactive') {
+        const executionMode = context.executionMode ?? "interactive";
+        if (executionMode !== "interactive") {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: 'Arena is not supported in non-interactive mode.',
+            type: "message",
+            messageType: "error",
+            content: "Arena is not supported in non-interactive mode.",
           };
         }
 
         const { config } = context.services;
         if (!config) {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: 'Configuration not available.',
+            type: "message",
+            messageType: "error",
+            content: "Configuration not available.",
           };
         }
 
         const manager = config.getArenaManager();
         if (!manager) {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: 'No Arena session found. Start one with /arena start.',
+            type: "message",
+            messageType: "error",
+            content: "No Arena session found. Start one with /arena start.",
           };
         }
 
         return {
-          type: 'dialog',
-          dialog: 'arena_status',
+          type: "dialog",
+          dialog: "arena_status",
         };
       },
     },
     {
-      name: 'select',
-      altNames: ['choose'],
+      name: "select",
+      altNames: ["choose"],
       description:
-        'Select a model result and merge its diff into the current workspace',
+        "Select a model result and merge its diff into the current workspace",
       kind: CommandKind.BUILT_IN,
       action: async (
         context: CommandContext,
@@ -538,21 +538,21 @@ export const arenaCommand: SlashCommand = {
         | OpenDialogActionReturn
         | ConfirmActionReturn
       > => {
-        const executionMode = context.executionMode ?? 'interactive';
-        if (executionMode !== 'interactive') {
+        const executionMode = context.executionMode ?? "interactive";
+        if (executionMode !== "interactive") {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: 'Arena is not supported in non-interactive mode.',
+            type: "message",
+            messageType: "error",
+            content: "Arena is not supported in non-interactive mode.",
           };
         }
 
         const { config } = context.services;
         if (!config) {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: 'Configuration not available.',
+            type: "message",
+            messageType: "error",
+            content: "Configuration not available.",
           };
         }
 
@@ -560,9 +560,9 @@ export const arenaCommand: SlashCommand = {
 
         if (!manager) {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: 'No arena session found. Start one with /arena start.',
+            type: "message",
+            messageType: "error",
+            content: "No arena session found. Start one with /arena start.",
           };
         }
 
@@ -572,32 +572,32 @@ export const arenaCommand: SlashCommand = {
           sessionStatus === ArenaSessionStatus.INITIALIZING
         ) {
           return {
-            type: 'message',
-            messageType: 'error',
+            type: "message",
+            messageType: "error",
             content:
-              'Arena session is still running. Wait for it to complete or use /arena stop first.',
+              "Arena session is still running. Wait for it to complete or use /arena stop first.",
           };
         }
 
         // Handle --discard flag before checking for successful agents,
         // so users can clean up worktrees even when all agents failed.
         const trimmedArgs = args.trim();
-        if (trimmedArgs === '--discard') {
+        if (trimmedArgs === "--discard") {
           if (!context.overwriteConfirmed) {
             return {
-              type: 'confirm_action',
-              prompt: 'Discard all Arena results and clean up worktrees?',
+              type: "confirm_action",
+              prompt: "Discard all Arena results and clean up worktrees?",
               originalInvocation: {
-                raw: context.invocation?.raw || '/arena select --discard',
+                raw: context.invocation?.raw || "/arena select --discard",
               },
             };
           }
 
           await config.cleanupArenaRuntime(true);
           return {
-            type: 'message',
-            messageType: 'info',
-            content: 'Arena results discarded. All worktrees cleaned up.',
+            type: "message",
+            messageType: "info",
+            content: "Arena results discarded. All worktrees cleaned up.",
           };
         }
 
@@ -606,11 +606,11 @@ export const arenaCommand: SlashCommand = {
 
         if (!hasSuccessful) {
           return {
-            type: 'message',
-            messageType: 'error',
+            type: "message",
+            messageType: "error",
             content:
-              'No successful agent results to select from. All agents failed or were cancelled.\n' +
-              'Use /arena stop to end the session.',
+              "No successful agent results to select from. All agents failed or were cancelled.\n" +
+              "Use /arena stop to end the session.",
           };
         }
 
@@ -624,8 +624,8 @@ export const arenaCommand: SlashCommand = {
 
           if (!matchingAgent) {
             return {
-              type: 'message',
-              messageType: 'error',
+              type: "message",
+              messageType: "error",
               content: `No idle agent found matching "${trimmedArgs}".`,
             };
           }
@@ -634,24 +634,24 @@ export const arenaCommand: SlashCommand = {
           const result = await manager.applyAgentResult(matchingAgent.agentId);
           if (!result.success) {
             return {
-              type: 'message',
-              messageType: 'error',
+              type: "message",
+              messageType: "error",
               content: `Failed to apply changes from ${label}: ${result.error}`,
             };
           }
 
           await config.cleanupArenaRuntime(true);
           return {
-            type: 'message',
-            messageType: 'info',
+            type: "message",
+            messageType: "info",
             content: `Applied changes from ${label} to workspace. Arena session complete.`,
           };
         }
 
         // No args → open the select dialog
         return {
-          type: 'dialog',
-          dialog: 'arena_select',
+          type: "dialog",
+          dialog: "arena_select",
         };
       },
     },

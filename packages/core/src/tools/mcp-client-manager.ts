@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Config } from '../config/config.js';
-import { isSdkMcpServerConfig } from '../config/config.js';
-import type { ToolRegistry } from './tool-registry.js';
+import type { Config } from "../config/config.js";
+import { isSdkMcpServerConfig } from "../config/config.js";
+import type { ToolRegistry } from "./tool-registry.js";
 import {
   McpClient,
   MCPDiscoveryState,
   MCPServerStatus,
   populateMcpServerCommand,
-} from './mcp-client.js';
-import type { SendSdkMcpMessage } from './mcp-client.js';
-import { getErrorMessage } from '../utils/errors.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import type { EventEmitter } from 'node:events';
-import type { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
+} from "./mcp-client.js";
+import type { SendSdkMcpMessage } from "./mcp-client.js";
+import { getErrorMessage } from "../utils/errors.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import type { EventEmitter } from "node:events";
+import type { ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
 
-const debugLogger = createDebugLogger('MCP');
+const debugLogger = createDebugLogger("MCP");
 
 /**
  * Configuration for MCP health monitoring
@@ -92,7 +92,7 @@ export class McpClientManager {
 
     this.discoveryState = MCPDiscoveryState.IN_PROGRESS;
 
-    this.eventEmitter?.emit('mcp-client-update', this.clients);
+    this.eventEmitter?.emit("mcp-client-update", this.clients);
     const discoveryPromises = Object.entries(servers).map(
       async ([name, config]) => {
         // Skip disabled servers
@@ -117,13 +117,13 @@ export class McpClientManager {
         );
         this.clients.set(name, client);
 
-        this.eventEmitter?.emit('mcp-client-update', this.clients);
+        this.eventEmitter?.emit("mcp-client-update", this.clients);
         try {
           await client.connect();
           await client.discover(cliConfig);
-          this.eventEmitter?.emit('mcp-client-update', this.clients);
+          this.eventEmitter?.emit("mcp-client-update", this.clients);
         } catch (error) {
-          this.eventEmitter?.emit('mcp-client-update', this.clients);
+          this.eventEmitter?.emit("mcp-client-update", this.clients);
           // Log the error but don't let a single failed server stop the others
           debugLogger.error(
             `Error during discovery for server '${name}': ${getErrorMessage(
@@ -168,7 +168,7 @@ export class McpClientManager {
         );
       } finally {
         this.clients.delete(serverName);
-        this.eventEmitter?.emit('mcp-client-update', this.clients);
+        this.eventEmitter?.emit("mcp-client-update", this.clients);
       }
     }
 
@@ -188,7 +188,7 @@ export class McpClientManager {
     );
 
     this.clients.set(serverName, client);
-    this.eventEmitter?.emit('mcp-client-update', this.clients);
+    this.eventEmitter?.emit("mcp-client-update", this.clients);
 
     try {
       await client.connect();
@@ -203,7 +203,7 @@ export class McpClientManager {
         )}`,
       );
     } finally {
-      this.eventEmitter?.emit('mcp-client-update', this.clients);
+      this.eventEmitter?.emit("mcp-client-update", this.clients);
     }
   }
 
@@ -253,7 +253,7 @@ export class McpClientManager {
         this.clients.delete(serverName);
         this.consecutiveFailures.delete(serverName);
         this.isReconnecting.delete(serverName);
-        this.eventEmitter?.emit('mcp-client-update', this.clients);
+        this.eventEmitter?.emit("mcp-client-update", this.clients);
       }
     }
   }
@@ -487,7 +487,7 @@ export class McpClientManager {
     // Remove tools for this server from registry
     this.toolRegistry.removeMcpToolsByServer(serverName);
 
-    this.eventEmitter?.emit('mcp-client-update', this.clients);
+    this.eventEmitter?.emit("mcp-client-update", this.clients);
   }
 
   async readResource(
@@ -520,7 +520,7 @@ export class McpClientManager {
         sdkCallback,
       );
       this.clients.set(serverName, client);
-      this.eventEmitter?.emit('mcp-client-update', this.clients);
+      this.eventEmitter?.emit("mcp-client-update", this.clients);
     }
 
     if (client.getStatus() !== MCPServerStatus.CONNECTED) {

@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box } from 'ink';
-import { Notifications } from '../components/Notifications.js';
-import { MainContent } from '../components/MainContent.js';
-import { DialogManager } from '../components/DialogManager.js';
-import { Composer } from '../components/Composer.js';
-import { Footer } from '../components/Footer.js';
-import { ExitWarning } from '../components/ExitWarning.js';
-import { BtwMessage } from '../components/messages/BtwMessage.js';
-import { useUIState } from '../contexts/UIStateContext.js';
+import type React from "react";
+import { Box } from "ink";
+import { Notifications } from "../components/Notifications.js";
+import { MainContent } from "../components/MainContent.js";
+import { DialogManager } from "../components/DialogManager.js";
+import { Composer } from "../components/Composer.js";
+import { Footer } from "../components/Footer.js";
+import { ExitWarning } from "../components/ExitWarning.js";
+import { BtwMessage } from "../components/messages/BtwMessage.js";
+import { useUIState } from "../contexts/UIStateContext.js";
 
 export const ScreenReaderAppLayout: React.FC = () => {
   const uiState = useUIState();

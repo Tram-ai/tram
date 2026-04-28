@@ -20,7 +20,7 @@ interface IconvLite {
 // iconv-lite is a CJS module. Under NodeNext resolution, its ambient type
 // declarations don't map correctly. We import the default export (which is
 // the CJS module.exports object) and cast it to a proper interface.
-import iconvModule from 'iconv-lite';
+import iconvModule from "iconv-lite";
 const iconvLite: IconvLite = iconvModule as unknown as IconvLite;
 
 /**
@@ -60,6 +60,6 @@ export function iconvEncodingExists(encoding: string): boolean {
  * @returns True if the encoding is UTF-8 or ASCII compatible
  */
 export function isUtf8CompatibleEncoding(encoding: string): boolean {
-  const lower = encoding.toLowerCase().replace(/[^a-z0-9]/g, '');
-  return lower === 'utf8' || lower === 'ascii' || lower === 'usascii';
+  const lower = encoding.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return lower === "utf8" || lower === "ascii" || lower === "usascii";
 }

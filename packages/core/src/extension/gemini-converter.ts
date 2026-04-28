@@ -8,16 +8,16 @@
  * Converter for Gemini extensions to TRAM format.
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { glob } from 'glob';
-import type { ExtensionConfig } from './extensionManager.js';
-import type { ExtensionSetting } from './extensionSettings.js';
-import { ExtensionStorage } from './storage.js';
-import { convertTomlToMarkdown } from '../utils/toml-to-markdown-converter.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { glob } from "glob";
+import type { ExtensionConfig } from "./extensionManager.js";
+import type { ExtensionSetting } from "./extensionSettings.js";
+import { ExtensionStorage } from "./storage.js";
+import { convertTomlToMarkdown } from "../utils/toml-to-markdown-converter.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('GEMINI_CONVERTER');
+const debugLogger = createDebugLogger("GEMINI_CONVERTER");
 
 export interface GeminiExtensionConfig {
   name: string;
@@ -35,13 +35,13 @@ export interface GeminiExtensionConfig {
 export function convertGeminiToTramConfig(
   extensionDir: string,
 ): ExtensionConfig {
-  const configFilePath = path.join(extensionDir, 'gemini-extension.json');
-  const configContent = fs.readFileSync(configFilePath, 'utf-8');
+  const configFilePath = path.join(extensionDir, "gemini-extension.json");
+  const configContent = fs.readFileSync(configFilePath, "utf-8");
   const geminiConfig: GeminiExtensionConfig = JSON.parse(configContent);
   // Validate required fields
   if (!geminiConfig.name || !geminiConfig.version) {
     throw new Error(
-      'Gemini extension config must have name and version fields',
+      "Gemini extension config must have name and version fields",
     );
   }
 
@@ -51,7 +51,7 @@ export function convertGeminiToTramConfig(
   return {
     name: geminiConfig.name,
     version: geminiConfig.version,
-    mcpServers: geminiConfig.mcpServers as ExtensionConfig['mcpServers'],
+    mcpServers: geminiConfig.mcpServers as ExtensionConfig["mcpServers"],
     contextFileName: geminiConfig.contextFileName,
     settings,
   };
@@ -80,17 +80,17 @@ export async function convertGeminiExtensionPackage(
     await copyDirectory(extensionDir, tmpDir);
 
     // Step 2: Convert TOML commands to Markdown in commands folder
-    const commandsDir = path.join(tmpDir, 'commands');
+    const commandsDir = path.join(tmpDir, "commands");
     if (fs.existsSync(commandsDir)) {
       await convertCommandsDirectory(commandsDir);
     }
 
     // Step 3: Create tram-extension.json with converted config
-    const tramConfigPath = path.join(tmpDir, 'tram-extension.json');
+    const tramConfigPath = path.join(tmpDir, "tram-extension.json");
     fs.writeFileSync(
       tramConfigPath,
       JSON.stringify(geminiConfig, null, 2),
-      'utf-8',
+      "utf-8",
     );
 
     return {
@@ -157,7 +157,7 @@ export async function copyDirectory(
  */
 async function convertCommandsDirectory(commandsDir: string): Promise<void> {
   // Find all .toml files in the commands directory
-  const tomlFiles = await glob('**/*.toml', {
+  const tomlFiles = await glob("**/*.toml", {
     cwd: commandsDir,
     nodir: true,
     dot: false,
@@ -169,16 +169,16 @@ async function convertCommandsDirectory(commandsDir: string): Promise<void> {
 
     try {
       // Read TOML file
-      const tomlContent = fs.readFileSync(tomlPath, 'utf-8');
+      const tomlContent = fs.readFileSync(tomlPath, "utf-8");
 
       // Convert to Markdown
       const markdownContent = convertTomlToMarkdown(tomlContent);
 
       // Generate Markdown file path (same location, .md extension)
-      const markdownPath = tomlPath.replace(/\.toml$/, '.md');
+      const markdownPath = tomlPath.replace(/\.toml$/, ".md");
 
       // Write Markdown file
-      fs.writeFileSync(markdownPath, markdownContent, 'utf-8');
+      fs.writeFileSync(markdownPath, markdownContent, "utf-8");
 
       // Delete original TOML file
       fs.unlinkSync(tomlPath);
@@ -198,32 +198,32 @@ async function convertCommandsDirectory(commandsDir: string): Promise<void> {
  * @returns true if config appears to be Gemini format
  */
 export function isGeminiExtensionConfig(extensionDir: string) {
-  const configFilePath = path.join(extensionDir, 'gemini-extension.json');
+  const configFilePath = path.join(extensionDir, "gemini-extension.json");
   if (!fs.existsSync(configFilePath)) {
     return false;
   }
 
-  const configContent = fs.readFileSync(configFilePath, 'utf-8');
+  const configContent = fs.readFileSync(configFilePath, "utf-8");
   const parsedConfig = JSON.parse(configContent);
 
-  if (typeof parsedConfig !== 'object' || parsedConfig === null) {
+  if (typeof parsedConfig !== "object" || parsedConfig === null) {
     return false;
   }
 
   const obj = parsedConfig as Record<string, unknown>;
 
   // Must have name and version
-  if (typeof obj['name'] !== 'string' || typeof obj['version'] !== 'string') {
+  if (typeof obj["name"] !== "string" || typeof obj["version"] !== "string") {
     return false;
   }
 
   // Check for Gemini-specific settings format
-  if (obj['settings'] && Array.isArray(obj['settings'])) {
-    const firstSetting = obj['settings'][0];
+  if (obj["settings"] && Array.isArray(obj["settings"])) {
+    const firstSetting = obj["settings"][0];
     if (
       firstSetting &&
-      typeof firstSetting === 'object' &&
-      'envVar' in firstSetting
+      typeof firstSetting === "object" &&
+      "envVar" in firstSetting
     ) {
       return true;
     }

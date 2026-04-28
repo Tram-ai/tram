@@ -6,23 +6,23 @@
  * Edit tool call component - specialized for file editing operations
  */
 
-import { useMemo } from 'react';
+import { useMemo } from "react";
 import {
   groupContent,
   mapToolStatusToContainerStatus,
-} from './shared/index.js';
+} from "./shared/index.js";
 import type {
   BaseToolCallProps,
   ToolCallContainerProps,
-} from './shared/index.js';
-import { FileLink } from '../layout/FileLink.js';
+} from "./shared/index.js";
+import { FileLink } from "../layout/FileLink.js";
 
 /**
  * Custom ToolCallContainer for EditToolCall with specific styling
  */
 const EditToolCallContainer: React.FC<ToolCallContainerProps> = ({
   label,
-  status = 'success',
+  status = "success",
   children,
   toolCallId: _toolCallId,
   labelSuffix,
@@ -31,7 +31,7 @@ const EditToolCallContainer: React.FC<ToolCallContainerProps> = ({
   isLast = false,
 }) => (
   <div
-    className={`tram-message message-item ${_className || ''} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
+    className={`tram-message message-item ${_className || ""} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
     data-first={isFirst}
     data-last={isLast}
   >
@@ -58,8 +58,8 @@ const getDiffSummary = (
   oldText: string | null | undefined,
   newText: string | undefined,
 ): string => {
-  const oldLines = oldText ? oldText.split('\n').length : 0;
-  const newLines = newText ? newText.split('\n').length : 0;
+  const oldLines = oldText ? oldText.split("\n").length : 0;
+  const newLines = newText ? newText.split("\n").length : 0;
   const diff = newLines - oldLines;
 
   if (diff > 0) {
@@ -67,7 +67,7 @@ const getDiffSummary = (
   } else if (diff < 0) {
     return `${diff} lines`;
   } else {
-    return 'Modified';
+    return "Modified";
   }
 };
 
@@ -86,9 +86,9 @@ export const EditToolCall: React.FC<BaseToolCallProps> = ({
   const { errors, diffs } = useMemo(() => groupContent(content), [content]);
 
   // Failed case: show explicit failed message and render inline diffs
-  if (toolCall.status === 'failed') {
+  if (toolCall.status === "failed") {
     const firstDiff = diffs[0];
-    const path = firstDiff?.path || locations?.[0]?.path || '';
+    const path = firstDiff?.path || locations?.[0]?.path || "";
     const containerStatus = mapToolStatusToContainerStatus(toolCall.status);
     return (
       <div
@@ -122,10 +122,10 @@ export const EditToolCall: React.FC<BaseToolCallProps> = ({
 
   // Error case: show error
   if (errors.length > 0) {
-    const path = diffs[0]?.path || locations?.[0]?.path || '';
+    const path = diffs[0]?.path || locations?.[0]?.path || "";
     return (
       <EditToolCallContainer
-        label={'Edit'}
+        label={"Edit"}
         status="error"
         toolCallId={toolCallId}
         isFirst={isFirst}
@@ -140,7 +140,7 @@ export const EditToolCall: React.FC<BaseToolCallProps> = ({
           ) : undefined
         }
       >
-        {errors.join('\n')}
+        {errors.join("\n")}
       </EditToolCallContainer>
     );
   }
@@ -148,7 +148,7 @@ export const EditToolCall: React.FC<BaseToolCallProps> = ({
   // Success case with diff: show minimal inline preview
   if (diffs.length > 0) {
     const firstDiff = diffs[0];
-    const path = firstDiff.path || (locations && locations[0]?.path) || '';
+    const path = firstDiff.path || (locations && locations[0]?.path) || "";
     const summary = getDiffSummary(firstDiff.oldText, firstDiff.newText);
     const containerStatus = mapToolStatusToContainerStatus(toolCall.status);
     return (

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ConfigParameters } from '../config/config.js';
-import { Config } from '../config/config.js';
+import type { ConfigParameters } from "../config/config.js";
+import { Config } from "../config/config.js";
 
 /**
  * Default parameters used for {@link FAKE_CONFIG}
@@ -14,9 +14,9 @@ export const DEFAULT_CONFIG_PARAMETERS: ConfigParameters = {
   usageStatisticsEnabled: true,
   debugMode: false,
   proxy: undefined,
-  model: 'tram-9001-super-duper',
-  targetDir: '/',
-  cwd: '/',
+  model: "tram-9001-super-duper",
+  targetDir: "/",
+  cwd: "/",
 };
 
 /**

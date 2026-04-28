@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box } from 'ink';
-import { RadioButtonSelect } from '../../shared/RadioButtonSelect.js';
-import type { WizardStepProps } from '../types.js';
-import { t } from '../../../../i18n/index.js';
+import { Box } from "ink";
+import { RadioButtonSelect } from "../../shared/RadioButtonSelect.js";
+import type { WizardStepProps } from "../types.js";
+import { t } from "../../../../i18n/index.js";
 
 interface GenerationOption {
   label: string;
-  value: 'tram' | 'manual';
+  value: "tram" | "manual";
 }
 
 const generationOptions: GenerationOption[] = [
   {
     get label() {
-      return t('Generate with TRAM (Recommended)');
+      return t("Generate with TRAM (Recommended)");
     },
-    value: 'tram',
+    value: "tram",
   },
   {
     get label() {
-      return t('Manual Creation');
+      return t("Manual Creation");
     },
-    value: 'manual',
+    value: "manual",
   },
 ];
 
@@ -39,8 +39,8 @@ export function GenerationMethodSelector({
   onPrevious: _onPrevious,
 }: WizardStepProps) {
   const handleSelect = (selectedValue: string) => {
-    const method = selectedValue as 'tram' | 'manual';
-    dispatch({ type: 'SET_GENERATION_METHOD', method });
+    const method = selectedValue as "tram" | "manual";
+    dispatch({ type: "SET_GENERATION_METHOD", method });
     onNext();
   };
 

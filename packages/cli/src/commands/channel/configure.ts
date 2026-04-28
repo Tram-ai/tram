@@ -1,34 +1,34 @@
-import type { CommandModule } from 'yargs';
-import { writeStderrLine, writeStdoutLine } from '../../utils/stdioHelpers.js';
+import type { CommandModule } from "yargs";
+import { writeStderrLine, writeStdoutLine } from "../../utils/stdioHelpers.js";
 import {
   loadAccount,
   saveAccount,
   clearAccount,
   DEFAULT_BASE_URL,
-} from '@qwen-code/channel-weixin/accounts';
-import { startLogin, waitForLogin } from '@qwen-code/channel-weixin/login';
+} from "@tram-ai/channel-weixin/accounts";
+import { startLogin, waitForLogin } from "@tram-ai/channel-weixin/login";
 
 export const configureWeixinCommand: CommandModule<
   object,
   { action: string | undefined }
 > = {
-  command: 'configure-weixin [action]',
-  describe: 'Configure WeChat channel (login via QR code)',
+  command: "configure-weixin [action]",
+  describe: "Configure WeChat channel (login via QR code)",
   builder: (yargs) =>
-    yargs.positional('action', {
-      type: 'string',
+    yargs.positional("action", {
+      type: "string",
       describe: '"clear" to remove stored credentials, omit to login',
     }),
   handler: async (argv) => {
     const { action } = argv;
 
-    if (action === 'clear') {
+    if (action === "clear") {
       clearAccount();
-      writeStdoutLine('WeChat credentials cleared.');
+      writeStdoutLine("WeChat credentials cleared.");
       return;
     }
 
-    if (action === 'status') {
+    if (action === "status") {
       const account = loadAccount();
       if (account) {
         writeStdoutLine(`WeChat account configured (saved ${account.savedAt})`);
@@ -37,7 +37,7 @@ export const configureWeixinCommand: CommandModule<
           writeStdoutLine(`  User ID: ${account.userId}`);
         }
       } else {
-        writeStdoutLine('WeChat account not configured.');
+        writeStdoutLine("WeChat account not configured.");
       }
       return;
     }
@@ -48,12 +48,12 @@ export const configureWeixinCommand: CommandModule<
       writeStdoutLine(
         `Existing WeChat credentials found (saved ${existing.savedAt}).`,
       );
-      writeStdoutLine('Re-running login will overwrite them.\n');
+      writeStdoutLine("Re-running login will overwrite them.\n");
     }
 
     const baseUrl = DEFAULT_BASE_URL;
 
-    writeStdoutLine('Starting WeChat QR code login...\n');
+    writeStdoutLine("Starting WeChat QR code login...\n");
 
     try {
       const qrcodeId = await startLogin(baseUrl);
@@ -66,13 +66,13 @@ export const configureWeixinCommand: CommandModule<
           userId: result.userId,
           savedAt: new Date().toISOString(),
         });
-        writeStdoutLine('\n' + result.message);
+        writeStdoutLine("\n" + result.message);
         writeStdoutLine(
-          'Credentials saved. You can now start a weixin channel with:',
+          "Credentials saved. You can now start a weixin channel with:",
         );
-        writeStdoutLine('  qwen channel start <name>');
+        writeStdoutLine("  tram channel start <name>");
       } else {
-        writeStderrLine('\n' + result.message);
+        writeStderrLine("\n" + result.message);
         process.exit(1);
       }
     } catch (err) {

@@ -4,23 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as path from 'node:path';
-import * as os from 'node:os';
-import * as fs from 'node:fs';
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { getProjectHash, sanitizeCwd } from '../utils/paths.js';
+import * as path from "node:path";
+import * as os from "node:os";
+import * as fs from "node:fs";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { getProjectHash, sanitizeCwd } from "../utils/paths.js";
 
-export const TRAM_DIR = '.tram';
-export const GOOGLE_ACCOUNTS_FILENAME = 'google_accounts.json';
-export const OAUTH_FILE = 'oauth_creds.json';
-export const SKILL_PROVIDER_CONFIG_DIRS = ['.qwen', '.agents'];
-const TMP_DIR_NAME = 'tmp';
-const BIN_DIR_NAME = 'bin';
-const PROJECT_DIR_NAME = 'projects';
-const IDE_DIR_NAME = 'ide';
-const PLANS_DIR_NAME = 'plans';
-const DEBUG_DIR_NAME = 'debug';
-const ARENA_DIR_NAME = 'arena';
+export const TRAM_DIR = ".tram";
+export const GOOGLE_ACCOUNTS_FILENAME = "google_accounts.json";
+export const OAUTH_FILE = "oauth_creds.json";
+export const SKILL_PROVIDER_CONFIG_DIRS = [".tram", ".agents"];
+const TMP_DIR_NAME = "tmp";
+const BIN_DIR_NAME = "bin";
+const PROJECT_DIR_NAME = "projects";
+const IDE_DIR_NAME = "ide";
+const PLANS_DIR_NAME = "plans";
+const DEBUG_DIR_NAME = "debug";
+const ARENA_DIR_NAME = "arena";
 
 export class Storage {
   private readonly targetDir: string;
@@ -48,12 +48,12 @@ export class Storage {
 
     let resolved = dir;
     if (
-      resolved === '~' ||
-      resolved.startsWith('~/') ||
-      resolved.startsWith('~\\')
+      resolved === "~" ||
+      resolved.startsWith("~/") ||
+      resolved.startsWith("~\\")
     ) {
       const relativeSegments =
-        resolved === '~'
+        resolved === "~"
           ? []
           : resolved
               .slice(2)
@@ -73,7 +73,7 @@ export class Storage {
    * Pass null/undefined/empty string to reset to default (getGlobalQwenDir()).
    * @param dir - The directory path, or null/undefined to reset
    * @param cwd - Base directory for resolving relative paths (defaults to process.cwd()).
-   *              Pass the project root so that relative values like ".qwen" resolve
+   *              Pass the project root so that relative values like ".tram" resolve
    *              per-project, enabling a single global config to work across all projects.
    */
   static setRuntimeBaseDir(dir: string | null | undefined, cwd?: string): void {
@@ -101,7 +101,7 @@ export class Storage {
    * @returns Absolute path to the runtime output base directory
    */
   static getRuntimeBaseDir(): string {
-    const envDir = process.env['QWEN_RUNTIME_DIR'];
+    const envDir = process.env["QWEN_RUNTIME_DIR"];
     if (envDir) {
       return (
         Storage.resolveRuntimeBaseDir(envDir) ?? Storage.getGlobalQwenDir()
@@ -121,9 +121,13 @@ export class Storage {
   static getGlobalQwenDir(): string {
     const homeDir = os.homedir();
     if (!homeDir) {
-      return path.join(os.tmpdir(), '.tram');
+      return path.join(os.tmpdir(), ".tram");
     }
     return path.join(homeDir, TRAM_DIR);
+  }
+
+  static getGlobalTramDir(): string {
+    return Storage.getGlobalQwenDir();
   }
 
   /**
@@ -132,7 +136,7 @@ export class Storage {
    * Stored at ~/.tram/ops-data/
    */
   static getOpsDataDir(): string {
-    return path.join(Storage.getGlobalTramDir(), 'ops-data');
+    return path.join(Storage.getGlobalTramDir(), "ops-data");
   }
 
   /**
@@ -141,19 +145,19 @@ export class Storage {
    * Stored at ~/.tram/ops-data/ops-memory.md
    */
   static getOpsMemoryFilePath(): string {
-    return path.join(Storage.getOpsDataDir(), 'ops-memory.md');
+    return path.join(Storage.getOpsDataDir(), "ops-memory.md");
   }
 
   static getMcpOAuthTokensPath(): string {
-    return path.join(Storage.getGlobalTramDir(), 'mcp-oauth-tokens.json');
+    return path.join(Storage.getGlobalTramDir(), "mcp-oauth-tokens.json");
   }
 
   static getGlobalSettingsPath(): string {
-    return path.join(Storage.getGlobalTramDir(), 'settings.json');
+    return path.join(Storage.getGlobalTramDir(), "settings.json");
   }
 
   static getInstallationIdPath(): string {
-    return path.join(Storage.getGlobalTramDir(), 'installation_id');
+    return path.join(Storage.getGlobalTramDir(), "installation_id");
   }
 
   static getGoogleAccountsPath(): string {
@@ -161,11 +165,11 @@ export class Storage {
   }
 
   static getUserCommandsDir(): string {
-    return path.join(Storage.getGlobalTramDir(), 'commands');
+    return path.join(Storage.getGlobalTramDir(), "commands");
   }
 
   static getGlobalMemoryFilePath(): string {
-    return path.join(Storage.getGlobalTramDir(), 'memory.md');
+    return path.join(Storage.getGlobalTramDir(), "memory.md");
   }
 
   static getGlobalTempDir(): string {
@@ -201,7 +205,11 @@ export class Storage {
   }
 
   getQwenDir(): string {
-    return path.join(this.targetDir, QWEN_DIR);
+    return path.join(this.targetDir, TRAM_DIR);
+  }
+
+  getTramDir(): string {
+    return this.getQwenDir();
   }
 
   getProjectDir(): string {
@@ -234,48 +242,48 @@ export class Storage {
 
   getHistoryDir(): string {
     const hash = getProjectHash(this.getProjectRoot());
-    const historyDir = path.join(Storage.getRuntimeBaseDir(), 'history');
+    const historyDir = path.join(Storage.getRuntimeBaseDir(), "history");
     const targetDir = path.join(historyDir, hash);
     return targetDir;
   }
 
   getWorkspaceSettingsPath(): string {
-    return path.join(this.getTramDir(), 'settings.json');
+    return path.join(this.getTramDir(), "settings.json");
   }
 
   getProjectCommandsDir(): string {
-    return path.join(this.getTramDir(), 'commands');
+    return path.join(this.getTramDir(), "commands");
   }
 
   getProjectTempCheckpointsDir(): string {
-    return path.join(this.getProjectTempDir(), 'checkpoints');
+    return path.join(this.getProjectTempDir(), "checkpoints");
   }
 
   getExtensionsDir(): string {
-    return path.join(this.getTramDir(), 'extensions');
+    return path.join(this.getTramDir(), "extensions");
   }
 
   getExtensionsConfigPath(): string {
-    return path.join(this.getExtensionsDir(), 'tram-extension.json');
+    return path.join(this.getExtensionsDir(), "tram-extension.json");
   }
 
   getUserSkillsDirs(): string[] {
     const homeDir = os.homedir() || os.tmpdir();
     return SKILL_PROVIDER_CONFIG_DIRS.map((dir) =>
-      path.join(homeDir, dir, 'skills'),
+      path.join(homeDir, dir, "skills"),
     );
   }
 
   /**
-   * Returns the user-level extensions directory (~/.qwen/extensions/).
+   * Returns the user-level extensions directory (~/.tram/extensions/).
    * Extensions installed at user scope are stored here, as opposed to
-   * project-level extensions which live in <project>/.qwen/extensions/.
+   * project-level extensions which live in <project>/.tram/extensions/.
    */
   static getUserExtensionsDir(): string {
-    return path.join(Storage.getGlobalQwenDir(), 'extensions');
+    return path.join(Storage.getGlobalQwenDir(), "extensions");
   }
 
   getHistoryFilePath(): string {
-    return path.join(this.getProjectTempDir(), 'shell_history');
+    return path.join(this.getProjectTempDir(), "shell_history");
   }
 }

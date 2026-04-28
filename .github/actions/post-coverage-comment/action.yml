@@ -1,43 +1,43 @@
-name: 'Post Coverage Comment Action'
-description: 'Prepares and posts a code coverage comment to a PR.'
+name: "Post Coverage Comment Action"
+description: "Prepares and posts a code coverage comment to a PR."
 
 inputs:
   cli_json_file:
-    description: 'Path to CLI coverage-summary.json'
+    description: "Path to CLI coverage-summary.json"
     required: true
   core_json_file:
-    description: 'Path to Core coverage-summary.json'
+    description: "Path to Core coverage-summary.json"
     required: true
   cli_full_text_summary_file:
-    description: 'Path to CLI full-text-summary.txt'
+    description: "Path to CLI full-text-summary.txt"
     required: true
   core_full_text_summary_file:
-    description: 'Path to Core full-text-summary.txt'
+    description: "Path to Core full-text-summary.txt"
     required: true
   node_version:
-    description: 'Node.js version for context in messages'
+    description: "Node.js version for context in messages"
     required: true
   os:
-    description: 'The os for context in messages'
+    description: "The os for context in messages"
     required: true
   github_token:
-    description: 'GitHub token for posting comments'
+    description: "GitHub token for posting comments"
     required: true
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
-    - name: 'Prepare Coverage Comment'
-      id: 'prep_coverage_comment'
-      shell: 'bash'
+    - name: "Prepare Coverage Comment"
+      id: "prep_coverage_comment"
+      shell: "bash"
       env:
-        CLI_JSON_FILE: '${{ inputs.cli_json_file }}'
-        CORE_JSON_FILE: '${{ inputs.core_json_file }}'
-        CLI_FULL_TEXT_SUMMARY_FILE: '${{ inputs.cli_full_text_summary_file }}'
-        CORE_FULL_TEXT_SUMMARY_FILE: '${{ inputs.core_full_text_summary_file }}'
-        COMMENT_FILE: 'coverage-comment.md'
-        NODE_VERSION: '${{ inputs.node_version }}'
-        OS: '${{ inputs.os }}'
+        CLI_JSON_FILE: "${{ inputs.cli_json_file }}"
+        CORE_JSON_FILE: "${{ inputs.core_json_file }}"
+        CLI_FULL_TEXT_SUMMARY_FILE: "${{ inputs.cli_full_text_summary_file }}"
+        CORE_FULL_TEXT_SUMMARY_FILE: "${{ inputs.core_full_text_summary_file }}"
+        COMMENT_FILE: "coverage-comment.md"
+        NODE_VERSION: "${{ inputs.node_version }}"
+        OS: "${{ inputs.os }}"
       run: |-
         # Extract percentages using jq for the main table
         if [ -f "${CLI_JSON_FILE}" ]; then
@@ -104,11 +104,11 @@ runs:
 
         echo "_For detailed HTML reports, please see the 'coverage-reports-${NODE_VERSION}-${OS}' artifact from the main CI run._" >> "${COMMENT_FILE}"
 
-    - name: 'Post Coverage Comment'
-      uses: 'thollander/actions-comment-pull-request@65f9e5c9a1f2cd378bd74b2e057c9736982a8e74' # ratchet:thollander/actions-comment-pull-request@v3
+    - name: "Post Coverage Comment"
+      uses: "thollander/actions-comment-pull-request@65f9e5c9a1f2cd378bd74b2e057c9736982a8e74" # ratchet:thollander/actions-comment-pull-request@v3
       if: |-
         ${{ always() }}
       with:
-        file-path: 'coverage-comment.md' # Use the generated file directly
-        comment-tag: 'code-coverage-summary'
-        github-token: '${{ inputs.github_token }}'
+        file-path: "coverage-comment.md" # Use the generated file directly
+        comment-tag: "code-coverage-summary"
+        github-token: "${{ inputs.github_token }}"

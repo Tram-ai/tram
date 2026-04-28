@@ -10,29 +10,29 @@ export function humanReadableCron(cronExpr: string): string {
 
   // */N * * * * → Every N minutes
   if (
-    min!.startsWith('*/') &&
-    hour === '*' &&
-    dom === '*' &&
-    mon === '*' &&
-    dow === '*'
+    min!.startsWith("*/") &&
+    hour === "*" &&
+    dom === "*" &&
+    mon === "*" &&
+    dow === "*"
   ) {
     const n = parseInt(min!.slice(2), 10);
     if (!isNaN(n)) {
-      return n === 1 ? 'Every minute' : `Every ${n} minutes`;
+      return n === 1 ? "Every minute" : `Every ${n} minutes`;
     }
   }
 
   // 0 */N * * * → Every N hours (or single minute with */N hours)
   if (
     /^\d+$/.test(min!) &&
-    hour!.startsWith('*/') &&
-    dom === '*' &&
-    mon === '*' &&
-    dow === '*'
+    hour!.startsWith("*/") &&
+    dom === "*" &&
+    mon === "*" &&
+    dow === "*"
   ) {
     const n = parseInt(hour!.slice(2), 10);
     if (!isNaN(n)) {
-      return n === 1 ? 'Every hour' : `Every ${n} hours`;
+      return n === 1 ? "Every hour" : `Every ${n} hours`;
     }
   }
 
@@ -40,13 +40,13 @@ export function humanReadableCron(cronExpr: string): string {
   if (
     /^\d+$/.test(min!) &&
     /^\d+$/.test(hour!) &&
-    dom!.startsWith('*/') &&
-    mon === '*' &&
-    dow === '*'
+    dom!.startsWith("*/") &&
+    mon === "*" &&
+    dow === "*"
   ) {
     const n = parseInt(dom!.slice(2), 10);
     if (!isNaN(n)) {
-      return n === 1 ? 'Every day' : `Every ${n} days`;
+      return n === 1 ? "Every day" : `Every ${n} days`;
     }
   }
 

@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useCompletion } from './useCompletion.js';
-import type { TextBuffer } from '../components/shared/text-buffer.js';
-import type { Suggestion } from '../components/SuggestionsDisplay.js';
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useCompletion } from "./useCompletion.js";
+import type { TextBuffer } from "../components/shared/text-buffer.js";
+import type { Suggestion } from "../components/SuggestionsDisplay.js";
 
 function useDebouncedValue<T>(value: T, delay = 200): T {
   const [debounced, setDebounced] = useState(value);
@@ -53,20 +53,20 @@ export function useReverseSearchCompletion(
   const debouncedQuery = useDebouncedValue(buffer.text, 100);
 
   // incremental search
-  const prevQueryRef = useRef<string>('');
+  const prevQueryRef = useRef<string>("");
   const prevMatchesRef = useRef<Suggestion[]>([]);
 
   // Clear incremental cache when activating reverse search
   useEffect(() => {
     if (reverseSearchActive) {
-      prevQueryRef.current = '';
+      prevQueryRef.current = "";
       prevMatchesRef.current = [];
     }
   }, [reverseSearchActive]);
 
   // Also clear cache when history changes so new items are considered
   useEffect(() => {
-    prevQueryRef.current = '';
+    prevQueryRef.current = "";
     prevMatchesRef.current = [];
   }, [history]);
 

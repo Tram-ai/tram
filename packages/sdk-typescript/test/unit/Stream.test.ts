@@ -3,42 +3,42 @@
  * Tests producer-consumer patterns and async iteration
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Stream } from '../../src/utils/Stream.js';
+import { describe, it, expect, beforeEach } from "vitest";
+import { Stream } from "../../src/utils/Stream.js";
 
-describe('Stream', () => {
+describe("Stream", () => {
   let stream: Stream<string>;
 
   beforeEach(() => {
     stream = new Stream<string>();
   });
 
-  describe('Producer-Consumer Patterns', () => {
-    it('should deliver enqueued value immediately to waiting consumer', async () => {
+  describe("Producer-Consumer Patterns", () => {
+    it("should deliver enqueued value immediately to waiting consumer", async () => {
       // Start consumer (waits for value)
       const consumerPromise = stream.next();
 
       // Producer enqueues value
-      stream.enqueue('hello');
+      stream.enqueue("hello");
 
       // Consumer should receive value immediately
       const result = await consumerPromise;
-      expect(result).toEqual({ value: 'hello', done: false });
+      expect(result).toEqual({ value: "hello", done: false });
     });
 
-    it('should buffer values when consumer is slow', async () => {
+    it("should buffer values when consumer is slow", async () => {
       // Producer enqueues multiple values
-      stream.enqueue('first');
-      stream.enqueue('second');
-      stream.enqueue('third');
+      stream.enqueue("first");
+      stream.enqueue("second");
+      stream.enqueue("third");
 
       // Consumer reads buffered values
-      expect(await stream.next()).toEqual({ value: 'first', done: false });
-      expect(await stream.next()).toEqual({ value: 'second', done: false });
-      expect(await stream.next()).toEqual({ value: 'third', done: false });
+      expect(await stream.next()).toEqual({ value: "first", done: false });
+      expect(await stream.next()).toEqual({ value: "second", done: false });
+      expect(await stream.next()).toEqual({ value: "third", done: false });
     });
 
-    it('should handle fast producer and fast consumer', async () => {
+    it("should handle fast producer and fast consumer", async () => {
       const values: string[] = [];
 
       // Produce and consume simultaneously
@@ -51,15 +51,15 @@ describe('Stream', () => {
         }
       })();
 
-      stream.enqueue('a');
-      stream.enqueue('b');
-      stream.enqueue('c');
+      stream.enqueue("a");
+      stream.enqueue("b");
+      stream.enqueue("c");
 
       await consumerPromise;
-      expect(values).toEqual(['a', 'b', 'c']);
+      expect(values).toEqual(["a", "b", "c"]);
     });
 
-    it('should handle async iteration with for await loop', async () => {
+    it("should handle async iteration with for await loop", async () => {
       const values: string[] = [];
 
       // Start consumer
@@ -70,31 +70,31 @@ describe('Stream', () => {
       })();
 
       // Producer enqueues and completes
-      stream.enqueue('x');
-      stream.enqueue('y');
-      stream.enqueue('z');
+      stream.enqueue("x");
+      stream.enqueue("y");
+      stream.enqueue("z");
       stream.done();
 
       await consumerPromise;
-      expect(values).toEqual(['x', 'y', 'z']);
+      expect(values).toEqual(["x", "y", "z"]);
     });
   });
 
-  describe('Stream Completion', () => {
-    it('should signal completion when done() is called', async () => {
+  describe("Stream Completion", () => {
+    it("should signal completion when done() is called", async () => {
       stream.done();
       const result = await stream.next();
       expect(result).toEqual({ done: true, value: undefined });
     });
 
-    it('should complete waiting consumer immediately', async () => {
+    it("should complete waiting consumer immediately", async () => {
       const consumerPromise = stream.next();
       stream.done();
       const result = await consumerPromise;
       expect(result).toEqual({ done: true, value: undefined });
     });
 
-    it('should allow done() to be called multiple times', async () => {
+    it("should allow done() to be called multiple times", async () => {
       stream.done();
       stream.done();
       stream.done();
@@ -103,93 +103,93 @@ describe('Stream', () => {
       expect(result).toEqual({ done: true, value: undefined });
     });
 
-    it('should allow enqueuing to completed stream (no check in reference)', async () => {
+    it("should allow enqueuing to completed stream (no check in reference)", async () => {
       stream.done();
       // Reference version doesn't check for done in enqueue
-      stream.enqueue('value');
+      stream.enqueue("value");
       // Verify value was enqueued by reading it
-      expect(await stream.next()).toEqual({ value: 'value', done: false });
+      expect(await stream.next()).toEqual({ value: "value", done: false });
     });
 
-    it('should deliver buffered values before completion', async () => {
-      stream.enqueue('first');
-      stream.enqueue('second');
+    it("should deliver buffered values before completion", async () => {
+      stream.enqueue("first");
+      stream.enqueue("second");
       stream.done();
 
-      expect(await stream.next()).toEqual({ value: 'first', done: false });
-      expect(await stream.next()).toEqual({ value: 'second', done: false });
+      expect(await stream.next()).toEqual({ value: "first", done: false });
+      expect(await stream.next()).toEqual({ value: "second", done: false });
       expect(await stream.next()).toEqual({ done: true, value: undefined });
     });
   });
 
-  describe('Error Handling', () => {
-    it('should propagate error to waiting consumer', async () => {
+  describe("Error Handling", () => {
+    it("should propagate error to waiting consumer", async () => {
       const consumerPromise = stream.next();
-      const error = new Error('Stream error');
+      const error = new Error("Stream error");
       stream.error(error);
 
-      await expect(consumerPromise).rejects.toThrow('Stream error');
+      await expect(consumerPromise).rejects.toThrow("Stream error");
     });
 
-    it('should throw error on next read after error is set', async () => {
-      const error = new Error('Test error');
+    it("should throw error on next read after error is set", async () => {
+      const error = new Error("Test error");
       stream.error(error);
 
-      await expect(stream.next()).rejects.toThrow('Test error');
+      await expect(stream.next()).rejects.toThrow("Test error");
     });
 
-    it('should allow enqueuing to stream with error (no check in reference)', async () => {
-      stream.error(new Error('Error'));
+    it("should allow enqueuing to stream with error (no check in reference)", async () => {
+      stream.error(new Error("Error"));
       // Reference version doesn't check for error in enqueue
-      stream.enqueue('value');
+      stream.enqueue("value");
       // Verify value was enqueued by reading it
-      expect(await stream.next()).toEqual({ value: 'value', done: false });
+      expect(await stream.next()).toEqual({ value: "value", done: false });
     });
 
-    it('should store last error (reference overwrites)', async () => {
-      const firstError = new Error('First');
-      const secondError = new Error('Second');
+    it("should store last error (reference overwrites)", async () => {
+      const firstError = new Error("First");
+      const secondError = new Error("Second");
 
       stream.error(firstError);
       stream.error(secondError);
 
-      await expect(stream.next()).rejects.toThrow('Second');
+      await expect(stream.next()).rejects.toThrow("Second");
     });
 
-    it('should deliver buffered values before throwing error', async () => {
-      stream.enqueue('buffered');
-      stream.error(new Error('Stream error'));
+    it("should deliver buffered values before throwing error", async () => {
+      stream.enqueue("buffered");
+      stream.error(new Error("Stream error"));
 
-      expect(await stream.next()).toEqual({ value: 'buffered', done: false });
-      await expect(stream.next()).rejects.toThrow('Stream error');
+      expect(await stream.next()).toEqual({ value: "buffered", done: false });
+      await expect(stream.next()).rejects.toThrow("Stream error");
     });
   });
 
-  describe('State Properties', () => {
-    it('should track error state', () => {
+  describe("State Properties", () => {
+    it("should track error state", () => {
       expect(stream.hasError).toBeUndefined();
-      stream.error(new Error('Test'));
+      stream.error(new Error("Test"));
       expect(stream.hasError).toBeInstanceOf(Error);
-      expect(stream.hasError?.message).toBe('Test');
+      expect(stream.hasError?.message).toBe("Test");
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle empty stream', async () => {
+  describe("Edge Cases", () => {
+    it("should handle empty stream", async () => {
       stream.done();
       const result = await stream.next();
       expect(result.done).toBe(true);
     });
 
-    it('should handle single value', async () => {
-      stream.enqueue('only');
+    it("should handle single value", async () => {
+      stream.enqueue("only");
       stream.done();
 
-      expect(await stream.next()).toEqual({ value: 'only', done: false });
+      expect(await stream.next()).toEqual({ value: "only", done: false });
       expect(await stream.next()).toEqual({ done: true, value: undefined });
     });
 
-    it('should handle rapid enqueue-dequeue cycles', async () => {
+    it("should handle rapid enqueue-dequeue cycles", async () => {
       const numberStream = new Stream<number>();
       const iterations = 100;
       const values: number[] = [];
@@ -215,8 +215,8 @@ describe('Stream', () => {
     });
   });
 
-  describe('TypeScript Types', () => {
-    it('should handle different value types', async () => {
+  describe("TypeScript Types", () => {
+    it("should handle different value types", async () => {
       const numberStream = new Stream<number>();
       numberStream.enqueue(42);
       numberStream.done();
@@ -225,30 +225,30 @@ describe('Stream', () => {
       expect(result.value).toBe(42);
 
       const objectStream = new Stream<{ id: number; name: string }>();
-      objectStream.enqueue({ id: 1, name: 'test' });
+      objectStream.enqueue({ id: 1, name: "test" });
       objectStream.done();
 
       const objectResult = await objectStream.next();
-      expect(objectResult.value).toEqual({ id: 1, name: 'test' });
+      expect(objectResult.value).toEqual({ id: 1, name: "test" });
     });
   });
 
-  describe('Iteration Restrictions', () => {
-    it('should only allow iteration once', async () => {
+  describe("Iteration Restrictions", () => {
+    it("should only allow iteration once", async () => {
       const stream = new Stream<string>();
-      stream.enqueue('test');
+      stream.enqueue("test");
       stream.done();
 
       // First iteration should work
       const iterator1 = stream[Symbol.asyncIterator]();
       expect(await iterator1.next()).toEqual({
-        value: 'test',
+        value: "test",
         done: false,
       });
 
       // Second iteration should throw
       expect(() => stream[Symbol.asyncIterator]()).toThrow(
-        'Stream can only be iterated once',
+        "Stream can only be iterated once",
       );
     });
   });

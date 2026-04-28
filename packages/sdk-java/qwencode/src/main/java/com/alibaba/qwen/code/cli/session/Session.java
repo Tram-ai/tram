@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manages a session with the Qwen Code CLI, handling communication, sending prompts, and processing responses.
+ * Manages a session with the TRAM CLI, handling communication, sending prompts, and processing responses.
  *
  * @author skyfire
  * @version $Id: 0.0.1

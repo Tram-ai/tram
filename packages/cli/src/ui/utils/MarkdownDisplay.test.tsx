@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MarkdownDisplay } from './MarkdownDisplay.js';
-import { LoadedSettings } from '../../config/settings.js';
-import { renderWithProviders } from '../../test-utils/render.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { MarkdownDisplay } from "./MarkdownDisplay.js";
+import { LoadedSettings } from "../../config/settings.js";
+import { renderWithProviders } from "../../test-utils/render.js";
 
-describe('<MarkdownDisplay />', () => {
+describe("<MarkdownDisplay />", () => {
   const baseProps = {
     isPending: false,
     contentWidth: 80,
@@ -20,15 +20,15 @@ describe('<MarkdownDisplay />', () => {
     vi.clearAllMocks();
   });
 
-  it('renders nothing for empty text', () => {
+  it("renders nothing for empty text", () => {
     const { lastFrame } = renderWithProviders(
       <MarkdownDisplay {...baseProps} text="" />,
     );
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders a simple paragraph', () => {
-    const text = 'Hello, world.';
+  it("renders a simple paragraph", () => {
+    const text = "Hello, world.";
     const { lastFrame } = renderWithProviders(
       <MarkdownDisplay {...baseProps} text={text} />,
     );
@@ -36,12 +36,12 @@ describe('<MarkdownDisplay />', () => {
   });
 
   const lineEndings = [
-    { name: 'Windows', eol: '\r\n' },
-    { name: 'Unix', eol: '\n' },
+    { name: "Windows", eol: "\r\n" },
+    { name: "Unix", eol: "\n" },
   ];
 
-  describe.each(lineEndings)('with $name line endings', ({ eol }) => {
-    it('renders headers with correct levels', () => {
+  describe.each(lineEndings)("with $name line endings", ({ eol }) => {
+    it("renders headers with correct levels", () => {
       const text = `
 # Header 1
 ## Header 2
@@ -54,8 +54,8 @@ describe('<MarkdownDisplay />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders a fenced code block with a language', () => {
-      const text = '```javascript\nconst x = 1;\nconsole.log(x);\n```'.replace(
+    it("renders a fenced code block with a language", () => {
+      const text = "```javascript\nconst x = 1;\nconsole.log(x);\n```".replace(
         /\n/g,
         eol,
       );
@@ -65,23 +65,23 @@ describe('<MarkdownDisplay />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders a fenced code block without a language', () => {
-      const text = '```\nplain text\n```'.replace(/\n/g, eol);
+    it("renders a fenced code block without a language", () => {
+      const text = "```\nplain text\n```".replace(/\n/g, eol);
       const { lastFrame } = renderWithProviders(
         <MarkdownDisplay {...baseProps} text={text} />,
       );
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('handles unclosed (pending) code blocks', () => {
-      const text = '```typescript\nlet y = 2;'.replace(/\n/g, eol);
+    it("handles unclosed (pending) code blocks", () => {
+      const text = "```typescript\nlet y = 2;".replace(/\n/g, eol);
       const { lastFrame } = renderWithProviders(
         <MarkdownDisplay {...baseProps} text={text} isPending={true} />,
       );
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders unordered lists with different markers', () => {
+    it("renders unordered lists with different markers", () => {
       const text = `
 - item A
 * item B
@@ -93,7 +93,7 @@ describe('<MarkdownDisplay />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders nested unordered lists', () => {
+    it("renders nested unordered lists", () => {
       const text = `
 * Level 1
   * Level 2
@@ -105,7 +105,7 @@ describe('<MarkdownDisplay />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders ordered lists', () => {
+    it("renders ordered lists", () => {
       const text = `
 1. First item
 2. Second item
@@ -116,7 +116,7 @@ describe('<MarkdownDisplay />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders horizontal rules', () => {
+    it("renders horizontal rules", () => {
       const text = `
 Hello
 ---
@@ -130,7 +130,7 @@ Test
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders tables correctly', () => {
+    it("renders tables correctly", () => {
       const text = `
 | Header 1 | Header 2 |
 |----------|:--------:|
@@ -143,7 +143,7 @@ Test
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('handles a table at the end of the input', () => {
+    it("handles a table at the end of the input", () => {
       const text = `
 Some text before.
 | A | B |
@@ -155,7 +155,7 @@ Some text before.
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders a single-column table', () => {
+    it("renders a single-column table", () => {
       const text = `
 | Name |
 |---|
@@ -166,15 +166,15 @@ Some text before.
         <MarkdownDisplay {...baseProps} text={text} />,
       );
       const output = lastFrame();
-      expect(output).toContain('Name');
-      expect(output).toContain('Alice');
-      expect(output).toContain('Bob');
-      expect(output).toContain('┌');
-      expect(output).toContain('└');
+      expect(output).toContain("Name");
+      expect(output).toContain("Alice");
+      expect(output).toContain("Bob");
+      expect(output).toContain("┌");
+      expect(output).toContain("└");
       expect(output).toMatchSnapshot();
     });
 
-    it('renders a single-column table with center alignment', () => {
+    it("renders a single-column table with center alignment", () => {
       const text = `
 | Name |
 |:---:|
@@ -183,11 +183,11 @@ Some text before.
       const { lastFrame } = renderWithProviders(
         <MarkdownDisplay {...baseProps} text={text} />,
       );
-      expect(lastFrame()).toContain('Alice');
+      expect(lastFrame()).toContain("Alice");
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('handles escaped pipes in table cells', () => {
+    it("handles escaped pipes in table cells", () => {
       const text = `
 | Name | Value |
 |---|---|
@@ -197,11 +197,11 @@ Some text before.
         <MarkdownDisplay {...baseProps} text={text} />,
       );
       const output = lastFrame();
-      expect(output).toContain('A | B');
-      expect(output).toContain('C');
+      expect(output).toContain("A | B");
+      expect(output).toContain("C");
     });
 
-    it('does not treat a lone table-like line as a table', () => {
+    it("does not treat a lone table-like line as a table", () => {
       const text = `
 | just text |
 next line
@@ -210,11 +210,11 @@ next line
         <MarkdownDisplay {...baseProps} text={text} />,
       );
       const output = lastFrame();
-      expect(output).toContain('| just text |');
-      expect(output).not.toContain('┌');
+      expect(output).toContain("| just text |");
+      expect(output).not.toContain("┌");
     });
 
-    it('does not treat invalid separator as a table separator', () => {
+    it("does not treat invalid separator as a table separator", () => {
       const text = `
 | A | B |
 | x | y |
@@ -224,11 +224,11 @@ next line
         <MarkdownDisplay {...baseProps} text={text} />,
       );
       const output = lastFrame();
-      expect(output).toContain('| A | B |');
-      expect(output).not.toContain('┌');
+      expect(output).toContain("| A | B |");
+      expect(output).not.toContain("┌");
     });
 
-    it('does not treat separator with mismatched column count as a table', () => {
+    it("does not treat separator with mismatched column count as a table", () => {
       const text = `
 | A | B |
 |---|
@@ -238,11 +238,11 @@ next line
         <MarkdownDisplay {...baseProps} text={text} />,
       );
       const output = lastFrame();
-      expect(output).toContain('| A | B |');
-      expect(output).not.toContain('┌');
+      expect(output).toContain("| A | B |");
+      expect(output).not.toContain("┌");
     });
 
-    it('does not treat a horizontal rule after a pipe line as a table separator', () => {
+    it("does not treat a horizontal rule after a pipe line as a table separator", () => {
       const text = `
 | Header |
 ---
@@ -253,11 +253,11 @@ data
       );
       const output = lastFrame();
       // `---` without any `|` is a horizontal rule, not a table separator
-      expect(output).toContain('| Header |');
-      expect(output).not.toContain('┌');
+      expect(output).toContain("| Header |");
+      expect(output).not.toContain("┌");
     });
 
-    it('ends a table when a blank line appears', () => {
+    it("ends a table when a blank line appears", () => {
       const text = `
 | A | B |
 |---|---|
@@ -269,11 +269,11 @@ After
         <MarkdownDisplay {...baseProps} text={text} />,
       );
       const output = lastFrame();
-      expect(output).toContain('┌');
-      expect(output).toContain('After');
+      expect(output).toContain("┌");
+      expect(output).toContain("After");
     });
 
-    it('does not treat separator-only text without header row as a table', () => {
+    it("does not treat separator-only text without header row as a table", () => {
       const text = `
 |---|---|
 plain
@@ -282,11 +282,11 @@ plain
         <MarkdownDisplay {...baseProps} text={text} />,
       );
       const output = lastFrame();
-      expect(output).toContain('|---|---|');
-      expect(output).not.toContain('┌');
+      expect(output).toContain("|---|---|");
+      expect(output).not.toContain("┌");
     });
 
-    it('does not crash on uneven escaped pipes near row edges', () => {
+    it("does not crash on uneven escaped pipes near row edges", () => {
       const text = `
 | A | B |
 |---|---|
@@ -295,10 +295,10 @@ plain
       const { lastFrame } = renderWithProviders(
         <MarkdownDisplay {...baseProps} text={text} />,
       );
-      expect(lastFrame()).toContain('| edge');
+      expect(lastFrame()).toContain("| edge");
     });
 
-    it('inserts a single space between paragraphs', () => {
+    it("inserts a single space between paragraphs", () => {
       const text = `Paragraph 1.
 
 Paragraph 2.`.replace(/\n/g, eol);
@@ -308,7 +308,7 @@ Paragraph 2.`.replace(/\n/g, eol);
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('correctly parses a mix of markdown elements', () => {
+    it("correctly parses a mix of markdown elements", () => {
       const text = `
 # Main Title
 
@@ -329,17 +329,17 @@ Another paragraph.
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('hides line numbers in code blocks when showLineNumbers is false', () => {
-      const text = '```javascript\nconst x = 1;\n```'.replace(/\n/g, eol);
+    it("hides line numbers in code blocks when showLineNumbers is false", () => {
+      const text = "```javascript\nconst x = 1;\n```".replace(/\n/g, eol);
       const settings = new LoadedSettings(
-        { path: '', settings: {}, originalSettings: {} },
-        { path: '', settings: {}, originalSettings: {} },
+        { path: "", settings: {}, originalSettings: {} },
+        { path: "", settings: {}, originalSettings: {} },
         {
-          path: '',
+          path: "",
           settings: { ui: { showLineNumbers: false } },
           originalSettings: { ui: { showLineNumbers: false } },
         },
-        { path: '', settings: {}, originalSettings: {} },
+        { path: "", settings: {}, originalSettings: {} },
         true,
         new Set(),
       );
@@ -349,31 +349,31 @@ Another paragraph.
         { settings },
       );
       expect(lastFrame()).toMatchSnapshot();
-      expect(lastFrame()).not.toContain(' 1 ');
+      expect(lastFrame()).not.toContain(" 1 ");
     });
 
-    it('shows line numbers in code blocks by default', () => {
-      const text = '```javascript\nconst x = 1;\n```'.replace(/\n/g, eol);
+    it("shows line numbers in code blocks by default", () => {
+      const text = "```javascript\nconst x = 1;\n```".replace(/\n/g, eol);
       const { lastFrame } = renderWithProviders(
         <MarkdownDisplay {...baseProps} text={text} />,
       );
       expect(lastFrame()).toMatchSnapshot();
-      expect(lastFrame()).toContain(' 1 ');
+      expect(lastFrame()).toContain(" 1 ");
     });
   });
 
-  it('correctly splits lines using \\n regardless of platform EOL', () => {
+  it("correctly splits lines using \\n regardless of platform EOL", () => {
     // Test that the component uses \n for splitting, not EOL
-    const textWithUnixLineEndings = 'Line 1\nLine 2\nLine 3';
+    const textWithUnixLineEndings = "Line 1\nLine 2\nLine 3";
 
     const { lastFrame } = renderWithProviders(
       <MarkdownDisplay {...baseProps} text={textWithUnixLineEndings} />,
     );
 
     const output = lastFrame();
-    expect(output).toContain('Line 1');
-    expect(output).toContain('Line 2');
-    expect(output).toContain('Line 3');
+    expect(output).toContain("Line 1");
+    expect(output).toContain("Line 2");
+    expect(output).toContain("Line 3");
     expect(output).toMatchSnapshot();
   });
 });

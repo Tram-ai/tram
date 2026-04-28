@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BaseEmitter } from './BaseEmitter.js';
-import type { TodoItem } from '../types.js';
-import type { PlanEntry } from '@agentclientprotocol/sdk';
+import { BaseEmitter } from "./BaseEmitter.js";
+import type { TodoItem } from "../types.js";
+import type { PlanEntry } from "@agentclientprotocol/sdk";
 
 /**
  * Handles emission of plan/todo updates.
@@ -24,12 +24,12 @@ export class PlanEmitter extends BaseEmitter {
   async emitPlan(todos: TodoItem[]): Promise<void> {
     const entries: PlanEntry[] = todos.map((todo) => ({
       content: todo.content,
-      priority: 'medium' as const, // Default priority since todos don't have priority
+      priority: "medium" as const, // Default priority since todos don't have priority
       status: todo.status,
     }));
 
     await this.sendUpdate({
-      sessionUpdate: 'plan',
+      sessionUpdate: "plan",
       entries,
     });
   }
@@ -54,8 +54,8 @@ export class PlanEmitter extends BaseEmitter {
     if (fromDisplay) return fromDisplay;
 
     // Fallback to args (initial state)
-    if (args && Array.isArray(args['todos'])) {
-      return args['todos'] as TodoItem[];
+    if (args && Array.isArray(args["todos"])) {
+      return args["todos"] as TodoItem[];
     }
 
     return null;
@@ -69,22 +69,22 @@ export class PlanEmitter extends BaseEmitter {
     if (!resultDisplay) return null;
 
     // Handle direct object with type 'todo_list'
-    if (typeof resultDisplay === 'object') {
+    if (typeof resultDisplay === "object") {
       const obj = resultDisplay as Record<string, unknown>;
-      if (obj['type'] === 'todo_list' && Array.isArray(obj['todos'])) {
-        return obj['todos'] as TodoItem[];
+      if (obj["type"] === "todo_list" && Array.isArray(obj["todos"])) {
+        return obj["todos"] as TodoItem[];
       }
     }
 
     // Handle JSON string (from subagent events)
-    if (typeof resultDisplay === 'string') {
+    if (typeof resultDisplay === "string") {
       try {
         const parsed = JSON.parse(resultDisplay) as Record<string, unknown>;
         if (
-          parsed?.['type'] === 'todo_list' &&
-          Array.isArray(parsed['todos'])
+          parsed?.["type"] === "todo_list" &&
+          Array.isArray(parsed["todos"])
         ) {
-          return parsed['todos'] as TodoItem[];
+          return parsed["todos"] as TodoItem[];
         }
       } catch {
         // Not JSON, ignore

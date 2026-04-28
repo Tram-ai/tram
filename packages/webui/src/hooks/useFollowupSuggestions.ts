@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import type { FollowupState } from '../types/followup.js';
-import { INITIAL_FOLLOWUP_STATE } from '../types/followup.js';
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import type { FollowupState } from "../types/followup.js";
+import { INITIAL_FOLLOWUP_STATE } from "../types/followup.js";
 
-export type { FollowupState } from '../types/followup.js';
+export type { FollowupState } from "../types/followup.js";
 
 // ---------------------------------------------------------------------------
 // Controller (framework-agnostic)
@@ -24,8 +24,8 @@ interface FollowupControllerOptions {
   onStateChange: (state: FollowupState) => void;
   getOnAccept?: () => ((text: string) => void) | undefined;
   onOutcome?: (params: {
-    outcome: 'accepted' | 'ignored';
-    accept_method?: 'tab' | 'enter' | 'right';
+    outcome: "accepted" | "ignored";
+    accept_method?: "tab" | "enter" | "right";
     time_ms: number;
     suggestion_length: number;
   }) => void;
@@ -33,7 +33,7 @@ interface FollowupControllerOptions {
 
 interface FollowupControllerActions {
   setSuggestion: (text: string | null) => void;
-  accept: (method?: 'tab' | 'enter' | 'right') => void;
+  accept: (method?: "tab" | "enter" | "right") => void;
   dismiss: () => void;
   clear: () => void;
   cleanup: () => void;
@@ -85,7 +85,7 @@ function createFollowupController(
     }, SUGGESTION_DELAY_MS);
   };
 
-  const accept = (method?: 'tab' | 'enter' | 'right'): void => {
+  const accept = (method?: "tab" | "enter" | "right"): void => {
     if (accepting) {
       return;
     }
@@ -106,13 +106,13 @@ function createFollowupController(
 
     try {
       onOutcome?.({
-        outcome: 'accepted',
+        outcome: "accepted",
         accept_method: method,
         time_ms: shownAt > 0 ? Date.now() - shownAt : 0,
         suggestion_length: text.length,
       });
     } catch (e: unknown) {
-      console.error('[followup] onOutcome callback threw:', e);
+      console.error("[followup] onOutcome callback threw:", e);
     }
 
     applyState(INITIAL_FOLLOWUP_STATE);
@@ -121,7 +121,7 @@ function createFollowupController(
       try {
         getOnAccept?.()?.(text);
       } catch (error: unknown) {
-        console.error('[followup] onAccept callback threw:', error);
+        console.error("[followup] onAccept callback threw:", error);
       } finally {
         if (acceptTimeoutId) {
           clearTimeout(acceptTimeoutId);
@@ -146,13 +146,13 @@ function createFollowupController(
     if (currentState.isVisible && currentState.suggestion) {
       try {
         onOutcome?.({
-          outcome: 'ignored',
+          outcome: "ignored",
           time_ms:
             currentState.shownAt > 0 ? Date.now() - currentState.shownAt : 0,
           suggestion_length: currentState.suggestion.length,
         });
       } catch (e: unknown) {
-        console.error('[followup] onOutcome callback threw:', e);
+        console.error("[followup] onOutcome callback threw:", e);
       }
     }
 
@@ -181,8 +181,8 @@ export interface UseFollowupSuggestionsOptions {
   enabled?: boolean;
   onAccept?: (suggestion: string) => void;
   onOutcome?: (params: {
-    outcome: 'accepted' | 'ignored';
-    accept_method?: 'tab' | 'enter' | 'right';
+    outcome: "accepted" | "ignored";
+    accept_method?: "tab" | "enter" | "right";
     time_ms: number;
     suggestion_length: number;
   }) => void;
@@ -194,7 +194,7 @@ export interface UseFollowupSuggestionsReturn {
   setSuggestion: (text: string | null) => void;
   /** Accept the current suggestion */
   accept: (
-    method?: 'tab' | 'enter' | 'right',
+    method?: "tab" | "enter" | "right",
     options?: { skipOnAccept?: boolean },
   ) => void;
   /** Dismiss the current suggestion */

@@ -13,16 +13,16 @@
  * layout and interaction.
  */
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   AgentStatus,
   AgentEventType,
   isTerminalStatus,
   type AgentInteractive,
   type AgentEventEmitter,
-} from '@qwen-code/qwen-code-core';
-import { StreamingState } from '../types.js';
-import { useTimer } from './useTimer.js';
+} from "@tram-ai/tram-core";
+import { StreamingState } from "../types.js";
+import { useTimer } from "./useTimer.js";
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -92,7 +92,7 @@ export function useAgentStreamingState(
     }) => {
       const count =
         event?.usage?.totalTokenCount ?? event?.usage?.promptTokenCount;
-      if (typeof count === 'number' && count > 0) {
+      if (typeof count === "number" && count > 0) {
         setLastPromptTokenCount(count);
       }
     };

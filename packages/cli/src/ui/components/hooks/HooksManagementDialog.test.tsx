@@ -4,39 +4,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { HooksManagementDialog } from './HooksManagementDialog.js';
-import { renderWithProviders } from '../../../test-utils/render.js';
-import { useKeypress } from '../../hooks/useKeypress.js';
-import type { Key } from '../../contexts/KeypressContext.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { HooksManagementDialog } from "./HooksManagementDialog.js";
+import { renderWithProviders } from "../../../test-utils/render.js";
+import { useKeypress } from "../../hooks/useKeypress.js";
+import type { Key } from "../../contexts/KeypressContext.js";
 
 // Mock useKeypress
-vi.mock('../../hooks/useKeypress.js', () => ({
+vi.mock("../../hooks/useKeypress.js", () => ({
   useKeypress: vi.fn(),
 }));
 
 const mockedUseKeypress = vi.mocked(useKeypress);
 
 // Mock i18n module
-vi.mock('../../../i18n/index.js', () => ({
+vi.mock("../../../i18n/index.js", () => ({
   t: vi.fn((key: string, options?: { count?: string }) => {
     // Handle pluralization
-    if (key === '{{count}} hook configured' && options?.count) {
+    if (key === "{{count}} hook configured" && options?.count) {
       return `${options.count} hook configured`;
     }
-    if (key === '{{count}} hooks configured' && options?.count) {
+    if (key === "{{count}} hooks configured" && options?.count) {
       return `${options.count} hooks configured`;
     }
-    if (key === '{{count}} configured hook' && options?.count) {
+    if (key === "{{count}} configured hook" && options?.count) {
       return `${options.count} configured hook`;
     }
-    if (key === '{{count}} configured hooks' && options?.count) {
+    if (key === "{{count}} configured hooks" && options?.count) {
       return `${options.count} configured hooks`;
     }
     // Handle interpolation for disabled message
     if (
       key ===
-        'All hooks are currently disabled. You have {{count}} that are not running.' &&
+        "All hooks are currently disabled. You have {{count}} that are not running." &&
       options?.count
     ) {
       return `All hooks are currently disabled. You have ${options.count} that are not running.`;
@@ -46,14 +46,14 @@ vi.mock('../../../i18n/index.js', () => ({
 }));
 
 // Mock useTerminalSize
-vi.mock('../../hooks/useTerminalSize.js', () => ({
+vi.mock("../../hooks/useTerminalSize.js", () => ({
   useTerminalSize: vi.fn(() => ({ columns: 120, rows: 24 })),
 }));
 
 // Mock useConfig
-vi.mock('../../contexts/ConfigContext.js', async (importOriginal) => {
+vi.mock("../../contexts/ConfigContext.js", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('../../contexts/ConfigContext.js')>();
+    await importOriginal<typeof import("../../contexts/ConfigContext.js")>();
   return {
     ...actual,
     useConfig: vi.fn(() => ({
@@ -64,9 +64,9 @@ vi.mock('../../contexts/ConfigContext.js', async (importOriginal) => {
 });
 
 // Mock loadSettings
-vi.mock('../../../config/settings.js', async (importOriginal) => {
+vi.mock("../../../config/settings.js", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('../../../config/settings.js')>();
+    await importOriginal<typeof import("../../../config/settings.js")>();
   return {
     ...actual,
     loadSettings: vi.fn(() => ({
@@ -76,28 +76,27 @@ vi.mock('../../../config/settings.js', async (importOriginal) => {
 });
 
 // Mock semantic-colors
-vi.mock('../../semantic-colors.js', () => ({
+vi.mock("../../semantic-colors.js", () => ({
   theme: {
     text: {
-      primary: 'white',
-      secondary: 'gray',
-      accent: 'cyan',
+      primary: "white",
+      secondary: "gray",
+      accent: "cyan",
     },
     status: {
-      success: 'green',
-      error: 'red',
-      warning: 'yellow',
+      success: "green",
+      error: "red",
+      warning: "yellow",
     },
     border: {
-      default: 'gray',
+      default: "gray",
     },
   },
 }));
 
 // Mock createDebugLogger
-vi.mock('@qwen-code/qwen-code-core', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@qwen-code/qwen-code-core')>();
+vi.mock("@tram-ai/tram-core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tram-ai/tram-core")>();
   return {
     ...actual,
     createDebugLogger: vi.fn(() => ({
@@ -108,7 +107,7 @@ vi.mock('@qwen-code/qwen-code-core', async (importOriginal) => {
 });
 
 // Helper to create a key object
-function createKey(name: string, sequence = ''): Key {
+function createKey(name: string, sequence = ""): Key {
   return {
     name,
     sequence,
@@ -119,7 +118,7 @@ function createKey(name: string, sequence = ''): Key {
   };
 }
 
-describe('HooksManagementDialog', () => {
+describe("HooksManagementDialog", () => {
   const mockOnClose = vi.fn();
   let keypressHandler: ((key: Key) => void) | null = null;
 
@@ -137,16 +136,16 @@ describe('HooksManagementDialog', () => {
     keypressHandler = null;
   });
 
-  describe('Initial rendering', () => {
-    it('should render loading state initially', () => {
+  describe("Initial rendering", () => {
+    it("should render loading state initially", () => {
       const { lastFrame } = renderWithProviders(
         <HooksManagementDialog onClose={mockOnClose} />,
       );
 
-      expect(lastFrame()).toContain('Loading hooks');
+      expect(lastFrame()).toContain("Loading hooks");
     });
 
-    it('should render with border', async () => {
+    it("should render with border", async () => {
       const { lastFrame, unmount } = renderWithProviders(
         <HooksManagementDialog onClose={mockOnClose} />,
       );
@@ -160,7 +159,7 @@ describe('HooksManagementDialog', () => {
       unmount();
     });
 
-    it('should handle empty hooks list gracefully', async () => {
+    it("should handle empty hooks list gracefully", async () => {
       const { lastFrame, unmount } = renderWithProviders(
         <HooksManagementDialog onClose={mockOnClose} />,
       );
@@ -169,14 +168,14 @@ describe('HooksManagementDialog', () => {
 
       const output = lastFrame();
       // Should show 0 hooks configured when no hooks are configured
-      expect(output).toContain('0 hooks configured');
+      expect(output).toContain("0 hooks configured");
 
       unmount();
     });
   });
 
-  describe('Keyboard navigation - HOOKS_LIST step', () => {
-    it('should register keypress handler with isActive: true', async () => {
+  describe("Keyboard navigation - HOOKS_LIST step", () => {
+    it("should register keypress handler with isActive: true", async () => {
       renderWithProviders(<HooksManagementDialog onClose={mockOnClose} />);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -186,18 +185,18 @@ describe('HooksManagementDialog', () => {
       expect(options).toEqual({ isActive: true });
     });
 
-    it('should close dialog on Escape key', async () => {
+    it("should close dialog on Escape key", async () => {
       renderWithProviders(<HooksManagementDialog onClose={mockOnClose} />);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(keypressHandler).not.toBeNull();
-      keypressHandler!(createKey('escape', '\x1b'));
+      keypressHandler!(createKey("escape", "\x1b"));
 
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
-    it('should not go above first item when pressing up', async () => {
+    it("should not go above first item when pressing up", async () => {
       const { unmount } = renderWithProviders(
         <HooksManagementDialog onClose={mockOnClose} />,
       );
@@ -205,19 +204,19 @@ describe('HooksManagementDialog', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Press up multiple times from first item
-      keypressHandler!(createKey('up'));
-      keypressHandler!(createKey('up'));
-      keypressHandler!(createKey('up'));
+      keypressHandler!(createKey("up"));
+      keypressHandler!(createKey("up"));
+      keypressHandler!(createKey("up"));
 
       // Should still be at first item (no crash)
       unmount();
     });
   });
 
-  describe('Keyboard navigation - HOOKS_DISABLED step', () => {
-    it('should show disabled state when disableAllHooks is true', async () => {
+  describe("Keyboard navigation - HOOKS_DISABLED step", () => {
+    it("should show disabled state when disableAllHooks is true", async () => {
       // Override the mock for this test
-      const configContext = await import('../../contexts/ConfigContext.js');
+      const configContext = await import("../../contexts/ConfigContext.js");
       vi.mocked(configContext.useConfig).mockReturnValue({
         getExtensions: vi.fn(() => []),
         getDisableAllHooks: vi.fn(() => true),
@@ -230,13 +229,13 @@ describe('HooksManagementDialog', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const output = lastFrame();
-      expect(output).toContain('Hook Configuration - Disabled');
+      expect(output).toContain("Hook Configuration - Disabled");
 
       unmount();
     });
 
-    it('should close dialog on Escape key when hooks are disabled', async () => {
-      const configContext = await import('../../contexts/ConfigContext.js');
+    it("should close dialog on Escape key when hooks are disabled", async () => {
+      const configContext = await import("../../contexts/ConfigContext.js");
       vi.mocked(configContext.useConfig).mockReturnValue({
         getExtensions: vi.fn(() => []),
         getDisableAllHooks: vi.fn(() => true),
@@ -247,19 +246,19 @@ describe('HooksManagementDialog', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(keypressHandler).not.toBeNull();
-      keypressHandler!(createKey('escape', '\x1b'));
+      keypressHandler!(createKey("escape", "\x1b"));
 
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('Loading and error states', () => {
-    it('should allow Escape to close during loading state', () => {
+  describe("Loading and error states", () => {
+    it("should allow Escape to close during loading state", () => {
       renderWithProviders(<HooksManagementDialog onClose={mockOnClose} />);
 
       // Don't wait for loading to complete
       expect(keypressHandler).not.toBeNull();
-      keypressHandler!(createKey('escape', '\x1b'));
+      keypressHandler!(createKey("escape", "\x1b"));
 
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });

@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import type { CompressionDisplayProps } from './CompressionMessage.js';
-import { CompressionMessage } from './CompressionMessage.js';
-import { CompressionStatus } from '@tram-ai/tram-core';
-import type { CompressionProps } from '../../types.js';
-import { describe, it, expect } from 'vitest';
+import { render } from "ink-testing-library";
+import type { CompressionDisplayProps } from "./CompressionMessage.js";
+import { CompressionMessage } from "./CompressionMessage.js";
+import { CompressionStatus } from "@tram-ai/tram-core";
+import type { CompressionProps } from "../../types.js";
+import { describe, it, expect } from "vitest";
 
-describe('<CompressionMessage />', () => {
+describe("<CompressionMessage />", () => {
   const createCompressionProps = (
     overrides: Partial<CompressionProps> = {},
   ): CompressionDisplayProps => ({
@@ -24,18 +24,18 @@ describe('<CompressionMessage />', () => {
     },
   });
 
-  describe('pending state', () => {
-    it('renders pending message when compression is in progress', () => {
+  describe("pending state", () => {
+    it("renders pending message when compression is in progress", () => {
       const props = createCompressionProps({ isPending: true });
       const { lastFrame } = render(<CompressionMessage {...props} />);
       const output = lastFrame();
 
-      expect(output).toContain('Compressing chat history');
+      expect(output).toContain("Compressing chat history");
     });
   });
 
-  describe('normal compression (successful token reduction)', () => {
-    it('renders success message when tokens are reduced', () => {
+  describe("normal compression (successful token reduction)", () => {
+    it("renders success message when tokens are reduced", () => {
       const props = createCompressionProps({
         isPending: false,
         originalTokenCount: 100,
@@ -45,13 +45,13 @@ describe('<CompressionMessage />', () => {
       const { lastFrame } = render(<CompressionMessage {...props} />);
       const output = lastFrame();
 
-      expect(output).toContain('✦');
+      expect(output).toContain("✦");
       expect(output).toContain(
-        'Chat history compressed from 100 to 50 tokens.',
+        "Chat history compressed from 100 to 50 tokens.",
       );
     });
 
-    it('renders success message for large successful compressions', () => {
+    it("renders success message for large successful compressions", () => {
       const testCases = [
         { original: 50000, new: 25000 }, // Large compression
         { original: 700000, new: 350000 }, // Very large compression
@@ -67,18 +67,18 @@ describe('<CompressionMessage />', () => {
         const { lastFrame } = render(<CompressionMessage {...props} />);
         const output = lastFrame();
 
-        expect(output).toContain('✦');
+        expect(output).toContain("✦");
         expect(output).toContain(
           `compressed from ${original} to ${newTokens} tokens`,
         );
-        expect(output).not.toContain('Skipping compression');
-        expect(output).not.toContain('did not reduce size');
+        expect(output).not.toContain("Skipping compression");
+        expect(output).not.toContain("did not reduce size");
       });
     });
   });
 
-  describe('skipped compression (tokens increased or same)', () => {
-    it('renders skip message when compression would increase token count', () => {
+  describe("skipped compression (tokens increased or same)", () => {
+    it("renders skip message when compression would increase token count", () => {
       const props = createCompressionProps({
         isPending: false,
         originalTokenCount: 50,
@@ -89,13 +89,13 @@ describe('<CompressionMessage />', () => {
       const { lastFrame } = render(<CompressionMessage {...props} />);
       const output = lastFrame();
 
-      expect(output).toContain('✦');
+      expect(output).toContain("✦");
       expect(output).toContain(
-        'Compression was not beneficial for this history size.',
+        "Compression was not beneficial for this history size.",
       );
     });
 
-    it('renders skip message when token counts are equal', () => {
+    it("renders skip message when token counts are equal", () => {
       const props = createCompressionProps({
         isPending: false,
         originalTokenCount: 50,
@@ -107,28 +107,28 @@ describe('<CompressionMessage />', () => {
       const output = lastFrame();
 
       expect(output).toContain(
-        'Compression was not beneficial for this history size.',
+        "Compression was not beneficial for this history size.",
       );
     });
   });
 
-  describe('message content validation', () => {
-    it('displays correct compression statistics', () => {
+  describe("message content validation", () => {
+    it("displays correct compression statistics", () => {
       const testCases = [
         {
           original: 200,
           new: 80,
-          expected: 'compressed from 200 to 80 tokens',
+          expected: "compressed from 200 to 80 tokens",
         },
         {
           original: 500,
           new: 150,
-          expected: 'compressed from 500 to 150 tokens',
+          expected: "compressed from 500 to 150 tokens",
         },
         {
           original: 1500,
           new: 400,
-          expected: 'compressed from 1500 to 400 tokens',
+          expected: "compressed from 1500 to 400 tokens",
         },
       ];
 
@@ -146,7 +146,7 @@ describe('<CompressionMessage />', () => {
       });
     });
 
-    it('shows skip message for small histories when new tokens >= original tokens', () => {
+    it("shows skip message for small histories when new tokens >= original tokens", () => {
       const testCases = [
         { original: 50, new: 60 }, // Increased
         { original: 100, new: 100 }, // Same
@@ -165,13 +165,13 @@ describe('<CompressionMessage />', () => {
         const output = lastFrame();
 
         expect(output).toContain(
-          'Compression was not beneficial for this history size.',
+          "Compression was not beneficial for this history size.",
         );
-        expect(output).not.toContain('compressed from');
+        expect(output).not.toContain("compressed from");
       });
     });
 
-    it('shows compression failure message for large histories when new tokens >= original tokens', () => {
+    it("shows compression failure message for large histories when new tokens >= original tokens", () => {
       const testCases = [
         { original: 50000, new: 50100 }, // At 50k threshold
         { original: 700000, new: 710000 }, // Large history case
@@ -189,9 +189,9 @@ describe('<CompressionMessage />', () => {
         const { lastFrame } = render(<CompressionMessage {...props} />);
         const output = lastFrame();
 
-        expect(output).toContain('compression did not reduce size');
-        expect(output).not.toContain('compressed from');
-        expect(output).not.toContain('Compression was not beneficial');
+        expect(output).toContain("compression did not reduce size");
+        expect(output).not.toContain("compressed from");
+        expect(output).not.toContain("Compression was not beneficial");
       });
     });
   });

@@ -4,35 +4,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { promises as fs } from 'node:fs';
-import * as fsSync from 'node:fs';
-import path from 'node:path';
-import toml from '@iarna/toml';
-import { glob } from 'glob';
-import { z } from 'zod';
-import type { Config } from '@tram-ai/tram-core';
+import { promises as fs } from "node:fs";
+import * as fsSync from "node:fs";
+import path from "node:path";
+import toml from "@iarna/toml";
+import { glob } from "glob";
+import { z } from "zod";
+import type { Config } from "@tram-ai/tram-core";
 import {
   createDebugLogger,
   EXTENSIONS_CONFIG_FILENAME,
   Storage,
-} from '@tram-ai/tram-core';
-import type { ICommandLoader } from './types.js';
+} from "@tram-ai/tram-core";
+import type { ICommandLoader } from "./types.js";
 import {
   parseMarkdownCommand,
   MarkdownCommandDefSchema,
-} from './markdown-command-parser.js';
+} from "./markdown-command-parser.js";
 import {
   createSlashCommandFromDefinition,
   type CommandDefinition,
-} from './command-factory.js';
-import type { SlashCommand } from '../ui/commands/types.js';
+} from "./command-factory.js";
+import type { SlashCommand } from "../ui/commands/types.js";
 
 interface CommandDirectory {
   path: string;
   extensionName?: string;
 }
 
-const debugLogger = createDebugLogger('FILE_COMMAND_LOADER');
+const debugLogger = createDebugLogger("FILE_COMMAND_LOADER");
 
 /**
  * Defines the Zod schema for a command definition file. This serves as the
@@ -92,11 +92,11 @@ export class FileCommandLoader implements ICommandLoader {
     for (const dirInfo of commandDirs) {
       try {
         // Scan both .toml and .md files
-        const tomlFiles = await glob('**/*.toml', {
+        const tomlFiles = await glob("**/*.toml", {
           ...globOptions,
           cwd: dirInfo.path,
         });
-        const mdFiles = await glob('**/*.md', {
+        const mdFiles = await glob("**/*.md", {
           ...globOptions,
           cwd: dirInfo.path,
         });
@@ -131,9 +131,9 @@ export class FileCommandLoader implements ICommandLoader {
         allCommands.push(...commands);
       } catch (error) {
         // Ignore ENOENT (directory doesn't exist) and AbortError (operation was cancelled)
-        const isEnoent = (error as NodeJS.ErrnoException).code === 'ENOENT';
+        const isEnoent = (error as NodeJS.ErrnoException).code === "ENOENT";
         const isAbortError =
-          error instanceof Error && error.name === 'AbortError';
+          error instanceof Error && error.name === "AbortError";
         if (!isEnoent && !isAbortError) {
           debugLogger.error(
             `[FileCommandLoader] Error loading commands from ${dirInfo.path}:`,
@@ -198,7 +198,7 @@ export class FileCommandLoader implements ICommandLoader {
     try {
       const configPath = path.join(ext.path, EXTENSIONS_CONFIG_FILENAME);
       if (fsSync.existsSync(configPath)) {
-        const configContent = fsSync.readFileSync(configPath, 'utf-8');
+        const configContent = fsSync.readFileSync(configPath, "utf-8");
         const config = JSON.parse(configContent);
 
         if (config.commands) {
@@ -227,7 +227,7 @@ export class FileCommandLoader implements ICommandLoader {
     }
 
     // Default fallback: use 'commands' directory
-    const defaultPath = path.join(ext.path, 'commands');
+    const defaultPath = path.join(ext.path, "commands");
     try {
       if (fsSync.existsSync(defaultPath)) {
         return [defaultPath];
@@ -253,7 +253,7 @@ export class FileCommandLoader implements ICommandLoader {
   ): Promise<SlashCommand | null> {
     let fileContent: string;
     try {
-      fileContent = await fs.readFile(filePath, 'utf-8');
+      fileContent = await fs.readFile(filePath, "utf-8");
     } catch (error: unknown) {
       debugLogger.error(
         `[FileCommandLoader] Failed to read file ${filePath}:`,
@@ -291,7 +291,7 @@ export class FileCommandLoader implements ICommandLoader {
       baseDir,
       validDef,
       extensionName,
-      '.toml',
+      ".toml",
     );
   }
 
@@ -309,7 +309,7 @@ export class FileCommandLoader implements ICommandLoader {
   ): Promise<SlashCommand | null> {
     let fileContent: string;
     try {
-      fileContent = await fs.readFile(filePath, 'utf-8');
+      fileContent = await fs.readFile(filePath, "utf-8");
     } catch (error: unknown) {
       debugLogger.error(
         `[FileCommandLoader] Failed to read file ${filePath}:`,
@@ -346,7 +346,7 @@ export class FileCommandLoader implements ICommandLoader {
       prompt: validDef.prompt,
       description:
         validDef.frontmatter?.description &&
-        typeof validDef.frontmatter.description === 'string'
+        typeof validDef.frontmatter.description === "string"
           ? validDef.frontmatter.description
           : undefined,
     };
@@ -357,7 +357,7 @@ export class FileCommandLoader implements ICommandLoader {
       baseDir,
       definition,
       extensionName,
-      '.md',
+      ".md",
     );
   }
 }

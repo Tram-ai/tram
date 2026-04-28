@@ -17,16 +17,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { copyFileSync, existsSync, mkdirSync, statSync } from 'node:fs';
-import { dirname, join, basename } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { glob } from 'glob';
-import fs from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, statSync } from "node:fs";
+import { dirname, join, basename } from "node:path";
+import { fileURLToPath } from "node:url";
+import { glob } from "glob";
+import fs from "node:fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = join(__dirname, '..');
-const distDir = join(root, 'dist');
-const coreVendorDir = join(root, 'packages', 'core', 'vendor');
+const root = join(__dirname, "..");
+const distDir = join(root, "dist");
+const coreVendorDir = join(root, "packages", "core", "vendor");
 
 // Create the dist directory if it doesn't exist
 if (!existsSync(distDir)) {
@@ -34,19 +34,29 @@ if (!existsSync(distDir)) {
 }
 
 // Find and copy all .sb files from packages to the root of the dist directory
-const sbFiles = glob.sync('packages/**/*.sb', { cwd: root });
+const sbFiles = glob.sync("packages/**/*.sb", { cwd: root });
 for (const file of sbFiles) {
   copyFileSync(join(root, file), join(distDir, basename(file)));
 }
 
-console.log('Copied sandbox profiles to dist/');
+console.log("Copied sandbox profiles to dist/");
+
+// Copy locale files
+const localesDir = join(root, "packages", "cli", "src", "i18n", "locales");
+if (existsSync(localesDir)) {
+  const destLocalesDir = join(distDir, "locales");
+  copyRecursiveSync(localesDir, destLocalesDir);
+  console.log("Copied locales to dist/locales/");
+} else {
+  console.warn(`Warning: Locales directory not found at ${localesDir}`);
+}
 
 // Copy vendor directory (contains ripgrep binaries)
-console.log('Copying vendor directory...');
+console.log("Copying vendor directory...");
 if (existsSync(coreVendorDir)) {
-  const destVendorDir = join(distDir, 'vendor');
+  const destVendorDir = join(distDir, "vendor");
   copyRecursiveSync(coreVendorDir, destVendorDir);
-  console.log('Copied vendor directory to dist/');
+  console.log("Copied vendor directory to dist/");
 } else {
   console.warn(`Warning: Vendor directory not found at ${coreVendorDir}`);
 }
@@ -56,16 +66,16 @@ if (existsSync(coreVendorDir)) {
 // SkillManager looks for bundled skills at dist/bundled/.
 const bundledSkillsDir = join(
   root,
-  'packages',
-  'core',
-  'src',
-  'skills',
-  'bundled',
+  "packages",
+  "core",
+  "src",
+  "skills",
+  "bundled",
 );
 if (existsSync(bundledSkillsDir)) {
-  const destBundledDir = join(distDir, 'bundled');
+  const destBundledDir = join(distDir, "bundled");
   copyRecursiveSync(bundledSkillsDir, destBundledDir);
-  console.log('Copied bundled skills to dist/bundled/');
+  console.log("Copied bundled skills to dist/bundled/");
 } else {
   console.warn(
     `Warning: Bundled skills directory not found at ${bundledSkillsDir}`,
@@ -75,16 +85,16 @@ if (existsSync(bundledSkillsDir)) {
 // Copy user docs into qc-helper bundled skill so it can reference them at runtime.
 // The qc-helper skill reads docs from a `docs/` subdirectory relative to its own
 // directory. In the esbuild bundle this becomes dist/bundled/qc-helper/docs/.
-const userDocsDir = join(root, 'docs', 'users');
+const userDocsDir = join(root, "docs", "users");
 if (existsSync(userDocsDir)) {
-  const destDocsDir = join(distDir, 'bundled', 'qc-helper', 'docs');
+  const destDocsDir = join(distDir, "bundled", "qc-helper", "docs");
   copyRecursiveSync(userDocsDir, destDocsDir);
-  console.log('Copied docs/users/ to dist/bundled/qc-helper/docs/');
+  console.log("Copied docs/users/ to dist/bundled/qc-helper/docs/");
 } else {
   console.warn(`Warning: User docs directory not found at ${userDocsDir}`);
 }
 
-console.log('\n✅ All bundle assets copied to dist/');
+console.log("\n✅ All bundle assets copied to dist/");
 
 /**
  * Recursively copy directory
@@ -104,7 +114,7 @@ function copyRecursiveSync(src, dest) {
     const entries = fs.readdirSync(src);
     for (const entry of entries) {
       // Skip .DS_Store files
-      if (entry === '.DS_Store') {
+      if (entry === ".DS_Store") {
         continue;
       }
 

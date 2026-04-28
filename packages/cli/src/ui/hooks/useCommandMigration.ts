@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
-import { Storage } from '@tram-ai/tram-core';
-import { detectTomlCommands } from '../../services/command-migration-tool.js';
-import type { LoadedSettings } from '../../config/settings.js';
+import { useEffect, useState } from "react";
+import { Storage } from "@tram-ai/tram-core";
+import { detectTomlCommands } from "../../services/command-migration-tool.js";
+import type { LoadedSettings } from "../../config/settings.js";
 
 /**
  * Hook to detect TOML command files and manage migration nudge visibility.

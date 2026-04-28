@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { GitIgnoreFilter } from '../utils/gitIgnoreParser.js';
-import type { TramIgnoreFilter } from '../utils/tramIgnoreParser.js';
-import { GitIgnoreParser } from '../utils/gitIgnoreParser.js';
-import { TramIgnoreParser } from '../utils/tramIgnoreParser.js';
-import { isGitRepository } from '../utils/gitUtils.js';
-import * as path from 'node:path';
+import type { GitIgnoreFilter } from "../utils/gitIgnoreParser.js";
+import type { TramIgnoreFilter } from "../utils/tramIgnoreParser.js";
+import { GitIgnoreParser } from "../utils/gitIgnoreParser.js";
+import { TramIgnoreParser } from "../utils/tramIgnoreParser.js";
+import { isGitRepository } from "../utils/gitUtils.js";
+import * as path from "node:path";
 
 export interface FilterFilesOptions {
   respectGitIgnore?: boolean;

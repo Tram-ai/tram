@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { EventEmitter } from 'events';
-import { type ChildProcess } from 'child_process';
-import type { Config } from '../config/config.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { EventEmitter } from "events";
+import { type ChildProcess } from "child_process";
+import type { Config } from "../config/config.js";
 import {
   generateCodeChallenge,
   generateCodeVerifier,
@@ -23,12 +23,12 @@ import {
   type DeviceTokenResponse,
   type ErrorData,
   type TramCredentials,
-} from './tramOAuth2.js';
+} from "./tramOAuth2.js";
 import {
   SharedTokenManager,
   TokenManagerError,
   TokenError,
-} from './sharedTokenManager.js';
+} from "./sharedTokenManager.js";
 
 interface MockSharedTokenManager {
   getValidCredentials(tramClient: TramOAuth2Client): Promise<TramCredentials>;
@@ -37,7 +37,7 @@ interface MockSharedTokenManager {
 }
 
 // Mock SharedTokenManager
-vi.mock('./sharedTokenManager.js', () => ({
+vi.mock("./sharedTokenManager.js", () => ({
   SharedTokenManager: class {
     private static instance: MockSharedTokenManager | null = null;
 
@@ -59,10 +59,10 @@ vi.mock('./sharedTokenManager.js', () => ({
 
       // Fall back to default mock credentials if client has none
       return {
-        access_token: 'new-access-token',
-        refresh_token: 'valid-refresh-token',
+        access_token: "new-access-token",
+        refresh_token: "valid-refresh-token",
         resource_url: undefined,
-        token_type: 'Bearer',
+        token_type: "Bearer",
         expiry_date: Date.now() + 3600000,
       };
     }
@@ -79,32 +79,32 @@ vi.mock('./sharedTokenManager.js', () => ({
   TokenManagerError: class extends Error {
     constructor(message: string) {
       super(message);
-      this.name = 'TokenManagerError';
+      this.name = "TokenManagerError";
     }
   },
   TokenError: {
-    REFRESH_FAILED: 'REFRESH_FAILED',
-    NO_REFRESH_TOKEN: 'NO_REFRESH_TOKEN',
-    LOCK_TIMEOUT: 'LOCK_TIMEOUT',
-    FILE_ACCESS_ERROR: 'FILE_ACCESS_ERROR',
-    NETWORK_ERROR: 'NETWORK_ERROR',
+    REFRESH_FAILED: "REFRESH_FAILED",
+    NO_REFRESH_TOKEN: "NO_REFRESH_TOKEN",
+    LOCK_TIMEOUT: "LOCK_TIMEOUT",
+    FILE_ACCESS_ERROR: "FILE_ACCESS_ERROR",
+    NETWORK_ERROR: "NETWORK_ERROR",
   },
 }));
 
 // Mock open
-vi.mock('open', () => ({
+vi.mock("open", () => ({
   default: vi.fn(),
 }));
 
 // Mock process.stdout.write
-vi.mock('process', () => ({
+vi.mock("process", () => ({
   stdout: {
     write: vi.fn(),
   },
 }));
 
 // Mock file system operations
-vi.mock('node:fs', () => ({
+vi.mock("node:fs", () => ({
   promises: {
     readFile: vi.fn(),
     writeFile: vi.fn(),
@@ -113,23 +113,23 @@ vi.mock('node:fs', () => ({
   },
 }));
 
-describe('PKCE Code Generation', () => {
-  describe('generateCodeVerifier', () => {
-    it('should generate a code verifier with correct length', () => {
+describe("PKCE Code Generation", () => {
+  describe("generateCodeVerifier", () => {
+    it("should generate a code verifier with correct length", () => {
       const codeVerifier = generateCodeVerifier();
       expect(codeVerifier).toMatch(/^[A-Za-z0-9_-]{43}$/);
     });
 
-    it('should generate different verifiers on subsequent calls', () => {
+    it("should generate different verifiers on subsequent calls", () => {
       const verifier1 = generateCodeVerifier();
       const verifier2 = generateCodeVerifier();
       expect(verifier1).not.toBe(verifier2);
     });
   });
 
-  describe('generateCodeChallenge', () => {
-    it('should generate code challenge from verifier', () => {
-      const verifier = 'test-verifier-1234567890abcdefghijklmnopqrst';
+  describe("generateCodeChallenge", () => {
+    it("should generate code challenge from verifier", () => {
+      const verifier = "test-verifier-1234567890abcdefghijklmnopqrst";
       const challenge = generateCodeChallenge(verifier);
 
       // Should be base64url encoded
@@ -138,8 +138,8 @@ describe('PKCE Code Generation', () => {
     });
   });
 
-  describe('generatePKCEPair', () => {
-    it('should generate valid PKCE pair', () => {
+  describe("generatePKCEPair", () => {
+    it("should generate valid PKCE pair", () => {
       const { code_verifier, code_challenge } = generatePKCEPair();
 
       expect(code_verifier).toMatch(/^[A-Za-z0-9_-]{43}$/);
@@ -149,16 +149,16 @@ describe('PKCE Code Generation', () => {
   });
 });
 
-describe('Type Guards', () => {
-  describe('isDeviceAuthorizationSuccess', () => {
-    it('should return true for successful authorization response', () => {
-      const expectedBaseUrl = process.env['DEBUG']
-        ? 'https://pre4-chat.tram.ai'
-        : 'https://chat.tram.ai';
+describe("Type Guards", () => {
+  describe("isDeviceAuthorizationSuccess", () => {
+    it("should return true for successful authorization response", () => {
+      const expectedBaseUrl = process.env["DEBUG"]
+        ? "https://pre4-chat.tram.ai"
+        : "https://chat.tram.ai";
 
       const successResponse: DeviceAuthorizationResponse = {
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
         verification_uri: `${expectedBaseUrl}/device`,
         verification_uri_complete: `${expectedBaseUrl}/device?code=TEST123`,
         expires_in: 1800,
@@ -167,91 +167,91 @@ describe('Type Guards', () => {
       expect(isDeviceAuthorizationSuccess(successResponse)).toBe(true);
     });
 
-    it('should return false for error response', () => {
+    it("should return false for error response", () => {
       const errorResponse: DeviceAuthorizationResponse = {
-        error: 'INVALID_REQUEST',
-        error_description: 'The request parameters are invalid',
+        error: "INVALID_REQUEST",
+        error_description: "The request parameters are invalid",
       };
 
       expect(isDeviceAuthorizationSuccess(errorResponse)).toBe(false);
     });
   });
 
-  describe('isDeviceTokenPending', () => {
-    it('should return true for pending response', () => {
+  describe("isDeviceTokenPending", () => {
+    it("should return true for pending response", () => {
       const pendingResponse: DeviceTokenResponse = {
-        status: 'pending',
+        status: "pending",
       };
 
       expect(isDeviceTokenPending(pendingResponse)).toBe(true);
     });
 
-    it('should return false for success response', () => {
+    it("should return false for success response", () => {
       const successResponse: DeviceTokenResponse = {
-        access_token: 'valid-access-token',
-        refresh_token: 'valid-refresh-token',
-        token_type: 'Bearer',
+        access_token: "valid-access-token",
+        refresh_token: "valid-refresh-token",
+        token_type: "Bearer",
         expires_in: 3600,
-        scope: 'openid profile email model.completion',
+        scope: "openid profile email model.completion",
       };
 
       expect(isDeviceTokenPending(successResponse)).toBe(false);
     });
 
-    it('should return false for error response', () => {
+    it("should return false for error response", () => {
       const errorResponse: DeviceTokenResponse = {
-        error: 'ACCESS_DENIED',
-        error_description: 'User denied the authorization request',
+        error: "ACCESS_DENIED",
+        error_description: "User denied the authorization request",
       };
 
       expect(isDeviceTokenPending(errorResponse)).toBe(false);
     });
   });
 
-  describe('isDeviceTokenSuccess', () => {
-    it('should return true for successful token response', () => {
+  describe("isDeviceTokenSuccess", () => {
+    it("should return true for successful token response", () => {
       const successResponse: DeviceTokenResponse = {
-        access_token: 'valid-access-token',
-        refresh_token: 'valid-refresh-token',
-        token_type: 'Bearer',
+        access_token: "valid-access-token",
+        refresh_token: "valid-refresh-token",
+        token_type: "Bearer",
         expires_in: 3600,
-        scope: 'openid profile email model.completion',
+        scope: "openid profile email model.completion",
       };
 
       expect(isDeviceTokenSuccess(successResponse)).toBe(true);
     });
 
-    it('should return false for pending response', () => {
+    it("should return false for pending response", () => {
       const pendingResponse: DeviceTokenResponse = {
-        status: 'pending',
+        status: "pending",
       };
 
       expect(isDeviceTokenSuccess(pendingResponse)).toBe(false);
     });
 
-    it('should return false for error response', () => {
+    it("should return false for error response", () => {
       const errorResponse: DeviceTokenResponse = {
-        error: 'ACCESS_DENIED',
-        error_description: 'User denied the authorization request',
+        error: "ACCESS_DENIED",
+        error_description: "User denied the authorization request",
       };
 
       expect(isDeviceTokenSuccess(errorResponse)).toBe(false);
     });
 
-    it('should return false for null access token', () => {
+    it("should return false for null access token", () => {
       const nullTokenResponse: DeviceTokenResponse = {
         access_token: null,
-        token_type: 'Bearer',
+        token_type: "Bearer",
         expires_in: 3600,
       };
 
       expect(isDeviceTokenSuccess(nullTokenResponse)).toBe(false);
     });
 
-    it('should return false for empty access token', () => {
+    it("should return false for empty access token", () => {
       const emptyTokenResponse: DeviceTokenResponse = {
-        access_token: '',
-        token_type: 'Bearer',
+        access_token: "",
+        token_type: "Bearer",
         expires_in: 3600,
       };
 
@@ -259,22 +259,22 @@ describe('Type Guards', () => {
     });
   });
 
-  describe('isErrorResponse', () => {
-    it('should return true for error responses', () => {
+  describe("isErrorResponse", () => {
+    it("should return true for error responses", () => {
       const errorResponse: ErrorData = {
-        error: 'INVALID_REQUEST',
-        error_description: 'The request parameters are invalid',
+        error: "INVALID_REQUEST",
+        error_description: "The request parameters are invalid",
       };
 
       expect(isErrorResponse(errorResponse)).toBe(true);
     });
 
-    it('should return false for successful responses', () => {
+    it("should return false for successful responses", () => {
       const successResponse: DeviceAuthorizationResponse = {
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       };
 
@@ -283,7 +283,7 @@ describe('Type Guards', () => {
   });
 });
 
-describe('TramOAuth2Client', () => {
+describe("TramOAuth2Client", () => {
   let client: TramOAuth2Client;
   let originalFetch: typeof global.fetch;
 
@@ -301,15 +301,15 @@ describe('TramOAuth2Client', () => {
     vi.clearAllMocks();
   });
 
-  describe('requestDeviceAuthorization', () => {
-    it('should successfully request device authorization', async () => {
+  describe("requestDeviceAuthorization", () => {
+    it("should successfully request device authorization", async () => {
       const mockResponse = {
         ok: true,
         json: async () => ({
-          device_code: 'test-device-code',
-          user_code: 'TEST123',
-          verification_uri: 'https://chat.tram.ai/device',
-          verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+          device_code: "test-device-code",
+          user_code: "TEST123",
+          verification_uri: "https://chat.tram.ai/device",
+          verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
           expires_in: 1800,
         }),
       };
@@ -317,26 +317,26 @@ describe('TramOAuth2Client', () => {
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       const result = await client.requestDeviceAuthorization({
-        scope: 'openid profile email model.completion',
-        code_challenge: 'test-challenge',
-        code_challenge_method: 'S256',
+        scope: "openid profile email model.completion",
+        code_challenge: "test-challenge",
+        code_challenge_method: "S256",
       });
 
       expect(result).toEqual({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       });
     });
 
-    it('should handle error response', async () => {
+    it("should handle error response", async () => {
       const mockResponse = {
         ok: true,
         json: async () => ({
-          error: 'INVALID_REQUEST',
-          error_description: 'The request parameters are invalid',
+          error: "INVALID_REQUEST",
+          error_description: "The request parameters are invalid",
         }),
       };
 
@@ -344,41 +344,41 @@ describe('TramOAuth2Client', () => {
 
       await expect(
         client.requestDeviceAuthorization({
-          scope: 'openid profile email model.completion',
-          code_challenge: 'test-challenge',
-          code_challenge_method: 'S256',
+          scope: "openid profile email model.completion",
+          code_challenge: "test-challenge",
+          code_challenge_method: "S256",
         }),
       ).rejects.toThrow(
-        'Device authorization failed: INVALID_REQUEST - The request parameters are invalid',
+        "Device authorization failed: INVALID_REQUEST - The request parameters are invalid",
       );
     });
   });
 
-  describe('refreshAccessToken', () => {
+  describe("refreshAccessToken", () => {
     beforeEach(() => {
       // Set up client with credentials
       client.setCredentials({
-        access_token: 'old-token',
-        refresh_token: 'test-refresh-token',
-        token_type: 'Bearer',
+        access_token: "old-token",
+        refresh_token: "test-refresh-token",
+        token_type: "Bearer",
       });
     });
 
-    it('should successfully refresh access token', async () => {
+    it("should successfully refresh access token", async () => {
       const mockResponse = {
         ok: true,
         text: async () =>
           JSON.stringify({
-            access_token: 'new-access-token',
-            token_type: 'Bearer',
+            access_token: "new-access-token",
+            token_type: "Bearer",
             expires_in: 3600,
-            resource_url: 'https://new-endpoint.com',
+            resource_url: "https://new-endpoint.com",
           }),
         json: async () => ({
-          access_token: 'new-access-token',
-          token_type: 'Bearer',
+          access_token: "new-access-token",
+          token_type: "Bearer",
           expires_in: 3600,
-          resource_url: 'https://new-endpoint.com',
+          resource_url: "https://new-endpoint.com",
         }),
       };
 
@@ -387,39 +387,39 @@ describe('TramOAuth2Client', () => {
       const result = await client.refreshAccessToken();
 
       expect(result).toEqual({
-        access_token: 'new-access-token',
-        token_type: 'Bearer',
+        access_token: "new-access-token",
+        token_type: "Bearer",
         expires_in: 3600,
-        resource_url: 'https://new-endpoint.com',
+        resource_url: "https://new-endpoint.com",
       });
 
       // Verify credentials were updated
       const credentials = client.getCredentials();
-      expect(credentials.access_token).toBe('new-access-token');
+      expect(credentials.access_token).toBe("new-access-token");
     });
 
-    it('should handle refresh error', async () => {
+    it("should handle refresh error", async () => {
       const mockResponse = {
         ok: true,
         text: async () =>
           JSON.stringify({
-            error: 'INVALID_GRANT',
-            error_description: 'The refresh token is invalid',
+            error: "INVALID_GRANT",
+            error_description: "The refresh token is invalid",
           }),
         json: async () => ({
-          error: 'INVALID_GRANT',
-          error_description: 'The refresh token is invalid',
+          error: "INVALID_GRANT",
+          error_description: "The refresh token is invalid",
         }),
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       await expect(client.refreshAccessToken()).rejects.toThrow(
-        'Token refresh failed: INVALID_GRANT - The refresh token is invalid',
+        "Token refresh failed: INVALID_GRANT - The refresh token is invalid",
       );
     });
 
-    it('should successfully refresh access token and update credentials', async () => {
+    it("should successfully refresh access token and update credentials", async () => {
       // Clear any previous calls
       vi.clearAllMocks();
 
@@ -427,16 +427,16 @@ describe('TramOAuth2Client', () => {
         ok: true,
         text: async () =>
           JSON.stringify({
-            access_token: 'new-access-token',
-            token_type: 'Bearer',
+            access_token: "new-access-token",
+            token_type: "Bearer",
             expires_in: 3600,
-            resource_url: 'https://new-endpoint.com',
+            resource_url: "https://new-endpoint.com",
           }),
         json: async () => ({
-          access_token: 'new-access-token',
-          token_type: 'Bearer',
+          access_token: "new-access-token",
+          token_type: "Bearer",
           expires_in: 3600,
-          resource_url: 'https://new-endpoint.com',
+          resource_url: "https://new-endpoint.com",
         }),
       };
 
@@ -446,24 +446,24 @@ describe('TramOAuth2Client', () => {
 
       // Verify the response
       expect(result).toMatchObject({
-        access_token: 'new-access-token',
-        token_type: 'Bearer',
+        access_token: "new-access-token",
+        token_type: "Bearer",
         expires_in: 3600,
-        resource_url: 'https://new-endpoint.com',
+        resource_url: "https://new-endpoint.com",
       });
 
       // Verify credentials were updated
       const credentials = client.getCredentials();
       expect(credentials).toMatchObject({
-        access_token: 'new-access-token',
-        token_type: 'Bearer',
-        refresh_token: 'test-refresh-token', // Should preserve existing refresh token
-        resource_url: 'https://new-endpoint.com',
+        access_token: "new-access-token",
+        token_type: "Bearer",
+        refresh_token: "test-refresh-token", // Should preserve existing refresh token
+        resource_url: "https://new-endpoint.com",
       });
       expect(credentials.expiry_date).toBeDefined();
     });
 
-    it('should use new refresh token if provided in response', async () => {
+    it("should use new refresh token if provided in response", async () => {
       // Clear any previous calls
       vi.clearAllMocks();
 
@@ -471,18 +471,18 @@ describe('TramOAuth2Client', () => {
         ok: true,
         text: async () =>
           JSON.stringify({
-            access_token: 'new-access-token',
-            token_type: 'Bearer',
+            access_token: "new-access-token",
+            token_type: "Bearer",
             expires_in: 3600,
-            refresh_token: 'new-refresh-token',
-            resource_url: 'https://new-endpoint.com',
+            refresh_token: "new-refresh-token",
+            resource_url: "https://new-endpoint.com",
           }),
         json: async () => ({
-          access_token: 'new-access-token',
-          token_type: 'Bearer',
+          access_token: "new-access-token",
+          token_type: "Bearer",
           expires_in: 3600,
-          refresh_token: 'new-refresh-token', // New refresh token provided
-          resource_url: 'https://new-endpoint.com',
+          refresh_token: "new-refresh-token", // New refresh token provided
+          resource_url: "https://new-endpoint.com",
         }),
       };
 
@@ -492,27 +492,27 @@ describe('TramOAuth2Client', () => {
 
       // Verify the credentials contain the new refresh token
       const credentials = client.getCredentials();
-      expect(credentials.refresh_token).toBe('new-refresh-token');
+      expect(credentials.refresh_token).toBe("new-refresh-token");
     });
   });
 
-  describe('getAccessToken', () => {
-    it('should return access token if valid and not expired', async () => {
+  describe("getAccessToken", () => {
+    it("should return access token if valid and not expired", async () => {
       // Set valid credentials
       client.setCredentials({
-        access_token: 'valid-token',
+        access_token: "valid-token",
         expiry_date: Date.now() + 60 * 60 * 1000, // 1 hour from now
       });
 
       const result = await client.getAccessToken();
-      expect(result.token).toBe('valid-token');
+      expect(result.token).toBe("valid-token");
     });
 
-    it('should refresh token if access token is expired', async () => {
+    it("should refresh token if access token is expired", async () => {
       // Set expired credentials with refresh token
       client.setCredentials({
-        access_token: 'expired-token',
-        refresh_token: 'valid-refresh-token',
+        access_token: "expired-token",
+        refresh_token: "valid-refresh-token",
         expiry_date: Date.now() - 1000, // 1 second ago
       });
 
@@ -525,18 +525,18 @@ describe('TramOAuth2Client', () => {
         }
       ).sharedManager = {
         getValidCredentials: vi.fn().mockResolvedValue({
-          access_token: 'new-access-token',
-          refresh_token: 'valid-refresh-token',
-          token_type: 'Bearer',
+          access_token: "new-access-token",
+          refresh_token: "valid-refresh-token",
+          token_type: "Bearer",
           expiry_date: Date.now() + 3600000,
         }),
       };
 
       const result = await client.getAccessToken();
-      expect(result.token).toBe('new-access-token');
+      expect(result.token).toBe("new-access-token");
     });
 
-    it('should return undefined if no access token and no refresh token', async () => {
+    it("should return undefined if no access token and no refresh token", async () => {
       client.setCredentials({});
 
       // Override the client's SharedTokenManager instance directly
@@ -549,7 +549,7 @@ describe('TramOAuth2Client', () => {
       ).sharedManager = {
         getValidCredentials: vi
           .fn()
-          .mockRejectedValue(new Error('No credentials available')),
+          .mockRejectedValue(new Error("No credentials available")),
       };
 
       const result = await client.getAccessToken();
@@ -557,102 +557,102 @@ describe('TramOAuth2Client', () => {
     });
   });
 
-  describe('pollDeviceToken', () => {
-    it('should successfully poll for device token', async () => {
+  describe("pollDeviceToken", () => {
+    it("should successfully poll for device token", async () => {
       const mockResponse = {
         ok: true,
         json: async () => ({
-          access_token: 'new-access-token',
-          refresh_token: 'new-refresh-token',
-          token_type: 'Bearer',
+          access_token: "new-access-token",
+          refresh_token: "new-refresh-token",
+          token_type: "Bearer",
           expires_in: 3600,
-          scope: 'openid profile email model.completion',
+          scope: "openid profile email model.completion",
         }),
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       const result = await client.pollDeviceToken({
-        device_code: 'test-device-code',
-        code_verifier: 'test-code-verifier',
+        device_code: "test-device-code",
+        code_verifier: "test-code-verifier",
       });
 
       expect(result).toEqual({
-        access_token: 'new-access-token',
-        refresh_token: 'new-refresh-token',
-        token_type: 'Bearer',
+        access_token: "new-access-token",
+        refresh_token: "new-refresh-token",
+        token_type: "Bearer",
         expires_in: 3600,
-        scope: 'openid profile email model.completion',
+        scope: "openid profile email model.completion",
       });
     });
 
-    it('should return pending status when authorization is pending', async () => {
+    it("should return pending status when authorization is pending", async () => {
       const mockResponse = {
         ok: true,
         json: async () => ({
-          status: 'pending',
+          status: "pending",
         }),
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       const result = await client.pollDeviceToken({
-        device_code: 'test-device-code',
-        code_verifier: 'test-code-verifier',
+        device_code: "test-device-code",
+        code_verifier: "test-code-verifier",
       });
 
       expect(result).toEqual({
-        status: 'pending',
+        status: "pending",
       });
     });
 
-    it('should handle HTTP error responses', async () => {
+    it("should handle HTTP error responses", async () => {
       const mockResponse = {
         ok: false,
         status: 400,
-        statusText: 'Bad Request',
-        text: async () => 'Invalid device code',
+        statusText: "Bad Request",
+        text: async () => "Invalid device code",
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       await expect(
         client.pollDeviceToken({
-          device_code: 'invalid-device-code',
-          code_verifier: 'test-code-verifier',
+          device_code: "invalid-device-code",
+          code_verifier: "test-code-verifier",
         }),
-      ).rejects.toThrow('Device token poll failed: 400 Bad Request');
+      ).rejects.toThrow("Device token poll failed: 400 Bad Request");
     });
 
-    it('should include status code in error for better handling', async () => {
+    it("should include status code in error for better handling", async () => {
       const mockResponse = {
         ok: false,
         status: 429,
-        statusText: 'Too Many Requests',
-        text: async () => 'Rate limited',
+        statusText: "Too Many Requests",
+        text: async () => "Rate limited",
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       try {
         await client.pollDeviceToken({
-          device_code: 'test-device-code',
-          code_verifier: 'test-code-verifier',
+          device_code: "test-device-code",
+          code_verifier: "test-code-verifier",
         });
       } catch (error) {
         expect((error as Error & { status?: number }).status).toBe(429);
       }
     });
 
-    it('should handle authorization_pending with HTTP 400 according to RFC 8628', async () => {
+    it("should handle authorization_pending with HTTP 400 according to RFC 8628", async () => {
       const errorData = {
-        error: 'authorization_pending',
-        error_description: 'The authorization request is still pending',
+        error: "authorization_pending",
+        error_description: "The authorization request is still pending",
       };
       const mockResponse = {
         ok: false,
         status: 400,
-        statusText: 'Bad Request',
+        statusText: "Bad Request",
         text: async () => JSON.stringify(errorData),
         json: async () => errorData,
       };
@@ -660,24 +660,24 @@ describe('TramOAuth2Client', () => {
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       const result = await client.pollDeviceToken({
-        device_code: 'test-device-code',
-        code_verifier: 'test-code-verifier',
+        device_code: "test-device-code",
+        code_verifier: "test-code-verifier",
       });
 
       expect(result).toEqual({
-        status: 'pending',
+        status: "pending",
       });
     });
 
-    it('should handle slow_down with HTTP 429 according to RFC 8628', async () => {
+    it("should handle slow_down with HTTP 429 according to RFC 8628", async () => {
       const errorData = {
-        error: 'slow_down',
-        error_description: 'The client is polling too frequently',
+        error: "slow_down",
+        error_description: "The client is polling too frequently",
       };
       const mockResponse = {
         ok: false,
         status: 429,
-        statusText: 'Too Many Requests',
+        statusText: "Too Many Requests",
         text: async () => JSON.stringify(errorData),
         json: async () => errorData,
       };
@@ -685,40 +685,40 @@ describe('TramOAuth2Client', () => {
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       const result = await client.pollDeviceToken({
-        device_code: 'test-device-code',
-        code_verifier: 'test-code-verifier',
+        device_code: "test-device-code",
+        code_verifier: "test-code-verifier",
       });
 
       expect(result).toEqual({
-        status: 'pending',
+        status: "pending",
         slowDown: true,
       });
     });
   });
 
-  describe('refreshAccessToken error handling', () => {
+  describe("refreshAccessToken error handling", () => {
     beforeEach(() => {
       client.setCredentials({
-        access_token: 'old-token',
-        refresh_token: 'test-refresh-token',
-        token_type: 'Bearer',
+        access_token: "old-token",
+        refresh_token: "test-refresh-token",
+        token_type: "Bearer",
       });
     });
 
-    it('should throw error if no refresh token available', async () => {
-      client.setCredentials({ access_token: 'token' });
+    it("should throw error if no refresh token available", async () => {
+      client.setCredentials({ access_token: "token" });
 
       await expect(client.refreshAccessToken()).rejects.toThrow(
-        'No refresh token available',
+        "No refresh token available",
       );
     });
 
-    it('should handle 400 status as expired refresh token', async () => {
+    it("should handle 400 status as expired refresh token", async () => {
       const mockResponse = {
         ok: false,
         status: 400,
-        statusText: 'Bad Request',
-        text: async () => 'Refresh token expired',
+        statusText: "Bad Request",
+        text: async () => "Refresh token expired",
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
@@ -728,28 +728,28 @@ describe('TramOAuth2Client', () => {
       );
     });
 
-    it('should handle other HTTP error statuses', async () => {
+    it("should handle other HTTP error statuses", async () => {
       const mockResponse = {
         ok: false,
         status: 500,
-        statusText: 'Internal Server Error',
-        text: async () => 'Server error',
+        statusText: "Internal Server Error",
+        text: async () => "Server error",
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       await expect(client.refreshAccessToken()).rejects.toThrow(
-        'Token refresh failed: 500 Internal Server Error',
+        "Token refresh failed: 500 Internal Server Error",
       );
     });
 
-    it('should NOT clear credentials on malformed 200 response (e.g. proxy HTML)', async () => {
-      const { CredentialsClearRequiredError } = await import('./qwenOAuth2.js');
+    it("should NOT clear credentials on malformed 200 response (e.g. proxy HTML)", async () => {
+      const { CredentialsClearRequiredError } = await import("./tramOAuth2.js");
 
       const mockResponse = {
         ok: true,
         status: 200,
-        text: async () => '<html><body>Proxy Error</body></html>',
+        text: async () => "<html><body>Proxy Error</body></html>",
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
@@ -761,18 +761,18 @@ describe('TramOAuth2Client', () => {
         CredentialsClearRequiredError,
       );
       await expect(client.refreshAccessToken()).rejects.toThrow(
-        'Qwen OAuth refresh returned invalid JSON:',
+        "Qwen OAuth refresh returned invalid JSON:",
       );
     });
 
-    it('should clear credentials and throw CredentialsClearRequiredError on 401 response', async () => {
-      const { CredentialsClearRequiredError } = await import('./qwenOAuth2.js');
+    it("should clear credentials and throw CredentialsClearRequiredError on 401 response", async () => {
+      const { CredentialsClearRequiredError } = await import("./tramOAuth2.js");
 
       const mockResponse = {
         ok: false,
         status: 401,
-        statusText: 'Unauthorized',
-        text: async () => 'Unauthorized',
+        statusText: "Unauthorized",
+        text: async () => "Unauthorized",
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
@@ -787,12 +787,12 @@ describe('TramOAuth2Client', () => {
     });
   });
 
-  describe('credentials management', () => {
-    it('should set and get credentials correctly', () => {
+  describe("credentials management", () => {
+    it("should set and get credentials correctly", () => {
       const credentials = {
-        access_token: 'test-token',
-        refresh_token: 'test-refresh',
-        token_type: 'Bearer',
+        access_token: "test-token",
+        refresh_token: "test-refresh",
+        token_type: "Bearer",
         expiry_date: Date.now() + 3600000,
       };
 
@@ -800,14 +800,14 @@ describe('TramOAuth2Client', () => {
       expect(client.getCredentials()).toEqual(credentials);
     });
 
-    it('should handle empty credentials', () => {
+    it("should handle empty credentials", () => {
       client.setCredentials({});
       expect(client.getCredentials()).toEqual({});
     });
   });
 });
 
-describe('getTramOAuthClient', () => {
+describe("getTramOAuthClient", () => {
   let mockConfig: Config;
   let originalFetch: typeof global.fetch;
 
@@ -826,11 +826,11 @@ describe('getTramOAuthClient', () => {
     vi.clearAllMocks();
   });
 
-  it('should load cached credentials if available', async () => {
+  it("should load cached credentials if available", async () => {
     const mockCredentials = {
-      access_token: 'cached-token',
-      refresh_token: 'cached-refresh',
-      token_type: 'Bearer',
+      access_token: "cached-token",
+      refresh_token: "cached-refresh",
+      token_type: "Bearer",
       expiry_date: Date.now() + 3600000,
     };
 
@@ -842,7 +842,7 @@ describe('getTramOAuthClient', () => {
     const originalGetInstance = SharedTokenManager.getInstance;
     SharedTokenManager.getInstance = vi.fn().mockReturnValue(mockTokenManager);
 
-    const client = await import('./tramOAuth2.js').then((module) =>
+    const client = await import("./tramOAuth2.js").then((module) =>
       module.getTramOAuthClient(mockConfig),
     );
 
@@ -852,12 +852,12 @@ describe('getTramOAuthClient', () => {
     SharedTokenManager.getInstance = originalGetInstance;
   });
 
-  it('should handle cached credentials refresh failure', async () => {
+  it("should handle cached credentials refresh failure", async () => {
     // Mock SharedTokenManager to fail with a specific error
     const mockTokenManager = {
       getValidCredentials: vi
         .fn()
-        .mockRejectedValue(new Error('Token refresh failed')),
+        .mockRejectedValue(new Error("Token refresh failed")),
     };
 
     const originalGetInstance = SharedTokenManager.getInstance;
@@ -867,28 +867,28 @@ describe('getTramOAuthClient', () => {
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        error: 'invalid_request',
-        error_description: 'Invalid request parameters',
+        error: "invalid_request",
+        error_description: "Invalid request parameters",
       }),
     };
     vi.mocked(global.fetch).mockResolvedValue(mockAuthResponse as Response);
 
     // The function should handle the invalid cached credentials and throw the expected error
     await expect(
-      import('./tramOAuth2.js').then((module) =>
+      import("./tramOAuth2.js").then((module) =>
         module.getTramOAuthClient(mockConfig),
       ),
-    ).rejects.toThrow('Device authorization flow failed');
+    ).rejects.toThrow("Device authorization flow failed");
 
     SharedTokenManager.getInstance = originalGetInstance;
   });
 
-  it('should not start device flow when requireCachedCredentials is true', async () => {
+  it("should not start device flow when requireCachedCredentials is true", async () => {
     // Make SharedTokenManager fail so we hit the fallback path
     const mockTokenManager = {
       getValidCredentials: vi
         .fn()
-        .mockRejectedValue(new Error('No credentials')),
+        .mockRejectedValue(new Error("No credentials")),
     };
 
     const originalGetInstance = SharedTokenManager.getInstance;
@@ -898,13 +898,13 @@ describe('getTramOAuthClient', () => {
     vi.mocked(global.fetch).mockResolvedValue({ ok: true } as Response);
 
     await expect(
-      import('./tramOAuth2.js').then((module) =>
+      import("./tramOAuth2.js").then((module) =>
         module.getTramOAuthClient(mockConfig, {
           requireCachedCredentials: true,
         }),
       ),
     ).rejects.toThrow(
-      'TRAM OAuth credentials expired. Please use /auth to re-authenticate with tram-oauth.',
+      "TRAM OAuth credentials expired. Please use /auth to re-authenticate with tram-oauth.",
     );
 
     expect(global.fetch).not.toHaveBeenCalled();
@@ -912,33 +912,33 @@ describe('getTramOAuthClient', () => {
     SharedTokenManager.getInstance = originalGetInstance;
   });
 
-  it('should include troubleshooting hints when device auth fetch fails', async () => {
+  it("should include troubleshooting hints when device auth fetch fails", async () => {
     // Make SharedTokenManager fail so we hit the fallback device-flow path
     const mockTokenManager = {
       getValidCredentials: vi
         .fn()
-        .mockRejectedValue(new Error('Token refresh failed')),
+        .mockRejectedValue(new Error("Token refresh failed")),
     };
 
     const originalGetInstance = SharedTokenManager.getInstance;
     SharedTokenManager.getInstance = vi.fn().mockReturnValue(mockTokenManager);
 
-    const tlsCause = new Error('unable to verify the first certificate');
+    const tlsCause = new Error("unable to verify the first certificate");
     (tlsCause as Error & { code?: string }).code =
-      'UNABLE_TO_VERIFY_LEAF_SIGNATURE';
+      "UNABLE_TO_VERIFY_LEAF_SIGNATURE";
 
-    const fetchError = new TypeError('fetch failed') as TypeError & {
+    const fetchError = new TypeError("fetch failed") as TypeError & {
       cause?: unknown;
     };
     fetchError.cause = tlsCause;
 
     vi.mocked(global.fetch).mockRejectedValue(fetchError);
 
-    const emitSpy = vi.spyOn(tramOAuth2Events, 'emit');
+    const emitSpy = vi.spyOn(tramOAuth2Events, "emit");
 
     let thrownError: unknown;
     try {
-      const { getTramOAuthClient } = await import('./tramOAuth2.js');
+      const { getTramOAuthClient } = await import("./tramOAuth2.js");
       await getTramOAuthClient(mockConfig);
     } catch (error: unknown) {
       thrownError = error;
@@ -946,18 +946,18 @@ describe('getTramOAuthClient', () => {
 
     expect(thrownError).toBeInstanceOf(Error);
     expect((thrownError as Error).message).toContain(
-      'Device authorization flow failed: fetch failed',
+      "Device authorization flow failed: fetch failed",
     );
     expect((thrownError as Error).message).toContain(
-      'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+      "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
     );
-    expect((thrownError as Error).message).toContain('NODE_EXTRA_CA_CERTS');
-    expect((thrownError as Error).message).toContain('--proxy');
+    expect((thrownError as Error).message).toContain("NODE_EXTRA_CA_CERTS");
+    expect((thrownError as Error).message).toContain("--proxy");
 
     expect(emitSpy).toHaveBeenCalledWith(
       TramOAuth2Event.AuthProgress,
-      'error',
-      expect.stringContaining('NODE_EXTRA_CA_CERTS'),
+      "error",
+      expect.stringContaining("NODE_EXTRA_CA_CERTS"),
     );
 
     emitSpy.mockRestore();
@@ -965,36 +965,36 @@ describe('getTramOAuthClient', () => {
   });
 });
 
-describe('CredentialsClearRequiredError', () => {
-  it('should create error with correct name and message', async () => {
-    const { CredentialsClearRequiredError } = await import('./tramOAuth2.js');
+describe("CredentialsClearRequiredError", () => {
+  it("should create error with correct name and message", async () => {
+    const { CredentialsClearRequiredError } = await import("./tramOAuth2.js");
 
-    const message = 'Test error message';
-    const originalError = { status: 400, response: 'Bad Request' };
+    const message = "Test error message";
+    const originalError = { status: 400, response: "Bad Request" };
     const error = new CredentialsClearRequiredError(message, originalError);
 
-    expect(error.name).toBe('CredentialsClearRequiredError');
+    expect(error.name).toBe("CredentialsClearRequiredError");
     expect(error.message).toBe(message);
     expect(error.originalError).toBe(originalError);
     expect(error instanceof Error).toBe(true);
   });
 
-  it('should work without originalError', async () => {
-    const { CredentialsClearRequiredError } = await import('./tramOAuth2.js');
+  it("should work without originalError", async () => {
+    const { CredentialsClearRequiredError } = await import("./tramOAuth2.js");
 
-    const message = 'Test error message';
+    const message = "Test error message";
     const error = new CredentialsClearRequiredError(message);
 
-    expect(error.name).toBe('CredentialsClearRequiredError');
+    expect(error.name).toBe("CredentialsClearRequiredError");
     expect(error.message).toBe(message);
     expect(error.originalError).toBeUndefined();
   });
 });
 
-describe('clearTramCredentials', () => {
-  it('should successfully clear credentials file', async () => {
-    const { promises: fs } = await import('node:fs');
-    const { clearTramCredentials } = await import('./tramOAuth2.js');
+describe("clearTramCredentials", () => {
+  it("should successfully clear credentials file", async () => {
+    const { promises: fs } = await import("node:fs");
+    const { clearTramCredentials } = await import("./tramOAuth2.js");
 
     vi.mocked(fs.unlink).mockResolvedValue(undefined);
 
@@ -1002,22 +1002,22 @@ describe('clearTramCredentials', () => {
     expect(fs.unlink).toHaveBeenCalled();
   });
 
-  it('should handle file not found error gracefully', async () => {
-    const { promises: fs } = await import('node:fs');
-    const { clearTramCredentials } = await import('./tramOAuth2.js');
+  it("should handle file not found error gracefully", async () => {
+    const { promises: fs } = await import("node:fs");
+    const { clearTramCredentials } = await import("./tramOAuth2.js");
 
-    const notFoundError = new Error('File not found');
-    (notFoundError as Error & { code: string }).code = 'ENOENT';
+    const notFoundError = new Error("File not found");
+    (notFoundError as Error & { code: string }).code = "ENOENT";
     vi.mocked(fs.unlink).mockRejectedValue(notFoundError);
 
     await expect(clearTramCredentials()).resolves.not.toThrow();
   });
 
-  it('should handle other file system errors gracefully', async () => {
-    const { promises: fs } = await import('node:fs');
-    const { clearTramCredentials } = await import('./tramOAuth2.js');
+  it("should handle other file system errors gracefully", async () => {
+    const { promises: fs } = await import("node:fs");
+    const { clearTramCredentials } = await import("./tramOAuth2.js");
 
-    const permissionError = new Error('Permission denied');
+    const permissionError = new Error("Permission denied");
     vi.mocked(fs.unlink).mockRejectedValue(permissionError);
 
     // Should not throw but may log warning
@@ -1025,7 +1025,7 @@ describe('clearTramCredentials', () => {
   });
 });
 
-describe('TramOAuth2Client - Additional Error Scenarios', () => {
+describe("TramOAuth2Client - Additional Error Scenarios", () => {
   let client: TramOAuth2Client;
   let originalFetch: typeof global.fetch;
 
@@ -1040,31 +1040,31 @@ describe('TramOAuth2Client - Additional Error Scenarios', () => {
     vi.clearAllMocks();
   });
 
-  describe('requestDeviceAuthorization HTTP errors', () => {
-    it('should handle HTTP error response with non-ok status', async () => {
+  describe("requestDeviceAuthorization HTTP errors", () => {
+    it("should handle HTTP error response with non-ok status", async () => {
       const mockResponse = {
         ok: false,
         status: 500,
-        statusText: 'Internal Server Error',
-        text: async () => 'Server error occurred',
+        statusText: "Internal Server Error",
+        text: async () => "Server error occurred",
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       await expect(
         client.requestDeviceAuthorization({
-          scope: 'openid profile email model.completion',
-          code_challenge: 'test-challenge',
-          code_challenge_method: 'S256',
+          scope: "openid profile email model.completion",
+          code_challenge: "test-challenge",
+          code_challenge_method: "S256",
         }),
       ).rejects.toThrow(
-        'Device authorization failed: 500 Internal Server Error. Response: Server error occurred',
+        "Device authorization failed: 500 Internal Server Error. Response: Server error occurred",
       );
     });
   });
 });
 
-describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
+describe("getTramOAuthClient - Enhanced Error Scenarios", () => {
   let mockConfig: Config;
   let originalFetch: typeof global.fetch;
 
@@ -1083,12 +1083,12 @@ describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
     vi.clearAllMocks();
   });
 
-  it('should handle generic refresh token errors', async () => {
-    const { promises: fs } = await import('node:fs');
+  it("should handle generic refresh token errors", async () => {
+    const { promises: fs } = await import("node:fs");
     const mockCredentials = {
-      access_token: 'cached-token',
-      refresh_token: 'some-refresh-token',
-      token_type: 'Bearer',
+      access_token: "cached-token",
+      refresh_token: "some-refresh-token",
+      token_type: "Bearer",
       expiry_date: Date.now() + 3600000,
     };
 
@@ -1098,7 +1098,7 @@ describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
     const mockTokenManager = {
       getValidCredentials: vi
         .fn()
-        .mockRejectedValue(new Error('Refresh failed')),
+        .mockRejectedValue(new Error("Refresh failed")),
     };
 
     const originalGetInstance = SharedTokenManager.getInstance;
@@ -1108,32 +1108,32 @@ describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        error: 'invalid_request',
-        error_description: 'Invalid request parameters',
+        error: "invalid_request",
+        error_description: "Invalid request parameters",
       }),
     };
     vi.mocked(global.fetch).mockResolvedValue(mockAuthResponse as Response);
 
     await expect(
-      import('./tramOAuth2.js').then((module) =>
+      import("./tramOAuth2.js").then((module) =>
         module.getTramOAuthClient(mockConfig),
       ),
-    ).rejects.toThrow('Device authorization flow failed');
+    ).rejects.toThrow("Device authorization flow failed");
 
     SharedTokenManager.getInstance = originalGetInstance;
   });
 
-  it('should handle different authentication failure reasons - timeout', async () => {
-    const { promises: fs } = await import('node:fs');
+  it("should handle different authentication failure reasons - timeout", async () => {
+    const { promises: fs } = await import("node:fs");
     vi.mocked(fs.readFile).mockRejectedValue(
-      new Error('No cached credentials'),
+      new Error("No cached credentials"),
     );
 
     // Mock SharedTokenManager to fail
     const mockTokenManager = {
       getValidCredentials: vi
         .fn()
-        .mockRejectedValue(new Error('No credentials')),
+        .mockRejectedValue(new Error("No credentials")),
     };
 
     const originalGetInstance = SharedTokenManager.getInstance;
@@ -1143,10 +1143,10 @@ describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 0.1, // Very short timeout for testing
       }),
     };
@@ -1154,7 +1154,7 @@ describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
     const mockPendingResponse = {
       ok: true,
       json: async () => ({
-        status: 'pending',
+        status: "pending",
       }),
     };
 
@@ -1164,25 +1164,25 @@ describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
       .mockResolvedValue(mockPendingResponse as Response);
 
     await expect(
-      import('./tramOAuth2.js').then((module) =>
+      import("./tramOAuth2.js").then((module) =>
         module.getTramOAuthClient(mockConfig),
       ),
-    ).rejects.toThrow('Authorization timeout, please restart the process.');
+    ).rejects.toThrow("Authorization timeout, please restart the process.");
 
     SharedTokenManager.getInstance = originalGetInstance;
   });
 
-  it('should handle authentication failure reason - rate limit', async () => {
-    const { promises: fs } = await import('node:fs');
+  it("should handle authentication failure reason - rate limit", async () => {
+    const { promises: fs } = await import("node:fs");
     vi.mocked(fs.readFile).mockRejectedValue(
-      new Error('No cached credentials'),
+      new Error("No cached credentials"),
     );
 
     // Mock SharedTokenManager to fail
     const mockTokenManager = {
       getValidCredentials: vi
         .fn()
-        .mockRejectedValue(new Error('No credentials')),
+        .mockRejectedValue(new Error("No credentials")),
     };
 
     const originalGetInstance = SharedTokenManager.getInstance;
@@ -1192,10 +1192,10 @@ describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       }),
     };
@@ -1203,8 +1203,8 @@ describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
     const mockRateLimitResponse = {
       ok: false,
       status: 429,
-      statusText: 'Too Many Requests',
-      text: async () => 'Rate limited',
+      statusText: "Too Many Requests",
+      text: async () => "Rate limited",
     };
 
     global.fetch = vi
@@ -1213,27 +1213,27 @@ describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
       .mockResolvedValue(mockRateLimitResponse as Response);
 
     await expect(
-      import('./tramOAuth2.js').then((module) =>
+      import("./tramOAuth2.js").then((module) =>
         module.getTramOAuthClient(mockConfig),
       ),
     ).rejects.toThrow(
-      'Too many requests. The server is rate limiting our requests. Please select a different authentication method or try again later.',
+      "Too many requests. The server is rate limiting our requests. Please select a different authentication method or try again later.",
     );
 
     SharedTokenManager.getInstance = originalGetInstance;
   });
 
-  it('should handle authentication failure reason - error', async () => {
-    const { promises: fs } = await import('node:fs');
+  it("should handle authentication failure reason - error", async () => {
+    const { promises: fs } = await import("node:fs");
     vi.mocked(fs.readFile).mockRejectedValue(
-      new Error('No cached credentials'),
+      new Error("No cached credentials"),
     );
 
     // Mock SharedTokenManager to fail
     const mockTokenManager = {
       getValidCredentials: vi
         .fn()
-        .mockRejectedValue(new Error('No credentials')),
+        .mockRejectedValue(new Error("No credentials")),
     };
 
     const originalGetInstance = SharedTokenManager.getInstance;
@@ -1243,24 +1243,24 @@ describe('getTramOAuthClient - Enhanced Error Scenarios', () => {
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        error: 'invalid_request',
-        error_description: 'Invalid request parameters',
+        error: "invalid_request",
+        error_description: "Invalid request parameters",
       }),
     };
 
     global.fetch = vi.fn().mockResolvedValue(mockAuthResponse as Response);
 
     await expect(
-      import('./tramOAuth2.js').then((module) =>
+      import("./tramOAuth2.js").then((module) =>
         module.getTramOAuthClient(mockConfig),
       ),
-    ).rejects.toThrow('Device authorization flow failed');
+    ).rejects.toThrow("Device authorization flow failed");
 
     SharedTokenManager.getInstance = originalGetInstance;
   });
 });
 
-describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
+describe("authWithTramDeviceFlow - Comprehensive Testing", () => {
   let mockConfig: Config;
   let originalFetch: typeof global.fetch;
 
@@ -1283,17 +1283,17 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
     vi.useRealTimers();
   });
 
-  it('should handle device authorization error response', async () => {
-    const { promises: fs } = await import('node:fs');
+  it("should handle device authorization error response", async () => {
+    const { promises: fs } = await import("node:fs");
     vi.mocked(fs.readFile).mockRejectedValue(
-      new Error('No cached credentials'),
+      new Error("No cached credentials"),
     );
 
     // Mock SharedTokenManager to fail
     const mockTokenManager = {
       getValidCredentials: vi
         .fn()
-        .mockRejectedValue(new Error('No credentials')),
+        .mockRejectedValue(new Error("No credentials")),
     };
 
     const originalGetInstance = SharedTokenManager.getInstance;
@@ -1302,35 +1302,35 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        error: 'invalid_client',
-        error_description: 'Client authentication failed',
+        error: "invalid_client",
+        error_description: "Client authentication failed",
       }),
     };
 
     global.fetch = vi.fn().mockResolvedValue(mockAuthResponse as Response);
 
     await expect(
-      import('./tramOAuth2.js').then((module) =>
+      import("./tramOAuth2.js").then((module) =>
         module.getTramOAuthClient(mockConfig),
       ),
-    ).rejects.toThrow('Device authorization flow failed');
+    ).rejects.toThrow("Device authorization flow failed");
 
     SharedTokenManager.getInstance = originalGetInstance;
   });
 
-  it('should handle successful authentication flow', async () => {
-    const { promises: fs } = await import('node:fs');
+  it("should handle successful authentication flow", async () => {
+    const { promises: fs } = await import("node:fs");
     vi.mocked(fs.readFile).mockRejectedValue(
-      new Error('No cached credentials'),
+      new Error("No cached credentials"),
     );
 
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       }),
     };
@@ -1338,11 +1338,11 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
     const mockTokenResponse = {
       ok: true,
       json: async () => ({
-        access_token: 'new-access-token',
-        refresh_token: 'new-refresh-token',
-        token_type: 'Bearer',
+        access_token: "new-access-token",
+        refresh_token: "new-refresh-token",
+        token_type: "Bearer",
         expires_in: 3600,
-        scope: 'openid profile email model.completion',
+        scope: "openid profile email model.completion",
       }),
     };
 
@@ -1350,24 +1350,24 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
       .mockResolvedValueOnce(mockAuthResponse as Response)
       .mockResolvedValue(mockTokenResponse as Response);
 
-    const client = await import('./tramOAuth2.js').then((module) =>
+    const client = await import("./tramOAuth2.js").then((module) =>
       module.getTramOAuthClient(mockConfig),
     );
 
     expect(client).toBeInstanceOf(Object);
   });
 
-  it('should handle 401 error during token polling', async () => {
-    const { promises: fs } = await import('node:fs');
+  it("should handle 401 error during token polling", async () => {
+    const { promises: fs } = await import("node:fs");
     vi.mocked(fs.readFile).mockRejectedValue(
-      new Error('No cached credentials'),
+      new Error("No cached credentials"),
     );
 
     // Mock SharedTokenManager to fail
     const mockTokenManager = {
       getValidCredentials: vi
         .fn()
-        .mockRejectedValue(new Error('No credentials')),
+        .mockRejectedValue(new Error("No credentials")),
     };
 
     const originalGetInstance = SharedTokenManager.getInstance;
@@ -1376,10 +1376,10 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       }),
     };
@@ -1387,8 +1387,8 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
     const mock401Response = {
       ok: false,
       status: 401,
-      statusText: 'Unauthorized',
-      text: async () => 'Device code expired',
+      statusText: "Unauthorized",
+      text: async () => "Device code expired",
     };
 
     global.fetch = vi
@@ -1397,27 +1397,27 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
       .mockResolvedValue(mock401Response as Response);
 
     await expect(
-      import('./tramOAuth2.js').then((module) =>
+      import("./tramOAuth2.js").then((module) =>
         module.getTramOAuthClient(mockConfig),
       ),
     ).rejects.toThrow(
-      'Device code expired or invalid, please restart the authorization process.',
+      "Device code expired or invalid, please restart the authorization process.",
     );
 
     SharedTokenManager.getInstance = originalGetInstance;
   });
 
-  it('should handle token polling with browser launch suppressed', async () => {
-    const { promises: fs } = await import('node:fs');
+  it("should handle token polling with browser launch suppressed", async () => {
+    const { promises: fs } = await import("node:fs");
     vi.mocked(fs.readFile).mockRejectedValue(
-      new Error('No cached credentials'),
+      new Error("No cached credentials"),
     );
 
     // Mock SharedTokenManager to fail initially so device flow is used
     const mockTokenManager = {
       getValidCredentials: vi
         .fn()
-        .mockRejectedValue(new Error('No credentials')),
+        .mockRejectedValue(new Error("No credentials")),
     };
 
     const originalGetInstance = SharedTokenManager.getInstance;
@@ -1429,10 +1429,10 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       }),
     };
@@ -1440,11 +1440,11 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
     const mockTokenResponse = {
       ok: true,
       json: async () => ({
-        access_token: 'new-access-token',
-        refresh_token: 'new-refresh-token',
-        token_type: 'Bearer',
+        access_token: "new-access-token",
+        refresh_token: "new-refresh-token",
+        token_type: "Bearer",
         expires_in: 3600,
-        scope: 'openid profile email model.completion',
+        scope: "openid profile email model.completion",
       }),
     };
 
@@ -1453,7 +1453,7 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
       .mockResolvedValueOnce(mockAuthResponse as Response)
       .mockResolvedValue(mockTokenResponse as Response);
 
-    const client = await import('./tramOAuth2.js').then((module) =>
+    const client = await import("./tramOAuth2.js").then((module) =>
       module.getTramOAuthClient(mockConfig),
     );
 
@@ -1464,7 +1464,7 @@ describe('authWithTramDeviceFlow - Comprehensive Testing', () => {
   });
 });
 
-describe('Browser Launch and Error Handling', () => {
+describe("Browser Launch and Error Handling", () => {
   let mockConfig: Config;
   let originalFetch: typeof global.fetch;
 
@@ -1483,25 +1483,25 @@ describe('Browser Launch and Error Handling', () => {
     vi.clearAllMocks();
   });
 
-  it('should handle browser launch failure gracefully', async () => {
-    const { promises: fs } = await import('node:fs');
+  it("should handle browser launch failure gracefully", async () => {
+    const { promises: fs } = await import("node:fs");
     vi.mocked(fs.readFile).mockRejectedValue(
-      new Error('No cached credentials'),
+      new Error("No cached credentials"),
     );
 
     // Mock open to throw error
-    const open = await import('open');
+    const open = await import("open");
     vi.mocked(open.default).mockRejectedValue(
-      new Error('Browser launch failed'),
+      new Error("Browser launch failed"),
     );
 
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       }),
     };
@@ -1509,11 +1509,11 @@ describe('Browser Launch and Error Handling', () => {
     const mockTokenResponse = {
       ok: true,
       json: async () => ({
-        access_token: 'new-access-token',
-        refresh_token: 'new-refresh-token',
-        token_type: 'Bearer',
+        access_token: "new-access-token",
+        refresh_token: "new-refresh-token",
+        token_type: "Bearer",
         expires_in: 3600,
-        scope: 'openid profile email model.completion',
+        scope: "openid profile email model.completion",
       }),
     };
 
@@ -1521,26 +1521,26 @@ describe('Browser Launch and Error Handling', () => {
       .mockResolvedValueOnce(mockAuthResponse as Response)
       .mockResolvedValue(mockTokenResponse as Response);
 
-    const client = await import('./tramOAuth2.js').then((module) =>
+    const client = await import("./tramOAuth2.js").then((module) =>
       module.getTramOAuthClient(mockConfig),
     );
 
     expect(client).toBeInstanceOf(Object);
   });
 
-  it('should handle browser child process error gracefully', async () => {
-    const { promises: fs } = await import('node:fs');
+  it("should handle browser child process error gracefully", async () => {
+    const { promises: fs } = await import("node:fs");
     vi.mocked(fs.readFile).mockRejectedValue(
-      new Error('No cached credentials'),
+      new Error("No cached credentials"),
     );
 
     // Mock open to return a child process that will emit error
-    const open = await import('open');
+    const open = await import("open");
     const mockChildProcess = {
       on: vi.fn((event: string, callback: (error: Error) => void) => {
-        if (event === 'error') {
+        if (event === "error") {
           // Call the error handler immediately for testing
-          setTimeout(() => callback(new Error('Process spawn failed')), 0);
+          setTimeout(() => callback(new Error("Process spawn failed")), 0);
         }
       }),
     };
@@ -1551,10 +1551,10 @@ describe('Browser Launch and Error Handling', () => {
     const mockAuthResponse = {
       ok: true,
       json: async () => ({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       }),
     };
@@ -1562,11 +1562,11 @@ describe('Browser Launch and Error Handling', () => {
     const mockTokenResponse = {
       ok: true,
       json: async () => ({
-        access_token: 'new-access-token',
-        refresh_token: 'new-refresh-token',
-        token_type: 'Bearer',
+        access_token: "new-access-token",
+        refresh_token: "new-refresh-token",
+        token_type: "Bearer",
         expires_in: 3600,
-        scope: 'openid profile email model.completion',
+        scope: "openid profile email model.completion",
       }),
     };
 
@@ -1574,7 +1574,7 @@ describe('Browser Launch and Error Handling', () => {
       .mockResolvedValueOnce(mockAuthResponse as Response)
       .mockResolvedValue(mockTokenResponse as Response);
 
-    const client = await import('./tramOAuth2.js').then((module) =>
+    const client = await import("./tramOAuth2.js").then((module) =>
       module.getTramOAuthClient(mockConfig),
     );
 
@@ -1582,23 +1582,23 @@ describe('Browser Launch and Error Handling', () => {
   });
 });
 
-describe('Event Emitter Integration', () => {
-  it('should export tramOAuth2Events as EventEmitter', async () => {
-    const { tramOAuth2Events } = await import('./tramOAuth2.js');
+describe("Event Emitter Integration", () => {
+  it("should export tramOAuth2Events as EventEmitter", async () => {
+    const { tramOAuth2Events } = await import("./tramOAuth2.js");
     expect(tramOAuth2Events).toBeInstanceOf(EventEmitter);
   });
 
-  it('should define correct event enum values', async () => {
-    const { TramOAuth2Event } = await import('./tramOAuth2.js');
-    expect(TramOAuth2Event.AuthUri).toBe('auth-uri');
-    expect(TramOAuth2Event.AuthProgress).toBe('auth-progress');
-    expect(TramOAuth2Event.AuthCancel).toBe('auth-cancel');
+  it("should define correct event enum values", async () => {
+    const { TramOAuth2Event } = await import("./tramOAuth2.js");
+    expect(TramOAuth2Event.AuthUri).toBe("auth-uri");
+    expect(TramOAuth2Event.AuthProgress).toBe("auth-progress");
+    expect(TramOAuth2Event.AuthCancel).toBe("auth-cancel");
   });
 });
 
-describe('Utility Functions', () => {
-  describe('objectToUrlEncoded', () => {
-    it('should encode object properties to URL-encoded format', async () => {
+describe("Utility Functions", () => {
+  describe("objectToUrlEncoded", () => {
+    it("should encode object properties to URL-encoded format", async () => {
       // Since objectToUrlEncoded is private, we test it indirectly through the client
       const objectToUrlEncoded = (data: Record<string, string>): string =>
         Object.keys(data)
@@ -1606,69 +1606,69 @@ describe('Utility Functions', () => {
             (key) =>
               `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`,
           )
-          .join('&');
+          .join("&");
 
       const testData = {
-        client_id: 'test-client',
-        scope: 'openid profile',
-        redirect_uri: 'https://example.com/callback',
+        client_id: "test-client",
+        scope: "openid profile",
+        redirect_uri: "https://example.com/callback",
       };
 
       const result = objectToUrlEncoded(testData);
 
-      expect(result).toContain('client_id=test-client');
-      expect(result).toContain('scope=openid%20profile');
+      expect(result).toContain("client_id=test-client");
+      expect(result).toContain("scope=openid%20profile");
       expect(result).toContain(
-        'redirect_uri=https%3A%2F%2Fexample.com%2Fcallback',
+        "redirect_uri=https%3A%2F%2Fexample.com%2Fcallback",
       );
     });
 
-    it('should handle special characters', async () => {
+    it("should handle special characters", async () => {
       const objectToUrlEncoded = (data: Record<string, string>): string =>
         Object.keys(data)
           .map(
             (key) =>
               `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`,
           )
-          .join('&');
+          .join("&");
 
       const testData = {
-        'param with spaces': 'value with spaces',
-        'param&with&amps': 'value&with&amps',
-        'param=with=equals': 'value=with=equals',
+        "param with spaces": "value with spaces",
+        "param&with&amps": "value&with&amps",
+        "param=with=equals": "value=with=equals",
       };
 
       const result = objectToUrlEncoded(testData);
 
-      expect(result).toContain('param%20with%20spaces=value%20with%20spaces');
-      expect(result).toContain('param%26with%26amps=value%26with%26amps');
-      expect(result).toContain('param%3Dwith%3Dequals=value%3Dwith%3Dequals');
+      expect(result).toContain("param%20with%20spaces=value%20with%20spaces");
+      expect(result).toContain("param%26with%26amps=value%26with%26amps");
+      expect(result).toContain("param%3Dwith%3Dequals=value%3Dwith%3Dequals");
     });
 
-    it('should handle empty object', async () => {
+    it("should handle empty object", async () => {
       const objectToUrlEncoded = (data: Record<string, string>): string =>
         Object.keys(data)
           .map(
             (key) =>
               `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`,
           )
-          .join('&');
+          .join("&");
 
       const result = objectToUrlEncoded({});
-      expect(result).toBe('');
+      expect(result).toBe("");
     });
   });
 
-  describe('getTramCachedCredentialPath', () => {
-    it('should return correct path to cached credentials', async () => {
-      const os = await import('os');
-      const path = await import('path');
+  describe("getTramCachedCredentialPath", () => {
+    it("should return correct path to cached credentials", async () => {
+      const os = await import("os");
+      const path = await import("path");
 
-      const expectedPath = path.join(os.homedir(), '.tram', 'oauth_creds.json');
+      const expectedPath = path.join(os.homedir(), ".tram", "oauth_creds.json");
 
       // Since this is a private function, we test it indirectly through clearTramCredentials
-      const { promises: fs } = await import('node:fs');
-      const { clearTramCredentials } = await import('./tramOAuth2.js');
+      const { promises: fs } = await import("node:fs");
+      const { clearTramCredentials } = await import("./tramOAuth2.js");
 
       vi.mocked(fs.unlink).mockResolvedValue(undefined);
 
@@ -1679,26 +1679,26 @@ describe('Utility Functions', () => {
   });
 });
 
-describe('Credential Caching Functions', () => {
-  describe('cacheTramCredentials', () => {
-    it('should create directory and write credentials to file', async () => {
+describe("Credential Caching Functions", () => {
+  describe("cacheTramCredentials", () => {
+    it("should create directory and write credentials to file", async () => {
       // Mock the internal cacheTramCredentials function by creating client and calling refresh
       const client = new TramOAuth2Client();
       client.setCredentials({
-        refresh_token: 'test-refresh',
+        refresh_token: "test-refresh",
       });
 
       const mockResponse = {
         ok: true,
         text: async () =>
           JSON.stringify({
-            access_token: 'new-token',
-            token_type: 'Bearer',
+            access_token: "new-token",
+            token_type: "Bearer",
             expires_in: 3600,
           }),
         json: async () => ({
-          access_token: 'new-token',
-          token_type: 'Bearer',
+          access_token: "new-token",
+          token_type: "Bearer",
           expires_in: 3600,
         }),
       };
@@ -1710,12 +1710,12 @@ describe('Credential Caching Functions', () => {
       // Note: File caching is now handled by SharedTokenManager, so these calls won't happen
       // This test verifies that refreshAccessToken works correctly
       const updatedCredentials = client.getCredentials();
-      expect(updatedCredentials.access_token).toBe('new-token');
+      expect(updatedCredentials.access_token).toBe("new-token");
     });
   });
 });
 
-describe('Enhanced Error Handling and Edge Cases', () => {
+describe("Enhanced Error Handling and Edge Cases", () => {
   let client: TramOAuth2Client;
   let originalFetch: typeof global.fetch;
 
@@ -1730,11 +1730,11 @@ describe('Enhanced Error Handling and Edge Cases', () => {
     vi.clearAllMocks();
   });
 
-  describe('TramOAuth2Client getAccessToken enhanced scenarios', () => {
-    it('should return undefined when SharedTokenManager fails (no fallback)', async () => {
+  describe("TramOAuth2Client getAccessToken enhanced scenarios", () => {
+    it("should return undefined when SharedTokenManager fails (no fallback)", async () => {
       // Set up client with valid credentials (but we don't use fallback anymore)
       client.setCredentials({
-        access_token: 'fallback-token',
+        access_token: "fallback-token",
         expiry_date: Date.now() + 3600000, // Valid for 1 hour
       });
 
@@ -1748,7 +1748,7 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       ).sharedManager = {
         getValidCredentials: vi
           .fn()
-          .mockRejectedValue(new Error('Manager failed')),
+          .mockRejectedValue(new Error("Manager failed")),
       };
 
       const result = await client.getAccessToken();
@@ -1758,10 +1758,10 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       expect(result.token).toBeUndefined();
     });
 
-    it('should return undefined when both manager and cache fail', async () => {
+    it("should return undefined when both manager and cache fail", async () => {
       // Set up client with expired credentials
       client.setCredentials({
-        access_token: 'expired-token',
+        access_token: "expired-token",
         expiry_date: Date.now() - 1000, // Expired
       });
 
@@ -1775,7 +1775,7 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       ).sharedManager = {
         getValidCredentials: vi
           .fn()
-          .mockRejectedValue(new Error('Manager failed')),
+          .mockRejectedValue(new Error("Manager failed")),
       };
 
       const result = await client.getAccessToken();
@@ -1783,7 +1783,7 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       expect(result.token).toBeUndefined();
     });
 
-    it('should handle missing credentials gracefully', async () => {
+    it("should handle missing credentials gracefully", async () => {
       // No credentials set
       client.setCredentials({});
 
@@ -1797,7 +1797,7 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       ).sharedManager = {
         getValidCredentials: vi
           .fn()
-          .mockRejectedValue(new Error('No credentials')),
+          .mockRejectedValue(new Error("No credentials")),
       };
 
       const result = await client.getAccessToken();
@@ -1806,15 +1806,15 @@ describe('Enhanced Error Handling and Edge Cases', () => {
     });
   });
 
-  describe('Enhanced requestDeviceAuthorization scenarios', () => {
-    it('should include x-request-id header', async () => {
+  describe("Enhanced requestDeviceAuthorization scenarios", () => {
+    it("should include x-request-id header", async () => {
       const mockResponse = {
         ok: true,
         json: async () => ({
-          device_code: 'test-device-code',
-          user_code: 'TEST123',
-          verification_uri: 'https://chat.tram.ai/device',
-          verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+          device_code: "test-device-code",
+          user_code: "TEST123",
+          verification_uri: "https://chat.tram.ai/device",
+          verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
           expires_in: 1800,
         }),
       };
@@ -1822,29 +1822,29 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       await client.requestDeviceAuthorization({
-        scope: 'openid profile email model.completion',
-        code_challenge: 'test-challenge',
-        code_challenge_method: 'S256',
+        scope: "openid profile email model.completion",
+        code_challenge: "test-challenge",
+        code_challenge_method: "S256",
       });
 
       expect(global.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'x-request-id': expect.any(String),
+            "x-request-id": expect.any(String),
           }),
         }),
       );
     });
 
-    it('should include correct Content-Type and Accept headers', async () => {
+    it("should include correct Content-Type and Accept headers", async () => {
       const mockResponse = {
         ok: true,
         json: async () => ({
-          device_code: 'test-device-code',
-          user_code: 'TEST123',
-          verification_uri: 'https://chat.tram.ai/device',
-          verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+          device_code: "test-device-code",
+          user_code: "TEST123",
+          verification_uri: "https://chat.tram.ai/device",
+          verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
           expires_in: 1800,
         }),
       };
@@ -1852,30 +1852,30 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       await client.requestDeviceAuthorization({
-        scope: 'openid profile email model.completion',
-        code_challenge: 'test-challenge',
-        code_challenge_method: 'S256',
+        scope: "openid profile email model.completion",
+        code_challenge: "test-challenge",
+        code_challenge_method: "S256",
       });
 
       expect(global.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json',
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "application/json",
           }),
         }),
       );
     });
 
-    it('should send correct form data', async () => {
+    it("should send correct form data", async () => {
       const mockResponse = {
         ok: true,
         json: async () => ({
-          device_code: 'test-device-code',
-          user_code: 'TEST123',
-          verification_uri: 'https://chat.tram.ai/device',
-          verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+          device_code: "test-device-code",
+          user_code: "TEST123",
+          verification_uri: "https://chat.tram.ai/device",
+          verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
           expires_in: 1800,
         }),
       };
@@ -1883,29 +1883,29 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
 
       await client.requestDeviceAuthorization({
-        scope: 'test-scope',
-        code_challenge: 'test-challenge',
-        code_challenge_method: 'S256',
+        scope: "test-scope",
+        code_challenge: "test-challenge",
+        code_challenge_method: "S256",
       });
 
       const [, options] = vi.mocked(global.fetch).mock.calls[0];
       expect(options?.body).toContain(
-        'client_id=f0304373b74a44d2b584a3fb70ca9e56',
+        "client_id=f0304373b74a44d2b584a3fb70ca9e56",
       );
-      expect(options?.body).toContain('scope=test-scope');
-      expect(options?.body).toContain('code_challenge=test-challenge');
-      expect(options?.body).toContain('code_challenge_method=S256');
+      expect(options?.body).toContain("scope=test-scope");
+      expect(options?.body).toContain("code_challenge=test-challenge");
+      expect(options?.body).toContain("code_challenge_method=S256");
     });
   });
 
-  describe('Enhanced pollDeviceToken scenarios', () => {
-    it('should handle JSON parsing error during error response', async () => {
+  describe("Enhanced pollDeviceToken scenarios", () => {
+    it("should handle JSON parsing error during error response", async () => {
       const mockResponse = {
         ok: false,
         status: 400,
-        statusText: 'Bad Request',
-        json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
-        text: vi.fn().mockResolvedValue('Invalid request format'),
+        statusText: "Bad Request",
+        json: vi.fn().mockRejectedValue(new Error("Invalid JSON")),
+        text: vi.fn().mockResolvedValue("Invalid request format"),
       };
 
       vi.mocked(global.fetch).mockResolvedValue(
@@ -1914,19 +1914,19 @@ describe('Enhanced Error Handling and Edge Cases', () => {
 
       await expect(
         client.pollDeviceToken({
-          device_code: 'test-device-code',
-          code_verifier: 'test-verifier',
+          device_code: "test-device-code",
+          code_verifier: "test-verifier",
         }),
-      ).rejects.toThrow('Device token poll failed: 400 Bad Request');
+      ).rejects.toThrow("Device token poll failed: 400 Bad Request");
     });
 
-    it('should include status code in thrown errors', async () => {
+    it("should include status code in thrown errors", async () => {
       const mockResponse = {
         ok: false,
         status: 500,
-        statusText: 'Internal Server Error',
-        json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
-        text: vi.fn().mockResolvedValue('Internal server error'),
+        statusText: "Internal Server Error",
+        json: vi.fn().mockRejectedValue(new Error("Invalid JSON")),
+        text: vi.fn().mockResolvedValue("Internal server error"),
       };
 
       global.fetch = vi
@@ -1935,26 +1935,26 @@ describe('Enhanced Error Handling and Edge Cases', () => {
 
       await expect(
         client.pollDeviceToken({
-          device_code: 'test-device-code',
-          code_verifier: 'test-verifier',
+          device_code: "test-device-code",
+          code_verifier: "test-verifier",
         }),
       ).rejects.toMatchObject({
         message: expect.stringContaining(
-          'Device token poll failed: 500 Internal Server Error',
+          "Device token poll failed: 500 Internal Server Error",
         ),
         status: 500,
       });
     });
 
-    it('should handle authorization_pending with correct status', async () => {
+    it("should handle authorization_pending with correct status", async () => {
       const errorData = {
-        error: 'authorization_pending',
-        error_description: 'Authorization request is pending',
+        error: "authorization_pending",
+        error_description: "Authorization request is pending",
       };
       const mockResponse = {
         ok: false,
         status: 400,
-        statusText: 'Bad Request',
+        statusText: "Bad Request",
         text: vi.fn().mockResolvedValue(JSON.stringify(errorData)),
         json: vi.fn().mockResolvedValue(errorData),
       };
@@ -1964,27 +1964,27 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       );
 
       const result = await client.pollDeviceToken({
-        device_code: 'test-device-code',
-        code_verifier: 'test-verifier',
+        device_code: "test-device-code",
+        code_verifier: "test-verifier",
       });
 
-      expect(result).toEqual({ status: 'pending' });
+      expect(result).toEqual({ status: "pending" });
     });
   });
 
-  describe('Enhanced refreshAccessToken scenarios', () => {
-    it('should call clearTramCredentials on 400 error', async () => {
+  describe("Enhanced refreshAccessToken scenarios", () => {
+    it("should call clearTramCredentials on 400 error", async () => {
       client.setCredentials({
-        refresh_token: 'expired-refresh',
+        refresh_token: "expired-refresh",
       });
 
-      const { promises: fs } = await import('node:fs');
+      const { promises: fs } = await import("node:fs");
       vi.mocked(fs.unlink).mockResolvedValue(undefined);
 
       const mockResponse = {
         ok: false,
         status: 400,
-        text: async () => 'Bad Request',
+        text: async () => "Bad Request",
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
@@ -1996,20 +1996,20 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       expect(fs.unlink).toHaveBeenCalled();
     });
 
-    it('should throw CredentialsClearRequiredError on 400 error', async () => {
-      const { CredentialsClearRequiredError } = await import('./tramOAuth2.js');
+    it("should throw CredentialsClearRequiredError on 400 error", async () => {
+      const { CredentialsClearRequiredError } = await import("./tramOAuth2.js");
 
       client.setCredentials({
-        refresh_token: 'expired-refresh',
+        refresh_token: "expired-refresh",
       });
 
-      const { promises: fs } = await import('node:fs');
+      const { promises: fs } = await import("node:fs");
       vi.mocked(fs.unlink).mockResolvedValue(undefined);
 
       const mockResponse = {
         ok: false,
         status: 400,
-        text: async () => 'Bad Request',
+        text: async () => "Bad Request",
       };
 
       vi.mocked(global.fetch).mockResolvedValue(mockResponse as Response);
@@ -2025,7 +2025,7 @@ describe('Enhanced Error Handling and Edge Cases', () => {
         if (error instanceof CredentialsClearRequiredError) {
           expect(error.originalError).toEqual({
             status: 400,
-            response: 'Bad Request',
+            response: "Bad Request",
           });
         }
       }
@@ -2033,8 +2033,8 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       expect(fs.unlink).toHaveBeenCalled();
     });
 
-    it('should preserve existing refresh token when new one not provided', async () => {
-      const originalRefreshToken = 'original-refresh-token';
+    it("should preserve existing refresh token when new one not provided", async () => {
+      const originalRefreshToken = "original-refresh-token";
       client.setCredentials({
         refresh_token: originalRefreshToken,
       });
@@ -2043,14 +2043,14 @@ describe('Enhanced Error Handling and Edge Cases', () => {
         ok: true,
         text: async () =>
           JSON.stringify({
-            access_token: 'new-access-token',
-            token_type: 'Bearer',
+            access_token: "new-access-token",
+            token_type: "Bearer",
             expires_in: 3600,
             // No refresh_token in response
           }),
         json: async () => ({
-          access_token: 'new-access-token',
-          token_type: 'Bearer',
+          access_token: "new-access-token",
+          token_type: "Bearer",
           expires_in: 3600,
           // No refresh_token in response
         }),
@@ -2064,25 +2064,25 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       expect(credentials.refresh_token).toBe(originalRefreshToken);
     });
 
-    it('should include resource_url when provided in response', async () => {
+    it("should include resource_url when provided in response", async () => {
       client.setCredentials({
-        refresh_token: 'test-refresh',
+        refresh_token: "test-refresh",
       });
 
       const mockResponse = {
         ok: true,
         text: async () =>
           JSON.stringify({
-            access_token: 'new-access-token',
-            token_type: 'Bearer',
+            access_token: "new-access-token",
+            token_type: "Bearer",
             expires_in: 3600,
-            resource_url: 'https://new-resource-url.com',
+            resource_url: "https://new-resource-url.com",
           }),
         json: async () => ({
-          access_token: 'new-access-token',
-          token_type: 'Bearer',
+          access_token: "new-access-token",
+          token_type: "Bearer",
           expires_in: 3600,
-          resource_url: 'https://new-resource-url.com',
+          resource_url: "https://new-resource-url.com",
         }),
       };
 
@@ -2091,26 +2091,26 @@ describe('Enhanced Error Handling and Edge Cases', () => {
       await client.refreshAccessToken();
 
       const credentials = client.getCredentials();
-      expect(credentials.resource_url).toBe('https://new-resource-url.com');
+      expect(credentials.resource_url).toBe("https://new-resource-url.com");
     });
   });
 });
 
-describe('SharedTokenManager Integration in TramOAuth2Client', () => {
+describe("SharedTokenManager Integration in TramOAuth2Client", () => {
   let client: TramOAuth2Client;
 
   beforeEach(() => {
     client = new TramOAuth2Client();
   });
 
-  it('should use SharedTokenManager instance in constructor', () => {
+  it("should use SharedTokenManager instance in constructor", () => {
     const sharedManager = (
       client as unknown as { sharedManager: MockSharedTokenManager }
     ).sharedManager;
     expect(sharedManager).toBeDefined();
   });
 
-  it('should handle TokenManagerError types correctly in getTramOAuthClient', async () => {
+  it("should handle TokenManagerError types correctly in getTramOAuthClient", async () => {
     const mockConfig = {
       isBrowserLaunchSuppressed: vi.fn().mockReturnValue(true),
       isInteractive: vi.fn().mockReturnValue(true),
@@ -2118,10 +2118,10 @@ describe('SharedTokenManager Integration in TramOAuth2Client', () => {
 
     // Test different TokenManagerError types
     const tokenErrors = [
-      { type: TokenError.NO_REFRESH_TOKEN, message: 'No refresh token' },
-      { type: TokenError.REFRESH_FAILED, message: 'Token refresh failed' },
-      { type: TokenError.NETWORK_ERROR, message: 'Network error' },
-      { type: TokenError.REFRESH_FAILED, message: 'Refresh failed' },
+      { type: TokenError.NO_REFRESH_TOKEN, message: "No refresh token" },
+      { type: TokenError.REFRESH_FAILED, message: "Token refresh failed" },
+      { type: TokenError.NETWORK_ERROR, message: "Network error" },
+      { type: TokenError.REFRESH_FAILED, message: "Refresh failed" },
     ];
 
     for (const errorInfo of tokenErrors) {
@@ -2139,17 +2139,17 @@ describe('SharedTokenManager Integration in TramOAuth2Client', () => {
         .fn()
         .mockReturnValue(mockTokenManager);
 
-      const { promises: fs } = await import('node:fs');
-      vi.mocked(fs.readFile).mockRejectedValue(new Error('No cached file'));
+      const { promises: fs } = await import("node:fs");
+      vi.mocked(fs.readFile).mockRejectedValue(new Error("No cached file"));
 
       // Mock device flow to succeed
       const mockAuthResponse = {
         ok: true,
         json: async () => ({
-          device_code: 'test-device-code',
-          user_code: 'TEST123',
-          verification_uri: 'https://chat.tram.ai/device',
-          verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+          device_code: "test-device-code",
+          user_code: "TEST123",
+          verification_uri: "https://chat.tram.ai/device",
+          verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
           expires_in: 1800,
         }),
       };
@@ -2157,9 +2157,9 @@ describe('SharedTokenManager Integration in TramOAuth2Client', () => {
       const mockTokenResponse = {
         ok: true,
         json: async () => ({
-          access_token: 'new-token',
-          refresh_token: 'new-refresh',
-          token_type: 'Bearer',
+          access_token: "new-token",
+          refresh_token: "new-refresh",
+          token_type: "Bearer",
           expires_in: 3600,
         }),
       };
@@ -2170,7 +2170,7 @@ describe('SharedTokenManager Integration in TramOAuth2Client', () => {
         .mockResolvedValue(mockTokenResponse as Response);
 
       try {
-        await import('./tramOAuth2.js').then((module) =>
+        await import("./tramOAuth2.js").then((module) =>
           module.getTramOAuthClient(mockConfig),
         );
       } catch {
@@ -2183,18 +2183,18 @@ describe('SharedTokenManager Integration in TramOAuth2Client', () => {
   });
 });
 
-describe('Constants and Configuration', () => {
-  it('should have correct OAuth endpoints', async () => {
+describe("Constants and Configuration", () => {
+  it("should have correct OAuth endpoints", async () => {
     // Test that the constants are properly defined by checking they're used in requests
     const client = new TramOAuth2Client();
 
     const mockResponse = {
       ok: true,
       json: async () => ({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       }),
     };
@@ -2202,25 +2202,25 @@ describe('Constants and Configuration', () => {
     global.fetch = vi.fn().mockResolvedValue(mockResponse as Response);
 
     await client.requestDeviceAuthorization({
-      scope: 'test-scope',
-      code_challenge: 'test-challenge',
-      code_challenge_method: 'S256',
+      scope: "test-scope",
+      code_challenge: "test-challenge",
+      code_challenge_method: "S256",
     });
 
     const [url] = vi.mocked(global.fetch).mock.calls[0];
-    expect(url).toBe('https://chat.tram.ai/api/v1/oauth2/device/code');
+    expect(url).toBe("https://chat.tram.ai/api/v1/oauth2/device/code");
   });
 
-  it('should use correct client ID in requests', async () => {
+  it("should use correct client ID in requests", async () => {
     const client = new TramOAuth2Client();
 
     const mockResponse = {
       ok: true,
       json: async () => ({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       }),
     };
@@ -2228,28 +2228,28 @@ describe('Constants and Configuration', () => {
     global.fetch = vi.fn().mockResolvedValue(mockResponse as Response);
 
     await client.requestDeviceAuthorization({
-      scope: 'test-scope',
-      code_challenge: 'test-challenge',
-      code_challenge_method: 'S256',
+      scope: "test-scope",
+      code_challenge: "test-challenge",
+      code_challenge_method: "S256",
     });
 
     const [, options] = vi.mocked(global.fetch).mock.calls[0];
     expect(options?.body).toContain(
-      'client_id=f0304373b74a44d2b584a3fb70ca9e56',
+      "client_id=f0304373b74a44d2b584a3fb70ca9e56",
     );
   });
 
-  it('should use correct default scope', async () => {
+  it("should use correct default scope", async () => {
     // Test the default scope constant by checking it's used in device flow
     const client = new TramOAuth2Client();
 
     const mockResponse = {
       ok: true,
       json: async () => ({
-        device_code: 'test-device-code',
-        user_code: 'TEST123',
-        verification_uri: 'https://chat.tram.ai/device',
-        verification_uri_complete: 'https://chat.tram.ai/device?code=TEST123',
+        device_code: "test-device-code",
+        user_code: "TEST123",
+        verification_uri: "https://chat.tram.ai/device",
+        verification_uri_complete: "https://chat.tram.ai/device?code=TEST123",
         expires_in: 1800,
       }),
     };
@@ -2257,14 +2257,14 @@ describe('Constants and Configuration', () => {
     global.fetch = vi.fn().mockResolvedValue(mockResponse as Response);
 
     await client.requestDeviceAuthorization({
-      scope: 'openid profile email model.completion',
-      code_challenge: 'test-challenge',
-      code_challenge_method: 'S256',
+      scope: "openid profile email model.completion",
+      code_challenge: "test-challenge",
+      code_challenge_method: "S256",
     });
 
     const [, options] = vi.mocked(global.fetch).mock.calls[0];
     expect(options?.body).toContain(
-      'scope=openid%20profile%20email%20model.completion',
+      "scope=openid%20profile%20email%20model.completion",
     );
   });
 });

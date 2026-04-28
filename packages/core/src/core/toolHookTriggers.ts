@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { MessageBus } from '../confirmation-bus/message-bus.js';
-import { MessageBusType } from '../confirmation-bus/types.js';
+import type { MessageBus } from "../confirmation-bus/message-bus.js";
+import { MessageBusType } from "../confirmation-bus/types.js";
 import type {
   HookExecutionRequest,
   HookExecutionResponse,
-} from '../confirmation-bus/types.js';
+} from "../confirmation-bus/types.js";
 import {
   createHookOutput,
   type PreToolUseHookOutput,
@@ -18,11 +18,11 @@ import {
   type NotificationType,
   type PermissionRequestHookOutput,
   type PermissionSuggestion,
-} from '../hooks/types.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import type { Part, PartListUnion } from '@google/genai';
+} from "../hooks/types.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import type { Part, PartListUnion } from "@google/genai";
 
-const debugLogger = createDebugLogger('TOOL_HOOKS');
+const debugLogger = createDebugLogger("TOOL_HOOKS");
 
 /**
  * Generate a unique tool_use_id for tracking tool executions
@@ -40,7 +40,7 @@ export interface PreToolUseHookResult {
   /** If blocked, the reason for blocking */
   blockReason?: string;
   /** If blocked, the error type */
-  blockType?: 'denied' | 'ask' | 'stop';
+  blockType?: "denied" | "ask" | "stop";
   /** Additional context to add */
   additionalContext?: string;
 }
@@ -94,7 +94,7 @@ export async function firePreToolUseHook(
     >(
       {
         type: MessageBusType.HOOK_EXECUTION_REQUEST,
-        eventName: 'PreToolUse',
+        eventName: "PreToolUse",
         input: {
           permission_mode: permissionMode,
           tool_name: toolName,
@@ -111,7 +111,7 @@ export async function firePreToolUseHook(
     }
 
     const preToolOutput = createHookOutput(
-      'PreToolUse',
+      "PreToolUse",
       response.output,
     ) as PreToolUseHookOutput;
 
@@ -122,7 +122,7 @@ export async function firePreToolUseHook(
         blockReason:
           preToolOutput.getPermissionDecisionReason() ||
           preToolOutput.getEffectiveReason(),
-        blockType: 'denied',
+        blockType: "denied",
       };
     }
 
@@ -132,8 +132,8 @@ export async function firePreToolUseHook(
         shouldProceed: false,
         blockReason:
           preToolOutput.getPermissionDecisionReason() ||
-          'User confirmation required',
-        blockType: 'ask',
+          "User confirmation required",
+        blockType: "ask",
       };
     }
 
@@ -142,7 +142,7 @@ export async function firePreToolUseHook(
       return {
         shouldProceed: false,
         blockReason: preToolOutput.getEffectiveReason(),
-        blockType: 'stop',
+        blockType: "stop",
       };
     }
 
@@ -193,7 +193,7 @@ export async function firePostToolUseHook(
     >(
       {
         type: MessageBusType.HOOK_EXECUTION_REQUEST,
-        eventName: 'PostToolUse',
+        eventName: "PostToolUse",
         input: {
           permission_mode: permissionMode,
           tool_name: toolName,
@@ -211,7 +211,7 @@ export async function firePostToolUseHook(
     }
 
     const postToolOutput = createHookOutput(
-      'PostToolUse',
+      "PostToolUse",
       response.output,
     ) as PostToolUseHookOutput;
 
@@ -272,7 +272,7 @@ export async function firePostToolUseFailureHook(
     >(
       {
         type: MessageBusType.HOOK_EXECUTION_REQUEST,
-        eventName: 'PostToolUseFailure',
+        eventName: "PostToolUseFailure",
         input: {
           permission_mode: permissionMode,
           tool_use_id: toolUseId,
@@ -291,7 +291,7 @@ export async function firePostToolUseFailureHook(
     }
 
     const failureOutput = createHookOutput(
-      'PostToolUseFailure',
+      "PostToolUseFailure",
       response.output,
     ) as PostToolUseFailureHookOutput;
     const additionalContext = failureOutput.getAdditionalContext();
@@ -318,7 +318,7 @@ export interface NotificationHookResult {
 
 /**
  * Fire Notification hook via MessageBus
- * Called when Qwen Code sends a notification
+ * Called when TRAM sends a notification
  */
 export async function fireNotificationHook(
   messageBus: MessageBus | undefined,
@@ -338,7 +338,7 @@ export async function fireNotificationHook(
     >(
       {
         type: MessageBusType.HOOK_EXECUTION_REQUEST,
-        eventName: 'Notification',
+        eventName: "Notification",
         input: {
           message,
           notification_type: notificationType,
@@ -354,7 +354,7 @@ export async function fireNotificationHook(
     }
 
     const notificationOutput = createHookOutput(
-      'Notification',
+      "Notification",
       response.output,
     );
     const additionalContext = notificationOutput.getAdditionalContext();
@@ -411,7 +411,7 @@ export async function firePermissionRequestHook(
     >(
       {
         type: MessageBusType.HOOK_EXECUTION_REQUEST,
-        eventName: 'PermissionRequest',
+        eventName: "PermissionRequest",
         input: {
           tool_name: toolName,
           tool_input: toolInput,
@@ -428,7 +428,7 @@ export async function firePermissionRequestHook(
     }
 
     const permissionOutput = createHookOutput(
-      'PermissionRequest',
+      "PermissionRequest",
       response.output,
     ) as PermissionRequestHookOutput;
 
@@ -437,7 +437,7 @@ export async function firePermissionRequestHook(
       return { hasDecision: false };
     }
 
-    if (decision.behavior === 'allow') {
+    if (decision.behavior === "allow") {
       return {
         hasDecision: true,
         shouldAllow: true,
@@ -474,8 +474,8 @@ export function appendAdditionalContext(
     return content;
   }
 
-  if (typeof content === 'string') {
-    return content + '\n\n' + additionalContext;
+  if (typeof content === "string") {
+    return content + "\n\n" + additionalContext;
   }
 
   // For PartListUnion content, append as an additional text part

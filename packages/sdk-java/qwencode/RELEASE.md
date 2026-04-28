@@ -28,7 +28,7 @@ January 14, 2026
 
 ### Summary
 
-This release includes updates to the Qwen Code Java SDK with improved session management, enhanced transport options, and better error handling capabilities.
+This release includes updates to the TRAM Java SDK with improved session management, enhanced transport options, and better error handling capabilities.
 
 ### Maven Configuration
 
@@ -133,7 +133,7 @@ Planned improvements for upcoming releases:
 
 1. **Enhanced Security**: Additional authentication mechanisms and secure credential handling
 2. **Performance Optimization**: Improved memory usage and faster response times
-3. **Extended API Coverage**: More comprehensive coverage of Qwen Code CLI features
+3. **Extended API Coverage**: More comprehensive coverage of TRAM CLI features
 4. **Better Documentation**: Expanded examples and API reference materials
 5. **Improved Error Recovery**: More robust handling of connection failures and retries
 

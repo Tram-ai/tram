@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useCallback, useState } from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { ApprovalMode, APPROVAL_MODES } from '@tram-ai/tram-core';
-import { RadioButtonSelect } from './shared/RadioButtonSelect.js';
-import type { LoadedSettings } from '../../config/settings.js';
-import { SettingScope } from '../../config/settings.js';
-import { getScopeMessageForSetting } from '../../utils/dialogScopeUtils.js';
-import { useKeypress } from '../hooks/useKeypress.js';
-import { ScopeSelector } from './shared/ScopeSelector.js';
-import { t } from '../../i18n/index.js';
+import type React from "react";
+import { useCallback, useState } from "react";
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import { ApprovalMode, APPROVAL_MODES } from "@tram-ai/tram-core";
+import { RadioButtonSelect } from "./shared/RadioButtonSelect.js";
+import type { LoadedSettings } from "../../config/settings.js";
+import { SettingScope } from "../../config/settings.js";
+import { getScopeMessageForSetting } from "../../utils/dialogScopeUtils.js";
+import { useKeypress } from "../hooks/useKeypress.js";
+import { ScopeSelector } from "./shared/ScopeSelector.js";
+import { t } from "../../i18n/index.js";
 
 interface ApprovalModeDialogProps {
   /** Callback function when an approval mode is selected */
@@ -34,15 +34,15 @@ interface ApprovalModeDialogProps {
 const formatModeDescription = (mode: ApprovalMode): string => {
   switch (mode) {
     case ApprovalMode.PLAN:
-      return t('Analyze only, do not modify files or execute commands');
+      return t("Analyze only, do not modify files or execute commands");
     case ApprovalMode.DEFAULT:
-      return t('Require approval for file edits or shell commands');
+      return t("Require approval for file edits or shell commands");
     case ApprovalMode.AUTO_EDIT:
-      return t('Automatically approve file edits');
+      return t("Automatically approve file edits");
     case ApprovalMode.YOLO:
-      return t('Automatically approve all tools');
+      return t("Automatically approve all tools");
     default:
-      return t('{{mode}} mode', { mode });
+      return t("{{mode}} mode", { mode });
   }
 };
 
@@ -92,17 +92,17 @@ export function ApprovalModeDialog({
 
   const handleScopeSelect = useCallback((scope: SettingScope) => {
     setSelectedScope(scope);
-    setMode('mode');
+    setMode("mode");
   }, []);
 
-  const [mode, setMode] = useState<'mode' | 'scope'>('mode');
+  const [mode, setMode] = useState<"mode" | "scope">("mode");
 
   useKeypress(
     (key) => {
-      if (key.name === 'tab') {
-        setMode((prev) => (prev === 'mode' ? 'scope' : 'mode'));
+      if (key.name === "tab") {
+        setMode((prev) => (prev === "mode" ? "scope" : "mode"));
       }
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         onSelect(undefined, selectedScope);
       }
     },
@@ -111,7 +111,7 @@ export function ApprovalModeDialog({
 
   // Generate scope message for approval mode setting
   const otherScopeModifiedMessage = getScopeMessageForSetting(
-    'tools.approvalMode',
+    "tools.approvalMode",
     selectedScope,
     settings,
   );
@@ -119,7 +119,7 @@ export function ApprovalModeDialog({
   // Check if user scope is selected but workspace has the setting
   const showWorkspacePriorityWarning =
     selectedScope === SettingScope.User &&
-    otherScopeModifiedMessage.toLowerCase().includes('workspace');
+    otherScopeModifiedMessage.toLowerCase().includes("workspace");
 
   return (
     <Box
@@ -129,12 +129,12 @@ export function ApprovalModeDialog({
       padding={1}
       width="100%"
     >
-      {mode === 'mode' ? (
+      {mode === "mode" ? (
         <Box flexDirection="column" flexGrow={1}>
           {/* Approval Mode Selection */}
-          <Text bold={mode === 'mode'} wrap="truncate">
-            {mode === 'mode' ? '> ' : '  '}
-            {t('Approval Mode')}{' '}
+          <Text bold={mode === "mode"} wrap="truncate">
+            {mode === "mode" ? "> " : "  "}
+            {t("Approval Mode")}{" "}
             <Text color={theme.text.secondary}>
               {otherScopeModifiedMessage}
             </Text>
@@ -145,18 +145,18 @@ export function ApprovalModeDialog({
             initialIndex={safeInitialModeIndex}
             onSelect={handleModeSelect}
             onHighlight={handleModeHighlight}
-            isFocused={mode === 'mode'}
+            isFocused={mode === "mode"}
             maxItemsToShow={10}
             showScrollArrows={false}
-            showNumbers={mode === 'mode'}
+            showNumbers={mode === "mode"}
           />
           {/* Warning when workspace setting will override user setting */}
           {showWorkspacePriorityWarning && (
             <Box marginTop={1}>
               <Text color={theme.status.warning} wrap="wrap">
-                ⚠{' '}
+                ⚠{" "}
                 {t(
-                  'Workspace approval mode exists and takes priority. User-level change will have no effect.',
+                  "Workspace approval mode exists and takes priority. User-level change will have no effect.",
                 )}
               </Text>
             </Box>
@@ -166,15 +166,15 @@ export function ApprovalModeDialog({
         <ScopeSelector
           onSelect={handleScopeSelect}
           onHighlight={handleScopeHighlight}
-          isFocused={mode === 'scope'}
+          isFocused={mode === "scope"}
           initialScope={selectedScope}
         />
       )}
       <Box marginTop={1}>
         <Text color={theme.text.secondary} wrap="truncate">
-          {mode === 'mode'
-            ? t('(Use Enter to select, Tab to configure scope)')
-            : t('(Use Enter to apply scope, Tab to go back)')}
+          {mode === "mode"
+            ? t("(Use Enter to select, Tab to configure scope)")
+            : t("(Use Enter to apply scope, Tab to go back)")}
         </Text>
       </Box>
     </Box>

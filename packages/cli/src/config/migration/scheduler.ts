@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createDebugLogger } from '@tram-ai/tram-core';
-import type { SettingsMigration, MigrationResult } from './types.js';
+import { createDebugLogger } from "@tram-ai/tram-core";
+import type { SettingsMigration, MigrationResult } from "./types.js";
 
-const debugLogger = createDebugLogger('SETTINGS_MIGRATION');
+const debugLogger = createDebugLogger("SETTINGS_MIGRATION");
 
 /**
  * Formats a SettingScope enum value to a human-readable string.
@@ -15,8 +15,8 @@ const debugLogger = createDebugLogger('SETTINGS_MIGRATION');
  * - Special case: 'SystemDefaults' -> 'system default'
  */
 export function formatScope(scope: string): string {
-  if (scope === 'SystemDefaults') {
-    return 'system default';
+  if (scope === "SystemDefaults") {
+    return "system default";
   }
   return scope.toLowerCase();
 }
@@ -61,7 +61,7 @@ export class MigrationScheduler {
    * @returns MigrationResult containing the final settings, version, and execution log
    */
   migrate(settings: unknown): MigrationResult {
-    debugLogger.debug('MigrationScheduler: Starting migration chain');
+    debugLogger.debug("MigrationScheduler: Starting migration chain");
 
     let current = settings;
     const executed: Array<{ fromVersion: number; toVersion: number }> = [];
@@ -99,7 +99,7 @@ export class MigrationScheduler {
 
     // Determine final version from the settings object
     const finalVersion =
-      ((current as Record<string, unknown>)['$version'] as number) ?? 1;
+      ((current as Record<string, unknown>)["$version"] as number) ?? 1;
 
     debugLogger.debug(
       `MigrationScheduler: Migration chain complete. Final version: ${finalVersion}, Executed: ${executed.length} migrations`,

@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import dts from 'vite-plugin-dts';
-import { resolve } from 'path';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import dts from "vite-plugin-dts";
+import { resolve } from "path";
 
 /**
  * Vite configuration for @tram-ai/webui library
@@ -23,33 +23,33 @@ export default defineConfig({
   plugins: [
     react(),
     dts({
-      include: ['src'],
-      outDir: 'dist',
+      include: ["src"],
+      outDir: "dist",
       rollupTypes: true,
       insertTypesEntry: true,
     }),
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
-      name: 'TramWebUI',
-      formats: ['es', 'cjs', 'umd'],
+      entry: resolve(__dirname, "src/index.ts"),
+      name: "TramWebUI",
+      formats: ["es", "cjs", "umd"],
       fileName: (format) => {
-        if (format === 'es') return 'index.js';
-        if (format === 'cjs') return 'index.cjs';
-        if (format === 'umd') return 'index.umd.js';
-        return 'index.js';
+        if (format === "es") return "index.js";
+        if (format === "cjs") return "index.cjs";
+        if (format === "umd") return "index.umd.js";
+        return "index.js";
       },
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      external: ["react", "react-dom", "react/jsx-runtime"],
       output: {
         globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-          'react/jsx-runtime': 'ReactJSXRuntime',
+          react: "React",
+          "react-dom": "ReactDOM",
+          "react/jsx-runtime": "ReactJSXRuntime",
         },
-        assetFileNames: 'styles.[ext]',
+        assetFileNames: "styles.[ext]",
       },
     },
     sourcemap: true,

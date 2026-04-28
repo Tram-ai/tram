@@ -9,21 +9,22 @@ import {
   getErrorMessage,
   type Config,
   type ProviderModelConfig as ModelConfig,
-} from '@qwen-code/qwen-code-core';
-import { writeStdoutLine, writeStderrLine } from '../../utils/stdioHelpers.js';
-import { t } from '../../i18n/index.js';
+} from "@tram-ai/tram-core";
+import { writeStdoutLine, writeStderrLine } from "../../utils/stdioHelpers.js";
+import { t } from "../../i18n/index.js";
 import {
   getCodingPlanConfig,
   isCodingPlanConfig,
   CodingPlanRegion,
   CODING_PLAN_ENV_KEY,
-} from '../../constants/codingPlan.js';
-import { getPersistScopeForModelSelection } from '../../config/modelProvidersScope.js';
-import { backupSettingsFile } from '../../utils/settingsUtils.js';
-import { loadSettings, type LoadedSettings } from '../../config/settings.js';
-import { loadCliConfig } from '../../config/config.js';
-import type { CliArgs } from '../../config/config.js';
-import { InteractiveSelector } from './interactiveSelector.js';
+} from "../../constants/codingPlan.js";
+import { getPersistScopeForModelSelection } from "../../config/modelProvidersScope.js";
+import { backupSettingsFile } from "../../utils/settingsUtils.js";
+import { normalizeModelsForAuthType } from "../../utils/modelProviderIds.js";
+import { loadSettings, type LoadedSettings } from "../../config/settings.js";
+import { loadCliConfig } from "../../config/config.js";
+import type { CliArgs } from "../../config/config.js";
+import { InteractiveSelector } from "./interactiveSelector.js";
 
 interface QwenAuthOptions {
   region?: string;
@@ -53,7 +54,7 @@ interface MergedSettingsWithCodingPlan {
  * Handles the authentication process based on the specified command and options
  */
 export async function handleQwenAuth(
-  command: 'qwen-oauth' | 'coding-plan',
+  command: "qwen-oauth" | "coding-plan",
   options: QwenAuthOptions,
 ) {
   try {
@@ -109,6 +110,8 @@ export async function handleQwenAuth(
       channel: undefined,
       systemPrompt: undefined,
       appendSystemPrompt: undefined,
+      initialize: undefined,
+      initializeLocalModelList: undefined,
     };
 
     // Create a minimal config to access settings and storage
@@ -119,14 +122,14 @@ export async function handleQwenAuth(
       [], // No extensions for auth command
     );
 
-    if (command === 'qwen-oauth') {
+    if (command === "qwen-oauth") {
       await handleQwenOAuth(config, settings);
-    } else if (command === 'coding-plan') {
+    } else if (command === "coding-plan") {
       await handleCodePlanAuth(config, settings, options);
     }
 
     // Exit after authentication is complete
-    writeStdoutLine(t('Authentication completed successfully.'));
+    writeStdoutLine(t("Authentication completed successfully."));
     process.exit(0);
   } catch (error) {
     writeStderrLine(getErrorMessage(error));
@@ -141,24 +144,24 @@ async function handleQwenOAuth(
   config: Config,
   settings: LoadedSettings,
 ): Promise<void> {
-  writeStdoutLine(t('Starting Qwen OAuth authentication...'));
+  writeStdoutLine(t("Starting Qwen OAuth authentication..."));
 
   try {
-    await config.refreshAuth(AuthType.QWEN_OAUTH);
+    await config.refreshAuth(AuthType.TRAM_OAUTH);
 
     // Persist the auth type
     const authTypeScope = getPersistScopeForModelSelection(settings);
     settings.setValue(
       authTypeScope,
-      'security.auth.selectedType',
-      AuthType.QWEN_OAUTH,
+      "security.auth.selectedType",
+      AuthType.TRAM_OAUTH,
     );
 
-    writeStdoutLine(t('Successfully authenticated with Qwen OAuth.'));
+    writeStdoutLine(t("Successfully authenticated with Qwen OAuth."));
     process.exit(0);
   } catch (error) {
     writeStderrLine(
-      t('Failed to authenticate with Qwen OAuth: {{error}}', {
+      t("Failed to authenticate with Qwen OAuth: {{error}}", {
         error: getErrorMessage(error),
       }),
     );
@@ -182,7 +185,7 @@ async function handleCodePlanAuth(
   // If region and key are provided as options, use them
   if (region && key) {
     selectedRegion =
-      region.toLowerCase() === 'global'
+      region.toLowerCase() === "global"
         ? CodingPlanRegion.GLOBAL
         : CodingPlanRegion.CHINA;
     selectedKey = key;
@@ -192,7 +195,7 @@ async function handleCodePlanAuth(
     selectedKey = await promptForKey();
   }
 
-  writeStdoutLine(t('Processing Alibaba Cloud Coding Plan authentication...'));
+  writeStdoutLine(t("Processing Alibaba Cloud Coding Plan authentication..."));
 
   try {
     // Get configuration based on region
@@ -229,7 +232,10 @@ async function handleCodePlanAuth(
     );
 
     // Add new Coding Plan configs at the beginning
-    const updatedConfigs = [...newConfigs, ...nonCodingPlanConfigs];
+    const updatedConfigs = normalizeModelsForAuthType(AuthType.USE_OPENAI, [
+      ...newConfigs,
+      ...nonCodingPlanConfigs,
+    ]);
 
     // Persist to modelProviders
     settings.setValue(
@@ -241,21 +247,21 @@ async function handleCodePlanAuth(
     // Also persist authType
     settings.setValue(
       authTypeScope,
-      'security.auth.selectedType',
+      "security.auth.selectedType",
       AuthType.USE_OPENAI,
     );
 
     // Persist coding plan region
-    settings.setValue(authTypeScope, 'codingPlan.region', selectedRegion);
+    settings.setValue(authTypeScope, "codingPlan.region", selectedRegion);
 
     // Persist coding plan version (single field for backward compatibility)
-    settings.setValue(authTypeScope, 'codingPlan.version', version);
+    settings.setValue(authTypeScope, "codingPlan.version", version);
 
     // If there are configs, use the first one as the model
     if (updatedConfigs.length > 0 && updatedConfigs[0]?.id) {
       settings.setValue(
         authTypeScope,
-        'model.name',
+        "model.name",
         (updatedConfigs[0] as ModelConfig).id,
       );
     }
@@ -264,11 +270,11 @@ async function handleCodePlanAuth(
     await config.refreshAuth(AuthType.USE_OPENAI);
 
     writeStdoutLine(
-      t('Successfully authenticated with Alibaba Cloud Coding Plan.'),
+      t("Successfully authenticated with Alibaba Cloud Coding Plan."),
     );
   } catch (error) {
     writeStderrLine(
-      t('Failed to authenticate with Coding Plan: {{error}}', {
+      t("Failed to authenticate with Coding Plan: {{error}}", {
         error: getErrorMessage(error),
       }),
     );
@@ -284,16 +290,16 @@ async function promptForRegion(): Promise<CodingPlanRegion> {
     [
       {
         value: CodingPlanRegion.CHINA,
-        label: t('中国 (China)'),
-        description: t('阿里云百炼 (aliyun.com)'),
+        label: t("中国 (China)"),
+        description: t("阿里云百炼 (aliyun.com)"),
       },
       {
         value: CodingPlanRegion.GLOBAL,
-        label: t('Global'),
-        description: t('Alibaba Cloud (alibabacloud.com)'),
+        label: t("Global"),
+        description: t("Alibaba Cloud (alibabacloud.com)"),
       },
     ],
-    t('Select region for Coding Plan:'),
+    t("Select region for Coding Plan:"),
   );
 
   return await selector.select();
@@ -307,7 +313,7 @@ async function promptForKey(): Promise<string> {
   const stdin = process.stdin;
   const stdout = process.stdout;
 
-  stdout.write(t('Enter your Coding Plan API key: '));
+  stdout.write(t("Enter your Coding Plan API key: "));
 
   // Set raw mode to capture keystrokes
   const wasRaw = stdin.isRaw;
@@ -317,47 +323,47 @@ async function promptForKey(): Promise<string> {
   stdin.resume();
 
   return new Promise<string>((resolve, reject) => {
-    let input = '';
+    let input = "";
 
     const onData = (chunk: string) => {
       for (const char of chunk) {
         switch (char) {
-          case '\r': // Enter
-          case '\n':
-            stdin.removeListener('data', onData);
+          case "\r": // Enter
+          case "\n":
+            stdin.removeListener("data", onData);
             if (stdin.setRawMode) {
               stdin.setRawMode(wasRaw);
             }
-            stdout.write('\n'); // New line after input
+            stdout.write("\n"); // New line after input
             resolve(input);
             return;
-          case '\x03': // Ctrl+C
-            stdin.removeListener('data', onData);
+          case "\x03": // Ctrl+C
+            stdin.removeListener("data", onData);
             if (stdin.setRawMode) {
               stdin.setRawMode(wasRaw);
             }
-            stdout.write('^C\n');
-            reject(new Error('Interrupted'));
+            stdout.write("^C\n");
+            reject(new Error("Interrupted"));
             return;
-          case '\x08': // Backspace
-          case '\x7F': // Delete
+          case "\x08": // Backspace
+          case "\x7F": // Delete
             if (input.length > 0) {
               input = input.slice(0, -1);
               // Move cursor back, print space, move back again
-              stdout.write('\x1B[D \x1B[D');
+              stdout.write("\x1B[D \x1B[D");
             }
             break;
           default:
             // Add character to input
             input += char;
             // Print asterisk instead of the actual character for security
-            stdout.write('*');
+            stdout.write("*");
             break;
         }
       }
     };
 
-    stdin.on('data', onData);
+    stdin.on("data", onData);
   });
 }
 
@@ -368,35 +374,35 @@ export async function runInteractiveAuth() {
   const selector = new InteractiveSelector(
     [
       {
-        value: 'coding-plan' as const,
-        label: t('Alibaba Cloud Coding Plan'),
+        value: "coding-plan" as const,
+        label: t("Alibaba Cloud Coding Plan"),
         description: t(
-          'Paid · Up to 6,000 requests/5 hrs · All Alibaba Cloud Coding Plan Models',
+          "Paid · Up to 6,000 requests/5 hrs · All Alibaba Cloud Coding Plan Models",
         ),
       },
       {
-        value: 'qwen-oauth' as const,
-        label: t('Qwen OAuth'),
-        description: t('Discontinued — switch to Coding Plan or API Key'),
+        value: "qwen-oauth" as const,
+        label: t("Qwen OAuth"),
+        description: t("Discontinued — switch to Coding Plan or API Key"),
       },
     ],
-    t('Select authentication method:'),
+    t("Select authentication method:"),
   );
 
   let choice = await selector.select();
 
   // If user selects discontinued Qwen OAuth, warn and re-prompt
-  while (choice === 'qwen-oauth') {
+  while (choice === "qwen-oauth") {
     writeStdoutLine(
       t(
-        '\n⚠ Qwen OAuth free tier was discontinued on 2026-04-15. Please select another option.\n',
+        "\n⚠ Qwen OAuth free tier was discontinued on 2026-04-15. Please select another option.\n",
       ),
     );
     choice = await selector.select();
   }
 
-  if (choice === 'coding-plan') {
-    await handleQwenAuth('coding-plan', {});
+  if (choice === "coding-plan") {
+    await handleQwenAuth("coding-plan", {});
   }
 }
 
@@ -408,39 +414,39 @@ export async function showAuthStatus(): Promise<void> {
     const settings = loadSettings();
     const mergedSettings = settings.merged as MergedSettingsWithCodingPlan;
 
-    writeStdoutLine(t('\n=== Authentication Status ===\n'));
+    writeStdoutLine(t("\n=== Authentication Status ===\n"));
 
     // Check for selected auth type
     const selectedType = mergedSettings.security?.auth?.selectedType;
 
     if (!selectedType) {
-      writeStdoutLine(t('⚠️  No authentication method configured.\n'));
-      writeStdoutLine(t('Run one of the following commands to get started:\n'));
+      writeStdoutLine(t("⚠️  No authentication method configured.\n"));
+      writeStdoutLine(t("Run one of the following commands to get started:\n"));
       writeStdoutLine(
         t(
-          '  qwen auth qwen-oauth     - Authenticate with Qwen OAuth (free tier)',
+          "  qwen auth qwen-oauth     - Authenticate with Qwen OAuth (free tier)",
         ),
       );
       writeStdoutLine(
         t(
-          '  qwen auth coding-plan      - Authenticate with Alibaba Cloud Coding Plan\n',
+          "  qwen auth coding-plan      - Authenticate with Alibaba Cloud Coding Plan\n",
         ),
       );
-      writeStdoutLine(t('Or simply run:'));
+      writeStdoutLine(t("Or simply run:"));
       writeStdoutLine(
-        t('  qwen auth                - Interactive authentication setup\n'),
+        t("  qwen auth                - Interactive authentication setup\n"),
       );
       process.exit(0);
     }
 
     // Display status based on auth type
-    if (selectedType === AuthType.QWEN_OAUTH) {
-      writeStdoutLine(t('✓ Authentication Method: Qwen OAuth'));
-      writeStdoutLine(t('  Type: Free tier (discontinued 2026-04-15)'));
-      writeStdoutLine(t('  Limit: No longer available'));
-      writeStdoutLine(t('  Models: Qwen latest models'));
+    if (selectedType === AuthType.TRAM_OAUTH) {
+      writeStdoutLine(t("✓ Authentication Method: Qwen OAuth"));
+      writeStdoutLine(t("  Type: Free tier (discontinued 2026-04-15)"));
+      writeStdoutLine(t("  Limit: No longer available"));
+      writeStdoutLine(t("  Models: Qwen latest models"));
       writeStdoutLine(
-        t('\n  ⚠ Run /auth to switch to Coding Plan or another provider.\n'),
+        t("\n  ⚠ Run /auth to switch to Coding Plan or another provider.\n"),
       );
     } else if (selectedType === AuthType.USE_OPENAI) {
       // Check for Coding Plan configuration
@@ -455,53 +461,53 @@ export async function showAuthStatus(): Promise<void> {
 
       if (hasApiKey) {
         writeStdoutLine(
-          t('✓ Authentication Method: Alibaba Cloud Coding Plan'),
+          t("✓ Authentication Method: Alibaba Cloud Coding Plan"),
         );
 
         if (codingPlanRegion) {
           const regionDisplay =
             codingPlanRegion === CodingPlanRegion.CHINA
-              ? t('中国 (China) - 阿里云百炼')
-              : t('Global - Alibaba Cloud');
-          writeStdoutLine(t('  Region: {{region}}', { region: regionDisplay }));
+              ? t("中国 (China) - 阿里云百炼")
+              : t("Global - Alibaba Cloud");
+          writeStdoutLine(t("  Region: {{region}}", { region: regionDisplay }));
         }
 
         if (modelName) {
           writeStdoutLine(
-            t('  Current Model: {{model}}', { model: modelName }),
+            t("  Current Model: {{model}}", { model: modelName }),
           );
         }
 
         if (codingPlanVersion) {
           writeStdoutLine(
-            t('  Config Version: {{version}}', {
-              version: codingPlanVersion.substring(0, 8) + '...',
+            t("  Config Version: {{version}}", {
+              version: codingPlanVersion.substring(0, 8) + "...",
             }),
           );
         }
 
-        writeStdoutLine(t('  Status: API key configured\n'));
+        writeStdoutLine(t("  Status: API key configured\n"));
       } else {
         writeStdoutLine(
           t(
-            '⚠️  Authentication Method: Alibaba Cloud Coding Plan (Incomplete)',
+            "⚠️  Authentication Method: Alibaba Cloud Coding Plan (Incomplete)",
           ),
         );
         writeStdoutLine(
-          t('  Issue: API key not found in environment or settings\n'),
+          t("  Issue: API key not found in environment or settings\n"),
         );
-        writeStdoutLine(t('  Run `qwen auth coding-plan` to re-configure.\n'));
+        writeStdoutLine(t("  Run `qwen auth coding-plan` to re-configure.\n"));
       }
     } else {
       writeStdoutLine(
-        t('✓ Authentication Method: {{type}}', { type: selectedType }),
+        t("✓ Authentication Method: {{type}}", { type: selectedType }),
       );
-      writeStdoutLine(t('  Status: Configured\n'));
+      writeStdoutLine(t("  Status: Configured\n"));
     }
     process.exit(0);
   } catch (error) {
     writeStderrLine(
-      t('Failed to check authentication status: {{error}}', {
+      t("Failed to check authentication status: {{error}}", {
         error: getErrorMessage(error),
       }),
     );

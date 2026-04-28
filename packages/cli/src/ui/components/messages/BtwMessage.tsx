@@ -1,16 +1,16 @@
 /**
  * @license
- * Copyright 2025 Qwen Code
+ * Copyright 2025 TRAM
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { Box, Text } from 'ink';
-import type { BtwProps } from '../../types.js';
-import { Colors } from '../../colors.js';
-import { t } from '../../../i18n/index.js';
-import { MarkdownDisplay } from '../../utils/MarkdownDisplay.js';
-import { useTerminalSize } from '../../hooks/useTerminalSize.js';
+import React from "react";
+import { Box, Text } from "ink";
+import type { BtwProps } from "../../types.js";
+import { Colors } from "../../colors.js";
+import { t } from "../../../i18n/index.js";
+import { MarkdownDisplay } from "../../utils/MarkdownDisplay.js";
+import { useTerminalSize } from "../../hooks/useTerminalSize.js";
 
 export interface BtwDisplayProps {
   btw: BtwProps;
@@ -28,7 +28,7 @@ const BTW_SELF_CHROME = 4;
  * emit the opening fence right after prose text without a preceding newline.
  */
 function normalizeCodeFences(text: string): string {
-  return text.replace(/([^\n])(```|~~~)/g, '$1\n$2');
+  return text.replace(/([^\n])(```|~~~)/g, "$1\n$2");
 }
 
 const BtwMessageInternal: React.FC<BtwDisplayProps> = ({
@@ -49,7 +49,7 @@ const BtwMessageInternal: React.FC<BtwDisplayProps> = ({
     >
       <Box flexDirection="row">
         <Text color={Colors.AccentYellow} bold>
-          {'/btw '}
+          {"/btw "}
         </Text>
         <Text wrap="wrap" color={Colors.AccentYellow}>
           {btw.question}
@@ -58,12 +58,12 @@ const BtwMessageInternal: React.FC<BtwDisplayProps> = ({
       {btw.isPending ? (
         <Box flexDirection="column" marginTop={1}>
           <Box>
-            <Text color={Colors.AccentYellow}>{'+ '}</Text>
-            <Text color={Colors.AccentYellow}>{t('Answering...')}</Text>
+            <Text color={Colors.AccentYellow}>{"+ "}</Text>
+            <Text color={Colors.AccentYellow}>{t("Answering...")}</Text>
           </Box>
           <Box marginTop={1}>
             <Text dimColor>
-              {t('Press Escape, Ctrl+C, or Ctrl+D to cancel')}
+              {t("Press Escape, Ctrl+C, or Ctrl+D to cancel")}
             </Text>
           </Box>
         </Box>
@@ -76,7 +76,7 @@ const BtwMessageInternal: React.FC<BtwDisplayProps> = ({
           />
           <Box marginTop={1}>
             <Text dimColor>
-              {t('Press Space, Enter, or Escape to dismiss')}
+              {t("Press Space, Enter, or Escape to dismiss")}
             </Text>
           </Box>
         </Box>

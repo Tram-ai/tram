@@ -12,15 +12,15 @@ import {
   beforeEach,
   type Mock,
   afterEach,
-} from 'vitest';
-import type { BaseLlmClient } from '../core/baseLlmClient.js';
-import type { Config } from '../config/config.js';
+} from "vitest";
+import type { BaseLlmClient } from "../core/baseLlmClient.js";
+import type { Config } from "../config/config.js";
 import {
   subagentGenerator,
   type SubagentGeneratedContent,
-} from './subagentGenerator.js';
+} from "./subagentGenerator.js";
 
-describe('subagentGenerator', () => {
+describe("subagentGenerator", () => {
   let mockClient: BaseLlmClient;
   let mockConfig: Config;
   const abortSignal = new AbortController().signal;
@@ -34,7 +34,7 @@ describe('subagentGenerator', () => {
     // Create a mock config that returns the mock client and model
     mockConfig = {
       getBaseLlmClient: vi.fn().mockReturnValue(mockClient),
-      getModel: vi.fn().mockReturnValue('qwen3-coder-plus'),
+      getModel: vi.fn().mockReturnValue("qwen3-coder-plus"),
     } as unknown as Config;
   });
 
@@ -42,26 +42,26 @@ describe('subagentGenerator', () => {
     vi.clearAllMocks();
   });
 
-  it('should throw error for empty user description', async () => {
+  it("should throw error for empty user description", async () => {
     await expect(
-      subagentGenerator('', mockConfig, abortSignal),
-    ).rejects.toThrow('User description cannot be empty');
+      subagentGenerator("", mockConfig, abortSignal),
+    ).rejects.toThrow("User description cannot be empty");
 
     await expect(
-      subagentGenerator('   ', mockConfig, abortSignal),
-    ).rejects.toThrow('User description cannot be empty');
+      subagentGenerator("   ", mockConfig, abortSignal),
+    ).rejects.toThrow("User description cannot be empty");
 
     expect(mockClient.generateJson).not.toHaveBeenCalled();
   });
 
-  it('should successfully generate content with valid LLM response', async () => {
-    const userDescription = 'help with code reviews and suggestions';
+  it("should successfully generate content with valid LLM response", async () => {
+    const userDescription = "help with code reviews and suggestions";
     const mockApiResponse: SubagentGeneratedContent = {
-      name: 'code-review-assistant',
+      name: "code-review-assistant",
       description:
-        'A specialized subagent that helps with code reviews and provides improvement suggestions.',
+        "A specialized subagent that helps with code reviews and provides improvement suggestions.",
       systemPrompt:
-        'You are a code review expert. Analyze code for best practices, bugs, and improvements.',
+        "You are a code review expert. Analyze code for best practices, bugs, and improvements.",
     };
 
     (mockClient.generateJson as Mock).mockResolvedValue(mockApiResponse);
@@ -81,24 +81,24 @@ describe('subagentGenerator', () => {
 
     // Check the contents
     expect(callParams.contents).toHaveLength(1);
-    expect(callParams.contents[0]?.role).toBe('user');
+    expect(callParams.contents[0]?.role).toBe("user");
     expect(callParams.contents[0]?.parts?.[0]?.text).toContain(
       `Create an agent configuration based on this request: "${userDescription}"`,
     );
 
     // Check other parameters
     expect(callParams.abortSignal).toBe(abortSignal);
-    expect(callParams.model).toBe('qwen3-coder-plus');
+    expect(callParams.model).toBe("qwen3-coder-plus");
     expect(callParams.systemInstruction).toContain(
-      'You are an elite AI agent architect',
+      "You are an elite AI agent architect",
     );
   });
 
-  it('should throw error when LLM response is missing required fields', async () => {
-    const userDescription = 'help with documentation';
+  it("should throw error when LLM response is missing required fields", async () => {
+    const userDescription = "help with documentation";
     const incompleteResponse = {
-      name: 'doc-helper',
-      description: 'Helps with documentation',
+      name: "doc-helper",
+      description: "Helps with documentation",
       // Missing systemPrompt
     };
 
@@ -106,41 +106,41 @@ describe('subagentGenerator', () => {
 
     await expect(
       subagentGenerator(userDescription, mockConfig, abortSignal),
-    ).rejects.toThrow('Invalid response from LLM: missing required fields');
+    ).rejects.toThrow("Invalid response from LLM: missing required fields");
 
     expect(mockClient.generateJson).toHaveBeenCalledTimes(1);
   });
 
-  it('should throw error when LLM response has empty fields', async () => {
-    const userDescription = 'database optimization';
+  it("should throw error when LLM response has empty fields", async () => {
+    const userDescription = "database optimization";
     const emptyFieldsResponse = {
-      name: '',
-      description: 'Helps with database optimization',
-      systemPrompt: 'You are a database expert.',
+      name: "",
+      description: "Helps with database optimization",
+      systemPrompt: "You are a database expert.",
     };
 
     (mockClient.generateJson as Mock).mockResolvedValue(emptyFieldsResponse);
 
     await expect(
       subagentGenerator(userDescription, mockConfig, abortSignal),
-    ).rejects.toThrow('Invalid response from LLM: missing required fields');
+    ).rejects.toThrow("Invalid response from LLM: missing required fields");
   });
 
-  it('should throw error when generateJson throws an error', async () => {
-    const userDescription = 'testing automation';
-    (mockClient.generateJson as Mock).mockRejectedValue(new Error('API Error'));
+  it("should throw error when generateJson throws an error", async () => {
+    const userDescription = "testing automation";
+    (mockClient.generateJson as Mock).mockRejectedValue(new Error("API Error"));
 
     await expect(
       subagentGenerator(userDescription, mockConfig, abortSignal),
-    ).rejects.toThrow('API Error');
+    ).rejects.toThrow("API Error");
   });
 
-  it('should call generateJson with correct schema and model', async () => {
-    const userDescription = 'data analysis';
+  it("should call generateJson with correct schema and model", async () => {
+    const userDescription = "data analysis";
     const mockResponse: SubagentGeneratedContent = {
-      name: 'data-analyst',
-      description: 'Analyzes data and provides insights.',
-      systemPrompt: 'You are a data analysis expert.',
+      name: "data-analyst",
+      description: "Analyzes data and provides insights.",
+      systemPrompt: "You are a data analysis expert.",
     };
 
     (mockClient.generateJson as Mock).mockResolvedValue(mockResponse);
@@ -149,31 +149,31 @@ describe('subagentGenerator', () => {
 
     expect(mockClient.generateJson).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'qwen3-coder-plus',
+        model: "qwen3-coder-plus",
         contents: expect.any(Object),
         schema: expect.objectContaining({
-          type: 'object',
+          type: "object",
           properties: expect.objectContaining({
-            name: expect.objectContaining({ type: 'string' }),
-            description: expect.objectContaining({ type: 'string' }),
-            systemPrompt: expect.objectContaining({ type: 'string' }),
+            name: expect.objectContaining({ type: "string" }),
+            description: expect.objectContaining({ type: "string" }),
+            systemPrompt: expect.objectContaining({ type: "string" }),
           }),
-          required: ['name', 'description', 'systemPrompt'],
+          required: ["name", "description", "systemPrompt"],
         }),
         abortSignal,
         systemInstruction: expect.stringContaining(
-          'You are an elite AI agent architect',
+          "You are an elite AI agent architect",
         ),
       }),
     );
   });
 
-  it('should include user description in the prompt', async () => {
-    const userDescription = 'machine learning model training';
+  it("should include user description in the prompt", async () => {
+    const userDescription = "machine learning model training";
     const mockResponse: SubagentGeneratedContent = {
-      name: 'ml-trainer',
-      description: 'Trains machine learning models.',
-      systemPrompt: 'You are an ML expert.',
+      name: "ml-trainer",
+      description: "Trains machine learning models.",
+      systemPrompt: "You are an ML expert.",
     };
 
     (mockClient.generateJson as Mock).mockResolvedValue(mockResponse);
@@ -188,30 +188,30 @@ describe('subagentGenerator', () => {
     const userQueryContent = callParams.contents[0]?.parts?.[0]?.text;
     expect(userQueryContent).toContain(userDescription);
     expect(userQueryContent).toContain(
-      'Create an agent configuration based on this request:',
+      "Create an agent configuration based on this request:",
     );
 
     // Check that system prompt is passed correctly
     expect(callParams.systemInstruction).toContain(
-      'You are an elite AI agent architect',
+      "You are an elite AI agent architect",
     );
   });
 
-  it('should throw error for null response from generateJson', async () => {
-    const userDescription = 'security auditing';
+  it("should throw error for null response from generateJson", async () => {
+    const userDescription = "security auditing";
     (mockClient.generateJson as Mock).mockResolvedValue(null);
 
     await expect(
       subagentGenerator(userDescription, mockConfig, abortSignal),
-    ).rejects.toThrow('Invalid response from LLM: missing required fields');
+    ).rejects.toThrow("Invalid response from LLM: missing required fields");
   });
 
-  it('should throw error for undefined response from generateJson', async () => {
-    const userDescription = 'api documentation';
+  it("should throw error for undefined response from generateJson", async () => {
+    const userDescription = "api documentation";
     (mockClient.generateJson as Mock).mockResolvedValue(undefined);
 
     await expect(
       subagentGenerator(userDescription, mockConfig, abortSignal),
-    ).rejects.toThrow('Invalid response from LLM: missing required fields');
+    ).rejects.toThrow("Invalid response from LLM: missing required fields");
   });
 });

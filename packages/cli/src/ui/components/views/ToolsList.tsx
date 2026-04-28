@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../../semantic-colors.js';
-import { type ToolDefinition } from '../../types.js';
-import { MarkdownDisplay } from '../../utils/MarkdownDisplay.js';
-import { t } from '../../../i18n/index.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { theme } from "../../semantic-colors.js";
+import { type ToolDefinition } from "../../types.js";
+import { MarkdownDisplay } from "../../utils/MarkdownDisplay.js";
+import { t } from "../../../i18n/index.js";
 
 interface ToolsListProps {
   tools: readonly ToolDefinition[];
@@ -24,17 +24,17 @@ export const ToolsList: React.FC<ToolsListProps> = ({
 }) => (
   <Box flexDirection="column">
     <Text bold color={theme.text.primary}>
-      {t('Available TRAM CLI tools:')}
+      {t("Available TRAM CLI tools:")}
     </Text>
     <Box height={1} />
     {tools.length > 0 ? (
       tools.map((tool) => (
         <Box key={tool.name} flexDirection="row">
-          <Text color={theme.text.primary}>{'  '}- </Text>
+          <Text color={theme.text.primary}>{"  "}- </Text>
           <Box flexDirection="column">
             <Text bold color={theme.text.accent}>
               {tool.displayName}
-              {showDescriptions ? ` (${tool.name})` : ''}
+              {showDescriptions ? ` (${tool.name})` : ""}
             </Text>
             {showDescriptions && tool.description && (
               <MarkdownDisplay
@@ -47,7 +47,7 @@ export const ToolsList: React.FC<ToolsListProps> = ({
         </Box>
       ))
     ) : (
-      <Text color={theme.text.primary}> {t('No tools available')}</Text>
+      <Text color={theme.text.primary}> {t("No tools available")}</Text>
     )}
   </Box>
 );

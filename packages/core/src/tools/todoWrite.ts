@@ -4,24 +4,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ToolResult } from './tools.js';
-import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
-import type { FunctionDeclaration } from '@google/genai';
-import * as fs from 'fs/promises';
-import * as fsSync from 'fs';
-import * as path from 'path';
+import type { ToolResult } from "./tools.js";
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from "./tools.js";
+import type { FunctionDeclaration } from "@google/genai";
+import * as fs from "fs/promises";
+import * as fsSync from "fs";
+import * as path from "path";
 
-import type { Config } from '../config/config.js';
-import { Storage } from '../config/storage.js';
-import { ToolDisplayNames, ToolNames } from './tool-names.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import type { Config } from "../config/config.js";
+import { Storage } from "../config/storage.js";
+import { ToolDisplayNames, ToolNames } from "./tool-names.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('TODO_WRITE');
+const debugLogger = createDebugLogger("TODO_WRITE");
 
 export interface TodoItem {
   id: string;
   content: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: "pending" | "in_progress" | "completed";
 }
 
 export interface TodoWriteParams {
@@ -31,37 +31,37 @@ export interface TodoWriteParams {
 }
 
 const todoWriteToolSchemaData: FunctionDeclaration = {
-  name: 'todo_write',
+  name: "todo_write",
   description:
-    'Creates and manages a structured task list for your current coding session. This helps track progress, organize complex tasks, and demonstrate thoroughness.',
+    "Creates and manages a structured task list for your current coding session. This helps track progress, organize complex tasks, and demonstrate thoroughness.",
   parametersJsonSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       todos: {
-        type: 'array',
+        type: "array",
         items: {
-          type: 'object',
+          type: "object",
           properties: {
             content: {
-              type: 'string',
+              type: "string",
               minLength: 1,
             },
             status: {
-              type: 'string',
-              enum: ['pending', 'in_progress', 'completed'],
+              type: "string",
+              enum: ["pending", "in_progress", "completed"],
             },
             id: {
-              type: 'string',
+              type: "string",
             },
           },
-          required: ['content', 'status', 'id'],
+          required: ["content", "status", "id"],
           additionalProperties: false,
         },
-        description: 'The updated todo list',
+        description: "The updated todo list",
       },
     },
-    required: ['todos'],
-    $schema: 'http://json-schema.org/draft-07/schema#',
+    required: ["todos"],
+    $schema: "http://json-schema.org/draft-07/schema#",
   },
 };
 
@@ -243,13 +243,13 @@ The assistant did not use the todo list because this is a single command executi
 When in doubt, use this tool. Being proactive with task management demonstrates attentiveness and ensures you complete all requirements successfully.
 `;
 
-const TODO_SUBDIR = 'todos';
+const TODO_SUBDIR = "todos";
 
 function getTodoFilePath(sessionId?: string): string {
   const todoDir = path.join(Storage.getRuntimeBaseDir(), TODO_SUBDIR);
 
   // Use sessionId if provided, otherwise fall back to 'default'
-  const filename = `${sessionId || 'default'}.json`;
+  const filename = `${sessionId || "default"}.json`;
   return path.join(todoDir, filename);
 }
 
@@ -259,12 +259,12 @@ function getTodoFilePath(sessionId?: string): string {
 async function readTodosFromFile(sessionId?: string): Promise<TodoItem[]> {
   try {
     const todoFilePath = getTodoFilePath(sessionId);
-    const content = await fs.readFile(todoFilePath, 'utf-8');
+    const content = await fs.readFile(todoFilePath, "utf-8");
     const data = JSON.parse(content);
     return Array.isArray(data.todos) ? data.todos : [];
   } catch (err) {
     const error = err as Error & { code?: string };
-    if (!(error instanceof Error) || error.code !== 'ENOENT') {
+    if (!(error instanceof Error) || error.code !== "ENOENT") {
       throw err;
     }
     return [];
@@ -285,29 +285,29 @@ async function writeTodosToFile(
 
   const data = {
     todos,
-    sessionId: sessionId || 'default',
+    sessionId: sessionId || "default",
   };
 
-  await fs.writeFile(todoFilePath, JSON.stringify(data, null, 2), 'utf-8');
+  await fs.writeFile(todoFilePath, JSON.stringify(data, null, 2), "utf-8");
 }
 
 class TodoWriteToolInvocation extends BaseToolInvocation<
   TodoWriteParams,
   ToolResult
 > {
-  private operationType: 'create' | 'update';
+  private operationType: "create" | "update";
 
   constructor(
     private readonly config: Config,
     params: TodoWriteParams,
-    operationType: 'create' | 'update' = 'update',
+    operationType: "create" | "update" = "update",
   ) {
     super(params);
     this.operationType = operationType;
   }
 
   getDescription(): string {
-    return this.operationType === 'create' ? 'Create todos' : 'Update todos';
+    return this.operationType === "create" ? "Create todos" : "Update todos";
   }
 
   async execute(_signal: AbortSignal): Promise<ToolResult> {
@@ -330,7 +330,7 @@ class TodoWriteToolInvocation extends BaseToolInvocation<
 
       // Create structured display object for rich UI rendering
       const todoResultDisplay = {
-        type: 'todo_list' as const,
+        type: "todo_list" as const,
         todos: finalTodos,
       };
 
@@ -399,11 +399,11 @@ export async function listTodoSessions(): Promise<string[]> {
     const todoDir = path.join(Storage.getRuntimeBaseDir(), TODO_SUBDIR);
     const files = await fs.readdir(todoDir);
     return files
-      .filter((file: string) => file.endsWith('.json'))
-      .map((file: string) => file.replace('.json', ''));
+      .filter((file: string) => file.endsWith(".json"))
+      .map((file: string) => file.replace(".json", ""));
   } catch (err) {
     const error = err as Error & { code?: string };
-    if (!(error instanceof Error) || error.code !== 'ENOENT') {
+    if (!(error instanceof Error) || error.code !== "ENOENT") {
       throw err;
     }
     return [];
@@ -434,17 +434,17 @@ export class TodoWriteTool extends BaseDeclarativeTool<
 
     // Validate individual todos
     for (const todo of params.todos) {
-      if (!todo.id || typeof todo.id !== 'string' || todo.id.trim() === '') {
+      if (!todo.id || typeof todo.id !== "string" || todo.id.trim() === "") {
         return 'Each todo must have a non-empty "id" string.';
       }
       if (
         !todo.content ||
-        typeof todo.content !== 'string' ||
-        todo.content.trim() === ''
+        typeof todo.content !== "string" ||
+        todo.content.trim() === ""
       ) {
         return 'Each todo must have a non-empty "content" string.';
       }
-      if (!['pending', 'in_progress', 'completed'].includes(todo.status)) {
+      if (!["pending", "in_progress", "completed"].includes(todo.status)) {
         return 'Each todo must have a valid "status" (pending, in_progress, completed).';
       }
     }
@@ -453,7 +453,7 @@ export class TodoWriteTool extends BaseDeclarativeTool<
     const ids = params.todos.map((todo) => todo.id);
     const uniqueIds = new Set(ids);
     if (ids.length !== uniqueIds.size) {
-      return 'Todo IDs must be unique within the array.';
+      return "Todo IDs must be unique within the array.";
     }
 
     return null;
@@ -463,7 +463,7 @@ export class TodoWriteTool extends BaseDeclarativeTool<
     // Determine if this is a create or update operation by checking if todos file exists
     const sessionId = this.config.getSessionId();
     const todoFilePath = getTodoFilePath(sessionId);
-    const operationType = fsSync.existsSync(todoFilePath) ? 'update' : 'create';
+    const operationType = fsSync.existsSync(todoFilePath) ? "update" : "create";
 
     return new TodoWriteToolInvocation(this.config, params, operationType);
   }

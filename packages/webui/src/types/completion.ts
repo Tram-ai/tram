@@ -6,18 +6,18 @@
  * Completion item types for autocomplete menus
  */
 
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 /**
  * Completion item type categories
  */
 export type CompletionItemType =
-  | 'file'
-  | 'folder'
-  | 'symbol'
-  | 'command'
-  | 'variable'
-  | 'info';
+  | "file"
+  | "folder"
+  | "symbol"
+  | "command"
+  | "variable"
+  | "info";
 
 /**
  * Completion item for autocomplete menus

@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState } from "react";
 
-export type ArenaDialogType = 'start' | 'select' | 'stop' | 'status' | null;
+export type ArenaDialogType = "start" | "select" | "stop" | "status" | null;
 
 interface UseArenaCommandReturn {
   activeArenaDialog: ArenaDialogType;

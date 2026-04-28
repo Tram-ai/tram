@@ -1,7 +1,7 @@
 {
   "name": "@qwen-code/channel-base",
-  "version": "0.14.5",
-  "description": "Base channel infrastructure for Qwen Code",
+  "version": "0.0.9-U0145",
+  "description": "Base channel infrastructure for TRAM",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

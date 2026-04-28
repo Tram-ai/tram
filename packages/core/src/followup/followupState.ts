@@ -57,8 +57,8 @@ export interface FollowupControllerOptions {
    * at the generation site, not through this callback.
    */
   onOutcome?: (params: {
-    outcome: 'accepted' | 'ignored';
-    accept_method?: 'tab' | 'enter' | 'right';
+    outcome: "accepted" | "ignored";
+    accept_method?: "tab" | "enter" | "right";
     time_ms: number;
     suggestion_length: number;
   }) => void;
@@ -73,7 +73,7 @@ export interface FollowupControllerActions {
   setSuggestion: (text: string | null) => void;
   /** Accept the current suggestion and invoke onAccept callback */
   accept: (
-    method?: 'tab' | 'enter' | 'right',
+    method?: "tab" | "enter" | "right",
     options?: { skipOnAccept?: boolean },
   ) => void;
   /** Dismiss/clear suggestion */
@@ -139,7 +139,7 @@ export function createFollowupController(
   };
 
   const accept = (
-    method?: 'tab' | 'enter' | 'right',
+    method?: "tab" | "enter" | "right",
     options?: { skipOnAccept?: boolean },
   ): void => {
     if (accepting) {
@@ -162,14 +162,14 @@ export function createFollowupController(
 
     try {
       onOutcome?.({
-        outcome: 'accepted',
+        outcome: "accepted",
         accept_method: method,
         time_ms: shownAt > 0 ? Date.now() - shownAt : 0,
         suggestion_length: text.length,
       });
     } catch (e: unknown) {
       // eslint-disable-next-line no-console
-      console.error('[followup] onOutcome callback threw:', e);
+      console.error("[followup] onOutcome callback threw:", e);
     }
 
     applyState(INITIAL_FOLLOWUP_STATE);
@@ -181,7 +181,7 @@ export function createFollowupController(
         }
       } catch (error: unknown) {
         // eslint-disable-next-line no-console
-        console.error('[followup] onAccept callback threw:', error);
+        console.error("[followup] onAccept callback threw:", error);
       } finally {
         if (acceptTimeoutId) {
           clearTimeout(acceptTimeoutId);
@@ -208,14 +208,14 @@ export function createFollowupController(
     if (currentState.isVisible && currentState.suggestion) {
       try {
         onOutcome?.({
-          outcome: 'ignored',
+          outcome: "ignored",
           time_ms:
             currentState.shownAt > 0 ? Date.now() - currentState.shownAt : 0,
           suggestion_length: currentState.suggestion.length,
         });
       } catch (e: unknown) {
         // eslint-disable-next-line no-console
-        console.error('[followup] onOutcome callback threw:', e);
+        console.error("[followup] onOutcome callback threw:", e);
       }
     }
 

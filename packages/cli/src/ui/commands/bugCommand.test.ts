@@ -4,39 +4,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import open from 'open';
-import { bugCommand } from './bugCommand.js';
-import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
-import { GIT_COMMIT_INFO } from '../../generated/git-commit.js';
-import { AuthType } from '@tram-ai/tram-core';
-import * as systemInfoUtils from '../../utils/systemInfo.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import open from "open";
+import { bugCommand } from "./bugCommand.js";
+import { createMockCommandContext } from "../../test-utils/mockCommandContext.js";
+import { GIT_COMMIT_INFO } from "../../generated/git-commit.js";
+import { AuthType } from "@tram-ai/tram-core";
+import * as systemInfoUtils from "../../utils/systemInfo.js";
 
 // Mock dependencies
-vi.mock('open');
-vi.mock('../../utils/systemInfo.js');
+vi.mock("open");
+vi.mock("../../utils/systemInfo.js");
 
-describe('bugCommand', () => {
+describe("bugCommand", () => {
   beforeEach(() => {
     vi.mocked(systemInfoUtils.getExtendedSystemInfo).mockResolvedValue({
-      cliVersion: '0.1.0',
-      osPlatform: 'test-platform',
-      osArch: 'x64',
-      osRelease: '22.0.0',
-      nodeVersion: 'v20.0.0',
-      npmVersion: '10.0.0',
-      sandboxEnv: 'test',
-      modelVersion: 'qwen3-coder-plus',
-      selectedAuthType: '',
-      ideClient: 'VSCode',
-      sessionId: 'test-session-id',
-      memoryUsage: '100 MB',
+      cliVersion: "0.1.0",
+      osPlatform: "test-platform",
+      osArch: "x64",
+      osRelease: "22.0.0",
+      nodeVersion: "v20.0.0",
+      npmVersion: "10.0.0",
+      sandboxEnv: "test",
+      modelVersion: "qwen3-coder-plus",
+      selectedAuthType: "",
+      ideClient: "VSCode",
+      sessionId: "test-session-id",
+      memoryUsage: "100 MB",
       gitCommit:
-        GIT_COMMIT_INFO && !['N/A'].includes(GIT_COMMIT_INFO)
+        GIT_COMMIT_INFO && !["N/A"].includes(GIT_COMMIT_INFO)
           ? GIT_COMMIT_INFO
           : undefined,
     });
-    vi.stubEnv('SANDBOX', 'tram-test');
+    vi.stubEnv("SANDBOX", "tram-test");
   });
 
   afterEach(() => {
@@ -44,7 +44,7 @@ describe('bugCommand', () => {
     vi.clearAllMocks();
   });
 
-  it('should generate the default GitHub issue URL', async () => {
+  it("should generate the default GitHub issue URL", async () => {
     const mockContext = createMockCommandContext({
       services: {
         config: {
@@ -53,13 +53,13 @@ describe('bugCommand', () => {
       },
     });
 
-    if (!bugCommand.action) throw new Error('Action is not defined');
-    await bugCommand.action(mockContext, 'A test bug');
+    if (!bugCommand.action) throw new Error("Action is not defined");
+    await bugCommand.action(mockContext, "A test bug");
 
     const tramCodeLine =
-      GIT_COMMIT_INFO && !['N/A'].includes(GIT_COMMIT_INFO)
+      GIT_COMMIT_INFO && !["N/A"].includes(GIT_COMMIT_INFO)
         ? `TRAM: 0.1.0 (${GIT_COMMIT_INFO})`
-        : 'TRAM: 0.1.0';
+        : "TRAM: 0.1.0";
     const expectedInfo = `${tramCodeLine}
 Runtime: Node.js v20.0.0 / npm 10.0.0
 IDE Client: VSCode
@@ -71,25 +71,25 @@ Sandbox: test
 Proxy: no proxy
 Memory Usage: 100 MB`;
     const expectedUrl =
-      'https://github.com/QwenLM/qwen-code/issues/new?template=bug_report.yml&title=A%20test%20bug&info=%0A' +
+      "https://github.com/tramLM/tram/issues/new?template=bug_report.yml&title=A%20test%20bug&info=%0A" +
       encodeURIComponent(expectedInfo) +
-      '%0A';
+      "%0A";
 
     expect(mockContext.ui.addItem).toHaveBeenCalledWith(
       {
-        type: 'info',
-        text: 'To submit your bug report, please open the following URL in your browser:',
+        type: "info",
+        text: "To submit your bug report, please open the following URL in your browser:",
         linkUrl: expectedUrl,
-        linkText: 'Open GitHub bug report form',
+        linkText: "Open GitHub bug report form",
       },
       expect.any(Number),
     );
     expect(open).toHaveBeenCalledWith(expectedUrl);
   });
 
-  it('should use a custom URL template from config if provided', async () => {
+  it("should use a custom URL template from config if provided", async () => {
     const customTemplate =
-      'https://internal.bug-tracker.com/new?desc={title}&details={info}';
+      "https://internal.bug-tracker.com/new?desc={title}&details={info}";
     const mockContext = createMockCommandContext({
       services: {
         config: {
@@ -98,13 +98,13 @@ Memory Usage: 100 MB`;
       },
     });
 
-    if (!bugCommand.action) throw new Error('Action is not defined');
-    await bugCommand.action(mockContext, 'A custom bug');
+    if (!bugCommand.action) throw new Error("Action is not defined");
+    await bugCommand.action(mockContext, "A custom bug");
 
     const tramCodeLine =
-      GIT_COMMIT_INFO && !['N/A'].includes(GIT_COMMIT_INFO)
+      GIT_COMMIT_INFO && !["N/A"].includes(GIT_COMMIT_INFO)
         ? `TRAM: 0.1.0 (${GIT_COMMIT_INFO})`
-        : 'TRAM: 0.1.0';
+        : "TRAM: 0.1.0";
     const expectedInfo = `${tramCodeLine}
 Runtime: Node.js v20.0.0 / npm 10.0.0
 IDE Client: VSCode
@@ -116,38 +116,38 @@ Sandbox: test
 Proxy: no proxy
 Memory Usage: 100 MB`;
     const expectedUrl = customTemplate
-      .replace('{title}', encodeURIComponent('A custom bug'))
-      .replace('{info}', encodeURIComponent(`\n${expectedInfo}\n`));
+      .replace("{title}", encodeURIComponent("A custom bug"))
+      .replace("{info}", encodeURIComponent(`\n${expectedInfo}\n`));
 
     expect(mockContext.ui.addItem).toHaveBeenCalledWith(
       {
-        type: 'info',
-        text: 'To submit your bug report, please open the following URL in your browser:',
+        type: "info",
+        text: "To submit your bug report, please open the following URL in your browser:",
         linkUrl: expectedUrl,
-        linkText: 'Open GitHub bug report form',
+        linkText: "Open GitHub bug report form",
       },
       expect.any(Number),
     );
     expect(open).toHaveBeenCalledWith(expectedUrl);
   });
 
-  it('should include Base URL when auth type is OpenAI', async () => {
+  it("should include Base URL when auth type is OpenAI", async () => {
     vi.mocked(systemInfoUtils.getExtendedSystemInfo).mockResolvedValue({
-      cliVersion: '0.1.0',
-      osPlatform: 'test-platform',
-      osArch: 'x64',
-      osRelease: '22.0.0',
-      nodeVersion: 'v20.0.0',
-      npmVersion: '10.0.0',
-      sandboxEnv: 'test',
-      modelVersion: 'qwen3-coder-plus',
+      cliVersion: "0.1.0",
+      osPlatform: "test-platform",
+      osArch: "x64",
+      osRelease: "22.0.0",
+      nodeVersion: "v20.0.0",
+      npmVersion: "10.0.0",
+      sandboxEnv: "test",
+      modelVersion: "qwen3-coder-plus",
       selectedAuthType: AuthType.USE_OPENAI,
-      ideClient: 'VSCode',
-      sessionId: 'test-session-id',
-      memoryUsage: '100 MB',
-      baseUrl: 'https://api.openai.com/v1',
+      ideClient: "VSCode",
+      sessionId: "test-session-id",
+      memoryUsage: "100 MB",
+      baseUrl: "https://api.openai.com/v1",
       gitCommit:
-        GIT_COMMIT_INFO && !['N/A'].includes(GIT_COMMIT_INFO)
+        GIT_COMMIT_INFO && !["N/A"].includes(GIT_COMMIT_INFO)
           ? GIT_COMMIT_INFO
           : undefined,
     });
@@ -160,13 +160,13 @@ Memory Usage: 100 MB`;
       },
     });
 
-    if (!bugCommand.action) throw new Error('Action is not defined');
-    await bugCommand.action(mockContext, 'OpenAI bug');
+    if (!bugCommand.action) throw new Error("Action is not defined");
+    await bugCommand.action(mockContext, "OpenAI bug");
 
     const tramCodeLine =
-      GIT_COMMIT_INFO && !['N/A'].includes(GIT_COMMIT_INFO)
+      GIT_COMMIT_INFO && !["N/A"].includes(GIT_COMMIT_INFO)
         ? `TRAM: 0.1.0 (${GIT_COMMIT_INFO})`
-        : 'TRAM: 0.1.0';
+        : "TRAM: 0.1.0";
     const expectedInfo = `${tramCodeLine}
 Runtime: Node.js v20.0.0 / npm 10.0.0
 IDE Client: VSCode
@@ -180,16 +180,16 @@ Sandbox: test
 Proxy: no proxy
 Memory Usage: 100 MB`;
     const expectedUrl =
-      'https://github.com/QwenLM/qwen-code/issues/new?template=bug_report.yml&title=OpenAI%20bug&info=%0A' +
+      "https://github.com/tramLM/tram/issues/new?template=bug_report.yml&title=OpenAI%20bug&info=%0A" +
       encodeURIComponent(expectedInfo) +
-      '%0A';
+      "%0A";
 
     expect(mockContext.ui.addItem).toHaveBeenCalledWith(
       {
-        type: 'info',
-        text: 'To submit your bug report, please open the following URL in your browser:',
+        type: "info",
+        text: "To submit your bug report, please open the following URL in your browser:",
         linkUrl: expectedUrl,
-        linkText: 'Open GitHub bug report form',
+        linkText: "Open GitHub bug report form",
       },
       expect.any(Number),
     );

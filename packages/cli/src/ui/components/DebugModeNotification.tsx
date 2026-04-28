@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import { Storage, isDebugLoggingDegraded } from '@tram-ai/tram-core';
-import { useConfig } from '../contexts/ConfigContext.js';
-import { theme } from '../semantic-colors.js';
+import { Box, Text } from "ink";
+import { Storage, isDebugLoggingDegraded } from "@tram-ai/tram-core";
+import { useConfig } from "../contexts/ConfigContext.js";
+import { theme } from "../semantic-colors.js";
 
 /**
  * Displays debug mode status and log file path when debug mode is enabled.

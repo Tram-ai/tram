@@ -11,7 +11,7 @@
  * run, tool), termination modes, and interactive agent types.
  */
 
-import type { Content, FunctionDeclaration } from '@google/genai';
+import type { Content, FunctionDeclaration } from "@google/genai";
 
 // ─── Agent Configuration ─────────────────────────────────────
 
@@ -87,17 +87,17 @@ export interface ToolConfig {
  */
 export enum AgentTerminateMode {
   /** The agent's execution terminated due to an unrecoverable error. */
-  ERROR = 'ERROR',
+  ERROR = "ERROR",
   /** The agent's execution terminated because it exceeded the maximum allowed working time. */
-  TIMEOUT = 'TIMEOUT',
+  TIMEOUT = "TIMEOUT",
   /** The agent's execution successfully completed all its defined goals. */
-  GOAL = 'GOAL',
+  GOAL = "GOAL",
   /** The agent's execution terminated because it exceeded the maximum number of turns. */
-  MAX_TURNS = 'MAX_TURNS',
+  MAX_TURNS = "MAX_TURNS",
   /** The agent's execution was cancelled via an abort signal. */
-  CANCELLED = 'CANCELLED',
+  CANCELLED = "CANCELLED",
   /** The agent was gracefully shut down (e.g., arena/team session ended). */
-  SHUTDOWN = 'SHUTDOWN',
+  SHUTDOWN = "SHUTDOWN",
 }
 
 // ─── Agent Status ────────────────────────────────────────────
@@ -116,12 +116,12 @@ export enum AgentTerminateMode {
  * - CANCELLED:    Cancelled by user or system.
  */
 export enum AgentStatus {
-  INITIALIZING = 'initializing',
-  RUNNING = 'running',
-  IDLE = 'idle',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
+  INITIALIZING = "initializing",
+  RUNNING = "running",
+  IDLE = "idle",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
 }
 
 /** True for COMPLETED, FAILED, CANCELLED — agent is done for good. */
@@ -169,7 +169,7 @@ export interface AgentInteractiveConfig {
  */
 export interface AgentMessage {
   /** Discriminator for the message kind. */
-  role: 'user' | 'assistant' | 'tool_call' | 'tool_result' | 'info';
+  role: "user" | "assistant" | "tool_call" | "tool_result" | "info";
   /** The text content of the message. */
   content: string;
   /** When the message was created (ms since epoch). */

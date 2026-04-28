@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { QualitativeInsights } from './QualitativeInsightTypes.js';
+import type { QualitativeInsights } from "./QualitativeInsightTypes.js";
 
 export interface HeatMapData {
   [date: string]: number;
@@ -44,34 +44,34 @@ export interface SessionFacets {
   underlying_goal: string;
   goal_categories: Record<string, number>;
   outcome:
-    | 'fully_achieved'
-    | 'mostly_achieved'
-    | 'partially_achieved'
-    | 'not_achieved'
-    | 'unclear_from_transcript';
+    | "fully_achieved"
+    | "mostly_achieved"
+    | "partially_achieved"
+    | "not_achieved"
+    | "unclear_from_transcript";
   user_satisfaction_counts: Record<string, number>;
   Tram_helpfulness:
-    | 'unhelpful'
-    | 'slightly_helpful'
-    | 'moderately_helpful'
-    | 'very_helpful'
-    | 'essential';
+    | "unhelpful"
+    | "slightly_helpful"
+    | "moderately_helpful"
+    | "very_helpful"
+    | "essential";
   session_type:
-    | 'single_task'
-    | 'multi_task'
-    | 'iterative_refinement'
-    | 'exploration'
-    | 'quick_question';
+    | "single_task"
+    | "multi_task"
+    | "iterative_refinement"
+    | "exploration"
+    | "quick_question";
   friction_counts: Record<string, number>;
   friction_detail: string;
   primary_success:
-    | 'none'
-    | 'fast_accurate_search'
-    | 'correct_code_edits'
-    | 'good_explanations'
-    | 'proactive_help'
-    | 'multi_file_changes'
-    | 'good_debugging';
+    | "none"
+    | "fast_accurate_search"
+    | "correct_code_edits"
+    | "good_explanations"
+    | "proactive_help"
+    | "multi_file_changes"
+    | "good_debugging";
   brief_summary: string;
 }
 

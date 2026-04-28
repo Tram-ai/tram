@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isApiError, isStructuredError } from './quotaErrorDetection.js';
-import { AuthType } from '../core/contentGenerator.js';
+import { isApiError, isStructuredError } from "./quotaErrorDetection.js";
+import { AuthType } from "../core/contentGenerator.js";
 
 // Free Tier message functions
 const RATE_LIMIT_ERROR_MESSAGE_USE_GEMINI =
-  '\nPlease wait and try again later. To increase your limits, request a quota increase through AI Studio, or switch to another /auth method';
+  "\nPlease wait and try again later. To increase your limits, request a quota increase through AI Studio, or switch to another /auth method";
 const RATE_LIMIT_ERROR_MESSAGE_VERTEX =
-  '\nPlease wait and try again later. To increase your limits, request a quota increase through Vertex, or switch to another /auth method';
+  "\nPlease wait and try again later. To increase your limits, request a quota increase through Vertex, or switch to another /auth method";
 const RATE_LIMIT_ERROR_MESSAGE_DEFAULT =
-  '\nPossible quota limitations in place or slow response times detected. Please wait and try again later.';
+  "\nPossible quota limitations in place or slow response times detected. Please wait and try again later.";
 
 function getRateLimitMessage(authType?: AuthType): string {
   switch (authType) {
@@ -33,8 +33,8 @@ export function parseAndFormatApiError(
   if (isStructuredError(error)) {
     // Qwen OAuth quota errors have their own user-friendly message; don't wrap them
     if (
-      error.message.startsWith('Qwen OAuth quota exceeded:') ||
-      error.message.startsWith('Qwen OAuth free tier has been discontinued')
+      error.message.startsWith("Qwen OAuth quota exceeded:") ||
+      error.message.startsWith("Qwen OAuth free tier has been discontinued")
     ) {
       return error.message;
     }
@@ -47,8 +47,8 @@ export function parseAndFormatApiError(
   }
 
   // The error message might be a string containing a JSON object.
-  if (typeof error === 'string') {
-    const jsonStart = error.indexOf('{');
+  if (typeof error === "string") {
+    const jsonStart = error.indexOf("{");
     if (jsonStart === -1) {
       return `[API Error: ${error}]`; // Not a JSON error, return as is.
     }
@@ -70,7 +70,7 @@ export function parseAndFormatApiError(
         }
         const statusText = parsedError.error.status
           ? ` (Status: ${parsedError.error.status})`
-          : '';
+          : "";
         let text = `[API Error: ${finalMessage}${statusText}]`;
         if (parsedError.error.code === 429) {
           text += getRateLimitMessage(authType);
@@ -83,5 +83,5 @@ export function parseAndFormatApiError(
     return `[API Error: ${error}]`;
   }
 
-  return '[API Error: An unknown error occurred.]';
+  return "[API Error: An unknown error occurred.]";
 }

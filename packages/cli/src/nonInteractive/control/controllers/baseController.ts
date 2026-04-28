@@ -15,15 +15,15 @@
  * - Integration with central pending request registry
  */
 
-import { randomUUID } from 'node:crypto';
-import type { DebugLogger } from '@tram-ai/tram-core';
-import { createDebugLogger } from '@tram-ai/tram-core';
-import type { IControlContext } from '../ControlContext.js';
+import { randomUUID } from "node:crypto";
+import type { DebugLogger } from "@tram-ai/tram-core";
+import { createDebugLogger } from "@tram-ai/tram-core";
+import type { IControlContext } from "../ControlContext.js";
 import type {
   ControlRequestPayload,
   ControlResponse,
   CLIControlRequest,
-} from '../../types.js';
+} from "../../types.js";
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 30000; // 30 seconds
 
@@ -130,12 +130,12 @@ export abstract class BaseController {
   ): Promise<ControlResponse> {
     // Check if stream is closed
     if (this.context.inputClosed) {
-      throw new Error('Input closed');
+      throw new Error("Input closed");
     }
 
     // Check if already aborted
     if (signal?.aborted) {
-      throw new Error('Request aborted');
+      throw new Error("Request aborted");
     }
 
     const requestId = randomUUID();
@@ -144,23 +144,23 @@ export abstract class BaseController {
       // Setup abort handler
       const abortHandler = () => {
         this.registry.deregisterOutgoingRequest(requestId);
-        reject(new Error('Request aborted'));
+        reject(new Error("Request aborted"));
         this.debugLogger.warn(
           `[${this.controllerName}] Outgoing request aborted: ${requestId}`,
         );
       };
 
       if (signal) {
-        signal.addEventListener('abort', abortHandler, { once: true });
+        signal.addEventListener("abort", abortHandler, { once: true });
       }
 
       // Setup timeout
       const timeoutId = setTimeout(() => {
         if (signal) {
-          signal.removeEventListener('abort', abortHandler);
+          signal.removeEventListener("abort", abortHandler);
         }
         this.registry.deregisterOutgoingRequest(requestId);
-        reject(new Error('Control request timeout'));
+        reject(new Error("Control request timeout"));
         this.debugLogger.warn(
           `[${this.controllerName}] Outgoing request timeout: ${requestId}`,
         );
@@ -169,14 +169,14 @@ export abstract class BaseController {
       // Wrap resolve/reject to clean up abort listener
       const wrappedResolve = (response: ControlResponse) => {
         if (signal) {
-          signal.removeEventListener('abort', abortHandler);
+          signal.removeEventListener("abort", abortHandler);
         }
         resolve(response);
       };
 
       const wrappedReject = (error: Error) => {
         if (signal) {
-          signal.removeEventListener('abort', abortHandler);
+          signal.removeEventListener("abort", abortHandler);
         }
         reject(error);
       };
@@ -192,7 +192,7 @@ export abstract class BaseController {
 
       // Send control request
       const request: CLIControlRequest = {
-        type: 'control_request',
+        type: "control_request",
         request_id: requestId,
         request: payload,
       };
@@ -201,7 +201,7 @@ export abstract class BaseController {
         this.context.streamJson.send(request);
       } catch (error) {
         if (signal) {
-          signal.removeEventListener('abort', abortHandler);
+          signal.removeEventListener("abort", abortHandler);
         }
         this.registry.deregisterOutgoingRequest(requestId);
         reject(error);

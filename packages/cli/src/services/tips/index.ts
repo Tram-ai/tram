@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TipHistory } from './tipHistory.js';
+import { TipHistory } from "./tipHistory.js";
 
-export { TipHistory } from './tipHistory.js';
-export { selectTip } from './tipScheduler.js';
+export { TipHistory } from "./tipHistory.js";
+export { selectTip } from "./tipScheduler.js";
 export {
   tipRegistry,
   getContextUsagePercent,
   type ContextualTip,
   type TipContext,
   type TipTrigger,
-} from './tipRegistry.js';
+} from "./tipRegistry.js";
 
 /**
  * Shared TipHistory singleton for the session. Loaded once on first access

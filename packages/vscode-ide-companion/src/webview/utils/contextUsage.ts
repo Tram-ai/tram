@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ModelInfo } from '@agentclientprotocol/sdk';
-import type { ContextUsage } from '@qwen-code/webui';
-import type { UsageStatsPayload } from '../../types/chatTypes.js';
+import type { ModelInfo } from "@agentclientprotocol/sdk";
+import type { ContextUsage } from "@tram-ai/webui";
+import type { UsageStatsPayload } from "../../types/chatTypes.js";
 
 export function computeContextUsage(
   usageStats: UsageStatsPayload | null,
@@ -16,9 +16,9 @@ export function computeContextUsage(
     return null;
   }
 
-  const metaLimitRaw = modelInfo?._meta?.['contextLimit'];
+  const metaLimitRaw = modelInfo?._meta?.["contextLimit"];
   const metaLimit =
-    typeof metaLimitRaw === 'number' || metaLimitRaw === null
+    typeof metaLimitRaw === "number" || metaLimitRaw === null
       ? metaLimitRaw
       : undefined;
   // Intentionally avoid DEFAULT_TOKEN_LIMIT here. The footer should disappear
@@ -29,7 +29,7 @@ export function computeContextUsage(
   const used =
     usageStats?.usage?.inputTokens ?? usageStats?.usage?.promptTokens ?? 0;
 
-  if (typeof limit !== 'number' || limit <= 0 || used < 0) {
+  if (typeof limit !== "number" || limit <= 0 || used < 0) {
     return null;
   }
 

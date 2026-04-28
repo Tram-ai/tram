@@ -8,11 +8,11 @@ import {
   type ApprovalMode,
   APPROVAL_MODES,
   type Config,
-} from '@tram-ai/tram-core';
-import { useEffect, useState } from 'react';
-import { useKeypress } from './useKeypress.js';
-import type { HistoryItemWithoutId } from '../types.js';
-import { MessageType } from '../types.js';
+} from "@tram-ai/tram-core";
+import { useEffect, useState } from "react";
+import { useKeypress } from "./useKeypress.js";
+import type { HistoryItemWithoutId } from "../types.js";
+import { MessageType } from "../types.js";
 
 export interface UseAutoAcceptIndicatorArgs {
   config: Config;
@@ -43,10 +43,10 @@ export function useAutoAcceptIndicator({
       // Handle Shift+Tab to cycle through all modes
       // On Windows, Shift+Tab is indistinguishable from Tab (\t) in some terminals,
       // so we allow Tab to switch modes as well to support the shortcut.
-      const isShiftTab = key.shift && key.name === 'tab';
+      const isShiftTab = key.shift && key.name === "tab";
       const isWindowsTab =
-        process.platform === 'win32' &&
-        key.name === 'tab' &&
+        process.platform === "win32" &&
+        key.name === "tab" &&
         !key.ctrl &&
         !key.meta;
 

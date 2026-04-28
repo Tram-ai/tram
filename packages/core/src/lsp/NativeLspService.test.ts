@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, beforeEach, expect, test, vi } from 'vitest';
-import { NativeLspService } from './NativeLspService.js';
-import { EventEmitter } from 'events';
-import type { Config as CoreConfig } from '../config/config.js';
-import type { FileDiscoveryService } from '../services/fileDiscoveryService.js';
-import type { IdeContextStore } from '../ide/ideContext.js';
-import type { WorkspaceContext } from '../utils/workspaceContext.js';
-import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { describe, beforeEach, expect, test, vi } from "vitest";
+import { NativeLspService } from "./NativeLspService.js";
+import { EventEmitter } from "events";
+import type { Config as CoreConfig } from "../config/config.js";
+import type { FileDiscoveryService } from "../services/fileDiscoveryService.js";
+import type { IdeContextStore } from "../ide/ideContext.js";
+import type { WorkspaceContext } from "../utils/workspaceContext.js";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import { pathToFileURL } from "node:url";
 
 // 模拟依赖项
 class MockConfig {
-  rootPath = '/test/workspace';
+  rootPath = "/test/workspace";
 
   isTrustedFolder(): boolean {
     return true;
@@ -34,27 +34,27 @@ class MockConfig {
 }
 
 class MockWorkspaceContext {
-  rootPath = '/test/workspace';
+  rootPath = "/test/workspace";
 
   async fileExists(_path: string): Promise<boolean> {
-    return _path.endsWith('.json') || _path.includes('package.json');
+    return _path.endsWith(".json") || _path.includes("package.json");
   }
 
   async readFile(_path: string): Promise<string> {
-    if (_path.includes('.lsp.json')) {
+    if (_path.includes(".lsp.json")) {
       return JSON.stringify({
         typescript: {
-          command: 'typescript-language-server',
-          args: ['--stdio'],
-          transport: 'stdio',
+          command: "typescript-language-server",
+          args: ["--stdio"],
+          transport: "stdio",
         },
       });
     }
-    return '{}';
+    return "{}";
   }
 
   resolvePath(_path: string): string {
-    return this.rootPath + '/' + _path;
+    return this.rootPath + "/" + _path;
   }
 
   isPathWithinWorkspace(_path: string): boolean {
@@ -70,10 +70,10 @@ class MockFileDiscoveryService {
   async discoverFiles(_root: string, _options: unknown): Promise<string[]> {
     // 模拟发现一些文件
     return [
-      '/test/workspace/src/index.ts',
-      '/test/workspace/src/utils.ts',
-      '/test/workspace/server.py',
-      '/test/workspace/main.go',
+      "/test/workspace/src/index.ts",
+      "/test/workspace/src/utils.ts",
+      "/test/workspace/server.py",
+      "/test/workspace/main.go",
     ];
   }
 
@@ -86,7 +86,7 @@ class MockIdeContextStore {
   // 模拟 IDE 上下文存储
 }
 
-describe('NativeLspService', () => {
+describe("NativeLspService", () => {
   let lspService: NativeLspService;
   let mockConfig: MockConfig;
   let mockWorkspace: MockWorkspaceContext;
@@ -110,11 +110,11 @@ describe('NativeLspService', () => {
     );
   });
 
-  test('should initialize correctly', () => {
+  test("should initialize correctly", () => {
     expect(lspService).toBeDefined();
   });
 
-  test('discoverAndPrepare should not invoke language detection', async () => {
+  test("discoverAndPrepare should not invoke language detection", async () => {
     const service = new NativeLspService(
       mockConfig as unknown as CoreConfig,
       mockWorkspace as unknown as WorkspaceContext,
@@ -124,7 +124,7 @@ describe('NativeLspService', () => {
     );
 
     const detectLanguages = vi.fn(async () => {
-      throw new Error('detectLanguages should not be called');
+      throw new Error("detectLanguages should not be called");
     });
     (
       service as unknown as {
@@ -136,7 +136,7 @@ describe('NativeLspService', () => {
     expect(detectLanguages).not.toHaveBeenCalled();
   });
 
-  test('should prepare configs without language detection', async () => {
+  test("should prepare configs without language detection", async () => {
     await lspService.discoverAndPrepare();
     const status = lspService.getStatus();
 
@@ -144,17 +144,17 @@ describe('NativeLspService', () => {
     expect(status).toBeDefined();
   });
 
-  test('should open document before hover requests', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lsp-test-'));
-    const filePath = path.join(tempDir, 'main.cpp');
-    fs.writeFileSync(filePath, 'int main(){return 0;}\n', 'utf-8');
+  test("should open document before hover requests", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "lsp-test-"));
+    const filePath = path.join(tempDir, "main.cpp");
+    fs.writeFileSync(filePath, "int main(){return 0;}\n", "utf-8");
     const uri = pathToFileURL(filePath).toString();
 
     const events: string[] = [];
     const connection = {
       listen: vi.fn(),
       send: vi.fn((message: { method?: string }) => {
-        events.push(`send:${message.method ?? 'unknown'}`);
+        events.push(`send:${message.method ?? "unknown"}`);
       }),
       onNotification: vi.fn(),
       onRequest: vi.fn(),
@@ -169,18 +169,18 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'clangd',
-        languages: ['cpp'],
-        command: 'clangd',
+        name: "clangd",
+        languages: ["cpp"],
+        command: "clangd",
         args: [],
-        transport: 'stdio',
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection,
     };
 
     const serverManager = {
-      getHandles: () => new Map([['clangd', handle]]),
+      getHandles: () => new Map([["clangd", handle]]),
       warmupTypescriptServer: vi.fn(),
     };
 
@@ -201,20 +201,20 @@ describe('NativeLspService', () => {
 
       expect(connection.send).toHaveBeenCalledWith(
         expect.objectContaining({
-          method: 'textDocument/didOpen',
+          method: "textDocument/didOpen",
           params: {
             textDocument: expect.objectContaining({
               uri,
-              languageId: 'cpp',
+              languageId: "cpp",
             }),
           },
         }),
       );
       expect(connection.request).toHaveBeenCalledWith(
-        'textDocument/hover',
+        "textDocument/hover",
         expect.any(Object),
       );
-      expect(events[0]).toBe('send:textDocument/didOpen');
+      expect(events[0]).toBe("send:textDocument/didOpen");
 
       const promise2 = lspService.hover({
         uri,
@@ -233,11 +233,11 @@ describe('NativeLspService', () => {
     }
   });
 
-  test('should open a workspace file before workspace symbol search', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lsp-symbol-'));
-    const workspaceFile = path.join(tempDir, 'src', 'main.cpp');
+  test("should open a workspace file before workspace symbol search", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "lsp-symbol-"));
+    const workspaceFile = path.join(tempDir, "src", "main.cpp");
     fs.mkdirSync(path.dirname(workspaceFile), { recursive: true });
-    fs.writeFileSync(workspaceFile, 'int main(){return 0;}\n', 'utf-8');
+    fs.writeFileSync(workspaceFile, "int main(){return 0;}\n", "utf-8");
     const workspaceUri = pathToFileURL(workspaceFile).toString();
 
     const events: string[] = [];
@@ -245,8 +245,8 @@ describe('NativeLspService', () => {
     const connection = {
       listen: vi.fn(),
       send: vi.fn((message: { method?: string }) => {
-        events.push(`send:${message.method ?? 'unknown'}`);
-        if (message.method === 'textDocument/didOpen') {
+        events.push(`send:${message.method ?? "unknown"}`);
+        if (message.method === "textDocument/didOpen") {
           opened = true;
         }
       }),
@@ -254,11 +254,11 @@ describe('NativeLspService', () => {
       onRequest: vi.fn(),
       request: vi.fn(async (method: string) => {
         events.push(`request:${method}`);
-        if (method === 'workspace/symbol') {
+        if (method === "workspace/symbol") {
           return opened
             ? [
                 {
-                  name: 'Calculator',
+                  name: "Calculator",
                   kind: 5,
                   location: {
                     uri: workspaceUri,
@@ -280,18 +280,18 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'clangd',
-        languages: ['cpp'],
-        command: 'clangd',
+        name: "clangd",
+        languages: ["cpp"],
+        command: "clangd",
         args: [],
-        transport: 'stdio',
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection,
     };
 
     const serverManager = {
-      getHandles: () => new Map([['clangd', handle]]),
+      getHandles: () => new Map([["clangd", handle]]),
       warmupTypescriptServer: vi.fn(),
       isTypescriptServer: () => false,
     };
@@ -318,16 +318,16 @@ describe('NativeLspService', () => {
 
     vi.useFakeTimers();
     try {
-      const promise = tempService.workspaceSymbols('Calculator');
+      const promise = tempService.workspaceSymbols("Calculator");
       await vi.runAllTimersAsync();
       const results = await promise;
 
       expect(connection.send).toHaveBeenCalledWith(
         expect.objectContaining({
-          method: 'textDocument/didOpen',
+          method: "textDocument/didOpen",
         }),
       );
-      expect(events[0]).toBe('send:textDocument/didOpen');
+      expect(events[0]).toBe("send:textDocument/didOpen");
       expect(results.length).toBe(1);
     } finally {
       vi.useRealTimers();
@@ -335,11 +335,11 @@ describe('NativeLspService', () => {
     }
   });
 
-  test('should retry workspace symbols after warmup when initial result is empty', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lsp-symbol-retry-'));
-    const workspaceFile = path.join(tempDir, 'src', 'main.cpp');
+  test("should retry workspace symbols after warmup when initial result is empty", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "lsp-symbol-retry-"));
+    const workspaceFile = path.join(tempDir, "src", "main.cpp");
     fs.mkdirSync(path.dirname(workspaceFile), { recursive: true });
-    fs.writeFileSync(workspaceFile, 'int main(){return 0;}\n', 'utf-8');
+    fs.writeFileSync(workspaceFile, "int main(){return 0;}\n", "utf-8");
     const workspaceUri = pathToFileURL(workspaceFile).toString();
 
     const events: string[] = [];
@@ -348,8 +348,8 @@ describe('NativeLspService', () => {
     const connection = {
       listen: vi.fn(),
       send: vi.fn((message: { method?: string }) => {
-        events.push(`send:${message.method ?? 'unknown'}`);
-        if (message.method === 'textDocument/didOpen') {
+        events.push(`send:${message.method ?? "unknown"}`);
+        if (message.method === "textDocument/didOpen") {
           opened = true;
         }
       }),
@@ -357,7 +357,7 @@ describe('NativeLspService', () => {
       onRequest: vi.fn(),
       request: vi.fn(async (method: string) => {
         events.push(`request:${method}`);
-        if (method === 'workspace/symbol') {
+        if (method === "workspace/symbol") {
           symbolCalls += 1;
           if (!opened) {
             return [];
@@ -367,7 +367,7 @@ describe('NativeLspService', () => {
           }
           return [
             {
-              name: 'Calculator',
+              name: "Calculator",
               kind: 5,
               location: {
                 uri: workspaceUri,
@@ -388,18 +388,18 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'clangd',
-        languages: ['cpp'],
-        command: 'clangd',
+        name: "clangd",
+        languages: ["cpp"],
+        command: "clangd",
         args: [],
-        transport: 'stdio',
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection,
     };
 
     const serverManager = {
-      getHandles: () => new Map([['clangd', handle]]),
+      getHandles: () => new Map([["clangd", handle]]),
       warmupTypescriptServer: vi.fn(),
       isTypescriptServer: () => false,
     };
@@ -426,21 +426,21 @@ describe('NativeLspService', () => {
 
     vi.useFakeTimers();
     try {
-      const promise = tempService.workspaceSymbols('Calculator');
+      const promise = tempService.workspaceSymbols("Calculator");
       await vi.runAllTimersAsync();
       const results = await promise;
 
       expect(symbolCalls).toBe(2);
       expect(results.length).toBe(1);
-      expect(events[0]).toBe('send:textDocument/didOpen');
+      expect(events[0]).toBe("send:textDocument/didOpen");
     } finally {
       vi.useRealTimers();
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
   });
 
-  test('should not retry workspace symbols when no warmup file is available', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lsp-symbol-empty-'));
+  test("should not retry workspace symbols when no warmup file is available", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "lsp-symbol-empty-"));
 
     let symbolCalls = 0;
     const connection = {
@@ -449,7 +449,7 @@ describe('NativeLspService', () => {
       onNotification: vi.fn(),
       onRequest: vi.fn(),
       request: vi.fn(async (method: string) => {
-        if (method === 'workspace/symbol') {
+        if (method === "workspace/symbol") {
           symbolCalls += 1;
           return [];
         }
@@ -462,18 +462,18 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'clangd',
-        languages: ['cpp'],
-        command: 'clangd',
+        name: "clangd",
+        languages: ["cpp"],
+        command: "clangd",
         args: [],
-        transport: 'stdio',
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection,
     };
 
     const serverManager = {
-      getHandles: () => new Map([['clangd', handle]]),
+      getHandles: () => new Map([["clangd", handle]]),
       warmupTypescriptServer: vi.fn(),
       isTypescriptServer: () => false,
     };
@@ -500,7 +500,7 @@ describe('NativeLspService', () => {
 
     vi.useFakeTimers();
     try {
-      const promise = tempService.workspaceSymbols('Calculator');
+      const promise = tempService.workspaceSymbols("Calculator");
       await vi.runAllTimersAsync();
       await promise;
 
@@ -511,10 +511,10 @@ describe('NativeLspService', () => {
     }
   });
 
-  test('should reopen documents after connection changes', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lsp-reopen-'));
-    const filePath = path.join(tempDir, 'main.cpp');
-    fs.writeFileSync(filePath, 'int main(){return 0;}\n', 'utf-8');
+  test("should reopen documents after connection changes", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "lsp-reopen-"));
+    const filePath = path.join(tempDir, "main.cpp");
+    fs.writeFileSync(filePath, "int main(){return 0;}\n", "utf-8");
     const uri = pathToFileURL(filePath).toString();
 
     const connection1 = {
@@ -540,18 +540,18 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'clangd',
-        languages: ['cpp'],
-        command: 'clangd',
+        name: "clangd",
+        languages: ["cpp"],
+        command: "clangd",
         args: [],
-        transport: 'stdio',
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection: connection1,
     };
 
     const serverManager = {
-      getHandles: () => new Map([['clangd', handle]]),
+      getHandles: () => new Map([["clangd", handle]]),
       warmupTypescriptServer: vi.fn(),
     };
 
@@ -588,7 +588,7 @@ describe('NativeLspService', () => {
       await promise1;
 
       expect(connection1.send).toHaveBeenCalledWith(
-        expect.objectContaining({ method: 'textDocument/didOpen' }),
+        expect.objectContaining({ method: "textDocument/didOpen" }),
       );
 
       handle.connection = connection2;
@@ -604,32 +604,32 @@ describe('NativeLspService', () => {
       await promise2;
 
       expect(connection2.send).toHaveBeenCalledWith(
-        expect.objectContaining({ method: 'textDocument/didOpen' }),
+        expect.objectContaining({ method: "textDocument/didOpen" }),
       );
     } finally {
       vi.useRealTimers();
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
   });
-  test('should delay after fresh document open then send request', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lsp-delay-'));
-    const filePath = path.join(tempDir, 'main.cpp');
-    fs.writeFileSync(filePath, 'int main(){return 0;}\n', 'utf-8');
+  test("should delay after fresh document open then send request", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "lsp-delay-"));
+    const filePath = path.join(tempDir, "main.cpp");
+    fs.writeFileSync(filePath, "int main(){return 0;}\n", "utf-8");
     const uri = pathToFileURL(filePath).toString();
 
     const timeline: Array<{ event: string; time: number }> = [];
     const connection = {
       listen: vi.fn(),
       send: vi.fn((message: { method?: string }) => {
-        if (message.method === 'textDocument/didOpen') {
-          timeline.push({ event: 'didOpen', time: Date.now() });
+        if (message.method === "textDocument/didOpen") {
+          timeline.push({ event: "didOpen", time: Date.now() });
         }
       }),
       onNotification: vi.fn(),
       onRequest: vi.fn(),
       request: vi.fn(async (method: string) => {
-        if (method === 'textDocument/definition') {
-          timeline.push({ event: 'definition', time: Date.now() });
+        if (method === "textDocument/definition") {
+          timeline.push({ event: "definition", time: Date.now() });
           return [
             {
               uri,
@@ -649,18 +649,18 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'clangd',
-        languages: ['cpp'],
-        command: 'clangd',
+        name: "clangd",
+        languages: ["cpp"],
+        command: "clangd",
         args: [],
-        transport: 'stdio',
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection,
     };
 
     const serverManager = {
-      getHandles: () => new Map([['clangd', handle]]),
+      getHandles: () => new Map([["clangd", handle]]),
       warmupTypescriptServer: vi.fn(),
     };
 
@@ -681,8 +681,8 @@ describe('NativeLspService', () => {
 
       // Verify didOpen fires before the definition request
       expect(timeline.length).toBe(2);
-      expect(timeline[0]!.event).toBe('didOpen');
-      expect(timeline[1]!.event).toBe('definition');
+      expect(timeline[0]!.event).toBe("didOpen");
+      expect(timeline[1]!.event).toBe("definition");
       // The delay should have elapsed between the two events (200ms)
       expect(timeline[1]!.time - timeline[0]!.time).toBeGreaterThanOrEqual(200);
       expect(results.length).toBe(1);
@@ -692,17 +692,17 @@ describe('NativeLspService', () => {
     }
   });
 
-  test('should skip delay when document is already open', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lsp-nodelay-'));
-    const filePath = path.join(tempDir, 'main.cpp');
-    fs.writeFileSync(filePath, 'int main(){return 0;}\n', 'utf-8');
+  test("should skip delay when document is already open", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "lsp-nodelay-"));
+    const filePath = path.join(tempDir, "main.cpp");
+    fs.writeFileSync(filePath, "int main(){return 0;}\n", "utf-8");
     const uri = pathToFileURL(filePath).toString();
 
     let didOpenCount = 0;
     const connection = {
       listen: vi.fn(),
       send: vi.fn((message: { method?: string }) => {
-        if (message.method === 'textDocument/didOpen') {
+        if (message.method === "textDocument/didOpen") {
           didOpenCount += 1;
         }
       }),
@@ -716,18 +716,18 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'clangd',
-        languages: ['cpp'],
-        command: 'clangd',
+        name: "clangd",
+        languages: ["cpp"],
+        command: "clangd",
         args: [],
-        transport: 'stdio',
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection,
     };
 
     const serverManager = {
-      getHandles: () => new Map([['clangd', handle]]),
+      getHandles: () => new Map([["clangd", handle]]),
       warmupTypescriptServer: vi.fn(),
     };
 
@@ -770,12 +770,12 @@ describe('NativeLspService', () => {
     }
   });
 
-  test('should not send duplicate didOpen for warmup-opened URI on subsequent requests', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lsp-warmup-track-'));
-    const queryFilePath = path.join(tempDir, 'main.cpp');
-    const warmupFilePath = path.join(tempDir, 'index.ts');
-    fs.writeFileSync(queryFilePath, 'int main(){return 0;}\n', 'utf-8');
-    fs.writeFileSync(warmupFilePath, 'export const x = 1;\n', 'utf-8');
+  test("should not send duplicate didOpen for warmup-opened URI on subsequent requests", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "lsp-warmup-track-"));
+    const queryFilePath = path.join(tempDir, "main.cpp");
+    const warmupFilePath = path.join(tempDir, "index.ts");
+    fs.writeFileSync(queryFilePath, "int main(){return 0;}\n", "utf-8");
+    fs.writeFileSync(warmupFilePath, "export const x = 1;\n", "utf-8");
     const queryUri = pathToFileURL(queryFilePath).toString();
     const warmupUri = pathToFileURL(warmupFilePath).toString();
 
@@ -787,8 +787,8 @@ describe('NativeLspService', () => {
           method?: string;
           params?: { textDocument?: { uri?: string } };
         }) => {
-          if (message.method === 'textDocument/didOpen') {
-            didOpenUris.push(message.params?.textDocument?.uri ?? '');
+          if (message.method === "textDocument/didOpen") {
+            didOpenUris.push(message.params?.textDocument?.uri ?? "");
           }
         },
       ),
@@ -802,19 +802,19 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'typescript',
-        languages: ['typescript'],
-        command: 'typescript-language-server',
-        args: ['--stdio'],
-        transport: 'stdio',
+        name: "typescript",
+        languages: ["typescript"],
+        command: "typescript-language-server",
+        args: ["--stdio"],
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection,
     };
 
     // First call: warmup returns warmupUri (different from queryUri)
     const serverManager = {
-      getHandles: () => new Map([['typescript', handle]]),
+      getHandles: () => new Map([["typescript", handle]]),
       warmupTypescriptServer: vi.fn(async () => warmupUri),
     };
 
@@ -858,10 +858,10 @@ describe('NativeLspService', () => {
     }
   });
 
-  test('should retry document operations for slow servers after fresh didOpen', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lsp-retry-doc-'));
-    const filePath = path.join(tempDir, 'Main.java');
-    fs.writeFileSync(filePath, 'public class Main { }\n', 'utf-8');
+  test("should retry document operations for slow servers after fresh didOpen", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "lsp-retry-doc-"));
+    const filePath = path.join(tempDir, "Main.java");
+    fs.writeFileSync(filePath, "public class Main { }\n", "utf-8");
     const uri = pathToFileURL(filePath).toString();
 
     let requestCount = 0;
@@ -871,7 +871,7 @@ describe('NativeLspService', () => {
       onNotification: vi.fn(),
       onRequest: vi.fn(),
       request: vi.fn(async (method: string) => {
-        if (method === 'textDocument/documentSymbol') {
+        if (method === "textDocument/documentSymbol") {
           requestCount += 1;
           // First call returns empty (server still indexing), second returns data
           if (requestCount === 1) {
@@ -879,7 +879,7 @@ describe('NativeLspService', () => {
           }
           return [
             {
-              name: 'Main',
+              name: "Main",
               kind: 5,
               range: {
                 start: { line: 0, character: 0 },
@@ -901,18 +901,18 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'jdtls',
-        languages: ['java'],
-        command: 'jdtls',
+        name: "jdtls",
+        languages: ["java"],
+        command: "jdtls",
         args: [],
-        transport: 'stdio',
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection,
     };
 
     const serverManager = {
-      getHandles: () => new Map([['jdtls', handle]]),
+      getHandles: () => new Map([["jdtls", handle]]),
       warmupTypescriptServer: vi.fn(),
       isTypescriptServer: () => false,
     };
@@ -943,17 +943,17 @@ describe('NativeLspService', () => {
       // Should have retried: 2 requests total
       expect(requestCount).toBe(2);
       expect(results.length).toBe(1);
-      expect(results[0]?.name).toBe('Main');
+      expect(results[0]?.name).toBe("Main");
     } finally {
       vi.useRealTimers();
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
   });
 
-  test('should NOT retry document operations for TypeScript servers', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lsp-no-retry-ts-'));
-    const filePath = path.join(tempDir, 'index.ts');
-    fs.writeFileSync(filePath, 'export const x = 1;\n', 'utf-8');
+  test("should NOT retry document operations for TypeScript servers", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "lsp-no-retry-ts-"));
+    const filePath = path.join(tempDir, "index.ts");
+    fs.writeFileSync(filePath, "export const x = 1;\n", "utf-8");
     const uri = pathToFileURL(filePath).toString();
 
     let requestCount = 0;
@@ -963,7 +963,7 @@ describe('NativeLspService', () => {
       onNotification: vi.fn(),
       onRequest: vi.fn(),
       request: vi.fn(async (method: string) => {
-        if (method === 'textDocument/documentSymbol') {
+        if (method === "textDocument/documentSymbol") {
           requestCount += 1;
           return [];
         }
@@ -976,18 +976,18 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'typescript-language-server',
-        languages: ['typescript'],
-        command: 'typescript-language-server',
-        args: ['--stdio'],
-        transport: 'stdio',
+        name: "typescript-language-server",
+        languages: ["typescript"],
+        command: "typescript-language-server",
+        args: ["--stdio"],
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection,
     };
 
     const serverManager = {
-      getHandles: () => new Map([['typescript', handle]]),
+      getHandles: () => new Map([["typescript", handle]]),
       warmupTypescriptServer: vi.fn(),
       isTypescriptServer: () => true,
     };
@@ -1009,12 +1009,12 @@ describe('NativeLspService', () => {
     }
   });
 
-  test('should NOT retry when document was already open', async () => {
+  test("should NOT retry when document was already open", async () => {
     const tempDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), 'lsp-no-retry-open-'),
+      path.join(os.tmpdir(), "lsp-no-retry-open-"),
     );
-    const filePath = path.join(tempDir, 'Main.java');
-    fs.writeFileSync(filePath, 'public class Main { }\n', 'utf-8');
+    const filePath = path.join(tempDir, "Main.java");
+    fs.writeFileSync(filePath, "public class Main { }\n", "utf-8");
     const uri = pathToFileURL(filePath).toString();
 
     let requestCount = 0;
@@ -1025,8 +1025,8 @@ describe('NativeLspService', () => {
       onRequest: vi.fn(),
       request: vi.fn(async (method: string) => {
         if (
-          method === 'textDocument/hover' ||
-          method === 'textDocument/documentSymbol'
+          method === "textDocument/hover" ||
+          method === "textDocument/documentSymbol"
         ) {
           requestCount += 1;
           return null;
@@ -1040,18 +1040,18 @@ describe('NativeLspService', () => {
 
     const handle = {
       config: {
-        name: 'jdtls',
-        languages: ['java'],
-        command: 'jdtls',
+        name: "jdtls",
+        languages: ["java"],
+        command: "jdtls",
         args: [],
-        transport: 'stdio',
+        transport: "stdio",
       },
-      status: 'READY',
+      status: "READY",
       connection,
     };
 
     const serverManager = {
-      getHandles: () => new Map([['jdtls', handle]]),
+      getHandles: () => new Map([["jdtls", handle]]),
       warmupTypescriptServer: vi.fn(),
       isTypescriptServer: () => false,
     };

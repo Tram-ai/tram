@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Config } from '@tram-ai/tram-core';
+import type { Config } from "@tram-ai/tram-core";
 import {
   OutputFormat,
   JsonFormatter,
@@ -13,10 +13,10 @@ import {
   FatalCancellationError,
   ToolErrorType,
   createDebugLogger,
-} from '@tram-ai/tram-core';
-import { writeStderrLine } from './stdioHelpers.js';
+} from "@tram-ai/tram-core";
+import { writeStderrLine } from "./stdioHelpers.js";
 
-const debugLogger = createDebugLogger('CLI_ERRORS');
+const debugLogger = createDebugLogger("CLI_ERRORS");
 
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -26,15 +26,15 @@ export function getErrorMessage(error: unknown): string {
   // Handle objects with message property (error-like objects)
   if (
     error !== null &&
-    typeof error === 'object' &&
-    'message' in error &&
-    typeof (error as { message: unknown }).message === 'string'
+    typeof error === "object" &&
+    "message" in error &&
+    typeof (error as { message: unknown }).message === "string"
   ) {
     return (error as { message: string }).message;
   }
 
   // Handle plain objects by stringifying them
-  if (error !== null && typeof error === 'object') {
+  if (error !== null && typeof error === "object") {
     try {
       const stringified = JSON.stringify(error);
       // JSON.stringify can return undefined for objects with toJSON() returning undefined
@@ -61,7 +61,7 @@ function extractErrorCode(error: unknown): string | number {
   const errorWithCode = error as ErrorWithCode;
 
   // Prioritize exitCode for FatalError types, fall back to other codes
-  if (typeof errorWithCode.exitCode === 'number') {
+  if (typeof errorWithCode.exitCode === "number") {
     return errorWithCode.exitCode;
   }
   if (errorWithCode.code !== undefined) {
@@ -78,7 +78,7 @@ function extractErrorCode(error: unknown): string | number {
  * Converts an error code to a numeric exit code.
  */
 function getNumericExitCode(errorCode: string | number): number {
-  return typeof errorCode === 'number' ? errorCode : 1;
+  return typeof errorCode === "number" ? errorCode : 1;
 }
 
 /**
@@ -156,7 +156,7 @@ export function handleToolError(
  * Handles cancellation/abort signals consistently.
  */
 export function handleCancellationError(config: Config): never {
-  const cancellationError = new FatalCancellationError('Operation cancelled.');
+  const cancellationError = new FatalCancellationError("Operation cancelled.");
 
   if (config.getOutputFormat() === OutputFormat.JSON) {
     const formatter = new JsonFormatter();
@@ -178,7 +178,7 @@ export function handleCancellationError(config: Config): never {
  */
 export function handleMaxTurnsExceededError(config: Config): never {
   const maxTurnsError = new FatalTurnLimitedError(
-    'Reached max session turns for this session. Increase the number of turns by specifying maxSessionTurns in settings.json.',
+    "Reached max session turns for this session. Increase the number of turns by specifying maxSessionTurns in settings.json.",
   );
 
   if (config.getOutputFormat() === OutputFormat.JSON) {

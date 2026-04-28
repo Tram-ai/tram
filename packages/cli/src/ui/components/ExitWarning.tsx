@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { useUIState } from '../contexts/UIStateContext.js';
-import { theme } from '../semantic-colors.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { useUIState } from "../contexts/UIStateContext.js";
+import { theme } from "../semantic-colors.js";
 
 export const ExitWarning: React.FC = () => {
   const uiState = useUIState();

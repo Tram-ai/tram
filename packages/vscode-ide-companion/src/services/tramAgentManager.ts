@@ -3,42 +3,42 @@
  * Copyright 2025 Qwen Team
  * SPDX-License-Identifier: Apache-2.0
  */
-import { AcpConnection } from './acpConnection.js';
+import { AcpConnection } from "./acpConnection.js";
 import type {
   ModelInfo,
   AvailableCommand,
   ContentBlock,
   RequestPermissionRequest,
   SessionNotification,
-} from '@agentclientprotocol/sdk';
+} from "@agentclientprotocol/sdk";
 import type {
   AuthenticateUpdateNotification,
   AskUserQuestionRequest,
-} from '../types/acpTypes.js';
-import type { ApprovalModeValue } from '../types/approvalModeValueTypes.js';
-import { TramSessionReader, type TramSession } from './tramSessionReader.js';
-import { TramSessionManager } from './tramSessionManager.js';
+} from "../types/acpTypes.js";
+import type { ApprovalModeValue } from "../types/approvalModeValueTypes.js";
+import { TramSessionReader, type TramSession } from "./tramSessionReader.js";
+import { TramSessionManager } from "./tramSessionManager.js";
 import type {
   ChatMessage,
   PlanEntry,
   ToolCallUpdateData,
   TramAgentCallbacks,
   UsageStatsPayload,
-} from '../types/chatTypes.js';
+} from "../types/chatTypes.js";
 import {
   TramConnectionHandler,
   type TramConnectionResult,
-} from '../services/tramConnectionHandler.js';
-import { TramSessionUpdateHandler } from './tramSessionUpdateHandler.js';
-import { authMethod } from '../types/acpTypes.js';
+} from "../services/tramConnectionHandler.js";
+import { TramSessionUpdateHandler } from "./tramSessionUpdateHandler.js";
+import { authMethod } from "../types/acpTypes.js";
 import {
   extractModelInfoFromNewSessionResult,
   extractSessionModeState,
   extractSessionModelState,
-} from '../utils/acpModelInfo.js';
-import { isAuthenticationRequiredError } from '../utils/authErrors.js';
-import { getErrorMessage } from '../utils/errorMessage.js';
-import { handleAuthenticateUpdate } from '../utils/authNotificationHandler.js';
+} from "../utils/acpModelInfo.js";
+import { isAuthenticationRequiredError } from "../utils/authErrors.js";
+import { getErrorMessage } from "../utils/errorMessage.js";
+import { handleAuthenticateUpdate } from "../utils/authNotificationHandler.js";
 
 export type { ChatMessage, PlanEntry, ToolCallUpdateData };
 
@@ -51,7 +51,7 @@ export type { ChatMessage, PlanEntry, ToolCallUpdateData };
 export function extractSessionListItems(
   response: unknown,
 ): Array<Record<string, unknown>> {
-  if (!response || typeof response !== 'object') {
+  if (!response || typeof response !== "object") {
     return [];
   }
 
@@ -104,7 +104,7 @@ export class TramAgentManager {
   private callbacks: TramAgentCallbacks = {};
   // Baseline state from session/new (default/settings-backed), used to clear stale
   // UI mode/model when session/load response omits optional fields.
-  private baselineModeId: ApprovalModeValue = 'default';
+  private baselineModeId: ApprovalModeValue = "default";
   private baselineAvailableModes:
     | Array<{
         id: ApprovalModeValue;
@@ -134,9 +134,9 @@ export class TramAgentManager {
         const targetId = this.rehydratingSessionId;
         if (
           targetId &&
-          typeof data === 'object' &&
+          typeof data === "object" &&
           data &&
-          'update' in data &&
+          "update" in data &&
           (data as { sessionId?: string }).sessionId === targetId
         ) {
           const update = (
@@ -148,34 +148,34 @@ export class TramAgentManager {
               };
             }
           ).update;
-          const text = update?.content?.text || '';
+          const text = update?.content?.text || "";
           const metaObj = update?._meta ?? {};
           const timestamp =
-            typeof metaObj['timestamp'] === 'number'
-              ? (metaObj['timestamp'] as number)
+            typeof metaObj["timestamp"] === "number"
+              ? (metaObj["timestamp"] as number)
               : Date.now();
 
-          if (update?.sessionUpdate === 'user_message_chunk' && text) {
+          if (update?.sessionUpdate === "user_message_chunk" && text) {
             this.callbacks.onMessage?.({
-              role: 'user',
+              role: "user",
               content: text,
               timestamp,
             });
             return;
           }
 
-          if (update?.sessionUpdate === 'agent_message_chunk' && text) {
+          if (update?.sessionUpdate === "agent_message_chunk" && text) {
             this.callbacks.onMessage?.({
-              role: 'assistant',
+              role: "assistant",
               content: text,
               timestamp,
             });
             return;
           }
 
-          if (update?.sessionUpdate === 'agent_thought_chunk' && text) {
+          if (update?.sessionUpdate === "agent_thought_chunk" && text) {
             this.callbacks.onMessage?.({
-              role: 'thinking',
+              role: "thinking",
               content: text,
               timestamp,
             });
@@ -185,23 +185,23 @@ export class TramAgentManager {
           // Usage-only agent_message_chunk (empty text): forward usage but
           // skip the empty stream chunk that would be discarded anyway.
           if (
-            update?.sessionUpdate === 'agent_message_chunk' &&
+            update?.sessionUpdate === "agent_message_chunk" &&
             !text &&
-            metaObj['usage']
+            metaObj["usage"]
           ) {
             if (this.callbacks.onUsageUpdate) {
-              const raw = metaObj['usage'] as Record<string, unknown>;
+              const raw = metaObj["usage"] as Record<string, unknown>;
               this.callbacks.onUsageUpdate({
                 usage: {
-                  inputTokens: raw['inputTokens'] as number | undefined,
-                  outputTokens: raw['outputTokens'] as number | undefined,
-                  totalTokens: raw['totalTokens'] as number | undefined,
-                  thoughtTokens: raw['thoughtTokens'] as number | undefined,
-                  cachedReadTokens: raw['cachedReadTokens'] as
+                  inputTokens: raw["inputTokens"] as number | undefined,
+                  outputTokens: raw["outputTokens"] as number | undefined,
+                  totalTokens: raw["totalTokens"] as number | undefined,
+                  thoughtTokens: raw["thoughtTokens"] as number | undefined,
+                  cachedReadTokens: raw["cachedReadTokens"] as
                     | number
                     | undefined,
                 },
-                durationMs: metaObj['durationMs'] as number | undefined,
+                durationMs: metaObj["durationMs"] as number | undefined,
               });
             }
             return;
@@ -212,7 +212,7 @@ export class TramAgentManager {
           // the webview can process independently of streaming state.
         }
       } catch (err) {
-        console.warn('[TramAgentManager] Rehydration routing failed:', err);
+        console.warn("[TramAgentManager] Rehydration routing failed:", err);
       }
 
       // Default handling path
@@ -228,10 +228,10 @@ export class TramAgentManager {
           optionId:
             this.resolvePermissionOptionId(data, optionId) ||
             this.resolvePermissionOptionId(data) ||
-            '',
+            "",
         };
       }
-      return { optionId: this.resolvePermissionOptionId(data) || '' };
+      return { optionId: this.resolvePermissionOptionId(data) || "" };
     };
 
     this.connection.onAskUserQuestion = async (
@@ -241,7 +241,7 @@ export class TramAgentManager {
         const result = await this.callbacks.onAskUserQuestion(data);
         return result;
       }
-      return { optionId: 'cancel' };
+      return { optionId: "cancel" };
     };
 
     this.connection.onEndTurn = (reason?: string) => {
@@ -250,10 +250,10 @@ export class TramAgentManager {
           this.callbacks.onEndTurn(reason);
         } else if (this.callbacks.onStreamChunk) {
           // Fallback: send a zero-length chunk then rely on streamEnd elsewhere
-          this.callbacks.onStreamChunk('');
+          this.callbacks.onStreamChunk("");
         }
       } catch (err) {
-        console.warn('[TramAgentManager] onEndTurn callback error:', err);
+        console.warn("[TramAgentManager] onEndTurn callback error:", err);
       }
     };
 
@@ -265,7 +265,7 @@ export class TramAgentManager {
         handleAuthenticateUpdate(data);
       } catch (err) {
         console.warn(
-          '[TramAgentManager] onAuthenticateUpdate callback error:',
+          "[TramAgentManager] onAuthenticateUpdate callback error:",
           err,
         );
       }
@@ -275,11 +275,11 @@ export class TramAgentManager {
     this.connection.onInitialized = (init: unknown) => {
       try {
         const obj = (init || {}) as Record<string, unknown>;
-        const modes = obj['modes'] as
+        const modes = obj["modes"] as
           | {
-              currentModeId?: 'plan' | 'default' | 'auto-edit' | 'yolo';
+              currentModeId?: "plan" | "default" | "auto-edit" | "yolo";
               availableModes?: Array<{
-                id: 'plan' | 'default' | 'auto-edit' | 'yolo';
+                id: "plan" | "default" | "auto-edit" | "yolo";
                 name: string;
                 description: string;
               }>;
@@ -292,7 +292,7 @@ export class TramAgentManager {
           });
         }
       } catch (err) {
-        console.warn('[TramAgentManager] onInitialized parse error:', err);
+        console.warn("[TramAgentManager] onInitialized parse error:", err);
       }
     };
 
@@ -301,7 +301,7 @@ export class TramAgentManager {
       signal: string | null,
     ) => {
       console.log(
-        `[QwenAgentManager] Process disconnected (code: ${code}, signal: ${signal})`,
+        `[TramAgentManager] Process disconnected (code: ${code}, signal: ${signal})`,
       );
       this.callbacks.onDisconnected?.(code, signal);
     };
@@ -333,7 +333,7 @@ export class TramAgentManager {
     if (res.availableModels && res.availableModels.length > 0) {
       this.baselineAvailableModels = res.availableModels;
       console.log(
-        '[TramAgentManager] Emitting availableModels from connect():',
+        "[TramAgentManager] Emitting availableModels from connect():",
         res.availableModels.map((m) => m.modelId),
       );
       if (this.callbacks.onAvailableModels) {
@@ -365,8 +365,8 @@ export class TramAgentManager {
   async reconnect(
     cliEntryPath: string,
     options?: AgentConnectOptions,
-  ): Promise<QwenConnectionResult> {
-    console.log('[QwenAgentManager] Attempting reconnection...');
+  ): Promise<TramConnectionResult> {
+    console.log("[TramAgentManager] Attempting reconnection...");
     try {
       this.connection.disconnect();
     } catch (_e) {
@@ -398,7 +398,7 @@ export class TramAgentManager {
       this.callbacks.onModeChanged?.(confirmed);
       return confirmed;
     } catch (err) {
-      console.error('[TramAgentManager] Failed to set mode:', err);
+      console.error("[TramAgentManager] Failed to set mode:", err);
       throw err;
     }
   }
@@ -420,7 +420,7 @@ export class TramAgentManager {
       this.callbacks.onModelChanged?.(modelInfo);
       return modelInfo;
     } catch (err) {
-      console.error('[TramAgentManager] Failed to set model:', err);
+      console.error("[TramAgentManager] Failed to set model:", err);
       throw err;
     }
   }
@@ -460,7 +460,7 @@ export class TramAgentManager {
 
       return sessionExists;
     } catch (error) {
-      console.warn('[TramAgentManager] Session validation failed:', error);
+      console.warn("[TramAgentManager] Session validation failed:", error);
       // If we can't validate, assume session is invalid
       return false;
     }
@@ -474,21 +474,21 @@ export class TramAgentManager {
    */
   async getSessionList(): Promise<Array<Record<string, unknown>>> {
     console.log(
-      '[TramAgentManager] Getting session list with version-aware strategy',
+      "[TramAgentManager] Getting session list with version-aware strategy",
     );
 
     try {
       console.log(
-        '[TramAgentManager] Attempting to get session list via ACP method',
+        "[TramAgentManager] Attempting to get session list via ACP method",
       );
       const response = await this.connection.listSessions();
-      console.log('[TramAgentManager] ACP session list response:', response);
+      console.log("[TramAgentManager] ACP session list response:", response);
 
       const res: unknown = response;
       const items = extractSessionListItems(res);
 
       console.log(
-        '[TramAgentManager] Sessions retrieved via ACP:',
+        "[TramAgentManager] Sessions retrieved via ACP:",
         res,
         items.length,
       );
@@ -496,8 +496,8 @@ export class TramAgentManager {
         const sessions = items.map((item) => ({
           id: item.sessionId || item.id,
           sessionId: item.sessionId || item.id,
-          title: item.title || item.name || item.prompt || 'Untitled Session',
-          name: item.title || item.name || item.prompt || 'Untitled Session',
+          title: item.title || item.name || item.prompt || "Untitled Session",
+          name: item.title || item.name || item.prompt || "Untitled Session",
           startTime: item.startTime,
           lastUpdated: item.updatedAt || item.mtime || item.lastUpdated,
           messageCount: item.messageCount || 0,
@@ -507,24 +507,24 @@ export class TramAgentManager {
         }));
 
         console.log(
-          '[TramAgentManager] Sessions retrieved via ACP:',
+          "[TramAgentManager] Sessions retrieved via ACP:",
           sessions.length,
         );
         return sessions;
       }
     } catch (error) {
       console.warn(
-        '[TramAgentManager] ACP session list failed, falling back to file system method:',
+        "[TramAgentManager] ACP session list failed, falling back to file system method:",
         error,
       );
     }
 
     // Always fall back to file system method
     try {
-      console.log('[TramAgentManager] Getting session list from file system');
+      console.log("[TramAgentManager] Getting session list from file system");
       const sessions = await this.sessionReader.getAllSessions(undefined, true);
       console.log(
-        '[TramAgentManager] Session list from file system (all projects):',
+        "[TramAgentManager] Session list from file system (all projects):",
         sessions.length,
       );
 
@@ -544,13 +544,13 @@ export class TramAgentManager {
       );
 
       console.log(
-        '[TramAgentManager] Sessions retrieved from file system:',
+        "[TramAgentManager] Sessions retrieved from file system:",
         result.length,
       );
       return result;
     } catch (error) {
       console.error(
-        '[TramAgentManager] Failed to get session list from file system:',
+        "[TramAgentManager] Failed to get session list from file system:",
         error,
       );
       return [];
@@ -584,8 +584,8 @@ export class TramAgentManager {
       const mapped = items.map((item) => ({
         id: item.sessionId || item.id,
         sessionId: item.sessionId || item.id,
-        title: item.title || item.name || item.prompt || 'Untitled Session',
-        name: item.title || item.name || item.prompt || 'Untitled Session',
+        title: item.title || item.name || item.prompt || "Untitled Session",
+        name: item.title || item.name || item.prompt || "Untitled Session",
         startTime: item.startTime,
         lastUpdated: item.updatedAt || item.mtime || item.lastUpdated,
         messageCount: item.messageCount || 0,
@@ -596,11 +596,11 @@ export class TramAgentManager {
 
       // SDK returns nextCursor as string; convert to numeric cursor for paging
       let nextCursorNum: number | undefined;
-      if (typeof res === 'object' && res !== null && 'nextCursor' in res) {
+      if (typeof res === "object" && res !== null && "nextCursor" in res) {
         const raw = (res as { nextCursor?: unknown }).nextCursor;
-        if (typeof raw === 'number') {
+        if (typeof raw === "number") {
           nextCursorNum = raw;
-        } else if (typeof raw === 'string') {
+        } else if (typeof raw === "string") {
           const parsed = Number(raw);
           if (!Number.isNaN(parsed)) {
             nextCursorNum = parsed;
@@ -611,7 +611,7 @@ export class TramAgentManager {
 
       return { sessions: mapped, nextCursor: nextCursorNum, hasMore };
     } catch (error) {
-      console.warn('[TramAgentManager] Paged ACP session list failed:', error);
+      console.warn("[TramAgentManager] Paged ACP session list failed:", error);
       // fall through to file system
     }
 
@@ -648,7 +648,7 @@ export class TramAgentManager {
       const hasMore = filtered.length > size;
       return { sessions, nextCursor: nextCursorVal, hasMore };
     } catch (error) {
-      console.error('[TramAgentManager] File system paged list failed:', error);
+      console.error("[TramAgentManager] File system paged list failed:", error);
       return { sessions: [], hasMore: false };
     }
   }
@@ -667,14 +667,14 @@ export class TramAgentManager {
           (s) => s.sessionId === sessionId || s.id === sessionId,
         );
         console.log(
-          '[TramAgentManager] Session list item for filePath lookup:',
+          "[TramAgentManager] Session list item for filePath lookup:",
           item,
         );
         if (
-          typeof item === 'object' &&
+          typeof item === "object" &&
           item !== null &&
-          'filePath' in item &&
-          typeof item.filePath === 'string'
+          "filePath" in item &&
+          typeof item.filePath === "string"
         ) {
           const messages = await this.readJsonlMessages(item.filePath);
           // Even if messages array is empty, we should return it rather than falling back
@@ -682,7 +682,7 @@ export class TramAgentManager {
           return messages;
         }
       } catch (e) {
-        console.warn('[TramAgentManager] JSONL read path lookup failed:', e);
+        console.warn("[TramAgentManager] JSONL read path lookup failed:", e);
       }
 
       // Fallback: legacy JSON session files
@@ -695,14 +695,14 @@ export class TramAgentManager {
       }
       return session.messages.map(
         (msg: { type: string; content: string; timestamp: string }) => ({
-          role: msg.type === 'user' ? 'user' : 'assistant',
+          role: msg.type === "user" ? "user" : "assistant",
           content: msg.content,
           timestamp: new Date(msg.timestamp).getTime(),
         }),
       );
     } catch (error) {
       console.error(
-        '[TramAgentManager] Failed to get session messages:',
+        "[TramAgentManager] Failed to get session messages:",
         error,
       );
       return [];
@@ -711,13 +711,13 @@ export class TramAgentManager {
 
   // Read CLI JSONL session file and convert to ChatMessage[] for UI
   private async readJsonlMessages(filePath: string): Promise<ChatMessage[]> {
-    const fs = await import('fs');
-    const readline = await import('readline');
+    const fs = await import("fs");
+    const readline = await import("readline");
     try {
       if (!fs.existsSync(filePath)) {
         return [];
       }
-      const fileStream = fs.createReadStream(filePath, { encoding: 'utf-8' });
+      const fileStream = fs.createReadStream(filePath, { encoding: "utf-8" });
       const rl = readline.createInterface({
         input: fileStream,
         crlfDelay: Infinity,
@@ -737,7 +737,7 @@ export class TramAgentManager {
       }
       // Simple linear reconstruction: filter user/assistant and sort by timestamp
       console.log(
-        '[TramAgentManager] JSONL records read:',
+        "[TramAgentManager] JSONL records read:",
         records.length,
         filePath,
       );
@@ -755,10 +755,10 @@ export class TramAgentManager {
       };
 
       const isJsonlRecord = (x: unknown): x is JsonlRecord =>
-        typeof x === 'object' &&
+        typeof x === "object" &&
         x !== null &&
-        typeof (x as Record<string, unknown>).type === 'string' &&
-        typeof (x as Record<string, unknown>).timestamp === 'string';
+        typeof (x as Record<string, unknown>).type === "string" &&
+        typeof (x as Record<string, unknown>).timestamp === "string";
 
       const allRecords = records
         .filter(isJsonlRecord)
@@ -770,21 +770,21 @@ export class TramAgentManager {
       const msgs: ChatMessage[] = [];
       for (const r of allRecords) {
         // Handle user and assistant messages
-        if ((r.type === 'user' || r.type === 'assistant') && r.message) {
+        if ((r.type === "user" || r.type === "assistant") && r.message) {
           msgs.push({
             role:
-              r.type === 'user' ? ('user' as const) : ('assistant' as const),
+              r.type === "user" ? ("user" as const) : ("assistant" as const),
             content: this.contentToText(r.message),
             timestamp: new Date(r.timestamp).getTime(),
           });
         }
         // Handle tool call records that might have content we want to show
-        else if (r.type === 'tool_call' || r.type === 'tool_call_update') {
+        else if (r.type === "tool_call" || r.type === "tool_call_update") {
           // Convert tool calls to messages if they have relevant content
           const toolContent = this.extractToolCallContent(r as unknown);
           if (toolContent) {
             msgs.push({
-              role: 'assistant',
+              role: "assistant",
               content: toolContent,
               timestamp: new Date(r.timestamp).getTime(),
             });
@@ -792,30 +792,30 @@ export class TramAgentManager {
         }
         // Handle tool result records
         else if (
-          r.type === 'tool_result' &&
+          r.type === "tool_result" &&
           r.toolCallResult &&
-          typeof r.toolCallResult === 'object'
+          typeof r.toolCallResult === "object"
         ) {
           const toolResult = r.toolCallResult as {
             callId?: string;
             status?: string;
           };
-          const callId = toolResult.callId ?? 'unknown';
-          const status = toolResult.status ?? 'unknown';
+          const callId = toolResult.callId ?? "unknown";
+          const status = toolResult.status ?? "unknown";
           const resultText = `Tool Result (${callId}): ${status}`;
           msgs.push({
-            role: 'assistant',
+            role: "assistant",
             content: resultText,
             timestamp: new Date(r.timestamp).getTime(),
           });
         }
         // Handle system telemetry records
         else if (
-          r.type === 'system' &&
-          r.subtype === 'ui_telemetry' &&
+          r.type === "system" &&
+          r.subtype === "ui_telemetry" &&
           r.systemPayload &&
-          typeof r.systemPayload === 'object' &&
-          'uiEvent' in r.systemPayload &&
+          typeof r.systemPayload === "object" &&
+          "uiEvent" in r.systemPayload &&
           (r.systemPayload as { uiEvent?: Record<string, unknown> }).uiEvent
         ) {
           const uiEvent = (
@@ -823,44 +823,44 @@ export class TramAgentManager {
               uiEvent?: Record<string, unknown>;
             }
           ).uiEvent as Record<string, unknown>;
-          let telemetryText = '';
+          let telemetryText = "";
 
           if (
-            typeof uiEvent['event.name'] === 'string' &&
-            (uiEvent['event.name'] as string).includes('tool_call')
+            typeof uiEvent["event.name"] === "string" &&
+            (uiEvent["event.name"] as string).includes("tool_call")
           ) {
             const functionName =
-              (uiEvent['function_name'] as string | undefined) ||
-              'Unknown tool';
+              (uiEvent["function_name"] as string | undefined) ||
+              "Unknown tool";
             const status =
-              (uiEvent['status'] as string | undefined) || 'unknown';
+              (uiEvent["status"] as string | undefined) || "unknown";
             const duration =
-              typeof uiEvent['duration_ms'] === 'number'
-                ? ` (${uiEvent['duration_ms']}ms)`
-                : '';
+              typeof uiEvent["duration_ms"] === "number"
+                ? ` (${uiEvent["duration_ms"]}ms)`
+                : "";
             telemetryText = `Tool Call: ${functionName} - ${status}${duration}`;
           } else if (
-            typeof uiEvent['event.name'] === 'string' &&
-            (uiEvent['event.name'] as string).includes('api_response')
+            typeof uiEvent["event.name"] === "string" &&
+            (uiEvent["event.name"] as string).includes("api_response")
           ) {
             const statusCode =
-              (uiEvent['status_code'] as string | number | undefined) ||
-              'unknown';
+              (uiEvent["status_code"] as string | number | undefined) ||
+              "unknown";
             const duration =
-              typeof uiEvent['duration_ms'] === 'number'
-                ? ` (${uiEvent['duration_ms']}ms)`
-                : '';
+              typeof uiEvent["duration_ms"] === "number"
+                ? ` (${uiEvent["duration_ms"]}ms)`
+                : "";
             telemetryText = `API Response: Status ${statusCode}${duration}`;
           } else {
             // Generic system telemetry
             const eventName =
-              (uiEvent['event.name'] as string | undefined) || 'Unknown event';
+              (uiEvent["event.name"] as string | undefined) || "Unknown event";
             telemetryText = `System Event: ${eventName}`;
           }
 
           if (telemetryText) {
             msgs.push({
-              role: 'assistant',
+              role: "assistant",
               content: telemetryText,
               timestamp: new Date(r.timestamp).getTime(),
             });
@@ -868,10 +868,10 @@ export class TramAgentManager {
         }
         // Handle plan entries
         else if (
-          r.type === 'plan' &&
+          r.type === "plan" &&
           r.plan &&
-          typeof r.plan === 'object' &&
-          'entries' in r.plan
+          typeof r.plan === "object" &&
+          "entries" in r.plan
         ) {
           const planEntries =
             ((r.plan as { entries?: Array<Record<string, unknown>> })
@@ -881,12 +881,12 @@ export class TramAgentManager {
               .map(
                 (entry: Record<string, unknown>, index: number) =>
                   `${index + 1}. ${
-                    entry.description || entry.title || 'Unnamed step'
+                    entry.description || entry.title || "Unnamed step"
                   }`,
               )
-              .join('\n');
+              .join("\n");
             msgs.push({
-              role: 'assistant',
+              role: "assistant",
               content: `Plan:\n${planText}`,
               timestamp: new Date(r.timestamp).getTime(),
             });
@@ -896,12 +896,12 @@ export class TramAgentManager {
       }
 
       console.log(
-        '[TramAgentManager] JSONL messages reconstructed:',
+        "[TramAgentManager] JSONL messages reconstructed:",
         msgs.length,
       );
       return msgs;
     } catch (err) {
-      console.warn('[TramAgentManager] Failed to read JSONL messages:', err);
+      console.warn("[TramAgentManager] Failed to read JSONL messages:", err);
       return [];
     }
   }
@@ -910,7 +910,7 @@ export class TramAgentManager {
   private extractToolCallContent(record: unknown): string | null {
     try {
       // Type guard for record
-      if (typeof record !== 'object' || record === null) {
+      if (typeof record !== "object" || record === null) {
         return null;
       }
 
@@ -918,49 +918,49 @@ export class TramAgentManager {
       const typedRecord = record as Record<string, unknown>;
 
       // If the tool call has a result or output, include it
-      if ('toolCallResult' in typedRecord && typedRecord.toolCallResult) {
+      if ("toolCallResult" in typedRecord && typedRecord.toolCallResult) {
         return `Tool result: ${this.formatValue(typedRecord.toolCallResult)}`;
       }
 
       // If the tool call has content, include it
-      if ('content' in typedRecord && typedRecord.content) {
+      if ("content" in typedRecord && typedRecord.content) {
         return this.formatValue(typedRecord.content);
       }
 
       // If the tool call has a title or name, include it
       if (
-        ('title' in typedRecord && typedRecord.title) ||
-        ('name' in typedRecord && typedRecord.name)
+        ("title" in typedRecord && typedRecord.title) ||
+        ("name" in typedRecord && typedRecord.name)
       ) {
         return `Tool: ${typedRecord.title || typedRecord.name}`;
       }
 
       // Handle tool_call records with more details
       if (
-        typedRecord.type === 'tool_call' &&
-        'toolCall' in typedRecord &&
+        typedRecord.type === "tool_call" &&
+        "toolCall" in typedRecord &&
         typedRecord.toolCall
       ) {
         const toolCall = typedRecord.toolCall as Record<string, unknown>;
         if (
-          ('title' in toolCall && toolCall.title) ||
-          ('name' in toolCall && toolCall.name)
+          ("title" in toolCall && toolCall.title) ||
+          ("name" in toolCall && toolCall.name)
         ) {
           return `Tool call: ${toolCall.title || toolCall.name}`;
         }
-        if ('rawInput' in toolCall && toolCall.rawInput) {
+        if ("rawInput" in toolCall && toolCall.rawInput) {
           return `Tool input: ${this.formatValue(toolCall.rawInput)}`;
         }
       }
 
       // Handle tool_call_update records with status
-      if (typedRecord.type === 'tool_call_update') {
+      if (typedRecord.type === "tool_call_update") {
         const status =
-          ('status' in typedRecord && typedRecord.status) || 'unknown';
+          ("status" in typedRecord && typedRecord.status) || "unknown";
         const title =
-          ('title' in typedRecord && typedRecord.title) ||
-          ('name' in typedRecord && typedRecord.name) ||
-          'Unknown tool';
+          ("title" in typedRecord && typedRecord.title) ||
+          ("name" in typedRecord && typedRecord.name) ||
+          "Unknown tool";
         return `Tool ${status}: ${title}`;
       }
 
@@ -973,12 +973,12 @@ export class TramAgentManager {
   // Format any value to a string for display
   private formatValue(value: unknown): string {
     if (value === null || value === undefined) {
-      return '';
+      return "";
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       return value;
     }
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       try {
         return JSON.stringify(value, null, 2);
       } catch (_e) {
@@ -992,8 +992,8 @@ export class TramAgentManager {
   private contentToText(message: unknown): string {
     try {
       // Type guard for message
-      if (typeof message !== 'object' || message === null) {
-        return '';
+      if (typeof message !== "object" || message === null) {
+        return "";
       }
 
       // Cast to a more specific type for easier handling
@@ -1003,20 +1003,20 @@ export class TramAgentManager {
       const texts: string[] = [];
       for (const p of parts) {
         // Type guard for part
-        if (typeof p !== 'object' || p === null) {
+        if (typeof p !== "object" || p === null) {
           continue;
         }
 
         const typedPart = p as Record<string, unknown>;
-        if (typeof typedPart.text === 'string') {
+        if (typeof typedPart.text === "string") {
           texts.push(typedPart.text);
-        } else if (typeof typedPart.data === 'string') {
+        } else if (typeof typedPart.data === "string") {
           texts.push(typedPart.data);
         }
       }
-      return texts.join('\n');
+      return texts.join("\n");
     } catch {
-      return '';
+      return "";
     }
   }
 
@@ -1035,11 +1035,11 @@ export class TramAgentManager {
       // Route upcoming session/update messages as discrete messages for replay
       this.rehydratingSessionId = sessionId;
       console.log(
-        '[TramAgentManager] Rehydration start for session:',
+        "[TramAgentManager] Rehydration start for session:",
         sessionId,
       );
       console.log(
-        '[TramAgentManager] Attempting session/load via ACP for session:',
+        "[TramAgentManager] Attempting session/load via ACP for session:",
         sessionId,
       );
       const response = await this.connection.loadSession(
@@ -1047,7 +1047,7 @@ export class TramAgentManager {
         cwdOverride,
       );
       console.log(
-        '[TramAgentManager] Session load succeeded. Response:',
+        "[TramAgentManager] Session load succeeded. Response:",
         JSON.stringify(response).substring(0, 200),
       );
       this.applySessionStateFromResult(response);
@@ -1057,38 +1057,38 @@ export class TramAgentManager {
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error(
-        '[TramAgentManager] Session load via ACP failed for session:',
+        "[TramAgentManager] Session load via ACP failed for session:",
         sessionId,
       );
-      console.error('[TramAgentManager] Error type:', error?.constructor?.name);
-      console.error('[TramAgentManager] Error message:', errorMessage);
+      console.error("[TramAgentManager] Error type:", error?.constructor?.name);
+      console.error("[TramAgentManager] Error message:", errorMessage);
 
       // Check if error is from ACP response
-      if (error && typeof error === 'object') {
+      if (error && typeof error === "object") {
         // Safely check if 'error' property exists
-        if ('error' in error) {
+        if ("error" in error) {
           const acpError = error as {
             error?: { code?: number; message?: string };
           };
           if (acpError.error) {
             console.error(
-              '[TramAgentManager] ACP error code:',
+              "[TramAgentManager] ACP error code:",
               acpError.error.code,
             );
             console.error(
-              '[TramAgentManager] ACP error message:',
+              "[TramAgentManager] ACP error message:",
               acpError.error.message,
             );
           }
         } else {
-          console.error('[TramAgentManager] Non-ACPIf error details:', error);
+          console.error("[TramAgentManager] Non-ACPIf error details:", error);
         }
       }
 
       throw error;
     } finally {
       // End rehydration routing regardless of outcome
-      console.log('[TramAgentManager] Rehydration end for session:', sessionId);
+      console.log("[TramAgentManager] Rehydration end for session:", sessionId);
       this.rehydratingSessionId = null;
     }
   }
@@ -1102,22 +1102,22 @@ export class TramAgentManager {
    */
   async loadSession(sessionId: string): Promise<ChatMessage[] | null> {
     console.log(
-      '[TramAgentManager] Loading session with version-aware strategy:',
+      "[TramAgentManager] Loading session with version-aware strategy:",
       sessionId,
     );
 
     try {
       console.log(
-        '[TramAgentManager] Attempting to load session via ACP method',
+        "[TramAgentManager] Attempting to load session via ACP method",
       );
       await this.loadSessionViaAcp(sessionId);
-      console.log('[TramAgentManager] Session loaded successfully via ACP');
+      console.log("[TramAgentManager] Session loaded successfully via ACP");
 
       // After loading via ACP, we still need to get messages from file system
       // In future, we might get them directly from the ACP response
     } catch (error) {
       console.warn(
-        '[TramAgentManager] ACP session load failed, falling back to file system method:',
+        "[TramAgentManager] ACP session load failed, falling back to file system method:",
         error,
       );
     }
@@ -1125,16 +1125,16 @@ export class TramAgentManager {
     // Always fall back to file system method
     try {
       console.log(
-        '[TramAgentManager] Loading session messages from file system',
+        "[TramAgentManager] Loading session messages from file system",
       );
       const messages = await this.loadSessionMessagesFromFile(sessionId);
       console.log(
-        '[TramAgentManager] Session messages loaded successfully from file system',
+        "[TramAgentManager] Session messages loaded successfully from file system",
       );
       return messages;
     } catch (error) {
       console.error(
-        '[TramAgentManager] Failed to load session messages from file system:',
+        "[TramAgentManager] Failed to load session messages from file system:",
         error,
       );
       return null;
@@ -1152,7 +1152,7 @@ export class TramAgentManager {
   ): Promise<ChatMessage[] | null> {
     try {
       console.log(
-        '[TramAgentManager] Loading session from file system:',
+        "[TramAgentManager] Loading session from file system:",
         sessionId,
       );
 
@@ -1164,7 +1164,7 @@ export class TramAgentManager {
 
       if (!session) {
         console.log(
-          '[TramAgentManager] Session not found in file system:',
+          "[TramAgentManager] Session not found in file system:",
           sessionId,
         );
         return null;
@@ -1172,7 +1172,7 @@ export class TramAgentManager {
 
       // Convert message format
       const messages: ChatMessage[] = session.messages.map((msg) => ({
-        role: msg.type === 'user' ? 'user' : 'assistant',
+        role: msg.type === "user" ? "user" : "assistant",
         content: msg.content,
         timestamp: new Date(msg.timestamp).getTime(),
       }));
@@ -1180,7 +1180,7 @@ export class TramAgentManager {
       return messages;
     } catch (error) {
       console.error(
-        '[TramAgentManager] Session load from file system failed:',
+        "[TramAgentManager] Session load from file system failed:",
         error,
       );
       throw error;
@@ -1205,7 +1205,7 @@ export class TramAgentManager {
     // Explicit "new session" actions must bypass this and call session/new.
     if (!forceNew && this.connection.currentSessionId) {
       console.log(
-        '[TramAgentManager] createNewSession: reusing existing session',
+        "[TramAgentManager] createNewSession: reusing existing session",
         this.connection.currentSessionId,
       );
       return this.connection.currentSessionId;
@@ -1213,7 +1213,7 @@ export class TramAgentManager {
     // Deduplicate concurrent session/new attempts
     if (this.sessionCreateInFlight) {
       console.log(
-        '[TramAgentManager] createNewSession: session creation already in flight',
+        "[TramAgentManager] createNewSession: session creation already in flight",
       );
       if (!forceNew) {
         return this.sessionCreateInFlight;
@@ -1221,7 +1221,7 @@ export class TramAgentManager {
       await this.sessionCreateInFlight;
     }
 
-    console.log('[TramAgentManager] Creating new session...');
+    console.log("[TramAgentManager] Creating new session...");
 
     this.sessionCreateInFlight = (async () => {
       try {
@@ -1230,7 +1230,7 @@ export class TramAgentManager {
         try {
           newSessionResult = await this.connection.newSession(workingDir);
           console.log(
-            '[TramAgentManager] newSession returned:',
+            "[TramAgentManager] newSession returned:",
             JSON.stringify(newSessionResult, null, 2),
           );
         } catch (err) {
@@ -1239,25 +1239,25 @@ export class TramAgentManager {
           if (requiresAuth) {
             if (!autoAuthenticate) {
               console.warn(
-                '[TramAgentManager] session/new requires authentication but auto-auth is disabled. Deferring until user logs in.',
+                "[TramAgentManager] session/new requires authentication but auto-auth is disabled. Deferring until user logs in.",
               );
               throw err;
             }
             console.warn(
-              '[TramAgentManager] session/new requires authentication. Retrying with authenticate...',
+              "[TramAgentManager] session/new requires authentication. Retrying with authenticate...",
             );
             try {
               // Let CLI handle authentication - it's the single source of truth
               await this.connection.authenticate(authMethod);
               console.log(
-                '[TramAgentManager] createNewSession Authentication successful. Retrying session/new...',
+                "[TramAgentManager] createNewSession Authentication successful. Retrying session/new...",
               );
               // Add a slight delay to ensure auth state is settled
               await new Promise((resolve) => setTimeout(resolve, 300));
               newSessionResult = await this.connection.newSession(workingDir);
             } catch (reauthErr) {
               console.error(
-                '[TramAgentManager] Re-authentication failed:',
+                "[TramAgentManager] Re-authentication failed:",
                 reauthErr,
               );
               throw reauthErr;
@@ -1271,7 +1271,7 @@ export class TramAgentManager {
 
         const newSessionId = this.connection.currentSessionId;
         console.log(
-          '[TramAgentManager] New session created with ID:',
+          "[TramAgentManager] New session created with ID:",
           newSessionId,
         );
         return newSessionId;
@@ -1296,7 +1296,7 @@ export class TramAgentManager {
    * Cancel current prompt
    */
   async cancelCurrentPrompt(): Promise<void> {
-    console.log('[TramAgentManager] Cancelling current prompt');
+    console.log("[TramAgentManager] Cancelling current prompt");
     await this.connection.cancelSession();
   }
 
@@ -1391,9 +1391,9 @@ export class TramAgentManager {
    */
   onModeInfo(
     callback: (info: {
-      currentModeId?: 'plan' | 'default' | 'auto-edit' | 'yolo';
+      currentModeId?: "plan" | "default" | "auto-edit" | "yolo";
       availableModes?: Array<{
-        id: 'plan' | 'default' | 'auto-edit' | 'yolo';
+        id: "plan" | "default" | "auto-edit" | "yolo";
         name: string;
         description: string;
       }>;
@@ -1407,7 +1407,7 @@ export class TramAgentManager {
    * Register mode changed callback
    */
   onModeChanged(
-    callback: (modeId: 'plan' | 'default' | 'auto-edit' | 'yolo') => void,
+    callback: (modeId: "plan" | "default" | "auto-edit" | "yolo") => void,
   ): void {
     this.callbacks.onModeChanged = callback;
     this.sessionUpdateHandler.updateCallbacks(this.callbacks);
@@ -1514,8 +1514,8 @@ export class TramAgentManager {
 
   private restoreBaselineSessionStateAfterLoad(result: unknown): void {
     const obj = (result || {}) as Record<string, unknown>;
-    const hasModes = !!obj['modes'];
-    const hasModels = !!obj['models'];
+    const hasModes = !!obj["modes"];
+    const hasModels = !!obj["models"];
 
     if (!hasModes) {
       this.callbacks.onModeInfo?.({
@@ -1556,9 +1556,9 @@ export class TramAgentManager {
     }
 
     return (
-      options.find((option) => option.kind === 'allow_once')?.optionId ||
-      options.find((option) => option.optionId === 'proceed_once')?.optionId ||
-      options.find((option) => option.optionId.includes('proceed_once'))
+      options.find((option) => option.kind === "allow_once")?.optionId ||
+      options.find((option) => option.optionId === "proceed_once")?.optionId ||
+      options.find((option) => option.optionId.includes("proceed_once"))
         ?.optionId ||
       options[0]?.optionId
     );

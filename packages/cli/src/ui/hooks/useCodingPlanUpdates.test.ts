@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { useCodingPlanUpdates } from './useCodingPlanUpdates.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { renderHook, waitFor } from "@testing-library/react";
+import { useCodingPlanUpdates } from "./useCodingPlanUpdates.js";
 import {
   CODING_PLAN_ENV_KEY,
   getCodingPlanConfig,
   CodingPlanRegion,
-} from '../../constants/codingPlan.js';
-import { AuthType } from '@tram-ai/tram-core';
+} from "../../constants/codingPlan.js";
+import { AuthType } from "@tram-ai/tram-core";
 
 // Get region configs for testing
 const chinaConfig = getCodingPlanConfig(CodingPlanRegion.CHINA);
 const globalConfig = getCodingPlanConfig(CodingPlanRegion.GLOBAL);
 
-describe('useCodingPlanUpdates', () => {
+describe("useCodingPlanUpdates", () => {
   const mockSettings = {
     merged: {
       modelProviders: {},
@@ -33,7 +33,7 @@ describe('useCodingPlanUpdates', () => {
   const mockConfig = {
     reloadModelProvidersConfig: vi.fn(),
     refreshAuth: vi.fn(),
-    getModel: vi.fn().mockReturnValue('tram-max'),
+    getModel: vi.fn().mockReturnValue("tram-max"),
   };
 
   const mockAddItem = vi.fn();
@@ -43,8 +43,8 @@ describe('useCodingPlanUpdates', () => {
     delete process.env[CODING_PLAN_ENV_KEY];
   });
 
-  describe('version comparison', () => {
-    it('should not show update prompt when no version is stored', () => {
+  describe("version comparison", () => {
+    it("should not show update prompt when no version is stored", () => {
       mockSettings.merged.codingPlan = {};
 
       const { result } = renderHook(() =>
@@ -58,7 +58,7 @@ describe('useCodingPlanUpdates', () => {
       expect(result.current.codingPlanUpdateRequest).toBeUndefined();
     });
 
-    it('should not show update prompt when China region versions match', () => {
+    it("should not show update prompt when China region versions match", () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.CHINA,
         version: chinaConfig.version,
@@ -75,7 +75,7 @@ describe('useCodingPlanUpdates', () => {
       expect(result.current.codingPlanUpdateRequest).toBeUndefined();
     });
 
-    it('should not show update prompt when Global region versions match', () => {
+    it("should not show update prompt when Global region versions match", () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.GLOBAL,
         version: globalConfig.version,
@@ -92,10 +92,10 @@ describe('useCodingPlanUpdates', () => {
       expect(result.current.codingPlanUpdateRequest).toBeUndefined();
     });
 
-    it('should default to China region when region is not specified', async () => {
+    it("should default to China region when region is not specified", async () => {
       // No region specified, should default to China
       mockSettings.merged.codingPlan = {
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
 
       const { result } = renderHook(() =>
@@ -112,14 +112,14 @@ describe('useCodingPlanUpdates', () => {
 
       // Should prompt for China region since it defaults to China
       expect(result.current.codingPlanUpdateRequest?.prompt).toContain(
-        'Alibaba Cloud Coding Plan',
+        "Alibaba Cloud Coding Plan",
       );
     });
 
-    it('should show update prompt when China region versions differ', async () => {
+    it("should show update prompt when China region versions differ", async () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.CHINA,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
 
       const { result } = renderHook(() =>
@@ -135,14 +135,14 @@ describe('useCodingPlanUpdates', () => {
       });
 
       expect(result.current.codingPlanUpdateRequest?.prompt).toContain(
-        'Alibaba Cloud Coding Plan',
+        "Alibaba Cloud Coding Plan",
       );
     });
 
-    it('should show update prompt when Global region versions differ', async () => {
+    it("should show update prompt when Global region versions differ", async () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.GLOBAL,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
 
       const { result } = renderHook(() =>
@@ -158,28 +158,28 @@ describe('useCodingPlanUpdates', () => {
       });
 
       expect(result.current.codingPlanUpdateRequest?.prompt).toContain(
-        'Alibaba Cloud Coding Plan',
+        "Alibaba Cloud Coding Plan",
       );
     });
   });
 
-  describe('update execution', () => {
-    it('should execute China region update when user confirms', async () => {
+  describe("update execution", () => {
+    it("should execute China region update when user confirms", async () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.CHINA,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
       mockSettings.merged.modelProviders = {
         [AuthType.USE_OPENAI]: [
           {
-            id: 'test-model-china-1',
+            id: "test-model-china-1",
             baseUrl: chinaConfig.baseUrl,
             envKey: CODING_PLAN_ENV_KEY,
           },
           {
-            id: 'custom-model',
-            baseUrl: 'https://custom.example.com',
-            envKey: 'CUSTOM_API_KEY',
+            id: "custom-model",
+            baseUrl: "https://custom.example.com",
+            envKey: "CUSTOM_API_KEY",
           },
         ],
       };
@@ -209,14 +209,14 @@ describe('useCodingPlanUpdates', () => {
       // Should update version with correct hash
       expect(mockSettings.setValue).toHaveBeenCalledWith(
         expect.anything(),
-        'codingPlan.version',
+        "codingPlan.version",
         chinaConfig.version,
       );
 
       // Should update region
       expect(mockSettings.setValue).toHaveBeenCalledWith(
         expect.anything(),
-        'codingPlan.region',
+        "codingPlan.region",
         CodingPlanRegion.CHINA,
       );
 
@@ -227,29 +227,29 @@ describe('useCodingPlanUpdates', () => {
       // Should show success message with region info
       expect(mockAddItem).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'info',
-          text: expect.stringContaining('Alibaba Cloud Coding Plan'),
+          type: "info",
+          text: expect.stringContaining("Alibaba Cloud Coding Plan"),
         }),
         expect.any(Number),
       );
     });
 
-    it('should execute Global region update when user confirms', async () => {
+    it("should execute Global region update when user confirms", async () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.GLOBAL,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
       mockSettings.merged.modelProviders = {
         [AuthType.USE_OPENAI]: [
           {
-            id: 'test-model-global-1',
+            id: "test-model-global-1",
             baseUrl: globalConfig.baseUrl,
             envKey: CODING_PLAN_ENV_KEY,
           },
           {
-            id: 'custom-model',
-            baseUrl: 'https://custom.example.com',
-            envKey: 'CUSTOM_API_KEY',
+            id: "custom-model",
+            baseUrl: "https://custom.example.com",
+            envKey: "CUSTOM_API_KEY",
           },
         ],
       };
@@ -278,14 +278,14 @@ describe('useCodingPlanUpdates', () => {
       // Should update version with correct hash (single version field)
       expect(mockSettings.setValue).toHaveBeenCalledWith(
         expect.anything(),
-        'codingPlan.version',
+        "codingPlan.version",
         globalConfig.version,
       );
 
       // Should update region
       expect(mockSettings.setValue).toHaveBeenCalledWith(
         expect.anything(),
-        'codingPlan.region',
+        "codingPlan.region",
         CodingPlanRegion.GLOBAL,
       );
 
@@ -296,17 +296,17 @@ describe('useCodingPlanUpdates', () => {
       // Should show success message with Global region info
       expect(mockAddItem).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'info',
-          text: expect.stringContaining('Alibaba Cloud Coding Plan'),
+          type: "info",
+          text: expect.stringContaining("Alibaba Cloud Coding Plan"),
         }),
         expect.any(Number),
       );
     });
 
-    it('should not execute update when user declines', async () => {
+    it("should not execute update when user declines", async () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.CHINA,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
 
       const { result } = renderHook(() =>
@@ -329,27 +329,27 @@ describe('useCodingPlanUpdates', () => {
       expect(mockConfig.reloadModelProvidersConfig).not.toHaveBeenCalled();
     });
 
-    it('should replace all Coding Plan configs during update (mutually exclusive)', async () => {
+    it("should replace all Coding Plan configs during update (mutually exclusive)", async () => {
       // Since regions are mutually exclusive, when updating one region,
       // all Coding Plan configs should be replaced (not preserving other region configs)
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.CHINA,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
       const chinaModelConfig = {
-        id: 'test-model-china-1',
+        id: "test-model-china-1",
         baseUrl: chinaConfig.baseUrl,
         envKey: CODING_PLAN_ENV_KEY,
       };
       const globalModelConfig = {
-        id: 'test-model-global-1',
+        id: "test-model-global-1",
         baseUrl: globalConfig.baseUrl,
         envKey: CODING_PLAN_ENV_KEY,
       };
       const customConfig = {
-        id: 'custom-model',
-        baseUrl: 'https://custom.example.com',
-        envKey: 'CUSTOM_API_KEY',
+        id: "custom-model",
+        baseUrl: "https://custom.example.com",
+        envKey: "CUSTOM_API_KEY",
       };
       mockSettings.merged.modelProviders = {
         [AuthType.USE_OPENAI]: [
@@ -382,7 +382,7 @@ describe('useCodingPlanUpdates', () => {
       // Get the updated configs passed to setValue
       const setValueCalls = mockSettings.setValue.mock.calls;
       const modelProvidersCall = setValueCalls.find((call: unknown[]) =>
-        (call[1] as string).includes('modelProviders'),
+        (call[1] as string).includes("modelProviders"),
       );
 
       expect(modelProvidersCall).toBeDefined();
@@ -398,21 +398,21 @@ describe('useCodingPlanUpdates', () => {
       // Should NOT contain the Global config (mutually exclusive)
       expect(
         updatedConfigs.some(
-          (c: Record<string, unknown>) => c['baseUrl'] === globalConfig.baseUrl,
+          (c: Record<string, unknown>) => c["baseUrl"] === globalConfig.baseUrl,
         ),
       ).toBe(false);
 
       // Should contain the custom config
       expect(
         updatedConfigs.some(
-          (c: Record<string, unknown>) => c['id'] === 'custom-model',
+          (c: Record<string, unknown>) => c["id"] === "custom-model",
         ),
       ).toBe(true);
 
       // All configs should use the unified env key
       updatedConfigs.forEach((config) => {
-        if (config['envKey'] === CODING_PLAN_ENV_KEY) {
-          expect(config['baseUrl']).toBe(chinaConfig.baseUrl);
+        if (config["envKey"] === CODING_PLAN_ENV_KEY) {
+          expect(config["baseUrl"]).toBe(chinaConfig.baseUrl);
         }
       });
 
@@ -421,20 +421,20 @@ describe('useCodingPlanUpdates', () => {
       expect(mockConfig.refreshAuth).toHaveBeenCalledWith(AuthType.USE_OPENAI);
     });
 
-    it('should preserve non-Coding Plan configs during update', async () => {
+    it("should preserve non-Coding Plan configs during update", async () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.CHINA,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
       const customConfig = {
-        id: 'custom-model',
-        baseUrl: 'https://custom.example.com',
-        envKey: 'CUSTOM_API_KEY',
+        id: "custom-model",
+        baseUrl: "https://custom.example.com",
+        envKey: "CUSTOM_API_KEY",
       };
       mockSettings.merged.modelProviders = {
         [AuthType.USE_OPENAI]: [
           {
-            id: 'test-model-china-1',
+            id: "test-model-china-1",
             baseUrl: chinaConfig.baseUrl,
             envKey: CODING_PLAN_ENV_KEY,
           },
@@ -466,7 +466,7 @@ describe('useCodingPlanUpdates', () => {
       // Get the updated configs passed to setValue
       const setValueCalls = mockSettings.setValue.mock.calls;
       const modelProvidersCall = setValueCalls.find((call: unknown[]) =>
-        (call[1] as string).includes('modelProviders'),
+        (call[1] as string).includes("modelProviders"),
       );
 
       // Should preserve custom config
@@ -476,7 +476,7 @@ describe('useCodingPlanUpdates', () => {
       >;
       expect(
         updatedConfigs.some(
-          (c: Record<string, unknown>) => c['id'] === 'custom-model',
+          (c: Record<string, unknown>) => c["id"] === "custom-model",
         ),
       ).toBe(true);
     });
@@ -484,19 +484,19 @@ describe('useCodingPlanUpdates', () => {
     it('should show "model preserved" message when current model exists in new template', async () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.CHINA,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
       mockSettings.merged.modelProviders = {
         [AuthType.USE_OPENAI]: [
           {
-            id: 'qwen3.5-plus',
+            id: "qwen3.5-plus",
             baseUrl: chinaConfig.baseUrl,
             envKey: CODING_PLAN_ENV_KEY,
           },
         ],
       };
       // Simulate the user's current model being one that exists in the new template
-      mockConfig.getModel.mockReturnValue('qwen3.5-plus');
+      mockConfig.getModel.mockReturnValue("qwen3.5-plus");
       mockConfig.refreshAuth.mockResolvedValue(undefined);
 
       const { result } = renderHook(() =>
@@ -520,39 +520,39 @@ describe('useCodingPlanUpdates', () => {
       // Should show plain success message without "switched"
       expect(mockAddItem).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'info',
-          text: expect.stringContaining('updated successfully'),
+          type: "info",
+          text: expect.stringContaining("updated successfully"),
         }),
         expect.any(Number),
       );
       expect(mockAddItem).not.toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'info',
-          text: expect.stringContaining('switched'),
+          type: "info",
+          text: expect.stringContaining("switched"),
         }),
         expect.any(Number),
       );
 
       // Reset mock
-      mockConfig.getModel.mockReturnValue('tram-max');
+      mockConfig.getModel.mockReturnValue("tram-max");
     });
 
     it('should show "model switched" message when current model is not in new template', async () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.CHINA,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
       mockSettings.merged.modelProviders = {
         [AuthType.USE_OPENAI]: [
           {
-            id: 'removed-model',
+            id: "removed-model",
             baseUrl: chinaConfig.baseUrl,
             envKey: CODING_PLAN_ENV_KEY,
           },
         ],
       };
       // The user's current model no longer exists in the new template
-      mockConfig.getModel.mockReturnValue('removed-model');
+      mockConfig.getModel.mockReturnValue("removed-model");
       mockConfig.refreshAuth.mockResolvedValue(undefined);
 
       const { result } = renderHook(() =>
@@ -576,32 +576,32 @@ describe('useCodingPlanUpdates', () => {
       // Should show "model switched" message
       expect(mockAddItem).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'info',
-          text: expect.stringContaining('switched'),
+          type: "info",
+          text: expect.stringContaining("switched"),
         }),
         expect.any(Number),
       );
 
       // Reset mock
-      mockConfig.getModel.mockReturnValue('tram-max');
+      mockConfig.getModel.mockReturnValue("tram-max");
     });
 
-    it('should handle update errors gracefully', async () => {
+    it("should handle update errors gracefully", async () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.CHINA,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
       mockSettings.merged.modelProviders = {
         [AuthType.USE_OPENAI]: [
           {
-            id: 'test-model-china-1',
+            id: "test-model-china-1",
             baseUrl: chinaConfig.baseUrl,
             envKey: CODING_PLAN_ENV_KEY,
           },
         ],
       };
       // Simulate an error during refreshAuth
-      mockConfig.refreshAuth.mockRejectedValue(new Error('Network error'));
+      mockConfig.refreshAuth.mockRejectedValue(new Error("Network error"));
 
       const { result } = renderHook(() =>
         useCodingPlanUpdates(
@@ -621,7 +621,7 @@ describe('useCodingPlanUpdates', () => {
       await waitFor(() => {
         expect(mockAddItem).toHaveBeenCalledWith(
           expect.objectContaining({
-            type: 'error',
+            type: "error",
           }),
           expect.any(Number),
         );
@@ -629,11 +629,11 @@ describe('useCodingPlanUpdates', () => {
     });
   });
 
-  describe('dismissUpdate', () => {
-    it('should clear update request when dismissed', async () => {
+  describe("dismissUpdate", () => {
+    it("should clear update request when dismissed", async () => {
       mockSettings.merged.codingPlan = {
         region: CodingPlanRegion.CHINA,
-        version: 'old-version-hash',
+        version: "old-version-hash",
       };
 
       const { result } = renderHook(() =>

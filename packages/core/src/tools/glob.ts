@@ -4,25 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { glob, escape } from 'glob';
-import type { ToolInvocation, ToolResult } from './tools.js';
-import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
-import { ToolNames, ToolDisplayNames } from './tool-names.js';
-import { resolveAndValidatePath } from '../utils/paths.js';
-import { type Config } from '../config/config.js';
-import type { PermissionDecision } from '../permissions/types.js';
+import fs from "node:fs";
+import path from "node:path";
+import { glob, escape } from "glob";
+import type { ToolInvocation, ToolResult } from "./tools.js";
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from "./tools.js";
+import { ToolNames, ToolDisplayNames } from "./tool-names.js";
+import { resolveAndValidatePath } from "../utils/paths.js";
+import { type Config } from "../config/config.js";
+import type { PermissionDecision } from "../permissions/types.js";
 import {
   DEFAULT_FILE_FILTERING_OPTIONS,
   type FileFilteringOptions,
-} from '../config/constants.js';
-import { ToolErrorType } from './tool-error.js';
-import { getErrorMessage } from '../utils/errors.js';
-import type { FileDiscoveryService } from '../services/fileDiscoveryService.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "../config/constants.js";
+import { ToolErrorType } from "./tool-error.js";
+import { getErrorMessage } from "../utils/errors.js";
+import type { FileDiscoveryService } from "../services/fileDiscoveryService.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('GLOB');
+const debugLogger = createDebugLogger("GLOB");
 
 const MAX_FILE_COUNT = 100;
 
@@ -106,7 +106,7 @@ class GlobToolInvocation extends BaseToolInvocation<
    */
   override async getDefaultPermission(): Promise<PermissionDecision> {
     if (!this.params.path) {
-      return 'allow'; // Default workspace directory
+      return "allow"; // Default workspace directory
     }
     const workspaceContext = this.config.getWorkspaceContext();
     const resolvedPath = path.resolve(
@@ -114,9 +114,9 @@ class GlobToolInvocation extends BaseToolInvocation<
       this.params.path,
     );
     if (workspaceContext.isPathWithinWorkspace(resolvedPath)) {
-      return 'allow';
+      return "allow";
     }
-    return 'ask';
+    return "ask";
   }
 
   /**
@@ -145,7 +145,7 @@ class GlobToolInvocation extends BaseToolInvocation<
     })) as GlobPath[];
 
     // Filter using paths relative to the project root (the base that
-    // FileDiscoveryService uses for .gitignore / .qwenignore evaluation).
+    // FileDiscoveryService uses for .gitignore / .tramignore evaluation).
     // Using searchDir-relative paths would cause ignore rules to be
     // evaluated against incorrect paths when searchDir != projectRoot.
     const projectRoot = this.config.getTargetDir();
@@ -159,7 +159,7 @@ class GlobToolInvocation extends BaseToolInvocation<
     );
 
     const normalizePathForComparison = (p: string) =>
-      process.platform === 'win32' || process.platform === 'darwin'
+      process.platform === "win32" || process.platform === "darwin"
         ? p.toLowerCase()
         : p;
 
@@ -253,7 +253,7 @@ class GlobToolInvocation extends BaseToolInvocation<
       const sortedAbsolutePaths = entriesToShow.map((entry) =>
         entry.fullpath(),
       );
-      const fileListDescription = sortedAbsolutePaths.join('\n');
+      const fileListDescription = sortedAbsolutePaths.join("\n");
 
       let resultMessage = `Found ${totalFileCount} file(s) matching "${this.params.pattern}" ${searchLocationDescription}`;
       resultMessage += `, sorted by modification time (newest first):\n---\n${fileListDescription}`;
@@ -261,13 +261,13 @@ class GlobToolInvocation extends BaseToolInvocation<
       // Add truncation notice if needed
       if (truncated) {
         const omittedFiles = totalFileCount - fileLimit;
-        const fileTerm = omittedFiles === 1 ? 'file' : 'files';
+        const fileTerm = omittedFiles === 1 ? "file" : "files";
         resultMessage += `\n---\n[${omittedFiles} ${fileTerm} truncated] ...`;
       }
 
       return {
         llmContent: resultMessage,
-        returnDisplay: `Found ${totalFileCount} matching file(s)${truncated ? ' (truncated)' : ''}`,
+        returnDisplay: `Found ${totalFileCount} matching file(s)${truncated ? " (truncated)" : ""}`,
       };
     } catch (error) {
       const errorMessage =
@@ -276,7 +276,7 @@ class GlobToolInvocation extends BaseToolInvocation<
       const rawError = `Error during glob search operation: ${errorMessage}`;
       return {
         llmContent: rawError,
-        returnDisplay: `Error: ${errorMessage || 'An unexpected error occurred.'}`,
+        returnDisplay: `Error: ${errorMessage || "An unexpected error occurred."}`,
         error: {
           message: rawError,
           type: ToolErrorType.GLOB_EXECUTION_ERROR,
@@ -313,17 +313,17 @@ export class GlobTool extends BaseDeclarativeTool<GlobToolParams, ToolResult> {
       {
         properties: {
           pattern: {
-            description: 'The glob pattern to match files against',
-            type: 'string',
+            description: "The glob pattern to match files against",
+            type: "string",
           },
           path: {
             description:
               'The directory to search in. If not specified, the current working directory will be used. IMPORTANT: Omit this field to use the default directory. DO NOT enter "undefined" or "null" - simply omit it for the default behavior. Must be a valid directory path if provided.',
-            type: 'string',
+            type: "string",
           },
         },
-        required: ['pattern'],
-        type: 'object',
+        required: ["pattern"],
+        type: "object",
       },
     );
   }
@@ -336,8 +336,8 @@ export class GlobTool extends BaseDeclarativeTool<GlobToolParams, ToolResult> {
   ): string | null {
     if (
       !params.pattern ||
-      typeof params.pattern !== 'string' ||
-      params.pattern.trim() === ''
+      typeof params.pattern !== "string" ||
+      params.pattern.trim() === ""
     ) {
       return "The 'pattern' parameter cannot be empty.";
     }

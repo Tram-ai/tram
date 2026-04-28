@@ -10,12 +10,12 @@
  * main-agent-specific concerns (vim mode, shell mode, exit prompts, etc.).
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { ApprovalMode } from '@qwen-code/qwen-code-core';
-import { AutoAcceptIndicator } from '../AutoAcceptIndicator.js';
-import { ContextUsageDisplay } from '../ContextUsageDisplay.js';
-import { theme } from '../../semantic-colors.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { ApprovalMode } from "@tram-ai/tram-core";
+import { AutoAcceptIndicator } from "../AutoAcceptIndicator.js";
+import { ContextUsageDisplay } from "../ContextUsageDisplay.js";
+import { theme } from "../../semantic-colors.js";
 
 interface AgentFooterProps {
   approvalMode: ApprovalMode | undefined;

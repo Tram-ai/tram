@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createContext, useContext } from 'react';
-import type { HistoryItemWithoutId } from '../types.js';
+import { createContext, useContext } from "react";
+import type { HistoryItemWithoutId } from "../types.js";
 
 interface CompactModeContextType {
   compactMode: boolean;

@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import stringWidth from 'string-width';
-import { MarkdownDisplay } from '../../utils/MarkdownDisplay.js';
-import { theme } from '../../semantic-colors.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import stringWidth from "string-width";
+import { MarkdownDisplay } from "../../utils/MarkdownDisplay.js";
+import { theme } from "../../semantic-colors.js";
 import {
   SCREEN_READER_MODEL_PREFIX,
   SCREEN_READER_USER_PREFIX,
-} from '../../textConstants.js';
+} from "../../textConstants.js";
 
 interface UserMessageProps {
   text: string;
@@ -57,7 +57,7 @@ interface PrefixedTextMessageProps {
   textColor: string;
   ariaLabel?: string;
   marginTop?: number;
-  alignSelf?: 'auto' | 'flex-start' | 'center' | 'flex-end';
+  alignSelf?: "auto" | "flex-start" | "center" | "flex-end";
 }
 
 interface PrefixedMarkdownMessageProps {
@@ -186,7 +186,7 @@ export const UserMessage: React.FC<UserMessageProps> = ({ text }) => (
 );
 
 export const UserShellMessage: React.FC<UserShellMessageProps> = ({ text }) => {
-  const commandToDisplay = text.startsWith('!') ? text.substring(1) : text;
+  const commandToDisplay = text.startsWith("!") ? text.substring(1) : text;
 
   return (
     <PrefixedTextMessage

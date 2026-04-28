@@ -9,31 +9,31 @@ import {
   type CommandCompletionItem,
   type CommandContext,
   type SlashCommand,
-} from './types.js';
-import { MessageType, type HistoryItemSkillsList } from '../types.js';
-import { t } from '../../i18n/index.js';
-import { AsyncFzf } from 'fzf';
-import type { SkillConfig } from '@tram-ai/tram-core';
-import { createDebugLogger } from '@tram-ai/tram-core';
+} from "./types.js";
+import { MessageType, type HistoryItemSkillsList } from "../types.js";
+import { t } from "../../i18n/index.js";
+import { AsyncFzf } from "fzf";
+import type { SkillConfig } from "@tram-ai/tram-core";
+import { createDebugLogger } from "@tram-ai/tram-core";
 
-const debugLogger = createDebugLogger('SKILLS_COMMAND');
+const debugLogger = createDebugLogger("SKILLS_COMMAND");
 
 export const skillsCommand: SlashCommand = {
-  name: 'skills',
+  name: "skills",
   get description() {
-    return t('List available skills.');
+    return t("List available skills.");
   },
   kind: CommandKind.BUILT_IN,
   action: async (context: CommandContext, args?: string) => {
-    const rawArgs = args?.trim() ?? '';
-    const [skillName = ''] = rawArgs.split(/\s+/);
+    const rawArgs = args?.trim() ?? "";
+    const [skillName = ""] = rawArgs.split(/\s+/);
 
     const skillManager = context.services.config?.getSkillManager();
     if (!skillManager) {
       context.ui.addItem(
         {
           type: MessageType.ERROR,
-          text: t('Could not retrieve skill manager.'),
+          text: t("Could not retrieve skill manager."),
         },
         Date.now(),
       );
@@ -45,7 +45,7 @@ export const skillsCommand: SlashCommand = {
       context.ui.addItem(
         {
           type: MessageType.INFO,
-          text: t('No skills are currently available.'),
+          text: t("No skills are currently available."),
         },
         Date.now(),
       );
@@ -72,7 +72,7 @@ export const skillsCommand: SlashCommand = {
       context.ui.addItem(
         {
           type: MessageType.ERROR,
-          text: t('Unknown skill: {{name}}', { name: skillName }),
+          text: t("Unknown skill: {{name}}", { name: skillName }),
         },
         Date.now(),
       );
@@ -81,7 +81,7 @@ export const skillsCommand: SlashCommand = {
 
     const rawInput = context.invocation?.raw ?? `/skills ${rawArgs}`;
     return {
-      type: 'submit_prompt',
+      type: "submit_prompt",
       content: [{ text: rawInput }],
     };
   },
@@ -118,15 +118,15 @@ async function getSkillMatches(
 
   try {
     const fzf = new AsyncFzf(names, {
-      fuzzy: 'v2',
-      casing: 'case-insensitive',
+      fuzzy: "v2",
+      casing: "case-insensitive",
     });
     const results = (await fzf.find(query)) as Array<{ item: string }>;
     return results
       .map((result) => skillMap.get(result.item))
       .filter((skill): skill is SkillConfig => !!skill);
   } catch (error) {
-    debugLogger.error('[skillsCommand] Fuzzy match failed:', error);
+    debugLogger.error("[skillsCommand] Fuzzy match failed:", error);
     const lowerQuery = query.toLowerCase();
     return skills.filter((skill) =>
       skill.name.toLowerCase().startsWith(lowerQuery),

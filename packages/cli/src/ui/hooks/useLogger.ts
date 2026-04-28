@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
-import type { Storage } from '@tram-ai/tram-core';
-import { Logger } from '@tram-ai/tram-core';
+import { useState, useEffect } from "react";
+import type { Storage } from "@tram-ai/tram-core";
+import { Logger } from "@tram-ai/tram-core";
 
 /**
  * Hook to manage the logger instance.

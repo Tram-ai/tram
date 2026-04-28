@@ -1,6 +1,6 @@
-import type OpenAI from 'openai';
-import { DefaultOpenAICompatibleProvider } from './default.js';
-import type { ContentGeneratorConfig } from '../../contentGenerator.js';
+import type OpenAI from "openai";
+import { DefaultOpenAICompatibleProvider } from "./default.js";
+import type { ContentGeneratorConfig } from "../../contentGenerator.js";
 
 /**
  * Provider for ModelScope API
@@ -10,7 +10,7 @@ export class ModelScopeOpenAICompatibleProvider extends DefaultOpenAICompatibleP
    * Checks if the configuration is for ModelScope.
    */
   static isModelScopeProvider(config: ContentGeneratorConfig): boolean {
-    return !!config.baseUrl?.includes('modelscope');
+    return !!config.baseUrl?.includes("modelscope");
   }
 
   /**

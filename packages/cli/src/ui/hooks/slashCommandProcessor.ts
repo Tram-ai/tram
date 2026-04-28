@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useEffect, useRef, useState } from 'react';
-import { type PartListUnion } from '@google/genai';
-import type { UseHistoryManagerReturn } from './useHistoryManager.js';
-import type { ArenaDialogType } from './useArenaCommand.js';
+import { useCallback, useMemo, useEffect, useRef, useState } from "react";
+import { type PartListUnion } from "@google/genai";
+import type { UseHistoryManagerReturn } from "./useHistoryManager.js";
+import type { ArenaDialogType } from "./useArenaCommand.js";
 import {
   type Logger,
   type Config,
@@ -18,8 +18,8 @@ import {
   SlashCommandStatus,
   ToolConfirmationOutcome,
   IdeClient,
-} from '@tram-ai/tram-core';
-import { useSessionStats } from '../contexts/SessionContext.js';
+} from "@tram-ai/tram-core";
+import { useSessionStats } from "../contexts/SessionContext.js";
 import type {
   Message,
   HistoryItemWithoutId,
@@ -27,46 +27,49 @@ import type {
   SlashCommandProcessorResult,
   HistoryItem,
   ConfirmationRequest,
-} from '../types.js';
-import { MessageType } from '../types.js';
-import type { LoadedSettings } from '../../config/settings.js';
-import { type CommandContext, type SlashCommand } from '../commands/types.js';
-import { CommandService } from '../../services/CommandService.js';
-import { BuiltinCommandLoader } from '../../services/BuiltinCommandLoader.js';
-import { BundledSkillLoader } from '../../services/BundledSkillLoader.js';
-import { FileCommandLoader } from '../../services/FileCommandLoader.js';
-import { McpPromptLoader } from '../../services/McpPromptLoader.js';
-import { parseSlashCommand } from '../../utils/commands.js';
-import { isBtwCommand } from '../utils/commandUtils.js';
-import { clearScreen } from '../../utils/stdioHelpers.js';
-import { useKeypress } from './useKeypress.js';
+} from "../types.js";
+import { MessageType } from "../types.js";
+import type { LoadedSettings } from "../../config/settings.js";
+import { type CommandContext, type SlashCommand } from "../commands/types.js";
+import { CommandService } from "../../services/CommandService.js";
+import { BuiltinCommandLoader } from "../../services/BuiltinCommandLoader.js";
+import { BundledSkillLoader } from "../../services/BundledSkillLoader.js";
+import { FileCommandLoader } from "../../services/FileCommandLoader.js";
+import { McpPromptLoader } from "../../services/McpPromptLoader.js";
+import { parseSlashCommand } from "../../utils/commands.js";
+import { isBtwCommand } from "../utils/commandUtils.js";
+import { clearScreen } from "../../utils/stdioHelpers.js";
+import { useKeypress } from "./useKeypress.js";
 import {
   type ExtensionUpdateAction,
   type ExtensionUpdateStatus,
-} from '../state/extensions.js';
-import { ServiceRuntimeManager } from '@tram-ai/tram-core';
+} from "../state/extensions.js";
+import {
+  ServiceRuntimeManager,
+  type ServiceAlertEvent,
+} from "@tram-ai/tram-core";
 
 type SerializableHistoryItem = Record<string, unknown>;
-const debugLogger = createDebugLogger('SLASH_COMMAND_PROCESSOR');
+const debugLogger = createDebugLogger("SLASH_COMMAND_PROCESSOR");
 
 function serializeHistoryItemForRecording(
-  item: Omit<HistoryItem, 'id'>,
+  item: Omit<HistoryItem, "id">,
 ): SerializableHistoryItem {
   const clone: SerializableHistoryItem = { ...item };
-  if ('timestamp' in clone && clone['timestamp'] instanceof Date) {
-    clone['timestamp'] = clone['timestamp'].toISOString();
+  if ("timestamp" in clone && clone["timestamp"] instanceof Date) {
+    clone["timestamp"] = clone["timestamp"].toISOString();
   }
   return clone;
 }
 
 const SLASH_COMMANDS_SKIP_RECORDING = new Set([
-  'quit',
-  'exit',
-  'clear',
-  'reset',
-  'new',
-  'resume',
-  'btw',
+  "quit",
+  "exit",
+  "clear",
+  "reset",
+  "new",
+  "resume",
+  "btw",
 ]);
 
 interface SlashCommandProcessorActions {
@@ -89,6 +92,7 @@ interface SlashCommandProcessorActions {
   openExtensionsManagerDialog: () => void;
   openMcpDialog: () => void;
   openHooksDialog: () => void;
+  openInitializeDialog: () => void;
 }
 
 /**
@@ -97,9 +101,9 @@ interface SlashCommandProcessorActions {
 export const useSlashCommandProcessor = (
   config: Config | null,
   settings: LoadedSettings,
-  addItem: UseHistoryManagerReturn['addItem'],
-  clearItems: UseHistoryManagerReturn['clearItems'],
-  loadHistory: UseHistoryManagerReturn['loadHistory'],
+  addItem: UseHistoryManagerReturn["addItem"],
+  clearItems: UseHistoryManagerReturn["clearItems"],
+  loadHistory: UseHistoryManagerReturn["loadHistory"],
   refreshStatic: () => void,
   toggleVimEnabled: () => Promise<boolean>,
   isProcessing: boolean,
@@ -165,7 +169,7 @@ export const useSlashCommandProcessor = (
     addItem(
       {
         type: MessageType.INFO,
-        text: 'Command cancelled.',
+        text: "Command cancelled.",
       },
       Date.now(),
     );
@@ -175,7 +179,7 @@ export const useSlashCommandProcessor = (
 
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         cancelSlashCommand();
       }
     },
@@ -196,45 +200,45 @@ export const useSlashCommandProcessor = (
       let historyItemContent: HistoryItemWithoutId;
       if (message.type === MessageType.ABOUT) {
         historyItemContent = {
-          type: 'about',
+          type: "about",
           systemInfo: message.systemInfo,
         };
       } else if (message.type === MessageType.HELP) {
         historyItemContent = {
-          type: 'help',
+          type: "help",
           timestamp: message.timestamp,
         };
       } else if (message.type === MessageType.STATS) {
         historyItemContent = {
-          type: 'stats',
+          type: "stats",
           duration: message.duration,
         };
       } else if (message.type === MessageType.MODEL_STATS) {
         historyItemContent = {
-          type: 'model_stats',
+          type: "model_stats",
         };
       } else if (message.type === MessageType.TOOL_STATS) {
         historyItemContent = {
-          type: 'tool_stats',
+          type: "tool_stats",
         };
       } else if (message.type === MessageType.QUIT) {
         historyItemContent = {
-          type: 'quit',
+          type: "quit",
           duration: message.duration,
         };
       } else if (message.type === MessageType.COMPRESSION) {
         historyItemContent = {
-          type: 'compression',
+          type: "compression",
           compression: message.compression,
         };
       } else if (message.type === MessageType.SUMMARY) {
         historyItemContent = {
-          type: 'summary',
+          type: "summary",
           summary: message.summary,
         };
       } else if (message.type === MessageType.INSIGHT_PROGRESS) {
         historyItemContent = {
-          type: 'insight_progress',
+          type: "insight_progress",
           progress: message.progress,
         };
       } else {
@@ -315,11 +319,11 @@ export const useSlashCommandProcessor = (
     }
 
     const manager = ServiceRuntimeManager.forConfig(config);
-    manager.attachNotifier((event) => {
+    manager.attachNotifier((event: ServiceAlertEvent) => {
       const type =
-        event.level === 'error'
+        event.level === "error"
           ? MessageType.ERROR
-          : event.level === 'warning'
+          : event.level === "warning"
             ? MessageType.WARNING
             : MessageType.INFO;
 
@@ -380,7 +384,7 @@ export const useSlashCommandProcessor = (
           setCommands(commandService.getCommands());
         }
       } catch (error) {
-        debugLogger.error('Failed to load slash commands:', error);
+        debugLogger.error("Failed to load slash commands:", error);
       }
     };
 
@@ -397,20 +401,20 @@ export const useSlashCommandProcessor = (
       oneTimeShellAllowlist?: Set<string>,
       overwriteConfirmed?: boolean,
     ): Promise<SlashCommandProcessorResult | false> => {
-      if (typeof rawQuery !== 'string') {
+      if (typeof rawQuery !== "string") {
         return false;
       }
 
       const trimmed = rawQuery.trim();
-      if (!trimmed.startsWith('/') && !trimmed.startsWith('?')) {
+      if (!trimmed.startsWith("/") && !trimmed.startsWith("?")) {
         return false;
       }
 
-      const recordedItems: Array<Omit<HistoryItem, 'id'>> = [];
-      const recordItem = (item: Omit<HistoryItem, 'id'>) => {
+      const recordedItems: Array<Omit<HistoryItem, "id">> = [];
+      const recordItem = (item: Omit<HistoryItem, "id">) => {
         recordedItems.push(item);
       };
-      const addItemWithRecording: UseHistoryManagerReturn['addItem'] = (
+      const addItemWithRecording: UseHistoryManagerReturn["addItem"] = (
         item,
         timestamp,
       ) => {
@@ -441,7 +445,7 @@ export const useSlashCommandProcessor = (
 
       const subcommand =
         resolvedCommandPath.length > 1
-          ? resolvedCommandPath.slice(1).join(' ')
+          ? resolvedCommandPath.slice(1).join(" ")
           : undefined;
 
       try {
@@ -480,7 +484,7 @@ export const useSlashCommandProcessor = (
             // would keep submitQuery stuck until the operation completes.
             const abortPromise = new Promise<undefined>((resolve) => {
               abortController.signal.addEventListener(
-                'abort',
+                "abort",
                 () => resolve(undefined),
                 { once: true },
               );
@@ -492,19 +496,19 @@ export const useSlashCommandProcessor = (
 
             // If the command was cancelled via ESC while executing, skip result processing
             if (abortController.signal.aborted) {
-              return { type: 'handled' };
+              return { type: "handled" };
             }
 
             if (result) {
               switch (result.type) {
-                case 'tool':
+                case "tool":
                   return {
-                    type: 'schedule_tool',
+                    type: "schedule_tool",
                     toolName: result.toolName,
                     toolArgs: result.toolArgs,
                   };
-                case 'message':
-                  if (result.messageType === 'info') {
+                case "message":
+                  if (result.messageType === "info") {
                     addMessage({
                       type: MessageType.INFO,
                       content: result.content,
@@ -518,73 +522,76 @@ export const useSlashCommandProcessor = (
                     });
                   }
                   return {
-                    type: 'handled',
-                    output: typeof result.content === 'string' ? result.content : undefined,
+                    type: "handled",
+                    output:
+                      typeof result.content === "string"
+                        ? result.content
+                        : undefined,
                   };
-                case 'dialog':
+                case "dialog":
                   switch (result.dialog) {
-                    case 'arena_start':
-                      actions.openArenaDialog?.('start');
-                      return { type: 'handled' };
-                    case 'arena_select':
-                      actions.openArenaDialog?.('select');
-                      return { type: 'handled' };
-                    case 'arena_stop':
-                      actions.openArenaDialog?.('stop');
-                      return { type: 'handled' };
-                    case 'arena_status':
-                      actions.openArenaDialog?.('status');
-                      return { type: 'handled' };
-                    case 'auth':
+                    case "arena_start":
+                      actions.openArenaDialog?.("start");
+                      return { type: "handled" };
+                    case "arena_select":
+                      actions.openArenaDialog?.("select");
+                      return { type: "handled" };
+                    case "arena_stop":
+                      actions.openArenaDialog?.("stop");
+                      return { type: "handled" };
+                    case "arena_status":
+                      actions.openArenaDialog?.("status");
+                      return { type: "handled" };
+                    case "auth":
                       actions.openAuthDialog();
-                      return { type: 'handled' };
-                    case 'theme':
+                      return { type: "handled" };
+                    case "theme":
                       actions.openThemeDialog();
-                      return { type: 'handled' };
-                    case 'editor':
+                      return { type: "handled" };
+                    case "editor":
                       actions.openEditorDialog();
-                      return { type: 'handled' };
-                    case 'settings':
+                      return { type: "handled" };
+                    case "settings":
                       actions.openSettingsDialog();
-                      return { type: 'handled' };
-                    case 'model':
+                      return { type: "handled" };
+                    case "model":
                       actions.openModelDialog();
-                      return { type: 'handled' };
-                    case 'fast-model':
+                      return { type: "handled" };
+                    case "fast-model":
                       actions.openModelDialog({ fastModelMode: true });
-                      return { type: 'handled' };
-                    case 'trust':
+                      return { type: "handled" };
+                    case "trust":
                       actions.openTrustDialog();
-                      return { type: 'handled' };
-                    case 'permissions':
+                      return { type: "handled" };
+                    case "permissions":
                       actions.openPermissionsDialog();
-                      return { type: 'handled' };
-                    case 'subagent_create':
+                      return { type: "handled" };
+                    case "subagent_create":
                       actions.openSubagentCreateDialog();
-                      return { type: 'handled' };
-                    case 'subagent_list':
+                      return { type: "handled" };
+                    case "subagent_list":
                       actions.openAgentsManagerDialog();
-                      return { type: 'handled' };
-                    case 'mcp':
+                      return { type: "handled" };
+                    case "mcp":
                       actions.openMcpDialog();
-                      return { type: 'handled' };
-                    case 'hooks':
+                      return { type: "handled" };
+                    case "hooks":
                       actions.openHooksDialog();
-                      return { type: 'handled' };
-                    case 'approval-mode':
+                      return { type: "handled" };
+                    case "approval-mode":
                       actions.openApprovalModeDialog();
-                      return { type: 'handled' };
-                    case 'resume':
+                      return { type: "handled" };
+                    case "resume":
                       actions.openResumeDialog();
-                      return { type: 'handled' };
-                    case 'extensions_manage':
+                      return { type: "handled" };
+                    case "extensions_manage":
                       actions.openExtensionsManagerDialog();
-                      return { type: 'handled' };
-                    case 'initialize':
+                      return { type: "handled" };
+                    case "initialize":
                       actions.openInitializeDialog();
-                      return { type: 'handled' };
-                    case 'help':
-                      return { type: 'handled' };
+                      return { type: "handled" };
+                    case "help":
+                      return { type: "handled" };
                     default: {
                       const unhandled: never = result.dialog;
                       throw new Error(
@@ -592,26 +599,26 @@ export const useSlashCommandProcessor = (
                       );
                     }
                   }
-                case 'load_history': {
+                case "load_history": {
                   config?.getGeminiClient()?.setHistory(result.clientHistory);
                   config?.getGeminiClient()?.stripThoughtsFromHistory();
                   fullCommandContext.ui.clear();
                   result.history.forEach((item, index) => {
                     fullCommandContext.ui.addItem(item, index);
                   });
-                  return { type: 'handled' };
+                  return { type: "handled" };
                 }
 
-                case 'quit':
+                case "quit":
                   actions.quit(result.messages);
-                  return { type: 'handled' };
+                  return { type: "handled" };
 
-                case 'submit_prompt':
+                case "submit_prompt":
                   return {
-                    type: 'submit_prompt',
+                    type: "submit_prompt",
                     content: result.content,
                   };
-                case 'confirm_shell_commands': {
+                case "confirm_shell_commands": {
                   const { outcome, approvedCommands } = await new Promise<{
                     outcome: ToolConfirmationOutcome;
                     approvedCommands?: string[];
@@ -636,7 +643,7 @@ export const useSlashCommandProcessor = (
                     !approvedCommands ||
                     approvedCommands.length === 0
                   ) {
-                    return { type: 'handled' };
+                    return { type: "handled" };
                   }
 
                   if (outcome === ToolConfirmationOutcome.ProceedAlways) {
@@ -651,7 +658,7 @@ export const useSlashCommandProcessor = (
                     new Set(approvedCommands),
                   );
                 }
-                case 'confirm_action': {
+                case "confirm_action": {
                   const { confirmed } = await new Promise<{
                     confirmed: boolean;
                   }>((resolve) => {
@@ -668,11 +675,11 @@ export const useSlashCommandProcessor = (
                     addItemWithRecording(
                       {
                         type: MessageType.INFO,
-                        text: 'Operation cancelled.',
+                        text: "Operation cancelled.",
                       },
                       Date.now(),
                     );
-                    return { type: 'handled' };
+                    return { type: "handled" };
                   }
 
                   return await handleSlashCommand(
@@ -681,11 +688,11 @@ export const useSlashCommandProcessor = (
                     true,
                   );
                 }
-                case 'stream_messages': {
+                case "stream_messages": {
                   // stream_messages is only used in ACP/Zed integration mode
                   // and should not be returned in interactive UI mode
                   throw new Error(
-                    'stream_messages result type is not supported in interactive mode',
+                    "stream_messages result type is not supported in interactive mode",
                   );
                 }
                 default: {
@@ -697,17 +704,17 @@ export const useSlashCommandProcessor = (
               }
             }
 
-            return { type: 'handled' };
+            return { type: "handled" };
           } else if (commandToExecute.subCommands) {
             const helpText = `Command '/${commandToExecute.name}' requires a subcommand. Available:\n${commandToExecute.subCommands
-              .map((sc) => `  - ${sc.name}: ${sc.description || ''}`)
-              .join('\n')}`;
+              .map((sc) => `  - ${sc.name}: ${sc.description || ""}`)
+              .join("\n")}`;
             addMessage({
               type: MessageType.INFO,
               content: helpText,
               timestamp: new Date(),
             });
-            return { type: 'handled' };
+            return { type: "handled" };
           }
         }
 
@@ -717,11 +724,11 @@ export const useSlashCommandProcessor = (
           timestamp: new Date(),
         });
 
-        return { type: 'handled' };
+        return { type: "handled" };
       } catch (e: unknown) {
         // If cancelled via ESC, the cancelSlashCommand callback already handled cleanup
         if (abortController.signal.aborted) {
-          return { type: 'handled' };
+          return { type: "handled" };
         }
         hasError = true;
         if (config) {
@@ -739,34 +746,34 @@ export const useSlashCommandProcessor = (
           },
           Date.now(),
         );
-        return { type: 'handled' };
+        return { type: "handled" };
       } finally {
         if (config?.getChatRecordingService) {
           const chatRecorder = config.getChatRecordingService();
           const primaryCommand =
             resolvedCommandPath[0] ||
-            trimmed.replace(/^[/?]/, '').split(/\s+/)[0] ||
+            trimmed.replace(/^[/?]/, "").split(/\s+/)[0] ||
             trimmed;
           const shouldRecord =
             !SLASH_COMMANDS_SKIP_RECORDING.has(primaryCommand);
           try {
             if (shouldRecord) {
               chatRecorder?.recordSlashCommand({
-                phase: 'invocation',
+                phase: "invocation",
                 rawCommand: trimmed,
               });
               const outputItems = recordedItems
-                .filter((item) => item.type !== 'user')
+                .filter((item) => item.type !== "user")
                 .map(serializeHistoryItemForRecording);
               chatRecorder?.recordSlashCommand({
-                phase: 'result',
+                phase: "result",
                 rawCommand: trimmed,
                 outputHistoryItems: outputItems,
               });
             }
           } catch (recordError) {
             debugLogger.error(
-              '[slashCommand] Failed to record slash command:',
+              "[slashCommand] Failed to record slash command:",
               recordError,
             );
           }

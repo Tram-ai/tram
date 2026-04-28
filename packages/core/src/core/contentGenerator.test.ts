@@ -4,24 +4,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi } from "vitest";
 import {
   createContentGenerator,
   createContentGeneratorConfig,
   AuthType,
-} from './contentGenerator.js';
-import { GoogleGenAI } from '@google/genai';
-import type { Config } from '../config/config.js';
-import { LoggingContentGenerator } from './loggingContentGenerator/index.js';
+} from "./contentGenerator.js";
+import { GoogleGenAI } from "@google/genai";
+import type { Config } from "../config/config.js";
+import { LoggingContentGenerator } from "./loggingContentGenerator/index.js";
 
-vi.mock('@google/genai');
+vi.mock("@google/genai");
 
-describe('createContentGenerator', () => {
-  it('should create a Gemini content generator', async () => {
+describe("createContentGenerator", () => {
+  it("should create a Gemini content generator", async () => {
     const mockConfig = {
       getUsageStatisticsEnabled: () => true,
       getContentGeneratorConfig: () => ({}),
-      getCliVersion: () => '1.0.0',
+      getCliVersion: () => "1.0.0",
     } as unknown as Config;
 
     const mockGenerator = {
@@ -30,19 +30,19 @@ describe('createContentGenerator', () => {
     vi.mocked(GoogleGenAI).mockImplementation(() => mockGenerator as never);
     const generator = await createContentGenerator(
       {
-        model: 'test-model',
-        apiKey: 'test-api-key',
+        model: "test-model",
+        apiKey: "test-api-key",
         authType: AuthType.USE_GEMINI,
       },
       mockConfig,
     );
     expect(GoogleGenAI).toHaveBeenCalledWith({
-      apiKey: 'test-api-key',
+      apiKey: "test-api-key",
       vertexai: undefined,
       httpOptions: {
         headers: {
-          'User-Agent': expect.any(String),
-          'x-gemini-api-privileged-user-id': expect.any(String),
+          "User-Agent": expect.any(String),
+          "x-gemini-api-privileged-user-id": expect.any(String),
         },
       },
     });
@@ -52,11 +52,11 @@ describe('createContentGenerator', () => {
     expect(wrapped).toBeDefined();
   });
 
-  it('should create a Gemini content generator with client install id logging disabled', async () => {
+  it("should create a Gemini content generator with client install id logging disabled", async () => {
     const mockConfig = {
       getUsageStatisticsEnabled: () => false,
       getContentGeneratorConfig: () => ({}),
-      getCliVersion: () => '1.0.0',
+      getCliVersion: () => "1.0.0",
     } as unknown as Config;
     const mockGenerator = {
       models: {},
@@ -64,18 +64,18 @@ describe('createContentGenerator', () => {
     vi.mocked(GoogleGenAI).mockImplementation(() => mockGenerator as never);
     const generator = await createContentGenerator(
       {
-        model: 'test-model',
-        apiKey: 'test-api-key',
+        model: "test-model",
+        apiKey: "test-api-key",
         authType: AuthType.USE_GEMINI,
       },
       mockConfig,
     );
     expect(GoogleGenAI).toHaveBeenCalledWith({
-      apiKey: 'test-api-key',
+      apiKey: "test-api-key",
       vertexai: undefined,
       httpOptions: {
         headers: {
-          'User-Agent': expect.any(String),
+          "User-Agent": expect.any(String),
         },
       },
     });
@@ -83,29 +83,29 @@ describe('createContentGenerator', () => {
   });
 });
 
-describe('createContentGeneratorConfig', () => {
+describe("createContentGeneratorConfig", () => {
   const mockConfig = {
     getProxy: () => undefined,
   } as unknown as Config;
 
-  it('should preserve provided fields and set authType for TRAM_OAUTH', () => {
+  it("should preserve provided fields and set authType for TRAM_OAUTH", () => {
     const cfg = createContentGeneratorConfig(mockConfig, AuthType.TRAM_OAUTH, {
-      model: 'coder-model',
-      apiKey: 'TRAM_OAUTH_DYNAMIC_TOKEN',
+      model: "coder-model",
+      apiKey: "TRAM_OAUTH_DYNAMIC_TOKEN",
     });
     expect(cfg.authType).toBe(AuthType.TRAM_OAUTH);
-    expect(cfg.model).toBe('coder-model');
-    expect(cfg.apiKey).toBe('TRAM_OAUTH_DYNAMIC_TOKEN');
+    expect(cfg.model).toBe("coder-model");
+    expect(cfg.apiKey).toBe("TRAM_OAUTH_DYNAMIC_TOKEN");
   });
 
-  it('should not warn or fallback for TRAM_OAUTH (resolution handled by ModelConfigResolver)', () => {
+  it("should not warn or fallback for TRAM_OAUTH (resolution handled by ModelConfigResolver)", () => {
     const warnSpy = vi
-      .spyOn(console, 'warn')
+      .spyOn(console, "warn")
       .mockImplementation(() => undefined);
     const cfg = createContentGeneratorConfig(mockConfig, AuthType.TRAM_OAUTH, {
-      model: 'some-random-model',
+      model: "some-random-model",
     });
-    expect(cfg.model).toBe('some-random-model');
+    expect(cfg.model).toBe("some-random-model");
     expect(cfg.apiKey).toBeUndefined();
     expect(warnSpy).not.toHaveBeenCalled();
     warnSpy.mockRestore();

@@ -6,26 +6,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { execSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { execSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const PACKAGE_NAME = '@tram-ai/sdk';
-const TAG_PREFIX = 'sdk-typescript-v';
+const PACKAGE_NAME = "@tram-ai/sdk";
+const TAG_PREFIX = "sdk-typescript-v";
 
 function readJson(filePath) {
-  return JSON.parse(readFileSync(filePath, 'utf-8'));
+  return JSON.parse(readFileSync(filePath, "utf-8"));
 }
 
 function getArgs() {
   const args = {};
   process.argv.slice(2).forEach((arg) => {
-    if (arg.startsWith('--')) {
-      const [key, value] = arg.substring(2).split('=');
+    if (arg.startsWith("--")) {
+      const [key, value] = arg.substring(2).split("=");
       args[key] = value === undefined ? true : value;
     }
   });
@@ -40,7 +40,7 @@ function getVersionFromNPM(distTag) {
     console.error(
       `Failed to get NPM version for dist-tag "${distTag}": ${error.message}`,
     );
-    return '';
+    return "";
   }
 }
 
@@ -72,9 +72,9 @@ function isVersionDeprecated(version) {
 
 function semverCompare(a, b) {
   const parseVersion = (v) => {
-    const [main, prerelease] = v.split('-');
-    const [major, minor, patch] = main.split('.').map(Number);
-    return { major, minor, patch, prerelease: prerelease || '' };
+    const [main, prerelease] = v.split("-");
+    const [major, minor, patch] = main.split(".").map(Number);
+    return { major, minor, patch, prerelease: prerelease || "" };
   };
 
   const va = parseVersion(a);
@@ -95,19 +95,19 @@ function semverCompare(a, b) {
 
 function detectRollbackAndGetBaseline(npmDistTag) {
   const distTagVersion = getVersionFromNPM(npmDistTag);
-  if (!distTagVersion) return { baseline: '', isRollback: false };
+  if (!distTagVersion) return { baseline: "", isRollback: false };
 
   const allVersions = getAllVersionsFromNPM();
   if (allVersions.length === 0)
     return { baseline: distTagVersion, isRollback: false };
 
   let matchingVersions;
-  if (npmDistTag === 'latest') {
-    matchingVersions = allVersions.filter((v) => !v.includes('-'));
-  } else if (npmDistTag === 'preview') {
-    matchingVersions = allVersions.filter((v) => v.includes('-preview'));
-  } else if (npmDistTag === 'nightly') {
-    matchingVersions = allVersions.filter((v) => v.includes('-nightly'));
+  if (npmDistTag === "latest") {
+    matchingVersions = allVersions.filter((v) => !v.includes("-"));
+  } else if (npmDistTag === "preview") {
+    matchingVersions = allVersions.filter((v) => v.includes("-preview"));
+  } else if (npmDistTag === "nightly") {
+    matchingVersions = allVersions.filter((v) => v.includes("-nightly"));
   } else {
     return { baseline: distTagVersion, isRollback: false };
   }
@@ -117,7 +117,7 @@ function detectRollbackAndGetBaseline(npmDistTag) {
 
   matchingVersions.sort((a, b) => -semverCompare(a, b));
 
-  let highestExistingVersion = '';
+  let highestExistingVersion = "";
   for (const version of matchingVersions) {
     if (!isVersionDeprecated(version)) {
       highestExistingVersion = version;
@@ -176,9 +176,9 @@ function doesVersionExist(version) {
     }
   } catch (error) {
     const isExpectedNotFound =
-      error.message.includes('release not found') ||
-      error.message.includes('Not Found') ||
-      error.message.includes('not found') ||
+      error.message.includes("release not found") ||
+      error.message.includes("Not Found") ||
+      error.message.includes("not found") ||
       error.status === 1;
     if (!isExpectedNotFound) {
       console.error(
@@ -196,10 +196,10 @@ function getAndVerifyTags(npmDistTag) {
 
   if (!baselineVersion) {
     // First release for this dist-tag, use package.json version as baseline
-    const packageJson = readJson(join(__dirname, '..', 'package.json'));
+    const packageJson = readJson(join(__dirname, "..", "package.json"));
     return {
-      latestVersion: packageJson.version.split('-')[0],
-      latestTag: `v${packageJson.version.split('-')[0]}`,
+      latestVersion: packageJson.version.split("-")[0],
+      latestTag: `v${packageJson.version.split("-")[0]}`,
     };
   }
 
@@ -217,43 +217,43 @@ function getAndVerifyTags(npmDistTag) {
 
 function getLatestStableReleaseTag() {
   try {
-    const { latestTag } = getAndVerifyTags('latest');
+    const { latestTag } = getAndVerifyTags("latest");
     return latestTag;
   } catch (error) {
     console.error(
       `Failed to determine latest stable release tag: ${error.message}`,
     );
-    return '';
+    return "";
   }
 }
 
 function getNextPatchVersion() {
   // Get latest stable version from npm and increment patch
-  const latestVersion = getVersionFromNPM('latest');
+  const latestVersion = getVersionFromNPM("latest");
   if (!latestVersion) {
     // Fallback to package.json if npm fails
-    const packageJson = readJson(join(__dirname, '..', 'package.json'));
-    return packageJson.version.split('-')[0];
+    const packageJson = readJson(join(__dirname, "..", "package.json"));
+    return packageJson.version.split("-")[0];
   }
-  const [major, minor, patch] = latestVersion.split('.').map(Number);
+  const [major, minor, patch] = latestVersion.split(".").map(Number);
   return `${major}.${minor}.${patch + 1}`;
 }
 
 function getNightlyVersion() {
   const baseVersion = getNextPatchVersion();
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const gitShortHash = execSync('git rev-parse --short HEAD').toString().trim();
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const gitShortHash = execSync("git rev-parse --short HEAD").toString().trim();
   const releaseVersion = `${baseVersion}-nightly.${date}.${gitShortHash}`;
   return {
     releaseVersion,
-    npmTag: 'nightly',
+    npmTag: "nightly",
   };
 }
 
 function validateVersion(version, format, name) {
   const versionRegex = {
-    'X.Y.Z': /^\d+\.\d+\.\d+$/,
-    'X.Y.Z-preview.N': /^\d+\.\d+\.\d+-preview\.\d+$/,
+    "X.Y.Z": /^\d+\.\d+\.\d+$/,
+    "X.Y.Z-preview.N": /^\d+\.\d+\.\d+-preview\.\d+$/,
   };
 
   if (!versionRegex[format] || !versionRegex[format].test(version)) {
@@ -266,29 +266,29 @@ function validateVersion(version, format, name) {
 function getStableVersion(args) {
   let releaseVersion;
   if (args.stable_version_override) {
-    const overrideVersion = args.stable_version_override.replace(/^v/, '');
-    validateVersion(overrideVersion, 'X.Y.Z', 'stable_version_override');
+    const overrideVersion = args.stable_version_override.replace(/^v/, "");
+    validateVersion(overrideVersion, "X.Y.Z", "stable_version_override");
     releaseVersion = overrideVersion;
   } else {
     // Try to get from preview, fallback to package.json for first release
-    const { latestVersion: latestPreviewVersion } = getAndVerifyTags('preview');
-    releaseVersion = latestPreviewVersion.replace(/-preview.*/, '');
+    const { latestVersion: latestPreviewVersion } = getAndVerifyTags("preview");
+    releaseVersion = latestPreviewVersion.replace(/-preview.*/, "");
   }
 
   return {
     releaseVersion,
-    npmTag: 'latest',
+    npmTag: "latest",
   };
 }
 
 function getPreviewVersion(args) {
   let releaseVersion;
   if (args.preview_version_override) {
-    const overrideVersion = args.preview_version_override.replace(/^v/, '');
+    const overrideVersion = args.preview_version_override.replace(/^v/, "");
     validateVersion(
       overrideVersion,
-      'X.Y.Z-preview.N',
-      'preview_version_override',
+      "X.Y.Z-preview.N",
+      "preview_version_override",
     );
     releaseVersion = overrideVersion;
   } else {
@@ -299,17 +299,17 @@ function getPreviewVersion(args) {
 
   return {
     releaseVersion,
-    npmTag: 'preview',
+    npmTag: "preview",
   };
 }
 
 export function getVersion(options = {}) {
   const args = { ...getArgs(), ...options };
-  const type = args.type || 'nightly';
+  const type = args.type || "nightly";
 
   let versionData;
   switch (type) {
-    case 'nightly':
+    case "nightly":
       versionData = getNightlyVersion();
       if (doesVersionExist(versionData.releaseVersion)) {
         throw new Error(
@@ -317,10 +317,10 @@ export function getVersion(options = {}) {
         );
       }
       break;
-    case 'stable':
+    case "stable":
       versionData = getStableVersion(args);
       break;
-    case 'preview':
+    case "preview":
       versionData = getPreviewVersion(args);
       break;
     default:
@@ -328,16 +328,16 @@ export function getVersion(options = {}) {
   }
 
   // For stable and preview versions, check for existence and increment if needed.
-  if (type === 'stable' || type === 'preview') {
+  if (type === "stable" || type === "preview") {
     let releaseVersion = versionData.releaseVersion;
     while (doesVersionExist(releaseVersion)) {
       console.error(`Version ${releaseVersion} exists, incrementing.`);
-      if (releaseVersion.includes('-preview.')) {
-        const [version, prereleasePart] = releaseVersion.split('-');
-        const previewNumber = parseInt(prereleasePart.split('.')[1]);
+      if (releaseVersion.includes("-preview.")) {
+        const [version, prereleasePart] = releaseVersion.split("-");
+        const previewNumber = parseInt(prereleasePart.split(".")[1]);
         releaseVersion = `${version}-preview.${previewNumber + 1}`;
       } else {
-        const versionParts = releaseVersion.split('.');
+        const versionParts = releaseVersion.split(".");
         const major = versionParts[0];
         const minor = versionParts[1];
         const patch = parseInt(versionParts[2]);

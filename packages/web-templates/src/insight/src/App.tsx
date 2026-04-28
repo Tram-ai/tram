@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom/client';
-import { StatsRow } from './Header';
+import { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom/client";
+import { StatsRow } from "./Header";
 import {
   AtAGlance,
   NavToc,
@@ -11,31 +11,31 @@ import {
   Improvements,
   FutureOpportunities,
   MemorableMoment,
-} from './Qualitative';
-import { ShareCard, type Theme } from './ShareCard';
-import './styles.css';
-import type { InsightData } from './types';
+} from "./Qualitative";
+import { ShareCard, type Theme } from "./ShareCard";
+import "./styles.css";
+import type { InsightData } from "./types";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React from 'react';
+import React from "react";
 
 // Main App Component
 function InsightApp({ data }: { data: InsightData }) {
-  const [cardTheme, setCardTheme] = useState<Theme>('dark');
+  const [cardTheme, setCardTheme] = useState<Theme>("dark");
   const pendingExport = useRef(false);
 
   const performExport = async () => {
-    const card = document.getElementById('share-card');
+    const card = document.getElementById("share-card");
     if (!card || !window.html2canvas) {
-      alert('Export functionality is not available.');
+      alert("Export functionality is not available.");
       return;
     }
 
     try {
       const clone = card.cloneNode(true) as HTMLElement;
-      clone.style.position = 'fixed';
-      clone.style.left = '-9999px';
-      clone.style.top = '0';
-      clone.style.pointerEvents = 'none';
+      clone.style.position = "fixed";
+      clone.style.left = "-9999px";
+      clone.style.top = "0";
+      clone.style.pointerEvents = "none";
       document.body.appendChild(clone);
 
       const canvas = await window.html2canvas(clone, {
@@ -48,14 +48,14 @@ function InsightApp({ data }: { data: InsightData }) {
 
       document.body.removeChild(clone);
 
-      const imgData = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
+      const imgData = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
       link.href = imgData;
       link.download = `tram-insights-card-${new Date().toISOString().slice(0, 10)}.png`;
       link.click();
     } catch (error) {
-      console.error('Export card error:', error);
-      alert('Failed to export card. Please try again.');
+      console.error("Export card error:", error);
+      alert("Failed to export card. Please try again.");
     }
   };
 
@@ -86,13 +86,13 @@ function InsightApp({ data }: { data: InsightData }) {
 
   // Calculate date range
   const heatmapKeys = Object.keys(data.heatmap || {});
-  let dateRangeStr = '';
+  let dateRangeStr = "";
   if (heatmapKeys.length > 0) {
     const dates = heatmapKeys.map((d) => new Date(d));
     const timestamps = dates.map((d) => d.getTime());
     const minDate = new Date(Math.min(...timestamps));
     const maxDate = new Date(Math.max(...timestamps));
-    const formatDate = (d: Date) => d.toISOString().split('T')[0];
+    const formatDate = (d: Date) => d.toISOString().split("T")[0];
     dateRangeStr = `${formatDate(minDate)} to ${formatDate(maxDate)}`;
   }
 
@@ -106,7 +106,7 @@ function InsightApp({ data }: { data: InsightData }) {
             <p className="header-subtitle">
               {data.totalMessages
                 ? `${data.totalMessages.toLocaleString()} messages across ${data.totalSessions?.toLocaleString()} sessions`
-                : 'Your personalized coding journey and patterns'}
+                : "Your personalized coding journey and patterns"}
               {dateRangeStr && ` · ${dateRangeStr}`}
             </p>
           </div>
@@ -179,8 +179,8 @@ function ExportCardButton({ onExport }: { onExport: (theme: Theme) => void }) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, [isOpen]);
 
   const handleSelect = (theme: Theme) => {
@@ -215,7 +215,7 @@ function ExportCardButton({ onExport }: { onExport: (theme: Theme) => void }) {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`export-chevron ${isOpen ? 'open' : ''}`}
+          className={`export-chevron ${isOpen ? "open" : ""}`}
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -225,7 +225,7 @@ function ExportCardButton({ onExport }: { onExport: (theme: Theme) => void }) {
         <div className="export-dropdown">
           <button
             className="export-dropdown-item"
-            onClick={() => handleSelect('light')}
+            onClick={() => handleSelect("light")}
           >
             <svg
               width="14"
@@ -251,7 +251,7 @@ function ExportCardButton({ onExport }: { onExport: (theme: Theme) => void }) {
           </button>
           <button
             className="export-dropdown-item"
-            onClick={() => handleSelect('dark')}
+            onClick={() => handleSelect("dark")}
           >
             <svg
               width="14"
@@ -274,12 +274,12 @@ function ExportCardButton({ onExport }: { onExport: (theme: Theme) => void }) {
 }
 
 // App Initialization - Mount React app when DOM is ready
-const container = document.getElementById('react-root');
+const container = document.getElementById("react-root");
 if (container && window.INSIGHT_DATA && ReactDOM) {
   const root = ReactDOM.createRoot(container);
   root.render(<InsightApp data={window.INSIGHT_DATA} />);
 } else {
-  console.error('Failed to mount React app:', {
+  console.error("Failed to mount React app:", {
     container: !!container,
     data: !!window.INSIGHT_DATA,
     ReactDOM: !!ReactDOM,

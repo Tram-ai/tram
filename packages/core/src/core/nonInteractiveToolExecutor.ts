@@ -8,13 +8,13 @@ import type {
   ToolCallRequestInfo,
   ToolCallResponseInfo,
   Config,
-} from '../index.js';
+} from "../index.js";
 import {
   CoreToolScheduler,
   type AllToolCallsCompleteHandler,
   type OutputUpdateHandler,
   type ToolCallsUpdateHandler,
-} from './coreToolScheduler.js';
+} from "./coreToolScheduler.js";
 
 export interface ExecuteToolCallOptions {
   outputUpdateHandler?: OutputUpdateHandler;

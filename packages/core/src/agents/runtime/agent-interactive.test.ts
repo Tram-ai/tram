@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AgentInteractive } from './agent-interactive.js';
-import type { AgentCore } from './agent-core.js';
-import { AgentEventEmitter, AgentEventType } from './agent-events.js';
-import { ContextState } from './agent-headless.js';
-import type { AgentInteractiveConfig } from './agent-types.js';
-import { AgentStatus } from './agent-types.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { AgentInteractive } from "./agent-interactive.js";
+import type { AgentCore } from "./agent-core.js";
+import { AgentEventEmitter, AgentEventType } from "./agent-events.js";
+import { ContextState } from "./agent-headless.js";
+import type { AgentInteractiveConfig } from "./agent-types.js";
+import { AgentStatus } from "./agent-types.js";
 
 function createMockChat() {
   return {
@@ -32,8 +32,8 @@ function createMockCore(
       ? overrides.chatValue
       : createMockChat();
   const core = {
-    subagentId: 'test-agent-abc123',
-    name: 'test-agent',
+    subagentId: "test-agent-abc123",
+    name: "test-agent",
     eventEmitter: emitter,
     stats: {
       start: vi.fn(),
@@ -55,7 +55,7 @@ function createMockCore(
     prepareTools: vi.fn().mockReturnValue([]),
     runReasoningLoop: vi.fn().mockResolvedValue(
       overrides.loopResult ?? {
-        text: 'Done',
+        text: "Done",
         terminateMode: null,
         turnsUsed: 1,
       },
@@ -80,13 +80,13 @@ function createConfig(
   overrides: Partial<AgentInteractiveConfig> = {},
 ): AgentInteractiveConfig {
   return {
-    agentId: 'agent-1',
-    agentName: 'Test Agent',
+    agentId: "agent-1",
+    agentName: "Test Agent",
     ...overrides,
   };
 }
 
-describe('AgentInteractive', () => {
+describe("AgentInteractive", () => {
   let context: ContextState;
 
   beforeEach(() => {
@@ -95,7 +95,7 @@ describe('AgentInteractive', () => {
 
   // ─── Lifecycle ──────────────────────────────────────────────
 
-  it('should initialize and complete cleanly without initialTask', async () => {
+  it("should initialize and complete cleanly without initialTask", async () => {
     const { core } = createMockCore();
     const config = createConfig();
     const agent = new AgentInteractive(config, core);
@@ -104,38 +104,38 @@ describe('AgentInteractive', () => {
     // No initialTask → agent is waiting on queue, status is still initializing.
     // Shutdown drains queue, loop exits normally → completed.
     await agent.shutdown();
-    expect(agent.getStatus()).toBe('completed');
+    expect(agent.getStatus()).toBe("completed");
   });
 
-  it('should process initialTask immediately on start', async () => {
+  it("should process initialTask immediately on start", async () => {
     const { core } = createMockCore();
-    const config = createConfig({ initialTask: 'Do something' });
+    const config = createConfig({ initialTask: "Do something" });
     const agent = new AgentInteractive(config, core);
 
     await agent.start(context);
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('idle');
+      expect(agent.getStatus()).toBe("idle");
     });
 
     expect(core.runReasoningLoop).toHaveBeenCalledOnce();
     expect(agent.getMessages().length).toBeGreaterThan(0);
-    expect(agent.getMessages()[0]?.role).toBe('user');
-    expect(agent.getMessages()[0]?.content).toBe('Do something');
+    expect(agent.getMessages()[0]?.role).toBe("user");
+    expect(agent.getMessages()[0]?.content).toBe("Do something");
 
     await agent.shutdown();
-    expect(agent.getStatus()).toBe('completed');
+    expect(agent.getStatus()).toBe("completed");
   });
 
-  it('should process enqueued messages', async () => {
+  it("should process enqueued messages", async () => {
     const { core } = createMockCore();
     const config = createConfig();
     const agent = new AgentInteractive(config, core);
 
     await agent.start(context);
 
-    agent.enqueueMessage('Hello');
+    agent.enqueueMessage("Hello");
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('idle');
+      expect(agent.getStatus()).toBe("idle");
     });
 
     expect(core.runReasoningLoop).toHaveBeenCalledOnce();
@@ -143,20 +143,20 @@ describe('AgentInteractive', () => {
     await agent.shutdown();
   });
 
-  it('should set status to failed when chat creation fails', async () => {
+  it("should set status to failed when chat creation fails", async () => {
     const { core } = createMockCore({ nullChat: true });
     const config = createConfig();
     const agent = new AgentInteractive(config, core);
 
     await agent.start(context);
 
-    expect(agent.getStatus()).toBe('failed');
-    expect(agent.getError()).toBe('Failed to create chat session');
+    expect(agent.getStatus()).toBe("failed");
+    expect(agent.getError()).toBe("Failed to create chat session");
   });
 
   // ─── Error Recovery ────────────────────────────────────────
 
-  it('should survive round errors and recover', async () => {
+  it("should survive round errors and recover", async () => {
     const { core } = createMockCore();
 
     let callCount = 0;
@@ -164,10 +164,10 @@ describe('AgentInteractive', () => {
       () => {
         callCount++;
         if (callCount === 1) {
-          return Promise.reject(new Error('Model error'));
+          return Promise.reject(new Error("Model error"));
         }
         return Promise.resolve({
-          text: 'Recovered',
+          text: "Recovered",
           terminateMode: null,
           turnsUsed: 1,
         });
@@ -179,9 +179,9 @@ describe('AgentInteractive', () => {
 
     await agent.start(context);
 
-    agent.enqueueMessage('cause error');
+    agent.enqueueMessage("cause error");
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('failed');
+      expect(agent.getStatus()).toBe("failed");
       expect(callCount).toBe(1);
     });
 
@@ -189,16 +189,16 @@ describe('AgentInteractive', () => {
     const messages = agent.getMessages();
     const errorMsg = messages.find(
       (m) =>
-        m.role === 'info' &&
-        m.content.includes('Model error') &&
-        m.metadata?.['level'] === 'error',
+        m.role === "info" &&
+        m.content.includes("Model error") &&
+        m.metadata?.["level"] === "error",
     );
     expect(errorMsg).toBeDefined();
 
     // Second message works fine
-    agent.enqueueMessage('recover');
+    agent.enqueueMessage("recover");
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('idle');
+      expect(agent.getStatus()).toBe("idle");
       expect(callCount).toBe(2);
     });
 
@@ -207,7 +207,7 @@ describe('AgentInteractive', () => {
 
   // ─── Cancellation ──────────────────────────────────────────
 
-  it('should cancel current round without killing the agent', async () => {
+  it("should cancel current round without killing the agent", async () => {
     const { core } = createMockCore();
     let resolveLoop: () => void;
     (core.runReasoningLoop as ReturnType<typeof vi.fn>).mockImplementation(
@@ -215,7 +215,7 @@ describe('AgentInteractive', () => {
         new Promise<{ text: string; terminateMode: string; turnsUsed: number }>(
           (resolve) => {
             resolveLoop = () =>
-              resolve({ text: '', terminateMode: 'cancelled', turnsUsed: 0 });
+              resolve({ text: "", terminateMode: "cancelled", turnsUsed: 0 });
           },
         ),
     );
@@ -225,22 +225,22 @@ describe('AgentInteractive', () => {
 
     await agent.start(context);
 
-    agent.enqueueMessage('long task');
+    agent.enqueueMessage("long task");
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('running');
+      expect(agent.getStatus()).toBe("running");
     });
 
     agent.cancelCurrentRound();
     resolveLoop!();
 
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('idle');
+      expect(agent.getStatus()).toBe("idle");
     });
 
     await agent.shutdown();
   });
 
-  it('should abort immediately', async () => {
+  it("should abort immediately", async () => {
     const { core } = createMockCore();
     (core.runReasoningLoop as ReturnType<typeof vi.fn>).mockImplementation(
       () =>
@@ -248,8 +248,8 @@ describe('AgentInteractive', () => {
           setTimeout(
             () =>
               resolve({
-                text: '',
-                terminateMode: 'cancelled',
+                text: "",
+                terminateMode: "cancelled",
                 turnsUsed: 0,
               }),
             50,
@@ -257,19 +257,19 @@ describe('AgentInteractive', () => {
         }),
     );
 
-    const config = createConfig({ initialTask: 'long task' });
+    const config = createConfig({ initialTask: "long task" });
     const agent = new AgentInteractive(config, core);
 
     await agent.start(context);
     agent.abort();
 
     await agent.waitForCompletion();
-    expect(agent.getStatus()).toBe('cancelled');
+    expect(agent.getStatus()).toBe("cancelled");
   });
 
   // ─── Accessors ─────────────────────────────────────────────
 
-  it('should provide stats via getStats()', async () => {
+  it("should provide stats via getStats()", async () => {
     const { core } = createMockCore();
     const config = createConfig();
     const agent = new AgentInteractive(config, core);
@@ -279,7 +279,7 @@ describe('AgentInteractive', () => {
     expect(stats.rounds).toBe(1);
   });
 
-  it('should provide core via getCore()', () => {
+  it("should provide core via getCore()", () => {
     const { core } = createMockCore();
     const config = createConfig();
     const agent = new AgentInteractive(config, core);
@@ -289,44 +289,44 @@ describe('AgentInteractive', () => {
 
   // ─── Message Recording ─────────────────────────────────────
 
-  it('should record assistant text from ROUND_TEXT events', async () => {
+  it("should record assistant text from ROUND_TEXT events", async () => {
     const { core, emitter } = createMockCore();
 
     (core.runReasoningLoop as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
         emitter.emit(AgentEventType.ROUND_TEXT, {
-          subagentId: 'test',
+          subagentId: "test",
           round: 1,
-          text: 'Hello from round',
-          thoughtText: '',
+          text: "Hello from round",
+          thoughtText: "",
           timestamp: Date.now(),
         });
         return Promise.resolve({
-          text: 'Hello from round',
+          text: "Hello from round",
           terminateMode: null,
           turnsUsed: 1,
         });
       },
     );
 
-    const config = createConfig({ initialTask: 'test' });
+    const config = createConfig({ initialTask: "test" });
     const agent = new AgentInteractive(config, core);
 
     await agent.start(context);
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('idle');
+      expect(agent.getStatus()).toBe("idle");
     });
 
     const assistantMsgs = agent
       .getMessages()
-      .filter((m) => m.role === 'assistant' && !m.thought);
+      .filter((m) => m.role === "assistant" && !m.thought);
     expect(assistantMsgs).toHaveLength(1);
-    expect(assistantMsgs[0]?.content).toBe('Hello from round');
+    expect(assistantMsgs[0]?.content).toBe("Hello from round");
 
     await agent.shutdown();
   });
 
-  it('should not cross-contaminate text across messages', async () => {
+  it("should not cross-contaminate text across messages", async () => {
     const { core, emitter } = createMockCore();
 
     let runCount = 0;
@@ -334,10 +334,10 @@ describe('AgentInteractive', () => {
       () => {
         runCount++;
         emitter.emit(AgentEventType.ROUND_TEXT, {
-          subagentId: 'test',
+          subagentId: "test",
           round: 1,
           text: `response-${runCount}`,
-          thoughtText: '',
+          thoughtText: "",
           timestamp: Date.now(),
         });
         return Promise.resolve({
@@ -348,186 +348,186 @@ describe('AgentInteractive', () => {
       },
     );
 
-    const config = createConfig({ initialTask: 'first message' });
+    const config = createConfig({ initialTask: "first message" });
     const agent = new AgentInteractive(config, core);
 
     await agent.start(context);
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('idle');
+      expect(agent.getStatus()).toBe("idle");
     });
 
-    agent.enqueueMessage('second message');
+    agent.enqueueMessage("second message");
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('idle');
+      expect(agent.getStatus()).toBe("idle");
       expect(runCount).toBe(2);
     });
 
     const messages = agent.getMessages();
     const assistantMessages = messages.filter(
-      (m) => m.role === 'assistant' && !m.thought,
+      (m) => m.role === "assistant" && !m.thought,
     );
     const corrupted = assistantMessages.find(
       (m) =>
-        m.content.includes('response-1') && m.content.includes('response-2'),
+        m.content.includes("response-1") && m.content.includes("response-2"),
     );
     expect(corrupted).toBeUndefined();
 
     await agent.shutdown();
   });
 
-  it('should capture thinking text as assistant messages with thought=true', async () => {
+  it("should capture thinking text as assistant messages with thought=true", async () => {
     const { core, emitter } = createMockCore();
 
     (core.runReasoningLoop as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
         emitter.emit(AgentEventType.ROUND_TEXT, {
-          subagentId: 'test',
+          subagentId: "test",
           round: 1,
-          text: 'Here is the answer',
-          thoughtText: 'Let me think...',
+          text: "Here is the answer",
+          thoughtText: "Let me think...",
           timestamp: Date.now(),
         });
         return Promise.resolve({
-          text: 'Here is the answer',
+          text: "Here is the answer",
           terminateMode: null,
           turnsUsed: 1,
         });
       },
     );
 
-    const config = createConfig({ initialTask: 'think about this' });
+    const config = createConfig({ initialTask: "think about this" });
     const agent = new AgentInteractive(config, core);
 
     await agent.start(context);
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('idle');
+      expect(agent.getStatus()).toBe("idle");
     });
 
     const messages = agent.getMessages();
     const thoughtMsg = messages.find(
-      (m) => m.role === 'assistant' && m.thought === true,
+      (m) => m.role === "assistant" && m.thought === true,
     );
-    const textMsg = messages.find((m) => m.role === 'assistant' && !m.thought);
+    const textMsg = messages.find((m) => m.role === "assistant" && !m.thought);
 
     expect(thoughtMsg).toBeDefined();
-    expect(thoughtMsg?.content).toBe('Let me think...');
+    expect(thoughtMsg?.content).toBe("Let me think...");
     expect(textMsg).toBeDefined();
-    expect(textMsg?.content).toBe('Here is the answer');
+    expect(textMsg?.content).toBe("Here is the answer");
 
     await agent.shutdown();
   });
 
-  it('should record tool_call and tool_result with correct roles', async () => {
+  it("should record tool_call and tool_result with correct roles", async () => {
     const { core, emitter } = createMockCore();
 
     (core.runReasoningLoop as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
         emitter.emit(AgentEventType.ROUND_TEXT, {
-          subagentId: 'test',
+          subagentId: "test",
           round: 1,
-          text: 'I will read the file',
-          thoughtText: '',
+          text: "I will read the file",
+          thoughtText: "",
           timestamp: Date.now(),
         });
         emitter.emit(AgentEventType.TOOL_CALL, {
-          subagentId: 'test',
+          subagentId: "test",
           round: 1,
-          callId: 'call-1',
-          name: 'read_file',
-          args: { path: 'test.ts' },
-          description: 'Read test.ts',
+          callId: "call-1",
+          name: "read_file",
+          args: { path: "test.ts" },
+          description: "Read test.ts",
           timestamp: Date.now(),
         });
         emitter.emit(AgentEventType.TOOL_RESULT, {
-          subagentId: 'test',
+          subagentId: "test",
           round: 1,
-          callId: 'call-1',
-          name: 'read_file',
+          callId: "call-1",
+          name: "read_file",
           success: true,
           timestamp: Date.now(),
         });
         return Promise.resolve({
-          text: '',
+          text: "",
           terminateMode: null,
           turnsUsed: 1,
         });
       },
     );
 
-    const config = createConfig({ initialTask: 'read a file' });
+    const config = createConfig({ initialTask: "read a file" });
     const agent = new AgentInteractive(config, core);
 
     await agent.start(context);
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('idle');
+      expect(agent.getStatus()).toBe("idle");
     });
 
     const messages = agent.getMessages();
-    const toolCall = messages.find((m) => m.role === 'tool_call');
-    const toolResult = messages.find((m) => m.role === 'tool_result');
+    const toolCall = messages.find((m) => m.role === "tool_call");
+    const toolResult = messages.find((m) => m.role === "tool_result");
 
     expect(toolCall).toBeDefined();
-    expect(toolCall?.metadata?.['toolName']).toBe('read_file');
-    expect(toolCall?.metadata?.['callId']).toBe('call-1');
+    expect(toolCall?.metadata?.["toolName"]).toBe("read_file");
+    expect(toolCall?.metadata?.["callId"]).toBe("call-1");
 
     expect(toolResult).toBeDefined();
-    expect(toolResult?.metadata?.['success']).toBe(true);
+    expect(toolResult?.metadata?.["success"]).toBe(true);
 
     await agent.shutdown();
   });
 
-  it('should place text before tool_call to preserve temporal ordering', async () => {
+  it("should place text before tool_call to preserve temporal ordering", async () => {
     const { core, emitter } = createMockCore();
 
     (core.runReasoningLoop as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
         emitter.emit(AgentEventType.ROUND_TEXT, {
-          subagentId: 'test',
+          subagentId: "test",
           round: 1,
-          text: 'Let me check',
-          thoughtText: '',
+          text: "Let me check",
+          thoughtText: "",
           timestamp: Date.now(),
         });
         emitter.emit(AgentEventType.TOOL_CALL, {
-          subagentId: 'test',
+          subagentId: "test",
           round: 1,
-          callId: 'call-1',
-          name: 'read_file',
+          callId: "call-1",
+          name: "read_file",
           args: {},
-          description: '',
+          description: "",
           timestamp: Date.now(),
         });
         emitter.emit(AgentEventType.TOOL_RESULT, {
-          subagentId: 'test',
+          subagentId: "test",
           round: 1,
-          callId: 'call-1',
-          name: 'read_file',
+          callId: "call-1",
+          name: "read_file",
           success: true,
           timestamp: Date.now(),
         });
         return Promise.resolve({
-          text: '',
+          text: "",
           terminateMode: null,
           turnsUsed: 1,
         });
       },
     );
 
-    const config = createConfig({ initialTask: 'task' });
+    const config = createConfig({ initialTask: "task" });
     const agent = new AgentInteractive(config, core);
 
     await agent.start(context);
     await vi.waitFor(() => {
-      expect(agent.getStatus()).toBe('idle');
+      expect(agent.getStatus()).toBe("idle");
     });
 
     const messages = agent.getMessages();
-    const nonUser = messages.filter((m) => m.role !== 'user');
+    const nonUser = messages.filter((m) => m.role !== "user");
 
     const textIdx = nonUser.findIndex(
-      (m) => m.role === 'assistant' && m.content === 'Let me check',
+      (m) => m.role === "assistant" && m.content === "Let me check",
     );
-    const toolIdx = nonUser.findIndex((m) => m.role === 'tool_call');
+    const toolIdx = nonUser.findIndex((m) => m.role === "tool_call");
     expect(textIdx).toBeLessThan(toolIdx);
 
     await agent.shutdown();
@@ -535,11 +535,11 @@ describe('AgentInteractive', () => {
 
   // ─── Chat History ────────────────────────────────────────────
 
-  it('should pass chatHistory as extraHistory to createChat', async () => {
+  it("should pass chatHistory as extraHistory to createChat", async () => {
     const { core } = createMockCore();
     const chatHistory = [
-      { role: 'user' as const, parts: [{ text: 'earlier question' }] },
-      { role: 'model' as const, parts: [{ text: 'earlier answer' }] },
+      { role: "user" as const, parts: [{ text: "earlier question" }] },
+      { role: "model" as const, parts: [{ text: "earlier answer" }] },
     ];
     const config = createConfig({ chatHistory });
     const agent = new AgentInteractive(config, core);
@@ -554,11 +554,11 @@ describe('AgentInteractive', () => {
     await agent.shutdown();
   });
 
-  it('should add info message when chatHistory is present', async () => {
+  it("should add info message when chatHistory is present", async () => {
     const { core } = createMockCore();
     const chatHistory = [
-      { role: 'user' as const, parts: [{ text: 'earlier question' }] },
-      { role: 'model' as const, parts: [{ text: 'earlier answer' }] },
+      { role: "user" as const, parts: [{ text: "earlier question" }] },
+      { role: "model" as const, parts: [{ text: "earlier answer" }] },
     ];
     const agent = new AgentInteractive(createConfig({ chatHistory }), core);
 
@@ -567,14 +567,14 @@ describe('AgentInteractive', () => {
     const messages = agent.getMessages();
     expect(messages).toHaveLength(1);
     expect(messages[0]).toMatchObject({
-      role: 'info',
-      content: 'History context from parent session included (2 messages)',
+      role: "info",
+      content: "History context from parent session included (2 messages)",
     });
 
     await agent.shutdown();
   });
 
-  it('should not add info message when chatHistory is absent', async () => {
+  it("should not add info message when chatHistory is absent", async () => {
     const { core } = createMockCore();
     const agent = new AgentInteractive(createConfig(), core);
 
@@ -585,7 +585,7 @@ describe('AgentInteractive', () => {
     await agent.shutdown();
   });
 
-  it('should pass undefined extraHistory when chatHistory is not set', async () => {
+  it("should pass undefined extraHistory when chatHistory is not set", async () => {
     const { core } = createMockCore();
     const config = createConfig();
     const agent = new AgentInteractive(config, core);
@@ -602,7 +602,7 @@ describe('AgentInteractive', () => {
 
   // ─── Events ────────────────────────────────────────────────
 
-  it('should emit status_change events', async () => {
+  it("should emit status_change events", async () => {
     const { core, emitter } = createMockCore();
     const config = createConfig();
     const agent = new AgentInteractive(config, core);

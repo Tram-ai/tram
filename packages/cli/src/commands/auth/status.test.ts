@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { showAuthStatus } from './handler.js';
-import { AuthType } from '@qwen-code/qwen-code-core';
-import { CODING_PLAN_ENV_KEY } from '../../constants/codingPlan.js';
-import type { LoadedSettings } from '../../config/settings.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { showAuthStatus } from "./handler.js";
+import { AuthType } from "@tram-ai/tram-core";
+import { CODING_PLAN_ENV_KEY } from "../../constants/codingPlan.js";
+import type { LoadedSettings } from "../../config/settings.js";
 
-vi.mock('../../config/settings.js', () => ({
+vi.mock("../../config/settings.js", () => ({
   loadSettings: vi.fn(),
 }));
 
-vi.mock('../../utils/stdioHelpers.js', () => ({
+vi.mock("../../utils/stdioHelpers.js", () => ({
   writeStdoutLine: vi.fn(),
   writeStderrLine: vi.fn(),
 }));
 
-import { loadSettings } from '../../config/settings.js';
-import { writeStdoutLine, writeStderrLine } from '../../utils/stdioHelpers.js';
+import { loadSettings } from "../../config/settings.js";
+import { writeStdoutLine, writeStderrLine } from "../../utils/stdioHelpers.js";
 
-describe('showAuthStatus', () => {
+describe("showAuthStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+    vi.spyOn(process, "exit").mockImplementation((() => undefined) as never);
     delete process.env[CODING_PLAN_ENV_KEY];
   });
 
@@ -39,38 +39,38 @@ describe('showAuthStatus', () => {
   ): LoadedSettings =>
     ({
       merged,
-      system: { settings: {}, path: '/system.json' },
-      systemDefaults: { settings: {}, path: '/system-defaults.json' },
-      user: { settings: {}, path: '/user.json' },
-      workspace: { settings: {}, path: '/workspace.json' },
+      system: { settings: {}, path: "/system.json" },
+      systemDefaults: { settings: {}, path: "/system-defaults.json" },
+      user: { settings: {}, path: "/user.json" },
+      workspace: { settings: {}, path: "/workspace.json" },
       forScope: vi.fn(),
       setValue: vi.fn(),
       isTrusted: true,
     }) as unknown as LoadedSettings;
 
-  it('should show message when no authentication is configured', async () => {
+  it("should show message when no authentication is configured", async () => {
     vi.mocked(loadSettings).mockReturnValue(createMockSettings({}));
 
     await showAuthStatus();
 
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('No authentication method configured'),
+      expect.stringContaining("No authentication method configured"),
     );
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('qwen auth qwen-oauth'),
+      expect.stringContaining("qwen auth qwen-oauth"),
     );
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('qwen auth coding-plan'),
+      expect.stringContaining("qwen auth coding-plan"),
     );
     expect(process.exit).toHaveBeenCalledWith(0);
   });
 
-  it('should show Qwen OAuth status when configured', async () => {
+  it("should show Qwen OAuth status when configured", async () => {
     vi.mocked(loadSettings).mockReturnValue(
       createMockSettings({
         security: {
           auth: {
-            selectedType: AuthType.QWEN_OAUTH,
+            selectedType: AuthType.TRAM_OAUTH,
           },
         },
       }),
@@ -79,19 +79,19 @@ describe('showAuthStatus', () => {
     await showAuthStatus();
 
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('Qwen OAuth'),
+      expect.stringContaining("Qwen OAuth"),
     );
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('Free tier (discontinued 2026-04-15)'),
+      expect.stringContaining("Free tier (discontinued 2026-04-15)"),
     );
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('No longer available'),
+      expect.stringContaining("No longer available"),
     );
     expect(process.exit).toHaveBeenCalledWith(0);
   });
 
-  it('should show Coding Plan status when configured with API key', async () => {
-    process.env[CODING_PLAN_ENV_KEY] = 'test-api-key';
+  it("should show Coding Plan status when configured with API key", async () => {
+    process.env[CODING_PLAN_ENV_KEY] = "test-api-key";
 
     vi.mocked(loadSettings).mockReturnValue(
       createMockSettings({
@@ -101,11 +101,11 @@ describe('showAuthStatus', () => {
           },
         },
         codingPlan: {
-          region: 'china',
-          version: 'abc123def456',
+          region: "china",
+          version: "abc123def456",
         },
         model: {
-          name: 'qwen3.5-plus',
+          name: "qwen3.5-plus",
         },
       }),
     );
@@ -113,15 +113,15 @@ describe('showAuthStatus', () => {
     await showAuthStatus();
 
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('Alibaba Cloud Coding Plan'),
+      expect.stringContaining("Alibaba Cloud Coding Plan"),
     );
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('API key configured'),
+      expect.stringContaining("API key configured"),
     );
     expect(process.exit).toHaveBeenCalledWith(0);
   });
 
-  it('should show Coding Plan as incomplete when API key is missing', async () => {
+  it("should show Coding Plan as incomplete when API key is missing", async () => {
     vi.mocked(loadSettings).mockReturnValue(
       createMockSettings({
         security: {
@@ -130,7 +130,7 @@ describe('showAuthStatus', () => {
           },
         },
         codingPlan: {
-          region: 'global',
+          region: "global",
         },
       }),
     );
@@ -138,15 +138,15 @@ describe('showAuthStatus', () => {
     await showAuthStatus();
 
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('Incomplete'),
+      expect.stringContaining("Incomplete"),
     );
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('API key not found'),
+      expect.stringContaining("API key not found"),
     );
   });
 
-  it('should show Coding Plan region for china', async () => {
-    process.env[CODING_PLAN_ENV_KEY] = 'test-api-key';
+  it("should show Coding Plan region for china", async () => {
+    process.env[CODING_PLAN_ENV_KEY] = "test-api-key";
 
     vi.mocked(loadSettings).mockReturnValue(
       createMockSettings({
@@ -156,10 +156,10 @@ describe('showAuthStatus', () => {
           },
         },
         codingPlan: {
-          region: 'china',
+          region: "china",
         },
         model: {
-          name: 'qwen3.5-plus',
+          name: "qwen3.5-plus",
         },
       }),
     );
@@ -167,12 +167,12 @@ describe('showAuthStatus', () => {
     await showAuthStatus();
 
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('中国 (China)'),
+      expect.stringContaining("中国 (China)"),
     );
   });
 
-  it('should show Coding Plan region for global', async () => {
-    process.env[CODING_PLAN_ENV_KEY] = 'test-api-key';
+  it("should show Coding Plan region for global", async () => {
+    process.env[CODING_PLAN_ENV_KEY] = "test-api-key";
 
     vi.mocked(loadSettings).mockReturnValue(
       createMockSettings({
@@ -182,10 +182,10 @@ describe('showAuthStatus', () => {
           },
         },
         codingPlan: {
-          region: 'global',
+          region: "global",
         },
         model: {
-          name: 'qwen3-coder-plus',
+          name: "qwen3-coder-plus",
         },
       }),
     );
@@ -193,12 +193,12 @@ describe('showAuthStatus', () => {
     await showAuthStatus();
 
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('Global'),
+      expect.stringContaining("Global"),
     );
   });
 
-  it('should show current model name', async () => {
-    process.env[CODING_PLAN_ENV_KEY] = 'test-api-key';
+  it("should show current model name", async () => {
+    process.env[CODING_PLAN_ENV_KEY] = "test-api-key";
 
     vi.mocked(loadSettings).mockReturnValue(
       createMockSettings({
@@ -208,10 +208,10 @@ describe('showAuthStatus', () => {
           },
         },
         codingPlan: {
-          region: 'china',
+          region: "china",
         },
         model: {
-          name: 'qwen3.5-plus',
+          name: "qwen3.5-plus",
         },
       }),
     );
@@ -219,12 +219,12 @@ describe('showAuthStatus', () => {
     await showAuthStatus();
 
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('qwen3.5-plus'),
+      expect.stringContaining("qwen3.5-plus"),
     );
   });
 
-  it('should show config version (truncated)', async () => {
-    process.env[CODING_PLAN_ENV_KEY] = 'test-api-key';
+  it("should show config version (truncated)", async () => {
+    process.env[CODING_PLAN_ENV_KEY] = "test-api-key";
 
     vi.mocked(loadSettings).mockReturnValue(
       createMockSettings({
@@ -234,11 +234,11 @@ describe('showAuthStatus', () => {
           },
         },
         codingPlan: {
-          region: 'china',
-          version: 'abc123def456789',
+          region: "china",
+          version: "abc123def456789",
         },
         model: {
-          name: 'qwen3.5-plus',
+          name: "qwen3.5-plus",
         },
       }),
     );
@@ -246,12 +246,12 @@ describe('showAuthStatus', () => {
     await showAuthStatus();
 
     expect(writeStdoutLine).toHaveBeenCalledWith(
-      expect.stringContaining('abc123de...'),
+      expect.stringContaining("abc123de..."),
     );
   });
 
-  it('should handle errors and exit with code 1', async () => {
-    const error = new Error('Settings load failed');
+  it("should handle errors and exit with code 1", async () => {
+    const error = new Error("Settings load failed");
     vi.mocked(loadSettings).mockImplementation(() => {
       throw error;
     });
@@ -259,7 +259,7 @@ describe('showAuthStatus', () => {
     await showAuthStatus();
 
     expect(writeStderrLine).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to check authentication status'),
+      expect.stringContaining("Failed to check authentication status"),
     );
     expect(process.exit).toHaveBeenCalledWith(1);
   });

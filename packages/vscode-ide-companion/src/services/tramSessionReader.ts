@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
-import * as readline from 'readline';
-import { getProjectHash } from '@tram-ai/tram-core/src/utils/paths.js';
-import { truncatePanelTitle } from '../webview/utils/panelTitleUtils.js';
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
+import * as readline from "readline";
+import { getProjectHash } from "@tram-ai/tram-core/src/utils/paths.js";
+import { truncatePanelTitle } from "../webview/utils/panelTitleUtils.js";
 
 export interface TramMessage {
   id: string;
   timestamp: string;
-  type: 'user' | 'tram';
+  type: "user" | "tram";
   content: string;
   thoughts?: unknown[];
   tokens?: {
@@ -44,7 +44,7 @@ export class TramSessionReader {
   private tramDir: string;
 
   constructor() {
-    this.tramDir = path.join(os.homedir(), '.tram');
+    this.tramDir = path.join(os.homedir(), ".tram");
   }
 
   /**
@@ -60,20 +60,20 @@ export class TramSessionReader {
       if (!allProjects && workingDir) {
         // Current project only
         const projectHash = getProjectHash(workingDir);
-        const chatsDir = path.join(this.tramDir, 'tmp', projectHash, 'chats');
+        const chatsDir = path.join(this.tramDir, "tmp", projectHash, "chats");
         const projectSessions = await this.readSessionsFromDir(chatsDir);
         sessions.push(...projectSessions);
       } else {
         // All projects
-        const tmpDir = path.join(this.tramDir, 'tmp');
+        const tmpDir = path.join(this.tramDir, "tmp");
         if (!fs.existsSync(tmpDir)) {
-          console.log('[TramSessionReader] Tmp directory not found:', tmpDir);
+          console.log("[TramSessionReader] Tmp directory not found:", tmpDir);
           return [];
         }
 
         const projectDirs = fs.readdirSync(tmpDir);
         for (const projectHash of projectDirs) {
-          const chatsDir = path.join(tmpDir, projectHash, 'chats');
+          const chatsDir = path.join(tmpDir, projectHash, "chats");
           const projectSessions = await this.readSessionsFromDir(chatsDir);
           sessions.push(...projectSessions);
         }
@@ -87,7 +87,7 @@ export class TramSessionReader {
 
       return sessions;
     } catch (error) {
-      console.error('[TramSessionReader] Failed to get sessions:', error);
+      console.error("[TramSessionReader] Failed to get sessions:", error);
       return [];
     }
   }
@@ -105,7 +105,7 @@ export class TramSessionReader {
     const files = fs.readdirSync(chatsDir);
 
     const jsonSessionFiles = files.filter(
-      (f) => f.startsWith('session-') && f.endsWith('.json'),
+      (f) => f.startsWith("session-") && f.endsWith(".json"),
     );
 
     const jsonlSessionFiles = files.filter((f) =>
@@ -115,13 +115,13 @@ export class TramSessionReader {
     for (const file of jsonSessionFiles) {
       const filePath = path.join(chatsDir, file);
       try {
-        const content = fs.readFileSync(filePath, 'utf-8');
+        const content = fs.readFileSync(filePath, "utf-8");
         const session = JSON.parse(content) as TramSession;
         session.filePath = filePath;
         sessions.push(session);
       } catch (error) {
         console.error(
-          '[TramSessionReader] Failed to read session file:',
+          "[TramSessionReader] Failed to read session file:",
           filePath,
           error,
         );
@@ -138,7 +138,7 @@ export class TramSessionReader {
         }
       } catch (error) {
         console.error(
-          '[TramSessionReader] Failed to read JSONL session file:',
+          "[TramSessionReader] Failed to read JSONL session file:",
           filePath,
           error,
         );
@@ -166,7 +166,7 @@ export class TramSessionReader {
     // If the session points to a JSONL file, load full content on demand
     if (
       found.filePath &&
-      found.filePath.endsWith('.jsonl') &&
+      found.filePath.endsWith(".jsonl") &&
       found.messages.length === 0
     ) {
       const hydrated = await this.readJsonlSession(found.filePath, true);
@@ -185,10 +185,10 @@ export class TramSessionReader {
     // Prefer cached prompt text to avoid loading messages for JSONL sessions
     const text = session.firstUserText
       ? session.firstUserText
-      : (session.messages.find((m) => m.type === 'user')?.content ?? '');
+      : (session.messages.find((m) => m.type === "user")?.content ?? "");
 
     if (!text) {
-      return 'Untitled Session';
+      return "Untitled Session";
     }
 
     return truncatePanelTitle(text);
@@ -208,7 +208,7 @@ export class TramSessionReader {
       }
 
       const stats = fs.statSync(filePath);
-      const fileStream = fs.createReadStream(filePath, { encoding: 'utf-8' });
+      const fileStream = fs.createReadStream(filePath, { encoding: "utf-8" });
       const rl = readline.createInterface({
         input: fileStream,
         crlfDelay: Infinity,
@@ -234,19 +234,19 @@ export class TramSessionReader {
           continue;
         }
 
-        if (!sessionId && typeof obj.sessionId === 'string') {
+        if (!sessionId && typeof obj.sessionId === "string") {
           sessionId = obj.sessionId;
         }
-        if (!startTime && typeof obj.timestamp === 'string') {
+        if (!startTime && typeof obj.timestamp === "string") {
           startTime = obj.timestamp;
         }
-        if (!cwd && typeof obj.cwd === 'string') {
+        if (!cwd && typeof obj.cwd === "string") {
           cwd = obj.cwd;
         }
 
-        const type = typeof obj.type === 'string' ? obj.type : '';
-        if (type === 'user' || type === 'assistant') {
-          const uuid = typeof obj.uuid === 'string' ? obj.uuid : undefined;
+        const type = typeof obj.type === "string" ? obj.type : "";
+        if (type === "user" || type === "assistant") {
+          const uuid = typeof obj.uuid === "string" ? obj.uuid : undefined;
           if (uuid) {
             seenUuids.add(uuid);
           }
@@ -255,13 +255,13 @@ export class TramSessionReader {
           if (includeMessages) {
             messages.push({
               id: uuid || `${messages.length}`,
-              timestamp: typeof obj.timestamp === 'string' ? obj.timestamp : '',
-              type: type === 'user' ? 'user' : 'tram',
+              timestamp: typeof obj.timestamp === "string" ? obj.timestamp : "",
+              type: type === "user" ? "user" : "tram",
               content: text,
             });
           }
 
-          if (!firstUserText && type === 'user' && text) {
+          if (!firstUserText && type === "user" && text) {
             firstUserText = text;
           }
         }
@@ -291,7 +291,7 @@ export class TramSessionReader {
       };
     } catch (error) {
       console.error(
-        '[TramSessionReader] Failed to parse JSONL session:',
+        "[TramSessionReader] Failed to parse JSONL session:",
         error,
       );
       return null;
@@ -301,27 +301,27 @@ export class TramSessionReader {
   // Extract plain text from CLI Content structure
   private contentToText(message: unknown): string {
     try {
-      if (typeof message !== 'object' || message === null) {
-        return '';
+      if (typeof message !== "object" || message === null) {
+        return "";
       }
 
       const typed = message as { parts?: unknown[] };
       const parts = Array.isArray(typed.parts) ? typed.parts : [];
       const texts: string[] = [];
       for (const part of parts) {
-        if (typeof part !== 'object' || part === null) {
+        if (typeof part !== "object" || part === null) {
           continue;
         }
         const p = part as Record<string, unknown>;
-        if (typeof p.text === 'string') {
+        if (typeof p.text === "string") {
           texts.push(p.text);
-        } else if (typeof p.data === 'string') {
+        } else if (typeof p.data === "string") {
           texts.push(p.data);
         }
       }
-      return texts.join('\n');
+      return texts.join("\n");
     } catch {
-      return '';
+      return "";
     }
   }
 
@@ -340,7 +340,7 @@ export class TramSessionReader {
       }
       return false;
     } catch (error) {
-      console.error('[TramSessionReader] Failed to delete session:', error);
+      console.error("[TramSessionReader] Failed to delete session:", error);
       return false;
     }
   }

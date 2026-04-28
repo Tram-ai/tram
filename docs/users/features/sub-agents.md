@@ -1,6 +1,6 @@
 # Subagents
 
-Subagents are specialized AI assistants that handle specific types of tasks within Qwen Code. They allow you to delegate focused work to AI agents that are configured with task-specific prompts, tools, and behaviors.
+Subagents are specialized AI assistants that handle specific types of tasks within TRAM. They allow you to delegate focused work to AI agents that are configured with task-specific prompts, tools, and behaviors.
 
 ## What are Subagents?
 
@@ -14,7 +14,7 @@ Subagents are independent AI assistants that:
 
 ## Fork Subagent (Implicit Fork)
 
-In addition to named subagents, Qwen Code supports **implicit forking** — when the AI omits the `subagent_type` parameter, it triggers a fork that inherits the parent's full conversation context.
+In addition to named subagents, TRAM supports **implicit forking** — when the AI omits the `subagent_type` parameter, it triggers a fork that inherits the parent's full conversation context.
 
 ### How Fork Differs from Named Subagents
 
@@ -255,7 +255,7 @@ new contributors and end users understand the project.
 
 ### Automatic Delegation
 
-Qwen Code proactively delegates tasks based on:
+TRAM proactively delegates tasks based on:
 
 - The task description in your request
 - The description field in Subagents configurations

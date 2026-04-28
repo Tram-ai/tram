@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
 
 interface UpdateNotificationProps {
   message: string;

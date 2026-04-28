@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { t } from '../../i18n/index.js';
+import { useMemo } from "react";
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import { t } from "../../i18n/index.js";
 import {
   getTipHistory,
   selectTip,
   tipRegistry,
   type TipContext,
-} from '../../services/tips/index.js';
+} from "../../services/tips/index.js";
 
 /**
  * Select a startup tip. Extracted as a standalone function for clarity.
@@ -29,14 +29,14 @@ function pickStartupTip(): string {
     platform: process.platform,
   };
 
-  const tip = selectTip('startup', context, tipRegistry, history);
+  const tip = selectTip("startup", context, tipRegistry, history);
   if (tip) {
     history.recordShown(tip.id, 0);
     return tip.content;
   }
 
   // Fallback — should not happen with the current registry
-  return 'Type / to see all available commands.';
+  return "Type / to see all available commands.";
 }
 
 export const Tips: React.FC = () => {
@@ -45,7 +45,7 @@ export const Tips: React.FC = () => {
   return (
     <Box marginLeft={2} marginRight={2}>
       <Text color={theme.text.secondary}>
-        {t('Tips: ')}
+        {t("Tips: ")}
         {t(selectedTip)}
       </Text>
     </Box>

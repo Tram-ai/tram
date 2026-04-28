@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box } from 'ink';
-import { RadioButtonSelect } from '../../shared/RadioButtonSelect.js';
-import type { WizardStepProps } from '../types.js';
-import { t } from '../../../../i18n/index.js';
+import { Box } from "ink";
+import { RadioButtonSelect } from "../../shared/RadioButtonSelect.js";
+import type { WizardStepProps } from "../types.js";
+import { t } from "../../../../i18n/index.js";
 
 interface LocationOption {
   label: string;
-  value: 'project' | 'user';
+  value: "project" | "user";
 }
 
 const locationOptions: LocationOption[] = [
   {
     get label() {
-      return t('Project Level (.tram/agents/)');
+      return t("Project Level (.tram/agents/)");
     },
-    value: 'project',
+    value: "project",
   },
   {
     get label() {
-      return t('User Level (~/.tram/agents/)');
+      return t("User Level (~/.tram/agents/)");
     },
-    value: 'user',
+    value: "user",
   },
 ];
 
@@ -34,8 +34,8 @@ const locationOptions: LocationOption[] = [
  */
 export function LocationSelector({ state, dispatch, onNext }: WizardStepProps) {
   const handleSelect = (selectedValue: string) => {
-    const location = selectedValue as 'project' | 'user';
-    dispatch({ type: 'SET_LOCATION', location });
+    const location = selectedValue as "project" | "user";
+    dispatch({ type: "SET_LOCATION", location });
     onNext();
   };
 

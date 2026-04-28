@@ -8,22 +8,25 @@ import {
   spawn,
   type ChildProcessWithoutNullStreams,
   type SpawnOptions,
-} from 'node:child_process';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import type { Config } from '../config/config.js';
+} from "node:child_process";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import type { Config } from "../config/config.js";
 
-const SERVICE_CONFIG_FILENAME = 'services.json';
+const SERVICE_CONFIG_FILENAME = "services.json";
 const MAX_LOG_LINES = 2000;
 const DEFAULT_MAX_RUNNING_SERVICES = 1;
 const RAPID_CRASH_WINDOW_MS = 30_000; // If restart crashes within 30s, escalate to SubLM
-const LOG_VARIABLES_DIR = 'log-variables';
+const LOG_VARIABLES_DIR = "log-variables";
 
 /**
  * Resolve a $LOG_xxx variable name to its actual file path.
  * Returns the resolved path if it matches the pattern, or null otherwise.
  */
-export function resolveLogVariable(variableName: string, projectTempDir: string): string | null {
+export function resolveLogVariable(
+  variableName: string,
+  projectTempDir: string,
+): string | null {
   const match = variableName.match(/^\$?(LOG_[A-Z0-9_-]+_\d+)$/);
   if (!match) return null;
   return path.join(projectTempDir, LOG_VARIABLES_DIR, `${match[1]}.log`);
@@ -35,7 +38,7 @@ export interface LogVariableRef {
   lineCount: number;
 }
 
-export type ServiceAlertLevel = 'info' | 'warning' | 'error';
+export type ServiceAlertLevel = "info" | "warning" | "error";
 
 export interface ServiceAlertEvent {
   level: ServiceAlertLevel;
@@ -92,12 +95,12 @@ export interface ServiceAlertSnapshot {
   errorLinesFromAlert: number;
 }
 
-type AlertMode = 'all' | 'errors';
+type AlertMode = "all" | "errors";
 
 export interface LogPatternRule {
   id: string;
   pattern: string;
-  action: 'suppress' | 'analyze' | 'auto-fix';
+  action: "suppress" | "analyze" | "auto-fix";
   description: string;
   createdAt: number;
   appliedCount?: number;
@@ -110,7 +113,7 @@ interface PersistedServiceConfig {
 }
 
 function isWindows(): boolean {
-  return process.platform === 'win32';
+  return process.platform === "win32";
 }
 
 async function runCommand(
@@ -120,12 +123,12 @@ async function runCommand(
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const child = spawn(command, args, options);
-    child.once('error', reject);
-    child.once('exit', (code) => {
+    child.once("error", reject);
+    child.once("exit", (code) => {
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`${command} exited with code ${code ?? 'null'}`));
+        reject(new Error(`${command} exited with code ${code ?? "null"}`));
       }
     });
   });
@@ -142,19 +145,19 @@ export class ServiceRuntimeManager {
 
     ServiceRuntimeManager.shutdownHooksRegistered = true;
 
-    process.on('beforeExit', () => {
+    process.on("beforeExit", () => {
       for (const manager of ServiceRuntimeManager.instances.values()) {
         void manager.stopAllServicesForHostShutdown();
       }
     });
 
-    process.on('exit', () => {
+    process.on("exit", () => {
       for (const manager of ServiceRuntimeManager.instances.values()) {
         manager.forceKillAllServices();
       }
     });
 
-    for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+    for (const signal of ["SIGINT", "SIGTERM"] as const) {
       process.on(signal, () => {
         for (const manager of ServiceRuntimeManager.instances.values()) {
           void manager.stopAllServicesForHostShutdown();
@@ -191,9 +194,10 @@ export class ServiceRuntimeManager {
       return;
     }
 
-    const { services, maxRunningServices, logPatternRules } = await this.loadConfig();
+    const { services, maxRunningServices, logPatternRules } =
+      await this.loadConfig();
     this.maxRunningServices = maxRunningServices;
-    
+
     if (logPatternRules) {
       for (const [serviceName, rules] of Object.entries(logPatternRules)) {
         this.logPatternRules.set(serviceName, rules);
@@ -224,7 +228,7 @@ export class ServiceRuntimeManager {
           await this.startService(state.definition.name);
         } catch (error) {
           this.emit({
-            level: 'error',
+            level: "error",
             message: `[service/${state.definition.name}] auto-start failed: ${
               error instanceof Error ? error.message : String(error)
             }`,
@@ -256,7 +260,8 @@ export class ServiceRuntimeManager {
       notificationsEnabled: prevState?.notificationsEnabled ?? true,
       expectedStop: false,
       activeAlertStartIndex: prevState?.activeAlertStartIndex ?? null,
-      hasNotifiedForCurrentAlert: prevState?.hasNotifiedForCurrentAlert ?? false,
+      hasNotifiedForCurrentAlert:
+        prevState?.hasNotifiedForCurrentAlert ?? false,
       lastAlertAt: prevState?.lastAlertAt,
       pendingAlertPrompt: prevState?.pendingAlertPrompt ?? false,
       remindAlertAt: prevState?.remindAlertAt,
@@ -312,8 +317,8 @@ export class ServiceRuntimeManager {
     state.pendingAlertPrompt = false;
     state.remindAlertAt = undefined;
 
-    const runningCount = Array.from(this.services.values()).filter(
-      (svc) => Boolean(svc.child),
+    const runningCount = Array.from(this.services.values()).filter((svc) =>
+      Boolean(svc.child),
     ).length;
 
     if (runningCount >= this.maxRunningServices) {
@@ -327,7 +332,7 @@ export class ServiceRuntimeManager {
     const child = spawn(state.definition.command, {
       cwd: resolvedCwd,
       shell: true,
-      stdio: 'pipe',
+      stdio: "pipe",
       env: process.env,
       windowsHide: true,
     });
@@ -337,22 +342,22 @@ export class ServiceRuntimeManager {
     state.startedAt = Date.now();
     state.expectedStop = false;
 
-    child.stdout.on('data', (chunk: Buffer) => {
-      this.handleOutput(name, 'stdout', chunk.toString());
+    child.stdout.on("data", (chunk: Buffer) => {
+      this.handleOutput(name, "stdout", chunk.toString());
     });
 
-    child.stderr.on('data', (chunk: Buffer) => {
-      this.handleOutput(name, 'stderr', chunk.toString());
+    child.stderr.on("data", (chunk: Buffer) => {
+      this.handleOutput(name, "stderr", chunk.toString());
     });
 
-    child.on('error', (error) => {
+    child.on("error", (error) => {
       this.emit({
-        level: 'error',
+        level: "error",
         message: `[service/${name}] process error: ${error.message}`,
       });
     });
 
-    child.on('exit', (code, signal) => {
+    child.on("exit", (code, signal) => {
       const latest = this.services.get(name);
       if (!latest) {
         return;
@@ -374,16 +379,21 @@ export class ServiceRuntimeManager {
       latest.expectedStop = false;
 
       if (abnormal) {
-        this.activateAlertIfNeeded(name, `abnormal-exit code=${code ?? 'null'} signal=${signal ?? 'null'}`);
+        this.activateAlertIfNeeded(
+          name,
+          `abnormal-exit code=${code ?? "null"} signal=${signal ?? "null"}`,
+        );
 
         // Auto-restart logic: if the previous exit was recent (rapid crash), escalate to SubLM
-        const isRapidCrash = previousExit && (exitedAt - previousExit.at) < RAPID_CRASH_WINDOW_MS;
+        const isRapidCrash =
+          previousExit && exitedAt - previousExit.at < RAPID_CRASH_WINDOW_MS;
 
         if (isRapidCrash) {
           // Rapid crash detected — don't auto-restart, send logs for SubLM analysis
           this.emit({
-            level: 'error',
-            message: `[service/${name}] rapid crash detected (two exits within ${RAPID_CRASH_WINDOW_MS / 1000}s). ` +
+            level: "error",
+            message:
+              `[service/${name}] rapid crash detected (two exits within ${RAPID_CRASH_WINDOW_MS / 1000}s). ` +
               `Auto-restart disabled. Please analyze logs with SubLM:\n` +
               `Use service_manage tool with action "read-alert-logs" for service "${name}" to review, ` +
               `then use task tool to spawn a SubAgent for log analysis.`,
@@ -391,14 +401,14 @@ export class ServiceRuntimeManager {
         } else {
           // First abnormal exit — auto-restart
           this.emit({
-            level: 'warning',
+            level: "warning",
             message: `[service/${name}] abnormal exit detected. Auto-restarting...`,
           });
           // Delayed restart to avoid tight loops
           setTimeout(() => {
             void this.startService(name).catch((err) => {
               this.emit({
-                level: 'error',
+                level: "error",
                 message: `[service/${name}] auto-restart failed: ${err instanceof Error ? err.message : String(err)}`,
               });
             });
@@ -408,8 +418,8 @@ export class ServiceRuntimeManager {
     });
 
     this.emit({
-      level: 'info',
-      message: `[service/${name}] started (pid ${child.pid ?? 'unknown'})`,
+      level: "info",
+      message: `[service/${name}] started (pid ${child.pid ?? "unknown"})`,
     });
   }
 
@@ -429,7 +439,7 @@ export class ServiceRuntimeManager {
     }
 
     this.emit({
-      level: 'info',
+      level: "info",
       message: `[service/${name}] stopped`,
     });
   }
@@ -455,7 +465,7 @@ export class ServiceRuntimeManager {
       throw new Error(`Service "${name}" is not running or stdin is closed.`);
     }
 
-    this.appendDecoratedLogLine(state, 'stdin', `send: ${input}`);
+    this.appendDecoratedLogLine(state, "stdin", `send: ${input}`);
     state.child.stdin.write(`${input}\n`);
   }
 
@@ -486,7 +496,9 @@ export class ServiceRuntimeManager {
       hasAlert: true,
       alertStartedAtLine: state.activeAlertStartIndex + 1,
       totalLinesFromAlert: lines.length,
-      errorLinesFromAlert: lines.filter((line) => this.isErrorDecoratedLine(line)).length,
+      errorLinesFromAlert: lines.filter((line) =>
+        this.isErrorDecoratedLine(line),
+      ).length,
     };
   }
 
@@ -506,7 +518,7 @@ export class ServiceRuntimeManager {
     return latest?.name;
   }
 
-  readAlertLogs(name: string, mode: AlertMode = 'all'): string[] {
+  readAlertLogs(name: string, mode: AlertMode = "all"): string[] {
     const state = this.requireState(name);
     if (state.activeAlertStartIndex === null) {
       return [];
@@ -515,7 +527,7 @@ export class ServiceRuntimeManager {
     let lines = state.logs.slice(state.activeAlertStartIndex);
     // Filter out lines matching "suppress" pattern rules
     lines = this.filterSuppressedLines(name, lines);
-    if (mode === 'errors') {
+    if (mode === "errors") {
       return lines.filter((line) => this.isErrorDecoratedLine(line));
     }
     return lines;
@@ -578,7 +590,7 @@ export class ServiceRuntimeManager {
     serviceName: string,
     rule: {
       pattern: string;
-      action: 'suppress' | 'analyze' | 'auto-fix';
+      action: "suppress" | "analyze" | "auto-fix";
       description: string;
     },
   ): Promise<void> {
@@ -600,7 +612,7 @@ export class ServiceRuntimeManager {
     await this.saveConfig();
 
     this.emit({
-      level: 'info',
+      level: "info",
       message: `[service/${serviceName}] added log pattern rule: ${rule.pattern} (action: ${rule.action})`,
     });
   }
@@ -609,7 +621,10 @@ export class ServiceRuntimeManager {
     return this.logPatternRules.get(serviceName) ?? [];
   }
 
-  async removeLogPatternRule(serviceName: string, ruleId: string): Promise<boolean> {
+  async removeLogPatternRule(
+    serviceName: string,
+    ruleId: string,
+  ): Promise<boolean> {
     const rules = this.logPatternRules.get(serviceName);
     if (!rules) {
       return false;
@@ -628,7 +643,10 @@ export class ServiceRuntimeManager {
     return false;
   }
 
-  checkLogLineAgainstPatterns(serviceName: string, line: string): LogPatternRule[] {
+  checkLogLineAgainstPatterns(
+    serviceName: string,
+    line: string,
+  ): LogPatternRule[] {
     const rules = this.logPatternRules.get(serviceName) ?? [];
     const matched: LogPatternRule[] = [];
 
@@ -651,13 +669,19 @@ export class ServiceRuntimeManager {
    * Store log lines into a temp file and return a variable reference.
    * The main LM sees only the variable name; SubLM or file read tool can access full text.
    */
-  async storeLogsAsVariable(serviceName: string, lines: string[]): Promise<LogVariableRef> {
-    const varDir = path.join(this.config.storage.getProjectTempDir(), LOG_VARIABLES_DIR);
+  async storeLogsAsVariable(
+    serviceName: string,
+    lines: string[],
+  ): Promise<LogVariableRef> {
+    const varDir = path.join(
+      this.config.storage.getProjectTempDir(),
+      LOG_VARIABLES_DIR,
+    );
     await fs.mkdir(varDir, { recursive: true });
 
     const varId = `LOG_${serviceName.toUpperCase()}_${Date.now()}`;
     const filePath = path.join(varDir, `${varId}.log`);
-    await fs.writeFile(filePath, lines.join('\n'), 'utf-8');
+    await fs.writeFile(filePath, lines.join("\n"), "utf-8");
 
     return {
       variableName: `$${varId}`,
@@ -677,24 +701,31 @@ export class ServiceRuntimeManager {
     }
 
     const ref = await this.storeLogsAsVariable(name, lines);
-    return `[Log content stored as ${ref.variableName} (${ref.lineCount} lines)]\n` +
+    return (
+      `[Log content stored as ${ref.variableName} (${ref.lineCount} lines)]\n` +
       `To read full logs, use read_file with absolute_path: ${ref.variableName}\n` +
-      `To analyze with SubLM, reference ${ref.variableName} in filePaths`;
+      `To analyze with SubLM, reference ${ref.variableName} in filePaths`
+    );
   }
 
   /**
    * Get alert logs as a variable reference.
    */
-  async getAlertLogsAsVariable(name: string, mode: AlertMode = 'all'): Promise<string> {
+  async getAlertLogsAsVariable(
+    name: string,
+    mode: AlertMode = "all",
+  ): Promise<string> {
     const lines = this.readAlertLogs(name, mode);
     if (lines.length === 0) {
       return `[No alert logs for ${name}]`;
     }
 
     const ref = await this.storeLogsAsVariable(name, lines);
-    return `[Alert log content stored as ${ref.variableName} (${ref.lineCount} lines, mode: ${mode})]\n` +
+    return (
+      `[Alert log content stored as ${ref.variableName} (${ref.lineCount} lines, mode: ${mode})]\n` +
       `To read full logs, use read_file with absolute_path: ${ref.variableName}\n` +
-      `To analyze with SubLM, reference ${ref.variableName} in filePaths`;
+      `To analyze with SubLM, reference ${ref.variableName} in filePaths`
+    );
   }
 
   private emit(event: ServiceAlertEvent): void {
@@ -705,25 +736,31 @@ export class ServiceRuntimeManager {
    * Filter out log lines that match "suppress" pattern rules for a given service.
    * Lines matching suppress rules are hidden from LM analysis but remain in the raw log buffer.
    */
-  private filterSuppressedLines(serviceName: string, lines: string[]): string[] {
+  private filterSuppressedLines(
+    serviceName: string,
+    lines: string[],
+  ): string[] {
     const rules = this.logPatternRules.get(serviceName) ?? [];
-    const suppressRules = rules.filter(r => r.action === 'suppress');
+    const suppressRules = rules.filter((r) => r.action === "suppress");
 
     if (suppressRules.length === 0) {
       return lines;
     }
 
     const compiledRules = suppressRules
-      .map(rule => {
+      .map((rule) => {
         try {
           return { rule, regex: new RegExp(rule.pattern) };
         } catch {
           return null;
         }
       })
-      .filter((item): item is { rule: LogPatternRule; regex: RegExp } => item !== null);
+      .filter(
+        (item): item is { rule: LogPatternRule; regex: RegExp } =>
+          item !== null,
+      );
 
-    return lines.filter(line => {
+    return lines.filter((line) => {
       for (const { rule, regex } of compiledRules) {
         if (regex.test(line)) {
           rule.appliedCount = (rule.appliedCount ?? 0) + 1;
@@ -746,7 +783,7 @@ export class ServiceRuntimeManager {
 
   private handleOutput(
     name: string,
-    stream: 'stdout' | 'stderr',
+    stream: "stdout" | "stderr",
     chunk: string,
   ): void {
     const state = this.services.get(name);
@@ -768,7 +805,7 @@ export class ServiceRuntimeManager {
 
       if (state.followLogs && state.notificationsEnabled) {
         this.emit({
-          level: 'info',
+          level: "info",
           message: `[service/${name}] ${line}`,
         });
       }
@@ -786,7 +823,7 @@ export class ServiceRuntimeManager {
 
   private appendDecoratedLogLine(
     state: ServiceState,
-    stream: 'stdout' | 'stderr' | 'stdin',
+    stream: "stdout" | "stderr" | "stdin",
     line: string,
   ): void {
     const decorated = `[${new Date().toISOString()}][${stream}] ${line}`;
@@ -812,12 +849,12 @@ export class ServiceRuntimeManager {
       return false;
     }
 
-    const stopInputs = (state.definition.stopInputs ?? ['stop', 'end'])
+    const stopInputs = (state.definition.stopInputs ?? ["stop", "end"])
       .map((value) => value.trim())
       .filter((value) => value.length > 0);
 
     for (const input of stopInputs) {
-      this.appendDecoratedLogLine(state, 'stdin', `graceful-stop: ${input}`);
+      this.appendDecoratedLogLine(state, "stdin", `graceful-stop: ${input}`);
       child.stdin.write(`${input}\n`);
 
       const exited = await this.waitForExit(child, 1800);
@@ -840,16 +877,16 @@ export class ServiceRuntimeManager {
     return new Promise<boolean>((resolve) => {
       const onExit = () => {
         clearTimeout(timer);
-        child.off('exit', onExit);
+        child.off("exit", onExit);
         resolve(true);
       };
 
       const timer = setTimeout(() => {
-        child.off('exit', onExit);
+        child.off("exit", onExit);
         resolve(child.exitCode !== null || child.killed);
       }, timeoutMs);
 
-      child.once('exit', onExit);
+      child.once("exit", onExit);
     });
   }
 
@@ -864,7 +901,7 @@ export class ServiceRuntimeManager {
   private forceKillAllServices(): void {
     for (const state of this.services.values()) {
       try {
-        state.child?.kill('SIGKILL');
+        state.child?.kill("SIGKILL");
       } catch {
         // ignore
       }
@@ -891,7 +928,7 @@ export class ServiceRuntimeManager {
 
     state.hasNotifiedForCurrentAlert = true;
     this.emit({
-      level: 'warning',
+      level: "warning",
       message: `[service/${name}] detected error signal: ${sourceLine}\nLogs were buffered from this point. The first alert will auto-open ask flow. You can also use /service alert ${name} manually.\nThen use /service analyze ${name} all or /service analyze ${name} errors.\nTip: Press \`+Tab to switch to Servers Log, then press again to return to Chat.`,
     });
   }
@@ -899,11 +936,11 @@ export class ServiceRuntimeManager {
   private isErrorDecoratedLine(line: string): boolean {
     const lower = line.toLowerCase();
     return (
-      lower.includes('[stderr]') ||
-      lower.includes('error') ||
-      lower.includes('warn') ||
-      lower.includes('exception') ||
-      lower.includes('fatal')
+      lower.includes("[stderr]") ||
+      lower.includes("error") ||
+      lower.includes("warn") ||
+      lower.includes("exception") ||
+      lower.includes("fatal")
     );
   }
 
@@ -921,15 +958,17 @@ export class ServiceRuntimeManager {
     });
   }
 
-  private normalizeDefinition(definition: ServiceDefinition): ServiceDefinition {
+  private normalizeDefinition(
+    definition: ServiceDefinition,
+  ): ServiceDefinition {
     const name = definition.name.trim();
     if (!name) {
-      throw new Error('Service name is required.');
+      throw new Error("Service name is required.");
     }
 
     const command = definition.command.trim();
     if (!command) {
-      throw new Error('Service command is required.');
+      throw new Error("Service command is required.");
     }
 
     const normalizedWatchPatterns = (definition.watchPatterns ?? [])
@@ -978,29 +1017,29 @@ export class ServiceRuntimeManager {
     pid?: number,
   ): Promise<void> {
     const waitForExit = new Promise<void>((resolve) => {
-      child.once('exit', () => resolve());
+      child.once("exit", () => resolve());
     });
 
     try {
       if (pid) {
         if (isWindows()) {
-          await runCommand('taskkill', ['/PID', String(pid), '/T', '/F'], {
-            stdio: 'ignore',
+          await runCommand("taskkill", ["/PID", String(pid), "/T", "/F"], {
+            stdio: "ignore",
             windowsHide: true,
           });
         } else {
           try {
-            process.kill(pid, 'SIGTERM');
+            process.kill(pid, "SIGTERM");
           } catch {
             // ignore and continue waiting
           }
         }
       } else {
-        child.kill('SIGTERM');
+        child.kill("SIGTERM");
       }
     } catch {
       try {
-        child.kill('SIGKILL');
+        child.kill("SIGKILL");
       } catch {
         // ignore
       }
@@ -1013,7 +1052,7 @@ export class ServiceRuntimeManager {
 
     if (child.exitCode === null && !child.killed) {
       try {
-        child.kill('SIGKILL');
+        child.kill("SIGKILL");
       } catch {
         // ignore
       }
@@ -1025,13 +1064,16 @@ export class ServiceRuntimeManager {
   }
 
   private getConfigPath(): string {
-    return path.join(this.config.storage.getProjectDir(), SERVICE_CONFIG_FILENAME);
+    return path.join(
+      this.config.storage.getProjectDir(),
+      SERVICE_CONFIG_FILENAME,
+    );
   }
 
   private async loadConfig(): Promise<PersistedServiceConfig> {
     const configPath = this.getConfigPath();
     try {
-      const content = await fs.readFile(configPath, 'utf-8');
+      const content = await fs.readFile(configPath, "utf-8");
       const parsed = JSON.parse(content) as unknown;
 
       if (Array.isArray(parsed)) {
@@ -1042,7 +1084,7 @@ export class ServiceRuntimeManager {
         };
       }
 
-      if (typeof parsed !== 'object' || parsed === null) {
+      if (typeof parsed !== "object" || parsed === null) {
         return {
           maxRunningServices: DEFAULT_MAX_RUNNING_SERVICES,
           services: [],
@@ -1056,7 +1098,7 @@ export class ServiceRuntimeManager {
         logPatternRules?: unknown;
       };
       const max =
-        typeof obj.maxRunningServices === 'number' && obj.maxRunningServices > 0
+        typeof obj.maxRunningServices === "number" && obj.maxRunningServices > 0
           ? Math.floor(obj.maxRunningServices)
           : DEFAULT_MAX_RUNNING_SERVICES;
 
@@ -1070,7 +1112,7 @@ export class ServiceRuntimeManager {
         logPatternRules: rules,
       };
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         return {
           maxRunningServices: DEFAULT_MAX_RUNNING_SERVICES,
           services: [],
@@ -1079,7 +1121,7 @@ export class ServiceRuntimeManager {
       }
 
       this.emit({
-        level: 'warning',
+        level: "warning",
         message: `[service] failed to load config: ${
           error instanceof Error ? error.message : String(error)
         }`,
@@ -1097,39 +1139,41 @@ export class ServiceRuntimeManager {
     return input
       .filter((item): item is ServiceDefinition => {
         return (
-          typeof item === 'object' &&
+          typeof item === "object" &&
           item !== null &&
-          'name' in item &&
-          'command' in item
+          "name" in item &&
+          "command" in item
         );
       })
       .map((item) => ({
         name: String(item.name),
         command: String(item.command),
         cwd:
-          typeof item.cwd === 'string' && item.cwd.trim().length > 0
+          typeof item.cwd === "string" && item.cwd.trim().length > 0
             ? item.cwd
             : undefined,
         autoStart: Boolean(item.autoStart),
         watchPatterns: Array.isArray(item.watchPatterns)
           ? item.watchPatterns
-              .filter((pattern): pattern is string => typeof pattern === 'string')
+              .filter(
+                (pattern): pattern is string => typeof pattern === "string",
+              )
               .map((pattern) => pattern.trim())
               .filter((pattern) => pattern.length > 0)
-          : ['WARN', 'ERROR'],
+          : ["WARN", "ERROR"],
         stopInputs: Array.isArray(item.stopInputs)
           ? item.stopInputs
-              .filter((input): input is string => typeof input === 'string')
+              .filter((input): input is string => typeof input === "string")
               .map((input) => input.trim())
               .filter((input) => input.length > 0)
-          : ['stop', 'end'],
+          : ["stop", "end"],
       }));
   }
 
   private parseLogPatternRules(
     input: unknown,
   ): Record<string, LogPatternRule[]> {
-    if (typeof input !== 'object' || input === null) {
+    if (typeof input !== "object" || input === null) {
       return {};
     }
 
@@ -1137,23 +1181,22 @@ export class ServiceRuntimeManager {
 
     for (const [serviceName, rules] of Object.entries(input)) {
       if (Array.isArray(rules)) {
-        result[serviceName] = rules
-          .filter((rule): rule is LogPatternRule => {
-            return (
-              typeof rule === 'object' &&
-              rule !== null &&
-              'id' in rule &&
-              'pattern' in rule &&
-              'action' in rule &&
-              'description' in rule &&
-              'createdAt' in rule &&
-              typeof String(rule.id) === 'string' &&
-              typeof String(rule.pattern) === 'string' &&
-              ['suppress', 'analyze', 'auto-fix'].includes(String(rule.action)) &&
-              typeof String(rule.description) === 'string' &&
-              typeof Number(rule.createdAt) === 'number'
-            );
-          });
+        result[serviceName] = rules.filter((rule): rule is LogPatternRule => {
+          return (
+            typeof rule === "object" &&
+            rule !== null &&
+            "id" in rule &&
+            "pattern" in rule &&
+            "action" in rule &&
+            "description" in rule &&
+            "createdAt" in rule &&
+            typeof String(rule.id) === "string" &&
+            typeof String(rule.pattern) === "string" &&
+            ["suppress", "analyze", "auto-fix"].includes(String(rule.action)) &&
+            typeof String(rule.description) === "string" &&
+            typeof Number(rule.createdAt) === "number"
+          );
+        });
       }
     }
 
@@ -1171,10 +1214,12 @@ export class ServiceRuntimeManager {
 
     const payload: PersistedServiceConfig = {
       maxRunningServices: this.maxRunningServices,
-      services: Array.from(this.services.values()).map((state) => state.definition),
+      services: Array.from(this.services.values()).map(
+        (state) => state.definition,
+      ),
       logPatternRules: rulesPayload,
     };
 
-    await fs.writeFile(configPath, JSON.stringify(payload, null, 2), 'utf-8');
+    await fs.writeFile(configPath, JSON.stringify(payload, null, 2), "utf-8");
   }
 }

@@ -4,136 +4,136 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   ChatCompressionService,
   findCompressSplitPoint,
-} from './chatCompressionService.js';
-import type { Content, GenerateContentResponse } from '@google/genai';
-import { CompressionStatus } from '../core/turn.js';
-import { uiTelemetryService } from '../telemetry/uiTelemetry.js';
-import { tokenLimit } from '../core/tokenLimits.js';
-import type { GeminiChat } from '../core/geminiChat.js';
-import type { Config } from '../config/config.js';
-import type { ContentGenerator } from '../core/contentGenerator.js';
+} from "./chatCompressionService.js";
+import type { Content, GenerateContentResponse } from "@google/genai";
+import { CompressionStatus } from "../core/turn.js";
+import { uiTelemetryService } from "../telemetry/uiTelemetry.js";
+import { tokenLimit } from "../core/tokenLimits.js";
+import type { GeminiChat } from "../core/geminiChat.js";
+import type { Config } from "../config/config.js";
+import type { ContentGenerator } from "../core/contentGenerator.js";
 import {
   SessionStartSource,
   PreCompactTrigger,
   PostCompactTrigger,
-} from '../hooks/types.js';
+} from "../hooks/types.js";
 
-vi.mock('../telemetry/uiTelemetry.js');
-vi.mock('../core/tokenLimits.js');
-vi.mock('../telemetry/loggers.js');
+vi.mock("../telemetry/uiTelemetry.js");
+vi.mock("../core/tokenLimits.js");
+vi.mock("../telemetry/loggers.js");
 
-describe('findCompressSplitPoint', () => {
-  it('should throw an error for non-positive numbers', () => {
+describe("findCompressSplitPoint", () => {
+  it("should throw an error for non-positive numbers", () => {
     expect(() => findCompressSplitPoint([], 0)).toThrow(
-      'Fraction must be between 0 and 1',
+      "Fraction must be between 0 and 1",
     );
   });
 
-  it('should throw an error for a fraction greater than or equal to 1', () => {
+  it("should throw an error for a fraction greater than or equal to 1", () => {
     expect(() => findCompressSplitPoint([], 1)).toThrow(
-      'Fraction must be between 0 and 1',
+      "Fraction must be between 0 and 1",
     );
   });
 
-  it('should handle an empty history', () => {
+  it("should handle an empty history", () => {
     expect(findCompressSplitPoint([], 0.5)).toBe(0);
   });
 
-  it('should handle a fraction in the middle', () => {
+  it("should handle a fraction in the middle", () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'This is the first message.' }] }, // JSON length: 66 (19%)
-      { role: 'model', parts: [{ text: 'This is the second message.' }] }, // JSON length: 68 (40%)
-      { role: 'user', parts: [{ text: 'This is the third message.' }] }, // JSON length: 66 (60%)
-      { role: 'model', parts: [{ text: 'This is the fourth message.' }] }, // JSON length: 68 (80%)
-      { role: 'user', parts: [{ text: 'This is the fifth message.' }] }, // JSON length: 65 (100%)
+      { role: "user", parts: [{ text: "This is the first message." }] }, // JSON length: 66 (19%)
+      { role: "model", parts: [{ text: "This is the second message." }] }, // JSON length: 68 (40%)
+      { role: "user", parts: [{ text: "This is the third message." }] }, // JSON length: 66 (60%)
+      { role: "model", parts: [{ text: "This is the fourth message." }] }, // JSON length: 68 (80%)
+      { role: "user", parts: [{ text: "This is the fifth message." }] }, // JSON length: 65 (100%)
     ];
     expect(findCompressSplitPoint(history, 0.5)).toBe(4);
   });
 
-  it('should handle a fraction of last index', () => {
+  it("should handle a fraction of last index", () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'This is the first message.' }] }, // JSON length: 66 (19%)
-      { role: 'model', parts: [{ text: 'This is the second message.' }] }, // JSON length: 68 (40%)
-      { role: 'user', parts: [{ text: 'This is the third message.' }] }, // JSON length: 66 (60%)
-      { role: 'model', parts: [{ text: 'This is the fourth message.' }] }, // JSON length: 68 (80%)
-      { role: 'user', parts: [{ text: 'This is the fifth message.' }] }, // JSON length: 65 (100%)
+      { role: "user", parts: [{ text: "This is the first message." }] }, // JSON length: 66 (19%)
+      { role: "model", parts: [{ text: "This is the second message." }] }, // JSON length: 68 (40%)
+      { role: "user", parts: [{ text: "This is the third message." }] }, // JSON length: 66 (60%)
+      { role: "model", parts: [{ text: "This is the fourth message." }] }, // JSON length: 68 (80%)
+      { role: "user", parts: [{ text: "This is the fifth message." }] }, // JSON length: 65 (100%)
     ];
     expect(findCompressSplitPoint(history, 0.9)).toBe(4);
   });
 
-  it('should handle a fraction of after last index', () => {
+  it("should handle a fraction of after last index", () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'This is the first message.' }] }, // JSON length: 66 (24%)
-      { role: 'model', parts: [{ text: 'This is the second message.' }] }, // JSON length: 68 (50%)
-      { role: 'user', parts: [{ text: 'This is the third message.' }] }, // JSON length: 66 (74%)
-      { role: 'model', parts: [{ text: 'This is the fourth message.' }] }, // JSON length: 68 (100%)
+      { role: "user", parts: [{ text: "This is the first message." }] }, // JSON length: 66 (24%)
+      { role: "model", parts: [{ text: "This is the second message." }] }, // JSON length: 68 (50%)
+      { role: "user", parts: [{ text: "This is the third message." }] }, // JSON length: 66 (74%)
+      { role: "model", parts: [{ text: "This is the fourth message." }] }, // JSON length: 68 (100%)
     ];
     expect(findCompressSplitPoint(history, 0.8)).toBe(4);
   });
 
-  it('should return earlier splitpoint if no valid ones are after threshhold', () => {
+  it("should return earlier splitpoint if no valid ones are after threshhold", () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'This is the first message.' }] },
-      { role: 'model', parts: [{ text: 'This is the second message.' }] },
-      { role: 'user', parts: [{ text: 'This is the third message.' }] },
-      { role: 'model', parts: [{ functionCall: { name: 'foo', args: {} } }] },
+      { role: "user", parts: [{ text: "This is the first message." }] },
+      { role: "model", parts: [{ text: "This is the second message." }] },
+      { role: "user", parts: [{ text: "This is the third message." }] },
+      { role: "model", parts: [{ functionCall: { name: "foo", args: {} } }] },
     ];
     // Can't return 4 because the previous item has a function call.
     expect(findCompressSplitPoint(history, 0.99)).toBe(2);
   });
 
-  it('should handle a history with only one item', () => {
+  it("should handle a history with only one item", () => {
     const historyWithEmptyParts: Content[] = [
-      { role: 'user', parts: [{ text: 'Message 1' }] },
+      { role: "user", parts: [{ text: "Message 1" }] },
     ];
     expect(findCompressSplitPoint(historyWithEmptyParts, 0.5)).toBe(0);
   });
 
-  it('should handle history with weird parts', () => {
+  it("should handle history with weird parts", () => {
     const historyWithEmptyParts: Content[] = [
-      { role: 'user', parts: [{ text: 'Message 1' }] },
+      { role: "user", parts: [{ text: "Message 1" }] },
       {
-        role: 'model',
-        parts: [{ fileData: { fileUri: 'derp', mimeType: 'text/plain' } }],
+        role: "model",
+        parts: [{ fileData: { fileUri: "derp", mimeType: "text/plain" } }],
       },
-      { role: 'user', parts: [{ text: 'Message 2' }] },
+      { role: "user", parts: [{ text: "Message 2" }] },
     ];
     expect(findCompressSplitPoint(historyWithEmptyParts, 0.5)).toBe(2);
   });
 
-  it('should compress everything when last message is a functionResponse', () => {
+  it("should compress everything when last message is a functionResponse", () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'Fix this bug' }] },
+      { role: "user", parts: [{ text: "Fix this bug" }] },
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'readFile', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "readFile", args: {} } }],
       },
       {
-        role: 'user',
+        role: "user",
         parts: [
           {
             functionResponse: {
-              name: 'readFile',
-              response: { result: 'file content' },
+              name: "readFile",
+              response: { result: "file content" },
             },
           },
         ],
       },
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'writeFile', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "writeFile", args: {} } }],
       },
       {
-        role: 'user',
+        role: "user",
         parts: [
           {
             functionResponse: {
-              name: 'writeFile',
-              response: { result: 'ok' },
+              name: "writeFile",
+              response: { result: "ok" },
             },
           },
         ],
@@ -143,42 +143,42 @@ describe('findCompressSplitPoint', () => {
     expect(findCompressSplitPoint(history, 0.7)).toBe(5);
   });
 
-  it('should return primary split point when tool completions have no subsequent regular user message', () => {
+  it("should return primary split point when tool completions have no subsequent regular user message", () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'Fix this' }] },
+      { role: "user", parts: [{ text: "Fix this" }] },
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'read1', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "read1", args: {} } }],
       },
       {
-        role: 'user',
+        role: "user",
         parts: [
           {
             functionResponse: {
-              name: 'read1',
-              response: { result: 'a'.repeat(1000) },
+              name: "read1",
+              response: { result: "a".repeat(1000) },
             },
           },
         ],
       },
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'read2', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "read2", args: {} } }],
       },
       {
-        role: 'user',
+        role: "user",
         parts: [
           {
             functionResponse: {
-              name: 'read2',
-              response: { result: 'b'.repeat(1000) },
+              name: "read2",
+              response: { result: "b".repeat(1000) },
             },
           },
         ],
       },
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'write1', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "write1", args: {} } }],
       },
     ];
     // Only one non-functionResponse user message (index 0) -> lastSplitPoint=0
@@ -188,45 +188,45 @@ describe('findCompressSplitPoint', () => {
     expect(findCompressSplitPoint(history, 0.7)).toBe(0);
   });
 
-  it('should prefer primary split point when tool completions yield no valid user-starting split', () => {
-    const longContent = 'a'.repeat(10000);
+  it("should prefer primary split point when tool completions yield no valid user-starting split", () => {
+    const longContent = "a".repeat(10000);
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'Fix bug A' }] },
-      { role: 'model', parts: [{ text: 'OK' }] },
-      { role: 'user', parts: [{ text: 'Fix bug B' }] },
+      { role: "user", parts: [{ text: "Fix bug A" }] },
+      { role: "model", parts: [{ text: "OK" }] },
+      { role: "user", parts: [{ text: "Fix bug B" }] },
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'read1', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "read1", args: {} } }],
       },
       {
-        role: 'user',
+        role: "user",
         parts: [
           {
             functionResponse: {
-              name: 'read1',
+              name: "read1",
               response: { result: longContent },
             },
           },
         ],
       },
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'read2', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "read2", args: {} } }],
       },
       {
-        role: 'user',
+        role: "user",
         parts: [
           {
             functionResponse: {
-              name: 'read2',
+              name: "read2",
               response: { result: longContent },
             },
           },
         ],
       },
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'write1', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "write1", args: {} } }],
       },
     ];
     // Primary split points at 0 and 2 (regular user messages before the bulky tool outputs)
@@ -235,35 +235,35 @@ describe('findCompressSplitPoint', () => {
     expect(findCompressSplitPoint(history, 0.7)).toBe(2);
   });
 
-  it('should still prefer primary split point when it is better', () => {
+  it("should still prefer primary split point when it is better", () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'msg1' }] },
-      { role: 'model', parts: [{ text: 'resp1' }] },
+      { role: "user", parts: [{ text: "msg1" }] },
+      { role: "model", parts: [{ text: "resp1" }] },
       {
-        role: 'user',
-        parts: [{ text: 'msg2 with some substantial content here' }],
+        role: "user",
+        parts: [{ text: "msg2 with some substantial content here" }],
       },
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'tool1', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "tool1", args: {} } }],
       },
       {
-        role: 'user',
+        role: "user",
         parts: [
           {
             functionResponse: {
-              name: 'tool1',
-              response: { result: 'short' },
+              name: "tool1",
+              response: { result: "short" },
             },
           },
         ],
       },
-      { role: 'user', parts: [{ text: 'msg3' }] },
-      { role: 'model', parts: [{ text: 'resp3' }] },
-      { role: 'user', parts: [{ text: 'msg4' }] },
+      { role: "user", parts: [{ text: "msg3" }] },
+      { role: "model", parts: [{ text: "resp3" }] },
+      { role: "user", parts: [{ text: "msg4" }] },
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'tool2', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "tool2", args: {} } }],
       },
     ];
     // Primary split points: 0, 2, 5, 7
@@ -273,12 +273,12 @@ describe('findCompressSplitPoint', () => {
   });
 });
 
-describe('ChatCompressionService', () => {
+describe("ChatCompressionService", () => {
   let service: ChatCompressionService;
   let mockChat: GeminiChat;
   let mockConfig: Config;
-  const mockModel = 'gemini-pro';
-  const mockPromptId = 'test-prompt-id';
+  const mockModel = "gemini-pro";
+  const mockPromptId = "test-prompt-id";
   let mockFireSessionStartEvent: ReturnType<typeof vi.fn>;
   let mockGetHookSystem: ReturnType<typeof vi.fn>;
 
@@ -296,8 +296,8 @@ describe('ChatCompressionService', () => {
       getContentGenerator: vi.fn(),
       getContentGeneratorConfig: vi.fn().mockReturnValue({}),
       getHookSystem: mockGetHookSystem,
-      getModel: () => 'test-model',
-      getApprovalMode: () => 'default',
+      getModel: () => "test-model",
+      getApprovalMode: () => "default",
       getDebugLogger: () => ({
         warn: vi.fn(),
       }),
@@ -311,7 +311,7 @@ describe('ChatCompressionService', () => {
     vi.restoreAllMocks();
   });
 
-  it('should return NOOP if history is empty', async () => {
+  it("should return NOOP if history is empty", async () => {
     vi.mocked(mockChat.getHistory).mockReturnValue([]);
     const result = await service.compress(
       mockChat,
@@ -325,9 +325,9 @@ describe('ChatCompressionService', () => {
     expect(result.newHistory).toBeNull();
   });
 
-  it('should return NOOP if previously failed and not forced', async () => {
+  it("should return NOOP if previously failed and not forced", async () => {
     vi.mocked(mockChat.getHistory).mockReturnValue([
-      { role: 'user', parts: [{ text: 'hi' }] },
+      { role: "user", parts: [{ text: "hi" }] },
     ]);
     const result = await service.compress(
       mockChat,
@@ -341,9 +341,9 @@ describe('ChatCompressionService', () => {
     expect(result.newHistory).toBeNull();
   });
 
-  it('should return NOOP if under token threshold and not forced', async () => {
+  it("should return NOOP if under token threshold and not forced", async () => {
     vi.mocked(mockChat.getHistory).mockReturnValue([
-      { role: 'user', parts: [{ text: 'hi' }] },
+      { role: "user", parts: [{ text: "hi" }] },
     ]);
     vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(600);
     vi.mocked(tokenLimit).mockReturnValue(1000);
@@ -361,10 +361,10 @@ describe('ChatCompressionService', () => {
     expect(result.newHistory).toBeNull();
   });
 
-  it('should return NOOP when contextPercentageThreshold is 0', async () => {
+  it("should return NOOP when contextPercentageThreshold is 0", async () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'msg1' }] },
-      { role: 'model', parts: [{ text: 'msg2' }] },
+      { role: "user", parts: [{ text: "msg1" }] },
+      { role: "model", parts: [{ text: "msg2" }] },
     ];
     vi.mocked(mockChat.getHistory).mockReturnValue(history);
     vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(800);
@@ -411,21 +411,21 @@ describe('ChatCompressionService', () => {
     expect(tokenLimit).not.toHaveBeenCalled();
   });
 
-  it('should return NOOP when historyToCompress is below MIN_COMPRESSION_FRACTION of total', async () => {
+  it("should return NOOP when historyToCompress is below MIN_COMPRESSION_FRACTION of total", async () => {
     // Construct a history where the split point lands on the 2nd regular user
     // message (index 2), but indices 0-1 are tiny relative to the huge content
     // at index 2. historyToCompress = [0,1] will be << 5% of totalCharCount.
-    const hugeContent = 'x'.repeat(100000);
+    const hugeContent = "x".repeat(100000);
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'hello' }] },
-      { role: 'model', parts: [{ text: 'world' }] },
+      { role: "user", parts: [{ text: "hello" }] },
+      { role: "model", parts: [{ text: "world" }] },
       // Huge user message pushes the cumulative well past the split threshold
-      { role: 'user', parts: [{ text: hugeContent }] },
+      { role: "user", parts: [{ text: hugeContent }] },
       // Pending functionCall prevents returning contents.length,
       // so the fallback split at index 2 is used
       {
-        role: 'model',
-        parts: [{ functionCall: { name: 'process', args: {} } }],
+        role: "model",
+        parts: [{ functionCall: { name: "process", args: {} } }],
       },
     ];
     vi.mocked(mockChat.getHistory).mockReturnValue(history);
@@ -452,18 +452,18 @@ describe('ChatCompressionService', () => {
     expect(mockGenerateContent).not.toHaveBeenCalled();
   });
 
-  it('should compress if over token threshold', async () => {
+  it("should compress if over token threshold", async () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'msg1' }] },
-      { role: 'model', parts: [{ text: 'msg2' }] },
-      { role: 'user', parts: [{ text: 'msg3' }] },
-      { role: 'model', parts: [{ text: 'msg4' }] },
+      { role: "user", parts: [{ text: "msg1" }] },
+      { role: "model", parts: [{ text: "msg2" }] },
+      { role: "user", parts: [{ text: "msg3" }] },
+      { role: "model", parts: [{ text: "msg4" }] },
     ];
     vi.mocked(mockChat.getHistory).mockReturnValue(history);
     vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(800);
     // Mock contextWindowSize instead of tokenLimit
     vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-      model: 'gemini-pro',
+      model: "gemini-pro",
       contextWindowSize: 1000,
     } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
     // newTokenCount = 800 - (1600 - 1000) + 50 = 800 - 600 + 50 = 250 <= 800 (success)
@@ -471,7 +471,7 @@ describe('ChatCompressionService', () => {
       candidates: [
         {
           content: {
-            parts: [{ text: 'Summary' }],
+            parts: [{ text: "Summary" }],
           },
         },
       ],
@@ -497,24 +497,24 @@ describe('ChatCompressionService', () => {
     expect(result.info.compressionStatus).toBe(CompressionStatus.COMPRESSED);
     expect(result.info.newTokenCount).toBe(250); // 800 - (1600 - 1000) + 50
     expect(result.newHistory).not.toBeNull();
-    expect(result.newHistory![0].parts![0].text).toBe('Summary');
+    expect(result.newHistory![0].parts![0].text).toBe("Summary");
     expect(mockGenerateContent).toHaveBeenCalled();
     expect(mockGetHookSystem).toHaveBeenCalled();
     expect(mockFireSessionStartEvent).toHaveBeenCalledWith(
       SessionStartSource.Compact,
       mockModel,
-      'default',
+      "default",
       undefined,
       undefined,
     );
   });
 
-  it('should force compress even if under threshold', async () => {
+  it("should force compress even if under threshold", async () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'msg1' }] },
-      { role: 'model', parts: [{ text: 'msg2' }] },
-      { role: 'user', parts: [{ text: 'msg3' }] },
-      { role: 'model', parts: [{ text: 'msg4' }] },
+      { role: "user", parts: [{ text: "msg1" }] },
+      { role: "model", parts: [{ text: "msg2" }] },
+      { role: "user", parts: [{ text: "msg3" }] },
+      { role: "model", parts: [{ text: "msg4" }] },
     ];
     vi.mocked(mockChat.getHistory).mockReturnValue(history);
     vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(100);
@@ -525,7 +525,7 @@ describe('ChatCompressionService', () => {
       candidates: [
         {
           content: {
-            parts: [{ text: 'Summary' }],
+            parts: [{ text: "Summary" }],
           },
         },
       ],
@@ -553,16 +553,16 @@ describe('ChatCompressionService', () => {
     expect(mockFireSessionStartEvent).toHaveBeenCalledWith(
       SessionStartSource.Compact,
       mockModel,
-      'default',
+      "default",
       undefined,
       undefined,
     );
   });
 
-  it('should return FAILED if new token count is inflated', async () => {
+  it("should return FAILED if new token count is inflated", async () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'msg1' }] },
-      { role: 'model', parts: [{ text: 'msg2' }] },
+      { role: "user", parts: [{ text: "msg1" }] },
+      { role: "model", parts: [{ text: "msg2" }] },
     ];
     vi.mocked(mockChat.getHistory).mockReturnValue(history);
     vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(10);
@@ -572,7 +572,7 @@ describe('ChatCompressionService', () => {
       candidates: [
         {
           content: {
-            parts: [{ text: 'Summary' }],
+            parts: [{ text: "Summary" }],
           },
         },
       ],
@@ -601,17 +601,17 @@ describe('ChatCompressionService', () => {
     expect(result.newHistory).toBeNull();
   });
 
-  it('should return FAILED if usage metadata is missing', async () => {
+  it("should return FAILED if usage metadata is missing", async () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'msg1' }] },
-      { role: 'model', parts: [{ text: 'msg2' }] },
-      { role: 'user', parts: [{ text: 'msg3' }] },
-      { role: 'model', parts: [{ text: 'msg4' }] },
+      { role: "user", parts: [{ text: "msg1" }] },
+      { role: "model", parts: [{ text: "msg2" }] },
+      { role: "user", parts: [{ text: "msg3" }] },
+      { role: "model", parts: [{ text: "msg4" }] },
     ];
     vi.mocked(mockChat.getHistory).mockReturnValue(history);
     vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(800);
     vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-      model: 'gemini-pro',
+      model: "gemini-pro",
       contextWindowSize: 1000,
     } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 
@@ -619,7 +619,7 @@ describe('ChatCompressionService', () => {
       candidates: [
         {
           content: {
-            parts: [{ text: 'Summary' }],
+            parts: [{ text: "Summary" }],
           },
         },
       ],
@@ -646,10 +646,10 @@ describe('ChatCompressionService', () => {
     expect(result.newHistory).toBeNull();
   });
 
-  it('should return FAILED if summary is empty string', async () => {
+  it("should return FAILED if summary is empty string", async () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'msg1' }] },
-      { role: 'model', parts: [{ text: 'msg2' }] },
+      { role: "user", parts: [{ text: "msg1" }] },
+      { role: "model", parts: [{ text: "msg2" }] },
     ];
     vi.mocked(mockChat.getHistory).mockReturnValue(history);
     vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(100);
@@ -659,7 +659,7 @@ describe('ChatCompressionService', () => {
       candidates: [
         {
           content: {
-            parts: [{ text: '' }], // Empty summary
+            parts: [{ text: "" }], // Empty summary
           },
         },
       ],
@@ -685,10 +685,10 @@ describe('ChatCompressionService', () => {
     expect(result.info.newTokenCount).toBe(100);
   });
 
-  it('should return FAILED if summary is only whitespace', async () => {
+  it("should return FAILED if summary is only whitespace", async () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'msg1' }] },
-      { role: 'model', parts: [{ text: 'msg2' }] },
+      { role: "user", parts: [{ text: "msg1" }] },
+      { role: "model", parts: [{ text: "msg2" }] },
     ];
     vi.mocked(mockChat.getHistory).mockReturnValue(history);
     vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(100);
@@ -698,7 +698,7 @@ describe('ChatCompressionService', () => {
       candidates: [
         {
           content: {
-            parts: [{ text: '   \n\t  ' }], // Only whitespace
+            parts: [{ text: "   \n\t  " }], // Only whitespace
           },
         },
       ],
@@ -722,10 +722,10 @@ describe('ChatCompressionService', () => {
     expect(result.newHistory).toBeNull();
   });
 
-  it('should not fire SessionStart event when compression fails', async () => {
+  it("should not fire SessionStart event when compression fails", async () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'msg1' }] },
-      { role: 'model', parts: [{ text: 'msg2' }] },
+      { role: "user", parts: [{ text: "msg1" }] },
+      { role: "model", parts: [{ text: "msg2" }] },
     ];
     vi.mocked(mockChat.getHistory).mockReturnValue(history);
     vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(10);
@@ -735,7 +735,7 @@ describe('ChatCompressionService', () => {
       candidates: [
         {
           content: {
-            parts: [{ text: 'Summary' }],
+            parts: [{ text: "Summary" }],
           },
         },
       ],
@@ -765,29 +765,29 @@ describe('ChatCompressionService', () => {
     expect(mockFireSessionStartEvent).not.toHaveBeenCalled();
   });
 
-  it('should handle SessionStart hook errors gracefully', async () => {
+  it("should handle SessionStart hook errors gracefully", async () => {
     const history: Content[] = [
-      { role: 'user', parts: [{ text: 'msg1' }] },
-      { role: 'model', parts: [{ text: 'msg2' }] },
-      { role: 'user', parts: [{ text: 'msg3' }] },
-      { role: 'model', parts: [{ text: 'msg4' }] },
+      { role: "user", parts: [{ text: "msg1" }] },
+      { role: "model", parts: [{ text: "msg2" }] },
+      { role: "user", parts: [{ text: "msg3" }] },
+      { role: "model", parts: [{ text: "msg4" }] },
     ];
     vi.mocked(mockChat.getHistory).mockReturnValue(history);
     vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(800);
     vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-      model: 'gemini-pro',
+      model: "gemini-pro",
       contextWindowSize: 1000,
     } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 
     mockFireSessionStartEvent.mockRejectedValue(
-      new Error('SessionStart hook failed'),
+      new Error("SessionStart hook failed"),
     );
 
     const mockGenerateContent = vi.fn().mockResolvedValue({
       candidates: [
         {
           content: {
-            parts: [{ text: 'Summary' }],
+            parts: [{ text: "Summary" }],
           },
         },
       ],
@@ -815,7 +815,7 @@ describe('ChatCompressionService', () => {
     expect(result.newHistory).not.toBeNull();
   });
 
-  describe('PreCompact hook', () => {
+  describe("PreCompact hook", () => {
     let mockFirePreCompactEvent: ReturnType<typeof vi.fn>;
     let mockFirePostCompactEvent: ReturnType<typeof vi.fn>;
 
@@ -829,12 +829,12 @@ describe('ChatCompressionService', () => {
       });
     });
 
-    it('should fire PreCompact hook with Manual trigger when force=true', async () => {
+    it("should fire PreCompact hook with Manual trigger when force=true", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
@@ -846,7 +846,7 @@ describe('ChatCompressionService', () => {
         candidates: [
           {
             content: {
-              parts: [{ text: 'Summary' }],
+              parts: [{ text: "Summary" }],
             },
           },
         ],
@@ -871,24 +871,24 @@ describe('ChatCompressionService', () => {
 
       expect(mockFirePreCompactEvent).toHaveBeenCalledWith(
         PreCompactTrigger.Manual,
-        '',
+        "",
         undefined,
       );
     });
 
-    it('should fire PreCompact hook with Auto trigger when force=false', async () => {
+    it("should fire PreCompact hook with Auto trigger when force=false", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
         800,
       );
       vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-        model: 'gemini-pro',
+        model: "gemini-pro",
         contextWindowSize: 1000,
       } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 
@@ -896,7 +896,7 @@ describe('ChatCompressionService', () => {
         candidates: [
           {
             content: {
-              parts: [{ text: 'Summary' }],
+              parts: [{ text: "Summary" }],
             },
           },
         ],
@@ -921,12 +921,12 @@ describe('ChatCompressionService', () => {
 
       expect(mockFirePreCompactEvent).toHaveBeenCalledWith(
         PreCompactTrigger.Auto,
-        '',
+        "",
         undefined,
       );
     });
 
-    it('should not fire PreCompact hook when history is empty', async () => {
+    it("should not fire PreCompact hook when history is empty", async () => {
       vi.mocked(mockChat.getHistory).mockReturnValue([]);
 
       const result = await service.compress(
@@ -942,10 +942,10 @@ describe('ChatCompressionService', () => {
       expect(mockFirePreCompactEvent).not.toHaveBeenCalled();
     });
 
-    it('should not fire PreCompact hook when threshold is 0', async () => {
+    it("should not fire PreCompact hook when threshold is 0", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(mockConfig.getChatCompression).mockReturnValue({
@@ -965,10 +965,10 @@ describe('ChatCompressionService', () => {
       expect(mockFirePreCompactEvent).not.toHaveBeenCalled();
     });
 
-    it('should not fire PreCompact hook when under threshold and not forced', async () => {
+    it("should not fire PreCompact hook when under threshold and not forced", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
@@ -989,31 +989,31 @@ describe('ChatCompressionService', () => {
       expect(mockFirePreCompactEvent).not.toHaveBeenCalled();
     });
 
-    it('should handle PreCompact hook errors gracefully', async () => {
+    it("should handle PreCompact hook errors gracefully", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
         800,
       );
       vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-        model: 'gemini-pro',
+        model: "gemini-pro",
         contextWindowSize: 1000,
       } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 
       mockFirePreCompactEvent.mockRejectedValue(
-        new Error('PreCompact hook failed'),
+        new Error("PreCompact hook failed"),
       );
 
       const mockGenerateContent = vi.fn().mockResolvedValue({
         candidates: [
           {
             content: {
-              parts: [{ text: 'Summary' }],
+              parts: [{ text: "Summary" }],
             },
           },
         ],
@@ -1042,35 +1042,35 @@ describe('ChatCompressionService', () => {
       expect(mockFirePreCompactEvent).toHaveBeenCalled();
     });
 
-    it('should fire PreCompact hook before compression and SessionStart after', async () => {
+    it("should fire PreCompact hook before compression and SessionStart after", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
         800,
       );
       vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-        model: 'gemini-pro',
+        model: "gemini-pro",
         contextWindowSize: 1000,
       } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 
       const callOrder: string[] = [];
       mockFirePreCompactEvent.mockImplementation(async () => {
-        callOrder.push('PreCompact');
+        callOrder.push("PreCompact");
       });
       mockFireSessionStartEvent.mockImplementation(async () => {
-        callOrder.push('SessionStart');
+        callOrder.push("SessionStart");
       });
 
       const mockGenerateContent = vi.fn().mockResolvedValue({
         candidates: [
           {
             content: {
-              parts: [{ text: 'Summary' }],
+              parts: [{ text: "Summary" }],
             },
           },
         ],
@@ -1094,24 +1094,24 @@ describe('ChatCompressionService', () => {
       );
 
       // PreCompact should be called before SessionStart
-      expect(callOrder).toEqual(['PreCompact', 'SessionStart']);
+      expect(callOrder).toEqual(["PreCompact", "SessionStart"]);
     });
 
-    it('should not fire PreCompact hook when hookSystem is null', async () => {
+    it("should not fire PreCompact hook when hookSystem is null", async () => {
       mockGetHookSystem.mockReturnValue(null);
 
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
         800,
       );
       vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-        model: 'gemini-pro',
+        model: "gemini-pro",
         contextWindowSize: 1000,
       } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 
@@ -1119,7 +1119,7 @@ describe('ChatCompressionService', () => {
         candidates: [
           {
             content: {
-              parts: [{ text: 'Summary' }],
+              parts: [{ text: "Summary" }],
             },
           },
         ],
@@ -1150,7 +1150,7 @@ describe('ChatCompressionService', () => {
     });
   });
 
-  describe('PostCompact hook', () => {
+  describe("PostCompact hook", () => {
     let mockFirePreCompactEvent: ReturnType<typeof vi.fn>;
     let mockFirePostCompactEvent: ReturnType<typeof vi.fn>;
 
@@ -1164,12 +1164,12 @@ describe('ChatCompressionService', () => {
       });
     });
 
-    it('should fire PostCompact hook with Manual trigger when force=true', async () => {
+    it("should fire PostCompact hook with Manual trigger when force=true", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
@@ -1181,7 +1181,7 @@ describe('ChatCompressionService', () => {
         candidates: [
           {
             content: {
-              parts: [{ text: 'Summary' }],
+              parts: [{ text: "Summary" }],
             },
           },
         ],
@@ -1206,24 +1206,24 @@ describe('ChatCompressionService', () => {
 
       expect(mockFirePostCompactEvent).toHaveBeenCalledWith(
         PostCompactTrigger.Manual,
-        'Summary',
+        "Summary",
         undefined,
       );
     });
 
-    it('should fire PostCompact hook with Auto trigger when force=false', async () => {
+    it("should fire PostCompact hook with Auto trigger when force=false", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
         800,
       );
       vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-        model: 'gemini-pro',
+        model: "gemini-pro",
         contextWindowSize: 1000,
       } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 
@@ -1231,7 +1231,7 @@ describe('ChatCompressionService', () => {
         candidates: [
           {
             content: {
-              parts: [{ text: 'Auto Summary' }],
+              parts: [{ text: "Auto Summary" }],
             },
           },
         ],
@@ -1256,17 +1256,17 @@ describe('ChatCompressionService', () => {
 
       expect(mockFirePostCompactEvent).toHaveBeenCalledWith(
         PostCompactTrigger.Auto,
-        'Auto Summary',
+        "Auto Summary",
         undefined,
       );
     });
 
-    it('should not fire PostCompact hook when compression fails with empty summary', async () => {
+    it("should not fire PostCompact hook when compression fails with empty summary", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
@@ -1278,7 +1278,7 @@ describe('ChatCompressionService', () => {
         candidates: [
           {
             content: {
-              parts: [{ text: '' }], // Empty summary
+              parts: [{ text: "" }], // Empty summary
             },
           },
         ],
@@ -1307,31 +1307,31 @@ describe('ChatCompressionService', () => {
       expect(mockFirePostCompactEvent).not.toHaveBeenCalled();
     });
 
-    it('should handle PostCompact hook errors gracefully', async () => {
+    it("should handle PostCompact hook errors gracefully", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
         800,
       );
       vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-        model: 'gemini-pro',
+        model: "gemini-pro",
         contextWindowSize: 1000,
       } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 
       mockFirePostCompactEvent.mockRejectedValue(
-        new Error('PostCompact hook failed'),
+        new Error("PostCompact hook failed"),
       );
 
       const mockGenerateContent = vi.fn().mockResolvedValue({
         candidates: [
           {
             content: {
-              parts: [{ text: 'Summary' }],
+              parts: [{ text: "Summary" }],
             },
           },
         ],
@@ -1360,38 +1360,38 @@ describe('ChatCompressionService', () => {
       expect(mockFirePostCompactEvent).toHaveBeenCalled();
     });
 
-    it('should fire hooks in correct order: PreCompact -> SessionStart -> PostCompact', async () => {
+    it("should fire hooks in correct order: PreCompact -> SessionStart -> PostCompact", async () => {
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
         800,
       );
       vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-        model: 'gemini-pro',
+        model: "gemini-pro",
         contextWindowSize: 1000,
       } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 
       const callOrder: string[] = [];
       mockFirePreCompactEvent.mockImplementation(async () => {
-        callOrder.push('PreCompact');
+        callOrder.push("PreCompact");
       });
       mockFireSessionStartEvent.mockImplementation(async () => {
-        callOrder.push('SessionStart');
+        callOrder.push("SessionStart");
       });
       mockFirePostCompactEvent.mockImplementation(async () => {
-        callOrder.push('PostCompact');
+        callOrder.push("PostCompact");
       });
 
       const mockGenerateContent = vi.fn().mockResolvedValue({
         candidates: [
           {
             content: {
-              parts: [{ text: 'Summary' }],
+              parts: [{ text: "Summary" }],
             },
           },
         ],
@@ -1415,24 +1415,24 @@ describe('ChatCompressionService', () => {
       );
 
       // Hooks should be called in order: PreCompact -> SessionStart -> PostCompact
-      expect(callOrder).toEqual(['PreCompact', 'SessionStart', 'PostCompact']);
+      expect(callOrder).toEqual(["PreCompact", "SessionStart", "PostCompact"]);
     });
 
-    it('should not fire PostCompact hook when hookSystem is null', async () => {
+    it("should not fire PostCompact hook when hookSystem is null", async () => {
       mockGetHookSystem.mockReturnValue(null);
 
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'msg1' }] },
-        { role: 'model', parts: [{ text: 'msg2' }] },
-        { role: 'user', parts: [{ text: 'msg3' }] },
-        { role: 'model', parts: [{ text: 'msg4' }] },
+        { role: "user", parts: [{ text: "msg1" }] },
+        { role: "model", parts: [{ text: "msg2" }] },
+        { role: "user", parts: [{ text: "msg3" }] },
+        { role: "model", parts: [{ text: "msg4" }] },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
       vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
         800,
       );
       vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-        model: 'gemini-pro',
+        model: "gemini-pro",
         contextWindowSize: 1000,
       } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 
@@ -1440,7 +1440,7 @@ describe('ChatCompressionService', () => {
         candidates: [
           {
             content: {
-              parts: [{ text: 'Summary' }],
+              parts: [{ text: "Summary" }],
             },
           },
         ],
@@ -1471,48 +1471,48 @@ describe('ChatCompressionService', () => {
     });
   });
 
-  describe('orphaned trailing funcCall handling', () => {
-    it('should compress everything when force=true and last message is an orphaned funcCall', async () => {
+  describe("orphaned trailing funcCall handling", () => {
+    it("should compress everything when force=true and last message is an orphaned funcCall", async () => {
       // Issue #2647: tool-heavy conversation interrupted/crashed while a tool
       // was still running. The funcCall will never get a response since the agent
       // is idle. Manual /compress strips the orphaned funcCall, then compresses
       // the remaining history normally.
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'Fix all TypeScript errors.' }] },
+        { role: "user", parts: [{ text: "Fix all TypeScript errors." }] },
         {
-          role: 'model',
-          parts: [{ functionCall: { name: 'glob', args: {} } }],
+          role: "model",
+          parts: [{ functionCall: { name: "glob", args: {} } }],
         },
         {
-          role: 'user',
+          role: "user",
           parts: [
             {
               functionResponse: {
-                name: 'glob',
-                response: { result: 'files...' },
+                name: "glob",
+                response: { result: "files..." },
               },
             },
           ],
         },
         {
-          role: 'model',
-          parts: [{ functionCall: { name: 'readFile', args: {} } }],
+          role: "model",
+          parts: [{ functionCall: { name: "readFile", args: {} } }],
         },
         {
-          role: 'user',
+          role: "user",
           parts: [
             {
               functionResponse: {
-                name: 'readFile',
-                response: { result: 'code...' },
+                name: "readFile",
+                response: { result: "code..." },
               },
             },
           ],
         },
         // orphaned funcCall — agent was interrupted before getting a response
         {
-          role: 'model',
-          parts: [{ functionCall: { name: 'editFile', args: {} } }],
+          role: "model",
+          parts: [{ functionCall: { name: "editFile", args: {} } }],
         },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
@@ -1523,7 +1523,7 @@ describe('ChatCompressionService', () => {
 
       const mockGenerateContent = vi.fn().mockResolvedValue({
         candidates: [
-          { content: { parts: [{ text: 'Summary of all work done' }] } },
+          { content: { parts: [{ text: "Summary of all work done" }] } },
         ],
         usageMetadata: {
           promptTokenCount: 1100,
@@ -1550,39 +1550,39 @@ describe('ChatCompressionService', () => {
       expect(result.newHistory).not.toBeNull();
       // Reconstructed history: [User(summary), Model("Got it...")] — valid structure
       expect(result.newHistory).toHaveLength(2);
-      expect(result.newHistory![0].role).toBe('user');
-      expect(result.newHistory![1].role).toBe('model');
+      expect(result.newHistory![0].role).toBe("user");
+      expect(result.newHistory![1].role).toBe("model");
       // The orphaned funcCall is stripped before compression, so only the first 5
       // messages are sent, plus the compression instruction (+1) = history.length total.
       const callArg = mockGenerateContent.mock.calls[0][0];
       expect(callArg.contents.length).toBe(history.length); // (history.length - 1) messages + 1 instruction
     });
 
-    it('should NOT compress orphaned funcCall when force=false (auto-compress)', async () => {
+    it("should NOT compress orphaned funcCall when force=false (auto-compress)", async () => {
       // Auto-compress fires BEFORE the matching funcResponse is sent back to the
       // model. Compressing the funcCall away would orphan the upcoming funcResponse
       // and cause an API error. So force=false must NOT take this path.
       const history: Content[] = [
-        { role: 'user', parts: [{ text: 'Fix all TypeScript errors.' }] },
+        { role: "user", parts: [{ text: "Fix all TypeScript errors." }] },
         {
-          role: 'model',
-          parts: [{ functionCall: { name: 'glob', args: {} } }],
+          role: "model",
+          parts: [{ functionCall: { name: "glob", args: {} } }],
         },
         {
-          role: 'user',
+          role: "user",
           parts: [
             {
               functionResponse: {
-                name: 'glob',
-                response: { result: 'files...' },
+                name: "glob",
+                response: { result: "files..." },
               },
             },
           ],
         },
         // Pending funcCall: tool is currently executing, funcResponse is coming
         {
-          role: 'model',
-          parts: [{ functionCall: { name: 'readFile', args: {} } }],
+          role: "model",
+          parts: [{ functionCall: { name: "readFile", args: {} } }],
         },
       ];
       vi.mocked(mockChat.getHistory).mockReturnValue(history);
@@ -1591,7 +1591,7 @@ describe('ChatCompressionService', () => {
         800,
       );
       vi.mocked(mockConfig.getContentGeneratorConfig).mockReturnValue({
-        model: 'gemini-pro',
+        model: "gemini-pro",
         contextWindowSize: 1000,
       } as unknown as ReturnType<typeof mockConfig.getContentGeneratorConfig>);
 

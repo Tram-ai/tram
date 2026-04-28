@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
-import { useState } from 'react';
-import { MessageContent } from './MessageContent.js';
-import { ChevronIcon } from '../icons/index.js';
-import './ThinkingMessage.css';
+import type { FC } from "react";
+import { useState } from "react";
+import { MessageContent } from "./MessageContent.js";
+import { ChevronIcon } from "../icons/index.js";
+import "./ThinkingMessage.css";
 
 /**
  * ThinkingMessage component props interface
@@ -23,7 +23,7 @@ export interface ThinkingMessageProps {
   /** Whether to expand by default, defaults to false */
   defaultExpanded?: boolean;
   /** Status: 'loading' means thinking in progress, 'default' means thinking complete */
-  status?: 'loading' | 'default';
+  status?: "loading" | "default";
 }
 
 /**
@@ -40,7 +40,7 @@ export const ThinkingMessage: FC<ThinkingMessageProps> = ({
   timestamp: _timestamp,
   onFileClick,
   defaultExpanded = false,
-  status = 'default',
+  status = "default",
 }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
@@ -59,14 +59,14 @@ export const ThinkingMessage: FC<ThinkingMessageProps> = ({
           onClick={handleToggle}
           className="thinking-toggle-btn"
           aria-expanded={isExpanded}
-          aria-label={isExpanded ? 'Collapse thinking' : 'Expand thinking'}
+          aria-label={isExpanded ? "Collapse thinking" : "Expand thinking"}
         >
           {/* Thinking label text */}
           <span className="thinking-label">Thinking</span>
           {/* Expand/collapse arrow */}
           <ChevronIcon
             size={12}
-            direction={isExpanded ? 'up' : 'down'}
+            direction={isExpanded ? "up" : "down"}
             className="thinking-chevron"
           />
         </button>

@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import { buildRuntimeFetchOptions } from './runtimeFetchOptions.js';
+import { describe, it, expect, vi } from "vitest";
+import { buildRuntimeFetchOptions } from "./runtimeFetchOptions.js";
 
 type UndiciOptions = Record<string, unknown>;
 
-vi.mock('undici', () => {
+vi.mock("undici", () => {
   class MockAgent {
     options: UndiciOptions;
     constructor(options: UndiciOptions) {
@@ -30,12 +30,12 @@ vi.mock('undici', () => {
   };
 });
 
-describe('buildRuntimeFetchOptions (node runtime)', () => {
-  it('disables undici timeouts for Agent in OpenAI options', () => {
-    const result = buildRuntimeFetchOptions('openai');
+describe("buildRuntimeFetchOptions (node runtime)", () => {
+  it("disables undici timeouts for Agent in OpenAI options", () => {
+    const result = buildRuntimeFetchOptions("openai");
 
     expect(result).toBeDefined();
-    expect(result && 'fetchOptions' in result).toBe(true);
+    expect(result && "fetchOptions" in result).toBe(true);
 
     const dispatcher = (
       result as { fetchOptions?: { dispatcher?: { options?: UndiciOptions } } }
@@ -46,27 +46,27 @@ describe('buildRuntimeFetchOptions (node runtime)', () => {
     });
   });
 
-  it('uses ProxyAgent with disabled timeouts when proxy is set', () => {
-    const result = buildRuntimeFetchOptions('openai', 'http://proxy.local');
+  it("uses ProxyAgent with disabled timeouts when proxy is set", () => {
+    const result = buildRuntimeFetchOptions("openai", "http://proxy.local");
 
     expect(result).toBeDefined();
-    expect(result && 'fetchOptions' in result).toBe(true);
+    expect(result && "fetchOptions" in result).toBe(true);
 
     const dispatcher = (
       result as { fetchOptions?: { dispatcher?: { options?: UndiciOptions } } }
     ).fetchOptions?.dispatcher;
     expect(dispatcher?.options).toMatchObject({
-      uri: 'http://proxy.local',
+      uri: "http://proxy.local",
       headersTimeout: 0,
       bodyTimeout: 0,
     });
   });
 
-  it('returns fetchOptions with dispatcher for Anthropic without proxy', () => {
-    const result = buildRuntimeFetchOptions('anthropic');
+  it("returns fetchOptions with dispatcher for Anthropic without proxy", () => {
+    const result = buildRuntimeFetchOptions("anthropic");
 
     expect(result).toBeDefined();
-    expect(result && 'fetchOptions' in result).toBe(true);
+    expect(result && "fetchOptions" in result).toBe(true);
 
     const dispatcher = (
       result as { fetchOptions?: { dispatcher?: { options?: UndiciOptions } } }
@@ -77,17 +77,17 @@ describe('buildRuntimeFetchOptions (node runtime)', () => {
     });
   });
 
-  it('returns fetchOptions with ProxyAgent for Anthropic with proxy', () => {
-    const result = buildRuntimeFetchOptions('anthropic', 'http://proxy.local');
+  it("returns fetchOptions with ProxyAgent for Anthropic with proxy", () => {
+    const result = buildRuntimeFetchOptions("anthropic", "http://proxy.local");
 
     expect(result).toBeDefined();
-    expect(result && 'fetchOptions' in result).toBe(true);
+    expect(result && "fetchOptions" in result).toBe(true);
 
     const dispatcher = (
       result as { fetchOptions?: { dispatcher?: { options?: UndiciOptions } } }
     ).fetchOptions?.dispatcher;
     expect(dispatcher?.options).toMatchObject({
-      uri: 'http://proxy.local',
+      uri: "http://proxy.local",
       headersTimeout: 0,
       bodyTimeout: 0,
     });

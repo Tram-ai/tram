@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import * as os from 'node:os';
-import { ArenaManager } from './ArenaManager.js';
-import { ArenaEventType } from './arena-events.js';
-import { ArenaSessionStatus, ARENA_MAX_AGENTS } from './types.js';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import * as os from "node:os";
+import { ArenaManager } from "./ArenaManager.js";
+import { ArenaEventType } from "./arena-events.js";
+import { ArenaSessionStatus, ARENA_MAX_AGENTS } from "./types.js";
 
 const hoistedMockSetupWorktrees = vi.hoisted(() => vi.fn());
 const hoistedMockCleanupSession = vi.hoisted(() => vi.fn());
@@ -18,8 +18,8 @@ const hoistedMockGetWorktreeDiff = vi.hoisted(() => vi.fn());
 const hoistedMockApplyWorktreeChanges = vi.hoisted(() => vi.fn());
 const hoistedMockDetectBackend = vi.hoisted(() => vi.fn());
 
-vi.mock('../index.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../index.js')>();
+vi.mock("../index.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../index.js")>();
   return {
     ...actual,
     detectBackend: hoistedMockDetectBackend,
@@ -28,7 +28,7 @@ vi.mock('../index.js', async (importOriginal) => {
 
 // Mock GitWorktreeService to avoid real git operations.
 // The class mock includes static methods used by ArenaManager.
-vi.mock('../../services/gitWorktreeService.js', () => {
+vi.mock("../../services/gitWorktreeService.js", () => {
   const MockClass = vi.fn().mockImplementation(() => ({
     checkGitAvailable: vi.fn().mockResolvedValue({ available: true }),
     isGitRepository: vi.fn().mockResolvedValue(true),
@@ -38,14 +38,14 @@ vi.mock('../../services/gitWorktreeService.js', () => {
     applyWorktreeChanges: hoistedMockApplyWorktreeChanges,
   }));
   // Static methods called by ArenaManager
-  (MockClass as unknown as Record<string, unknown>)['getBaseDir'] = () =>
-    path.join(os.tmpdir(), 'arena-mock');
-  (MockClass as unknown as Record<string, unknown>)['getSessionDir'] = (
+  (MockClass as unknown as Record<string, unknown>)["getBaseDir"] = () =>
+    path.join(os.tmpdir(), "arena-mock");
+  (MockClass as unknown as Record<string, unknown>)["getSessionDir"] = (
     sessionId: string,
-  ) => path.join(os.tmpdir(), 'arena-mock', sessionId);
-  (MockClass as unknown as Record<string, unknown>)['getWorktreesDir'] = (
+  ) => path.join(os.tmpdir(), "arena-mock", sessionId);
+  (MockClass as unknown as Record<string, unknown>)["getWorktreesDir"] = (
     sessionId: string,
-  ) => path.join(os.tmpdir(), 'arena-mock', sessionId, 'worktrees');
+  ) => path.join(os.tmpdir(), "arena-mock", sessionId, "worktrees");
   return { GitWorktreeService: MockClass };
 });
 
@@ -55,9 +55,9 @@ const createMockConfig = (
   arenaSettings: Record<string, unknown> = {},
 ) => ({
   getWorkingDir: () => workingDir,
-  getModel: () => 'test-model',
-  getSessionId: () => 'test-session',
-  getUserMemory: () => '',
+  getModel: () => "test-model",
+  getSessionId: () => "test-session",
+  getUserMemory: () => "",
   getToolRegistry: () => ({
     getFunctionDeclarations: () => [],
     getFunctionDeclarationsFiltered: () => [],
@@ -69,14 +69,14 @@ const createMockConfig = (
   getTelemetryLogPromptsEnabled: () => false,
 });
 
-describe('ArenaManager', () => {
+describe("ArenaManager", () => {
   let tempDir: string;
   let mockConfig: ReturnType<typeof createMockConfig>;
   let mockBackend: ReturnType<typeof createMockBackend>;
 
   beforeEach(async () => {
     // Create a temp directory - no need for git repo since we mock GitWorktreeService
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'arena-test-'));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "arena-test-"));
     // Use tempDir as worktreeBaseDir to avoid slow filesystem access in deriveWorktreeDirName
     mockConfig = createMockConfig(tempDir, { worktreeBaseDir: tempDir });
 
@@ -119,7 +119,7 @@ describe('ArenaManager', () => {
       removedBranches: [],
       errors: [],
     });
-    hoistedMockGetWorktreeDiff.mockResolvedValue('');
+    hoistedMockGetWorktreeDiff.mockResolvedValue("");
     hoistedMockApplyWorktreeChanges.mockResolvedValue({ success: true });
   });
 
@@ -131,161 +131,161 @@ describe('ArenaManager', () => {
     }
   });
 
-  describe('constructor', () => {
-    it('should create an ArenaManager instance', () => {
+  describe("constructor", () => {
+    it("should create an ArenaManager instance", () => {
       const manager = new ArenaManager(mockConfig as never);
       expect(manager).toBeDefined();
       expect(manager.getSessionId()).toBeUndefined();
       expect(manager.getSessionStatus()).toBe(ArenaSessionStatus.INITIALIZING);
     });
 
-    it('should not have a backend before start', () => {
+    it("should not have a backend before start", () => {
       const manager = new ArenaManager(mockConfig as never);
       expect(manager.getBackend()).toBeNull();
     });
   });
 
-  describe('start validation', () => {
-    it('should reject start with less than 2 models', async () => {
+  describe("start validation", () => {
+    it("should reject start with less than 2 models", async () => {
       const manager = new ArenaManager(mockConfig as never);
 
       await expect(
         manager.start({
-          models: [{ modelId: 'model-1', authType: 'openai' }],
-          task: 'Test task',
+          models: [{ modelId: "model-1", authType: "openai" }],
+          task: "Test task",
         }),
-      ).rejects.toThrow('Arena requires at least 2 models');
+      ).rejects.toThrow("Arena requires at least 2 models");
     });
 
-    it('should reject start with more than max models', async () => {
+    it("should reject start with more than max models", async () => {
       const manager = new ArenaManager(mockConfig as never);
 
       const models = Array.from({ length: ARENA_MAX_AGENTS + 1 }, (_, i) => ({
         modelId: `model-${i}`,
-        authType: 'openai',
+        authType: "openai",
       }));
 
       await expect(
         manager.start({
           models,
-          task: 'Test task',
+          task: "Test task",
         }),
       ).rejects.toThrow(
         `Arena supports a maximum of ${ARENA_MAX_AGENTS} models`,
       );
     });
 
-    it('should reject start with empty task', async () => {
+    it("should reject start with empty task", async () => {
       const manager = new ArenaManager(mockConfig as never);
 
       await expect(
         manager.start({
           models: [
-            { modelId: 'model-1', authType: 'openai' },
-            { modelId: 'model-2', authType: 'openai' },
+            { modelId: "model-1", authType: "openai" },
+            { modelId: "model-2", authType: "openai" },
           ],
-          task: '',
+          task: "",
         }),
-      ).rejects.toThrow('Arena requires a task/prompt');
+      ).rejects.toThrow("Arena requires a task/prompt");
     });
 
-    it('should reject start with duplicate model IDs', async () => {
+    it("should reject start with duplicate model IDs", async () => {
       const manager = new ArenaManager(mockConfig as never);
 
       await expect(
         manager.start({
           models: [
-            { modelId: 'model-1', authType: 'openai' },
-            { modelId: 'model-1', authType: 'openai' },
+            { modelId: "model-1", authType: "openai" },
+            { modelId: "model-1", authType: "openai" },
           ],
-          task: 'Test task',
+          task: "Test task",
         }),
-      ).rejects.toThrow('Arena models must have unique identifiers');
+      ).rejects.toThrow("Arena models must have unique identifiers");
     });
   });
 
-  describe('event emitter', () => {
-    it('should return the event emitter', () => {
+  describe("event emitter", () => {
+    it("should return the event emitter", () => {
       const manager = new ArenaManager(mockConfig as never);
       const emitter = manager.getEventEmitter();
       expect(emitter).toBeDefined();
-      expect(typeof emitter.on).toBe('function');
-      expect(typeof emitter.off).toBe('function');
-      expect(typeof emitter.emit).toBe('function');
+      expect(typeof emitter.on).toBe("function");
+      expect(typeof emitter.off).toBe("function");
+      expect(typeof emitter.emit).toBe("function");
     });
   });
 
-  describe('PTY interaction methods', () => {
-    it('should expose PTY interaction methods', () => {
+  describe("PTY interaction methods", () => {
+    it("should expose PTY interaction methods", () => {
       const manager = new ArenaManager(mockConfig as never);
-      expect(typeof manager.switchToAgent).toBe('function');
-      expect(typeof manager.switchToNextAgent).toBe('function');
-      expect(typeof manager.switchToPreviousAgent).toBe('function');
-      expect(typeof manager.getActiveAgentId).toBe('function');
-      expect(typeof manager.getActiveSnapshot).toBe('function');
-      expect(typeof manager.getAgentSnapshot).toBe('function');
-      expect(typeof manager.forwardInput).toBe('function');
-      expect(typeof manager.resizeAgents).toBe('function');
+      expect(typeof manager.switchToAgent).toBe("function");
+      expect(typeof manager.switchToNextAgent).toBe("function");
+      expect(typeof manager.switchToPreviousAgent).toBe("function");
+      expect(typeof manager.getActiveAgentId).toBe("function");
+      expect(typeof manager.getActiveSnapshot).toBe("function");
+      expect(typeof manager.getAgentSnapshot).toBe("function");
+      expect(typeof manager.forwardInput).toBe("function");
+      expect(typeof manager.resizeAgents).toBe("function");
     });
 
-    it('should return null for active agent ID when no session', () => {
+    it("should return null for active agent ID when no session", () => {
       const manager = new ArenaManager(mockConfig as never);
       expect(manager.getActiveAgentId()).toBeNull();
     });
 
-    it('should return null for active snapshot when no session', () => {
+    it("should return null for active snapshot when no session", () => {
       const manager = new ArenaManager(mockConfig as never);
       expect(manager.getActiveSnapshot()).toBeNull();
     });
   });
 
-  describe('cancel', () => {
-    it('should handle cancel when no session is active', async () => {
+  describe("cancel", () => {
+    it("should handle cancel when no session is active", async () => {
       const manager = new ArenaManager(mockConfig as never);
       await expect(manager.cancel()).resolves.not.toThrow();
     });
   });
 
-  describe('cleanup', () => {
-    it('should handle cleanup when no session is active', async () => {
+  describe("cleanup", () => {
+    it("should handle cleanup when no session is active", async () => {
       const manager = new ArenaManager(mockConfig as never);
       await expect(manager.cleanup()).resolves.not.toThrow();
     });
   });
 
-  describe('getAgentStates', () => {
-    it('should return empty array when no agents', () => {
+  describe("getAgentStates", () => {
+    it("should return empty array when no agents", () => {
       const manager = new ArenaManager(mockConfig as never);
       expect(manager.getAgentStates()).toEqual([]);
     });
   });
 
-  describe('getAgentState', () => {
-    it('should return undefined for non-existent agent', () => {
+  describe("getAgentState", () => {
+    it("should return undefined for non-existent agent", () => {
       const manager = new ArenaManager(mockConfig as never);
-      expect(manager.getAgentState('non-existent')).toBeUndefined();
+      expect(manager.getAgentState("non-existent")).toBeUndefined();
     });
   });
 
-  describe('applyAgentResult', () => {
-    it('should return error for non-existent agent', async () => {
+  describe("applyAgentResult", () => {
+    it("should return error for non-existent agent", async () => {
       const manager = new ArenaManager(mockConfig as never);
-      const result = await manager.applyAgentResult('non-existent');
+      const result = await manager.applyAgentResult("non-existent");
       expect(result.success).toBe(false);
-      expect(result.error).toContain('not found');
+      expect(result.error).toContain("not found");
     });
   });
 
-  describe('getAgentDiff', () => {
-    it('should return error message for non-existent agent', async () => {
+  describe("getAgentDiff", () => {
+    it("should return error message for non-existent agent", async () => {
       const manager = new ArenaManager(mockConfig as never);
-      const diff = await manager.getAgentDiff('non-existent');
-      expect(diff).toContain('not found');
+      const diff = await manager.getAgentDiff("non-existent");
+      expect(diff).toContain("not found");
     });
   });
 
-  describe('backend initialization', () => {
-    it('should emit SESSION_UPDATE with type warning when backend detection returns warning', async () => {
+  describe("backend initialization", () => {
+    it("should emit SESSION_UPDATE with type warning when backend detection returns warning", async () => {
       const manager = new ArenaManager(mockConfig as never);
       const updates: Array<{
         type: string;
@@ -302,7 +302,7 @@ describe('ArenaManager', () => {
 
       hoistedMockDetectBackend.mockResolvedValueOnce({
         backend: mockBackend,
-        warning: 'fallback to tmux backend',
+        warning: "fallback to tmux backend",
       });
 
       await manager.start(createValidStartOptions());
@@ -311,35 +311,35 @@ describe('ArenaManager', () => {
         undefined,
         expect.anything(),
       );
-      const warningUpdate = updates.find((u) => u.type === 'warning');
+      const warningUpdate = updates.find((u) => u.type === "warning");
       expect(warningUpdate).toBeDefined();
-      expect(warningUpdate?.message).toContain('fallback to tmux backend');
-      expect(warningUpdate?.sessionId).toBe('test-session');
+      expect(warningUpdate?.message).toContain("fallback to tmux backend");
+      expect(warningUpdate?.sessionId).toBe("test-session");
     });
 
-    it('should emit SESSION_ERROR and mark FAILED when backend init fails', async () => {
+    it("should emit SESSION_ERROR and mark FAILED when backend init fails", async () => {
       const manager = new ArenaManager(mockConfig as never);
       const sessionErrors: string[] = [];
       manager.getEventEmitter().on(ArenaEventType.SESSION_ERROR, (event) => {
         sessionErrors.push(event.error);
       });
 
-      mockBackend.init.mockRejectedValueOnce(new Error('init failed'));
+      mockBackend.init.mockRejectedValueOnce(new Error("init failed"));
 
       await expect(manager.start(createValidStartOptions())).rejects.toThrow(
-        'init failed',
+        "init failed",
       );
       expect(manager.getSessionStatus()).toBe(ArenaSessionStatus.FAILED);
-      expect(sessionErrors).toEqual(['init failed']);
+      expect(sessionErrors).toEqual(["init failed"]);
     });
   });
 
-  describe('chat history forwarding', () => {
-    it('should pass chatHistory to backend spawnAgent calls', async () => {
+  describe("chat history forwarding", () => {
+    it("should pass chatHistory to backend spawnAgent calls", async () => {
       const manager = new ArenaManager(mockConfig as never);
       const chatHistory = [
-        { role: 'user' as const, parts: [{ text: 'prior question' }] },
-        { role: 'model' as const, parts: [{ text: 'prior answer' }] },
+        { role: "user" as const, parts: [{ text: "prior question" }] },
+        { role: "model" as const, parts: [{ text: "prior answer" }] },
       ];
 
       await manager.start({
@@ -358,7 +358,7 @@ describe('ArenaManager', () => {
       }
     });
 
-    it('should pass undefined chatHistory when not provided', async () => {
+    it("should pass undefined chatHistory when not provided", async () => {
       const manager = new ArenaManager(mockConfig as never);
 
       await manager.start(createValidStartOptions());
@@ -373,8 +373,8 @@ describe('ArenaManager', () => {
     });
   });
 
-  describe('active session lifecycle', () => {
-    it('cancel should stop backend and move session to CANCELLED', async () => {
+  describe("active session lifecycle", () => {
+    it("cancel should stop backend and move session to CANCELLED", async () => {
       const manager = new ArenaManager(mockConfig as never);
 
       // Disable auto-exit so agents stay running until we cancel.
@@ -400,7 +400,7 @@ describe('ArenaManager', () => {
       expect(manager.getSessionStatus()).toBe(ArenaSessionStatus.CANCELLED);
     });
 
-    it('cleanup should release backend and worktree resources after start', async () => {
+    it("cleanup should release backend and worktree resources after start", async () => {
       const manager = new ArenaManager(mockConfig as never);
 
       // auto-exit is on by default, so agents terminate quickly.
@@ -411,15 +411,15 @@ describe('ArenaManager', () => {
       expect(mockBackend.cleanup).toHaveBeenCalledTimes(1);
       // cleanupSession is called with worktreeDirName (short ID), not the full sessionId.
       // For 'test-session', the short ID is 'testsess' (first 8 chars with dashes removed).
-      expect(hoistedMockCleanupSession).toHaveBeenCalledWith('testsess');
+      expect(hoistedMockCleanupSession).toHaveBeenCalledWith("testsess");
       expect(manager.getBackend()).toBeNull();
       expect(manager.getSessionId()).toBeUndefined();
     });
   });
 });
 
-describe('ARENA_MAX_AGENTS', () => {
-  it('should be 5', () => {
+describe("ARENA_MAX_AGENTS", () => {
+  it("should be 5", () => {
     expect(ARENA_MAX_AGENTS).toBe(5);
   });
 });
@@ -434,7 +434,7 @@ function createMockBackend() {
   let autoExit = true;
 
   const backend = {
-    type: 'tmux' as const,
+    type: "tmux" as const,
     init: vi.fn().mockResolvedValue(undefined),
     spawnAgent: vi.fn(async (config: { agentId: string }) => {
       // By default, simulate immediate agent termination so tests
@@ -472,10 +472,10 @@ function createMockBackend() {
 function createValidStartOptions() {
   return {
     models: [
-      { modelId: 'model-1', authType: 'openai' },
-      { modelId: 'model-2', authType: 'openai' },
+      { modelId: "model-1", authType: "openai" },
+      { modelId: "model-2", authType: "openai" },
     ],
-    task: 'Implement feature X',
+    task: "Implement feature X",
   };
 }
 
@@ -483,7 +483,7 @@ async function waitForMicrotask(): Promise<void> {
   // Use setImmediate (or setTimeout fallback) to yield to the event loop
   // and allow other async operations (like the start() method) to progress.
   await new Promise<void>((resolve) => {
-    if (typeof setImmediate === 'function') {
+    if (typeof setImmediate === "function") {
       setImmediate(resolve);
     } else {
       setTimeout(resolve, 0);
@@ -498,7 +498,7 @@ async function waitForCondition(
   const startedAt = Date.now();
   while (!predicate()) {
     if (Date.now() - startedAt > timeoutMs) {
-      throw new Error('Timed out while waiting for condition');
+      throw new Error("Timed out while waiting for condition");
     }
     await waitForMicrotask();
   }

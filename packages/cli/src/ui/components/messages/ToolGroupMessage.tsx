@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useMemo, useRef } from 'react';
-import { Box } from 'ink';
-import type { IndividualToolCallDisplay } from '../../types.js';
-import { ToolCallStatus } from '../../types.js';
-import { ToolMessage } from './ToolMessage.js';
-import { ToolConfirmationMessage } from './ToolConfirmationMessage.js';
-import { CompactToolGroupDisplay } from './CompactToolGroupDisplay.js';
-import { theme } from '../../semantic-colors.js';
-import { SHELL_COMMAND_NAME, SHELL_NAME } from '../../constants.js';
-import { useConfig } from '../../contexts/ConfigContext.js';
-import { useCompactMode } from '../../contexts/CompactModeContext.js';
-import type { AgentResultDisplay } from '@qwen-code/qwen-code-core';
+import type React from "react";
+import { useMemo, useRef } from "react";
+import { Box } from "ink";
+import type { IndividualToolCallDisplay } from "../../types.js";
+import { ToolCallStatus } from "../../types.js";
+import { ToolMessage } from "./ToolMessage.js";
+import { ToolConfirmationMessage } from "./ToolConfirmationMessage.js";
+import { CompactToolGroupDisplay } from "./CompactToolGroupDisplay.js";
+import { theme } from "../../semantic-colors.js";
+import { SHELL_COMMAND_NAME, SHELL_NAME } from "../../constants.js";
+import { useConfig } from "../../contexts/ConfigContext.js";
+import { useCompactMode } from "../../contexts/CompactModeContext.js";
+import type { AgentResultDisplay } from "@tram-ai/tram-core";
 
 function isAgentWithPendingConfirmation(
-  rd: IndividualToolCallDisplay['resultDisplay'],
+  rd: IndividualToolCallDisplay["resultDisplay"],
 ): rd is AgentResultDisplay {
   return (
-    typeof rd === 'object' &&
+    typeof rd === "object" &&
     rd !== null &&
-    'type' in rd &&
-    (rd as AgentResultDisplay).type === 'task_execution' &&
+    "type" in rd &&
+    (rd as AgentResultDisplay).type === "task_execution" &&
     (rd as AgentResultDisplay).pendingConfirmation !== undefined
   );
 }
@@ -138,7 +138,7 @@ export const ToolGroupMessage: React.FC<ToolGroupMessageProps> = ({
 
   let countToolCallsWithResults = 0;
   for (const tool of toolCalls) {
-    if (tool.resultDisplay !== undefined && tool.resultDisplay !== '') {
+    if (tool.resultDisplay !== undefined && tool.resultDisplay !== "") {
       countToolCallsWithResults++;
     }
   }
@@ -194,10 +194,10 @@ export const ToolGroupMessage: React.FC<ToolGroupMessageProps> = ({
                 contentWidth={innerWidth}
                 emphasis={
                   isConfirming
-                    ? 'high'
+                    ? "high"
                     : toolAwaitingApproval
-                      ? 'low'
-                      : 'medium'
+                      ? "low"
+                      : "medium"
                 }
                 activeShellPtyId={activeShellPtyId}
                 embeddedShellFocused={embeddedShellFocused}

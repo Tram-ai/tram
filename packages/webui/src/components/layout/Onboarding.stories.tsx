@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Onboarding } from './Onboarding.js';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Onboarding } from "./Onboarding.js";
 
 /**
  * Onboarding is the welcome screen shown to new users.
  * It displays the app logo, welcome message, and a get started button.
  */
 const meta: Meta<typeof Onboarding> = {
-  title: 'Layout/Onboarding',
+  title: "Layout/Onboarding",
   component: Onboarding,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -28,7 +28,7 @@ type Story = StoryObj<typeof meta>;
  */
 export const Default: Story = {
   args: {
-    onGetStarted: () => console.log('Get started clicked'),
+    onGetStarted: () => console.log("Get started clicked"),
   },
 };
 
@@ -37,8 +37,8 @@ export const Default: Story = {
  */
 export const WithIcon: Story = {
   args: {
-    iconUrl: 'https://via.placeholder.com/80',
-    onGetStarted: () => console.log('Get started clicked'),
+    iconUrl: "https://via.placeholder.com/80",
+    onGetStarted: () => console.log("Get started clicked"),
   },
 };
 
@@ -47,12 +47,12 @@ export const WithIcon: Story = {
  */
 export const CustomBranding: Story = {
   args: {
-    iconUrl: 'https://via.placeholder.com/80',
-    appName: 'My AI Assistant',
+    iconUrl: "https://via.placeholder.com/80",
+    appName: "My AI Assistant",
     subtitle:
-      'Your personal coding companion powered by advanced AI technology.',
-    buttonText: 'Start Coding Now',
-    onGetStarted: () => console.log('Get started clicked'),
+      "Your personal coding companion powered by advanced AI technology.",
+    buttonText: "Start Coding Now",
+    onGetStarted: () => console.log("Get started clicked"),
   },
 };
 
@@ -61,9 +61,9 @@ export const CustomBranding: Story = {
  */
 export const NoIcon: Story = {
   args: {
-    appName: 'Code Helper',
-    subtitle: 'Simple and powerful code assistance.',
-    buttonText: 'Begin',
-    onGetStarted: () => console.log('Get started clicked'),
+    appName: "Code Helper",
+    subtitle: "Simple and powerful code assistance.",
+    buttonText: "Begin",
+    onGetStarted: () => console.log("Get started clicked"),
   },
 };

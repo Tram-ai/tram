@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type * as vscode from 'vscode';
-import type { WebViewProvider } from './WebViewProvider.js';
+import type * as vscode from "vscode";
+import type { WebViewProvider } from "./WebViewProvider.js";
 
 /**
  * Factory function type that lazily creates a WebViewProvider instance.

@@ -6,14 +6,14 @@
  * Think tool call component - specialized for thinking/reasoning operations
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 import {
   ToolCallContainer,
   ToolCallCard,
   ToolCallRow,
   groupContent,
-} from './shared/index.js';
-import type { BaseToolCallProps } from './shared/index.js';
+} from "./shared/index.js";
+import type { BaseToolCallProps } from "./shared/index.js";
 
 /**
  * Specialized component for Think tool calls
@@ -39,19 +39,19 @@ export const ThinkToolCall: FC<BaseToolCallProps> = ({
         isFirst={isFirst}
         isLast={isLast}
       >
-        {errors.join('\n')}
+        {errors.join("\n")}
       </ToolCallContainer>
     );
   }
 
   // Show thoughts - use card for long content, compact for short
   if (textOutputs.length > 0) {
-    const thoughts = textOutputs.join('\n\n');
+    const thoughts = textOutputs.join("\n\n");
     const isLong = thoughts.length > 200;
 
     if (isLong) {
       const truncatedThoughts =
-        thoughts.length > 500 ? thoughts.substring(0, 500) + '...' : thoughts;
+        thoughts.length > 500 ? thoughts.substring(0, 500) + "..." : thoughts;
 
       return (
         <ToolCallCard icon="💭">
@@ -66,9 +66,9 @@ export const ThinkToolCall: FC<BaseToolCallProps> = ({
 
     // Short thoughts - compact format
     const status =
-      toolCall.status === 'pending' || toolCall.status === 'in_progress'
-        ? 'loading'
-        : 'default';
+      toolCall.status === "pending" || toolCall.status === "in_progress"
+        ? "loading"
+        : "default";
     return (
       <ToolCallContainer
         label="Think"

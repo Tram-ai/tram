@@ -10,93 +10,93 @@
  * limitations. The AST-based replacement provides accurate parsing via tree-sitter-bash.
  */
 
-import { parse } from 'shell-quote';
+import { parse } from "shell-quote";
 import {
   detectCommandSubstitution,
   splitCommands,
   stripShellWrapper,
-} from './shell-utils.js';
+} from "./shell-utils.js";
 
 const READ_ONLY_ROOT_COMMANDS = new Set([
-  'awk',
-  'basename',
-  'cat',
-  'cd',
-  'column',
-  'cut',
-  'df',
-  'dirname',
-  'du',
-  'echo',
-  'env',
-  'find',
-  'git',
-  'grep',
-  'head',
-  'less',
-  'ls',
-  'more',
-  'printenv',
-  'printf',
-  'ps',
-  'pwd',
-  'rg',
-  'ripgrep',
-  'sed',
-  'sort',
-  'stat',
-  'tail',
-  'tree',
-  'uniq',
-  'wc',
-  'which',
-  'where',
-  'whoami',
+  "awk",
+  "basename",
+  "cat",
+  "cd",
+  "column",
+  "cut",
+  "df",
+  "dirname",
+  "du",
+  "echo",
+  "env",
+  "find",
+  "git",
+  "grep",
+  "head",
+  "less",
+  "ls",
+  "more",
+  "printenv",
+  "printf",
+  "ps",
+  "pwd",
+  "rg",
+  "ripgrep",
+  "sed",
+  "sort",
+  "stat",
+  "tail",
+  "tree",
+  "uniq",
+  "wc",
+  "which",
+  "where",
+  "whoami",
 ]);
 
 const BLOCKED_FIND_FLAGS = new Set([
-  '-delete',
-  '-exec',
-  '-execdir',
-  '-ok',
-  '-okdir',
+  "-delete",
+  "-exec",
+  "-execdir",
+  "-ok",
+  "-okdir",
 ]);
 
-const BLOCKED_FIND_PREFIXES = ['-fprint', '-fprintf'];
+const BLOCKED_FIND_PREFIXES = ["-fprint", "-fprintf"];
 
 const READ_ONLY_GIT_SUBCOMMANDS = new Set([
-  'blame',
-  'branch',
-  'cat-file',
-  'diff',
-  'grep',
-  'log',
-  'ls-files',
-  'remote',
-  'rev-parse',
-  'show',
-  'status',
-  'describe',
+  "blame",
+  "branch",
+  "cat-file",
+  "diff",
+  "grep",
+  "log",
+  "ls-files",
+  "remote",
+  "rev-parse",
+  "show",
+  "status",
+  "describe",
 ]);
 
 const BLOCKED_GIT_REMOTE_ACTIONS = new Set([
-  'add',
-  'remove',
-  'rename',
-  'set-url',
-  'prune',
-  'update',
+  "add",
+  "remove",
+  "rename",
+  "set-url",
+  "prune",
+  "update",
 ]);
 
 const BLOCKED_GIT_BRANCH_FLAGS = new Set([
-  '-d',
-  '-D',
-  '--delete',
-  '--move',
-  '-m',
+  "-d",
+  "-D",
+  "--delete",
+  "--move",
+  "-m",
 ]);
 
-const BLOCKED_SED_PREFIXES = ['-i'];
+const BLOCKED_SED_PREFIXES = ["-i"];
 
 // AWK side-effect patterns that can execute commands or write files
 const AWK_SIDE_EFFECT_PATTERNS = [
@@ -135,7 +135,7 @@ function containsWriteRedirection(command: string): boolean {
       continue;
     }
 
-    if (char === '\\' && !inSingleQuotes) {
+    if (char === "\\" && !inSingleQuotes) {
       escapeNext = true;
       continue;
     }
@@ -150,7 +150,7 @@ function containsWriteRedirection(command: string): boolean {
       continue;
     }
 
-    if (!inSingleQuotes && !inDoubleQuotes && char === '>') {
+    if (!inSingleQuotes && !inDoubleQuotes && char === ">") {
       return true;
     }
   }
@@ -162,7 +162,7 @@ function normalizeTokens(segment: string): string[] {
   const parsed = parse(segment);
   const tokens: string[] = [];
   for (const token of parsed) {
-    if (typeof token === 'string') {
+    if (typeof token === "string") {
       tokens.push(token);
     }
   }
@@ -207,14 +207,14 @@ function evaluateSedCommand(tokens: string[]): boolean {
   for (const token of rest) {
     if (
       BLOCKED_SED_PREFIXES.some((prefix) => token.startsWith(prefix)) ||
-      token === '--in-place'
+      token === "--in-place"
     ) {
       return false;
     }
   }
 
   // Check for side-effect patterns in sed script
-  const scriptContent = rest.join(' ');
+  const scriptContent = rest.join(" ");
   for (const pattern of SED_SIDE_EFFECT_PATTERNS) {
     if (pattern.test(scriptContent)) {
       return false;
@@ -228,7 +228,7 @@ function evaluateAwkCommand(tokens: string[]): boolean {
   const [, ...rest] = tokens;
 
   // Join all arguments to check for awk script content
-  const scriptContent = rest.join(' ');
+  const scriptContent = rest.join(" ");
 
   // Check for dangerous side-effect patterns
   for (const pattern of AWK_SIDE_EFFECT_PATTERNS) {
@@ -260,9 +260,9 @@ function evaluateGitBranchArgs(args: string[]): boolean {
 
 function evaluateGitCommand(tokens: string[]): boolean {
   let index = 1;
-  while (index < tokens.length && tokens[index]!.startsWith('-')) {
+  while (index < tokens.length && tokens[index]!.startsWith("-")) {
     const flag = tokens[index]!.toLowerCase();
-    if (flag === '--version' || flag === '--help') {
+    if (flag === "--version" || flag === "--help") {
       return true;
     }
     index++;
@@ -279,11 +279,11 @@ function evaluateGitCommand(tokens: string[]): boolean {
 
   const args = tokens.slice(index + 1);
 
-  if (subcommand === 'remote') {
+  if (subcommand === "remote") {
     return evaluateGitRemoteArgs(args);
   }
 
-  if (subcommand === 'branch') {
+  if (subcommand === "branch") {
     return evaluateGitBranchArgs(args);
   }
 
@@ -323,19 +323,19 @@ function evaluateShellSegment(segment: string): boolean {
     return false;
   }
 
-  if (normalizedRoot === 'find') {
+  if (normalizedRoot === "find") {
     return evaluateFindCommand([normalizedRoot, ...args]);
   }
 
-  if (normalizedRoot === 'sed') {
+  if (normalizedRoot === "sed") {
     return evaluateSedCommand([normalizedRoot, ...args]);
   }
 
-  if (normalizedRoot === 'awk') {
+  if (normalizedRoot === "awk") {
     return evaluateAwkCommand([normalizedRoot, ...args]);
   }
 
-  if (normalizedRoot === 'git') {
+  if (normalizedRoot === "git") {
     return evaluateGitCommand([normalizedRoot, ...args]);
   }
 
@@ -348,7 +348,7 @@ function evaluateShellSegment(segment: string): boolean {
  * limitations. The AST-based replacement provides accurate parsing via tree-sitter-bash.
  */
 export function isShellCommandReadOnly(command: string): boolean {
-  if (typeof command !== 'string' || !command.trim()) {
+  if (typeof command !== "string" || !command.trim()) {
     return false;
   }
 

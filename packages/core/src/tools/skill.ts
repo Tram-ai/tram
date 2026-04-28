@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
-import { ToolNames, ToolDisplayNames } from './tool-names.js';
-import type { ToolResult, ToolResultDisplay } from './tools.js';
-import type { Config } from '../config/config.js';
-import type { SkillManager } from '../skills/skill-manager.js';
-import type { SkillConfig } from '../skills/types.js';
-import { logSkillLaunch, SkillLaunchEvent } from '../telemetry/index.js';
-import path from 'path';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from "./tools.js";
+import { ToolNames, ToolDisplayNames } from "./tool-names.js";
+import type { ToolResult, ToolResultDisplay } from "./tools.js";
+import type { Config } from "../config/config.js";
+import type { SkillManager } from "../skills/skill-manager.js";
+import type { SkillConfig } from "../skills/types.js";
+import { logSkillLaunch, SkillLaunchEvent } from "../telemetry/index.js";
+import path from "path";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('SKILL');
+const debugLogger = createDebugLogger("SKILL");
 
 export interface SkillParams {
   skill: string;
@@ -44,22 +44,22 @@ export class SkillTool extends BaseDeclarativeTool<SkillParams, ToolResult> {
   constructor(private readonly config: Config) {
     // Initialize with a basic schema first
     const initialSchema = {
-      type: 'object',
+      type: "object",
       properties: {
         skill: {
-          type: 'string',
+          type: "string",
           description: 'The skill name (no arguments). E.g., "pdf" or "xlsx"',
         },
       },
-      required: ['skill'],
+      required: ["skill"],
       additionalProperties: false,
-      $schema: 'http://json-schema.org/draft-07/schema#',
+      $schema: "http://json-schema.org/draft-07/schema#",
     };
 
     super(
       SkillTool.Name,
       ToolDisplayNames.SKILL,
-      'Execute a skill within the main conversation. Loading available skills...', // Initial description
+      "Execute a skill within the main conversation. Loading available skills...", // Initial description
       Kind.Read,
       initialSchema,
       false, // isOutputMarkdown
@@ -68,7 +68,7 @@ export class SkillTool extends BaseDeclarativeTool<SkillParams, ToolResult> {
 
     const skillManager = config.getSkillManager();
     if (!skillManager) {
-      throw new Error('SkillManager not available');
+      throw new Error("SkillManager not available");
     }
     this.skillManager = skillManager;
     this.skillManager.addChangeListener(() => {
@@ -88,7 +88,7 @@ export class SkillTool extends BaseDeclarativeTool<SkillParams, ToolResult> {
       this.availableSkills = await this.skillManager.listSkills();
       this.updateDescriptionAndSchema();
     } catch (error) {
-      debugLogger.warn('Failed to load skills for Skills tool:', error);
+      debugLogger.warn("Failed to load skills for Skills tool:", error);
       this.availableSkills = [];
       this.updateDescriptionAndSchema();
     } finally {
@@ -105,9 +105,10 @@ export class SkillTool extends BaseDeclarativeTool<SkillParams, ToolResult> {
    */
   private updateDescriptionAndSchema(): void {
     const skillCount = this.availableSkills.length;
-    const statusLine = skillCount === 0
-      ? 'No skills are currently configured. Skills can be created by adding directories with SKILL.md files to .tram/skills/ or ~/.tram/skills/.'
-      : `${skillCount} skill(s) available. Call this tool with a skill name to execute it.`;
+    const statusLine =
+      skillCount === 0
+        ? "No skills are currently configured. Skills can be created by adding directories with SKILL.md files to .tram/skills/ or ~/.tram/skills/."
+        : `${skillCount} skill(s) available. Call this tool with a skill name to execute it.`;
 
     const baseDescription = `Execute a skill within the main conversation.
 
@@ -139,8 +140,8 @@ Important:
     // Validate required fields
     if (
       !params.skill ||
-      typeof params.skill !== 'string' ||
-      params.skill.trim() === ''
+      typeof params.skill !== "string" ||
+      params.skill.trim() === ""
     ) {
       return 'Parameter "skill" must be a non-empty string.';
     }
@@ -155,7 +156,7 @@ Important:
       if (availableNames.length === 0) {
         return `Skill "${params.skill}" not found. No skills are currently available.`;
       }
-      return `Skill "${params.skill}" not found. Available skills: ${availableNames.join(', ')}`;
+      return `Skill "${params.skill}" not found. Available skills: ${availableNames.join(", ")}`;
     }
 
     return null;
@@ -235,8 +236,8 @@ class SkillToolInvocation extends BaseToolInvocation<SkillParams, ToolResult> {
 
         const errorDetail =
           errorMessages.length > 0
-            ? `\nErrors:\n${errorMessages.join('\n')}`
-            : '';
+            ? `\nErrors:\n${errorMessages.join("\n")}`
+            : "";
 
         return {
           llmContent: `Skill "${this.params.skill}" not found.${errorDetail}`,

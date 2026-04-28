@@ -1,24 +1,24 @@
-name: 'Assign Issue on Comment'
+name: "Assign Issue on Comment"
 
 on:
   issue_comment:
     types:
-      - 'created'
+      - "created"
 
 concurrency:
-  group: '${{ github.workflow }}-${{ github.event.issue.number }}'
+  group: "${{ github.workflow }}-${{ github.event.issue.number }}"
   cancel-in-progress: true
 
 defaults:
   run:
-    shell: 'bash'
+    shell: "bash"
 
 permissions:
-  contents: 'read'
-  id-token: 'write'
-  issues: 'write'
-  statuses: 'write'
-  packages: 'read'
+  contents: "read"
+  id-token: "write"
+  issues: "write"
+  statuses: "write"
+  packages: "read"
 
 jobs:
   self-assign-issue:
@@ -26,21 +26,21 @@ jobs:
       github.repository == 'google-gemini/gemini-cli' &&
       github.event_name == 'issue_comment' &&
       contains(github.event.comment.body, '/assign')
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     steps:
-      - name: 'Generate GitHub App Token'
-        id: 'generate_token'
-        uses: 'actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b'
+      - name: "Generate GitHub App Token"
+        id: "generate_token"
+        uses: "actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b"
         with:
-          app-id: '${{ secrets.APP_ID }}'
-          private-key: '${{ secrets.PRIVATE_KEY }}'
+          app-id: "${{ secrets.APP_ID }}"
+          private-key: "${{ secrets.PRIVATE_KEY }}"
           # Add 'assignments' write permission
-          permission-issues: 'write'
+          permission-issues: "write"
 
-      - name: 'Assign issue to user'
-        uses: 'actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea'
+      - name: "Assign issue to user"
+        uses: "actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea"
         with:
-          github-token: '${{ steps.generate_token.outputs.token }}'
+          github-token: "${{ steps.generate_token.outputs.token }}"
           script: |
             const issueNumber = context.issue.number;
             const commenter = context.actor;

@@ -16,18 +16,18 @@ import type {
   PartUnion,
   Tool,
   ToolListUnion,
-} from '@google/genai';
-import { FinishReason, GenerateContentResponse } from '@google/genai';
-import type Anthropic from '@anthropic-ai/sdk';
-import { safeJsonParse } from '../../utils/safeJsonParse.js';
+} from "@google/genai";
+import { FinishReason, GenerateContentResponse } from "@google/genai";
+import type Anthropic from "@anthropic-ai/sdk";
+import { safeJsonParse } from "../../utils/safeJsonParse.js";
 import {
   convertSchema,
   type SchemaComplianceMode,
-} from '../../utils/schemaConverter.js';
+} from "../../utils/schemaConverter.js";
 
 type AnthropicMessageParam = Anthropic.MessageParam;
 type AnthropicToolParam = Anthropic.Tool & {
-  cache_control?: { type: 'ephemeral' };
+  cache_control?: { type: "ephemeral" };
 };
 type AnthropicContentBlockParam = Anthropic.ContentBlockParam;
 
@@ -38,7 +38,7 @@ export class AnthropicContentConverter {
 
   constructor(
     model: string,
-    schemaCompliance: SchemaComplianceMode = 'auto',
+    schemaCompliance: SchemaComplianceMode = "auto",
     enableCacheControl: boolean = true,
   ) {
     this.model = model;
@@ -80,7 +80,7 @@ export class AnthropicContentConverter {
     for (const tool of geminiTools) {
       let actualTool: Tool;
 
-      if ('tool' in tool) {
+      if ("tool" in tool) {
         actualTool = await (tool as CallableTool).tool();
       } else {
         actualTool = tool as Tool;
@@ -104,12 +104,12 @@ export class AnthropicContentConverter {
         }
 
         if (!inputSchema) {
-          inputSchema = { type: 'object', properties: {} };
+          inputSchema = { type: "object", properties: {} };
         }
 
         inputSchema = convertSchema(inputSchema, this.schemaCompliance);
-        if (typeof inputSchema['type'] !== 'string') {
-          inputSchema['type'] = 'object';
+        if (typeof inputSchema["type"] !== "string") {
+          inputSchema["type"] = "object";
         }
 
         tools.push({
@@ -125,7 +125,7 @@ export class AnthropicContentConverter {
       const lastToolIndex = tools.length - 1;
       tools[lastToolIndex] = {
         ...tools[lastToolIndex],
-        cache_control: { type: 'ephemeral' },
+        cache_control: { type: "ephemeral" },
       };
     }
 
@@ -139,16 +139,16 @@ export class AnthropicContentConverter {
     const parts: Part[] = [];
 
     for (const block of response.content || []) {
-      const blockType = String((block as { type?: string })['type'] || '');
-      if (blockType === 'text') {
+      const blockType = String((block as { type?: string })["type"] || "");
+      if (blockType === "text") {
         const text =
-          typeof (block as { text?: string }).text === 'string'
+          typeof (block as { text?: string }).text === "string"
             ? (block as { text?: string }).text
-            : '';
+            : "";
         if (text) {
           parts.push({ text });
         }
-      } else if (blockType === 'tool_use') {
+      } else if (blockType === "tool_use") {
         const toolUse = block as {
           id?: string;
           name?: string;
@@ -156,20 +156,20 @@ export class AnthropicContentConverter {
         };
         parts.push({
           functionCall: {
-            id: typeof toolUse.id === 'string' ? toolUse.id : undefined,
-            name: typeof toolUse.name === 'string' ? toolUse.name : undefined,
+            id: typeof toolUse.id === "string" ? toolUse.id : undefined,
+            name: typeof toolUse.name === "string" ? toolUse.name : undefined,
             args: this.safeInputToArgs(toolUse.input),
           },
         });
-      } else if (blockType === 'thinking') {
+      } else if (blockType === "thinking") {
         const thinking =
-          typeof (block as { thinking?: string }).thinking === 'string'
+          typeof (block as { thinking?: string }).thinking === "string"
             ? (block as { thinking?: string }).thinking
-            : '';
+            : "";
         const signature =
-          typeof (block as { signature?: string }).signature === 'string'
+          typeof (block as { signature?: string }).signature === "string"
             ? (block as { signature?: string }).signature
-            : '';
+            : "";
         if (thinking || signature) {
           const thoughtPart: Part = {
             text: thinking,
@@ -178,15 +178,15 @@ export class AnthropicContentConverter {
           };
           parts.push(thoughtPart);
         }
-      } else if (blockType === 'redacted_thinking') {
-        parts.push({ text: '', thought: true });
+      } else if (blockType === "redacted_thinking") {
+        parts.push({ text: "", thought: true });
       }
     }
 
     const candidate: Candidate = {
       content: {
         parts,
-        role: 'model' as const,
+        role: "model" as const,
       },
       index: 0,
       safetyRatings: [],
@@ -235,35 +235,35 @@ export class AnthropicContentConverter {
     content: ContentUnion | PartUnion,
     messages: AnthropicMessageParam[],
   ): void {
-    if (typeof content === 'string') {
+    if (typeof content === "string") {
       messages.push({
-        role: 'user',
-        content: [{ type: 'text', text: content }],
+        role: "user",
+        content: [{ type: "text", text: content }],
       });
       return;
     }
 
     if (!this.isContentObject(content)) return;
     const parts = content.parts || [];
-    const role = content.role === 'model' ? 'assistant' : 'user';
+    const role = content.role === "model" ? "assistant" : "user";
     const contentBlocks: AnthropicContentBlockParam[] = [];
     let toolCallIndex = 0;
 
     for (const part of parts) {
-      if (typeof part === 'string') {
-        contentBlocks.push({ type: 'text', text: part });
+      if (typeof part === "string") {
+        contentBlocks.push({ type: "text", text: part });
         continue;
       }
 
-      if ('text' in part && 'thought' in part && part.thought) {
-        if (role === 'assistant') {
+      if ("text" in part && "thought" in part && part.thought) {
+        if (role === "assistant") {
           const thinkingBlock: unknown = {
-            type: 'thinking',
-            thinking: part.text || '',
+            type: "thinking",
+            thinking: part.text || "",
           };
           if (
-            'thoughtSignature' in part &&
-            typeof part.thoughtSignature === 'string'
+            "thoughtSignature" in part &&
+            typeof part.thoughtSignature === "string"
           ) {
             (thinkingBlock as { signature?: string }).signature =
               part.thoughtSignature;
@@ -272,8 +272,8 @@ export class AnthropicContentConverter {
         }
       }
 
-      if ('text' in part && part.text && !('thought' in part && part.thought)) {
-        contentBlocks.push({ type: 'text', text: part.text });
+      if ("text" in part && part.text && !("thought" in part && part.thought)) {
+        contentBlocks.push({ type: "text", text: part.text });
       }
 
       const mediaBlock = this.createMediaBlockFromPart(part);
@@ -281,12 +281,12 @@ export class AnthropicContentConverter {
         contentBlocks.push(mediaBlock);
       }
 
-      if ('functionCall' in part && part.functionCall) {
-        if (role === 'assistant') {
+      if ("functionCall" in part && part.functionCall) {
+        if (role === "assistant") {
           contentBlocks.push({
-            type: 'tool_use',
+            type: "tool_use",
             id: part.functionCall.id || `tool_${toolCallIndex}`,
-            name: part.functionCall.name || '',
+            name: part.functionCall.name || "",
             input: (part.functionCall.args as Record<string, unknown>) || {},
           });
           toolCallIndex += 1;
@@ -297,7 +297,7 @@ export class AnthropicContentConverter {
         const toolResultBlock = this.createToolResultBlock(
           part.functionResponse,
         );
-        if (toolResultBlock && role === 'user') {
+        if (toolResultBlock && role === "user") {
           contentBlocks.push(toolResultBlock);
         }
       }
@@ -313,7 +313,7 @@ export class AnthropicContentConverter {
   ): Anthropic.ToolResultBlockParam | null {
     const textContent = this.extractFunctionResponseContent(response.response);
 
-    type ToolResultContent = Anthropic.ToolResultBlockParam['content'];
+    type ToolResultContent = Anthropic.ToolResultBlockParam["content"];
     const partBlocks: AnthropicContentBlockParam[] = [];
 
     for (const part of response.parts || []) {
@@ -327,7 +327,7 @@ export class AnthropicContentConverter {
     if (partBlocks.length > 0) {
       const blocks: AnthropicContentBlockParam[] = [];
       if (textContent) {
-        blocks.push({ type: 'text', text: textContent });
+        blocks.push({ type: "text", text: textContent });
       }
       blocks.push(...partBlocks);
       content = blocks as unknown as ToolResultContent;
@@ -336,8 +336,8 @@ export class AnthropicContentConverter {
     }
 
     return {
-      type: 'tool_result',
-      tool_use_id: response.id || '',
+      type: "tool_result",
+      tool_use_id: response.id || "",
       content,
     };
   }
@@ -348,25 +348,25 @@ export class AnthropicContentConverter {
     if (part.inlineData?.mimeType && part.inlineData?.data) {
       if (this.isSupportedAnthropicImageMimeType(part.inlineData.mimeType)) {
         return {
-          type: 'image',
+          type: "image",
           source: {
-            type: 'base64',
+            type: "base64",
             media_type: part.inlineData.mimeType as
-              | 'image/jpeg'
-              | 'image/png'
-              | 'image/gif'
-              | 'image/webp',
+              | "image/jpeg"
+              | "image/png"
+              | "image/gif"
+              | "image/webp",
             data: part.inlineData.data,
           },
         };
       }
 
-      if (part.inlineData.mimeType === 'application/pdf') {
+      if (part.inlineData.mimeType === "application/pdf") {
         return {
-          type: 'document',
+          type: "document",
           source: {
-            type: 'base64',
-            media_type: 'application/pdf',
+            type: "base64",
+            media_type: "application/pdf",
             data: part.inlineData.data,
           },
         };
@@ -374,9 +374,9 @@ export class AnthropicContentConverter {
 
       const displayName = part.inlineData.displayName
         ? ` (${part.inlineData.displayName})`
-        : '';
+        : "";
       return {
-        type: 'text',
+        type: "text",
         text: `Unsupported inline media type: ${part.inlineData.mimeType}${displayName}.`,
       };
     }
@@ -384,31 +384,31 @@ export class AnthropicContentConverter {
     if (part.fileData?.mimeType && part.fileData?.fileUri) {
       const displayName = part.fileData.displayName
         ? ` (${part.fileData.displayName})`
-        : '';
+        : "";
       const fileUri = part.fileData.fileUri;
 
       if (this.isSupportedAnthropicImageMimeType(part.fileData.mimeType)) {
         return {
-          type: 'image',
+          type: "image",
           source: {
-            type: 'url',
+            type: "url",
             url: fileUri,
           },
         } as unknown as AnthropicContentBlockParam;
       }
 
-      if (part.fileData.mimeType === 'application/pdf') {
+      if (part.fileData.mimeType === "application/pdf") {
         return {
-          type: 'document',
+          type: "document",
           source: {
-            type: 'url',
+            type: "url",
             url: fileUri,
           },
         } as unknown as AnthropicContentBlockParam;
       }
 
       return {
-        type: 'text',
+        type: "text",
         text: `Unsupported file media type: ${part.fileData.mimeType}${displayName}.`,
       };
     }
@@ -418,17 +418,17 @@ export class AnthropicContentConverter {
 
   private isSupportedAnthropicImageMimeType(
     mimeType: string,
-  ): mimeType is 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' {
+  ): mimeType is "image/jpeg" | "image/png" | "image/gif" | "image/webp" {
     return (
-      mimeType === 'image/jpeg' ||
-      mimeType === 'image/png' ||
-      mimeType === 'image/gif' ||
-      mimeType === 'image/webp'
+      mimeType === "image/jpeg" ||
+      mimeType === "image/png" ||
+      mimeType === "image/gif" ||
+      mimeType === "image/webp"
     );
   }
 
   private extractTextFromContentUnion(contentUnion: unknown): string {
-    if (typeof contentUnion === 'string') {
+    if (typeof contentUnion === "string") {
       return contentUnion;
     }
 
@@ -436,46 +436,46 @@ export class AnthropicContentConverter {
       return contentUnion
         .map((item) => this.extractTextFromContentUnion(item))
         .filter(Boolean)
-        .join('\n');
+        .join("\n");
     }
 
-    if (typeof contentUnion === 'object' && contentUnion !== null) {
-      if ('parts' in contentUnion) {
+    if (typeof contentUnion === "object" && contentUnion !== null) {
+      if ("parts" in contentUnion) {
         const content = contentUnion as Content;
         return (
           content.parts
             ?.map((part: Part) => {
-              if (typeof part === 'string') return part;
-              if ('text' in part) return part.text || '';
-              return '';
+              if (typeof part === "string") return part;
+              if ("text" in part) return part.text || "";
+              return "";
             })
             .filter(Boolean)
-            .join('\n') || ''
+            .join("\n") || ""
         );
       }
     }
 
-    return '';
+    return "";
   }
 
   private extractFunctionResponseContent(response: unknown): string {
     if (response === null || response === undefined) {
-      return '';
+      return "";
     }
 
-    if (typeof response === 'string') {
+    if (typeof response === "string") {
       return response;
     }
 
-    if (typeof response === 'object') {
+    if (typeof response === "object") {
       const responseObject = response as Record<string, unknown>;
-      const output = responseObject['output'];
-      if (typeof output === 'string') {
+      const output = responseObject["output"];
+      if (typeof output === "string") {
         return output;
       }
 
-      const error = responseObject['error'];
-      if (typeof error === 'string') {
+      const error = responseObject["error"];
+      if (typeof error === "string") {
         return error;
       }
     }
@@ -489,10 +489,10 @@ export class AnthropicContentConverter {
   }
 
   private safeInputToArgs(input: unknown): Record<string, unknown> {
-    if (input && typeof input === 'object') {
+    if (input && typeof input === "object") {
       return input as Record<string, unknown>;
     }
-    if (typeof input === 'string') {
+    if (typeof input === "string") {
       return safeJsonParse(input, {});
     }
     return {};
@@ -516,11 +516,11 @@ export class AnthropicContentConverter {
     content: unknown,
   ): content is { role: string; parts: Part[] } {
     return (
-      typeof content === 'object' &&
+      typeof content === "object" &&
       content !== null &&
-      'role' in content &&
-      'parts' in content &&
-      Array.isArray((content as Record<string, unknown>)['parts'])
+      "role" in content &&
+      "parts" in content &&
+      Array.isArray((content as Record<string, unknown>)["parts"])
     );
   }
 
@@ -537,9 +537,9 @@ export class AnthropicContentConverter {
 
     return [
       {
-        type: 'text',
+        type: "text",
         text: systemText,
-        cache_control: { type: 'ephemeral' },
+        cache_control: { type: "ephemeral" },
       },
     ];
   }
@@ -552,23 +552,23 @@ export class AnthropicContentConverter {
     // Find the last user message to add cache_control
     for (let i = messages.length - 1; i >= 0; i--) {
       const msg = messages[i];
-      if (msg.role === 'user') {
+      if (msg.role === "user") {
         const content = Array.isArray(msg.content)
           ? msg.content
-          : [{ type: 'text' as const, text: msg.content }];
+          : [{ type: "text" as const, text: msg.content }];
 
         if (content.length > 0) {
           const lastContent = content[content.length - 1];
           // Only add cache_control if the last block is a non-empty text block
           if (
-            typeof lastContent === 'object' &&
-            'type' in lastContent &&
-            lastContent.type === 'text' &&
-            'text' in lastContent &&
+            typeof lastContent === "object" &&
+            "type" in lastContent &&
+            lastContent.type === "text" &&
+            "text" in lastContent &&
             lastContent.text
           ) {
             lastContent.cache_control = {
-              type: 'ephemeral',
+              type: "ephemeral",
             };
           }
           // If last block is not text or is empty, don't add cache_control

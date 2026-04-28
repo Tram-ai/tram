@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   parseMarkdownCommand,
   MarkdownCommandDefSchema,
-} from './markdown-command-parser.js';
+} from "./markdown-command-parser.js";
 
-describe('parseMarkdownCommand', () => {
-  it('should parse markdown with YAML frontmatter', () => {
+describe("parseMarkdownCommand", () => {
+  it("should parse markdown with YAML frontmatter", () => {
     const content = `---
 description: Test command
 ---
@@ -22,23 +22,23 @@ This is the prompt content.`;
 
     expect(result).toEqual({
       frontmatter: {
-        description: 'Test command',
+        description: "Test command",
       },
-      prompt: 'This is the prompt content.',
+      prompt: "This is the prompt content.",
     });
   });
 
-  it('should parse markdown without frontmatter', () => {
-    const content = 'This is just a prompt without frontmatter.';
+  it("should parse markdown without frontmatter", () => {
+    const content = "This is just a prompt without frontmatter.";
 
     const result = parseMarkdownCommand(content);
 
     expect(result).toEqual({
-      prompt: 'This is just a prompt without frontmatter.',
+      prompt: "This is just a prompt without frontmatter.",
     });
   });
 
-  it('should handle multi-line prompts', () => {
+  it("should handle multi-line prompts", () => {
     const content = `---
 description: Multi-line test
 ---
@@ -50,11 +50,11 @@ Third line of prompt.`;
     const result = parseMarkdownCommand(content);
 
     expect(result.prompt).toBe(
-      'First line of prompt.\nSecond line of prompt.\nThird line of prompt.',
+      "First line of prompt.\nSecond line of prompt.\nThird line of prompt.",
     );
   });
 
-  it('should trim whitespace from prompt', () => {
+  it("should trim whitespace from prompt", () => {
     const content = `---
 description: Whitespace test
 ---
@@ -64,10 +64,10 @@ description: Whitespace test
 
     const result = parseMarkdownCommand(content);
 
-    expect(result.prompt).toBe('Prompt with leading and trailing spaces');
+    expect(result.prompt).toBe("Prompt with leading and trailing spaces");
   });
 
-  it('should handle empty frontmatter', () => {
+  it("should handle empty frontmatter", () => {
     const content = `---
 ---
 
@@ -77,10 +77,10 @@ Prompt content after empty frontmatter.`;
 
     // Empty YAML frontmatter returns undefined, not {}
     expect(result.frontmatter).toBeUndefined();
-    expect(result.prompt).toBe('Prompt content after empty frontmatter.');
+    expect(result.prompt).toBe("Prompt content after empty frontmatter.");
   });
 
-  it('should handle invalid YAML frontmatter gracefully', () => {
+  it("should handle invalid YAML frontmatter gracefully", () => {
     // The YAML parser we use is quite tolerant, so most "invalid" YAML
     // actually parses successfully. This test verifies that behavior.
     const content = `---
@@ -92,38 +92,38 @@ Prompt content.`;
     const result = parseMarkdownCommand(content);
 
     expect(result.frontmatter).toBeDefined();
-    expect(result.prompt).toBe('Prompt content.');
+    expect(result.prompt).toBe("Prompt content.");
   });
 
-  it('should parse frontmatter in CRLF files', () => {
+  it("should parse frontmatter in CRLF files", () => {
     const content =
-      '---\r\ndescription: Windows command\r\n---\r\n\r\nLine 1\r\nLine 2\r\n';
+      "---\r\ndescription: Windows command\r\n---\r\n\r\nLine 1\r\nLine 2\r\n";
 
     const result = parseMarkdownCommand(content);
 
     expect(result).toEqual({
       frontmatter: {
-        description: 'Windows command',
+        description: "Windows command",
       },
-      prompt: 'Line 1\nLine 2',
+      prompt: "Line 1\nLine 2",
     });
   });
 
-  it('should parse frontmatter in CR-only files', () => {
+  it("should parse frontmatter in CR-only files", () => {
     const content =
-      '---\rdescription: Old mac command\r---\r\rLine 1\rLine 2\r';
+      "---\rdescription: Old mac command\r---\r\rLine 1\rLine 2\r";
 
     const result = parseMarkdownCommand(content);
 
     expect(result).toEqual({
       frontmatter: {
-        description: 'Old mac command',
+        description: "Old mac command",
       },
-      prompt: 'Line 1\nLine 2',
+      prompt: "Line 1\nLine 2",
     });
   });
 
-  it('should parse frontmatter when content starts with UTF-8 BOM', () => {
+  it("should parse frontmatter when content starts with UTF-8 BOM", () => {
     const content = `\uFEFF---
 description: BOM command
 ---
@@ -134,20 +134,20 @@ Prompt from BOM file.`;
 
     expect(result).toEqual({
       frontmatter: {
-        description: 'BOM command',
+        description: "BOM command",
       },
-      prompt: 'Prompt from BOM file.',
+      prompt: "Prompt from BOM file.",
     });
   });
 });
 
-describe('MarkdownCommandDefSchema', () => {
-  it('should validate valid markdown command def', () => {
+describe("MarkdownCommandDefSchema", () => {
+  it("should validate valid markdown command def", () => {
     const validDef = {
       frontmatter: {
-        description: 'Test description',
+        description: "Test description",
       },
-      prompt: 'Test prompt',
+      prompt: "Test prompt",
     };
 
     const result = MarkdownCommandDefSchema.safeParse(validDef);
@@ -155,9 +155,9 @@ describe('MarkdownCommandDefSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('should validate markdown command def without frontmatter', () => {
+  it("should validate markdown command def without frontmatter", () => {
     const validDef = {
-      prompt: 'Test prompt',
+      prompt: "Test prompt",
     };
 
     const result = MarkdownCommandDefSchema.safeParse(validDef);
@@ -165,10 +165,10 @@ describe('MarkdownCommandDefSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('should reject command def without prompt', () => {
+  it("should reject command def without prompt", () => {
     const invalidDef = {
       frontmatter: {
-        description: 'Test description',
+        description: "Test description",
       },
     };
 
@@ -177,7 +177,7 @@ describe('MarkdownCommandDefSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should reject command def with non-string prompt', () => {
+  it("should reject command def with non-string prompt", () => {
     const invalidDef = {
       prompt: 123,
     };

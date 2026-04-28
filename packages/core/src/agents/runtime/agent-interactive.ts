@@ -11,35 +11,35 @@
  * state (messages, pending approvals, live outputs) that the UI reads.
  */
 
-import { createDebugLogger } from '../../utils/debugLogger.js';
-import { type AgentEventEmitter, AgentEventType } from './agent-events.js';
+import { createDebugLogger } from "../../utils/debugLogger.js";
+import { type AgentEventEmitter, AgentEventType } from "./agent-events.js";
 import type {
   AgentRoundTextEvent,
   AgentToolCallEvent,
   AgentToolResultEvent,
   AgentToolOutputUpdateEvent,
   AgentApprovalRequestEvent,
-} from './agent-events.js';
-import type { AgentStatsSummary } from './agent-statistics.js';
-import type { AgentCore } from './agent-core.js';
-import type { ContextState } from './agent-headless.js';
-import type { GeminiChat } from '../../core/geminiChat.js';
-import type { FunctionDeclaration } from '@google/genai';
+} from "./agent-events.js";
+import type { AgentStatsSummary } from "./agent-statistics.js";
+import type { AgentCore } from "./agent-core.js";
+import type { ContextState } from "./agent-headless.js";
+import type { GeminiChat } from "../../core/geminiChat.js";
+import type { FunctionDeclaration } from "@google/genai";
 import {
   ToolConfirmationOutcome,
   type ToolCallConfirmationDetails,
   type ToolResultDisplay,
-} from '../../tools/tools.js';
-import { AsyncMessageQueue } from '../../utils/asyncMessageQueue.js';
+} from "../../tools/tools.js";
+import { AsyncMessageQueue } from "../../utils/asyncMessageQueue.js";
 import {
   AgentTerminateMode,
   AgentStatus,
   isTerminalStatus,
   type AgentInteractiveConfig,
   type AgentMessage,
-} from './agent-types.js';
+} from "./agent-types.js";
 
-const debugLogger = createDebugLogger('AGENT_INTERACTIVE');
+const debugLogger = createDebugLogger("AGENT_INTERACTIVE");
 
 /**
  * AgentInteractive — persistent interactive agent that processes
@@ -105,7 +105,7 @@ export class AgentInteractive {
       extraHistory: this.config.chatHistory,
     });
     if (!this.chat) {
-      this.error = 'Failed to create chat session';
+      this.error = "Failed to create chat session";
       this.setStatus(AgentStatus.FAILED);
       return;
     }
@@ -115,7 +115,7 @@ export class AgentInteractive {
 
     if (this.config.chatHistory?.length) {
       this.addMessage(
-        'info',
+        "info",
         `History context from parent session included (${this.config.chatHistory.length} messages)`,
       );
     }
@@ -135,7 +135,7 @@ export class AgentInteractive {
     try {
       let message = this.queue.dequeue();
       while (message !== null && !this.masterAbortController.signal.aborted) {
-        this.addMessage('user', message);
+        this.addMessage("user", message);
         await this.runOneRound(message);
         message = this.queue.dequeue();
       }
@@ -148,7 +148,7 @@ export class AgentInteractive {
     } catch (err) {
       this.error = err instanceof Error ? err.message : String(err);
       this.setStatus(AgentStatus.FAILED);
-      debugLogger.error('AgentInteractive processing failed:', err);
+      debugLogger.error("AgentInteractive processing failed:", err);
     } finally {
       this.processing = false;
     }
@@ -168,14 +168,14 @@ export class AgentInteractive {
 
     // Propagate master abort to round
     const onMasterAbort = () => this.roundAbortController?.abort();
-    this.masterAbortController.signal.addEventListener('abort', onMasterAbort);
+    this.masterAbortController.signal.addEventListener("abort", onMasterAbort);
     if (this.masterAbortController.signal.aborted) {
       this.roundAbortController.abort();
     }
 
     try {
       const initialMessages = [
-        { role: 'user' as const, parts: [{ text: message }] },
+        { role: "user" as const, parts: [{ text: message }] },
       ];
 
       const result = await this.core.runReasoningLoop(
@@ -197,7 +197,7 @@ export class AgentInteractive {
       ) {
         const msg = terminateModeMessage(result.terminateMode);
         if (msg) {
-          this.addMessage('info', msg.text, { metadata: { level: msg.level } });
+          this.addMessage("info", msg.text, { metadata: { level: msg.level } });
         }
         this.lastRoundError = `Terminated: ${result.terminateMode}`;
       }
@@ -207,11 +207,11 @@ export class AgentInteractive {
       // Agent survives round errors — log and settle status in runLoop.
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.lastRoundError = errorMessage;
-      debugLogger.error('AgentInteractive round error:', err);
-      this.addMessage('info', errorMessage, { metadata: { level: 'error' } });
+      debugLogger.error("AgentInteractive round error:", err);
+      this.addMessage("info", errorMessage, { metadata: { level: "error" } });
     } finally {
       this.masterAbortController.signal.removeEventListener(
-        'abort',
+        "abort",
         onMasterAbort,
       );
       this.roundAbortController = undefined;
@@ -228,8 +228,8 @@ export class AgentInteractive {
     this.roundCancelledByUser = true;
     this.roundAbortController?.abort();
     this.pendingApprovals.clear();
-    this.addMessage('info', 'Agent round cancelled.', {
-      metadata: { level: 'warning' },
+    this.addMessage("info", "Agent round cancelled.", {
+      metadata: { level: "warning" },
     });
   }
 
@@ -373,7 +373,7 @@ export class AgentInteractive {
   }
 
   private addMessage(
-    role: AgentMessage['role'],
+    role: AgentMessage["role"],
     content: string,
     options?: { thought?: boolean; metadata?: Record<string, unknown> },
   ): void {
@@ -397,15 +397,15 @@ export class AgentInteractive {
 
     emitter.on(AgentEventType.ROUND_TEXT, (event: AgentRoundTextEvent) => {
       if (event.thoughtText) {
-        this.addMessage('assistant', event.thoughtText, { thought: true });
+        this.addMessage("assistant", event.thoughtText, { thought: true });
       }
       if (event.text) {
-        this.addMessage('assistant', event.text);
+        this.addMessage("assistant", event.text);
       }
     });
 
     emitter.on(AgentEventType.TOOL_CALL, (event: AgentToolCallEvent) => {
-      this.addMessage('tool_call', `Tool call: ${event.name}`, {
+      this.addMessage("tool_call", `Tool call: ${event.name}`, {
         metadata: {
           callId: event.callId,
           toolName: event.name,
@@ -432,11 +432,11 @@ export class AgentInteractive {
       this.shellPids.delete(event.callId);
       this.pendingApprovals.delete(event.callId);
 
-      const statusText = event.success ? 'succeeded' : 'failed';
+      const statusText = event.success ? "succeeded" : "failed";
       const summary = event.error
         ? `Tool ${event.name} ${statusText}: ${event.error}`
         : `Tool ${event.name} ${statusText}`;
-      this.addMessage('tool_result', summary, {
+      this.addMessage("tool_result", summary, {
         metadata: {
           callId: event.callId,
           toolName: event.name,
@@ -454,8 +454,8 @@ export class AgentInteractive {
         const fullDetails = {
           ...event.confirmationDetails,
           onConfirm: async (
-            outcome: Parameters<ToolCallConfirmationDetails['onConfirm']>[0],
-            payload?: Parameters<ToolCallConfirmationDetails['onConfirm']>[1],
+            outcome: Parameters<ToolCallConfirmationDetails["onConfirm"]>[0],
+            payload?: Parameters<ToolCallConfirmationDetails["onConfirm"]>[1],
           ) => {
             this.pendingApprovals.delete(event.callId);
             // Nudge the UI to re-render so the tool transitions visually
@@ -465,7 +465,7 @@ export class AgentInteractive {
               subagentId: this.core.subagentId,
               round: event.round,
               callId: event.callId,
-              outputChunk: '',
+              outputChunk: "",
               timestamp: Date.now(),
             } as AgentToolOutputUpdateEvent);
             await event.respond(outcome, payload);
@@ -492,17 +492,17 @@ export class AgentInteractive {
  */
 function terminateModeMessage(
   mode: AgentTerminateMode,
-): { text: string; level: 'info' | 'warning' | 'error' } | null {
+): { text: string; level: "info" | "warning" | "error" } | null {
   switch (mode) {
     case AgentTerminateMode.MAX_TURNS:
       return {
-        text: 'Agent stopped: maximum turns reached.',
-        level: 'warning',
+        text: "Agent stopped: maximum turns reached.",
+        level: "warning",
       };
     case AgentTerminateMode.TIMEOUT:
-      return { text: 'Agent stopped: time limit reached.', level: 'warning' };
+      return { text: "Agent stopped: time limit reached.", level: "warning" };
     case AgentTerminateMode.ERROR:
-      return { text: 'Agent stopped due to an error.', level: 'error' };
+      return { text: "Agent stopped due to an error.", level: "error" };
     case AgentTerminateMode.CANCELLED:
     case AgentTerminateMode.SHUTDOWN:
       return null;

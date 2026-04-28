@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ExtensionConfig } from './extensionManager.js';
-import type { ExtensionInstallMetadata } from '../config/config.js';
-import type { ClaudeMarketplaceConfig } from './claude-converter.js';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import * as https from 'node:https';
-import { stat } from 'node:fs/promises';
-import { parseGitHubRepoForReleases } from './github.js';
-import { isScopedNpmPackage } from './npm.js';
+import type { ExtensionConfig } from "./extensionManager.js";
+import type { ExtensionInstallMetadata } from "../config/config.js";
+import type { ClaudeMarketplaceConfig } from "./claude-converter.js";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as https from "node:https";
+import { stat } from "node:fs/promises";
+import { parseGitHubRepoForReleases } from "./github.js";
+import { isScopedNpmPackage } from "./npm.js";
 
 export interface MarketplaceInstallOptions {
   marketplaceUrl: string;
@@ -40,7 +40,7 @@ function parseSourceAndPluginName(source: string): {
 } {
   // Check if source contains a colon that could be a pluginName separator
   // We need to handle URL schemes that contain colons
-  const urlSchemes = ['http://', 'https://', 'git@', 'sso://'];
+  const urlSchemes = ["http://", "https://", "git@", "sso://"];
 
   let repoEndIndex = source.length;
   let hasPluginName = false;
@@ -49,14 +49,14 @@ function parseSourceAndPluginName(source: string): {
   for (const scheme of urlSchemes) {
     if (source.startsWith(scheme)) {
       const afterScheme = source.substring(scheme.length);
-      const lastColonIndex = afterScheme.lastIndexOf(':');
+      const lastColonIndex = afterScheme.lastIndexOf(":");
       if (lastColonIndex !== -1) {
         // Check if what follows the colon looks like a pluginName (not a port number or path)
         const potentialPluginName = afterScheme.substring(lastColonIndex + 1);
         // Plugin name should not contain '/' and should not be a number (port)
         if (
           potentialPluginName &&
-          !potentialPluginName.includes('/') &&
+          !potentialPluginName.includes("/") &&
           !/^\d+/.test(potentialPluginName)
         ) {
           repoEndIndex = scheme.length + lastColonIndex;
@@ -72,7 +72,7 @@ function parseSourceAndPluginName(source: string): {
     repoEndIndex === source.length &&
     !urlSchemes.some((s) => source.startsWith(s))
   ) {
-    const lastColonIndex = source.lastIndexOf(':');
+    const lastColonIndex = source.lastIndexOf(":");
     // On Windows, avoid treating drive letter as pluginName separator (e.g., C:\path)
     if (lastColonIndex > 1) {
       repoEndIndex = lastColonIndex;
@@ -111,10 +111,10 @@ function convertOwnerRepoToGitHubUrl(ownerRepo: string): string {
  */
 function isGitUrl(source: string): boolean {
   return (
-    source.startsWith('http://') ||
-    source.startsWith('https://') ||
-    source.startsWith('git@') ||
-    source.startsWith('sso://')
+    source.startsWith("http://") ||
+    source.startsWith("https://") ||
+    source.startsWith("git@") ||
+    source.startsWith("sso://")
   );
 }
 
@@ -133,12 +133,12 @@ function fetchUrl(
           return;
         }
         const chunks: Buffer[] = [];
-        res.on('data', (chunk) => chunks.push(chunk));
-        res.on('end', () => {
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => {
           resolve(Buffer.concat(chunks).toString());
         });
       })
-      .on('error', () => resolve(null));
+      .on("error", () => resolve(null));
   });
 }
 
@@ -151,16 +151,16 @@ async function fetchGitHubMarketplaceConfig(
   owner: string,
   repo: string,
 ): Promise<ClaudeMarketplaceConfig | null> {
-  const token = process.env['GITHUB_TOKEN'];
+  const token = process.env["GITHUB_TOKEN"];
 
   // Primary: GitHub API (works for private repos, but has rate limits)
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/.claude-plugin/marketplace.json`;
   const apiHeaders: Record<string, string> = {
-    'User-Agent': 'tram',
-    Accept: 'application/vnd.github.v3.raw',
+    "User-Agent": "tram",
+    Accept: "application/vnd.github.v3.raw",
   };
   if (token) {
-    apiHeaders['Authorization'] = `token ${token}`;
+    apiHeaders["Authorization"] = `token ${token}`;
   }
 
   let content = await fetchUrl(apiUrl, apiHeaders);
@@ -169,7 +169,7 @@ async function fetchGitHubMarketplaceConfig(
   if (!content) {
     const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/.claude-plugin/marketplace.json`;
     const rawHeaders: Record<string, string> = {
-      'User-Agent': 'tram',
+      "User-Agent": "tram",
     };
     content = await fetchUrl(rawUrl, rawHeaders);
   }
@@ -193,11 +193,11 @@ async function readLocalMarketplaceConfig(
 ): Promise<ClaudeMarketplaceConfig | null> {
   const marketplaceConfigPath = path.join(
     localPath,
-    '.claude-plugin',
-    'marketplace.json',
+    ".claude-plugin",
+    "marketplace.json",
   );
   try {
-    const content = await fs.promises.readFile(marketplaceConfigPath, 'utf-8');
+    const content = await fs.promises.readFile(marketplaceConfigPath, "utf-8");
     return JSON.parse(content) as ClaudeMarketplaceConfig;
   } catch {
     return null;
@@ -228,7 +228,7 @@ export async function parseInstallSource(
     // Local path exists
     installMetadata = {
       source: repo,
-      type: 'local',
+      type: "local",
       pluginName,
     };
 
@@ -238,7 +238,7 @@ export async function parseInstallSource(
     // Priority 2: Git URL (http://, https://, git@, sso://)
     installMetadata = {
       source: repoSource,
-      type: 'git',
+      type: "git",
       pluginName,
     };
 
@@ -253,7 +253,7 @@ export async function parseInstallSource(
     // Priority 3: Scoped npm package (@scope/name, optionally @version)
     installMetadata = {
       source: repo,
-      type: 'npm',
+      type: "npm",
       pluginName,
     };
   } else if (isOwnerRepoFormat(repo)) {
@@ -261,13 +261,13 @@ export async function parseInstallSource(
     repoSource = convertOwnerRepoToGitHubUrl(repo);
     installMetadata = {
       source: repoSource,
-      type: 'git',
+      type: "git",
       pluginName,
     };
 
     // Try to fetch marketplace config from GitHub
     try {
-      const [owner, repoName] = repo.split('/');
+      const [owner, repoName] = repo.split("/");
       marketplaceConfig = await fetchGitHubMarketplaceConfig(owner, repoName);
     } catch {
       // Not a valid GitHub URL or failed to fetch, continue without marketplace config
@@ -280,7 +280,7 @@ export async function parseInstallSource(
   // Step 3: If marketplace config exists, update type to marketplace
   if (marketplaceConfig) {
     installMetadata.marketplaceConfig = marketplaceConfig;
-    installMetadata.originSource = 'Claude';
+    installMetadata.originSource = "Claude";
   }
 
   return installMetadata;

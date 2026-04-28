@@ -8,17 +8,17 @@ import {
   flatMapTextParts,
   readPathFromWorkspace,
   createDebugLogger,
-} from '@tram-ai/tram-core';
-import type { CommandContext } from '../../ui/commands/types.js';
-import { MessageType } from '../../ui/types.js';
+} from "@tram-ai/tram-core";
+import type { CommandContext } from "../../ui/commands/types.js";
+import { MessageType } from "../../ui/types.js";
 import {
   AT_FILE_INJECTION_TRIGGER,
   type IPromptProcessor,
   type PromptPipelineContent,
-} from './types.js';
-import { extractInjections } from './injectionParser.js';
+} from "./types.js";
+import { extractInjections } from "./injectionParser.js";
 
-const debugLogger = createDebugLogger('AT_FILE_PROCESSOR');
+const debugLogger = createDebugLogger("AT_FILE_PROCESSOR");
 
 export class AtFileProcessor implements IPromptProcessor {
   constructor(private readonly commandName?: string) {}

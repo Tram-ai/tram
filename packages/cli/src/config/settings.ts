@@ -4,23 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { homedir, platform } from 'node:os';
-import * as dotenv from 'dotenv';
-import process from 'node:process';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { homedir, platform } from "node:os";
+import * as dotenv from "dotenv";
+import process from "node:process";
 import {
   FatalConfigError,
   TRAM_DIR,
   getErrorMessage,
   Storage,
   createDebugLogger,
-} from '@tram-ai/tram-core';
-import stripJsonComments from 'strip-json-comments';
-import { DefaultLight } from '../ui/themes/default-light.js';
-import { DefaultDark } from '../ui/themes/default.js';
-import { isWorkspaceTrusted } from './trustedFolders.js';
-import { hasOwnModelProviders } from './modelProvidersScope.js';
+} from "@tram-ai/tram-core";
+import stripJsonComments from "strip-json-comments";
+import { DefaultLight } from "../ui/themes/default-light.js";
+import { DefaultDark } from "../ui/themes/default.js";
+import { isWorkspaceTrusted } from "./trustedFolders.js";
+import { hasOwnModelProviders } from "./modelProvidersScope.js";
 import {
   type Settings,
   type MemoryImportFormat,
@@ -28,19 +28,19 @@ import {
   type SettingsSchema,
   type SettingDefinition,
   getSettingsSchema,
-} from './settingsSchema.js';
-import { resolveEnvVarsInObject } from '../utils/envVarResolver.js';
-import { setNestedPropertySafe } from '../utils/settingsUtils.js';
-import { customDeepMerge } from '../utils/deepMerge.js';
-import { updateSettingsFilePreservingFormat } from '../utils/commentJson.js';
-import { runMigrations, needsMigration } from './migration/index.js';
+} from "./settingsSchema.js";
+import { resolveEnvVarsInObject } from "../utils/envVarResolver.js";
+import { setNestedPropertySafe } from "../utils/settingsUtils.js";
+import { customDeepMerge } from "../utils/deepMerge.js";
+import { updateSettingsFilePreservingFormat } from "../utils/commentJson.js";
+import { runMigrations, needsMigration } from "./migration/index.js";
 import {
   V1_TO_V2_MIGRATION_MAP,
   V2_CONTAINER_KEYS,
-} from './migration/versions/v1-to-v2-shared.js';
-import { writeWithBackupSync } from '../utils/writeWithBackup.js';
+} from "./migration/versions/v1-to-v2-shared.js";
+import { writeWithBackupSync } from "../utils/writeWithBackup.js";
 
-const debugLogger = createDebugLogger('SETTINGS');
+const debugLogger = createDebugLogger("SETTINGS");
 
 function getMergeStrategyForPath(path: string[]): MergeStrategy | undefined {
   let current: SettingDefinition | undefined = undefined;
@@ -59,14 +59,14 @@ function getMergeStrategyForPath(path: string[]): MergeStrategy | undefined {
 
 export type { Settings, MemoryImportFormat };
 
-export const SETTINGS_DIRECTORY_NAME = '.tram';
+export const SETTINGS_DIRECTORY_NAME = ".tram";
 export const USER_SETTINGS_PATH = Storage.getGlobalSettingsPath();
 export const USER_SETTINGS_DIR = path.dirname(USER_SETTINGS_PATH);
-export const DEFAULT_EXCLUDED_ENV_VARS = ['DEBUG', 'DEBUG_MODE'];
+export const DEFAULT_EXCLUDED_ENV_VARS = ["DEBUG", "DEBUG_MODE"];
 
 // Settings version to track migration state
 export const SETTINGS_VERSION = 3;
-export const SETTINGS_VERSION_KEY = '$version';
+export const SETTINGS_VERSION_KEY = "$version";
 
 /**
  * Migrate legacy tool permission settings (tools.core / tools.allowed / tools.exclude)
@@ -83,20 +83,20 @@ export const SETTINGS_VERSION_KEY = '$version';
 export function migrateLegacyPermissions(
   settings: Record<string, unknown>,
 ): Record<string, unknown> | null {
-  const tools = settings['tools'] as Record<string, unknown> | undefined;
+  const tools = settings["tools"] as Record<string, unknown> | undefined;
   if (!tools) return null;
 
   const hasLegacy =
-    Array.isArray(tools['core']) ||
-    Array.isArray(tools['allowed']) ||
-    Array.isArray(tools['exclude']);
+    Array.isArray(tools["core"]) ||
+    Array.isArray(tools["allowed"]) ||
+    Array.isArray(tools["exclude"]);
 
   if (!hasLegacy) return null;
 
   const result = structuredClone(settings) as Record<string, unknown>;
-  const resultTools = result['tools'] as Record<string, unknown>;
-  const permissions = (result['permissions'] as Record<string, unknown>) ?? {};
-  result['permissions'] = permissions;
+  const resultTools = result["tools"] as Record<string, unknown>;
+  const permissions = (result["permissions"] as Record<string, unknown>) ?? {};
+  result["permissions"] = permissions;
 
   const mergeInto = (key: string, items: string[]) => {
     const existing = Array.isArray(permissions[key])
@@ -107,15 +107,15 @@ export function migrateLegacyPermissions(
   };
 
   // tools.allowed → permissions.allow
-  if (Array.isArray(resultTools['allowed'])) {
-    mergeInto('allow', resultTools['allowed'] as string[]);
-    delete resultTools['allowed'];
+  if (Array.isArray(resultTools["allowed"])) {
+    mergeInto("allow", resultTools["allowed"] as string[]);
+    delete resultTools["allowed"];
   }
 
   // tools.exclude → permissions.deny
-  if (Array.isArray(resultTools['exclude'])) {
-    mergeInto('deny', resultTools['exclude'] as string[]);
-    delete resultTools['exclude'];
+  if (Array.isArray(resultTools["exclude"])) {
+    mergeInto("deny", resultTools["exclude"] as string[]);
+    delete resultTools["exclude"];
   }
 
   // tools.core → permissions.allow (explicit enables)
@@ -128,44 +128,44 @@ export function migrateLegacyPermissions(
   // Instead we just migrate to allow (auto-approve) and let the coreTools
   // semantics continue to work through the Config.getCoreTools() path until
   // the old API is fully removed.
-  if (Array.isArray(resultTools['core'])) {
-    mergeInto('allow', resultTools['core'] as string[]);
-    delete resultTools['core'];
+  if (Array.isArray(resultTools["core"])) {
+    mergeInto("allow", resultTools["core"] as string[]);
+    delete resultTools["core"];
   }
 
   return result;
 }
 
 export function getSystemSettingsPath(): string {
-  if (process.env['TRAM_CODE_SYSTEM_SETTINGS_PATH']) {
-    return process.env['TRAM_CODE_SYSTEM_SETTINGS_PATH'];
+  if (process.env["TRAM_CODE_SYSTEM_SETTINGS_PATH"]) {
+    return process.env["TRAM_CODE_SYSTEM_SETTINGS_PATH"];
   }
-  if (platform() === 'darwin') {
-    return '/Library/Application Support/TramCode/settings.json';
-  } else if (platform() === 'win32') {
-    return 'C:\\ProgramData\\tram\\settings.json';
+  if (platform() === "darwin") {
+    return "/Library/Application Support/TramCode/settings.json";
+  } else if (platform() === "win32") {
+    return "C:\\ProgramData\\tram\\settings.json";
   } else {
-    return '/etc/tram/settings.json';
+    return "/etc/tram/settings.json";
   }
 }
 
 export function getSystemDefaultsPath(): string {
-  if (process.env['TRAM_CODE_SYSTEM_DEFAULTS_PATH']) {
-    return process.env['TRAM_CODE_SYSTEM_DEFAULTS_PATH'];
+  if (process.env["TRAM_CODE_SYSTEM_DEFAULTS_PATH"]) {
+    return process.env["TRAM_CODE_SYSTEM_DEFAULTS_PATH"];
   }
   return path.join(
     path.dirname(getSystemSettingsPath()),
-    'system-defaults.json',
+    "system-defaults.json",
   );
 }
 
-export type { DnsResolutionOrder } from './settingsSchema.js';
+export type { DnsResolutionOrder } from "./settingsSchema.js";
 
 export enum SettingScope {
-  User = 'User',
-  Workspace = 'Workspace',
-  System = 'System',
-  SystemDefaults = 'SystemDefaults',
+  User = "User",
+  Workspace = "Workspace",
+  System = "System",
+  SystemDefaults = "SystemDefaults",
 }
 
 export interface CheckpointingSettings {
@@ -194,7 +194,7 @@ function getSettingsFileKeyWarnings(
   settingsFilePath: string,
 ): string[] {
   const version = settings[SETTINGS_VERSION_KEY];
-  if (typeof version !== 'number' || version < SETTINGS_VERSION) {
+  if (typeof version !== "number" || version < SETTINGS_VERSION) {
     return [];
   }
 
@@ -216,7 +216,7 @@ function getSettingsFileKeyWarnings(
     // it's likely already in V2 format. Don't warn.
     if (
       V2_CONTAINER_KEYS.has(oldKey) &&
-      typeof oldValue === 'object' &&
+      typeof oldValue === "object" &&
       oldValue !== null &&
       !Array.isArray(oldValue)
     ) {
@@ -251,7 +251,7 @@ function getSettingsFileKeyWarnings(
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function hasAnyProviderEntries(modelProviders: unknown): boolean {
@@ -285,8 +285,8 @@ function getModelProvidersOverrideWarnings(
     return [];
   }
 
-  const userModelProviders = userOriginal['modelProviders'];
-  const workspaceModelProviders = workspaceOriginal['modelProviders'];
+  const userModelProviders = userOriginal["modelProviders"];
+  const workspaceModelProviders = workspaceOriginal["modelProviders"];
   const workspaceIsEmptyModelProviders =
     isPlainObject(workspaceModelProviders) &&
     Object.keys(workspaceModelProviders).length === 0;
@@ -445,10 +445,10 @@ export class LoadedSettings {
  */
 export function createMinimalSettings(): LoadedSettings {
   const emptySettingsFile: SettingsFile = {
-    path: '',
+    path: "",
     settings: {},
     originalSettings: {},
-    rawJson: '{}',
+    rawJson: "{}",
   };
   return new LoadedSettings(
     emptySettingsFile,
@@ -474,8 +474,8 @@ function findEnvFile(settings: Settings, startDir: string): string | null {
 
   // Pre-compute user-level .env paths for fast comparison
   const userLevelPaths = new Set([
-    path.normalize(path.join(homeDir, '.env')),
-    path.normalize(path.join(homeDir, TRAM_DIR, '.env')),
+    path.normalize(path.join(homeDir, ".env")),
+    path.normalize(path.join(homeDir, TRAM_DIR, ".env")),
   ]);
 
   // Determine if we can use this .env file based on trust settings
@@ -485,12 +485,12 @@ function findEnvFile(settings: Settings, startDir: string): string | null {
   let currentDir = path.resolve(startDir);
   while (true) {
     // Prefer gemini-specific .env under TRAM_DIR
-    const geminiEnvPath = path.join(currentDir, TRAM_DIR, '.env');
+    const geminiEnvPath = path.join(currentDir, TRAM_DIR, ".env");
     if (fs.existsSync(geminiEnvPath) && canUseEnvFile(geminiEnvPath)) {
       return geminiEnvPath;
     }
 
-    const envPath = path.join(currentDir, '.env');
+    const envPath = path.join(currentDir, ".env");
     if (fs.existsSync(envPath) && canUseEnvFile(envPath)) {
       return envPath;
     }
@@ -498,11 +498,11 @@ function findEnvFile(settings: Settings, startDir: string): string | null {
     const parentDir = path.dirname(currentDir);
     if (parentDir === currentDir || !parentDir) {
       // At home directory - check fallback .env files
-      const homeGeminiEnvPath = path.join(homeDir, TRAM_DIR, '.env');
+      const homeGeminiEnvPath = path.join(homeDir, TRAM_DIR, ".env");
       if (fs.existsSync(homeGeminiEnvPath)) {
         return homeGeminiEnvPath;
       }
-      const homeEnvPath = path.join(homeDir, '.env');
+      const homeEnvPath = path.join(homeDir, ".env");
       if (fs.existsSync(homeEnvPath)) {
         return homeEnvPath;
       }
@@ -521,16 +521,16 @@ export function setUpCloudShellEnvironment(envFilePath: string | null): void {
   if (envFilePath && fs.existsSync(envFilePath)) {
     const envFileContent = fs.readFileSync(envFilePath);
     const parsedEnv = dotenv.parse(envFileContent);
-    if (parsedEnv['GOOGLE_CLOUD_PROJECT']) {
+    if (parsedEnv["GOOGLE_CLOUD_PROJECT"]) {
       // .env file takes precedence in Cloud Shell
-      process.env['GOOGLE_CLOUD_PROJECT'] = parsedEnv['GOOGLE_CLOUD_PROJECT'];
+      process.env["GOOGLE_CLOUD_PROJECT"] = parsedEnv["GOOGLE_CLOUD_PROJECT"];
     } else {
       // If not in .env, set to default and override global
-      process.env['GOOGLE_CLOUD_PROJECT'] = 'cloudshell-gca';
+      process.env["GOOGLE_CLOUD_PROJECT"] = "cloudshell-gca";
     }
   } else {
     // If no .env file, set to default and override global
-    process.env['GOOGLE_CLOUD_PROJECT'] = 'cloudshell-gca';
+    process.env["GOOGLE_CLOUD_PROJECT"] = "cloudshell-gca";
   }
 }
 /**
@@ -547,7 +547,7 @@ export function loadEnvironment(settings: Settings): void {
   const envFilePath = findEnvFile(settings, process.cwd());
 
   // Cloud Shell environment variable handling
-  if (process.env['CLOUD_SHELL'] === 'true') {
+  if (process.env["CLOUD_SHELL"] === "true") {
     setUpCloudShellEnvironment(envFilePath);
   }
 
@@ -555,7 +555,7 @@ export function loadEnvironment(settings: Settings): void {
   // Only set if not already present in process.env (no-override mode)
   if (envFilePath) {
     try {
-      const envFileContent = fs.readFileSync(envFilePath, 'utf-8');
+      const envFileContent = fs.readFileSync(envFilePath, "utf-8");
       const parsedEnv = dotenv.parse(envFileContent);
 
       const excludedVars =
@@ -584,7 +584,7 @@ export function loadEnvironment(settings: Settings): void {
   // Only set if not already present (no-override, after .env is loaded)
   if (settings.env) {
     for (const [key, value] of Object.entries(settings.env)) {
-      if (!Object.hasOwn(process.env, key) && typeof value === 'string') {
+      if (!Object.hasOwn(process.env, key) && typeof value === "string") {
         process.env[key] = value;
       }
     }
@@ -632,7 +632,7 @@ export function loadSettings(
   ): { settings: Settings; rawJson?: string; migrationWarnings?: string[] } => {
     try {
       if (fs.existsSync(filePath)) {
-        let content = fs.readFileSync(filePath, 'utf-8');
+        let content = fs.readFileSync(filePath, "utf-8");
         let rawSettings: unknown;
         let recoveryWarning: string | undefined;
 
@@ -646,12 +646,12 @@ export function loadSettings(
               `Settings file ${filePath} has invalid JSON (${getErrorMessage(parseError)}). Attempting recovery from backup ${backupPath}.`,
             );
             try {
-              const backupContent = fs.readFileSync(backupPath, 'utf-8');
+              const backupContent = fs.readFileSync(backupPath, "utf-8");
               const backupSettings = JSON.parse(
                 stripJsonComments(backupContent),
               );
               // Backup is valid — restore it
-              fs.writeFileSync(filePath, backupContent, 'utf-8');
+              fs.writeFileSync(filePath, backupContent, "utf-8");
               content = backupContent;
               rawSettings = backupSettings;
               const recoveryMsg = `Settings file ${filePath} had invalid JSON and was recovered from backup ${backupPath}. Some recent settings changes may have been lost.`;
@@ -690,12 +690,12 @@ export function loadSettings(
         }
 
         if (
-          typeof rawSettings !== 'object' ||
+          typeof rawSettings !== "object" ||
           rawSettings === null ||
           Array.isArray(rawSettings)
         ) {
           settingsErrors.push({
-            message: 'Settings file is not a valid JSON object.',
+            message: "Settings file is not a valid JSON object.",
             path: filePath,
           });
           return { settings: {} };
@@ -705,9 +705,9 @@ export function loadSettings(
         const hasVersionKey = SETTINGS_VERSION_KEY in settingsObject;
         const versionValue = settingsObject[SETTINGS_VERSION_KEY];
         const hasInvalidVersion =
-          hasVersionKey && typeof versionValue !== 'number';
+          hasVersionKey && typeof versionValue !== "number";
         const hasLegacyNumericVersion =
-          typeof versionValue === 'number' && versionValue < SETTINGS_VERSION;
+          typeof versionValue === "number" && versionValue < SETTINGS_VERSION;
         let migrationWarnings: string[] | undefined;
 
         const persistSettingsObject = (warningPrefix: string) => {
@@ -729,7 +729,7 @@ export function loadSettings(
               unknown
             >;
             migrationWarnings = migrationResult.warnings;
-            persistSettingsObject('Error migrating settings file on disk');
+            persistSettingsObject("Error migrating settings file on disk");
           } else if (hasLegacyNumericVersion || hasInvalidVersion) {
             // Migration was deemed needed but nothing executed. Normalize version metadata
             // to avoid repeated no-op checks on startup.
@@ -737,7 +737,7 @@ export function loadSettings(
             debugLogger.warn(
               `Settings version metadata in ${filePath} could not be migrated by any registered migration. Normalizing ${SETTINGS_VERSION_KEY} to ${SETTINGS_VERSION}.`,
             );
-            persistSettingsObject('Error normalizing settings version on disk');
+            persistSettingsObject("Error normalizing settings version on disk");
           }
         } else if (
           !hasVersionKey ||
@@ -747,7 +747,7 @@ export function loadSettings(
           // No migration needed/executable, but version metadata is missing or invalid.
           // Normalize it to current version to avoid repeated startup work.
           settingsObject[SETTINGS_VERSION_KEY] = SETTINGS_VERSION;
-          persistSettingsObject('Error normalizing settings version on disk');
+          persistSettingsObject("Error normalizing settings version on disk");
         }
 
         // Prepend recovery warning if settings were restored from backup
@@ -808,14 +808,14 @@ export function loadSettings(
   workspaceSettings = resolveEnvVarsInObject(workspaceResult.settings);
 
   // Support legacy theme names
-  if (userSettings.ui?.theme === 'VS') {
+  if (userSettings.ui?.theme === "VS") {
     userSettings.ui.theme = DefaultLight.name;
-  } else if (userSettings.ui?.theme === 'VS2015') {
+  } else if (userSettings.ui?.theme === "VS2015") {
     userSettings.ui.theme = DefaultDark.name;
   }
-  if (workspaceSettings.ui?.theme === 'VS') {
+  if (workspaceSettings.ui?.theme === "VS") {
     workspaceSettings.ui.theme = DefaultLight.name;
-  } else if (workspaceSettings.ui?.theme === 'VS2015') {
+  } else if (workspaceSettings.ui?.theme === "VS2015") {
     workspaceSettings.ui.theme = DefaultDark.name;
   }
 
@@ -849,7 +849,7 @@ export function loadSettings(
       (error) => `Error in ${error.path}: ${error.message}`,
     );
     throw new FatalConfigError(
-      `${errorMessages.join('\n')}\nPlease fix the configuration file(s) and try again.`,
+      `${errorMessages.join("\n")}\nPlease fix the configuration file(s) and try again.`,
     );
   }
 
@@ -918,7 +918,7 @@ export function saveSettings(
     // Use the format-preserving update function
     updateSettingsFilePreservingFormat(settingsFile.path, updates);
   } catch (error) {
-    debugLogger.error('Error saving user settings file.');
+    debugLogger.error("Error saving user settings file.");
     debugLogger.error(error instanceof Error ? error.message : String(error));
     throw error;
   }

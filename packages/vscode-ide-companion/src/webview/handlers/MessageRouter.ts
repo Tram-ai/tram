@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type * as vscode from 'vscode';
-import type { IMessageHandler } from './BaseMessageHandler.js';
-import type { TramAgentManager } from '../../services/tramAgentManager.js';
-import type { ConversationStore } from '../../services/conversationStore.js';
+import type * as vscode from "vscode";
+import type { IMessageHandler } from "./BaseMessageHandler.js";
+import type { TramAgentManager } from "../../services/tramAgentManager.js";
+import type { ConversationStore } from "../../services/conversationStore.js";
 import type {
   PermissionResponseMessage,
   AskUserQuestionResponseMessage,
-} from '../../types/webviewMessageTypes.js';
-import { SessionMessageHandler } from './SessionMessageHandler.js';
-import { FileMessageHandler } from './FileMessageHandler.js';
-import { EditorMessageHandler } from './EditorMessageHandler.js';
-import { AuthMessageHandler } from './AuthMessageHandler.js';
+} from "../../types/webviewMessageTypes.js";
+import { SessionMessageHandler } from "./SessionMessageHandler.js";
+import { FileMessageHandler } from "./FileMessageHandler.js";
+import { EditorMessageHandler } from "./EditorMessageHandler.js";
+import { AuthMessageHandler } from "./AuthMessageHandler.js";
 
 /**
  * Message Router
@@ -88,10 +88,10 @@ export class MessageRouter {
    * Route message to appropriate handler
    */
   async route(message: { type: string; data?: unknown }): Promise<void> {
-    console.log('[MessageRouter] Routing message:', message.type);
+    console.log("[MessageRouter] Routing message:", message.type);
 
     // Handle permission response specially
-    if (message.type === 'permissionResponse') {
+    if (message.type === "permissionResponse") {
       if (this.permissionHandler) {
         this.permissionHandler(message as PermissionResponseMessage);
       }
@@ -99,7 +99,7 @@ export class MessageRouter {
     }
 
     // Handle ask user question response specially
-    if (message.type === 'askUserQuestionResponse') {
+    if (message.type === "askUserQuestionResponse") {
       if (this.askUserQuestionHandler) {
         this.askUserQuestionHandler(message as AskUserQuestionResponseMessage);
       }
@@ -113,12 +113,12 @@ export class MessageRouter {
       try {
         await handler.handle(message);
       } catch (error) {
-        console.error('[MessageRouter] Handler error:', error);
+        console.error("[MessageRouter] Handler error:", error);
         throw error;
       }
     } else {
       console.warn(
-        '[MessageRouter] No handler found for message type:',
+        "[MessageRouter] No handler found for message type:",
         message.type,
       );
     }
@@ -131,7 +131,7 @@ export class MessageRouter {
     this.currentConversationId = id;
     // Update all handlers
     this.handlers.forEach((handler) => {
-      if ('setCurrentConversationId' in handler) {
+      if ("setCurrentConversationId" in handler) {
         (
           handler as { setCurrentConversationId: (id: string | null) => void }
         ).setCurrentConversationId(id);

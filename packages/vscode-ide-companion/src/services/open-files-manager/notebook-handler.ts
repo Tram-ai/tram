@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import type { File } from '@tram-ai/tram-core/src/ide/types.js';
-import { MAX_FILES, MAX_SELECTED_TEXT_LENGTH } from './constants.js';
+import * as vscode from "vscode";
+import type { File } from "@tram-ai/tram-core/src/ide/types.js";
+import { MAX_FILES, MAX_SELECTED_TEXT_LENGTH } from "./constants.js";
 import {
   deactivateCurrentActiveFile,
   enforceMaxFiles,
   truncateSelectedText,
   getNotebookUriFromCellUri,
-} from './utils.js';
+} from "./utils.js";
 
 export function addOrMoveToFrontNotebook(
   openFiles: File[],
@@ -56,7 +56,7 @@ export function updateNotebookActiveContext(
   // For notebook editors, selections may span multiple cells
   // We'll gather selected text from all selected cells
   const selections = notebookEditor.selections;
-  let combinedSelectedText = '';
+  let combinedSelectedText = "";
 
   for (const selection of selections) {
     // Process each selected cell range
@@ -65,7 +65,7 @@ export function updateNotebookActiveContext(
       if (cell && cell.kind === vscode.NotebookCellKind.Code) {
         // For now, we'll get the full cell content if it's in a selection
         // TODO: Implement per-cell cursor position and finer-grained selection if needed
-        combinedSelectedText += cell.document.getText() + '\n';
+        combinedSelectedText += cell.document.getText() + "\n";
       }
     }
   }
@@ -99,11 +99,11 @@ export function updateNotebookCellSelection(
   }
 
   // Extract the selected text from the cell editor
-  let selectedText = '';
+  let selectedText = "";
   for (const selection of selections) {
     const text = cellEditor.document.getText(selection);
     if (text) {
-      selectedText += text + '\n';
+      selectedText += text + "\n";
     }
   }
 

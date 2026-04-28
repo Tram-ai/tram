@@ -27,12 +27,12 @@ import type {
   LspSymbolInformation,
   LspTextEdit,
   LspWorkspaceEdit,
-} from './types.js';
+} from "./types.js";
 import {
   CODE_ACTION_KIND_LABELS,
   DIAGNOSTIC_SEVERITY_LABELS,
   SYMBOL_KIND_LABELS,
-} from './constants.js';
+} from "./constants.js";
 
 /**
  * Normalizes LSP protocol responses to internal types.
@@ -46,44 +46,44 @@ export class LspResponseNormalizer {
    * Normalize diagnostic result from LSP response
    */
   normalizeDiagnostic(item: unknown, serverName: string): LspDiagnostic | null {
-    if (!item || typeof item !== 'object') {
+    if (!item || typeof item !== "object") {
       return null;
     }
 
     const itemObj = item as Record<string, unknown>;
-    const range = this.normalizeRange(itemObj['range']);
+    const range = this.normalizeRange(itemObj["range"]);
     if (!range) {
       return null;
     }
 
     const message =
-      typeof itemObj['message'] === 'string'
-        ? (itemObj['message'] as string)
-        : '';
+      typeof itemObj["message"] === "string"
+        ? (itemObj["message"] as string)
+        : "";
     if (!message) {
       return null;
     }
 
     const severityNum =
-      typeof itemObj['severity'] === 'number'
-        ? (itemObj['severity'] as number)
+      typeof itemObj["severity"] === "number"
+        ? (itemObj["severity"] as number)
         : undefined;
     const severity = severityNum
       ? DIAGNOSTIC_SEVERITY_LABELS[severityNum]
       : undefined;
 
-    const code = itemObj['code'];
+    const code = itemObj["code"];
     const codeValue =
-      typeof code === 'string' || typeof code === 'number' ? code : undefined;
+      typeof code === "string" || typeof code === "number" ? code : undefined;
 
     const source =
-      typeof itemObj['source'] === 'string'
-        ? (itemObj['source'] as string)
+      typeof itemObj["source"] === "string"
+        ? (itemObj["source"] as string)
         : undefined;
 
-    const tags = this.normalizeDiagnosticTags(itemObj['tags']);
+    const tags = this.normalizeDiagnosticTags(itemObj["tags"]);
     const relatedInfo = this.normalizeDiagnosticRelatedInfo(
-      itemObj['relatedInformation'],
+      itemObj["relatedInformation"],
     );
 
     return {
@@ -123,17 +123,17 @@ export class LspResponseNormalizer {
   /**
    * Normalize diagnostic tags
    */
-  normalizeDiagnosticTags(tags: unknown): Array<'unnecessary' | 'deprecated'> {
+  normalizeDiagnosticTags(tags: unknown): Array<"unnecessary" | "deprecated"> {
     if (!Array.isArray(tags)) {
       return [];
     }
 
-    const result: Array<'unnecessary' | 'deprecated'> = [];
+    const result: Array<"unnecessary" | "deprecated"> = [];
     for (const tag of tags) {
       if (tag === 1) {
-        result.push('unnecessary');
+        result.push("unnecessary");
       } else if (tag === 2) {
-        result.push('deprecated');
+        result.push("deprecated");
       }
     }
     return result;
@@ -151,20 +151,20 @@ export class LspResponseNormalizer {
 
     const result: Array<{ location: LspLocation; message: string }> = [];
     for (const item of info) {
-      if (!item || typeof item !== 'object') {
+      if (!item || typeof item !== "object") {
         continue;
       }
       const itemObj = item as Record<string, unknown>;
-      const location = itemObj['location'];
-      if (!location || typeof location !== 'object') {
+      const location = itemObj["location"];
+      if (!location || typeof location !== "object") {
         continue;
       }
       const locObj = location as Record<string, unknown>;
-      const uri = locObj['uri'];
-      const range = this.normalizeRange(locObj['range']);
-      const message = itemObj['message'];
+      const uri = locObj["uri"];
+      const range = this.normalizeRange(locObj["range"]);
+      const message = itemObj["message"];
 
-      if (typeof uri === 'string' && range && typeof message === 'string') {
+      if (typeof uri === "string" && range && typeof message === "string") {
         result.push({
           location: { uri, range },
           message,
@@ -181,18 +181,18 @@ export class LspResponseNormalizer {
     item: unknown,
     serverName: string,
   ): LspFileDiagnostics | null {
-    if (!item || typeof item !== 'object') {
+    if (!item || typeof item !== "object") {
       return null;
     }
 
     const itemObj = item as Record<string, unknown>;
     const uri =
-      typeof itemObj['uri'] === 'string' ? (itemObj['uri'] as string) : '';
+      typeof itemObj["uri"] === "string" ? (itemObj["uri"] as string) : "";
     if (!uri) {
       return null;
     }
 
-    const items = itemObj['items'];
+    const items = itemObj["items"];
     if (!Array.isArray(items)) {
       return null;
     }
@@ -220,7 +220,7 @@ export class LspResponseNormalizer {
    * Normalize code action result
    */
   normalizeCodeAction(item: unknown, serverName: string): LspCodeAction | null {
-    if (!item || typeof item !== 'object') {
+    if (!item || typeof item !== "object") {
       return null;
     }
 
@@ -228,45 +228,45 @@ export class LspResponseNormalizer {
 
     // Check if this is a Command instead of CodeAction
     if (
-      itemObj['command'] &&
-      typeof itemObj['title'] === 'string' &&
-      !itemObj['kind']
+      itemObj["command"] &&
+      typeof itemObj["title"] === "string" &&
+      !itemObj["kind"]
     ) {
       // This is a raw Command, wrap it
       return {
-        title: itemObj['title'] as string,
+        title: itemObj["title"] as string,
         command: {
-          title: itemObj['title'] as string,
-          command: (itemObj['command'] as string) ?? '',
-          arguments: itemObj['arguments'] as unknown[] | undefined,
+          title: itemObj["title"] as string,
+          command: (itemObj["command"] as string) ?? "",
+          arguments: itemObj["arguments"] as unknown[] | undefined,
         },
         serverName,
       };
     }
 
     const title =
-      typeof itemObj['title'] === 'string' ? (itemObj['title'] as string) : '';
+      typeof itemObj["title"] === "string" ? (itemObj["title"] as string) : "";
     if (!title) {
       return null;
     }
 
     const kind =
-      typeof itemObj['kind'] === 'string'
-        ? (CODE_ACTION_KIND_LABELS[itemObj['kind'] as string] ??
-          (itemObj['kind'] as LspCodeActionKind))
+      typeof itemObj["kind"] === "string"
+        ? (CODE_ACTION_KIND_LABELS[itemObj["kind"] as string] ??
+          (itemObj["kind"] as LspCodeActionKind))
         : undefined;
 
     const isPreferred =
-      typeof itemObj['isPreferred'] === 'boolean'
-        ? (itemObj['isPreferred'] as boolean)
+      typeof itemObj["isPreferred"] === "boolean"
+        ? (itemObj["isPreferred"] as boolean)
         : undefined;
 
-    const edit = this.normalizeWorkspaceEdit(itemObj['edit']);
-    const command = this.normalizeCommand(itemObj['command']);
+    const edit = this.normalizeWorkspaceEdit(itemObj["edit"]);
+    const command = this.normalizeCommand(itemObj["command"]);
 
     const diagnostics: LspDiagnostic[] = [];
-    if (Array.isArray(itemObj['diagnostics'])) {
-      for (const diag of itemObj['diagnostics']) {
+    if (Array.isArray(itemObj["diagnostics"])) {
+      for (const diag of itemObj["diagnostics"]) {
         const normalized = this.normalizeDiagnostic(diag, serverName);
         if (normalized) {
           diagnostics.push(normalized);
@@ -281,7 +281,7 @@ export class LspResponseNormalizer {
       isPreferred,
       edit: edit ?? undefined,
       command: command ?? undefined,
-      data: itemObj['data'],
+      data: itemObj["data"],
       serverName,
     };
   }
@@ -294,7 +294,7 @@ export class LspResponseNormalizer {
    * Normalize workspace edit
    */
   normalizeWorkspaceEdit(edit: unknown): LspWorkspaceEdit | null {
-    if (!edit || typeof edit !== 'object') {
+    if (!edit || typeof edit !== "object") {
       return null;
     }
 
@@ -302,8 +302,8 @@ export class LspResponseNormalizer {
     const result: LspWorkspaceEdit = {};
 
     // Handle changes (map of URI to TextEdit[])
-    if (editObj['changes'] && typeof editObj['changes'] === 'object') {
-      const changes = editObj['changes'] as Record<string, unknown>;
+    if (editObj["changes"] && typeof editObj["changes"] === "object") {
+      const changes = editObj["changes"] as Record<string, unknown>;
       result.changes = {};
       for (const [uri, edits] of Object.entries(changes)) {
         if (Array.isArray(edits)) {
@@ -322,9 +322,9 @@ export class LspResponseNormalizer {
     }
 
     // Handle documentChanges
-    if (Array.isArray(editObj['documentChanges'])) {
+    if (Array.isArray(editObj["documentChanges"])) {
       result.documentChanges = [];
-      for (const docChange of editObj['documentChanges']) {
+      for (const docChange of editObj["documentChanges"]) {
         const normalized = this.normalizeTextDocumentEdit(docChange);
         if (normalized) {
           result.documentChanges.push(normalized);
@@ -346,20 +346,20 @@ export class LspResponseNormalizer {
    * Normalize text edit
    */
   normalizeTextEdit(edit: unknown): LspTextEdit | null {
-    if (!edit || typeof edit !== 'object') {
+    if (!edit || typeof edit !== "object") {
       return null;
     }
 
     const editObj = edit as Record<string, unknown>;
-    const range = this.normalizeRange(editObj['range']);
+    const range = this.normalizeRange(editObj["range"]);
     if (!range) {
       return null;
     }
 
     const newText =
-      typeof editObj['newText'] === 'string'
-        ? (editObj['newText'] as string)
-        : '';
+      typeof editObj["newText"] === "string"
+        ? (editObj["newText"] as string)
+        : "";
 
     return { range, newText };
   }
@@ -371,31 +371,31 @@ export class LspResponseNormalizer {
     textDocument: { uri: string; version?: number | null };
     edits: LspTextEdit[];
   } | null {
-    if (!docEdit || typeof docEdit !== 'object') {
+    if (!docEdit || typeof docEdit !== "object") {
       return null;
     }
 
     const docEditObj = docEdit as Record<string, unknown>;
-    const textDocument = docEditObj['textDocument'];
-    if (!textDocument || typeof textDocument !== 'object') {
+    const textDocument = docEditObj["textDocument"];
+    if (!textDocument || typeof textDocument !== "object") {
       return null;
     }
 
     const textDocObj = textDocument as Record<string, unknown>;
     const uri =
-      typeof textDocObj['uri'] === 'string'
-        ? (textDocObj['uri'] as string)
-        : '';
+      typeof textDocObj["uri"] === "string"
+        ? (textDocObj["uri"] as string)
+        : "";
     if (!uri) {
       return null;
     }
 
     const version =
-      typeof textDocObj['version'] === 'number'
-        ? (textDocObj['version'] as number)
+      typeof textDocObj["version"] === "number"
+        ? (textDocObj["version"] as number)
         : null;
 
-    const edits = docEditObj['edits'];
+    const edits = docEditObj["edits"];
     if (!Array.isArray(edits)) {
       return null;
     }
@@ -424,24 +424,24 @@ export class LspResponseNormalizer {
   normalizeCommand(
     cmd: unknown,
   ): { title: string; command: string; arguments?: unknown[] } | null {
-    if (!cmd || typeof cmd !== 'object') {
+    if (!cmd || typeof cmd !== "object") {
       return null;
     }
 
     const cmdObj = cmd as Record<string, unknown>;
     const title =
-      typeof cmdObj['title'] === 'string' ? (cmdObj['title'] as string) : '';
+      typeof cmdObj["title"] === "string" ? (cmdObj["title"] as string) : "";
     const command =
-      typeof cmdObj['command'] === 'string'
-        ? (cmdObj['command'] as string)
-        : '';
+      typeof cmdObj["command"] === "string"
+        ? (cmdObj["command"] as string)
+        : "";
 
     if (!command) {
       return null;
     }
 
-    const args = Array.isArray(cmdObj['arguments'])
-      ? (cmdObj['arguments'] as unknown[])
+    const args = Array.isArray(cmdObj["arguments"])
+      ? (cmdObj["arguments"] as unknown[])
       : undefined;
 
     return { title, command, arguments: args };
@@ -458,21 +458,21 @@ export class LspResponseNormalizer {
     item: unknown,
     serverName: string,
   ): LspReference | null {
-    if (!item || typeof item !== 'object') {
+    if (!item || typeof item !== "object") {
       return null;
     }
 
     const itemObj = item as Record<string, unknown>;
-    const uri = (itemObj['uri'] ??
-      itemObj['targetUri'] ??
-      (itemObj['target'] as Record<string, unknown>)?.['uri']) as
+    const uri = (itemObj["uri"] ??
+      itemObj["targetUri"] ??
+      (itemObj["target"] as Record<string, unknown>)?.["uri"]) as
       | string
       | undefined;
 
-    const range = (itemObj['range'] ??
-      itemObj['targetSelectionRange'] ??
-      itemObj['targetRange'] ??
-      (itemObj['target'] as Record<string, unknown>)?.['range']) as
+    const range = (itemObj["range"] ??
+      itemObj["targetSelectionRange"] ??
+      itemObj["targetRange"] ??
+      (itemObj["target"] as Record<string, unknown>)?.["range"]) as
       | { start?: unknown; end?: unknown }
       | undefined;
 
@@ -506,25 +506,25 @@ export class LspResponseNormalizer {
     item: unknown,
     serverName: string,
   ): LspSymbolInformation | null {
-    if (!item || typeof item !== 'object') {
+    if (!item || typeof item !== "object") {
       return null;
     }
 
     const itemObj = item as Record<string, unknown>;
-    const location = itemObj['location'] ?? itemObj['target'] ?? item;
-    if (!location || typeof location !== 'object') {
+    const location = itemObj["location"] ?? itemObj["target"] ?? item;
+    if (!location || typeof location !== "object") {
       return null;
     }
 
     const locationObj = location as Record<string, unknown>;
-    const range = (locationObj['range'] ??
-      locationObj['targetRange'] ??
-      itemObj['range'] ??
+    const range = (locationObj["range"] ??
+      locationObj["targetRange"] ??
+      itemObj["range"] ??
       undefined) as { start?: unknown; end?: unknown } | undefined;
 
     // Only require uri; range is optional per LSP 3.17 WorkspaceSymbol spec
     // where location may be { uri } without a range.
-    if (!locationObj['uri']) {
+    if (!locationObj["uri"]) {
       return null;
     }
 
@@ -539,13 +539,13 @@ export class LspResponseNormalizer {
       | undefined) ?? { line: 0, character: 0 };
 
     return {
-      name: (itemObj['name'] ?? itemObj['label'] ?? 'symbol') as string,
-      kind: this.normalizeSymbolKind(itemObj['kind']),
-      containerName: (itemObj['containerName'] ?? itemObj['container']) as
+      name: (itemObj["name"] ?? itemObj["label"] ?? "symbol") as string,
+      kind: this.normalizeSymbolKind(itemObj["kind"]),
+      containerName: (itemObj["containerName"] ?? itemObj["container"]) as
         | string
         | undefined,
       location: {
-        uri: locationObj['uri'] as string,
+        uri: locationObj["uri"] as string,
         range: {
           start: {
             line: Number(start?.line ?? 0),
@@ -569,19 +569,19 @@ export class LspResponseNormalizer {
    * Normalize a single range
    */
   normalizeRange(range: unknown): LspRange | null {
-    if (!range || typeof range !== 'object') {
+    if (!range || typeof range !== "object") {
       return null;
     }
 
     const rangeObj = range as Record<string, unknown>;
-    const start = rangeObj['start'];
-    const end = rangeObj['end'];
+    const start = rangeObj["start"];
+    const end = rangeObj["end"];
 
     if (
       !start ||
-      typeof start !== 'object' ||
+      typeof start !== "object" ||
       !end ||
-      typeof end !== 'object'
+      typeof end !== "object"
     ) {
       return null;
     }
@@ -591,12 +591,12 @@ export class LspResponseNormalizer {
 
     return {
       start: {
-        line: Number(startObj['line'] ?? 0),
-        character: Number(startObj['character'] ?? 0),
+        line: Number(startObj["line"] ?? 0),
+        character: Number(startObj["character"] ?? 0),
       },
       end: {
-        line: Number(endObj['line'] ?? 0),
-        character: Number(endObj['character'] ?? 0),
+        line: Number(endObj["line"] ?? 0),
+        character: Number(endObj["character"] ?? 0),
       },
     };
   }
@@ -624,12 +624,12 @@ export class LspResponseNormalizer {
    * Normalize symbol kind from number to string label
    */
   normalizeSymbolKind(kind: unknown): string | undefined {
-    if (typeof kind === 'number') {
+    if (typeof kind === "number") {
       return SYMBOL_KIND_LABELS[kind] ?? String(kind);
     }
-    if (typeof kind === 'string') {
+    if (typeof kind === "string") {
       const trimmed = kind.trim();
-      if (trimmed === '') {
+      if (trimmed === "") {
         return undefined;
       }
       const numeric = Number(trimmed);
@@ -650,9 +650,9 @@ export class LspResponseNormalizer {
    */
   normalizeHoverContents(contents: unknown): string {
     if (!contents) {
-      return '';
+      return "";
     }
-    if (typeof contents === 'string') {
+    if (typeof contents === "string") {
       return contents;
     }
     if (Array.isArray(contents)) {
@@ -660,20 +660,20 @@ export class LspResponseNormalizer {
         .map((item) => this.normalizeHoverContents(item))
         .map((item) => item.trim())
         .filter((item) => item.length > 0);
-      return parts.join('\n');
+      return parts.join("\n");
     }
-    if (typeof contents === 'object') {
+    if (typeof contents === "object") {
       const contentsObj = contents as Record<string, unknown>;
-      const value = contentsObj['value'];
-      if (typeof value === 'string') {
-        const language = contentsObj['language'];
-        if (typeof language === 'string' && language.trim() !== '') {
+      const value = contentsObj["value"];
+      if (typeof value === "string") {
+        const language = contentsObj["language"];
+        if (typeof language === "string" && language.trim() !== "") {
           return `\`\`\`${language}\n${value}\n\`\`\``;
         }
         return value;
       }
     }
-    return '';
+    return "";
   }
 
   /**
@@ -686,7 +686,7 @@ export class LspResponseNormalizer {
     if (!response) {
       return null;
     }
-    if (typeof response !== 'object') {
+    if (typeof response !== "object") {
       const contents = this.normalizeHoverContents(response);
       if (!contents.trim()) {
         return null;
@@ -698,12 +698,12 @@ export class LspResponseNormalizer {
     }
 
     const responseObj = response as Record<string, unknown>;
-    const contents = this.normalizeHoverContents(responseObj['contents']);
+    const contents = this.normalizeHoverContents(responseObj["contents"]);
     if (!contents.trim()) {
       return null;
     }
 
-    const range = this.normalizeRange(responseObj['range']);
+    const range = this.normalizeRange(responseObj["range"]);
     return {
       contents,
       range: range ?? undefined,
@@ -722,41 +722,41 @@ export class LspResponseNormalizer {
     item: unknown,
     serverName: string,
   ): LspCallHierarchyItem | null {
-    if (!item || typeof item !== 'object') {
+    if (!item || typeof item !== "object") {
       return null;
     }
 
     const itemObj = item as Record<string, unknown>;
-    const nameValue = itemObj['name'] ?? itemObj['label'] ?? 'symbol';
+    const nameValue = itemObj["name"] ?? itemObj["label"] ?? "symbol";
     const name =
-      typeof nameValue === 'string' ? nameValue : String(nameValue ?? '');
-    const uri = itemObj['uri'];
+      typeof nameValue === "string" ? nameValue : String(nameValue ?? "");
+    const uri = itemObj["uri"];
 
-    if (!name || typeof uri !== 'string') {
+    if (!name || typeof uri !== "string") {
       return null;
     }
 
-    const range = this.normalizeRange(itemObj['range']);
+    const range = this.normalizeRange(itemObj["range"]);
     const selectionRange =
-      this.normalizeRange(itemObj['selectionRange']) ?? range;
+      this.normalizeRange(itemObj["selectionRange"]) ?? range;
 
     if (!range || !selectionRange) {
       return null;
     }
 
     const serverOverride =
-      typeof itemObj['serverName'] === 'string'
-        ? (itemObj['serverName'] as string)
+      typeof itemObj["serverName"] === "string"
+        ? (itemObj["serverName"] as string)
         : undefined;
 
     // Preserve raw numeric kind for server communication
     let rawKind: number | undefined;
-    if (typeof itemObj['rawKind'] === 'number') {
-      rawKind = itemObj['rawKind'];
-    } else if (typeof itemObj['kind'] === 'number') {
-      rawKind = itemObj['kind'];
-    } else if (typeof itemObj['kind'] === 'string') {
-      const parsed = Number(itemObj['kind']);
+    if (typeof itemObj["rawKind"] === "number") {
+      rawKind = itemObj["rawKind"];
+    } else if (typeof itemObj["kind"] === "number") {
+      rawKind = itemObj["kind"];
+    } else if (typeof itemObj["kind"] === "string") {
+      const parsed = Number(itemObj["kind"]);
       if (Number.isFinite(parsed)) {
         rawKind = parsed;
       }
@@ -764,16 +764,16 @@ export class LspResponseNormalizer {
 
     return {
       name,
-      kind: this.normalizeSymbolKind(itemObj['kind']),
+      kind: this.normalizeSymbolKind(itemObj["kind"]),
       rawKind,
       detail:
-        typeof itemObj['detail'] === 'string'
-          ? (itemObj['detail'] as string)
+        typeof itemObj["detail"] === "string"
+          ? (itemObj["detail"] as string)
           : undefined,
       uri,
       range,
       selectionRange,
-      data: itemObj['data'],
+      data: itemObj["data"],
       serverName: serverOverride ?? serverName,
     };
   }
@@ -785,17 +785,17 @@ export class LspResponseNormalizer {
     item: unknown,
     serverName: string,
   ): LspCallHierarchyIncomingCall | null {
-    if (!item || typeof item !== 'object') {
+    if (!item || typeof item !== "object") {
       return null;
     }
     const itemObj = item as Record<string, unknown>;
-    const from = this.normalizeCallHierarchyItem(itemObj['from'], serverName);
+    const from = this.normalizeCallHierarchyItem(itemObj["from"], serverName);
     if (!from) {
       return null;
     }
     return {
       from,
-      fromRanges: this.normalizeRanges(itemObj['fromRanges']),
+      fromRanges: this.normalizeRanges(itemObj["fromRanges"]),
     };
   }
 
@@ -806,17 +806,17 @@ export class LspResponseNormalizer {
     item: unknown,
     serverName: string,
   ): LspCallHierarchyOutgoingCall | null {
-    if (!item || typeof item !== 'object') {
+    if (!item || typeof item !== "object") {
       return null;
     }
     const itemObj = item as Record<string, unknown>;
-    const to = this.normalizeCallHierarchyItem(itemObj['to'], serverName);
+    const to = this.normalizeCallHierarchyItem(itemObj["to"], serverName);
     if (!to) {
       return null;
     }
     return {
       to,
-      fromRanges: this.normalizeRanges(itemObj['fromRanges']),
+      fromRanges: this.normalizeRanges(itemObj["fromRanges"]),
     };
   }
 
@@ -854,12 +854,12 @@ export class LspResponseNormalizer {
    * Check if item is a DocumentSymbol (has range and selectionRange)
    */
   isDocumentSymbol(item: Record<string, unknown>): boolean {
-    const range = item['range'];
-    const selectionRange = item['selectionRange'];
+    const range = item["range"];
+    const selectionRange = item["selectionRange"];
     return (
-      typeof range === 'object' &&
+      typeof range === "object" &&
       range !== null &&
-      typeof selectionRange === 'object' &&
+      typeof selectionRange === "object" &&
       selectionRange !== null
     );
   }
@@ -879,11 +879,11 @@ export class LspResponseNormalizer {
       return;
     }
 
-    const nameValue = item['name'] ?? item['label'] ?? 'symbol';
-    const name = typeof nameValue === 'string' ? nameValue : String(nameValue);
+    const nameValue = item["name"] ?? item["label"] ?? "symbol";
+    const name = typeof nameValue === "string" ? nameValue : String(nameValue);
     const selectionRange =
-      this.normalizeRange(item['selectionRange']) ??
-      this.normalizeRange(item['range']);
+      this.normalizeRange(item["selectionRange"]) ??
+      this.normalizeRange(item["range"]);
 
     if (!selectionRange) {
       return;
@@ -891,7 +891,7 @@ export class LspResponseNormalizer {
 
     results.push({
       name,
-      kind: this.normalizeSymbolKind(item['kind']),
+      kind: this.normalizeSymbolKind(item["kind"]),
       containerName,
       location: {
         uri,
@@ -904,13 +904,13 @@ export class LspResponseNormalizer {
       return;
     }
 
-    const children = item['children'];
+    const children = item["children"];
     if (Array.isArray(children)) {
       for (const child of children) {
         if (results.length >= limit) {
           break;
         }
-        if (child && typeof child === 'object') {
+        if (child && typeof child === "object") {
           this.collectDocumentSymbol(
             child as Record<string, unknown>,
             uri,

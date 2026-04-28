@@ -4,11 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z } from 'zod';
-import {
-  parse as parseYaml,
-  normalizeContent,
-} from '@tram-ai/tram-core';
+import { z } from "zod";
+import { parse as parseYaml, normalizeContent } from "@tram-ai/tram-core";
 
 /**
  * Defines the Zod schema for a Markdown command definition file.
@@ -21,8 +18,8 @@ export const MarkdownCommandDefSchema = z.object({
     })
     .optional(),
   prompt: z.string({
-    required_error: 'The prompt content is required.',
-    invalid_type_error: 'The prompt content must be a string.',
+    required_error: "The prompt content is required.",
+    invalid_type_error: "The prompt content must be a string.",
   }),
 });
 
@@ -48,7 +45,7 @@ export function parseMarkdownCommand(content: string): MarkdownCommandDef {
     };
   }
 
-  const [, frontmatterYaml = '', body] = match;
+  const [, frontmatterYaml = "", body] = match;
 
   // Parse YAML frontmatter if not empty
   let frontmatter: Record<string, unknown> | undefined;

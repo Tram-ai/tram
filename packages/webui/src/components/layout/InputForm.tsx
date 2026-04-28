@@ -7,22 +7,22 @@
  * Platform-agnostic version with configurable edit modes
  */
 
-import type { FC } from 'react';
-import type { ReactNode } from 'react';
+import type { FC } from "react";
+import type { ReactNode } from "react";
 import {
   EditPencilIcon,
   AutoEditIcon,
   PlanModeIcon,
-} from '../icons/EditIcons.js';
-import { CodeBracketsIcon, HideContextIcon } from '../icons/EditIcons.js';
-import { SlashCommandIcon, LinkIcon } from '../icons/EditIcons.js';
-import { ArrowUpIcon } from '../icons/NavigationIcons.js';
-import { StopIcon } from '../icons/StopIcon.js';
-import { CompletionMenu } from './CompletionMenu.js';
-import { ContextIndicator } from './ContextIndicator.js';
-import type { CompletionItem } from '../../types/completion.js';
-import type { ContextUsage } from './ContextIndicator.js';
-import type { FollowupState } from '../../types/followup.js';
+} from "../icons/EditIcons.js";
+import { CodeBracketsIcon, HideContextIcon } from "../icons/EditIcons.js";
+import { SlashCommandIcon, LinkIcon } from "../icons/EditIcons.js";
+import { ArrowUpIcon } from "../icons/NavigationIcons.js";
+import { StopIcon } from "../icons/StopIcon.js";
+import { CompletionMenu } from "./CompletionMenu.js";
+import { ContextIndicator } from "./ContextIndicator.js";
+import type { CompletionItem } from "../../types/completion.js";
+import type { ContextUsage } from "./ContextIndicator.js";
+import type { FollowupState } from "../../types/followup.js";
 
 /**
  * Edit mode display information
@@ -39,19 +39,19 @@ export interface EditModeInfo {
 /**
  * Built-in icon types for edit modes
  */
-export type EditModeIconType = 'edit' | 'auto' | 'plan' | 'yolo';
+export type EditModeIconType = "edit" | "auto" | "plan" | "yolo";
 
 /**
  * Get icon component for edit mode type
  */
 export const getEditModeIcon = (iconType: EditModeIconType): ReactNode => {
   switch (iconType) {
-    case 'edit':
+    case "edit":
       return <EditPencilIcon />;
-    case 'auto':
-    case 'yolo':
+    case "auto":
+    case "yolo":
       return <AutoEditIcon />;
-    case 'plan':
+    case "plan":
       return <PlanModeIcon />;
     default:
       return null;
@@ -133,7 +133,7 @@ export interface InputFormProps {
   followupState?: FollowupState;
   /** Callback to accept prompt suggestion */
   onAcceptFollowup?: (
-    method?: 'tab' | 'enter' | 'right',
+    method?: "tab" | "enter" | "right",
     options?: { skipOnAccept?: boolean },
   ) => void;
   /** Callback to dismiss prompt suggestion */
@@ -195,7 +195,7 @@ export const InputForm: FC<InputFormProps> = ({
   onCompletionClose,
   onPaste,
   extraContent,
-  placeholder = 'Ask TRAM …',
+  placeholder = "Ask TRAM …",
   canSubmit,
   followupState,
   onAcceptFollowup,
@@ -203,7 +203,7 @@ export const InputForm: FC<InputFormProps> = ({
 }) => {
   const composerDisabled = isStreaming || isWaitingForResponse;
   const hasDraftContent =
-    canSubmit ?? inputText.replace(/\u200B/g, '').trim().length > 0;
+    canSubmit ?? inputText.replace(/\u200B/g, "").trim().length > 0;
   const completionItemsResolved = completionItems ?? [];
   const completionActive =
     completionIsOpen &&
@@ -224,21 +224,21 @@ export const InputForm: FC<InputFormProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Let the completion menu handle Escape when it's active.
-    if (completionActive && e.key === 'Escape') {
+    if (completionActive && e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();
       onCompletionClose?.();
       return;
     }
     // ESC should cancel the current interaction (stop generation)
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       e.preventDefault();
       onCancel();
       return;
     }
     // Tab to accept prompt suggestion (only when callback is wired)
     if (
-      e.key === 'Tab' &&
+      e.key === "Tab" &&
       hasFollowup &&
       onAcceptFollowup &&
       !inputText &&
@@ -246,23 +246,23 @@ export const InputForm: FC<InputFormProps> = ({
     ) {
       e.preventDefault();
       e.stopPropagation();
-      onAcceptFollowup('tab');
+      onAcceptFollowup("tab");
       return;
     }
     // Right arrow to accept prompt suggestion (only when callback is wired)
     if (
-      e.key === 'ArrowRight' &&
+      e.key === "ArrowRight" &&
       hasFollowup &&
       onAcceptFollowup &&
       !inputText &&
       !completionActive
     ) {
       e.preventDefault();
-      onAcceptFollowup?.('right');
+      onAcceptFollowup?.("right");
       return;
     }
     // If composing (Chinese IME input), don't process Enter key
-    if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
+    if (e.key === "Enter" && !e.shiftKey && !isComposing) {
       // If CompletionMenu is open, let it handle Enter key
       if (completionActive) {
         return;
@@ -273,7 +273,7 @@ export const InputForm: FC<InputFormProps> = ({
         // Skip onAccept callback — we pass the text directly to onSubmit.
         // Without skipOnAccept the microtask in accept() would re-insert
         // the suggestion into the input after it was already cleared.
-        onAcceptFollowup?.('enter', { skipOnAccept: true });
+        onAcceptFollowup?.("enter", { skipOnAccept: true });
         onSubmit(e, followupSuggestion);
         return;
       }
@@ -289,8 +289,8 @@ export const InputForm: FC<InputFormProps> = ({
     : 0;
   const selectedLinesText =
     selectedLinesCount > 0
-      ? `${selectedLinesCount} ${selectedLinesCount === 1 ? 'line' : 'lines'} selected`
-      : '';
+      ? `${selectedLinesCount} ${selectedLinesCount === 1 ? "line" : "lines"} selected`
+      : "";
 
   // Pre-compute active file title for accessibility
   const activeFileTitle = activeFileName
@@ -301,7 +301,7 @@ export const InputForm: FC<InputFormProps> = ({
       : selectedLinesText
         ? `Showing your current selection: ${selectedLinesText}`
         : `Showing your current file: ${activeFileName}`
-    : '';
+    : "";
 
   return (
     <div className="p-1 px-4 pb-4 absolute bottom-0 left-0 right-0 bg-gradient-to-b from-transparent to-[var(--app-primary-background)] pointer-events-none">
@@ -333,18 +333,18 @@ export const InputForm: FC<InputFormProps> = ({
               aria-multiline="true"
               data-placeholder={actualPlaceholder}
               // Indicate when a prompt suggestion is active
-              data-has-suggestion={hasFollowup ? 'true' : 'false'}
+              data-has-suggestion={hasFollowup ? "true" : "false"}
               // Use a data flag so CSS can show placeholder even if the browser
               // inserts an invisible <br> into contentEditable (so :empty no longer matches)
               data-empty={
-                inputText.replace(/\u200B/g, '').trim().length === 0
-                  ? 'true'
-                  : 'false'
+                inputText.replace(/\u200B/g, "").trim().length === 0
+                  ? "true"
+                  : "false"
               }
               onInput={(e) => {
                 const target = e.target as HTMLDivElement;
                 // Filter out zero-width space that we use to maintain height
-                const text = target.textContent?.replace(/\u200B/g, '') || '';
+                const text = target.textContent?.replace(/\u200B/g, "") || "";
                 onInputChange(text);
                 // Dismiss follow-up suggestion when user starts typing
                 if (hasFollowup && !inputText && text) {

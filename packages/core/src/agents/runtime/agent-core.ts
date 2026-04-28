@@ -16,20 +16,20 @@
  * and how to interpret the results.
  */
 
-import { reportError } from '../../utils/errorReporting.js';
-import type { Config } from '../../config/config.js';
-import { type ToolCallRequestInfo } from '../../core/turn.js';
+import { reportError } from "../../utils/errorReporting.js";
+import type { Config } from "../../config/config.js";
+import { type ToolCallRequestInfo } from "../../core/turn.js";
 import {
   CoreToolScheduler,
   type ToolCall,
   type ExecutingToolCall,
   type WaitingToolCall,
-} from '../../core/coreToolScheduler.js';
+} from "../../core/coreToolScheduler.js";
 import type {
   ToolConfirmationOutcome,
   ToolCallConfirmationDetails,
-} from '../../tools/tools.js';
-import { getInitialChatHistory } from '../../utils/environmentContext.js';
+} from "../../tools/tools.js";
+import { getInitialChatHistory } from "../../utils/environmentContext.js";
 import type {
   Content,
   Part,
@@ -37,15 +37,15 @@ import type {
   GenerateContentConfig,
   FunctionDeclaration,
   GenerateContentResponseUsageMetadata,
-} from '@google/genai';
-import { GeminiChat } from '../../core/geminiChat.js';
+} from "@google/genai";
+import { GeminiChat } from "../../core/geminiChat.js";
 import type {
   PromptConfig,
   ModelConfig,
   RunConfig,
   ToolConfig,
-} from './agent-types.js';
-import { AgentTerminateMode } from './agent-types.js';
+} from "./agent-types.js";
+import { AgentTerminateMode } from "./agent-types.js";
 import type {
   AgentRoundEvent,
   AgentRoundTextEvent,
@@ -54,13 +54,13 @@ import type {
   AgentToolOutputUpdateEvent,
   AgentUsageEvent,
   AgentHooks,
-} from './agent-events.js';
-import { type AgentEventEmitter, AgentEventType } from './agent-events.js';
-import { AgentStatistics, type AgentStatsSummary } from './agent-statistics.js';
-import { matchesMcpPattern } from '../../permissions/rule-parser.js';
-import { ToolNames } from '../../tools/tool-names.js';
-import { DEFAULT_QWEN_MODEL } from '../../config/models.js';
-import { type ContextState, templateString } from './agent-headless.js';
+} from "./agent-events.js";
+import { type AgentEventEmitter, AgentEventType } from "./agent-events.js";
+import { AgentStatistics, type AgentStatsSummary } from "./agent-statistics.js";
+import { matchesMcpPattern } from "../../permissions/rule-parser.js";
+import { ToolNames } from "../../tools/tool-names.js";
+import { DEFAULT_TRAM_MODEL } from "../../config/models.js";
+import { type ContextState, templateString } from "./agent-headless.js";
 
 /**
  * Result of a single reasoning loop invocation.
@@ -245,12 +245,12 @@ export class AgentCore {
   ): Promise<GeminiChat | undefined> {
     if (!this.promptConfig.systemPrompt && !this.promptConfig.initialMessages) {
       throw new Error(
-        'PromptConfig must have either `systemPrompt` or `initialMessages` defined.',
+        "PromptConfig must have either `systemPrompt` or `initialMessages` defined.",
       );
     }
     if (this.promptConfig.systemPrompt && this.promptConfig.initialMessages) {
       throw new Error(
-        'PromptConfig cannot have both `systemPrompt` and `initialMessages` defined.',
+        "PromptConfig cannot have both `systemPrompt` and `initialMessages` defined.",
       );
     }
 
@@ -299,9 +299,9 @@ export class AgentCore {
     } catch (error) {
       await reportError(
         error,
-        'Error initializing chat session.',
+        "Error initializing chat session.",
         startHistory,
-        'startChat',
+        "startChat",
       );
       return undefined;
     }
@@ -323,11 +323,11 @@ export class AgentCore {
 
     if (this.toolConfig) {
       const asStrings = this.toolConfig.tools.filter(
-        (t): t is string => typeof t === 'string',
+        (t): t is string => typeof t === "string",
       );
-      const hasWildcard = asStrings.includes('*');
+      const hasWildcard = asStrings.includes("*");
       const onlyInlineDecls = this.toolConfig.tools.filter(
-        (t): t is FunctionDeclaration => typeof t !== 'string',
+        (t): t is FunctionDeclaration => typeof t !== "string",
       );
 
       if (hasWildcard || asStrings.length === 0) {
@@ -359,7 +359,7 @@ export class AgentCore {
       return toolsList.filter((t) => {
         if (!t.name) return true;
         return !disallowed.some((pattern) =>
-          t.name!.startsWith('mcp__')
+          t.name!.startsWith("mcp__")
             ? matchesMcpPattern(pattern, t.name!)
             : pattern === t.name,
         );
@@ -400,7 +400,7 @@ export class AgentCore {
     const startTime = options?.startTimeMs ?? Date.now();
     let currentMessages = initialMessages;
     let turnCounter = 0;
-    let finalText = '';
+    let finalText = "";
     let terminateMode: AgentTerminateMode | null = null;
 
     while (true) {
@@ -427,7 +427,7 @@ export class AgentCore {
       // in the model SDK. The parent abortController propagates abort to it.
       const roundAbortController = new AbortController();
       const onParentAbort = () => roundAbortController.abort();
-      abortController.signal.addEventListener('abort', onParentAbort);
+      abortController.signal.addEventListener("abort", onParentAbort);
       if (abortController.signal.aborted) {
         roundAbortController.abort();
       }
@@ -446,7 +446,7 @@ export class AgentCore {
       const responseStream = await chat.sendMessageStream(
         this.modelConfig.model ||
           this.runtimeContext.getModel() ||
-          DEFAULT_QWEN_MODEL,
+          DEFAULT_TRAM_MODEL,
         messageParams,
         promptId,
       );
@@ -458,15 +458,15 @@ export class AgentCore {
       } as AgentRoundEvent);
 
       const functionCalls: FunctionCall[] = [];
-      let roundText = '';
-      let roundThoughtText = '';
+      let roundText = "";
+      let roundThoughtText = "";
       let lastUsage: GenerateContentResponseUsageMetadata | undefined =
         undefined;
       let currentResponseId: string | undefined = undefined;
 
       for await (const streamEvent of responseStream) {
         if (roundAbortController.signal.aborted) {
-          abortController.signal.removeEventListener('abort', onParentAbort);
+          abortController.signal.removeEventListener("abort", onParentAbort);
           return {
             text: finalText,
             terminateMode: AgentTerminateMode.CANCELLED,
@@ -475,12 +475,12 @@ export class AgentCore {
         }
 
         // Handle retry events
-        if (streamEvent.type === 'retry') {
+        if (streamEvent.type === "retry") {
           continue;
         }
 
         // Handle chunk events
-        if (streamEvent.type === 'chunk') {
+        if (streamEvent.type === "chunk") {
           const resp = streamEvent.value;
           // Track the response ID for tool call correlation
           if (resp.responseId) {
@@ -522,7 +522,7 @@ export class AgentCore {
 
       durationMin = (Date.now() - startTime) / (1000 * 60);
       if (options?.maxTimeMinutes && durationMin >= options.maxTimeMinutes) {
-        abortController.signal.removeEventListener('abort', onParentAbort);
+        abortController.signal.removeEventListener("abort", onParentAbort);
         terminateMode = AgentTerminateMode.TIMEOUT;
         break;
       }
@@ -555,17 +555,17 @@ export class AgentCore {
             timestamp: Date.now(),
           } as AgentRoundEvent);
           // Clean up before breaking
-          abortController.signal.removeEventListener('abort', onParentAbort);
+          abortController.signal.removeEventListener("abort", onParentAbort);
           // null terminateMode = normal text completion
           break;
         }
         // Otherwise, nudge the model to finalize a result.
         currentMessages = [
           {
-            role: 'user',
+            role: "user",
             parts: [
               {
-                text: 'Please provide the final result now and stop calling tools.',
+                text: "Please provide the final result now and stop calling tools.",
               },
             ],
           },
@@ -580,7 +580,7 @@ export class AgentCore {
       } as AgentRoundEvent);
 
       // Clean up the per-round listener before the next iteration
-      abortController.signal.removeEventListener('abort', onParentAbort);
+      abortController.signal.removeEventListener("abort", onParentAbort);
     }
 
     return {
@@ -694,9 +694,9 @@ export class AgentCore {
 
           const toolName = call.request.name;
           const duration = call.durationMs ?? 0;
-          const success = call.status === 'success';
+          const success = call.status === "success";
           const errorMessage =
-            call.status === 'error' || call.status === 'cancelled'
+            call.status === "error" || call.status === "cancelled"
               ? call.response.error?.message
               : undefined;
 
@@ -734,7 +734,7 @@ export class AgentCore {
           if (respParts) {
             const parts = Array.isArray(respParts) ? respParts : [respParts];
             for (const part of parts) {
-              if (typeof part === 'string') {
+              if (typeof part === "string") {
                 toolResponseParts.push({ text: part });
               } else if (part) {
                 toolResponseParts.push(part);
@@ -748,7 +748,7 @@ export class AgentCore {
       onToolCallsUpdate: (calls: ToolCall[]) => {
         for (const call of calls) {
           // Track PTY PIDs so TOOL_OUTPUT_UPDATE events can carry them.
-          if (call.status === 'executing') {
+          if (call.status === "executing") {
             const pid = (call as ExecutingToolCall).pid;
             if (pid !== undefined) {
               const isNewPid = !pidMap.has(call.request.callId);
@@ -760,7 +760,7 @@ export class AgentCore {
                   subagentId: this.subagentId,
                   round: currentRound,
                   callId: call.request.callId,
-                  outputChunk: (call as ExecutingToolCall).liveOutput ?? '',
+                  outputChunk: (call as ExecutingToolCall).liveOutput ?? "",
                   pid,
                   timestamp: Date.now(),
                 } as AgentToolOutputUpdateEvent);
@@ -768,7 +768,7 @@ export class AgentCore {
             }
           }
 
-          if (call.status !== 'awaiting_approval') continue;
+          if (call.status !== "awaiting_approval") continue;
           const waiting = call as WaitingToolCall;
 
           // Emit approval request event for UI visibility
@@ -788,7 +788,7 @@ export class AgentCore {
               respond: async (
                 outcome: ToolConfirmationOutcome,
                 payload?: Parameters<
-                  ToolCallConfirmationDetails['onConfirm']
+                  ToolCallConfirmationDetails["onConfirm"]
                 >[1],
               ) => {
                 if (responded.has(waiting.request.callId)) return;
@@ -808,7 +808,7 @@ export class AgentCore {
 
     // Prepare requests and emit TOOL_CALL events
     const requests: ToolCallRequestInfo[] = authorizedCalls.map((fc) => {
-      const toolName = String(fc.name || 'unknown');
+      const toolName = String(fc.name || "unknown");
       const callId = fc.id ?? `${fc.name}-${Date.now()}`;
       const args = (fc.args ?? {}) as Record<string, unknown>;
       const request: ToolCallRequestInfo = {
@@ -862,7 +862,7 @@ export class AgentCore {
           if (emittedCallIds.has(req.callId)) continue;
           emittedCallIds.add(req.callId);
 
-          const errorMessage = 'Tool call cancelled by user abort.';
+          const errorMessage = "Tool call cancelled by user abort.";
           this.recordToolCallStats(req.name, false, 0, errorMessage);
 
           this.eventEmitter?.emit(AgentEventType.TOOL_RESULT, {
@@ -887,7 +887,7 @@ export class AgentCore {
           } as AgentToolResultEvent);
         }
       };
-      abortController.signal.addEventListener('abort', onAbort, { once: true });
+      abortController.signal.addEventListener("abort", onAbort, { once: true });
 
       // If already aborted before the listener was registered, resolve
       // immediately to avoid blocking forever.
@@ -898,17 +898,17 @@ export class AgentCore {
       await scheduler.schedule(requests, abortController.signal);
       await batchDone;
 
-      abortController.signal.removeEventListener('abort', onAbort);
+      abortController.signal.removeEventListener("abort", onAbort);
     }
 
     // If all tool calls failed, inform the model so it can re-evaluate.
     if (functionCalls.length > 0 && toolResponseParts.length === 0) {
       toolResponseParts.push({
-        text: 'All tool calls failed. Please analyze the errors and try an alternative approach.',
+        text: "All tool calls failed. Please analyze the errors and try an alternative approach.",
       });
     }
 
-    return [{ role: 'user', parts: toolResponseParts }];
+    return [{ role: "user", parts: toolResponseParts }];
   }
 
   // ─── Stats & Events ───────────────────────────────────────
@@ -959,13 +959,13 @@ export class AgentCore {
       const toolRegistry = this.runtimeContext.getToolRegistry();
       const tool = toolRegistry.getTool(toolName);
       if (!tool) {
-        return '';
+        return "";
       }
 
       const toolInstance = tool.build(args);
-      return toolInstance.getDescription() || '';
+      return toolInstance.getDescription() || "";
     } catch {
-      return '';
+      return "";
     }
   }
 
@@ -1008,7 +1008,7 @@ export class AgentCore {
       tu.success += 1;
     } else {
       tu.failure += 1;
-      tu.lastError = errorMessage || 'Unknown error';
+      tu.lastError = errorMessage || "Unknown error";
     }
     tu.totalDurationMs = (tu.totalDurationMs || 0) + durationMs;
     tu.averageDurationMs = tu.count > 0 ? tu.totalDurationMs / tu.count : 0;
@@ -1034,7 +1034,7 @@ export class AgentCore {
     options?: CreateChatOptions,
   ): string {
     if (!this.promptConfig.systemPrompt) {
-      return '';
+      return "";
     }
 
     let finalPrompt = templateString(this.promptConfig.systemPrompt, context);

@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import * as path from 'path';
-import { pathToFileURL } from 'url';
+import * as fs from "node:fs";
+import * as path from "path";
+import { pathToFileURL } from "url";
 import {
   recursivelyHydrateStrings,
   type JsonValue,
-} from '../extension/variables.js';
-import type { Extension } from '../extension/extensionManager.js';
+} from "../extension/variables.js";
+import type { Extension } from "../extension/extensionManager.js";
 import type {
   LspInitializationOptions,
   LspServerConfig,
   LspSocketOptions,
-} from './types.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "./types.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('LSP');
+const debugLogger = createDebugLogger("LSP");
 
 export class LspConfigLoader {
   constructor(private readonly workspaceRoot: string) {}
@@ -29,17 +29,17 @@ export class LspConfigLoader {
    * Supports basic format: { "language": { "command": "...", "extensionToLanguage": {...} } }
    */
   async loadUserConfigs(): Promise<LspServerConfig[]> {
-    const lspConfigPath = path.join(this.workspaceRoot, '.lsp.json');
+    const lspConfigPath = path.join(this.workspaceRoot, ".lsp.json");
     if (!fs.existsSync(lspConfigPath)) {
       return [];
     }
 
     try {
-      const configContent = fs.readFileSync(lspConfigPath, 'utf-8');
+      const configContent = fs.readFileSync(lspConfigPath, "utf-8");
       const data = JSON.parse(configContent);
       return this.parseConfigSource(data, lspConfigPath);
     } catch (error) {
-      debugLogger.warn('Failed to load user .lsp.json config:', error);
+      debugLogger.warn("Failed to load user .lsp.json config:", error);
       return [];
     }
   }
@@ -59,7 +59,7 @@ export class LspConfigLoader {
       }
 
       const originBase = `extension ${extension.name}`;
-      if (typeof lspServers === 'string') {
+      if (typeof lspServers === "string") {
         const configPath = this.resolveExtensionConfigPath(
           extension.path,
           lspServers,
@@ -72,7 +72,7 @@ export class LspConfigLoader {
         }
 
         try {
-          const configContent = fs.readFileSync(configPath, 'utf-8');
+          const configContent = fs.readFileSync(configPath, "utf-8");
           const data = JSON.parse(configContent) as JsonValue;
           const hydrated = this.hydrateExtensionLspConfig(data, extension.path);
           configs.push(
@@ -147,10 +147,10 @@ export class LspConfigLoader {
         continue;
       }
       for (const [key, value] of Object.entries(config.extensionToLanguage)) {
-        if (typeof value !== 'string') {
+        if (typeof value !== "string") {
           continue;
         }
-        const normalized = key.startsWith('.') ? key.slice(1) : key;
+        const normalized = key.startsWith(".") ? key.slice(1) : key;
         if (!normalized) {
           continue;
         }
@@ -182,7 +182,7 @@ export class LspConfigLoader {
       // In basic format: key is language name, server name comes from command.
       const languages = [key];
       const name =
-        typeof spec['command'] === 'string' ? (spec['command'] as string) : key;
+        typeof spec["command"] === "string" ? (spec["command"] as string) : key;
 
       const config = this.buildServerConfig(name, languages, spec, origin);
       if (config) {
@@ -210,7 +210,7 @@ export class LspConfigLoader {
       extensionPath,
       CLAUDE_PLUGIN_ROOT: extensionPath,
       workspacePath: this.workspaceRoot,
-      '/': path.sep,
+      "/": path.sep,
       pathSeparator: path.sep,
     });
   }
@@ -221,47 +221,47 @@ export class LspConfigLoader {
     spec: Record<string, unknown>,
     origin: string,
   ): LspServerConfig | null {
-    const transport = this.normalizeTransport(spec['transport']);
+    const transport = this.normalizeTransport(spec["transport"]);
     const command =
-      typeof spec['command'] === 'string'
-        ? (spec['command'] as string)
+      typeof spec["command"] === "string"
+        ? (spec["command"] as string)
         : undefined;
-    const args = this.normalizeStringArray(spec['args']) ?? [];
-    const env = this.normalizeEnv(spec['env']);
-    const initializationOptions = this.isRecord(spec['initializationOptions'])
-      ? (spec['initializationOptions'] as LspInitializationOptions)
+    const args = this.normalizeStringArray(spec["args"]) ?? [];
+    const env = this.normalizeEnv(spec["env"]);
+    const initializationOptions = this.isRecord(spec["initializationOptions"])
+      ? (spec["initializationOptions"] as LspInitializationOptions)
       : undefined;
-    const settings = this.isRecord(spec['settings'])
-      ? (spec['settings'] as Record<string, unknown>)
+    const settings = this.isRecord(spec["settings"])
+      ? (spec["settings"] as Record<string, unknown>)
       : undefined;
     const extensionToLanguage = this.normalizeExtensionToLanguage(
-      spec['extensionToLanguage'],
+      spec["extensionToLanguage"],
     );
     const workspaceFolder = this.resolveWorkspaceFolder(
-      spec['workspaceFolder'],
+      spec["workspaceFolder"],
     );
     const rootUri = pathToFileURL(workspaceFolder).toString();
-    const startupTimeout = this.normalizeTimeout(spec['startupTimeout']);
-    const shutdownTimeout = this.normalizeTimeout(spec['shutdownTimeout']);
+    const startupTimeout = this.normalizeTimeout(spec["startupTimeout"]);
+    const shutdownTimeout = this.normalizeTimeout(spec["shutdownTimeout"]);
     const restartOnCrash =
-      typeof spec['restartOnCrash'] === 'boolean'
-        ? (spec['restartOnCrash'] as boolean)
+      typeof spec["restartOnCrash"] === "boolean"
+        ? (spec["restartOnCrash"] as boolean)
         : undefined;
-    const maxRestarts = this.normalizeMaxRestarts(spec['maxRestarts']);
+    const maxRestarts = this.normalizeMaxRestarts(spec["maxRestarts"]);
     const trustRequired =
-      typeof spec['trustRequired'] === 'boolean'
-        ? (spec['trustRequired'] as boolean)
+      typeof spec["trustRequired"] === "boolean"
+        ? (spec["trustRequired"] as boolean)
         : true;
     const socket = this.normalizeSocketOptions(spec);
 
-    if (transport === 'stdio' && !command) {
+    if (transport === "stdio" && !command) {
       debugLogger.warn(
         `LSP config error in ${origin}: ${name} missing command`,
       );
       return null;
     }
 
-    if (transport !== 'stdio' && !socket) {
+    if (transport !== "stdio" && !socket) {
       debugLogger.warn(
         `LSP config error in ${origin}: ${name} missing socket info`,
       );
@@ -290,14 +290,14 @@ export class LspConfigLoader {
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null && !Array.isArray(value);
+    return typeof value === "object" && value !== null && !Array.isArray(value);
   }
 
   private normalizeStringArray(value: unknown): string[] | undefined {
     if (!Array.isArray(value)) {
       return undefined;
     }
-    return value.filter((item): item is string => typeof item === 'string');
+    return value.filter((item): item is string => typeof item === "string");
   }
 
   private normalizeEnv(value: unknown): Record<string, string> | undefined {
@@ -307,9 +307,9 @@ export class LspConfigLoader {
     const env: Record<string, string> = {};
     for (const [key, val] of Object.entries(value)) {
       if (
-        typeof val === 'string' ||
-        typeof val === 'number' ||
-        typeof val === 'boolean'
+        typeof val === "string" ||
+        typeof val === "number" ||
+        typeof val === "boolean"
       ) {
         env[key] = String(val);
       }
@@ -325,10 +325,10 @@ export class LspConfigLoader {
     }
     const mapping: Record<string, string> = {};
     for (const [key, lang] of Object.entries(value)) {
-      if (typeof lang !== 'string') {
+      if (typeof lang !== "string") {
         continue;
       }
-      const normalized = key.startsWith('.') ? key.slice(1) : key;
+      const normalized = key.startsWith(".") ? key.slice(1) : key;
       if (!normalized) {
         continue;
       }
@@ -337,19 +337,19 @@ export class LspConfigLoader {
     return Object.keys(mapping).length > 0 ? mapping : undefined;
   }
 
-  private normalizeTransport(value: unknown): 'stdio' | 'tcp' | 'socket' {
-    if (typeof value !== 'string') {
-      return 'stdio';
+  private normalizeTransport(value: unknown): "stdio" | "tcp" | "socket" {
+    if (typeof value !== "string") {
+      return "stdio";
     }
     const normalized = value.toLowerCase();
-    if (normalized === 'tcp' || normalized === 'socket') {
+    if (normalized === "tcp" || normalized === "socket") {
       return normalized;
     }
-    return 'stdio';
+    return "stdio";
   }
 
   private normalizeTimeout(value: unknown): number | undefined {
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       return undefined;
     }
     if (!Number.isFinite(value) || value <= 0) {
@@ -359,7 +359,7 @@ export class LspConfigLoader {
   }
 
   private normalizeMaxRestarts(value: unknown): number | undefined {
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       return undefined;
     }
     if (!Number.isFinite(value) || value < 0) {
@@ -371,27 +371,27 @@ export class LspConfigLoader {
   private normalizeSocketOptions(
     value: Record<string, unknown>,
   ): LspSocketOptions | undefined {
-    const socketValue = value['socket'];
-    if (typeof socketValue === 'string') {
+    const socketValue = value["socket"];
+    if (typeof socketValue === "string") {
       return { path: socketValue };
     }
 
     const source = this.isRecord(socketValue) ? socketValue : value;
     const host =
-      typeof source['host'] === 'string'
-        ? (source['host'] as string)
+      typeof source["host"] === "string"
+        ? (source["host"] as string)
         : undefined;
     const pathValue =
-      typeof source['path'] === 'string'
-        ? (source['path'] as string)
-        : typeof source['socketPath'] === 'string'
-          ? (source['socketPath'] as string)
+      typeof source["path"] === "string"
+        ? (source["path"] as string)
+        : typeof source["socketPath"] === "string"
+          ? (source["socketPath"] as string)
           : undefined;
-    const portValue = source['port'];
+    const portValue = source["port"];
     const port =
-      typeof portValue === 'number'
+      typeof portValue === "number"
         ? portValue
-        : typeof portValue === 'string'
+        : typeof portValue === "string"
           ? Number(portValue)
           : undefined;
 
@@ -413,7 +413,7 @@ export class LspConfigLoader {
   }
 
   private resolveWorkspaceFolder(value: unknown): string {
-    if (typeof value !== 'string' || value.trim() === '') {
+    if (typeof value !== "string" || value.trim() === "") {
       return this.workspaceRoot;
     }
 

@@ -9,8 +9,8 @@ import {
   type Config,
   type AvailableModel as CoreAvailableModel,
   TRAM_OAUTH_MODELS,
-} from '@tram-ai/tram-core';
-import { t } from '../../i18n/index.js';
+} from "@tram-ai/tram-core";
+import { t } from "../../i18n/index.js";
 
 export type AvailableModel = {
   id: string;
@@ -45,26 +45,26 @@ export function getFilteredTramModels(): AvailableModel[] {
  * In the future, after settings.json is updated, we will allow users to configure this themselves.
  */
 export function getOpenAIAvailableModelFromEnv(): AvailableModel | null {
-  const id = process.env['OPENAI_MODEL']?.trim();
+  const id = process.env["OPENAI_MODEL"]?.trim();
   return id
     ? {
         id,
         label: id,
         get description() {
-          return t('Configured via OPENAI_MODEL environment variable');
+          return t("Configured via OPENAI_MODEL environment variable");
         },
       }
     : null;
 }
 
 export function getAnthropicAvailableModelFromEnv(): AvailableModel | null {
-  const id = process.env['ANTHROPIC_MODEL']?.trim();
+  const id = process.env["ANTHROPIC_MODEL"]?.trim();
   return id
     ? {
         id,
         label: id,
         get description() {
-          return t('Configured via ANTHROPIC_MODEL environment variable');
+          return t("Configured via ANTHROPIC_MODEL environment variable");
         },
       }
     : null;

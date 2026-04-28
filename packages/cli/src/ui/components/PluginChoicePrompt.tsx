@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import { useState, useCallback, useMemo } from 'react';
-import { theme } from '../semantic-colors.js';
-import { t } from '../../i18n/index.js';
-import { useKeypress, type Key } from '../hooks/useKeypress.js';
+import { Box, Text } from "ink";
+import { useState, useCallback, useMemo } from "react";
+import { theme } from "../semantic-colors.js";
+import { t } from "../../i18n/index.js";
+import { useKeypress, type Key } from "../hooks/useKeypress.js";
 
 interface PluginChoice {
   name: string;
@@ -37,12 +37,12 @@ export const PluginChoicePrompt = (props: PluginChoicePromptProps) => {
     (key: Key) => {
       const { name, sequence } = key;
 
-      if (name === 'escape') {
+      if (name === "escape") {
         onCancel();
         return;
       }
 
-      if (name === 'return') {
+      if (name === "return") {
         const plugin = plugins[selectedIndex];
         if (plugin) {
           onSelect(plugin.name);
@@ -51,19 +51,19 @@ export const PluginChoicePrompt = (props: PluginChoicePromptProps) => {
       }
 
       // Navigate up
-      if (name === 'up' || sequence === 'k') {
+      if (name === "up" || sequence === "k") {
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : plugins.length - 1));
         return;
       }
 
       // Navigate down
-      if (name === 'down' || sequence === 'j') {
+      if (name === "down" || sequence === "j") {
         setSelectedIndex((prev) => (prev < plugins.length - 1 ? prev + 1 : 0));
         return;
       }
 
       // Number shortcuts (1-9)
-      const num = parseInt(sequence || '', 10);
+      const num = parseInt(sequence || "", 10);
       if (!isNaN(num) && num >= 1 && num <= plugins.length && num <= 9) {
         setSelectedIndex(num - 1);
         const plugin = plugins[num - 1];
@@ -132,8 +132,8 @@ export const PluginChoicePrompt = (props: PluginChoicePromptProps) => {
         {hasLess && (
           <Box>
             <Text dimColor>
-              {' '}
-              ↑ {t('{{count}} more above', { count: String(startIndex) })}
+              {" "}
+              ↑ {t("{{count}} more above", { count: String(startIndex) })}
             </Text>
           </Box>
         )}
@@ -141,7 +141,7 @@ export const PluginChoicePrompt = (props: PluginChoicePromptProps) => {
         {visiblePlugins.map((plugin, visibleIndex) => {
           const actualIndex = startIndex + visibleIndex;
           const isSelected = actualIndex === selectedIndex;
-          const prefix = isSelected ? '❯ ' : '  ';
+          const prefix = isSelected ? "❯ " : "  ";
 
           return (
             <Box key={plugin.name} flexDirection="column">
@@ -170,9 +170,9 @@ export const PluginChoicePrompt = (props: PluginChoicePromptProps) => {
         {hasMore && (
           <Box>
             <Text dimColor>
-              {' '}
-              ↓{' '}
-              {t('{{count}} more below', {
+              {" "}
+              ↓{" "}
+              {t("{{count}} more below", {
                 count: String(plugins.length - startIndex - MAX_VISIBLE_ITEMS),
               })}
             </Text>
@@ -182,7 +182,7 @@ export const PluginChoicePrompt = (props: PluginChoicePromptProps) => {
 
       <Box marginTop={1} flexDirection="row" gap={2}>
         <Text dimColor>
-          {t('Use ↑↓ or j/k to navigate, Enter to select, Escape to cancel')}
+          {t("Use ↑↓ or j/k to navigate, Enter to select, Escape to cancel")}
         </Text>
         {plugins.length > MAX_VISIBLE_ITEMS && (
           <Text dimColor>

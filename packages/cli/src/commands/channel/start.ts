@@ -1,24 +1,24 @@
-import * as path from 'node:path';
-import * as os from 'node:os';
-import type { CommandModule } from 'yargs';
-import { ProxyAgent, setGlobalDispatcher } from 'undici';
-import { normalizeProxyUrl } from '@qwen-code/qwen-code-core';
-import { loadSettings } from '../../config/settings.js';
-import { writeStderrLine, writeStdoutLine } from '../../utils/stdioHelpers.js';
-import { AcpBridge, SessionRouter } from '@qwen-code/channel-base';
+import * as path from "node:path";
+import * as os from "node:os";
+import type { CommandModule } from "yargs";
+import { ProxyAgent, setGlobalDispatcher } from "undici";
+import { normalizeProxyUrl } from "@tram-ai/tram-core";
+import { loadSettings } from "../../config/settings.js";
+import { writeStderrLine, writeStdoutLine } from "../../utils/stdioHelpers.js";
+import { AcpBridge, SessionRouter } from "@tram-ai/channel-base";
 import type {
   ChannelBase,
   ChannelPlugin,
   ToolCallEvent,
-} from '@qwen-code/channel-base';
-import { getPlugin, registerPlugin } from './channel-registry.js';
-import { findCliEntryPath, parseChannelConfig } from './config-utils.js';
+} from "@tram-ai/channel-base";
+import { getPlugin, registerPlugin } from "./channel-registry.js";
+import { findCliEntryPath, parseChannelConfig } from "./config-utils.js";
 import {
   readServiceInfo,
   writeServiceInfo,
   removeServiceInfo,
-} from './pidfile.js';
-import { getExtensionManager } from '../extensions/utils.js';
+} from "./pidfile.js";
+import { getExtensionManager } from "../extensions/utils.js";
 
 const MAX_CRASH_RESTARTS = 3;
 const CRASH_WINDOW_MS = 5 * 60 * 1000; // 5-minute window for counting crashes
@@ -38,10 +38,10 @@ const RESTART_DELAY_MS = 3000;
 function resolveProxy(cliProxy?: string): string | undefined {
   const proxyUrl = normalizeProxyUrl(
     cliProxy ||
-      process.env['HTTPS_PROXY'] ||
-      process.env['https_proxy'] ||
-      process.env['HTTP_PROXY'] ||
-      process.env['http_proxy'],
+      process.env["HTTPS_PROXY"] ||
+      process.env["https_proxy"] ||
+      process.env["HTTP_PROXY"] ||
+      process.env["http_proxy"],
   );
   if (proxyUrl) {
     setGlobalDispatcher(new ProxyAgent(proxyUrl));
@@ -50,7 +50,7 @@ function resolveProxy(cliProxy?: string): string | undefined {
 }
 
 function sessionsPath(): string {
-  return path.join(os.homedir(), '.qwen', 'channels', 'sessions.json');
+  return path.join(os.homedir(), ".tram", "channels", "sessions.json");
 }
 
 function loadChannelsConfig(): Record<string, unknown> {
@@ -89,7 +89,7 @@ async function loadChannelsFromExtensions(): Promise<number> {
           };
           const plugin = module.plugin;
 
-          if (!plugin || typeof plugin.createChannel !== 'function') {
+          if (!plugin || typeof plugin.createChannel !== "function") {
             writeStderrLine(
               `[Extensions] "${ext.name}": channel entry point does not export a valid plugin object`,
             );
@@ -141,7 +141,7 @@ function registerToolCallDispatch(
   router: SessionRouter,
   channels: Map<string, ChannelBase>,
 ): void {
-  bridge.on('toolCall', (event: ToolCallEvent) => {
+  bridge.on("toolCall", (event: ToolCallEvent) => {
     const target = router.getTarget(event.sessionId);
     if (target) {
       const channel = channels.get(target.channelName);
@@ -159,7 +159,7 @@ function checkDuplicateInstance(): void {
     writeStderrLine(
       `Error: Channel service is already running (PID ${existing.pid}, started ${existing.startedAt}).`,
     );
-    writeStderrLine('Use "qwen channel stop" to stop it first.');
+    writeStderrLine('Use "tram channel stop" to stop it first.');
     process.exit(1);
   }
 }
@@ -224,7 +224,7 @@ async function startSingle(name: string, proxy?: string): Promise<void> {
   writeServiceInfo([name]);
   writeStdoutLine(`[Channel] "${name}" is running. Press Ctrl+C to stop.`);
 
-  bridge.on('disconnected', async () => {
+  bridge.on("disconnected", async () => {
     if (shuttingDown) return;
 
     const now = Date.now();
@@ -268,16 +268,27 @@ async function startSingle(name: string, proxy?: string): Promise<void> {
   });
 
   const shutdown = () => {
+    if (shuttingDown) return;
     shuttingDown = true;
-    writeStdoutLine('\n[Channel] Shutting down...');
-    channel.disconnect();
-    bridge.stop();
-    router.clearAll();
-    removeServiceInfo();
+    writeStdoutLine("\\n[Channel] Shutting down...");
+    try {
+      channel.disconnect();
+    } catch {
+      // best-effort
+    }
+    try {
+      bridge.stop();
+    } catch {}
+    try {
+      router.clearAll();
+    } catch {}
+    try {
+      removeServiceInfo();
+    } catch {}
     process.exit(0);
   };
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 
   await new Promise<void>(() => {});
 }
@@ -326,7 +337,7 @@ async function startAll(proxy?: string): Promise<void> {
   ];
   if (models.length > 1) {
     writeStderrLine(
-      `[Channel] Warning: Multiple models configured (${models.join(', ')}). ` +
+      `[Channel] Warning: Multiple models configured (${models.join(", ")}). ` +
         `Shared bridge will use "${models[0]}".`,
     );
   }
@@ -338,7 +349,7 @@ async function startAll(proxy?: string): Promise<void> {
   let bridge = new AcpBridge(bridgeOpts);
   await bridge.start();
 
-  const router = new SessionRouter(bridge, defaultCwd, 'user', sessionsPath());
+  const router = new SessionRouter(bridge, defaultCwd, "user", sessionsPath());
   // Register per-channel scope overrides so each channel uses its own sessionScope
   for (const { name, config } of parsed) {
     router.setChannelScope(name, config.sessionScope);
@@ -346,7 +357,7 @@ async function startAll(proxy?: string): Promise<void> {
   const channels: Map<string, ChannelBase> = new Map();
 
   writeStdoutLine(
-    `[Channel] Starting ${parsed.length} channel(s): ${parsed.map((p) => p.name).join(', ')}`,
+    `[Channel] Starting ${parsed.length} channel(s): ${parsed.map((p) => p.name).join(", ")}`,
   );
 
   for (const { name, config } of parsed) {
@@ -372,7 +383,7 @@ async function startAll(proxy?: string): Promise<void> {
   }
 
   if (connectedCount === 0) {
-    writeStderrLine('[Channel] No channels connected. Exiting.');
+    writeStderrLine("[Channel] No channels connected. Exiting.");
     bridge.stop();
     process.exit(1);
   }
@@ -382,7 +393,7 @@ async function startAll(proxy?: string): Promise<void> {
     `[Channel] Running ${connectedCount} channel(s). Press Ctrl+C to stop.`,
   );
 
-  bridge.on('disconnected', async () => {
+  bridge.on("disconnected", async () => {
     if (shuttingDown) return;
 
     const now = Date.now();
@@ -433,8 +444,9 @@ async function startAll(proxy?: string): Promise<void> {
   });
 
   const shutdown = () => {
+    if (shuttingDown) return;
     shuttingDown = true;
-    writeStdoutLine('\n[Channel] Shutting down...');
+    writeStdoutLine("\\n[Channel] Shutting down...");
     for (const [name, channel] of channels) {
       try {
         channel.disconnect();
@@ -443,28 +455,34 @@ async function startAll(proxy?: string): Promise<void> {
         // best-effort
       }
     }
-    bridge.stop();
-    router.clearAll();
-    removeServiceInfo();
+    try {
+      bridge.stop();
+    } catch {}
+    try {
+      router.clearAll();
+    } catch {}
+    try {
+      removeServiceInfo();
+    } catch {}
     process.exit(0);
   };
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 
   await new Promise<void>(() => {});
 }
 
 export const startCommand: CommandModule<object, { name?: string }> = {
-  command: 'start [name]',
-  describe: 'Start channels (all if no name given, or a single named channel)',
+  command: "start [name]",
+  describe: "Start channels (all if no name given, or a single named channel)",
   builder: (yargs) =>
-    yargs.positional('name', {
-      type: 'string',
-      describe: 'Channel name (omit to start all configured channels)',
+    yargs.positional("name", {
+      type: "string",
+      describe: "Channel name (omit to start all configured channels)",
     }),
   handler: async (argv) => {
     const proxy = resolveProxy(
-      (argv as Record<string, unknown>)['proxy'] as string | undefined,
+      (argv as Record<string, unknown>)["proxy"] as string | undefined,
     );
     if (argv.name) {
       await startSingle(argv.name, proxy);

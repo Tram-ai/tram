@@ -6,8 +6,8 @@
  * Navigation and action icons
  */
 
-import type { FC } from 'react';
-import type { IconProps } from './types.js';
+import type { FC } from "react";
+import type { IconProps } from "./types.js";
 
 /**
  * Chevron down icon (20x20)
@@ -41,7 +41,7 @@ export const ChevronDownIcon: FC<IconProps> = ({
  */
 interface ChevronIconProps extends IconProps {
   /** Arrow direction: 'up' | 'down' | 'left' | 'right' */
-  direction?: 'up' | 'down' | 'left' | 'right';
+  direction?: "up" | "down" | "left" | "right";
 }
 
 /**
@@ -49,15 +49,15 @@ interface ChevronIconProps extends IconProps {
  * @param direction - Arrow direction
  * @returns Rotation angle in degrees
  */
-const getRotation = (direction: 'up' | 'down' | 'left' | 'right'): number => {
+const getRotation = (direction: "up" | "down" | "left" | "right"): number => {
   switch (direction) {
-    case 'up':
+    case "up":
       return 180;
-    case 'down':
+    case "down":
       return 0;
-    case 'left':
+    case "left":
       return 90;
-    case 'right':
+    case "right":
       return -90;
     default:
       return 0;
@@ -71,7 +71,7 @@ const getRotation = (direction: 'up' | 'down' | 'left' | 'right'): number => {
 export const ChevronIcon: FC<ChevronIconProps> = ({
   size = 12,
   className,
-  direction = 'down',
+  direction = "down",
   style,
   ...props
 }) => (
@@ -90,7 +90,7 @@ export const ChevronIcon: FC<ChevronIconProps> = ({
     style={{
       ...style,
       transform: `rotate(${getRotation(direction)}deg)`,
-      transition: 'transform 0.15s ease-in-out',
+      transition: "transform 0.15s ease-in-out",
     }}
     {...props}
   >

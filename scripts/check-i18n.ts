@@ -6,11 +6,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { glob } from 'glob';
-import { fileURLToPath, pathToFileURL } from 'url';
-import { dirname } from 'path';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { glob } from "glob";
+import { fileURLToPath, pathToFileURL } from "url";
+import { dirname } from "path";
 
 // Get __dirname for ESM modules
 // @ts-expect-error - import.meta is supported in NodeNext module system at runtime
@@ -44,8 +44,8 @@ async function loadTranslationsFile(
     // Fallback: try reading as JSON if JS import fails
     try {
       const content = fs.readFileSync(
-        filePath.replace('.js', '.json'),
-        'utf-8',
+        filePath.replace(".js", ".json"),
+        "utf-8",
       );
       return JSON.parse(content);
     } catch {
@@ -63,28 +63,28 @@ function extractStringLiteral(
   quote: string,
 ): { value: string; endPos: number } | null {
   let pos = startPos + 1; // Skip opening quote
-  let value = '';
+  let value = "";
   let escaped = false;
 
   while (pos < content.length) {
     const char = content[pos];
 
     if (escaped) {
-      if (char === '\\') {
-        value += '\\';
+      if (char === "\\") {
+        value += "\\";
       } else if (char === quote) {
         value += quote;
-      } else if (char === 'n') {
-        value += '\n';
-      } else if (char === 't') {
-        value += '\t';
-      } else if (char === 'r') {
-        value += '\r';
+      } else if (char === "n") {
+        value += "\n";
+      } else if (char === "t") {
+        value += "\t";
+      } else if (char === "r") {
+        value += "\r";
       } else {
         value += char;
       }
       escaped = false;
-    } else if (char === '\\') {
+    } else if (char === "\\") {
       escaped = true;
     } else if (char === quote) {
       return { value, endPos: pos };
@@ -105,20 +105,20 @@ async function extractUsedKeys(sourceDir: string): Promise<Set<string>> {
   const usedKeys = new Set<string>();
 
   // Find all TypeScript/TSX files
-  const files = await glob('**/*.{ts,tsx}', {
+  const files = await glob("**/*.{ts,tsx}", {
     cwd: sourceDir,
     ignore: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/*.test.ts',
-      '**/*.test.tsx',
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/*.test.ts",
+      "**/*.test.tsx",
     ],
   });
 
   for (const file of files) {
     const filePath = path.join(sourceDir, file);
     try {
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = fs.readFileSync(filePath, "utf-8");
 
       // Find all t( or ta( calls
       const tCallRegex = /\bta?\s*\(/g;
@@ -253,13 +253,13 @@ async function findKeysOnlyInLocales(
   const localesDirName = path.basename(localesDir);
 
   // Find all TypeScript/TSX files (excluding locales, node_modules, dist, and test files)
-  const files = await glob('**/*.{ts,tsx}', {
+  const files = await glob("**/*.{ts,tsx}", {
     cwd: sourceDir,
     ignore: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/*.test.ts',
-      '**/*.test.tsx',
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/*.test.ts",
+      "**/*.test.tsx",
       `**/${localesDirName}/**`,
     ],
   });
@@ -270,7 +270,7 @@ async function findKeysOnlyInLocales(
   for (const file of files) {
     const filePath = path.join(sourceDir, file);
     try {
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = fs.readFileSync(filePath, "utf-8");
 
       // Check each unused key in the file content
       for (const key of unusedKeys) {
@@ -301,11 +301,11 @@ async function checkI18n(): Promise<CheckResult> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  const localesDir = path.join(__dirname, '../packages/cli/src/i18n/locales');
-  const sourceDir = path.join(__dirname, '../packages/cli/src');
+  const localesDir = path.join(__dirname, "../packages/cli/src/i18n/locales");
+  const sourceDir = path.join(__dirname, "../packages/cli/src");
 
-  const enPath = path.join(localesDir, 'en.js');
-  const zhPath = path.join(localesDir, 'zh.js');
+  const enPath = path.join(localesDir, "en.js");
+  const zhPath = path.join(localesDir, "zh.js");
 
   // Load translation files
   let enTranslations: Record<string, string | string[]>;
@@ -384,7 +384,7 @@ async function checkI18n(): Promise<CheckResult> {
 async function main() {
   const result = await checkI18n();
 
-  console.log('\n=== i18n Check Results ===\n');
+  console.log("\n=== i18n Check Results ===\n");
 
   console.log(`Total keys: ${result.stats.totalKeys}`);
   console.log(`Translated keys: ${result.stats.translatedKeys}`);
@@ -393,11 +393,11 @@ async function main() {
       ? ((result.stats.translatedKeys / result.stats.totalKeys) * 100).toFixed(
           1,
         )
-      : '0.0';
+      : "0.0";
   console.log(`Translation coverage: ${coverage}%\n`);
 
   if (result.warnings.length > 0) {
-    console.log('⚠️  Warnings:');
+    console.log("⚠️  Warnings:");
     result.warnings.forEach((warning) => console.log(`  - ${warning}`));
 
     // Show unused keys
@@ -405,7 +405,7 @@ async function main() {
       result.stats.unusedKeys.length > 0 &&
       result.stats.unusedKeys.length <= 10
     ) {
-      console.log('\nUnused keys:');
+      console.log("\nUnused keys:");
       result.stats.unusedKeys.forEach((key) => console.log(`  - "${key}"`));
     } else if (result.stats.unusedKeys.length > 10) {
       console.log(
@@ -422,10 +422,10 @@ async function main() {
       result.stats.unusedKeysOnlyInLocales.length > 0
     ) {
       console.log(
-        '\n⚠️  The following keys exist ONLY in locale files and nowhere else in the codebase:',
+        "\n⚠️  The following keys exist ONLY in locale files and nowhere else in the codebase:",
       );
       console.log(
-        '   Please review these keys - they might be safe to remove.',
+        "   Please review these keys - they might be safe to remove.",
       );
       result.stats.unusedKeysOnlyInLocales.forEach((key) =>
         console.log(`  - "${key}"`),
@@ -434,7 +434,7 @@ async function main() {
       // Save these keys to a JSON file
       const outputPath = path.join(
         __dirname,
-        'unused-keys-only-in-locales.json',
+        "unused-keys-only-in-locales.json",
       );
       saveKeysOnlyInLocalesToJson(
         result.stats.unusedKeysOnlyInLocales,
@@ -446,19 +446,19 @@ async function main() {
   }
 
   if (result.errors.length > 0) {
-    console.log('❌ Errors:');
+    console.log("❌ Errors:");
     result.errors.forEach((error) => console.log(`  - ${error}`));
     console.log();
     process.exit(1);
   }
 
   if (result.success) {
-    console.log('✅ All checks passed!\n');
+    console.log("✅ All checks passed!\n");
     process.exit(0);
   }
 }
 
 main().catch((error) => {
-  console.error('❌ Fatal error:', error);
+  console.error("❌ Fatal error:", error);
   process.exit(1);
 });

@@ -8,64 +8,74 @@ import type {
   CommandContext,
   MessageActionReturn,
   SlashCommand,
-} from './types.js';
-import { CommandKind } from './types.js';
-import { t } from '../../i18n/index.js';
+} from "./types.js";
+import { CommandKind } from "./types.js";
+import { t } from "../../i18n/index.js";
 import {
   getMCPServerStatus,
   MCPServerStatus,
   type MCPServerConfig,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 
 function maskApiKey(key: string | undefined): string {
-  if (!key) return t('(未设置)');
-  if (key.length <= 8) return '****';
-  return key.slice(0, 4) + '****' + key.slice(-4);
+  if (!key) return t("(未设置)");
+  if (key.length <= 8) return "****";
+  return key.slice(0, 4) + "****" + key.slice(-4);
 }
 
 function statusIcon(connected: boolean): string {
-  return connected ? '✅' : '❌';
+  return connected ? "✅" : "❌";
 }
 
 function mcpStatusText(status: MCPServerStatus): string {
   switch (status) {
     case MCPServerStatus.CONNECTED:
-      return '✅ ' + t('已连接');
+      return "✅ " + t("已连接");
     case MCPServerStatus.CONNECTING:
-      return '🔄 ' + t('连接中...');
+      return "🔄 " + t("连接中...");
     case MCPServerStatus.DISCONNECTED:
-      return '❌ ' + t('已断开');
+      return "❌ " + t("已断开");
     default:
-      return '❓ ' + t('未知');
+      return "❓ " + t("未知");
   }
 }
 
-function buildModelProviderInfo(config: NonNullable<CommandContext['services']['config']>): string {
+function buildModelProviderInfo(
+  config: NonNullable<CommandContext["services"]["config"]>,
+): string {
   const genConfig = config.getContentGeneratorConfig();
   const lines: string[] = [];
 
-  lines.push('═══ ' + t('模型供应商') + ' ═══');
-  lines.push(`  ${t('当前模型')}: ${config.getModelName() || genConfig.model || t('(未设置)')}`);
-  lines.push(`  ${t('模型ID')}: ${genConfig.model || t('(未设置)')}`);
-  lines.push(`  ${t('Base URL')}: ${genConfig.baseUrl || t('(默认)')}`);
-  lines.push(`  ${t('API Key')}: ${maskApiKey(genConfig.apiKey)}`);
-  lines.push(`  ${t('认证类型')}: ${genConfig.authType || 'openai'}`);
+  lines.push("═══ " + t("模型供应商") + " ═══");
+  lines.push(
+    `  ${t("当前模型")}: ${config.getModelName() || genConfig.model || t("(未设置)")}`,
+  );
+  lines.push(`  ${t("模型ID")}: ${genConfig.model || t("(未设置)")}`);
+  lines.push(`  ${t("Base URL")}: ${genConfig.baseUrl || t("(默认)")}`);
+  lines.push(`  ${t("API Key")}: ${maskApiKey(genConfig.apiKey)}`);
+  lines.push(`  ${t("认证类型")}: ${genConfig.authType || "openai"}`);
 
   const hasApiKey = !!genConfig.apiKey;
   const hasBaseUrl = !!genConfig.baseUrl;
-  lines.push(`  ${t('连接状态')}: ${statusIcon(hasApiKey)} ${hasApiKey ? t('API Key 已配置') : t('API Key 未配置')}${hasBaseUrl ? '' : ' (' + t('使用默认端点') + ')'}`);
+  lines.push(
+    `  ${t("连接状态")}: ${statusIcon(hasApiKey)} ${hasApiKey ? t("API Key 已配置") : t("API Key 未配置")}${hasBaseUrl ? "" : " (" + t("使用默认端点") + ")"}`,
+  );
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
-function buildMcpInfo(config: NonNullable<CommandContext['services']['config']>): string {
+function buildMcpInfo(
+  config: NonNullable<CommandContext["services"]["config"]>,
+): string {
   const mcpServers = config.getMcpServers() || {};
   const lines: string[] = [];
 
   const builtinServers: Array<[string, MCPServerConfig]> = [];
   const userServers: Array<[string, MCPServerConfig]> = [];
 
-  for (const [name, serverConfig] of Object.entries(mcpServers) as Array<[string, MCPServerConfig]>) {
+  for (const [name, serverConfig] of Object.entries(mcpServers) as Array<
+    [string, MCPServerConfig]
+  >) {
     if (config.isMcpServerDisabled(name)) continue;
     if (serverConfig.hidden) {
       builtinServers.push([name, serverConfig]);
@@ -74,27 +84,31 @@ function buildMcpInfo(config: NonNullable<CommandContext['services']['config']>)
     }
   }
 
-  lines.push('');
-  lines.push('═══ ' + t('内置 MCP 服务') + ' ═══');
+  lines.push("");
+  lines.push("═══ " + t("内置 MCP 服务") + " ═══");
   if (builtinServers.length === 0) {
-    lines.push('  ' + t('(无)'));
+    lines.push("  " + t("(无)"));
   } else {
     for (const [name, serverConfig] of builtinServers) {
       const status = getMCPServerStatus(name);
-      const desc = serverConfig.description || '';
-      lines.push(`  ${mcpStatusText(status)} ${name}${desc ? ' - ' + desc : ''}`);
+      const desc = serverConfig.description || "";
+      lines.push(
+        `  ${mcpStatusText(status)} ${name}${desc ? " - " + desc : ""}`,
+      );
     }
   }
 
-  lines.push('');
-  lines.push('═══ ' + t('用户 MCP 服务') + ' ═══');
+  lines.push("");
+  lines.push("═══ " + t("用户 MCP 服务") + " ═══");
   if (userServers.length === 0) {
-    lines.push('  ' + t('(无)'));
+    lines.push("  " + t("(无)"));
   } else {
     for (const [name, serverConfig] of userServers) {
       const status = getMCPServerStatus(name);
-      const desc = serverConfig.description || '';
-      lines.push(`  ${mcpStatusText(status)} ${name}${desc ? ' - ' + desc : ''}`);
+      const desc = serverConfig.description || "";
+      lines.push(
+        `  ${mcpStatusText(status)} ${name}${desc ? " - " + desc : ""}`,
+      );
     }
   }
 
@@ -106,49 +120,51 @@ function buildMcpInfo(config: NonNullable<CommandContext['services']['config']>)
     }
   }
   if (disabledServers.length > 0) {
-    lines.push('');
-    lines.push('═══ ' + t('已禁用的 MCP 服务') + ' ═══');
+    lines.push("");
+    lines.push("═══ " + t("已禁用的 MCP 服务") + " ═══");
     for (const name of disabledServers) {
       lines.push(`  🚫 ${name}`);
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
-function buildVisionInfo(config: NonNullable<CommandContext['services']['config']>): string {
+function buildVisionInfo(
+  config: NonNullable<CommandContext["services"]["config"]>,
+): string {
   const genConfig = config.getContentGeneratorConfig();
   const lines: string[] = [];
 
-  lines.push('');
-  lines.push('═══ ' + t('视觉 API') + ' ═══');
+  lines.push("");
+  lines.push("═══ " + t("视觉 API") + " ═══");
 
   const modalities = genConfig.modalities;
   if (modalities && modalities.image) {
-    lines.push(`  ${statusIcon(true)} ${t('图片输入')}: ${t('已启用')}`);
+    lines.push(`  ${statusIcon(true)} ${t("图片输入")}: ${t("已启用")}`);
   } else if (modalities && modalities.image === false) {
-    lines.push(`  ${statusIcon(false)} ${t('图片输入')}: ${t('已禁用')}`);
+    lines.push(`  ${statusIcon(false)} ${t("图片输入")}: ${t("已禁用")}`);
   } else {
-    lines.push(`  ℹ️ ${t('图片输入')}: ${t('自动检测 (取决于模型)')}`);
+    lines.push(`  ℹ️ ${t("图片输入")}: ${t("自动检测 (取决于模型)")}`);
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 export const apiCommand: SlashCommand = {
-  name: 'api',
-  altNames: ['connectivity', 'conn', 'status'],
+  name: "api",
+  altNames: ["connectivity", "conn", "status"],
   get description() {
-    return t('查看 API 连接状态与 MCP 服务信息');
+    return t("查看 API 连接状态与 MCP 服务信息");
   },
   kind: CommandKind.BUILT_IN,
   action: async (context: CommandContext): Promise<MessageActionReturn> => {
     const config = context.services.config;
     if (!config) {
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('配置服务不可用'),
+        type: "message",
+        messageType: "error",
+        content: t("配置服务不可用"),
       };
     }
 
@@ -156,22 +172,24 @@ export const apiCommand: SlashCommand = {
       buildModelProviderInfo(config),
       buildMcpInfo(config),
       buildVisionInfo(config),
-      '',
-      t('提示: 使用 /mcp 管理 MCP 服务, 使用 /auth 管理认证, 使用 /model 切换模型'),
+      "",
+      t(
+        "提示: 使用 /mcp 管理 MCP 服务, 使用 /auth 管理认证, 使用 /model 切换模型",
+      ),
     ];
 
     return {
-      type: 'message',
-      messageType: 'info',
-      content: sections.join('\n'),
+      type: "message",
+      messageType: "info",
+      content: sections.join("\n"),
     };
   },
   subCommands: [
     {
-      name: 'reconnect',
-      altNames: ['retry'],
+      name: "reconnect",
+      altNames: ["retry"],
       get description() {
-        return t('重新连接断开的 MCP 服务');
+        return t("重新连接断开的 MCP 服务");
       },
       kind: CommandKind.BUILT_IN,
       action: async (
@@ -181,9 +199,9 @@ export const apiCommand: SlashCommand = {
         const config = context.services.config;
         if (!config) {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: t('配置服务不可用'),
+            type: "message",
+            messageType: "error",
+            content: t("配置服务不可用"),
           };
         }
 
@@ -196,23 +214,25 @@ export const apiCommand: SlashCommand = {
           // Reconnect specific server
           if (!mcpServers[serverName]) {
             return {
-              type: 'message',
-              messageType: 'error',
+              type: "message",
+              messageType: "error",
               content: t('MCP 服务 "{{name}}" 不存在', { name: serverName }),
             };
           }
           try {
             await toolRegistry.discoverToolsForServer(serverName);
             return {
-              type: 'message',
-              messageType: 'info',
-              content: t('已重新连接 MCP 服务: {{name}}', { name: serverName }),
+              type: "message",
+              messageType: "info",
+              content: t("已重新连接 MCP 服务: {{name}}", { name: serverName }),
             };
           } catch {
             return {
-              type: 'message',
-              messageType: 'error',
-              content: t('重新连接 MCP 服务 "{{name}}" 失败', { name: serverName }),
+              type: "message",
+              messageType: "error",
+              content: t('重新连接 MCP 服务 "{{name}}" 失败', {
+                name: serverName,
+              }),
             };
           }
         } else {
@@ -228,9 +248,9 @@ export const apiCommand: SlashCommand = {
 
           if (disconnected.length === 0) {
             return {
-              type: 'message',
-              messageType: 'info',
-              content: t('所有 MCP 服务均已连接，无需重连'),
+              type: "message",
+              messageType: "info",
+              content: t("所有 MCP 服务均已连接，无需重连"),
             };
           }
 
@@ -243,11 +263,11 @@ export const apiCommand: SlashCommand = {
           }
 
           return {
-            type: 'message',
-            messageType: 'info',
-            content: t('已重新连接 {{count}} 个断开的 MCP 服务: {{names}}', {
+            type: "message",
+            messageType: "info",
+            content: t("已重新连接 {{count}} 个断开的 MCP 服务: {{names}}", {
               count: String(disconnected.length),
-              names: disconnected.join(', '),
+              names: disconnected.join(", "),
             }),
           };
         }

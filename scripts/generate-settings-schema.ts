@@ -15,16 +15,16 @@
  * Prerequisites: npm run build (core package must be built first)
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import type {
   SettingDefinition,
   SettingItemDefinition,
   SettingsSchema,
-} from '../packages/cli/src/config/settingsSchema.js';
-import { getSettingsSchema } from '../packages/cli/src/config/settingsSchema.js';
+} from "../packages/cli/src/config/settingsSchema.js";
+import { getSettingsSchema } from "../packages/cli/src/config/settingsSchema.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -56,7 +56,7 @@ function convertItemDefinitionToJsonSchema(
     schema.enum = itemDef.enum;
   }
 
-  if (itemDef.type === 'object' && itemDef.properties) {
+  if (itemDef.type === "object" && itemDef.properties) {
     schema.properties = {};
     const requiredFields: string[] = [];
 
@@ -73,8 +73,8 @@ function convertItemDefinitionToJsonSchema(
     }
   }
 
-  if (itemDef.type === 'object' && itemDef.additionalProperties !== undefined) {
-    if (typeof itemDef.additionalProperties === 'boolean') {
+  if (itemDef.type === "object" && itemDef.additionalProperties !== undefined) {
+    if (typeof itemDef.additionalProperties === "boolean") {
       schema.additionalProperties = itemDef.additionalProperties;
     } else {
       schema.additionalProperties = convertItemDefinitionToJsonSchema(
@@ -84,7 +84,7 @@ function convertItemDefinitionToJsonSchema(
   }
 
   if (itemDef.items) {
-    schema.type = 'array';
+    schema.type = "array";
     schema.items = convertItemDefinitionToJsonSchema(itemDef.items);
   }
 
@@ -101,35 +101,35 @@ function convertSettingToJsonSchema(
   }
 
   switch (setting.type) {
-    case 'boolean':
-      schema.type = 'boolean';
+    case "boolean":
+      schema.type = "boolean";
       break;
-    case 'string':
-      schema.type = 'string';
+    case "string":
+      schema.type = "string";
       break;
-    case 'number':
-      schema.type = 'number';
+    case "number":
+      schema.type = "number";
       break;
-    case 'array':
-      schema.type = 'array';
+    case "array":
+      schema.type = "array";
       if (setting.items) {
         schema.items = convertItemDefinitionToJsonSchema(setting.items);
       } else {
-        schema.items = { type: 'string' };
+        schema.items = { type: "string" };
       }
       break;
-    case 'enum':
+    case "enum":
       if (setting.options && setting.options.length > 0) {
         schema.enum = setting.options.map((o) => o.value);
         schema.description +=
-          ' Options: ' + setting.options.map((o) => `${o.value}`).join(', ');
+          " Options: " + setting.options.map((o) => `${o.value}`).join(", ");
       } else {
         // Enum without predefined options - accept any string
-        schema.type = 'string';
+        schema.type = "string";
       }
       break;
-    case 'object':
-      schema.type = 'object';
+    case "object":
+      schema.type = "object";
       if (setting.properties) {
         schema.properties = {};
         for (const [key, childDef] of Object.entries(setting.properties)) {
@@ -147,9 +147,9 @@ function convertSettingToJsonSchema(
   if (setting.default !== undefined && setting.default !== null) {
     const defaultVal = setting.default;
     if (
-      typeof defaultVal === 'boolean' ||
-      typeof defaultVal === 'number' ||
-      typeof defaultVal === 'string'
+      typeof defaultVal === "boolean" ||
+      typeof defaultVal === "number" ||
+      typeof defaultVal === "string"
     ) {
       schema.default = defaultVal;
     } else if (Array.isArray(defaultVal) && defaultVal.length > 0) {
@@ -164,9 +164,9 @@ function generateJsonSchema(
   settingsSchema: SettingsSchema,
 ): JsonSchemaProperty {
   const jsonSchema: JsonSchemaProperty = {
-    $schema: 'http://json-schema.org/draft-07/schema#',
-    type: 'object',
-    description: 'TRAM settings configuration',
+    $schema: "http://json-schema.org/draft-07/schema#",
+    type: "object",
+    description: "TRAM settings configuration",
     properties: {},
     additionalProperties: true,
   };
@@ -178,9 +178,9 @@ function generateJsonSchema(
   }
 
   // Add $version property
-  jsonSchema.properties!['$version'] = {
-    type: 'number',
-    description: 'Settings schema version for migration tracking.',
+  jsonSchema.properties!["$version"] = {
+    type: "number",
+    description: "Settings schema version for migration tracking.",
     default: 3,
   };
 
@@ -192,11 +192,11 @@ const jsonSchema = generateJsonSchema(schema as unknown as SettingsSchema);
 
 const outputDir = path.resolve(
   __dirname,
-  '../packages/vscode-ide-companion/schemas',
+  "../packages/vscode-ide-companion/schemas",
 );
-const outputPath = path.join(outputDir, 'settings.schema.json');
+const outputPath = path.join(outputDir, "settings.schema.json");
 
 fs.mkdirSync(outputDir, { recursive: true });
-fs.writeFileSync(outputPath, JSON.stringify(jsonSchema, null, 2) + '\n');
+fs.writeFileSync(outputPath, JSON.stringify(jsonSchema, null, 2) + "\n");
 
 console.log(`Generated settings JSON Schema at: ${outputPath}`);

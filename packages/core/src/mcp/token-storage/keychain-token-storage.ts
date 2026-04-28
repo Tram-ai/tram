@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as crypto from 'node:crypto';
-import { BaseTokenStorage } from './base-token-storage.js';
-import type { OAuthCredentials } from './types.js';
-import { createDebugLogger } from '../../utils/debugLogger.js';
+import * as crypto from "node:crypto";
+import { BaseTokenStorage } from "./base-token-storage.js";
+import type { OAuthCredentials } from "./types.js";
+import { createDebugLogger } from "../../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('MCP_KEYCHAIN');
+const debugLogger = createDebugLogger("MCP_KEYCHAIN");
 
 interface Keytar {
   getPassword(service: string, account: string): Promise<string | null>;
@@ -24,8 +24,8 @@ interface Keytar {
   ): Promise<Array<{ account: string; password: string }>>;
 }
 
-const KEYCHAIN_TEST_PREFIX = '__keychain_test__';
-const SECRET_PREFIX = '__secret__';
+const KEYCHAIN_TEST_PREFIX = "__keychain_test__";
+const SECRET_PREFIX = "__secret__";
 
 export class KeychainTokenStorage extends BaseTokenStorage {
   private keychainAvailable: boolean | null = null;
@@ -42,7 +42,7 @@ export class KeychainTokenStorage extends BaseTokenStorage {
 
     try {
       // Try to import keytar without any timeout - let the OS handle it
-      const moduleName = 'keytar';
+      const moduleName = "keytar";
       const module = await import(moduleName);
       this.keytarModule = module.default || module;
     } catch (error) {
@@ -53,12 +53,12 @@ export class KeychainTokenStorage extends BaseTokenStorage {
 
   async getCredentials(serverName: string): Promise<OAuthCredentials | null> {
     if (!(await this.checkKeychainAvailability())) {
-      throw new Error('Keychain is not available');
+      throw new Error("Keychain is not available");
     }
 
     const keytar = await this.getKeytar();
     if (!keytar) {
-      throw new Error('Keytar module not available');
+      throw new Error("Keytar module not available");
     }
 
     try {
@@ -86,12 +86,12 @@ export class KeychainTokenStorage extends BaseTokenStorage {
 
   async setCredentials(credentials: OAuthCredentials): Promise<void> {
     if (!(await this.checkKeychainAvailability())) {
-      throw new Error('Keychain is not available');
+      throw new Error("Keychain is not available");
     }
 
     const keytar = await this.getKeytar();
     if (!keytar) {
-      throw new Error('Keytar module not available');
+      throw new Error("Keytar module not available");
     }
 
     this.validateCredentials(credentials);
@@ -108,12 +108,12 @@ export class KeychainTokenStorage extends BaseTokenStorage {
 
   async deleteCredentials(serverName: string): Promise<void> {
     if (!(await this.checkKeychainAvailability())) {
-      throw new Error('Keychain is not available');
+      throw new Error("Keychain is not available");
     }
 
     const keytar = await this.getKeytar();
     if (!keytar) {
-      throw new Error('Keytar module not available');
+      throw new Error("Keytar module not available");
     }
 
     const sanitizedName = this.sanitizeServerName(serverName);
@@ -129,12 +129,12 @@ export class KeychainTokenStorage extends BaseTokenStorage {
 
   async listServers(): Promise<string[]> {
     if (!(await this.checkKeychainAvailability())) {
-      throw new Error('Keychain is not available');
+      throw new Error("Keychain is not available");
     }
 
     const keytar = await this.getKeytar();
     if (!keytar) {
-      throw new Error('Keytar module not available');
+      throw new Error("Keytar module not available");
     }
 
     try {
@@ -151,12 +151,12 @@ export class KeychainTokenStorage extends BaseTokenStorage {
 
   async getAllCredentials(): Promise<Map<string, OAuthCredentials>> {
     if (!(await this.checkKeychainAvailability())) {
-      throw new Error('Keychain is not available');
+      throw new Error("Keychain is not available");
     }
 
     const keytar = await this.getKeytar();
     if (!keytar) {
-      throw new Error('Keytar module not available');
+      throw new Error("Keytar module not available");
     }
 
     const result = new Map<string, OAuthCredentials>();
@@ -188,7 +188,7 @@ export class KeychainTokenStorage extends BaseTokenStorage {
 
   async clearAll(): Promise<void> {
     if (!(await this.checkKeychainAvailability())) {
-      throw new Error('Keychain is not available');
+      throw new Error("Keychain is not available");
     }
 
     const servers = this.keytarModule
@@ -213,7 +213,7 @@ export class KeychainTokenStorage extends BaseTokenStorage {
 
     if (errors.length > 0) {
       throw new Error(
-        `Failed to clear some credentials: ${errors.map((e) => e.message).join(', ')}`,
+        `Failed to clear some credentials: ${errors.map((e) => e.message).join(", ")}`,
       );
     }
   }
@@ -232,8 +232,8 @@ export class KeychainTokenStorage extends BaseTokenStorage {
         return false;
       }
 
-      const testAccount = `${KEYCHAIN_TEST_PREFIX}${crypto.randomBytes(8).toString('hex')}`;
-      const testPassword = 'test';
+      const testAccount = `${KEYCHAIN_TEST_PREFIX}${crypto.randomBytes(8).toString("hex")}`;
+      const testPassword = "test";
 
       await keytar.setPassword(this.serviceName, testAccount, testPassword);
       const retrieved = await keytar.getPassword(this.serviceName, testAccount);
@@ -257,33 +257,33 @@ export class KeychainTokenStorage extends BaseTokenStorage {
 
   async setSecret(key: string, value: string): Promise<void> {
     if (!(await this.checkKeychainAvailability())) {
-      throw new Error('Keychain is not available');
+      throw new Error("Keychain is not available");
     }
     const keytar = await this.getKeytar();
     if (!keytar) {
-      throw new Error('Keytar module not available');
+      throw new Error("Keytar module not available");
     }
     await keytar.setPassword(this.serviceName, `${SECRET_PREFIX}${key}`, value);
   }
 
   async getSecret(key: string): Promise<string | null> {
     if (!(await this.checkKeychainAvailability())) {
-      throw new Error('Keychain is not available');
+      throw new Error("Keychain is not available");
     }
     const keytar = await this.getKeytar();
     if (!keytar) {
-      throw new Error('Keytar module not available');
+      throw new Error("Keytar module not available");
     }
     return keytar.getPassword(this.serviceName, `${SECRET_PREFIX}${key}`);
   }
 
   async deleteSecret(key: string): Promise<void> {
     if (!(await this.checkKeychainAvailability())) {
-      throw new Error('Keychain is not available');
+      throw new Error("Keychain is not available");
     }
     const keytar = await this.getKeytar();
     if (!keytar) {
-      throw new Error('Keytar module not available');
+      throw new Error("Keytar module not available");
     }
     const deleted = await keytar.deletePassword(
       this.serviceName,
@@ -296,11 +296,11 @@ export class KeychainTokenStorage extends BaseTokenStorage {
 
   async listSecrets(): Promise<string[]> {
     if (!(await this.checkKeychainAvailability())) {
-      throw new Error('Keychain is not available');
+      throw new Error("Keychain is not available");
     }
     const keytar = await this.getKeytar();
     if (!keytar) {
-      throw new Error('Keytar module not available');
+      throw new Error("Keytar module not available");
     }
     try {
       const credentials = await keytar.findCredentials(this.serviceName);

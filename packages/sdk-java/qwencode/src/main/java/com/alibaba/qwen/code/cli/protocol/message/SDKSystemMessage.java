@@ -59,7 +59,7 @@ public class SDKSystemMessage extends MessageBase {
     @JSONField(name = "slash_commands")
     private List<String> slashCommands;
     /**
-     * Qwen Code version.
+     * TRAM version.
      */
     @JSONField(name = "qwen_code_version")
     private String qwenCodeVersion;
@@ -275,18 +275,18 @@ public class SDKSystemMessage extends MessageBase {
     }
 
     /**
-     * Gets the Qwen Code version.
+     * Gets the TRAM version.
      *
-     * @return The Qwen Code version
+     * @return The TRAM version
      */
     public String getQwenCodeVersion() {
         return qwenCodeVersion;
     }
 
     /**
-     * Sets the Qwen Code version.
+     * Sets the TRAM version.
      *
-     * @param qwenCodeVersion The Qwen Code version
+     * @param qwenCodeVersion The TRAM version
      */
     public void setQwenCodeVersion(String qwenCodeVersion) {
         this.qwenCodeVersion = qwenCodeVersion;

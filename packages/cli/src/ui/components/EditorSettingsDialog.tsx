@@ -4,28 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useState } from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
+import type React from "react";
+import { useState } from "react";
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
 import {
   EDITOR_DISPLAY_NAMES,
   editorSettingsManager,
   type EditorDisplay,
-} from '../editors/editorSettingsManager.js';
-import { RadioButtonSelect } from './shared/RadioButtonSelect.js';
-import { ScopeSelector } from './shared/ScopeSelector.js';
-import type { LoadedSettings } from '../../config/settings.js';
-import { SettingScope } from '../../config/settings.js';
-import type { EditorType } from '@tram-ai/tram-core';
-import {
-  createDebugLogger,
-  isEditorAvailable,
-} from '@tram-ai/tram-core';
-import { useKeypress } from '../hooks/useKeypress.js';
-import { t } from '../../i18n/index.js';
+} from "../editors/editorSettingsManager.js";
+import { RadioButtonSelect } from "./shared/RadioButtonSelect.js";
+import { ScopeSelector } from "./shared/ScopeSelector.js";
+import type { LoadedSettings } from "../../config/settings.js";
+import { SettingScope } from "../../config/settings.js";
+import type { EditorType } from "@tram-ai/tram-core";
+import { createDebugLogger, isEditorAvailable } from "@tram-ai/tram-core";
+import { useKeypress } from "../hooks/useKeypress.js";
+import { t } from "../../i18n/index.js";
 
-const debugLogger = createDebugLogger('EDITOR_SETTINGS_DIALOG');
+const debugLogger = createDebugLogger("EDITOR_SETTINGS_DIALOG");
 
 interface EditorDialogProps {
   onSelect: (editorType: EditorType | undefined, scope: SettingScope) => void;
@@ -41,14 +38,14 @@ export function EditorSettingsDialog({
   const [selectedScope, setSelectedScope] = useState<SettingScope>(
     SettingScope.User,
   );
-  const [mode, setMode] = useState<'editor' | 'scope'>('editor');
+  const [mode, setMode] = useState<"editor" | "scope">("editor");
 
   useKeypress(
     (key) => {
-      if (key.name === 'tab') {
-        setMode((prev) => (prev === 'editor' ? 'scope' : 'editor'));
+      if (key.name === "tab") {
+        setMode((prev) => (prev === "editor" ? "scope" : "editor"));
       }
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         onExit();
       }
     },
@@ -70,8 +67,8 @@ export function EditorSettingsDialog({
     editorIndex = 0;
   }
 
-  const handleEditorSelect = (editorType: EditorType | 'not_set') => {
-    if (editorType === 'not_set') {
+  const handleEditorSelect = (editorType: EditorType | "not_set") => {
+    if (editorType === "not_set") {
       onSelect(undefined, selectedScope);
       return;
     }
@@ -80,14 +77,14 @@ export function EditorSettingsDialog({
 
   const handleScopeSelect = (scope: SettingScope) => {
     setSelectedScope(scope);
-    setMode('editor');
+    setMode("editor");
   };
 
   const handleScopeHighlight = (scope: SettingScope) => {
     setSelectedScope(scope);
   };
 
-  let otherScopeModifiedMessage = '';
+  let otherScopeModifiedMessage = "";
   const otherScope =
     selectedScope === SettingScope.User
       ? SettingScope.Workspace
@@ -103,7 +100,7 @@ export function EditorSettingsDialog({
         : `(Modified in ${otherScope})`;
   }
 
-  let mergedEditorName = 'None';
+  let mergedEditorName = "None";
   if (
     settings.merged.general?.preferredEditor &&
     isEditorAvailable(settings.merged.general?.preferredEditor)
@@ -123,11 +120,11 @@ export function EditorSettingsDialog({
       width="100%"
     >
       <Box flexDirection="column" width="45%" paddingRight={2}>
-        {mode === 'editor' ? (
+        {mode === "editor" ? (
           <Box flexDirection="column">
-            <Text bold={mode === 'editor'} wrap="truncate">
-              {mode === 'editor' ? '> ' : '  '}
-              {t('Select Editor')}{' '}
+            <Text bold={mode === "editor"} wrap="truncate">
+              {mode === "editor" ? "> " : "  "}
+              {t("Select Editor")}{" "}
               <Text color={theme.text.secondary}>
                 {otherScopeModifiedMessage}
               </Text>
@@ -142,7 +139,7 @@ export function EditorSettingsDialog({
               }))}
               initialIndex={editorIndex}
               onSelect={handleEditorSelect}
-              isFocused={mode === 'editor'}
+              isFocused={mode === "editor"}
               key={selectedScope}
             />
           </Box>
@@ -150,35 +147,35 @@ export function EditorSettingsDialog({
           <ScopeSelector
             onSelect={handleScopeSelect}
             onHighlight={handleScopeHighlight}
-            isFocused={mode === 'scope'}
+            isFocused={mode === "scope"}
             initialScope={selectedScope}
           />
         )}
 
         <Box marginTop={1}>
           <Text color={theme.text.secondary} wrap="truncate">
-            {mode === 'editor'
-              ? t('(Use Enter to select, Tab to configure scope)')
-              : t('(Use Enter to apply scope, Tab to go back)')}
+            {mode === "editor"
+              ? t("(Use Enter to select, Tab to configure scope)")
+              : t("(Use Enter to apply scope, Tab to go back)")}
           </Text>
         </Box>
       </Box>
 
       <Box flexDirection="column" width="55%" paddingLeft={2}>
         <Text bold color={theme.text.primary}>
-          {t('Editor Preference')}
+          {t("Editor Preference")}
         </Text>
         <Box flexDirection="column" gap={1} marginTop={1}>
           <Text color={theme.text.secondary}>
             {t(
-              'These editors are currently supported. Please note that some editors cannot be used in sandbox mode.',
+              "These editors are currently supported. Please note that some editors cannot be used in sandbox mode.",
             )}
           </Text>
           <Text color={theme.text.secondary}>
-            {t('Your preferred editor is:')}{' '}
+            {t("Your preferred editor is:")}{" "}
             <Text
               color={
-                mergedEditorName === 'None'
+                mergedEditorName === "None"
                   ? theme.status.error
                   : theme.text.link
               }

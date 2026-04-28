@@ -26,14 +26,14 @@
  * plane exclusively through ControlService.
  */
 
-import type { IControlContext } from './ControlContext.js';
-import type { ControlDispatcher } from './ControlDispatcher.js';
+import type { IControlContext } from "./ControlContext.js";
+import type { ControlDispatcher } from "./ControlDispatcher.js";
 import type {
   PermissionServiceAPI,
   SystemServiceAPI,
   // McpServiceAPI,
   // HookServiceAPI,
-} from './types/serviceAPIs.js';
+} from "./types/serviceAPIs.js";
 
 /**
  * Control Service

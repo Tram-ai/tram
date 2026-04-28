@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   focusChatCommand,
   openNewChatTabCommand,
   registerNewCommands,
-} from './index.js';
+} from "./index.js";
 
 const {
   registerCommand,
@@ -28,7 +28,7 @@ const {
   showInformationMessage: vi.fn(),
 }));
 
-vi.mock('vscode', () => ({
+vi.mock("vscode", () => ({
   commands: {
     registerCommand,
     executeCommand,
@@ -53,7 +53,7 @@ function getRegisteredHandler(commandId: string) {
   return call[1] as (...args: unknown[]) => Promise<void>;
 }
 
-describe('registerNewCommands', () => {
+describe("registerNewCommands", () => {
   const context = { subscriptions: [] as Array<{ dispose: () => void }> };
   const diffManager = { showDiff: vi.fn() };
   const log = vi.fn();
@@ -66,7 +66,7 @@ describe('registerNewCommands', () => {
     showInformationMessage.mockClear();
   });
 
-  it('openNewChatTab opens a new provider without creating a second session explicitly', async () => {
+  it("openNewChatTab opens a new provider without creating a second session explicitly", async () => {
     const provider = {
       show: vi.fn().mockResolvedValue(undefined),
       createNewSession: vi.fn().mockResolvedValue(undefined),
@@ -82,15 +82,15 @@ describe('registerNewCommands', () => {
     );
 
     await getRegisteredHandler(openNewChatTabCommand)({
-      initialModelId: 'glm-5',
+      initialModelId: "glm-5",
     });
 
     expect(provider.show).toHaveBeenCalledTimes(1);
     expect(provider.createNewSession).not.toHaveBeenCalled();
-    expect(provider.setInitialModelId).toHaveBeenCalledWith('glm-5');
+    expect(provider.setInitialModelId).toHaveBeenCalledWith("glm-5");
   });
 
-  it('focusChat focuses the secondary sidebar when it is supported', async () => {
+  it("focusChat focuses the secondary sidebar when it is supported", async () => {
     registerNewCommands(
       context as never,
       log,
@@ -104,11 +104,11 @@ describe('registerNewCommands', () => {
     await getRegisteredHandler(focusChatCommand)();
 
     expect(executeCommand).toHaveBeenCalledWith(
-      'tram.chatView.secondary.focus',
+      "tram.chatView.secondary.focus",
     );
   });
 
-  it('focusChat falls back to the primary sidebar when secondary sidebar is unavailable', async () => {
+  it("focusChat falls back to the primary sidebar when secondary sidebar is unavailable", async () => {
     registerNewCommands(
       context as never,
       log,
@@ -121,8 +121,6 @@ describe('registerNewCommands', () => {
 
     await getRegisteredHandler(focusChatCommand)();
 
-    expect(executeCommand).toHaveBeenCalledWith(
-      'tram.chatView.sidebar.focus',
-    );
+    expect(executeCommand).toHaveBeenCalledWith("tram.chatView.sidebar.focus");
   });
 });

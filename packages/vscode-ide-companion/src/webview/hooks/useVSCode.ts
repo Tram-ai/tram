@@ -27,7 +27,7 @@ function getVSCodeAPI(): VSCodeAPI {
     return vscodeApiInstance;
   }
 
-  if (typeof acquireVsCodeApi !== 'undefined') {
+  if (typeof acquireVsCodeApi !== "undefined") {
     vscodeApiInstance = acquireVsCodeApi();
     return vscodeApiInstance;
   }
@@ -35,11 +35,11 @@ function getVSCodeAPI(): VSCodeAPI {
   // Fallback for development/testing
   vscodeApiInstance = {
     postMessage: (message: unknown) => {
-      console.log('Mock postMessage:', message);
+      console.log("Mock postMessage:", message);
     },
     getState: () => ({}),
     setState: (state: unknown) => {
-      console.log('Mock setState:', state);
+      console.log("Mock setState:", state);
     },
   };
   return vscodeApiInstance;

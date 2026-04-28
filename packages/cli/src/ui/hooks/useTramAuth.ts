@@ -4,23 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from "react";
 import {
   AuthType,
   tramOAuth2Events,
   TramOAuth2Event,
   type DeviceAuthorizationData,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 
 export interface TramAuthState {
   deviceAuth: DeviceAuthorizationData | null;
   authStatus:
-    | 'idle'
-    | 'polling'
-    | 'success'
-    | 'error'
-    | 'timeout'
-    | 'rate_limit';
+    | "idle"
+    | "polling"
+    | "success"
+    | "error"
+    | "timeout"
+    | "rate_limit";
   authMessage: string | null;
 }
 
@@ -30,7 +30,7 @@ export const useTramAuth = (
 ) => {
   const [TramAuthState, setTramAuthState] = useState<TramAuthState>({
     deviceAuth: null,
-    authStatus: 'idle',
+    authStatus: "idle",
     authMessage: null,
   });
 
@@ -42,7 +42,7 @@ export const useTramAuth = (
       // Reset state when not authenticating or not TRAM auth
       setTramAuthState({
         deviceAuth: null,
-        authStatus: 'idle',
+        authStatus: "idle",
         authMessage: null,
       });
       return;
@@ -50,7 +50,7 @@ export const useTramAuth = (
 
     setTramAuthState((prev) => ({
       ...prev,
-      authStatus: 'idle',
+      authStatus: "idle",
     }));
 
     // Set up event listeners
@@ -64,12 +64,12 @@ export const useTramAuth = (
           expires_in: deviceAuth.expires_in,
           device_code: deviceAuth.device_code,
         },
-        authStatus: 'polling',
+        authStatus: "polling",
       }));
     };
 
     const handleAuthProgress = (
-      status: 'success' | 'error' | 'polling' | 'timeout' | 'rate_limit',
+      status: "success" | "error" | "polling" | "timeout" | "rate_limit",
       message?: string,
     ) => {
       setTramAuthState((prev) => ({
@@ -96,7 +96,7 @@ export const useTramAuth = (
 
     setTramAuthState({
       deviceAuth: null,
-      authStatus: 'idle',
+      authStatus: "idle",
       authMessage: null,
     });
   }, []);

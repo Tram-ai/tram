@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import { useUIState } from '../../contexts/UIStateContext.js';
-import { ExtensionUpdateState } from '../../state/extensions.js';
-import { createDebugLogger } from '@tram-ai/tram-core';
+import { Box, Text } from "ink";
+import { useUIState } from "../../contexts/UIStateContext.js";
+import { ExtensionUpdateState } from "../../state/extensions.js";
+import { createDebugLogger } from "@tram-ai/tram-core";
 
-const debugLogger = createDebugLogger('EXTENSIONS_LIST');
+const debugLogger = createDebugLogger("EXTENSIONS_LIST");
 
 export const ExtensionsList = () => {
   const { extensionsUpdateState, commandContext } = useUIState();
@@ -26,28 +26,28 @@ export const ExtensionsList = () => {
         {extensions.map((ext) => {
           const state = extensionsUpdateState.get(ext.name);
           const isActive = ext.isActive;
-          const activeString = isActive ? 'active' : 'disabled';
-          const activeColor = isActive ? 'green' : 'grey';
+          const activeString = isActive ? "active" : "disabled";
+          const activeColor = isActive ? "green" : "grey";
 
-          let stateColor = 'gray';
-          const stateText = state || 'unknown state';
+          let stateColor = "gray";
+          const stateText = state || "unknown state";
 
           switch (state) {
             case ExtensionUpdateState.CHECKING_FOR_UPDATES:
             case ExtensionUpdateState.UPDATING:
-              stateColor = 'cyan';
+              stateColor = "cyan";
               break;
             case ExtensionUpdateState.UPDATE_AVAILABLE:
             case ExtensionUpdateState.UPDATED_NEEDS_RESTART:
-              stateColor = 'yellow';
+              stateColor = "yellow";
               break;
             case ExtensionUpdateState.ERROR:
-              stateColor = 'red';
+              stateColor = "red";
               break;
             case ExtensionUpdateState.UP_TO_DATE:
             case ExtensionUpdateState.NOT_UPDATABLE:
             case ExtensionUpdateState.UPDATED:
-              stateColor = 'green';
+              stateColor = "green";
               break;
             default:
               debugLogger.error(`Unhandled ExtensionUpdateState ${state}`);

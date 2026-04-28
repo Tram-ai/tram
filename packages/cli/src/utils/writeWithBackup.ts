@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
+import * as fs from "node:fs";
 
 /**
  * Options for writeWithBackup function.
@@ -63,7 +63,7 @@ export function writeWithBackupSync(
   content: string,
   options: WriteWithBackupOptions = {},
 ): void {
-  const { backupSuffix = '.orig', encoding = 'utf-8' } = options;
+  const { backupSuffix = ".orig", encoding = "utf-8" } = options;
   const tempPath = `${targetPath}.tmp`;
   const backupPath = `${targetPath}${backupSuffix}`;
 

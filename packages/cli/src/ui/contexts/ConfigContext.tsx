@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useContext } from 'react';
-import { type Config } from '@tram-ai/tram-core';
+import React, { useContext } from "react";
+import { type Config } from "@tram-ai/tram-core";
 
 export const ConfigContext = React.createContext<Config | undefined>(undefined);
 
 export const useConfig = () => {
   const context = useContext(ConfigContext);
   if (context === undefined) {
-    throw new Error('useConfig must be used within a ConfigProvider');
+    throw new Error("useConfig must be used within a ConfigProvider");
   }
   return context;
 };

@@ -1,9 +1,9 @@
-import type { ChannelConfig } from '@qwen-code/channel-base';
-import * as path from 'node:path';
-import { getPlugin, supportedTypes } from './channel-registry.js';
+import type { ChannelConfig } from "@tram-ai/channel-base";
+import * as path from "node:path";
+import { getPlugin, supportedTypes } from "./channel-registry.js";
 
 export function resolveEnvVars(value: string): string {
-  if (value.startsWith('$')) {
+  if (value.startsWith("$")) {
     const envName = value.substring(1);
     const envValue = process.env[envName];
     if (!envValue) {
@@ -21,23 +21,23 @@ export function findCliEntryPath(): string {
   if (mainModule) {
     return path.resolve(mainModule);
   }
-  throw new Error('Cannot determine CLI entry path');
+  throw new Error("Cannot determine CLI entry path");
 }
 
 export async function parseChannelConfig(
   name: string,
   rawConfig: Record<string, unknown>,
 ): Promise<ChannelConfig & Record<string, unknown>> {
-  if (!rawConfig['type']) {
+  if (!rawConfig["type"]) {
     throw new Error(`Channel "${name}" is missing required field "type".`);
   }
 
-  const channelType = rawConfig['type'] as string;
+  const channelType = rawConfig["type"] as string;
   const plugin = await getPlugin(channelType);
   if (!plugin) {
     const types = await supportedTypes();
     throw new Error(
-      `Channel type "${channelType}" is not supported. Available: ${types.join(', ')}`,
+      `Channel type "${channelType}" is not supported. Available: ${types.join(", ")}`,
     );
   }
 
@@ -51,14 +51,14 @@ export async function parseChannelConfig(
   }
 
   // Resolve env vars for known credential fields
-  const token = rawConfig['token']
-    ? resolveEnvVars(rawConfig['token'] as string)
-    : '';
-  const clientId = rawConfig['clientId']
-    ? resolveEnvVars(rawConfig['clientId'] as string)
+  const token = rawConfig["token"]
+    ? resolveEnvVars(rawConfig["token"] as string)
+    : "";
+  const clientId = rawConfig["clientId"]
+    ? resolveEnvVars(rawConfig["clientId"] as string)
     : undefined;
-  const clientSecret = rawConfig['clientSecret']
-    ? resolveEnvVars(rawConfig['clientSecret'] as string)
+  const clientSecret = rawConfig["clientSecret"]
+    ? resolveEnvVars(rawConfig["clientSecret"] as string)
     : undefined;
 
   return {
@@ -68,17 +68,17 @@ export async function parseChannelConfig(
     clientId,
     clientSecret,
     senderPolicy:
-      (rawConfig['senderPolicy'] as ChannelConfig['senderPolicy']) ||
-      'allowlist',
-    allowedUsers: (rawConfig['allowedUsers'] as string[]) || [],
+      (rawConfig["senderPolicy"] as ChannelConfig["senderPolicy"]) ||
+      "allowlist",
+    allowedUsers: (rawConfig["allowedUsers"] as string[]) || [],
     sessionScope:
-      (rawConfig['sessionScope'] as ChannelConfig['sessionScope']) || 'user',
-    cwd: (rawConfig['cwd'] as string) || process.cwd(),
-    approvalMode: rawConfig['approvalMode'] as string | undefined,
-    instructions: rawConfig['instructions'] as string | undefined,
-    model: rawConfig['model'] as string | undefined,
+      (rawConfig["sessionScope"] as ChannelConfig["sessionScope"]) || "user",
+    cwd: (rawConfig["cwd"] as string) || process.cwd(),
+    approvalMode: rawConfig["approvalMode"] as string | undefined,
+    instructions: rawConfig["instructions"] as string | undefined,
+    model: rawConfig["model"] as string | undefined,
     groupPolicy:
-      (rawConfig['groupPolicy'] as ChannelConfig['groupPolicy']) || 'disabled',
-    groups: (rawConfig['groups'] as ChannelConfig['groups']) || {},
+      (rawConfig["groupPolicy"] as ChannelConfig["groupPolicy"]) || "disabled",
+    groups: (rawConfig["groups"] as ChannelConfig["groups"]) || {},
   };
 }

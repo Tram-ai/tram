@@ -113,7 +113,7 @@ To skip building the sandbox container, you can use `npm run build` instead.
 
 ### Running
 
-To start the Qwen Code application from the source code (after building), run the following command from the root directory:
+To start the TRAM application from the source code (after building), run the following command from the root directory:
 
 ```bash
 npm start
@@ -137,7 +137,7 @@ This will run tests located in the `packages/core` and `packages/cli` directorie
 
 #### Integration Tests
 
-The integration tests are designed to validate the end-to-end functionality of Qwen Code. They are not run as part of the default `npm run test` command.
+The integration tests are designed to validate the end-to-end functionality of TRAM. They are not run as part of the default `npm run test` command.
 
 To run the integration tests, use the following command:
 
@@ -198,7 +198,7 @@ npm run lint
 
 - `packages/`: Contains the individual sub-packages of the project.
   - `cli/`: The command-line interface.
-  - `core/`: The core backend logic for Qwen Code.
+  - `core/`: The core backend logic for TRAM.
 - `docs/`: Contains all project documentation.
 - `scripts/`: Utility scripts for building, testing, and development tasks.
 
@@ -273,7 +273,7 @@ DEBUG=1 qwen-code
 
 To debug the CLI's React-based UI, you can use React DevTools. Ink, the library used for the CLI's interface, is compatible with React DevTools version 4.x.
 
-1.  **Start the Qwen Code application in development mode:**
+1.  **Start the TRAM application in development mode:**
 
     ```bash
     DEV=true npm start

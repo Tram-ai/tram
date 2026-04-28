@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getErrorStatus } from './errors.js';
-import { isApiError, isStructuredError } from './quotaErrorDetection.js';
+import { getErrorStatus } from "./errors.js";
+import { isApiError, isStructuredError } from "./quotaErrorDetection.js";
 
 // Known rate-limit error codes across providers.
 // 429  - Standard HTTP "Too Many Requests" (DashScope TPM, OpenAI, etc.)
@@ -63,11 +63,11 @@ function getErrorCode(error: unknown): number | null {
   const msg =
     error instanceof Error
       ? error.message
-      : typeof error === 'string'
+      : typeof error === "string"
         ? error
         : null;
   if (msg) {
-    const i = msg.indexOf('{');
+    const i = msg.indexOf("{");
     if (i !== -1) {
       try {
         const p = JSON.parse(msg.substring(i)) as unknown;
@@ -84,14 +84,14 @@ function getErrorCode(error: unknown): number | null {
   // StructuredError (.status) — plain objects from Gemini SDK.
   // Fall through when .status is missing so the getErrorStatus fallback
   // below can still recover a status from streamed SSE error frames.
-  if (isStructuredError(error) && typeof error.status === 'number') {
+  if (isStructuredError(error) && typeof error.status === "number") {
     return error.status;
   }
 
   // HttpError (.status on Error)
-  if (error instanceof Error && 'status' in error) {
+  if (error instanceof Error && "status" in error) {
     const s = (error as { status?: unknown }).status;
-    if (typeof s === 'number') return s;
+    if (typeof s === "number") return s;
   }
 
   // Final fallback: delegate to getErrorStatus which also parses

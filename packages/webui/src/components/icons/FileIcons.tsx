@@ -6,8 +6,8 @@
  * File and document related icons
  */
 
-import type { FC } from 'react';
-import type { IconProps } from './types.js';
+import type { FC } from "react";
+import type { IconProps } from "./types.js";
 
 /**
  * File document icon (16x16)

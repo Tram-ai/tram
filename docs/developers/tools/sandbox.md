@@ -8,7 +8,7 @@
 
 If you need extra tools inside the container (e.g., `git`, `python`, `rg`), create a custom Dockerfile, The specific operation is as follows
 
-#### 1、Clone qwen code project first, https://github.com/QwenLM/qwen-code.git
+#### 1、Clone TRAM project first, https://github.com/QwenLM/qwen-code.git
 
 #### 2、Make sure you perform the following operation in the source code repository directory
 
@@ -16,7 +16,7 @@ If you need extra tools inside the container (e.g., `git`, `python`, `rg`), crea
 # 1. First, install the dependencies of the project
 npm install
 
-# 2. Build the Qwen Code project
+# 2. Build the TRAM project
 npm run build
 
 # 3. Verify that the dist directory has been generated

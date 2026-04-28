@@ -1,12 +1,12 @@
 # Channels Design
 
-> External messaging integrations for Qwen Code — interact with an agent from Telegram, WeChat, and more.
+> External messaging integrations for TRAM — interact with an agent from Telegram, WeChat, and more.
 >
 > User documentation: [Channels Overview](../../users/features/channels/overview.md).
 
 ## Overview
 
-A **channel** connects an external messaging platform to a Qwen Code agent. Configured in `settings.json`, managed via `qwen channel` subcommands, multi-user (each user gets an isolated ACP session).
+A **channel** connects an external messaging platform to a TRAM agent. Configured in `settings.json`, managed via `qwen channel` subcommands, multi-user (each user gets an isolated ACP session).
 
 ## Architecture
 

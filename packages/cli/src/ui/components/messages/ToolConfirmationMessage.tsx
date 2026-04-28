@@ -4,32 +4,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useEffect, useState } from 'react';
-import { Box, Text } from 'ink';
-import { DiffRenderer } from './DiffRenderer.js';
-import { RenderInline } from '../../utils/InlineMarkdownRenderer.js';
-import { MarkdownDisplay } from '../../utils/MarkdownDisplay.js';
+import type React from "react";
+import { useEffect, useState } from "react";
+import { Box, Text } from "ink";
+import { DiffRenderer } from "./DiffRenderer.js";
+import { RenderInline } from "../../utils/InlineMarkdownRenderer.js";
+import { MarkdownDisplay } from "../../utils/MarkdownDisplay.js";
 import type {
   ToolCallConfirmationDetails,
   ToolExecuteConfirmationDetails,
   ToolMcpConfirmationDetails,
   Config,
   EditorType,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import {
   IdeClient,
   ToolConfirmationOutcome,
   buildHumanReadableRuleLabel,
-} from '@tram-ai/tram-core';
-import type { RadioSelectItem } from '../shared/RadioButtonSelect.js';
-import { RadioButtonSelect } from '../shared/RadioButtonSelect.js';
-import { MaxSizedBox } from '../shared/MaxSizedBox.js';
-import { useKeypress } from '../../hooks/useKeypress.js';
-import { useSettings } from '../../contexts/SettingsContext.js';
-import { theme } from '../../semantic-colors.js';
-import { t } from '../../../i18n/index.js';
-import { AskUserQuestionDialog } from './AskUserQuestionDialog.js';
+} from "@tram-ai/tram-core";
+import type { RadioSelectItem } from "../shared/RadioButtonSelect.js";
+import { RadioButtonSelect } from "../shared/RadioButtonSelect.js";
+import { MaxSizedBox } from "../shared/MaxSizedBox.js";
+import { useKeypress } from "../../hooks/useKeypress.js";
+import { useSettings } from "../../contexts/SettingsContext.js";
+import { theme } from "../../semantic-colors.js";
+import { t } from "../../../i18n/index.js";
+import { AskUserQuestionDialog } from "./AskUserQuestionDialog.js";
 
 export interface ToolConfirmationMessageProps {
   confirmationDetails: ToolCallConfirmationDetails;
@@ -84,10 +84,10 @@ export const ToolConfirmationMessage: React.FC<
     // with ProceedOnce, racing with the intended CLI outcome.
     onConfirm(outcome);
 
-    if (confirmationDetails.type === 'edit') {
+    if (confirmationDetails.type === "edit") {
       if (config.getIdeMode() && isDiffingEnabled) {
         const cliOutcome =
-          outcome === ToolConfirmationOutcome.Cancel ? 'rejected' : 'accepted';
+          outcome === ToolConfirmationOutcome.Cancel ? "rejected" : "accepted";
         await ideClient?.resolveDiffFromCli(
           confirmationDetails.filePath,
           cliOutcome,
@@ -101,7 +101,7 @@ export const ToolConfirmationMessage: React.FC<
   useKeypress(
     (key) => {
       if (!isFocused) return;
-      if (key.name === 'escape' || (key.ctrl && key.name === 'c')) {
+      if (key.name === "escape" || (key.ctrl && key.name === "c")) {
         handleConfirm(ToolConfirmationOutcome.Cancel);
       }
     },
@@ -114,18 +114,18 @@ export const ToolConfirmationMessage: React.FC<
   if (compactMode) {
     const compactOptions: Array<RadioSelectItem<ToolConfirmationOutcome>> = [
       {
-        key: 'proceed-once',
-        label: t('Yes, allow once'),
+        key: "proceed-once",
+        label: t("Yes, allow once"),
         value: ToolConfirmationOutcome.ProceedOnce,
       },
       {
-        key: 'proceed-always',
-        label: t('Allow always'),
+        key: "proceed-always",
+        label: t("Allow always"),
         value: ToolConfirmationOutcome.ProceedAlways,
       },
       {
-        key: 'cancel',
-        label: t('No'),
+        key: "cancel",
+        label: t("No"),
         value: ToolConfirmationOutcome.Cancel,
       },
     ];
@@ -133,7 +133,7 @@ export const ToolConfirmationMessage: React.FC<
     return (
       <Box flexDirection="column">
         <Box>
-          <Text wrap="truncate">{t('Do you want to proceed?')}</Text>
+          <Text wrap="truncate">{t("Do you want to proceed?")}</Text>
         </Box>
         <Box>
           <RadioButtonSelect
@@ -160,7 +160,7 @@ export const ToolConfirmationMessage: React.FC<
   function availableBodyContentHeight() {
     if (options.length === 0) {
       // This should not happen in practice as options are always added before this is called.
-      throw new Error('Options not provided for confirmation message');
+      throw new Error("Options not provided for confirmation message");
     }
 
     if (availableTerminalHeight === undefined) {
@@ -184,7 +184,7 @@ export const ToolConfirmationMessage: React.FC<
     return Math.max(availableTerminalHeight - surroundingElementsHeight, 1);
   }
 
-  if (confirmationDetails.type === 'edit') {
+  if (confirmationDetails.type === "edit") {
     if (confirmationDetails.isModifying) {
       return (
         <Box
@@ -195,39 +195,39 @@ export const ToolConfirmationMessage: React.FC<
           padding={1}
           overflow="hidden"
         >
-          <Text color={theme.text.primary}>{t('Modify in progress:')} </Text>
+          <Text color={theme.text.primary}>{t("Modify in progress:")} </Text>
           <Text color={theme.status.success}>
-            {t('Save and close external editor to continue')}
+            {t("Save and close external editor to continue")}
           </Text>
         </Box>
       );
     }
 
-    question = t('Apply this change?');
+    question = t("Apply this change?");
     options.push({
-      label: t('Yes, allow once'),
+      label: t("Yes, allow once"),
       value: ToolConfirmationOutcome.ProceedOnce,
-      key: 'Yes, allow once',
+      key: "Yes, allow once",
     });
     if (isTrustedFolder) {
       options.push({
-        label: t('Yes, allow always'),
+        label: t("Yes, allow always"),
         value: ToolConfirmationOutcome.ProceedAlways,
-        key: 'Yes, allow always',
+        key: "Yes, allow always",
       });
     }
     if ((!config.getIdeMode() || !isDiffingEnabled) && preferredEditor) {
       options.push({
-        label: t('Modify with external editor'),
+        label: t("Modify with external editor"),
         value: ToolConfirmationOutcome.ModifyWithEditor,
-        key: 'Modify with external editor',
+        key: "Modify with external editor",
       });
     }
 
     options.push({
-      label: t('No, suggest changes (esc)'),
+      label: t("No, suggest changes (esc)"),
       value: ToolConfirmationOutcome.Cancel,
-      key: 'No, suggest changes (esc)',
+      key: "No, suggest changes (esc)",
     });
 
     bodyContent = (
@@ -239,7 +239,7 @@ export const ToolConfirmationMessage: React.FC<
         settings={settings}
       />
     );
-  } else if (confirmationDetails.type === 'exec') {
+  } else if (confirmationDetails.type === "exec") {
     const executionProps =
       confirmationDetails as ToolExecuteConfirmationDetails;
 
@@ -247,37 +247,37 @@ export const ToolConfirmationMessage: React.FC<
       command: executionProps.rootCommand,
     });
     options.push({
-      label: t('Yes, allow once'),
+      label: t("Yes, allow once"),
       value: ToolConfirmationOutcome.ProceedOnce,
-      key: 'Yes, allow once',
+      key: "Yes, allow once",
     });
     if (isTrustedFolder && !confirmationDetails.hideAlwaysAllow) {
       const friendlyLabel = executionProps.permissionRules?.length
         ? ` ${buildHumanReadableRuleLabel(executionProps.permissionRules)}`
-        : '';
+        : "";
       options.push({
         label: friendlyLabel
-          ? t('Always allow {{action}} in this project', {
+          ? t("Always allow {{action}} in this project", {
               action: friendlyLabel.trim(),
             })
-          : t('Always allow in this project'),
+          : t("Always allow in this project"),
         value: ToolConfirmationOutcome.ProceedAlwaysProject,
-        key: 'Always allow in this project',
+        key: "Always allow in this project",
       });
       options.push({
         label: friendlyLabel
-          ? t('Always allow {{action}} for this user', {
+          ? t("Always allow {{action}} for this user", {
               action: friendlyLabel.trim(),
             })
-          : t('Always allow for this user'),
+          : t("Always allow for this user"),
         value: ToolConfirmationOutcome.ProceedAlwaysUser,
-        key: 'Always allow for this user',
+        key: "Always allow for this user",
       });
     }
     options.push({
-      label: t('No, suggest changes (esc)'),
+      label: t("No, suggest changes (esc)"),
       value: ToolConfirmationOutcome.Cancel,
-      key: 'No, suggest changes (esc)',
+      key: "No, suggest changes (esc)",
     });
 
     let bodyContentHeight = availableBodyContentHeight();
@@ -298,30 +298,30 @@ export const ToolConfirmationMessage: React.FC<
         </Box>
       </Box>
     );
-  } else if (confirmationDetails.type === 'plan') {
+  } else if (confirmationDetails.type === "plan") {
     const planProps = confirmationDetails;
 
     question = planProps.title;
     options.push({
-      key: 'restore-previous',
-      label: t('Yes, restore previous mode ({{mode}})', {
-        mode: planProps.prePlanMode ?? 'default',
+      key: "restore-previous",
+      label: t("Yes, restore previous mode ({{mode}})", {
+        mode: planProps.prePlanMode ?? "default",
       }),
       value: ToolConfirmationOutcome.RestorePrevious,
     });
     options.push({
-      key: 'proceed-always',
-      label: t('Yes, and auto-accept edits'),
+      key: "proceed-always",
+      label: t("Yes, and auto-accept edits"),
       value: ToolConfirmationOutcome.ProceedAlways,
     });
     options.push({
-      key: 'proceed-once',
-      label: t('Yes, and manually approve edits'),
+      key: "proceed-once",
+      label: t("Yes, and manually approve edits"),
       value: ToolConfirmationOutcome.ProceedOnce,
     });
     options.push({
-      key: 'cancel',
-      label: t('No, keep planning (esc)'),
+      key: "cancel",
+      label: t("No, keep planning (esc)"),
       value: ToolConfirmationOutcome.Cancel,
     });
 
@@ -335,47 +335,47 @@ export const ToolConfirmationMessage: React.FC<
         />
       </Box>
     );
-  } else if (confirmationDetails.type === 'info') {
+  } else if (confirmationDetails.type === "info") {
     const infoProps = confirmationDetails;
     const displayUrls =
       infoProps.urls &&
       !(infoProps.urls.length === 1 && infoProps.urls[0] === infoProps.prompt);
 
-    question = t('Do you want to proceed?');
+    question = t("Do you want to proceed?");
     options.push({
-      label: t('Yes, allow once'),
+      label: t("Yes, allow once"),
       value: ToolConfirmationOutcome.ProceedOnce,
-      key: 'Yes, allow once',
+      key: "Yes, allow once",
     });
     if (isTrustedFolder && !confirmationDetails.hideAlwaysAllow) {
       const friendlyLabel =
-        'permissionRules' in infoProps &&
+        "permissionRules" in infoProps &&
         (infoProps as { permissionRules?: string[] }).permissionRules?.length
           ? ` ${buildHumanReadableRuleLabel((infoProps as { permissionRules?: string[] }).permissionRules!)}`
-          : '';
+          : "";
       options.push({
         label: friendlyLabel
-          ? t('Always allow {{action}} in this project', {
+          ? t("Always allow {{action}} in this project", {
               action: friendlyLabel.trim(),
             })
-          : t('Always allow in this project'),
+          : t("Always allow in this project"),
         value: ToolConfirmationOutcome.ProceedAlwaysProject,
-        key: 'Always allow in this project',
+        key: "Always allow in this project",
       });
       options.push({
         label: friendlyLabel
-          ? t('Always allow {{action}} for this user', {
+          ? t("Always allow {{action}} for this user", {
               action: friendlyLabel.trim(),
             })
-          : t('Always allow for this user'),
+          : t("Always allow for this user"),
         value: ToolConfirmationOutcome.ProceedAlwaysUser,
-        key: 'Always allow for this user',
+        key: "Always allow for this user",
       });
     }
     options.push({
-      label: t('No, suggest changes (esc)'),
+      label: t("No, suggest changes (esc)"),
       value: ToolConfirmationOutcome.Cancel,
-      key: 'No, suggest changes (esc)',
+      key: "No, suggest changes (esc)",
     });
 
     bodyContent = (
@@ -385,10 +385,10 @@ export const ToolConfirmationMessage: React.FC<
         </Text>
         {displayUrls && infoProps.urls && infoProps.urls.length > 0 && (
           <Box flexDirection="column" marginTop={1}>
-            <Text color={theme.text.primary}>{t('URLs to fetch:')}</Text>
+            <Text color={theme.text.primary}>{t("URLs to fetch:")}</Text>
             {infoProps.urls.map((url) => (
               <Text key={url}>
-                {' '}
+                {" "}
                 - <RenderInline text={url} />
               </Text>
             ))}
@@ -396,7 +396,7 @@ export const ToolConfirmationMessage: React.FC<
         )}
       </Box>
     );
-  } else if (confirmationDetails.type === 'ask_user_question') {
+  } else if (confirmationDetails.type === "ask_user_question") {
     // Use dedicated dialog for ask_user_question type
     return (
       <AskUserQuestionDialog
@@ -412,10 +412,10 @@ export const ToolConfirmationMessage: React.FC<
     bodyContent = (
       <Box flexDirection="column" paddingX={1} marginLeft={1}>
         <Text color={theme.text.link}>
-          {t('MCP Server: {{server}}', { server: mcpProps.serverName })}
+          {t("MCP Server: {{server}}", { server: mcpProps.serverName })}
         </Text>
         <Text color={theme.text.link}>
-          {t('Tool: {{tool}}', { tool: mcpProps.toolName })}
+          {t("Tool: {{tool}}", { tool: mcpProps.toolName })}
         </Text>
       </Box>
     );
@@ -428,37 +428,37 @@ export const ToolConfirmationMessage: React.FC<
       },
     );
     options.push({
-      label: t('Yes, allow once'),
+      label: t("Yes, allow once"),
       value: ToolConfirmationOutcome.ProceedOnce,
-      key: 'Yes, allow once',
+      key: "Yes, allow once",
     });
     if (isTrustedFolder && !confirmationDetails.hideAlwaysAllow) {
       const friendlyLabel = mcpProps.permissionRules?.length
         ? ` ${buildHumanReadableRuleLabel(mcpProps.permissionRules)}`
-        : '';
+        : "";
       options.push({
         label: friendlyLabel
-          ? t('Always allow {{action}} in this project', {
+          ? t("Always allow {{action}} in this project", {
               action: friendlyLabel.trim(),
             })
-          : t('Always allow in this project'),
+          : t("Always allow in this project"),
         value: ToolConfirmationOutcome.ProceedAlwaysProject,
-        key: 'Always allow in this project',
+        key: "Always allow in this project",
       });
       options.push({
         label: friendlyLabel
-          ? t('Always allow {{action}} for this user', {
+          ? t("Always allow {{action}} for this user", {
               action: friendlyLabel.trim(),
             })
-          : t('Always allow for this user'),
+          : t("Always allow for this user"),
         value: ToolConfirmationOutcome.ProceedAlwaysUser,
-        key: 'Always allow for this user',
+        key: "Always allow for this user",
       });
     }
     options.push({
-      label: t('No, suggest changes (esc)'),
+      label: t("No, suggest changes (esc)"),
       value: ToolConfirmationOutcome.Cancel,
-      key: 'No, suggest changes (esc)',
+      key: "No, suggest changes (esc)",
     });
   }
 

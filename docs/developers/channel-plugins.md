@@ -1,6 +1,6 @@
 # Channel Plugin Developer Guide
 
-A channel plugin connects Qwen Code to a messaging platform. It's packaged as an [extension](../users/extension/introduction) and loaded at startup. For user-facing docs on installing and configuring plugins, see [Plugins](../users/features/channels/plugins).
+A channel plugin connects TRAM to a messaging platform. It's packaged as an [extension](../users/extension/introduction) and loaded at startup. For user-facing docs on installing and configuring plugins, see [Plugins](../users/features/channels/plugins).
 
 ## How It Fits Together
 

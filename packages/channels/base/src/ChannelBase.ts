@@ -1,10 +1,10 @@
-import type { ChannelConfig, DispatchMode, Envelope } from './types.js';
-import { BlockStreamer } from './BlockStreamer.js';
-import { GroupGate } from './GroupGate.js';
-import { SenderGate } from './SenderGate.js';
-import { PairingStore } from './PairingStore.js';
-import { SessionRouter } from './SessionRouter.js';
-import type { AcpBridge, ToolCallEvent } from './AcpBridge.js';
+import type { ChannelConfig, DispatchMode, Envelope } from "./types.js";
+import { BlockStreamer } from "./BlockStreamer.js";
+import { GroupGate } from "./GroupGate.js";
+import { SenderGate } from "./SenderGate.js";
+import { PairingStore } from "./PairingStore.js";
+import { SessionRouter } from "./SessionRouter.js";
+import type { AcpBridge, ToolCallEvent } from "./AcpBridge.js";
 
 export interface ChannelBaseOptions {
   router?: SessionRouter;
@@ -53,7 +53,7 @@ export abstract class ChannelBase {
     this.groupGate = new GroupGate(config.groupPolicy, config.groups);
 
     const pairingStore =
-      config.senderPolicy === 'pairing' ? new PairingStore(name) : undefined;
+      config.senderPolicy === "pairing" ? new PairingStore(name) : undefined;
     this.gate = new SenderGate(
       config.senderPolicy,
       config.allowedUsers,
@@ -68,7 +68,7 @@ export abstract class ChannelBase {
     // When running standalone (no gateway), register toolCall listener directly.
     // In gateway mode, the ChannelManager dispatches events instead.
     if (!options?.router) {
-      bridge.on('toolCall', (event: ToolCallEvent) => {
+      bridge.on("toolCall", (event: ToolCallEvent) => {
         const target = this.router.getTarget(event.sessionId);
         if (target) {
           this.onToolCall(target.chatId, event);
@@ -156,28 +156,28 @@ export abstract class ChannelBase {
         }
         await this.sendMessage(
           envelope.chatId,
-          'Session cleared. Your next message will start a fresh conversation.',
+          "Session cleared. Your next message will start a fresh conversation.",
         );
       } else {
-        await this.sendMessage(envelope.chatId, 'No active session to clear.');
+        await this.sendMessage(envelope.chatId, "No active session to clear.");
       }
       return true;
     };
 
-    this.registerCommand('clear', clearHandler);
-    this.registerCommand('reset', clearHandler);
-    this.registerCommand('new', clearHandler);
+    this.registerCommand("clear", clearHandler);
+    this.registerCommand("reset", clearHandler);
+    this.registerCommand("new", clearHandler);
 
-    this.registerCommand('help', async (envelope) => {
+    this.registerCommand("help", async (envelope) => {
       const lines = [
-        'Commands:',
-        '/help — Show this help',
-        '/clear — Clear your session (aliases: /reset, /new)',
-        '/status — Show session info',
+        "Commands:",
+        "/help — Show this help",
+        "/clear — Clear your session (aliases: /reset, /new)",
+        "/status — Show session info",
       ];
 
       // Platform-specific commands (registered by adapters, not shared ones)
-      const sharedCmds = new Set(['help', 'clear', 'reset', 'new', 'status']);
+      const sharedCmds = new Set(["help", "clear", "reset", "new", "status"]);
       const platformCmds = [...this.commands.keys()].filter(
         (c) => !sharedCmds.has(c),
       );
@@ -189,18 +189,18 @@ export abstract class ChannelBase {
 
       const agentCommands = this.bridge.availableCommands;
       if (agentCommands.length > 0) {
-        lines.push('', 'Agent commands (forwarded to Qwen Code):');
+        lines.push("", "Agent commands (forwarded to TRAM):");
         for (const cmd of agentCommands) {
           lines.push(`/${cmd.name} — ${cmd.description}`);
         }
       }
 
-      lines.push('', 'Send any text to chat with the agent.');
-      await this.sendMessage(envelope.chatId, lines.join('\n'));
+      lines.push("", "Send any text to chat with the agent.");
+      await this.sendMessage(envelope.chatId, lines.join("\n"));
       return true;
     });
 
-    this.registerCommand('status', async (envelope) => {
+    this.registerCommand("status", async (envelope) => {
       const hasSession = this.router.hasSession(
         this.name,
         envelope.senderId,
@@ -208,11 +208,11 @@ export abstract class ChannelBase {
       );
       const policy = this.config.senderPolicy;
       const lines = [
-        `Session: ${hasSession ? 'active' : 'none'}`,
+        `Session: ${hasSession ? "active" : "none"}`,
         `Access: ${policy}`,
         `Channel: ${this.name}`,
       ];
-      await this.sendMessage(envelope.chatId, lines.join('\n'));
+      await this.sendMessage(envelope.chatId, lines.join("\n"));
       return true;
     });
   }
@@ -228,7 +228,7 @@ export abstract class ChannelBase {
    * Returns { command, args } or null if not a slash command.
    */
   private parseCommand(text: string): { command: string; args: string } | null {
-    if (!text.startsWith('/')) return null;
+    if (!text.startsWith("/")) return null;
     // Handle /command@botname format (Telegram groups)
     const match = text.match(/^\/([a-zA-Z0-9_]+)(?:@\S+)?\s*(.*)/s);
     if (!match) return null;
@@ -282,19 +282,19 @@ export abstract class ChannelBase {
     if (envelope.attachments?.length) {
       const filePaths: string[] = [];
       for (const att of envelope.attachments) {
-        if (att.type === 'image' && att.data && !imageBase64) {
+        if (att.type === "image" && att.data && !imageBase64) {
           imageBase64 = att.data;
           imageMimeType = att.mimeType;
         } else if (att.filePath) {
-          const label = att.type === 'file' ? 'file' : att.type;
-          const name = att.fileName ? ` "${att.fileName}"` : '';
+          const label = att.type === "file" ? "file" : att.type;
+          const name = att.fileName ? ` "${att.fileName}"` : "";
           filePaths.push(
             `User sent a ${label}${name}. It has been saved to: ${att.filePath}`,
           );
         }
       }
       if (filePaths.length > 0) {
-        promptText = promptText + '\n\n' + filePaths.join('\n');
+        promptText = promptText + "\n\n" + filePaths.join("\n");
       }
     }
 
@@ -306,17 +306,17 @@ export abstract class ChannelBase {
 
     // Resolve dispatch mode: per-group override → channel config → default
     const groupCfg = envelope.isGroup
-      ? this.config.groups[envelope.chatId] || this.config.groups['*']
+      ? this.config.groups[envelope.chatId] || this.config.groups["*"]
       : undefined;
     const mode: DispatchMode =
-      groupCfg?.dispatchMode || this.config.dispatchMode || 'steer';
+      groupCfg?.dispatchMode || this.config.dispatchMode || "steer";
 
     const active = this.activePrompts.get(sessionId);
 
     if (active) {
       // A prompt is already running for this session
       switch (mode) {
-        case 'collect': {
+        case "collect": {
           // Buffer the message; it will be coalesced when the active prompt finishes
           let buffer = this.collectBuffers.get(sessionId);
           if (!buffer) {
@@ -326,7 +326,7 @@ export abstract class ChannelBase {
           buffer.push({ text: promptText, envelope });
           return;
         }
-        case 'steer': {
+        case "steer": {
           // Cancel the running prompt, then fall through to send a new one
           active.cancelled = true;
           await this.bridge.cancelSession(sessionId).catch(() => {});
@@ -336,7 +336,7 @@ export abstract class ChannelBase {
           promptText = `[The user sent a new message while you were working. Their previous request has been cancelled.]\n\n${promptText}`;
           break;
         }
-        case 'followup': {
+        case "followup": {
           // Chain onto the session queue (existing sequential behavior)
           break;
         }
@@ -350,7 +350,7 @@ export abstract class ChannelBase {
 
     // Run the prompt (with followup-mode serialization for safety)
     const prev = this.sessionQueues.get(sessionId) ?? Promise.resolve();
-    const useBlockStreaming = this.config.blockStreaming === 'on';
+    const useBlockStreaming = this.config.blockStreaming === "on";
     const current = prev.then(async () => {
       // Register this prompt as active
       let doneResolve: () => void = () => {};
@@ -377,7 +377,7 @@ export abstract class ChannelBase {
           streamer?.push(chunk);
         }
       };
-      this.bridge.on('textChunk', onChunk);
+      this.bridge.on("textChunk", onChunk);
 
       try {
         const response = await this.bridge.prompt(sessionId, promptText, {
@@ -394,7 +394,7 @@ export abstract class ChannelBase {
           }
         }
       } finally {
-        this.bridge.off('textChunk', onChunk);
+        this.bridge.off("textChunk", onChunk);
         this.onPromptEnd(envelope.chatId, sessionId, envelope.messageId);
         this.activePrompts.delete(sessionId);
         // Signal any steer waiter that we're done
@@ -404,7 +404,7 @@ export abstract class ChannelBase {
         const buffer = this.collectBuffers.get(sessionId);
         if (buffer && buffer.length > 0) {
           this.collectBuffers.delete(sessionId);
-          const coalesced = buffer.map((b) => b.text).join('\n\n');
+          const coalesced = buffer.map((b) => b.text).join("\n\n");
           const lastEnvelope = buffer[buffer.length - 1]!.envelope;
           // Re-enter handleInbound with the coalesced message
           const syntheticEnvelope: Envelope = {
@@ -435,12 +435,12 @@ export abstract class ChannelBase {
     if (code) {
       await this.sendMessage(
         chatId,
-        `Your pairing code is: ${code}\n\nAsk the bot operator to approve you with:\n  qwen channel pairing approve ${this.name} ${code}`,
+        `Your pairing code is: ${code}\n\nAsk the bot operator to approve you with:\n  tram channel pairing approve ${this.name} ${code}`,
       );
     } else {
       await this.sendMessage(
         chatId,
-        'Too many pending pairing requests. Please try again later.',
+        "Too many pending pairing requests. Please try again later.",
       );
     }
   }

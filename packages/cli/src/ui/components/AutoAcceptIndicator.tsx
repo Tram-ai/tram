@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { ApprovalMode } from '@tram-ai/tram-core';
-import { t } from '../../i18n/index.js';
+import type React from "react";
+import { Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import { ApprovalMode } from "@tram-ai/tram-core";
+import { t } from "../../i18n/index.js";
 
 interface AutoAcceptIndicatorProps {
   approvalMode: ApprovalMode;
@@ -17,29 +17,29 @@ interface AutoAcceptIndicatorProps {
 export const AutoAcceptIndicator: React.FC<AutoAcceptIndicatorProps> = ({
   approvalMode,
 }) => {
-  let textColor = '';
-  let textContent = '';
-  let subText = '';
+  let textColor = "";
+  let textContent = "";
+  let subText = "";
 
   const cycleText =
-    process.platform === 'win32'
-      ? ` ${t('(tab to cycle)')}`
-      : ` ${t('(shift + tab to cycle)')}`;
+    process.platform === "win32"
+      ? ` ${t("(tab to cycle)")}`
+      : ` ${t("(shift + tab to cycle)")}`;
 
   switch (approvalMode) {
     case ApprovalMode.PLAN:
       textColor = theme.status.success;
-      textContent = t('plan mode');
+      textContent = t("plan mode");
       subText = cycleText;
       break;
     case ApprovalMode.AUTO_EDIT:
       textColor = theme.status.warning;
-      textContent = t('auto-accept edits');
+      textContent = t("auto-accept edits");
       subText = cycleText;
       break;
     case ApprovalMode.YOLO:
       textColor = theme.status.error;
-      textContent = t('YOLO mode');
+      textContent = t("YOLO mode");
       subText = cycleText;
       break;
     case ApprovalMode.DEFAULT:

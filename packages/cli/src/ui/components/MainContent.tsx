@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Static } from 'ink';
-import { HistoryItemDisplay } from './HistoryItemDisplay.js';
-import { ShowMoreLines } from './ShowMoreLines.js';
-import { Notifications } from './Notifications.js';
-import { OverflowProvider } from '../contexts/OverflowContext.js';
-import { useUIState } from '../contexts/UIStateContext.js';
-import { useAppContext } from '../contexts/AppContext.js';
-import { AppHeader } from './AppHeader.js';
-import { DebugModeNotification } from './DebugModeNotification.js';
-import { useCompactMode } from '../contexts/CompactModeContext.js';
+import { Box, Static } from "ink";
+import { HistoryItemDisplay } from "./HistoryItemDisplay.js";
+import { ShowMoreLines } from "./ShowMoreLines.js";
+import { Notifications } from "./Notifications.js";
+import { OverflowProvider } from "../contexts/OverflowContext.js";
+import { useUIState } from "../contexts/UIStateContext.js";
+import { useAppContext } from "../contexts/AppContext.js";
+import { AppHeader } from "./AppHeader.js";
+import { DebugModeNotification } from "./DebugModeNotification.js";
+import { useCompactMode } from "../contexts/CompactModeContext.js";
 
 // Limit Gemini messages to a very high number of lines to mitigate performance
 // issues in the worst case if we somehow get an enormous response from Gemini.

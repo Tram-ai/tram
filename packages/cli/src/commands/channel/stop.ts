@@ -1,28 +1,28 @@
-import type { CommandModule } from 'yargs';
-import { writeStderrLine, writeStdoutLine } from '../../utils/stdioHelpers.js';
+import type { CommandModule } from "yargs";
+import { writeStderrLine, writeStdoutLine } from "../../utils/stdioHelpers.js";
 import {
   readServiceInfo,
   signalService,
   waitForExit,
   removeServiceInfo,
-} from './pidfile.js';
+} from "./pidfile.js";
 
 export const stopCommand: CommandModule = {
-  command: 'stop',
-  describe: 'Stop the running channel service',
+  command: "stop",
+  describe: "Stop the running channel service",
   handler: async () => {
     const info = readServiceInfo();
 
     if (!info) {
-      writeStdoutLine('No channel service is running.');
+      writeStdoutLine("No channel service is running.");
       process.exit(0);
     }
 
     writeStdoutLine(`Stopping channel service (PID ${info.pid})...`);
 
-    if (!signalService(info.pid, 'SIGTERM')) {
+    if (!signalService(info.pid, "SIGTERM")) {
       writeStderrLine(
-        'Failed to send signal — process may have already exited.',
+        "Failed to send signal — process may have already exited.",
       );
       removeServiceInfo();
       process.exit(0);
@@ -33,15 +33,15 @@ export const stopCommand: CommandModule = {
     if (exited) {
       // Clean up in case the process didn't delete its own PID file
       removeServiceInfo();
-      writeStdoutLine('Service stopped.');
+      writeStdoutLine("Service stopped.");
     } else {
       writeStderrLine(
-        'Service did not exit within 5 seconds. Sending SIGKILL...',
+        "Service did not exit within 5 seconds. Sending SIGKILL...",
       );
-      signalService(info.pid, 'SIGKILL');
+      signalService(info.pid, "SIGKILL");
       await waitForExit(info.pid, 2000);
       removeServiceInfo();
-      writeStdoutLine('Service killed.');
+      writeStdoutLine("Service killed.");
     }
 
     process.exit(0);

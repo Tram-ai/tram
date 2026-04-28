@@ -11,10 +11,10 @@
  * avoiding shell injection by passing arguments as arrays (execFile).
  */
 
-import { execCommand, isCommandAvailable } from '../../utils/shell-utils.js';
-import { createDebugLogger } from '../../utils/debugLogger.js';
+import { execCommand, isCommandAvailable } from "../../utils/shell-utils.js";
+import { createDebugLogger } from "../../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('TMUX_CMD');
+const debugLogger = createDebugLogger("TMUX_CMD");
 
 /**
  * Information about a tmux pane, parsed from `list-panes`.
@@ -41,7 +41,7 @@ export interface TmuxWindowInfo {
 /**
  * Minimum tmux version required for split-pane support.
  */
-const MIN_TMUX_VERSION = '3.0';
+const MIN_TMUX_VERSION = "3.0";
 
 // ─── Helpers ────────────────────────────────────────────────────
 
@@ -49,9 +49,9 @@ async function tmuxResult(
   args: string[],
   serverName?: string,
 ): Promise<{ stdout: string; stderr: string; code: number }> {
-  const fullArgs = serverName ? ['-L', serverName, ...args] : args;
-  debugLogger.info(`tmux ${fullArgs.join(' ')}`);
-  const result = await execCommand('tmux', fullArgs, {
+  const fullArgs = serverName ? ["-L", serverName, ...args] : args;
+  debugLogger.info(`tmux ${fullArgs.join(" ")}`);
+  const result = await execCommand("tmux", fullArgs, {
     preserveOutputOnError: true,
   });
   if (result.code !== 0 && result.stderr.trim()) {
@@ -90,14 +90,14 @@ function isVersionAtLeast(current: string, minimum: string): boolean {
  * Check if tmux is available on the system.
  */
 export function isTmuxAvailable(): boolean {
-  return isCommandAvailable('tmux').available;
+  return isCommandAvailable("tmux").available;
 }
 
 /**
  * Get tmux version string (e.g., "tmux 3.4").
  */
 export async function tmuxVersion(): Promise<string> {
-  const output = await tmux(['-V']);
+  const output = await tmux(["-V"]);
   return output.trim();
 }
 
@@ -109,7 +109,7 @@ export async function tmuxVersion(): Promise<string> {
 export async function verifyTmux(): Promise<void> {
   if (!isTmuxAvailable()) {
     throw new Error(
-      'tmux is not installed. Install tmux (version 3.0+) for split-pane mode.',
+      "tmux is not installed. Install tmux (version 3.0+) for split-pane mode.",
     );
   }
 
@@ -125,7 +125,7 @@ export async function verifyTmux(): Promise<void> {
  * Get the current tmux session name (when running inside tmux).
  */
 export async function tmuxCurrentSession(): Promise<string> {
-  const output = await tmux(['display-message', '-p', '#{session_name}']);
+  const output = await tmux(["display-message", "-p", "#{session_name}"]);
   return output.trim();
 }
 
@@ -133,7 +133,7 @@ export async function tmuxCurrentSession(): Promise<string> {
  * Get the current tmux pane ID (when running inside tmux).
  */
 export async function tmuxCurrentPaneId(): Promise<string> {
-  const output = await tmux(['display-message', '-p', '#{pane_id}']);
+  const output = await tmux(["display-message", "-p", "#{pane_id}"]);
   return output.trim();
 }
 
@@ -142,9 +142,9 @@ export async function tmuxCurrentPaneId(): Promise<string> {
  */
 export async function tmuxCurrentWindowTarget(): Promise<string> {
   const output = await tmux([
-    'display-message',
-    '-p',
-    '#{session_name}:#{window_index}',
+    "display-message",
+    "-p",
+    "#{session_name}:#{window_index}",
   ]);
   return output.trim();
 }
@@ -156,7 +156,7 @@ export async function tmuxHasSession(
   name: string,
   serverName?: string,
 ): Promise<boolean> {
-  const result = await tmuxResult(['has-session', '-t', name], serverName);
+  const result = await tmuxResult(["has-session", "-t", name], serverName);
   return result.code === 0;
 }
 
@@ -168,11 +168,11 @@ export async function tmuxListWindows(
   serverName?: string,
 ): Promise<TmuxWindowInfo[]> {
   const output = await tmux(
-    ['list-windows', '-t', sessionName, '-F', '#{window_name} #{window_id}'],
+    ["list-windows", "-t", sessionName, "-F", "#{window_name} #{window_id}"],
     serverName,
   );
   const windows: TmuxWindowInfo[] = [];
-  for (const line of output.trim().split('\n')) {
+  for (const line of output.trim().split("\n")) {
     if (!line.trim()) continue;
     const [name, id] = line.trim().split(/\s+/, 2);
     if (!name || !id) continue;
@@ -201,10 +201,10 @@ export async function tmuxNewSession(
   opts?: { cols?: number; rows?: number; windowName?: string },
   serverName?: string,
 ): Promise<void> {
-  const args = ['new-session', '-d', '-s', name];
-  if (opts?.windowName) args.push('-n', opts.windowName);
-  if (opts?.cols) args.push('-x', String(opts.cols));
-  if (opts?.rows) args.push('-y', String(opts.rows));
+  const args = ["new-session", "-d", "-s", name];
+  if (opts?.windowName) args.push("-n", opts.windowName);
+  if (opts?.cols) args.push("-x", String(opts.cols));
+  if (opts?.rows) args.push("-y", String(opts.rows));
   await tmux(args, serverName);
 }
 
@@ -219,7 +219,7 @@ export async function tmuxNewWindow(
   // -t session: (with trailing colon) means "create window in this session"
   // -t session (without colon) means "create at window index = session", which fails if index exists
   await tmux(
-    ['new-window', '-t', `${targetSession}:`, '-n', windowName],
+    ["new-window", "-t", `${targetSession}:`, "-n", windowName],
     serverName,
   );
 }
@@ -240,15 +240,15 @@ export async function tmuxSplitWindow(
   opts?: { horizontal?: boolean; percent?: number; command?: string },
   serverName?: string,
 ): Promise<string> {
-  const args = ['split-window', '-t', target];
+  const args = ["split-window", "-t", target];
   if (opts?.horizontal) {
-    args.push('-h');
+    args.push("-h");
   }
   if (opts?.percent !== undefined) {
-    args.push('-l', `${opts.percent}%`);
+    args.push("-l", `${opts.percent}%`);
   }
   // -P -F: print new pane info in the specified format
-  args.push('-P', '-F', '#{pane_id}');
+  args.push("-P", "-F", "#{pane_id}");
   if (opts?.command) {
     args.push(opts.command);
   }
@@ -269,13 +269,13 @@ export async function tmuxSendKeys(
   opts?: { literal?: boolean; enter?: boolean },
   serverName?: string,
 ): Promise<void> {
-  const args = ['send-keys', '-t', paneId];
+  const args = ["send-keys", "-t", paneId];
   if (opts?.literal) {
-    args.push('-l');
+    args.push("-l");
   }
   args.push(keys);
   if (opts?.enter) {
-    args.push('Enter');
+    args.push("Enter");
   }
   await tmux(args, serverName);
 }
@@ -287,7 +287,7 @@ export async function tmuxSelectPane(
   paneId: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['select-pane', '-t', paneId], serverName);
+  await tmux(["select-pane", "-t", paneId], serverName);
 }
 
 /**
@@ -298,7 +298,7 @@ export async function tmuxSelectPaneTitle(
   title: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['select-pane', '-t', paneId, '-T', title], serverName);
+  await tmux(["select-pane", "-t", paneId, "-T", title], serverName);
 }
 
 /**
@@ -309,7 +309,7 @@ export async function tmuxSelectPaneStyle(
   style: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['select-pane', '-t', paneId, '-P', style], serverName);
+  await tmux(["select-pane", "-t", paneId, "-P", style], serverName);
 }
 
 /**
@@ -323,7 +323,7 @@ export async function tmuxSelectLayout(
   layout: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['select-layout', '-t', target, layout], serverName);
+  await tmux(["select-layout", "-t", target, layout], serverName);
 }
 
 /**
@@ -336,7 +336,7 @@ export async function tmuxCapturePaneContent(
   serverName?: string,
 ): Promise<string> {
   // -p: output to stdout, -e: include escape sequences
-  return await tmux(['capture-pane', '-t', paneId, '-p', '-e'], serverName);
+  return await tmux(["capture-pane", "-t", paneId, "-p", "-e"], serverName);
 }
 
 /**
@@ -351,11 +351,11 @@ export async function tmuxListPanes(
 ): Promise<TmuxPaneInfo[]> {
   const output = await tmux(
     [
-      'list-panes',
-      '-t',
+      "list-panes",
+      "-t",
       target,
-      '-F',
-      '#{pane_id} #{pane_dead} #{pane_dead_status}',
+      "-F",
+      "#{pane_id} #{pane_dead} #{pane_dead_status}",
     ],
     serverName,
   );
@@ -367,13 +367,13 @@ export async function tmuxListPanes(
  */
 export function parseTmuxListPanes(output: string): TmuxPaneInfo[] {
   const panes: TmuxPaneInfo[] = [];
-  for (const line of output.trim().split('\n')) {
+  for (const line of output.trim().split("\n")) {
     if (!line.trim()) continue;
     const parts = line.trim().split(/\s+/);
     if (parts.length < 2) continue;
     panes.push({
       paneId: parts[0]!,
-      dead: parts[1] === '1',
+      dead: parts[1] === "1",
       deadStatus: parts[2] ? parseInt(parts[2], 10) : 0,
     });
   }
@@ -389,7 +389,7 @@ export async function tmuxSetOption(
   value: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['set-option', '-t', target, option, value], serverName);
+  await tmux(["set-option", "-t", target, option, value], serverName);
 }
 
 /**
@@ -407,7 +407,7 @@ export async function tmuxRespawnPane(
   command: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['respawn-pane', '-k', '-t', paneId, command], serverName);
+  await tmux(["respawn-pane", "-k", "-t", paneId, command], serverName);
 }
 
 /**
@@ -418,7 +418,7 @@ export async function tmuxBreakPane(
   targetSession: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['break-pane', '-s', paneId, '-t', targetSession], serverName);
+  await tmux(["break-pane", "-s", paneId, "-t", targetSession], serverName);
 }
 
 /**
@@ -429,7 +429,7 @@ export async function tmuxJoinPane(
   target: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['join-pane', '-s', paneId, '-t', target], serverName);
+  await tmux(["join-pane", "-s", paneId, "-t", target], serverName);
 }
 
 /**
@@ -439,7 +439,7 @@ export async function tmuxKillPane(
   paneId: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['kill-pane', '-t', paneId], serverName);
+  await tmux(["kill-pane", "-t", paneId], serverName);
 }
 
 /**
@@ -454,12 +454,12 @@ export async function tmuxResizePane(
   opts: { height?: number | string; width?: number | string },
   serverName?: string,
 ): Promise<void> {
-  const args = ['resize-pane', '-t', paneId];
+  const args = ["resize-pane", "-t", paneId];
   if (opts.height !== undefined) {
-    args.push('-y', String(opts.height));
+    args.push("-y", String(opts.height));
   }
   if (opts.width !== undefined) {
-    args.push('-x', String(opts.width));
+    args.push("-x", String(opts.width));
   }
   await tmux(args, serverName);
 }
@@ -471,7 +471,7 @@ export async function tmuxKillSession(
   name: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['kill-session', '-t', name], serverName);
+  await tmux(["kill-session", "-t", name], serverName);
 }
 
 /**
@@ -481,7 +481,7 @@ export async function tmuxKillWindow(
   target: string,
   serverName?: string,
 ): Promise<void> {
-  await tmux(['kill-window', '-t', target], serverName);
+  await tmux(["kill-window", "-t", target], serverName);
 }
 
 /**
@@ -492,10 +492,10 @@ export async function tmuxGetFirstPaneId(
   serverName?: string,
 ): Promise<string> {
   const output = await tmux(
-    ['list-panes', '-t', target, '-F', '#{pane_id}'],
+    ["list-panes", "-t", target, "-F", "#{pane_id}"],
     serverName,
   );
-  const firstLine = output.trim().split('\n')[0];
+  const firstLine = output.trim().split("\n")[0];
   if (!firstLine) {
     throw new Error(`No panes found in target: ${target}`);
   }

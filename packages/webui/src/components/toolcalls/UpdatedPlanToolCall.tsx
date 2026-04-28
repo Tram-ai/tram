@@ -6,24 +6,24 @@
  * UpdatedPlan tool call component - specialized for plan update operations
  */
 
-import type { FC } from 'react';
-import { groupContent, safeTitle } from './shared/index.js';
+import type { FC } from "react";
+import { groupContent, safeTitle } from "./shared/index.js";
 import type {
   BaseToolCallProps,
   ToolCallContainerProps,
   ToolCallStatus,
   PlanEntry,
   PlanEntryStatus,
-} from './shared/index.js';
-import { CheckboxDisplay } from './CheckboxDisplay.js';
-import { getToolDisplayLabel } from './labelUtils.js';
+} from "./shared/index.js";
+import { CheckboxDisplay } from "./CheckboxDisplay.js";
+import { getToolDisplayLabel } from "./labelUtils.js";
 
 /**
  * Custom container for UpdatedPlanToolCall with specific styling
  */
 const PlanToolCallContainer: FC<ToolCallContainerProps> = ({
   label,
-  status = 'success',
+  status = "success",
   children,
   toolCallId: _toolCallId,
   labelSuffix,
@@ -32,7 +32,7 @@ const PlanToolCallContainer: FC<ToolCallContainerProps> = ({
   isLast = false,
 }) => (
   <div
-    className={`tram-message message-item ${_className || ''} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
+    className={`tram-message message-item ${_className || ""} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
     data-first={isFirst}
     data-last={isLast}
   >
@@ -59,18 +59,18 @@ const PlanToolCallContainer: FC<ToolCallContainerProps> = ({
  */
 const mapToolStatusToBullet = (
   status: ToolCallStatus,
-): 'success' | 'error' | 'warning' | 'loading' | 'default' => {
+): "success" | "error" | "warning" | "loading" | "default" => {
   switch (status) {
-    case 'completed':
-      return 'success';
-    case 'failed':
-      return 'error';
-    case 'in_progress':
-      return 'warning';
-    case 'pending':
-      return 'loading';
+    case "completed":
+      return "success";
+    case "failed":
+      return "error";
+    case "in_progress":
+      return "warning";
+    case "pending":
+      return "loading";
     default:
-      return 'default';
+      return "default";
   }
 };
 
@@ -78,7 +78,7 @@ const mapToolStatusToBullet = (
  * Parse plan entries with - [ ] / - [x] from text
  */
 const parsePlanEntries = (textOutputs: string[]): PlanEntry[] => {
-  const text = textOutputs.join('\n');
+  const text = textOutputs.join("\n");
   const lines = text.split(/\r?\n/);
   const entries: PlanEntry[] = [];
 
@@ -91,11 +91,11 @@ const parsePlanEntries = (textOutputs: string[]): PlanEntry[] => {
       const mark = m[1];
       const title = m[2].trim();
       const status: PlanEntryStatus =
-        mark === 'x' || mark === 'X'
-          ? 'completed'
-          : mark === '-' || mark === '*'
-            ? 'in_progress'
-            : 'pending';
+        mark === "x" || mark === "X"
+          ? "completed"
+          : mark === "-" || mark === "*"
+            ? "in_progress"
+            : "pending";
       if (title) {
         entries.push({ content: title, status });
       }
@@ -107,7 +107,7 @@ const parsePlanEntries = (textOutputs: string[]): PlanEntry[] => {
     for (const line of lines) {
       const title = line.trim();
       if (title) {
-        entries.push({ content: title, status: 'pending' });
+        entries.push({ content: title, status: "pending" });
       }
     }
   }
@@ -136,7 +136,7 @@ export const UpdatedPlanToolCall: FC<BaseToolCallProps> = ({
         isFirst={isFirst}
         isLast={isLast}
       >
-        {errors.join('\n')}
+        {errors.join("\n")}
       </PlanToolCallContainer>
     );
   }
@@ -157,15 +157,15 @@ export const UpdatedPlanToolCall: FC<BaseToolCallProps> = ({
     >
       <ul className="Fr list-none p-0 m-0 flex flex-col gap-1">
         {entries.map((entry, idx) => {
-          const isDone = entry.status === 'completed';
-          const isIndeterminate = entry.status === 'in_progress';
+          const isDone = entry.status === "completed";
+          const isIndeterminate = entry.status === "in_progress";
           return (
             <li
               key={idx}
               className={[
-                'Hr flex items-start gap-2 p-0 rounded text-[var(--app-primary-foreground)]',
-                isDone ? 'fo opacity-70' : '',
-              ].join(' ')}
+                "Hr flex items-start gap-2 p-0 rounded text-[var(--app-primary-foreground)]",
+                isDone ? "fo opacity-70" : "",
+              ].join(" ")}
             >
               <label className="flex items-start gap-2">
                 <CheckboxDisplay
@@ -175,11 +175,11 @@ export const UpdatedPlanToolCall: FC<BaseToolCallProps> = ({
               </label>
               <div
                 className={[
-                  'vo flex-1 text-xs leading-[1.5] text-[var(--app-primary-foreground)]',
+                  "vo flex-1 text-xs leading-[1.5] text-[var(--app-primary-foreground)]",
                   isDone
-                    ? 'line-through text-[var(--app-secondary-foreground)] opacity-70'
-                    : 'opacity-85',
-                ].join(' ')}
+                    ? "line-through text-[var(--app-secondary-foreground)] opacity-70"
+                    : "opacity-85",
+                ].join(" ")}
               >
                 {entry.content}
               </div>

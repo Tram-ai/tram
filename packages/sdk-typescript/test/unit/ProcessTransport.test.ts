@@ -3,21 +3,21 @@
  * Tests subprocess lifecycle management and IPC
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { ProcessTransport } from '../../src/transport/ProcessTransport.js';
-import { AbortError } from '../../src/types/errors.js';
-import type { TransportOptions } from '../../src/types/types.js';
-import { Readable, Writable } from 'node:stream';
-import type { ChildProcess } from 'node:child_process';
-import { EventEmitter } from 'node:events';
-import * as childProcess from 'node:child_process';
-import * as cliPath from '../../src/utils/cliPath.js';
-import * as jsonLines from '../../src/utils/jsonLines.js';
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { ProcessTransport } from "../../src/transport/ProcessTransport.js";
+import { AbortError } from "../../src/types/errors.js";
+import type { TransportOptions } from "../../src/types/types.js";
+import { Readable, Writable } from "node:stream";
+import type { ChildProcess } from "node:child_process";
+import { EventEmitter } from "node:events";
+import * as childProcess from "node:child_process";
+import * as cliPath from "../../src/utils/cliPath.js";
+import * as jsonLines from "../../src/utils/jsonLines.js";
 
 // Mock modules
-vi.mock('node:child_process');
-vi.mock('../../src/utils/cliPath.js');
-vi.mock('../../src/utils/jsonLines.js');
+vi.mock("node:child_process");
+vi.mock("../../src/utils/cliPath.js");
+vi.mock("../../src/utils/jsonLines.js");
 
 const mockSpawn = vi.mocked(childProcess.spawn);
 const mockFork = vi.mocked(childProcess.fork);
@@ -30,12 +30,12 @@ function createMockChildProcess(
 ): ChildProcess & EventEmitter {
   const mockStdin = new Writable({
     write: vi.fn((chunk, encoding, callback) => {
-      if (typeof callback === 'function') callback();
+      if (typeof callback === "function") callback();
       return true;
     }),
   });
   const mockWriteFn = vi.fn((chunk, encoding, callback) => {
-    if (typeof callback === 'function') callback();
+    if (typeof callback === "function") callback();
     return true;
   });
   mockStdin.write = mockWriteFn as unknown as typeof mockStdin.write;
@@ -59,7 +59,7 @@ function createMockChildProcess(
     connected: false,
     stdio: [mockStdin, mockStdout, mockStderr, null, null],
     spawnargs: [],
-    spawnfile: 'tram',
+    spawnfile: "tram",
     channel: null,
     ...overrides,
   }) as unknown as ChildProcess & EventEmitter;
@@ -67,7 +67,7 @@ function createMockChildProcess(
   return baseProcess;
 }
 
-describe('ProcessTransport', () => {
+describe("ProcessTransport", () => {
   let mockChildProcess: ChildProcess & EventEmitter;
   let mockStdin: Writable;
   let mockStdout: Readable;
@@ -81,7 +81,7 @@ describe('ProcessTransport', () => {
     delete (process.versions as { electron?: string }).electron;
 
     const mockWriteFn = vi.fn((chunk, encoding, callback) => {
-      if (typeof callback === 'function') callback();
+      if (typeof callback === "function") callback();
       return true;
     });
 
@@ -110,7 +110,7 @@ describe('ProcessTransport', () => {
       connected: false,
       stdio: [mockStdin, mockStdout, mockStderr, null, null],
       spawnargs: [],
-      spawnfile: 'tram',
+      spawnfile: "tram",
       channel: null,
     }) as unknown as ChildProcess & EventEmitter;
   });
@@ -119,18 +119,18 @@ describe('ProcessTransport', () => {
     vi.restoreAllMocks();
   });
 
-  describe('Construction and Initialization', () => {
-    it('should create transport with required options', () => {
+  describe("Construction and Initialization", () => {
+    it("should create transport with required options", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -138,235 +138,235 @@ describe('ProcessTransport', () => {
       expect(transport).toBeDefined();
       expect(transport.isReady).toBe(true);
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.arrayContaining([
-          '--input-format',
-          'stream-json',
-          '--output-format',
-          'stream-json',
+          "--input-format",
+          "stream-json",
+          "--output-format",
+          "stream-json",
         ]),
         expect.objectContaining({
-          stdio: ['pipe', 'pipe', 'ignore'],
+          stdio: ["pipe", "pipe", "ignore"],
         }),
       );
     });
 
-    it('should build CLI arguments correctly with all options', () => {
+    it("should build CLI arguments correctly with all options", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
-        model: 'qwen-max',
-        permissionMode: 'auto-edit',
+        pathToTramExecutable: "tram",
+        model: "qwen-max",
+        permissionMode: "auto-edit",
         maxSessionTurns: 10,
-        coreTools: ['read_file', 'write_file'],
-        excludeTools: ['web_search'],
-        authType: 'api-key',
+        coreTools: ["read_file", "write_file"],
+        excludeTools: ["web_search"],
+        authType: "api-key",
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.arrayContaining([
-          '--input-format',
-          'stream-json',
-          '--output-format',
-          'stream-json',
-          '--model',
-          'qwen-max',
-          '--approval-mode',
-          'auto-edit',
-          '--max-session-turns',
-          '10',
-          '--core-tools',
-          'read_file,write_file',
-          '--exclude-tools',
-          'web_search',
-          '--auth-type',
-          'api-key',
+          "--input-format",
+          "stream-json",
+          "--output-format",
+          "stream-json",
+          "--model",
+          "qwen-max",
+          "--approval-mode",
+          "auto-edit",
+          "--max-session-turns",
+          "10",
+          "--core-tools",
+          "read_file,write_file",
+          "--exclude-tools",
+          "web_search",
+          "--auth-type",
+          "api-key",
         ]),
         expect.any(Object),
       );
     });
 
-    it('should pass systemPrompt through --system-prompt', () => {
+    it("should pass systemPrompt through --system-prompt", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'qwen',
+        command: "qwen",
         args: [],
-        type: 'native',
-        originalInput: 'qwen',
+        type: "native",
+        originalInput: "qwen",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToQwenExecutable: 'qwen',
-        systemPrompt: 'You are a test system prompt.',
+        pathToQwenExecutable: "qwen",
+        systemPrompt: "You are a test system prompt.",
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'qwen',
+        "qwen",
         expect.arrayContaining([
-          '--system-prompt',
-          'You are a test system prompt.',
+          "--system-prompt",
+          "You are a test system prompt.",
         ]),
         expect.any(Object),
       );
     });
 
-    it('should pass appendSystemPrompt through --append-system-prompt', () => {
+    it("should pass appendSystemPrompt through --append-system-prompt", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'qwen',
+        command: "qwen",
         args: [],
-        type: 'native',
-        originalInput: 'qwen',
+        type: "native",
+        originalInput: "qwen",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToQwenExecutable: 'qwen',
-        appendSystemPrompt: 'Be extra concise.',
+        pathToQwenExecutable: "qwen",
+        appendSystemPrompt: "Be extra concise.",
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'qwen',
-        expect.arrayContaining(['--append-system-prompt', 'Be extra concise.']),
+        "qwen",
+        expect.arrayContaining(["--append-system-prompt", "Be extra concise."]),
         expect.any(Object),
       );
     });
 
-    it('should pass both systemPrompt and appendSystemPrompt when provided', () => {
+    it("should pass both systemPrompt and appendSystemPrompt when provided", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'qwen',
+        command: "qwen",
         args: [],
-        type: 'native',
-        originalInput: 'qwen',
+        type: "native",
+        originalInput: "qwen",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToQwenExecutable: 'qwen',
-        systemPrompt: 'Override prompt',
-        appendSystemPrompt: 'Append prompt',
+        pathToQwenExecutable: "qwen",
+        systemPrompt: "Override prompt",
+        appendSystemPrompt: "Append prompt",
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'qwen',
+        "qwen",
         expect.arrayContaining([
-          '--system-prompt',
-          'Override prompt',
-          '--append-system-prompt',
-          'Append prompt',
+          "--system-prompt",
+          "Override prompt",
+          "--append-system-prompt",
+          "Append prompt",
         ]),
         expect.any(Object),
       );
     });
 
-    it('should include --resume argument when provided', () => {
+    it("should include --resume argument when provided", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
-        resume: '123e4567-e89b-12d3-a456-426614174000',
+        pathToTramExecutable: "tram",
+        resume: "123e4567-e89b-12d3-a456-426614174000",
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.arrayContaining([
-          '--resume',
-          '123e4567-e89b-12d3-a456-426614174000',
+          "--resume",
+          "123e4567-e89b-12d3-a456-426614174000",
         ]),
         expect.any(Object),
       );
     });
 
-    it('should include --session-id argument when sessionId is provided without resume', () => {
+    it("should include --session-id argument when sessionId is provided without resume", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
-        sessionId: '123e4567-e89b-12d3-a456-426614174000',
+        pathToTramExecutable: "tram",
+        sessionId: "123e4567-e89b-12d3-a456-426614174000",
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.arrayContaining([
-          '--session-id',
-          '123e4567-e89b-12d3-a456-426614174000',
+          "--session-id",
+          "123e4567-e89b-12d3-a456-426614174000",
         ]),
         expect.any(Object),
       );
     });
 
-    it('should throw if aborted before initialization', () => {
+    it("should throw if aborted before initialization", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
 
       const abortController = new AbortController();
       abortController.abort();
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         abortController,
       };
 
       expect(() => new ProcessTransport(options)).toThrow(AbortError);
       expect(() => new ProcessTransport(options)).toThrow(
-        'Transport start aborted',
+        "Transport start aborted",
       );
     });
 
-    it('should use provided AbortController', () => {
+    it("should use provided AbortController", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const abortController = new AbortController();
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         abortController,
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
           signal: abortController.signal,
@@ -374,23 +374,23 @@ describe('ProcessTransport', () => {
       );
     });
 
-    it('should create default AbortController if not provided', () => {
+    it("should create default AbortController if not provided", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
           signal: expect.any(AbortSignal),
@@ -399,18 +399,18 @@ describe('ProcessTransport', () => {
     });
   });
 
-  describe('Lifecycle Management', () => {
-    it('should spawn subprocess during construction', () => {
+  describe("Lifecycle Management", () => {
+    it("should spawn subprocess during construction", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
@@ -418,17 +418,17 @@ describe('ProcessTransport', () => {
       expect(mockSpawn).toHaveBeenCalledTimes(1);
     });
 
-    it('should set isReady to true after successful initialization', () => {
+    it("should set isReady to true after successful initialization", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -436,60 +436,60 @@ describe('ProcessTransport', () => {
       expect(transport.isReady).toBe(true);
     });
 
-    it('should set isReady to false on process error', () => {
+    it("should set isReady to false on process error", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
-      mockChildProcess.emit('error', new Error('Spawn failed'));
+      mockChildProcess.emit("error", new Error("Spawn failed"));
 
       expect(transport.isReady).toBe(false);
       expect(transport.exitError).toBeDefined();
     });
 
-    it('should close subprocess gracefully with SIGTERM', async () => {
+    it("should close subprocess gracefully with SIGTERM", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
       await transport.close();
 
-      expect(mockChildProcess.kill).toHaveBeenCalledWith('SIGTERM');
+      expect(mockChildProcess.kill).toHaveBeenCalledWith("SIGTERM");
     });
 
-    it('should force kill with SIGKILL after timeout', async () => {
+    it("should force kill with SIGKILL after timeout", async () => {
       vi.useFakeTimers();
 
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -498,22 +498,22 @@ describe('ProcessTransport', () => {
 
       vi.advanceTimersByTime(5000);
 
-      expect(mockChildProcess.kill).toHaveBeenCalledWith('SIGKILL');
+      expect(mockChildProcess.kill).toHaveBeenCalledWith("SIGKILL");
 
       vi.useRealTimers();
     });
 
-    it('should be idempotent when calling close() multiple times', async () => {
+    it("should be idempotent when calling close() multiple times", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -525,88 +525,88 @@ describe('ProcessTransport', () => {
       expect(mockChildProcess.kill).toHaveBeenCalledTimes(3);
     });
 
-    it('should wait for process exit in waitForExit()', async () => {
+    it("should wait for process exit in waitForExit()", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
       const waitPromise = transport.waitForExit();
 
-      mockChildProcess.emit('close', 0, null);
+      mockChildProcess.emit("close", 0, null);
 
       await expect(waitPromise).resolves.toBeUndefined();
     });
 
-    it('should reject waitForExit() on non-zero exit code', async () => {
+    it("should reject waitForExit() on non-zero exit code", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
       const waitPromise = transport.waitForExit();
 
-      mockChildProcess.emit('close', 1, null);
+      mockChildProcess.emit("close", 1, null);
 
       await expect(waitPromise).rejects.toThrow(
-        'CLI process exited with code 1',
+        "CLI process exited with code 1",
       );
     });
 
-    it('should reject waitForExit() on signal termination', async () => {
+    it("should reject waitForExit() on signal termination", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
       const waitPromise = transport.waitForExit();
 
-      mockChildProcess.emit('close', null, 'SIGTERM');
+      mockChildProcess.emit("close", null, "SIGTERM");
 
       await expect(waitPromise).rejects.toThrow(
-        'CLI process terminated by signal SIGTERM',
+        "CLI process terminated by signal SIGTERM",
       );
     });
 
-    it('should reject waitForExit() with AbortError when aborted', async () => {
+    it("should reject waitForExit() with AbortError when aborted", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const abortController = new AbortController();
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         abortController,
       };
 
@@ -615,25 +615,25 @@ describe('ProcessTransport', () => {
       const waitPromise = transport.waitForExit();
 
       abortController.abort();
-      mockChildProcess.emit('close', 0, null);
+      mockChildProcess.emit("close", 0, null);
 
       await expect(waitPromise).rejects.toThrow(AbortError);
     });
   });
 
-  describe('Message Reading', () => {
-    it('should read JSON Lines from stdout', async () => {
+  describe("Message Reading", () => {
+    it("should read JSON Lines from stdout", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const mockMessages = [
-        { type: 'message', content: 'test1' },
-        { type: 'message', content: 'test2' },
+        { type: "message", content: "test1" },
+        { type: "message", content: "test2" },
       ];
 
       mockParseJsonLinesStream.mockImplementation(async function* () {
@@ -643,7 +643,7 @@ describe('ProcessTransport', () => {
       });
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -658,26 +658,26 @@ describe('ProcessTransport', () => {
       // Give time for the async generator to start and yield messages
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      mockChildProcess.emit('close', 0, null);
+      mockChildProcess.emit("close", 0, null);
 
       await readPromise;
 
       expect(messages).toEqual(mockMessages);
     }, 5000); // Set a reasonable timeout
 
-    it('should throw if reading from transport without stdout', async () => {
+    it("should throw if reading from transport without stdout", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
 
       const processWithoutStdout = createMockChildProcess({ stdout: null });
       mockSpawn.mockReturnValue(processWithoutStdout);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -685,23 +685,23 @@ describe('ProcessTransport', () => {
       const generator = transport.readMessages();
 
       await expect(generator.next()).rejects.toThrow(
-        'Cannot read messages: process not started',
+        "Cannot read messages: process not started",
       );
     });
   });
 
-  describe('Message Writing', () => {
-    it('should write message to stdin', () => {
+  describe("Message Writing", () => {
+    it("should write message to stdin", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -712,39 +712,39 @@ describe('ProcessTransport', () => {
       expect(mockStdin.write).toHaveBeenCalledWith(message);
     });
 
-    it('should throw if writing before transport is ready', () => {
+    it("should throw if writing before transport is ready", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
-      mockChildProcess.emit('error', new Error('Process error'));
+      mockChildProcess.emit("error", new Error("Process error"));
 
-      expect(() => transport.write('test')).toThrow(
-        'Transport not ready for writing',
+      expect(() => transport.write("test")).toThrow(
+        "Transport not ready for writing",
       );
     });
 
-    it('should throw if writing to closed transport', async () => {
+    it("should throw if writing to closed transport", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -752,23 +752,23 @@ describe('ProcessTransport', () => {
       await transport.close();
 
       // After close(), isReady is false, so we get "Transport not ready" error first
-      expect(() => transport.write('test')).toThrow(
-        'Transport not ready for writing',
+      expect(() => transport.write("test")).toThrow(
+        "Transport not ready for writing",
       );
     });
 
-    it('should throw if writing when aborted', () => {
+    it("should throw if writing when aborted", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const abortController = new AbortController();
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         abortController,
       };
 
@@ -776,286 +776,286 @@ describe('ProcessTransport', () => {
 
       abortController.abort();
 
-      expect(() => transport.write('test')).toThrow(AbortError);
-      expect(() => transport.write('test')).toThrow(
-        'Cannot write: operation aborted',
+      expect(() => transport.write("test")).toThrow(AbortError);
+      expect(() => transport.write("test")).toThrow(
+        "Cannot write: operation aborted",
       );
     });
 
-    it('should throw when writing to ended stream', () => {
+    it("should throw when writing to ended stream", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
       mockStdin.end();
 
-      expect(() => transport.write('test')).toThrow('Input stream closed');
+      expect(() => transport.write("test")).toThrow("Input stream closed");
     });
 
-    it('should throw if writing to terminated process', () => {
+    it("should throw if writing to terminated process", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
 
       const terminatedProcess = createMockChildProcess({ exitCode: 1 });
       mockSpawn.mockReturnValue(terminatedProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
-      expect(() => transport.write('test')).toThrow(
-        'Cannot write to terminated process',
+      expect(() => transport.write("test")).toThrow(
+        "Cannot write to terminated process",
       );
     });
 
-    it('should throw if process has exit error', () => {
+    it("should throw if process has exit error", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
-      mockChildProcess.emit('close', 1, null);
+      mockChildProcess.emit("close", 1, null);
 
       // After process closes with error, isReady is false, so we get "Transport not ready" error first
-      expect(() => transport.write('test')).toThrow(
-        'Transport not ready for writing',
+      expect(() => transport.write("test")).toThrow(
+        "Transport not ready for writing",
       );
     });
   });
 
-  describe('Error Handling', () => {
-    it('should set exitError on process error', () => {
+  describe("Error Handling", () => {
+    it("should set exitError on process error", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
-      const error = new Error('Process error');
-      mockChildProcess.emit('error', error);
+      const error = new Error("Process error");
+      mockChildProcess.emit("error", error);
 
       expect(transport.exitError).toBeDefined();
-      expect(transport.exitError?.message).toContain('CLI process error');
+      expect(transport.exitError?.message).toContain("CLI process error");
     });
 
-    it('should set exitError on process close with non-zero code', () => {
+    it("should set exitError on process close with non-zero code", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
-      mockChildProcess.emit('close', 1, null);
-
-      expect(transport.exitError).toBeDefined();
-      expect(transport.exitError?.message).toBe(
-        'CLI process exited with code 1',
-      );
-    });
-
-    it('should set exitError on process close with signal', () => {
-      mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
-        args: [],
-        type: 'native',
-        originalInput: 'tram',
-      });
-      mockSpawn.mockReturnValue(mockChildProcess);
-
-      const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
-      };
-
-      const transport = new ProcessTransport(options);
-
-      mockChildProcess.emit('close', null, 'SIGKILL');
+      mockChildProcess.emit("close", 1, null);
 
       expect(transport.exitError).toBeDefined();
       expect(transport.exitError?.message).toBe(
-        'CLI process terminated by signal SIGKILL',
+        "CLI process exited with code 1",
       );
     });
 
-    it('should set AbortError when process aborted', () => {
+    it("should set exitError on process close with signal", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
+      });
+      mockSpawn.mockReturnValue(mockChildProcess);
+
+      const options: TransportOptions = {
+        pathToTramExecutable: "tram",
+      };
+
+      const transport = new ProcessTransport(options);
+
+      mockChildProcess.emit("close", null, "SIGKILL");
+
+      expect(transport.exitError).toBeDefined();
+      expect(transport.exitError?.message).toBe(
+        "CLI process terminated by signal SIGKILL",
+      );
+    });
+
+    it("should set AbortError when process aborted", () => {
+      mockPrepareSpawnInfo.mockReturnValue({
+        command: "tram",
+        args: [],
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const abortController = new AbortController();
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         abortController,
       };
 
       const transport = new ProcessTransport(options);
 
       abortController.abort();
-      mockChildProcess.emit('error', new Error('Aborted'));
+      mockChildProcess.emit("error", new Error("Aborted"));
 
       expect(transport.exitError).toBeInstanceOf(AbortError);
-      expect(transport.exitError?.message).toBe('CLI process aborted by user');
+      expect(transport.exitError?.message).toBe("CLI process aborted by user");
     });
 
-    it('should not set exitError on clean exit', () => {
+    it("should not set exitError on clean exit", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
-      mockChildProcess.emit('close', 0, null);
+      mockChildProcess.emit("close", 0, null);
 
       expect(transport.exitError).toBeNull();
     });
   });
 
-  describe('Resource Cleanup', () => {
-    it('should register cleanup on parent process exit', () => {
+  describe("Resource Cleanup", () => {
+    it("should register cleanup on parent process exit", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
-      const processOnSpy = vi.spyOn(process, 'on');
+      const processOnSpy = vi.spyOn(process, "on");
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
 
-      expect(processOnSpy).toHaveBeenCalledWith('exit', expect.any(Function));
+      expect(processOnSpy).toHaveBeenCalledWith("exit", expect.any(Function));
 
       processOnSpy.mockRestore();
     });
 
-    it('should remove event listeners on close', async () => {
+    it("should remove event listeners on close", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
-      const processOffSpy = vi.spyOn(process, 'off');
+      const processOffSpy = vi.spyOn(process, "off");
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
       await transport.close();
 
-      expect(processOffSpy).toHaveBeenCalledWith('exit', expect.any(Function));
+      expect(processOffSpy).toHaveBeenCalledWith("exit", expect.any(Function));
 
       processOffSpy.mockRestore();
     });
 
-    it('should register abort listener', () => {
+    it("should register abort listener", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const abortController = new AbortController();
       const addEventListenerSpy = vi.spyOn(
         abortController.signal,
-        'addEventListener',
+        "addEventListener",
       );
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         abortController,
       };
 
       new ProcessTransport(options);
 
       expect(addEventListenerSpy).toHaveBeenCalledWith(
-        'abort',
+        "abort",
         expect.any(Function),
       );
 
       addEventListenerSpy.mockRestore();
     });
 
-    it('should remove abort listener on close', async () => {
+    it("should remove abort listener on close", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const abortController = new AbortController();
       const removeEventListenerSpy = vi.spyOn(
         abortController.signal,
-        'removeEventListener',
+        "removeEventListener",
       );
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         abortController,
       };
 
@@ -1064,29 +1064,29 @@ describe('ProcessTransport', () => {
       await transport.close();
 
       expect(removeEventListenerSpy).toHaveBeenCalledWith(
-        'abort',
+        "abort",
         expect.any(Function),
       );
 
       removeEventListenerSpy.mockRestore();
     });
 
-    it('should end stdin on close', async () => {
+    it("should end stdin on close", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
-      const endSpy = vi.spyOn(mockStdin, 'end');
+      const endSpy = vi.spyOn(mockStdin, "end");
 
       await transport.close();
 
@@ -1094,49 +1094,49 @@ describe('ProcessTransport', () => {
     });
   });
 
-  describe('Working Directory', () => {
-    it('should spawn process in specified cwd', () => {
+  describe("Working Directory", () => {
+    it("should spawn process in specified cwd", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
-        cwd: '/custom/path',
+        pathToTramExecutable: "tram",
+        cwd: "/custom/path",
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
-          cwd: '/custom/path',
+          cwd: "/custom/path",
         }),
       );
     });
 
-    it('should default to process.cwd() if not specified', () => {
+    it("should default to process.cwd() if not specified", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
           cwd: process.cwd(),
@@ -1145,53 +1145,53 @@ describe('ProcessTransport', () => {
     });
   });
 
-  describe('Environment Variables', () => {
-    it('should pass environment variables to subprocess', () => {
+  describe("Environment Variables", () => {
+    it("should pass environment variables to subprocess", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         env: {
-          CUSTOM_VAR: 'custom_value',
+          CUSTOM_VAR: "custom_value",
         },
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
           env: expect.objectContaining({
-            CUSTOM_VAR: 'custom_value',
+            CUSTOM_VAR: "custom_value",
           }),
         }),
       );
     });
 
-    it('should inherit parent env by default', () => {
+    it("should inherit parent env by default", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
           env: expect.objectContaining(process.env),
@@ -1199,126 +1199,126 @@ describe('ProcessTransport', () => {
       );
     });
 
-    it('should merge custom env with parent env', () => {
+    it("should merge custom env with parent env", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         env: {
-          CUSTOM_VAR: 'custom_value',
+          CUSTOM_VAR: "custom_value",
         },
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
           env: expect.objectContaining({
             ...process.env,
-            CUSTOM_VAR: 'custom_value',
+            CUSTOM_VAR: "custom_value",
           }),
         }),
       );
     });
   });
 
-  describe('Debug and Stderr Handling', () => {
-    it('should pipe stderr when debug is true', () => {
+  describe("Debug and Stderr Handling", () => {
+    it("should pipe stderr when debug is true", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         debug: true,
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
-          stdio: ['pipe', 'pipe', 'pipe'],
+          stdio: ["pipe", "pipe", "pipe"],
         }),
       );
     });
 
-    it('should pipe stderr when stderr callback is provided', () => {
+    it("should pipe stderr when stderr callback is provided", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const stderrCallback = vi.fn();
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         stderr: stderrCallback,
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
-          stdio: ['pipe', 'pipe', 'pipe'],
+          stdio: ["pipe", "pipe", "pipe"],
         }),
       );
     });
 
-    it('should ignore stderr when debug is false and no callback', () => {
+    it("should ignore stderr when debug is false and no callback", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         debug: false,
       };
 
       new ProcessTransport(options);
 
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
-          stdio: ['pipe', 'pipe', 'ignore'],
+          stdio: ["pipe", "pipe", "ignore"],
         }),
       );
     });
 
-    it('should call stderr callback when data is received', () => {
+    it("should call stderr callback when data is received", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const stderrCallback = vi.fn();
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         stderr: stderrCallback,
         debug: true, // Enable debug to ensure stderr data is logged
       };
@@ -1328,27 +1328,27 @@ describe('ProcessTransport', () => {
       // Clear previous calls from logger.info during initialization
       stderrCallback.mockClear();
 
-      mockStderr.emit('data', Buffer.from('error message'));
+      mockStderr.emit("data", Buffer.from("error message"));
 
       // The stderr data is passed through logger.debug, which formats it
       // So we check that the callback was called with a message containing 'error message'
       expect(stderrCallback).toHaveBeenCalled();
-      expect(stderrCallback.mock.calls[0][0]).toContain('error message');
+      expect(stderrCallback.mock.calls[0][0]).toContain("error message");
     });
   });
 
-  describe('Stream Access', () => {
-    it('should provide access to stdin via getInputStream()', () => {
+  describe("Stream Access", () => {
+    it("should provide access to stdin via getInputStream()", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -1356,17 +1356,17 @@ describe('ProcessTransport', () => {
       expect(transport.getInputStream()).toBe(mockStdin);
     });
 
-    it('should provide access to stdout via getOutputStream()', () => {
+    it("should provide access to stdout via getOutputStream()", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -1374,22 +1374,22 @@ describe('ProcessTransport', () => {
       expect(transport.getOutputStream()).toBe(mockStdout);
     });
 
-    it('should allow ending input via endInput()', () => {
+    it("should allow ending input via endInput()", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
 
-      const endSpy = vi.spyOn(mockStdin, 'end');
+      const endSpy = vi.spyOn(mockStdin, "end");
 
       transport.endInput();
 
@@ -1397,20 +1397,20 @@ describe('ProcessTransport', () => {
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle process that exits immediately', () => {
+  describe("Edge Cases", () => {
+    it("should handle process that exits immediately", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
 
       const immediateExitProcess = createMockChildProcess({ exitCode: 0 });
       mockSpawn.mockReturnValue(immediateExitProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -1418,19 +1418,19 @@ describe('ProcessTransport', () => {
       expect(transport.isReady).toBe(true);
     });
 
-    it('should handle waitForExit() when process already exited', async () => {
+    it("should handle waitForExit() when process already exited", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
 
       const exitedProcess = createMockChildProcess({ exitCode: 0 });
       mockSpawn.mockReturnValue(exitedProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -1438,19 +1438,19 @@ describe('ProcessTransport', () => {
       await expect(transport.waitForExit()).resolves.toBeUndefined();
     });
 
-    it('should handle close() when process is already killed', async () => {
+    it("should handle close() when process is already killed", async () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
 
       const killedProcess = createMockChildProcess({ killed: true });
       mockSpawn.mockReturnValue(killedProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -1458,19 +1458,19 @@ describe('ProcessTransport', () => {
       await expect(transport.close()).resolves.toBeUndefined();
     });
 
-    it('should handle endInput() when stdin is null', () => {
+    it("should handle endInput() when stdin is null", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
 
       const processWithoutStdin = createMockChildProcess({ stdin: null });
       mockSpawn.mockReturnValue(processWithoutStdin);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -1478,19 +1478,19 @@ describe('ProcessTransport', () => {
       expect(() => transport.endInput()).not.toThrow();
     });
 
-    it('should return undefined for getInputStream() when stdin is null', () => {
+    it("should return undefined for getInputStream() when stdin is null", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
 
       const processWithoutStdin = createMockChildProcess({ stdin: null });
       mockSpawn.mockReturnValue(processWithoutStdin);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -1498,19 +1498,19 @@ describe('ProcessTransport', () => {
       expect(transport.getInputStream()).toBeUndefined();
     });
 
-    it('should return undefined for getOutputStream() when stdout is null', () => {
+    it("should return undefined for getOutputStream() when stdout is null", () => {
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
 
       const processWithoutStdout = createMockChildProcess({ stdout: null });
       mockSpawn.mockReturnValue(processWithoutStdout);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       const transport = new ProcessTransport(options);
@@ -1519,19 +1519,19 @@ describe('ProcessTransport', () => {
     });
   });
 
-  describe('Fork Mode', () => {
-    it('should use fork when FORK_MODE=1', () => {
-      process.env.FORK_MODE = '1';
+  describe("Fork Mode", () => {
+    it("should use fork when FORK_MODE=1", () => {
+      process.env.FORK_MODE = "1";
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'node',
-        args: ['/path/to/cli.js'],
-        type: 'node',
-        originalInput: 'node /path/to/cli.js',
+        command: "node",
+        args: ["/path/to/cli.js"],
+        type: "node",
+        originalInput: "node /path/to/cli.js",
       });
       mockFork.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
@@ -1540,18 +1540,18 @@ describe('ProcessTransport', () => {
       expect(mockSpawn).not.toHaveBeenCalled();
     });
 
-    it('should use spawn when FORK_MODE is not set', () => {
+    it("should use spawn when FORK_MODE is not set", () => {
       // process.env.FORK_MODE is not set
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
@@ -1560,18 +1560,18 @@ describe('ProcessTransport', () => {
       expect(mockFork).not.toHaveBeenCalled();
     });
 
-    it('should pass correct modulePath to fork', () => {
-      process.env.FORK_MODE = '1';
+    it("should pass correct modulePath to fork", () => {
+      process.env.FORK_MODE = "1";
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'node',
-        args: ['/path/to/cli.js'],
-        type: 'node',
-        originalInput: 'node /path/to/cli.js',
+        command: "node",
+        args: ["/path/to/cli.js"],
+        type: "node",
+        originalInput: "node /path/to/cli.js",
       });
       mockFork.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
@@ -1579,26 +1579,26 @@ describe('ProcessTransport', () => {
       // In non-Electron environment, JS file is used as modulePath
       // and execPath is set to the runtime (node)
       expect(mockFork).toHaveBeenCalledWith(
-        '/path/to/cli.js', // modulePath is the JS file
+        "/path/to/cli.js", // modulePath is the JS file
         expect.arrayContaining([]),
         expect.objectContaining({
-          execPath: 'node',
+          execPath: "node",
         }),
       );
     });
 
-    it('should configure stdio with ipc channel for fork', () => {
-      process.env.FORK_MODE = '1';
+    it("should configure stdio with ipc channel for fork", () => {
+      process.env.FORK_MODE = "1";
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'node',
-        args: ['/path/to/cli.js'],
-        type: 'node',
-        originalInput: 'node /path/to/cli.js',
+        command: "node",
+        args: ["/path/to/cli.js"],
+        type: "node",
+        originalInput: "node /path/to/cli.js",
       });
       mockFork.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
@@ -1607,23 +1607,23 @@ describe('ProcessTransport', () => {
         expect.any(String),
         expect.any(Array),
         expect.objectContaining({
-          stdio: ['pipe', 'pipe', 'ignore', 'ipc'], // 4th element is ipc
+          stdio: ["pipe", "pipe", "ignore", "ipc"], // 4th element is ipc
         }),
       );
     });
 
-    it('should configure stdio with pipe for stderr when debug mode is on', () => {
-      process.env.FORK_MODE = '1';
+    it("should configure stdio with pipe for stderr when debug mode is on", () => {
+      process.env.FORK_MODE = "1";
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'node',
-        args: ['/path/to/cli.js'],
-        type: 'node',
-        originalInput: 'node /path/to/cli.js',
+        command: "node",
+        args: ["/path/to/cli.js"],
+        type: "node",
+        originalInput: "node /path/to/cli.js",
       });
       mockFork.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         debug: true,
       };
 
@@ -1633,51 +1633,51 @@ describe('ProcessTransport', () => {
         expect.any(String),
         expect.any(Array),
         expect.objectContaining({
-          stdio: ['pipe', 'pipe', 'pipe', 'ipc'], // stderr is also pipe
+          stdio: ["pipe", "pipe", "pipe", "ipc"], // stderr is also pipe
         }),
       );
     });
 
-    it('should handle Electron environment with JS file execution', () => {
-      process.env.FORK_MODE = '1';
-      (process.versions as { electron?: string }).electron = '28.0.0';
+    it("should handle Electron environment with JS file execution", () => {
+      process.env.FORK_MODE = "1";
+      (process.versions as { electron?: string }).electron = "28.0.0";
 
       mockPrepareSpawnInfo.mockReturnValue({
-        command: '/path/to/Electron.app/Contents/MacOS/Electron',
-        args: ['/path/to/cli.js', '--some-arg'],
-        type: 'node',
-        originalInput: 'electron /path/to/cli.js',
+        command: "/path/to/Electron.app/Contents/MacOS/Electron",
+        args: ["/path/to/cli.js", "--some-arg"],
+        type: "node",
+        originalInput: "electron /path/to/cli.js",
       });
       mockFork.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
 
       // In Electron environment, should extract cli.js as modulePath
       expect(mockFork).toHaveBeenCalledWith(
-        '/path/to/cli.js',
-        expect.arrayContaining(['--some-arg']),
+        "/path/to/cli.js",
+        expect.arrayContaining(["--some-arg"]),
         expect.any(Object),
       );
     });
 
-    it('should handle normal JS execution in non-Electron environment', () => {
-      process.env.FORK_MODE = '1';
+    it("should handle normal JS execution in non-Electron environment", () => {
+      process.env.FORK_MODE = "1";
       // process.versions.electron is not set
 
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'node',
-        args: ['/path/to/cli.js', '--some-arg'],
-        type: 'node',
-        originalInput: 'node /path/to/cli.js',
+        command: "node",
+        args: ["/path/to/cli.js", "--some-arg"],
+        type: "node",
+        originalInput: "node /path/to/cli.js",
       });
       mockFork.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
@@ -1685,27 +1685,27 @@ describe('ProcessTransport', () => {
       // In normal Node.js, JS file is used as modulePath
       // and execPath is set to the runtime (node)
       expect(mockFork).toHaveBeenCalledWith(
-        '/path/to/cli.js',
-        expect.arrayContaining(['--some-arg']),
+        "/path/to/cli.js",
+        expect.arrayContaining(["--some-arg"]),
         expect.objectContaining({
-          execPath: 'node',
+          execPath: "node",
         }),
       );
     });
 
-    it('should pass env to fork', () => {
-      process.env.FORK_MODE = '1';
+    it("should pass env to fork", () => {
+      process.env.FORK_MODE = "1";
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'node',
-        args: ['/path/to/cli.js'],
-        type: 'node',
-        originalInput: 'node /path/to/cli.js',
+        command: "node",
+        args: ["/path/to/cli.js"],
+        type: "node",
+        originalInput: "node /path/to/cli.js",
       });
       mockFork.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
-        env: { CUSTOM_VAR: 'value' },
+        pathToTramExecutable: "tram",
+        env: { CUSTOM_VAR: "value" },
       };
 
       new ProcessTransport(options);
@@ -1715,26 +1715,26 @@ describe('ProcessTransport', () => {
         expect.any(Array),
         expect.objectContaining({
           env: expect.objectContaining({
-            CUSTOM_VAR: 'value',
-            FORK_MODE: '1',
+            CUSTOM_VAR: "value",
+            FORK_MODE: "1",
           }),
         }),
       );
     });
 
-    it('should pass cwd to fork', () => {
-      process.env.FORK_MODE = '1';
+    it("should pass cwd to fork", () => {
+      process.env.FORK_MODE = "1";
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'node',
-        args: ['/path/to/cli.js'],
-        type: 'node',
-        originalInput: 'node /path/to/cli.js',
+        command: "node",
+        args: ["/path/to/cli.js"],
+        type: "node",
+        originalInput: "node /path/to/cli.js",
       });
       mockFork.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
-        cwd: '/custom/workdir',
+        pathToTramExecutable: "tram",
+        cwd: "/custom/workdir",
       };
 
       new ProcessTransport(options);
@@ -1743,24 +1743,24 @@ describe('ProcessTransport', () => {
         expect.any(String),
         expect.any(Array),
         expect.objectContaining({
-          cwd: '/custom/workdir',
+          cwd: "/custom/workdir",
         }),
       );
     });
 
-    it('should pass abort signal to fork', () => {
-      process.env.FORK_MODE = '1';
+    it("should pass abort signal to fork", () => {
+      process.env.FORK_MODE = "1";
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'node',
-        args: ['/path/to/cli.js'],
-        type: 'node',
-        originalInput: 'node /path/to/cli.js',
+        command: "node",
+        args: ["/path/to/cli.js"],
+        type: "node",
+        originalInput: "node /path/to/cli.js",
       });
       mockFork.mockReturnValue(mockChildProcess);
 
       const abortController = new AbortController();
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
         abortController,
       };
 
@@ -1775,18 +1775,18 @@ describe('ProcessTransport', () => {
       );
     });
 
-    it('should fallback to spawn for native type when FORK_MODE=1', () => {
-      process.env.FORK_MODE = '1';
+    it("should fallback to spawn for native type when FORK_MODE=1", () => {
+      process.env.FORK_MODE = "1";
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'tram',
+        command: "tram",
         args: [],
-        type: 'native',
-        originalInput: 'tram',
+        type: "native",
+        originalInput: "tram",
       });
       mockSpawn.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
@@ -1794,26 +1794,26 @@ describe('ProcessTransport', () => {
       // Native type should fallback to spawn, not fork
       expect(mockFork).not.toHaveBeenCalled();
       expect(mockSpawn).toHaveBeenCalledWith(
-        'tram',
+        "tram",
         expect.any(Array),
         expect.objectContaining({
-          stdio: ['pipe', 'pipe', 'ignore'],
+          stdio: ["pipe", "pipe", "ignore"],
         }),
       );
     });
 
-    it('should use fork for bun type with correct execPath when FORK_MODE=1', () => {
-      process.env.FORK_MODE = '1';
+    it("should use fork for bun type with correct execPath when FORK_MODE=1", () => {
+      process.env.FORK_MODE = "1";
       mockPrepareSpawnInfo.mockReturnValue({
-        command: 'bun',
-        args: ['/path/to/cli.js'],
-        type: 'bun',
-        originalInput: 'bun /path/to/cli.js',
+        command: "bun",
+        args: ["/path/to/cli.js"],
+        type: "bun",
+        originalInput: "bun /path/to/cli.js",
       });
       mockFork.mockReturnValue(mockChildProcess);
 
       const options: TransportOptions = {
-        pathToTramExecutable: 'tram',
+        pathToTramExecutable: "tram",
       };
 
       new ProcessTransport(options);
@@ -1821,10 +1821,10 @@ describe('ProcessTransport', () => {
       // Bun type should use fork with execPath set to bun
       expect(mockSpawn).not.toHaveBeenCalled();
       expect(mockFork).toHaveBeenCalledWith(
-        '/path/to/cli.js',
+        "/path/to/cli.js",
         expect.any(Array),
         expect.objectContaining({
-          execPath: 'bun',
+          execPath: "bun",
         }),
       );
     });

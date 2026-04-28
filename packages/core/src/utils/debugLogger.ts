@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { AsyncLocalStorage } from 'node:async_hooks';
-import util from 'node:util';
-import { Storage } from '../config/storage.js';
-import { updateSymlink } from './symlink.js';
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { AsyncLocalStorage } from "node:async_hooks";
+import util from "node:util";
+import { Storage } from "../config/storage.js";
+import { updateSymlink } from "./symlink.js";
 
-type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
+type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR";
 
 export interface DebugLogSession {
   getSessionId: () => string;
@@ -31,10 +31,10 @@ let globalSession: DebugLogSession | null = null;
 const sessionContext = new AsyncLocalStorage<DebugLogSession>();
 
 function isDebugLogFileEnabled(): boolean {
-  const value = process.env['TRAM_DEBUG_LOG_FILE'];
+  const value = process.env["TRAM_DEBUG_LOG_FILE"];
   if (!value) return true;
   const normalized = value.trim().toLowerCase();
-  return !['0', 'false', 'off', 'no'].includes(normalized);
+  return !["0", "false", "off", "no"].includes(normalized);
 }
 
 function getActiveSession(): DebugLogSession | null {
@@ -65,8 +65,8 @@ function formatArgs(args: unknown[]): string {
       }
       return arg;
     })
-    .map((arg) => (typeof arg === 'string' ? arg : util.inspect(arg)))
-    .join(' ');
+    .map((arg) => (typeof arg === "string" ? arg : util.inspect(arg)))
+    .join(" ");
 }
 
 /**
@@ -78,7 +78,7 @@ function formatArgs(args: unknown[]): string {
  */
 function buildLogLine(level: LogLevel, message: string, tag?: string): string {
   const timestamp = new Date().toISOString();
-  const tagPart = tag ? ` [${tag}]` : '';
+  const tagPart = tag ? ` [${tag}]` : "";
   return `${timestamp} [${level}]${tagPart} ${message}\n`;
 }
 
@@ -98,7 +98,7 @@ function writeLog(
   const line = buildLogLine(level, message, tag);
 
   void ensureDebugDirExists()
-    .then(() => fs.appendFile(logFilePath, line, 'utf8'))
+    .then(() => fs.appendFile(logFilePath, line, "utf8"))
     .catch(() => {
       hasWriteFailure = true;
     });
@@ -122,7 +122,7 @@ export function resetDebugLoggingState(): void {
   ensuredDebugDirPath = null;
 }
 
-const DEBUG_LATEST_ALIAS = 'latest';
+const DEBUG_LATEST_ALIAS = "latest";
 
 function updateLatestDebugLogAlias(sessionId: string): void {
   if (!isDebugLogFileEnabled()) {
@@ -179,22 +179,22 @@ export function createDebugLogger(tag?: string): DebugLogger {
     debug: (...args: unknown[]) => {
       const session = getActiveSession();
       if (!session) return;
-      writeLog(session, 'DEBUG', tag, args);
+      writeLog(session, "DEBUG", tag, args);
     },
     info: (...args: unknown[]) => {
       const session = getActiveSession();
       if (!session) return;
-      writeLog(session, 'INFO', tag, args);
+      writeLog(session, "INFO", tag, args);
     },
     warn: (...args: unknown[]) => {
       const session = getActiveSession();
       if (!session) return;
-      writeLog(session, 'WARN', tag, args);
+      writeLog(session, "WARN", tag, args);
     },
     error: (...args: unknown[]) => {
       const session = getActiveSession();
       if (!session) return;
-      writeLog(session, 'ERROR', tag, args);
+      writeLog(session, "ERROR", tag, args);
     },
   };
 }

@@ -4,26 +4,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { AnyToolInvocation } from '../index.js';
-import type { Config } from '../config/config.js';
-import os from 'node:os';
-import path from 'node:path';
-import { parse, quote } from 'shell-quote';
-import { doesToolInvocationMatch } from './tool-utils.js';
-import { isShellCommandReadOnly } from './shellReadOnlyChecker.js';
+import type { AnyToolInvocation } from "../index.js";
+import type { Config } from "../config/config.js";
+import os from "node:os";
+import path from "node:path";
+import { parse, quote } from "shell-quote";
+import { doesToolInvocationMatch } from "./tool-utils.js";
+import { isShellCommandReadOnly } from "./shellReadOnlyChecker.js";
 import {
   execFile,
   execFileSync,
   type ExecFileOptions,
-} from 'node:child_process';
-import { accessSync, constants as fsConstants } from 'node:fs';
+} from "node:child_process";
+import { accessSync, constants as fsConstants } from "node:fs";
 
-const SHELL_TOOL_NAMES = ['run_shell_command', 'ShellTool'];
+const SHELL_TOOL_NAMES = ["run_shell_command", "ShellTool"];
 
 /**
  * An identifier for the shell type.
  */
-export type ShellType = 'cmd' | 'powershell' | 'bash';
+export type ShellType = "cmd" | "powershell" | "bash";
 
 /**
  * Defines the configuration required to execute a command string within a specific shell.
@@ -54,11 +54,11 @@ function findGitBashPath(): string {
   }
 
   // Search in PATH directories
-  const pathEnv = process.env['PATH'] || '';
+  const pathEnv = process.env["PATH"] || "";
   const pathDirs = pathEnv.split(path.delimiter).filter(Boolean);
 
   for (const dir of pathDirs) {
-    const bashPath = path.join(dir, 'bash.exe');
+    const bashPath = path.join(dir, "bash.exe");
     try {
       accessSync(bashPath, fsConstants.X_OK);
       cachedBashPath = bashPath;
@@ -70,22 +70,22 @@ function findGitBashPath(): string {
 
   // Check common Git Bash installation locations
   const commonPaths = [
-    path.join('C:', 'Program Files', 'Git', 'bin', 'bash.exe'),
-    path.join('C:', 'Program Files', 'Git', 'usr', 'bin', 'bash.exe'),
-    path.join('C:', 'Program Files (x86)', 'Git', 'bin', 'bash.exe'),
-    path.join('C:', 'Program Files (x86)', 'Git', 'usr', 'bin', 'bash.exe'),
+    path.join("C:", "Program Files", "Git", "bin", "bash.exe"),
+    path.join("C:", "Program Files", "Git", "usr", "bin", "bash.exe"),
+    path.join("C:", "Program Files (x86)", "Git", "bin", "bash.exe"),
+    path.join("C:", "Program Files (x86)", "Git", "usr", "bin", "bash.exe"),
     path.join(
-      process.env['ProgramFiles'] || path.join('C:', 'Program Files'),
-      'Git',
-      'bin',
-      'bash.exe',
+      process.env["ProgramFiles"] || path.join("C:", "Program Files"),
+      "Git",
+      "bin",
+      "bash.exe",
     ),
     path.join(
-      process.env['ProgramFiles(x86)'] ||
-        path.join('C:', 'Program Files (x86)'),
-      'Git',
-      'bin',
-      'bash.exe',
+      process.env["ProgramFiles(x86)"] ||
+        path.join("C:", "Program Files (x86)"),
+      "Git",
+      "bin",
+      "bash.exe",
     ),
   ];
 
@@ -100,8 +100,8 @@ function findGitBashPath(): string {
   }
 
   // Fallback to 'bash' and let the system handle it
-  cachedBashPath = 'bash';
-  return 'bash';
+  cachedBashPath = "bash";
+  return "bash";
 }
 
 /**
@@ -116,36 +116,36 @@ export function getShellConfiguration(): ShellConfiguration {
   if (isWindows()) {
     // Detect Git Bash / MSYS2 / MinTTY environments
     // These environments should use bash instead of cmd/PowerShell
-    const msystem = process.env['MSYSTEM'];
-    const term = process.env['TERM'] || '';
+    const msystem = process.env["MSYSTEM"];
+    const term = process.env["TERM"] || "";
     const isGitBash =
-      msystem?.startsWith('MINGW') ||
-      msystem?.startsWith('MSYS') ||
-      term.includes('msys') ||
-      term.includes('cygwin');
+      msystem?.startsWith("MINGW") ||
+      msystem?.startsWith("MSYS") ||
+      term.includes("msys") ||
+      term.includes("cygwin");
 
     if (isGitBash) {
       return {
         executable: findGitBashPath(),
-        argsPrefix: ['-c'],
-        shell: 'bash',
+        argsPrefix: ["-c"],
+        shell: "bash",
       };
     }
 
-    const comSpec = process.env['ComSpec'] || 'cmd.exe';
+    const comSpec = process.env["ComSpec"] || "cmd.exe";
     const executable = comSpec.toLowerCase();
 
     if (
-      executable.endsWith('powershell.exe') ||
-      executable.endsWith('pwsh.exe')
+      executable.endsWith("powershell.exe") ||
+      executable.endsWith("pwsh.exe")
     ) {
       // For PowerShell, the arguments are different.
       // -NoProfile: Speeds up startup.
       // -Command: Executes the following command.
       return {
         executable: comSpec,
-        argsPrefix: ['-NoProfile', '-Command'],
-        shell: 'powershell',
+        argsPrefix: ["-NoProfile", "-Command"],
+        shell: "powershell",
       };
     }
 
@@ -156,19 +156,19 @@ export function getShellConfiguration(): ShellConfiguration {
     // /c: Carries out the command specified by the string and then terminates.
     return {
       executable: comSpec,
-      argsPrefix: ['/d', '/s', '/c'],
-      shell: 'cmd',
+      argsPrefix: ["/d", "/s", "/c"],
+      shell: "cmd",
     };
   }
 
   // Unix-like systems (Linux, macOS)
-  return { executable: 'bash', argsPrefix: ['-c'], shell: 'bash' };
+  return { executable: "bash", argsPrefix: ["-c"], shell: "bash" };
 }
 
 /**
  * Export the platform detection constant for use in process management (e.g., killing processes).
  */
-export const isWindows = () => os.platform() === 'win32';
+export const isWindows = () => os.platform() === "win32";
 
 /**
  * Escapes a string so that it can be safely used as a single argument
@@ -180,17 +180,17 @@ export const isWindows = () => os.platform() === 'win32';
  */
 export function escapeShellArg(arg: string, shell: ShellType): string {
   if (!arg) {
-    return '';
+    return "";
   }
 
   switch (shell) {
-    case 'powershell':
+    case "powershell":
       // For PowerShell, wrap in single quotes and escape internal single quotes by doubling them.
       return `'${arg.replace(/'/g, "''")}'`;
-    case 'cmd':
+    case "cmd":
       // Simple Windows escaping for cmd.exe: wrap in double quotes and escape inner double quotes.
       return `"${arg.replace(/"/g, '""')}"`;
-    case 'bash':
+    case "bash":
     default:
       // POSIX shell escaping using shell-quote.
       return quote([arg]);
@@ -205,7 +205,7 @@ export function escapeShellArg(arg: string, shell: ShellType): string {
  */
 export function splitCommands(command: string): string[] {
   const commands: string[] = [];
-  let currentCommand = '';
+  let currentCommand = "";
   let inSingleQuotes = false;
   let inDoubleQuotes = false;
   let i = 0;
@@ -224,7 +224,7 @@ export function splitCommands(command: string): string[] {
     const char = command[i];
     const nextChar = command[i + 1];
 
-    if (char === '\\' && i < command.length - 1) {
+    if (char === "\\" && i < command.length - 1) {
       currentCommand += char + command[i + 1];
       i += 2;
       continue;
@@ -238,40 +238,40 @@ export function splitCommands(command: string): string[] {
 
     if (!inSingleQuotes && !inDoubleQuotes) {
       if (
-        (char === '&' && nextChar === '&') ||
-        (char === '|' && (nextChar === '|' || nextChar === '&'))
+        (char === "&" && nextChar === "&") ||
+        (char === "|" && (nextChar === "|" || nextChar === "&"))
       ) {
         commands.push(currentCommand.trim());
-        currentCommand = '';
+        currentCommand = "";
         i++; // Skip the next character
-      } else if (char === ';') {
+      } else if (char === ";") {
         commands.push(currentCommand.trim());
-        currentCommand = '';
-      } else if (char === '&') {
+        currentCommand = "";
+      } else if (char === "&") {
         const prevChar = previousNonWhitespaceChar(i);
-        if (prevChar === '>' || prevChar === '<') {
+        if (prevChar === ">" || prevChar === "<") {
           currentCommand += char;
         } else {
           commands.push(currentCommand.trim());
-          currentCommand = '';
+          currentCommand = "";
         }
-      } else if (char === '|') {
+      } else if (char === "|") {
         const prevChar = previousNonWhitespaceChar(i);
-        if (prevChar === '>') {
+        if (prevChar === ">") {
           currentCommand += char;
         } else {
           commands.push(currentCommand.trim());
-          currentCommand = '';
+          currentCommand = "";
         }
-      } else if (char === '\r' && nextChar === '\n') {
+      } else if (char === "\r" && nextChar === "\n") {
         // Windows-style \r\n newline - treat as command separator
         commands.push(currentCommand.trim());
-        currentCommand = '';
+        currentCommand = "";
         i++; // Skip the \n
-      } else if (char === '\n') {
+      } else if (char === "\n") {
         // Unix-style \n newline - treat as command separator
         commands.push(currentCommand.trim());
-        currentCommand = '';
+        currentCommand = "";
       } else {
         currentCommand += char;
       }
@@ -301,7 +301,7 @@ export function getCommandRoot(command: string): string | undefined {
 
   try {
     const tokens = parse(trimmedCommand).filter(
-      (token): token is string => typeof token === 'string',
+      (token): token is string => typeof token === "string",
     );
 
     let idx = 0;
@@ -371,48 +371,48 @@ export function detectCommandSubstitution(command: string): boolean {
   };
 
   const isCommentStart = (index: number): boolean => {
-    if (command[index] !== '#') return false;
+    if (command[index] !== "#") return false;
     if (index === 0) return true;
 
     const prev = command[index - 1]!;
-    if (prev === ' ' || prev === '\t' || prev === '\n' || prev === '\r') {
+    if (prev === " " || prev === "\t" || prev === "\n" || prev === "\r") {
       return true;
     }
 
     // `#` starts a comment when it begins a word. In practice this includes
     // common command separators/operators where a new word can begin.
-    return [';', '&', '|', '(', ')', '<', '>'].includes(prev);
+    return [";", "&", "|", "(", ")", "<", ">"].includes(prev);
   };
 
   const isWordBoundary = (char: string): boolean => {
-    if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
+    if (char === " " || char === "\t" || char === "\n" || char === "\r") {
       return true;
     }
     // Shell metacharacters that would terminate a WORD token in this context.
     // This helps correctly parse heredoc delimiters in cases like `<<EOF;`.
-    return [';', '&', '|', '<', '>', '(', ')'].includes(char);
+    return [";", "&", "|", "<", ">", "(", ")"].includes(char);
   };
 
   const parseHeredocOperator = (
     startIndex: number,
   ): { nextIndex: number; heredoc: PendingHeredoc } | null => {
     // startIndex points at the first '<' of the `<<` operator.
-    if (command[startIndex] !== '<' || command[startIndex + 1] !== '<') {
+    if (command[startIndex] !== "<" || command[startIndex + 1] !== "<") {
       return null;
     }
 
     let i = startIndex + 2;
-    const stripLeadingTabs = command[i] === '-';
+    const stripLeadingTabs = command[i] === "-";
     if (stripLeadingTabs) i++;
 
     // Skip whitespace between operator and delimiter word.
-    while (i < command.length && (command[i] === ' ' || command[i] === '\t')) {
+    while (i < command.length && (command[i] === " " || command[i] === "\t")) {
       i++;
     }
 
     // Parse the delimiter WORD token. If any quoting is used in the delimiter,
     // bash disables expansions in the heredoc body.
-    let delimiter = '';
+    let delimiter = "";
     let isQuotedDelimiter = false;
     let inSingleQuotes = false;
     let inDoubleQuotes = false;
@@ -436,7 +436,7 @@ export function detectCommandSubstitution(command: string): boolean {
           i++;
           continue;
         }
-        if (char === '\\') {
+        if (char === "\\") {
           isQuotedDelimiter = true;
           i++;
           if (i >= command.length) break;
@@ -466,7 +466,7 @@ export function detectCommandSubstitution(command: string): boolean {
         i++;
         continue;
       }
-      if (char === '\\') {
+      if (char === "\\") {
         // Backslash quoting is supported in double-quoted words. For our
         // purposes, treat it as quoting and include the escaped char as-is.
         isQuotedDelimiter = true;
@@ -502,16 +502,16 @@ export function detectCommandSubstitution(command: string): boolean {
       const nextChar = line[i + 1];
 
       // In unquoted heredocs, backslash can be used to escape `$` and backticks.
-      if (char === '\\') {
+      if (char === "\\") {
         i++; // Skip the escaped char (if any)
         continue;
       }
 
-      if (char === '$' && nextChar === '(') {
+      if (char === "$" && nextChar === "(") {
         return true;
       }
 
-      if (char === '`') {
+      if (char === "`") {
         return true;
       }
     }
@@ -534,8 +534,8 @@ export function detectCommandSubstitution(command: string): boolean {
         const lineStart = i;
         while (
           i < command.length &&
-          command[i] !== '\n' &&
-          command[i] !== '\r'
+          command[i] !== "\n" &&
+          command[i] !== "\r"
         ) {
           i++;
         }
@@ -544,20 +544,20 @@ export function detectCommandSubstitution(command: string): boolean {
         let newlineLength = 0;
         if (
           i < command.length &&
-          command[i] === '\r' &&
-          command[i + 1] === '\n'
+          command[i] === "\r" &&
+          command[i + 1] === "\n"
         ) {
           newlineLength = 2;
         } else if (
           i < command.length &&
-          (command[i] === '\n' || command[i] === '\r')
+          (command[i] === "\n" || command[i] === "\r")
         ) {
           newlineLength = 1;
         }
 
         const rawLine = command.slice(lineStart, lineEnd);
         const effectiveLine = heredoc.stripLeadingTabs
-          ? rawLine.replace(/^\t+/, '')
+          ? rawLine.replace(/^\t+/, "")
           : rawLine;
 
         if (effectiveLine === heredoc.delimiter) {
@@ -566,7 +566,7 @@ export function detectCommandSubstitution(command: string): boolean {
         }
 
         if (!heredoc.isQuotedDelimiter) {
-          if (pendingDollarLineContinuation && effectiveLine.startsWith('(')) {
+          if (pendingDollarLineContinuation && effectiveLine.startsWith("(")) {
             return { nextIndex: i, hasSubstitution: true };
           }
 
@@ -578,13 +578,13 @@ export function detectCommandSubstitution(command: string): boolean {
           if (
             newlineLength > 0 &&
             rawLine.length >= 2 &&
-            rawLine.endsWith('\\') &&
-            rawLine[rawLine.length - 2] === '$'
+            rawLine.endsWith("\\") &&
+            rawLine[rawLine.length - 2] === "$"
           ) {
             let backslashCount = 0;
             for (
               let j = rawLine.length - 3;
-              j >= 0 && rawLine[j] === '\\';
+              j >= 0 && rawLine[j] === "\\";
               j--
             ) {
               backslashCount++;
@@ -620,7 +620,7 @@ export function detectCommandSubstitution(command: string): boolean {
     // after the command line ends (a newline). Once we hit that newline,
     // consume heredoc bodies sequentially before continuing.
     if (!inSingleQuotes && !inDoubleQuotes && !inBackticks) {
-      if (char === '\r' && nextChar === '\n') {
+      if (char === "\r" && nextChar === "\n") {
         inComment = false;
         if (pendingHeredocs.length > 0) {
           const result = consumeHeredocBodies(i + 2, pendingHeredocs);
@@ -629,7 +629,7 @@ export function detectCommandSubstitution(command: string): boolean {
           i = result.nextIndex;
           continue;
         }
-      } else if (char === '\n' || char === '\r') {
+      } else if (char === "\n" || char === "\r") {
         inComment = false;
         if (pendingHeredocs.length > 0) {
           const result = consumeHeredocBodies(i + 1, pendingHeredocs);
@@ -655,7 +655,7 @@ export function detectCommandSubstitution(command: string): boolean {
     }
 
     // Handle escaping - only works outside single quotes
-    if (char === '\\' && !inSingleQuotes) {
+    if (char === "\\" && !inSingleQuotes) {
       i += 2; // Skip the escaped character
       continue;
     }
@@ -665,7 +665,7 @@ export function detectCommandSubstitution(command: string): boolean {
       inSingleQuotes = !inSingleQuotes;
     } else if (char === '"' && !inSingleQuotes && !inBackticks) {
       inDoubleQuotes = !inDoubleQuotes;
-    } else if (char === '`' && !inSingleQuotes) {
+    } else if (char === "`" && !inSingleQuotes) {
       // Backticks work outside single quotes (including in double quotes)
       inBackticks = !inBackticks;
     }
@@ -675,8 +675,8 @@ export function detectCommandSubstitution(command: string): boolean {
       !inSingleQuotes &&
       !inDoubleQuotes &&
       !inBackticks &&
-      char === '<' &&
-      nextChar === '<'
+      char === "<" &&
+      nextChar === "<"
     ) {
       const parsed = parseHeredocOperator(i);
       if (parsed) {
@@ -690,23 +690,23 @@ export function detectCommandSubstitution(command: string): boolean {
     // Note: heredoc body content is handled separately via consumeHeredocBodies.
     if (!inSingleQuotes) {
       // $(...) command substitution - works in double quotes and unquoted
-      if (char === '$' && nextChar === '(') {
+      if (char === "$" && nextChar === "(") {
         return true;
       }
 
       // <(...) process substitution - works unquoted only (not in double quotes)
-      if (char === '<' && nextChar === '(' && !inDoubleQuotes && !inBackticks) {
+      if (char === "<" && nextChar === "(" && !inDoubleQuotes && !inBackticks) {
         return true;
       }
 
       // >(...) process substitution - works unquoted only (not in double quotes)
-      if (char === '>' && nextChar === '(' && !inDoubleQuotes && !inBackticks) {
+      if (char === ">" && nextChar === "(" && !inDoubleQuotes && !inBackticks) {
         return true;
       }
 
       // Backtick command substitution.
       // We treat any unescaped backtick outside single quotes as substitution.
-      if (char === '`') {
+      if (char === "`") {
         return true;
       }
     }
@@ -756,15 +756,15 @@ export async function checkCommandPermissions(
       allAllowed: false,
       disallowedCommands: [command],
       blockReason:
-        'Command substitution using $(), `` ` ``, <(), or >() is not allowed for security reasons',
+        "Command substitution using $(), `` ` ``, <(), or >() is not allowed for security reasons",
       isHardDenial: true,
     };
   }
 
-  const normalize = (cmd: string): string => cmd.trim().replace(/\s+/g, ' ');
+  const normalize = (cmd: string): string => cmd.trim().replace(/\s+/g, " ");
   const commandsToValidate = splitCommands(command).map(normalize);
   const invocation: AnyToolInvocation & { params: { command: string } } = {
-    params: { command: '' },
+    params: { command: "" },
   } as AnyToolInvocation & { params: { command: string } };
 
   const pm = config.getPermissionManager?.();
@@ -776,9 +776,9 @@ export async function checkCommandPermissions(
     for (const cmd of commandsToValidate) {
       // 1. Session allowlist always wins (checked first regardless of PM rules)
       if (sessionAllowlist) {
-        invocation.params['command'] = cmd;
+        invocation.params["command"] = cmd;
         const isSessionAllowed = doesToolInvocationMatch(
-          'run_shell_command',
+          "run_shell_command",
           invocation,
           [...sessionAllowlist].flatMap((c) =>
             SHELL_TOOL_NAMES.map((name) => `${name}(${c})`),
@@ -789,7 +789,7 @@ export async function checkCommandPermissions(
 
       const decision = await pm.isCommandAllowed(cmd);
 
-      if (decision === 'deny') {
+      if (decision === "deny") {
         return {
           allAllowed: false,
           disallowedCommands: [cmd],
@@ -798,10 +798,10 @@ export async function checkCommandPermissions(
         };
       }
 
-      if (decision === 'allow') continue;
+      if (decision === "allow") continue;
 
       // 'ask' → always requires confirmation
-      if (decision === 'ask') {
+      if (decision === "ask") {
         disallowedCommands.push(cmd);
         continue;
       }
@@ -818,7 +818,7 @@ export async function checkCommandPermissions(
       return {
         allAllowed: false,
         disallowedCommands,
-        blockReason: `Command(s) require confirmation. Disallowed commands: ${disallowedCommands.map((c) => JSON.stringify(c)).join(', ')}`,
+        blockReason: `Command(s) require confirmation. Disallowed commands: ${disallowedCommands.map((c) => JSON.stringify(c)).join(", ")}`,
         isHardDenial: false,
       };
     }
@@ -840,15 +840,15 @@ export async function checkCommandPermissions(
     return {
       allAllowed: false,
       disallowedCommands: commandsToValidate,
-      blockReason: 'Shell tool is globally disabled in configuration',
+      blockReason: "Shell tool is globally disabled in configuration",
       isHardDenial: true,
     };
   }
 
   for (const cmd of commandsToValidate) {
-    invocation.params['command'] = cmd;
+    invocation.params["command"] = cmd;
     if (
-      doesToolInvocationMatch('run_shell_command', invocation, excludeTools)
+      doesToolInvocationMatch("run_shell_command", invocation, excludeTools)
     ) {
       return {
         allAllowed: false,
@@ -882,16 +882,16 @@ export async function checkCommandPermissions(
     );
 
     for (const cmd of commandsToValidate) {
-      invocation.params['command'] = cmd;
+      invocation.params["command"] = cmd;
       const isSessionAllowed = doesToolInvocationMatch(
-        'run_shell_command',
+        "run_shell_command",
         invocation,
         [...normalizedSessionAllowlist],
       );
       if (isSessionAllowed) continue;
 
       const isGloballyAllowed = doesToolInvocationMatch(
-        'run_shell_command',
+        "run_shell_command",
         invocation,
         coreTools,
       );
@@ -906,7 +906,7 @@ export async function checkCommandPermissions(
         disallowedCommands,
         blockReason: `Command(s) not on the global or session allowlist. Disallowed commands: ${disallowedCommands
           .map((c) => JSON.stringify(c))
-          .join(', ')}`,
+          .join(", ")}`,
         isHardDenial: false, // This is a soft denial; confirmation is possible.
       };
     }
@@ -919,9 +919,9 @@ export async function checkCommandPermissions(
 
     if (hasSpecificAllowedCommands) {
       for (const cmd of commandsToValidate) {
-        invocation.params['command'] = cmd;
+        invocation.params["command"] = cmd;
         const isGloballyAllowed = doesToolInvocationMatch(
-          'run_shell_command',
+          "run_shell_command",
           invocation,
           coreTools,
         );
@@ -935,7 +935,7 @@ export async function checkCommandPermissions(
           disallowedCommands,
           blockReason: `Command(s) not in the allowed commands list. Disallowed commands: ${disallowedCommands
             .map((c) => JSON.stringify(c))
-            .join(', ')}`,
+            .join(", ")}`,
           isHardDenial: false, // This is a soft denial.
         };
       }
@@ -973,28 +973,28 @@ export function execCommand(
     const child = execFile(
       command,
       args,
-      { encoding: 'utf8', ...options },
+      { encoding: "utf8", ...options },
       (error, stdout, stderr) => {
         if (error) {
           if (!options.preserveOutputOnError) {
             reject(error);
           } else {
             resolve({
-              stdout: String(stdout ?? ''),
-              stderr: String(stderr ?? ''),
-              code: typeof error.code === 'number' ? error.code : 1,
+              stdout: String(stdout ?? ""),
+              stderr: String(stderr ?? ""),
+              code: typeof error.code === "number" ? error.code : 1,
             });
           }
           return;
         }
         resolve({
-          stdout: String(stdout ?? ''),
-          stderr: String(stderr ?? ''),
+          stdout: String(stdout ?? ""),
+          stderr: String(stderr ?? ""),
           code: 0,
         });
       },
     );
-    child.on('error', reject);
+    child.on("error", reject);
   });
 }
 
@@ -1008,16 +1008,16 @@ export function resolveCommandPath(command: string): {
   error?: Error;
 } {
   try {
-    const isWin = process.platform === 'win32';
+    const isWin = process.platform === "win32";
 
     if (isWin) {
-      const checkCommand = 'where.exe';
+      const checkCommand = "where.exe";
       const checkArgs = [command];
 
       let result: string | null = null;
       try {
         result = execFileSync(checkCommand, checkArgs, {
-          encoding: 'utf8',
+          encoding: "utf8",
           shell: false,
         }).trim();
       } catch {
@@ -1026,13 +1026,13 @@ export function resolveCommandPath(command: string): {
 
       return result ? { path: result } : { path: null };
     } else {
-      const shell = '/bin/sh';
-      const checkArgs = ['-c', `command -v ${escapeShellArg(command, 'bash')}`];
+      const shell = "/bin/sh";
+      const checkArgs = ["-c", `command -v ${escapeShellArg(command, "bash")}`];
 
       let result: string | null = null;
       try {
         result = execFileSync(shell, checkArgs, {
-          encoding: 'utf8',
+          encoding: "utf8",
           shell: false,
         }).trim();
       } catch {
@@ -1091,7 +1091,7 @@ export function isCommandNeedsPermission(command: string): {
 
   return {
     requiresPermission: true,
-    reason: 'Command requires permission to execute.',
+    reason: "Command requires permission to execute.",
   };
 }
 
@@ -1113,26 +1113,26 @@ export function checkArgumentSafety(args: string): {
   const dangerousPatterns: string[] = [];
 
   // Command substitution patterns
-  if (args.includes('$(')) dangerousPatterns.push('$() command substitution');
-  if (args.includes('`'))
-    dangerousPatterns.push('backtick command substitution');
-  if (args.includes('<(')) dangerousPatterns.push('<() process substitution');
-  if (args.includes('>(')) dangerousPatterns.push('>() process substitution');
+  if (args.includes("$(")) dangerousPatterns.push("$() command substitution");
+  if (args.includes("`"))
+    dangerousPatterns.push("backtick command substitution");
+  if (args.includes("<(")) dangerousPatterns.push("<() process substitution");
+  if (args.includes(">(")) dangerousPatterns.push(">() process substitution");
 
   // Command separators (outside of quotes)
-  if (args.includes(';')) dangerousPatterns.push('; command separator');
-  if (args.includes('|')) dangerousPatterns.push('| pipe');
-  if (args.includes('&&')) dangerousPatterns.push('&& AND operator');
-  if (args.includes('||')) dangerousPatterns.push('|| OR operator');
+  if (args.includes(";")) dangerousPatterns.push("; command separator");
+  if (args.includes("|")) dangerousPatterns.push("| pipe");
+  if (args.includes("&&")) dangerousPatterns.push("&& AND operator");
+  if (args.includes("||")) dangerousPatterns.push("|| OR operator");
 
   // Background execution (space + &, with optional surrounding)
-  if (args.includes(' &') || args.includes('& '))
-    dangerousPatterns.push('& background operator');
+  if (args.includes(" &") || args.includes("& "))
+    dangerousPatterns.push("& background operator");
 
   // Input/Output redirection
-  if (args.includes('>') || args.includes('<')) {
-    if (/>\s|\d>/.test(args)) dangerousPatterns.push('> output redirection');
-    if (/<\s|\d</.test(args)) dangerousPatterns.push('< input redirection');
+  if (args.includes(">") || args.includes("<")) {
+    if (/>\s|\d>/.test(args)) dangerousPatterns.push("> output redirection");
+    if (/<\s|\d</.test(args)) dangerousPatterns.push("< input redirection");
   }
 
   return {
@@ -1146,7 +1146,7 @@ export function checkArgumentSafety(args: string): {
 const CONPTY_MIN_WINDOWS_BUILD = 19042;
 
 export function shouldDefaultToNodePty(): boolean {
-  if (os.platform() !== 'win32') return true;
-  const build = parseInt(os.release().split('.')[2] ?? '', 10);
+  if (os.platform() !== "win32") return true;
+  const build = parseInt(os.release().split(".")[2] ?? "", 10);
   return !isNaN(build) && build >= CONPTY_MIN_WINDOWS_BUILD;
 }

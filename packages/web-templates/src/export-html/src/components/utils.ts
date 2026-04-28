@@ -1,29 +1,29 @@
-import type { ChatData, ChatViewerMessage } from './types.js';
+import type { ChatData, ChatViewerMessage } from "./types.js";
 
 /**
  * Type guard for ChatViewerMessage
  */
 export const isChatViewerMessage = (
   value: unknown,
-): value is ChatViewerMessage => Boolean(value) && typeof value === 'object';
+): value is ChatViewerMessage => Boolean(value) && typeof value === "object";
 
 /**
  * Parse chat data from the embedded script tag
  */
 export const parseChatData = (): ChatData => {
-  const chatDataElement = document.getElementById('chat-data');
+  const chatDataElement = document.getElementById("chat-data");
   if (!chatDataElement?.textContent) {
     return {};
   }
 
   try {
     const parsed = JSON.parse(chatDataElement.textContent) as unknown;
-    if (parsed && typeof parsed === 'object') {
+    if (parsed && typeof parsed === "object") {
       return parsed as ChatData;
     }
     return {};
   } catch (error) {
-    console.error('Failed to parse chat data.', error);
+    console.error("Failed to parse chat data.", error);
     return {};
   }
 };
@@ -33,17 +33,17 @@ export const parseChatData = (): ChatData => {
  */
 export const formatSessionDate = (startTime?: string | null) => {
   if (!startTime) {
-    return '-';
+    return "-";
   }
 
   try {
     const date = new Date(startTime);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch {
     return startTime;
@@ -55,17 +55,17 @@ export const formatSessionDate = (startTime?: string | null) => {
  */
 export const formatExportTime = (exportTime?: string | null) => {
   if (!exportTime) {
-    return '-';
+    return "-";
   }
 
   try {
     const date = new Date(exportTime);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch {
     return exportTime;
@@ -77,14 +77,14 @@ export const formatExportTime = (exportTime?: string | null) => {
  */
 export const formatRelativeTime = (startTime?: string | null) => {
   if (!startTime) {
-    return '-';
+    return "-";
   }
 
   try {
     const date = new Date(startTime);
     const startTimestamp = date.getTime();
     if (Number.isNaN(startTimestamp)) {
-      return '-';
+      return "-";
     }
     const now = new Date();
     const diffMs = Math.max(0, now.getTime() - startTimestamp);
@@ -97,22 +97,22 @@ export const formatRelativeTime = (startTime?: string | null) => {
     const diffYears = Math.floor(diffDays / 365);
 
     if (diffSeconds < 60) {
-      return 'just now';
+      return "just now";
     } else if (diffMinutes < 60) {
-      return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+      return `${diffMinutes} minute${diffMinutes === 1 ? "" : "s"} ago`;
     } else if (diffHours < 24) {
-      return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+      return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
     } else if (diffDays < 7) {
-      return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+      return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
     } else if (diffWeeks < 4) {
-      return `${diffWeeks} week${diffWeeks === 1 ? '' : 's'} ago`;
+      return `${diffWeeks} week${diffWeeks === 1 ? "" : "s"} ago`;
     } else if (diffMonths < 12) {
-      return `${diffMonths} month${diffMonths === 1 ? '' : 's'} ago`;
+      return `${diffMonths} month${diffMonths === 1 ? "" : "s"} ago`;
     } else {
-      return `${diffYears} year${diffYears === 1 ? '' : 's'} ago`;
+      return `${diffYears} year${diffYears === 1 ? "" : "s"} ago`;
     }
   } catch {
-    return '-';
+    return "-";
   }
 };
 
@@ -121,7 +121,7 @@ export const formatRelativeTime = (startTime?: string | null) => {
  */
 export const formatPath = (path: string, maxLength: number = 40) => {
   if (!path || path.length <= maxLength) return path;
-  return '...' + path.slice(-maxLength + 3);
+  return "..." + path.slice(-maxLength + 3);
 };
 
 /**

@@ -4,33 +4,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import { IDEServer } from './ide-server.js';
-import semver from 'semver';
-import { DiffContentProvider, DiffManager } from './diff-manager.js';
-import { createLogger } from './utils/logger.js';
+import * as vscode from "vscode";
+import { IDEServer } from "./ide-server.js";
+import semver from "semver";
+import { DiffContentProvider, DiffManager } from "./diff-manager.js";
+import { createLogger } from "./utils/logger.js";
 import {
   detectIdeFromEnv,
   IDE_DEFINITIONS,
   type IdeInfo,
-} from '@tram-ai/tram-core/src/ide/detect-ide.js';
-import { WebViewProvider } from './webview/providers/WebViewProvider.js';
-import { ChatProviderRegistry } from './webview/providers/ChatProviderRegistry.js';
-import { registerChatViewProviders } from './webview/providers/chatViewRegistration.js';
-import { registerNewCommands } from './commands/index.js';
-import { ReadonlyFileSystemProvider } from './services/readonlyFileSystemProvider.js';
-import { isWindows } from './utils/platform.js';
+} from "@tram-ai/tram-core/src/ide/detect-ide.js";
+import { WebViewProvider } from "./webview/providers/WebViewProvider.js";
+import { ChatProviderRegistry } from "./webview/providers/ChatProviderRegistry.js";
+import { registerChatViewProviders } from "./webview/providers/chatViewRegistration.js";
+import { registerNewCommands } from "./commands/index.js";
+import { ReadonlyFileSystemProvider } from "./services/readonlyFileSystemProvider.js";
+import { isWindows } from "./utils/platform.js";
 
-const CLI_IDE_COMPANION_IDENTIFIER = 'tram-ai.tram-code-vscode-ide-companion';
-const INFO_MESSAGE_SHOWN_KEY = 'tramCodeInfoMessageShown';
-export const DIFF_SCHEME = 'tram-diff';
+const CLI_IDE_COMPANION_IDENTIFIER = "tram-ai.tram-code-vscode-ide-companion";
+const INFO_MESSAGE_SHOWN_KEY = "tramCodeInfoMessageShown";
+export const DIFF_SCHEME = "tram-diff";
 
 /**
  * IDE environments where the installation greeting is hidden.  In these
  * environments we either are pre-installed and the installation message is
  * confusing or we just want to be quiet.
  */
-const HIDE_INSTALLATION_GREETING_IDES: ReadonlySet<IdeInfo['name']> = new Set([
+const HIDE_INSTALLATION_GREETING_IDES: ReadonlySet<IdeInfo["name"]> = new Set([
   IDE_DEFINITIONS.firebasestudio.name,
   IDE_DEFINITIONS.cloudshell.name,
 ]);
@@ -50,12 +50,12 @@ async function checkForUpdates(
 
     // Fetch extension details from the VSCode Marketplace.
     const response = await fetch(
-      'https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery',
+      "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery",
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json;api-version=7.1-preview.1',
+          "Content-Type": "application/json",
+          Accept: "application/json;api-version=7.1-preview.1",
         },
         body: JSON.stringify({
           filters: [
@@ -91,12 +91,12 @@ async function checkForUpdates(
     if (latestVersion && semver.gt(latestVersion, currentVersion)) {
       const selection = await vscode.window.showInformationMessage(
         `A new version (${latestVersion}) of the TRAM Companion extension is available.`,
-        'Update to latest version',
+        "Update to latest version",
       );
-      if (selection === 'Update to latest version') {
+      if (selection === "Update to latest version") {
         // The install command will update the extension if a newer version is found.
         await vscode.commands.executeCommand(
-          'workbench.extensions.installExtension',
+          "workbench.extensions.installExtension",
           CLI_IDE_COMPANION_IDENTIFIER,
         );
       }
@@ -108,9 +108,9 @@ async function checkForUpdates(
 }
 
 export async function activate(context: vscode.ExtensionContext) {
-  logger = vscode.window.createOutputChannel('TRAM Companion');
+  logger = vscode.window.createOutputChannel("TRAM Companion");
   log = createLogger(context, logger);
-  log('Extension activated');
+  log("Extension activated");
 
   checkForUpdates(context, log);
 
@@ -125,7 +125,7 @@ export async function activate(context: vscode.ExtensionContext) {
     ),
     readonlyProvider,
   );
-  log('Readonly file system provider registered');
+  log("Readonly file system provider registered");
 
   chatProviderRegistry = new ChatProviderRegistry(
     () => new WebViewProvider(context, context.extensionUri),
@@ -145,7 +145,7 @@ export async function activate(context: vscode.ExtensionContext) {
       const providers =
         chatProviderRegistry
           ?.getPermissionAwareProviders()
-          .filter((p) => typeof p.shouldSuppressDiff === 'function') ?? [];
+          .filter((p) => typeof p.shouldSuppressDiff === "function") ?? [];
       if (providers.length === 0) {
         return false;
       }
@@ -167,23 +167,23 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Register WebView panel serializer for persistence across reloads
   context.subscriptions.push(
-    vscode.window.registerWebviewPanelSerializer('tramCode.chat', {
+    vscode.window.registerWebviewPanelSerializer("tramCode.chat", {
       async deserializeWebviewPanel(
         webviewPanel: vscode.WebviewPanel,
         state: unknown,
       ) {
         console.log(
-          '[Extension] Deserializing WebView panel with state:',
+          "[Extension] Deserializing WebView panel with state:",
           state,
         );
 
         // Create a new provider for the restored panel
         const provider = createWebViewProvider();
-        console.log('[Extension] Provider created for deserialization');
+        console.log("[Extension] Provider created for deserialization");
 
         // Restore state if available BEFORE restoring the panel
-        if (state && typeof state === 'object') {
-          console.log('[Extension] Restoring state:', state);
+        if (state && typeof state === "object") {
+          console.log("[Extension] Restoring state:", state);
           provider.restoreState(
             state as {
               conversationId: string | null;
@@ -191,13 +191,13 @@ export async function activate(context: vscode.ExtensionContext) {
             },
           );
         } else {
-          console.log('[Extension] No state to restore or invalid state');
+          console.log("[Extension] No state to restore or invalid state");
         }
 
         await provider.restorePanel(webviewPanel);
-        console.log('[Extension] Panel restore completed');
+        console.log("[Extension] Panel restore completed");
 
-        log('WebView panel restored from serialization');
+        log("WebView panel restored from serialization");
       },
     }),
   );
@@ -223,7 +223,7 @@ export async function activate(context: vscode.ExtensionContext) {
       DIFF_SCHEME,
       diffContentProvider,
     ),
-    (vscode.commands.registerCommand('tram.diff.accept', (uri?: vscode.Uri) => {
+    (vscode.commands.registerCommand("tram.diff.accept", (uri?: vscode.Uri) => {
       const docUri = uri ?? vscode.window.activeTextEditor?.document.uri;
       if (docUri && docUri.scheme === DIFF_SCHEME) {
         diffManager.acceptDiff(docUri);
@@ -233,15 +233,15 @@ export async function activate(context: vscode.ExtensionContext) {
         for (const provider of chatProviderRegistry?.getPermissionAwareProviders() ??
           []) {
           if (provider?.hasPendingPermission()) {
-            provider.respondToPendingPermission('allow');
+            provider.respondToPendingPermission("allow");
           }
         }
       } catch (err) {
-        console.warn('[Extension] Auto-allow on diff.accept failed:', err);
+        console.warn("[Extension] Auto-allow on diff.accept failed:", err);
       }
-      console.log('[Extension] Diff accepted');
+      console.log("[Extension] Diff accepted");
     }),
-    vscode.commands.registerCommand('tram.diff.cancel', (uri?: vscode.Uri) => {
+    vscode.commands.registerCommand("tram.diff.cancel", (uri?: vscode.Uri) => {
       const docUri = uri ?? vscode.window.activeTextEditor?.document.uri;
       if (docUri && docUri.scheme === DIFF_SCHEME) {
         diffManager.cancelDiff(docUri);
@@ -251,26 +251,26 @@ export async function activate(context: vscode.ExtensionContext) {
         for (const provider of chatProviderRegistry?.getPermissionAwareProviders() ??
           []) {
           if (provider?.hasPendingPermission()) {
-            provider.respondToPendingPermission('cancel');
+            provider.respondToPendingPermission("cancel");
           }
         }
       } catch (err) {
-        console.warn('[Extension] Auto-reject on diff.cancel failed:', err);
+        console.warn("[Extension] Auto-reject on diff.cancel failed:", err);
       }
-      console.log('[Extension] Diff cancelled');
+      console.log("[Extension] Diff cancelled");
     })),
-    vscode.commands.registerCommand('tram.diff.closeAll', async () => {
+    vscode.commands.registerCommand("tram.diff.closeAll", async () => {
       try {
         await diffManager.closeAll();
       } catch (err) {
-        console.warn('[Extension] tram.diff.closeAll failed:', err);
+        console.warn("[Extension] tram.diff.closeAll failed:", err);
       }
     }),
-    vscode.commands.registerCommand('tram.diff.suppressBriefly', async () => {
+    vscode.commands.registerCommand("tram.diff.suppressBriefly", async () => {
       try {
         diffManager.suppressFor(1200);
       } catch (err) {
-        console.warn('[Extension] tram.diff.suppressBriefly failed:', err);
+        console.warn("[Extension] tram.diff.suppressBriefly failed:", err);
       }
     }),
   );
@@ -289,7 +289,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   if (!context.globalState.get(INFO_MESSAGE_SHOWN_KEY) && infoMessageEnabled) {
     void vscode.window.showInformationMessage(
-      'TRAM Companion extension successfully installed.',
+      "TRAM Companion extension successfully installed.",
     );
     context.globalState.update(INFO_MESSAGE_SHOWN_KEY, true);
   }
@@ -302,7 +302,7 @@ export async function activate(context: vscode.ExtensionContext) {
       ideServer.syncEnvVars();
     }),
     vscode.commands.registerCommand(
-      'tram.runTram',
+      "tram.runTram",
       async (
         location?:
           | vscode.TerminalLocation
@@ -311,7 +311,7 @@ export async function activate(context: vscode.ExtensionContext) {
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders || workspaceFolders.length === 0) {
           vscode.window.showInformationMessage(
-            'No folder open. Please open a folder to run TRAM.',
+            "No folder open. Please open a folder to run TRAM.",
           );
           return;
         }
@@ -321,16 +321,16 @@ export async function activate(context: vscode.ExtensionContext) {
           selectedFolder = workspaceFolders[0];
         } else {
           selectedFolder = await vscode.window.showWorkspaceFolderPick({
-            placeHolder: 'Select a folder to run TRAM in',
+            placeHolder: "Select a folder to run TRAM in",
           });
         }
 
         if (selectedFolder) {
           const cliEntry = vscode.Uri.joinPath(
             context.extensionUri,
-            'dist',
-            'tram-cli',
-            'cli.js',
+            "dist",
+            "tram-cli",
+            "cli.js",
           ).fsPath;
           const execPath = process.execPath;
 
@@ -367,10 +367,10 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       },
     ),
-    vscode.commands.registerCommand('tram.showNotices', async () => {
+    vscode.commands.registerCommand("tram.showNotices", async () => {
       const noticePath = vscode.Uri.joinPath(
         context.extensionUri,
-        'NOTICES.txt',
+        "NOTICES.txt",
       );
       await vscode.window.showTextDocument(noticePath);
     }),
@@ -378,7 +378,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export async function deactivate(): Promise<void> {
-  log('Extension deactivated');
+  log("Extension deactivated");
   try {
     if (ideServer) {
       await ideServer.stop();

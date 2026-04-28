@@ -10,14 +10,14 @@ import {
   type SlashCommand,
   type MessageActionReturn,
   type SubmitPromptActionReturn,
-} from './types.js';
-import { t } from '../../i18n/index.js';
-import { ApprovalMode } from '@qwen-code/qwen-code-core';
+} from "./types.js";
+import { t } from "../../i18n/index.js";
+import { ApprovalMode } from "@tram-ai/tram-core";
 
 export const planCommand: SlashCommand = {
-  name: 'plan',
+  name: "plan",
   get description() {
-    return t('Switch to plan mode or exit plan mode');
+    return t("Switch to plan mode or exit plan mode");
   },
   kind: CommandKind.BUILT_IN,
   action: async (
@@ -27,20 +27,20 @@ export const planCommand: SlashCommand = {
     const { config } = context.services;
     if (!config) {
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('Configuration is not available.'),
+        type: "message",
+        messageType: "error",
+        content: t("Configuration is not available."),
       };
     }
 
     const trimmedArgs = args.trim();
     const currentMode = config.getApprovalMode();
 
-    if (trimmedArgs === 'exit') {
+    if (trimmedArgs === "exit") {
       if (currentMode !== ApprovalMode.PLAN) {
         return {
-          type: 'message',
-          messageType: 'error',
+          type: "message",
+          messageType: "error",
           content: t('Not in plan mode. Use "/plan" to enter plan mode first.'),
         };
       }
@@ -48,15 +48,15 @@ export const planCommand: SlashCommand = {
         config.setApprovalMode(config.getPrePlanMode());
       } catch (e) {
         return {
-          type: 'message',
-          messageType: 'error',
+          type: "message",
+          messageType: "error",
           content: (e as Error).message,
         };
       }
       return {
-        type: 'message',
-        messageType: 'info',
-        content: t('Exited plan mode. Previous approval mode restored.'),
+        type: "message",
+        messageType: "info",
+        content: t("Exited plan mode. Previous approval mode restored."),
       };
     }
 
@@ -65,24 +65,24 @@ export const planCommand: SlashCommand = {
         config.setApprovalMode(ApprovalMode.PLAN);
       } catch (e) {
         return {
-          type: 'message',
-          messageType: 'error',
+          type: "message",
+          messageType: "error",
           content: (e as Error).message,
         };
       }
 
       if (trimmedArgs) {
         return {
-          type: 'submit_prompt',
+          type: "submit_prompt",
           content: [{ text: trimmedArgs }],
         };
       }
 
       return {
-        type: 'message',
-        messageType: 'info',
+        type: "message",
+        messageType: "info",
         content: t(
-          'Enabled plan mode. The agent will analyze and plan without executing tools.',
+          "Enabled plan mode. The agent will analyze and plan without executing tools.",
         ),
       };
     }
@@ -90,14 +90,14 @@ export const planCommand: SlashCommand = {
     // Already in plan mode
     if (trimmedArgs) {
       return {
-        type: 'submit_prompt',
+        type: "submit_prompt",
         content: [{ text: trimmedArgs }],
       };
     }
 
     return {
-      type: 'message',
-      messageType: 'info',
+      type: "message",
+      messageType: "info",
       content: t('Already in plan mode. Use "/plan exit" to exit plan mode.'),
     };
   },

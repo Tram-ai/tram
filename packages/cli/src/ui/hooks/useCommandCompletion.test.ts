@@ -6,24 +6,24 @@
 
 /** @vitest-environment jsdom */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useCommandCompletion } from './useCommandCompletion.js';
-import type { CommandContext } from '../commands/types.js';
-import type { Config } from '@tram-ai/tram-core';
-import { useTextBuffer } from '../components/shared/text-buffer.js';
-import { useEffect } from 'react';
-import type { Suggestion } from '../components/SuggestionsDisplay.js';
-import type { UseAtCompletionProps } from './useAtCompletion.js';
-import { useAtCompletion } from './useAtCompletion.js';
-import type { UseSlashCompletionProps } from './useSlashCompletion.js';
-import { useSlashCompletion } from './useSlashCompletion.js';
+import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { renderHook, act, waitFor } from "@testing-library/react";
+import { useCommandCompletion } from "./useCommandCompletion.js";
+import type { CommandContext } from "../commands/types.js";
+import type { Config } from "@tram-ai/tram-core";
+import { useTextBuffer } from "../components/shared/text-buffer.js";
+import { useEffect } from "react";
+import type { Suggestion } from "../components/SuggestionsDisplay.js";
+import type { UseAtCompletionProps } from "./useAtCompletion.js";
+import { useAtCompletion } from "./useAtCompletion.js";
+import type { UseSlashCompletionProps } from "./useSlashCompletion.js";
+import { useSlashCompletion } from "./useSlashCompletion.js";
 
-vi.mock('./useAtCompletion', () => ({
+vi.mock("./useAtCompletion", () => ({
   useAtCompletion: vi.fn(),
 }));
 
-vi.mock('./useSlashCompletion', () => ({
+vi.mock("./useSlashCompletion", () => ({
   useSlashCompletion: vi.fn(() => ({
     completionStart: 0,
     completionEnd: 0,
@@ -81,10 +81,10 @@ const setupMocks = ({
   );
 };
 
-describe('useCommandCompletion', () => {
+describe("useCommandCompletion", () => {
   const mockCommandContext = {} as CommandContext;
   const mockConfig = {} as Config;
-  const testRootDir = '/';
+  const testRootDir = "/";
 
   // Helper to create real TextBuffer objects within renderHook
   function useTextBufferForTest(text: string, cursorOffset?: number) {
@@ -107,12 +107,12 @@ describe('useCommandCompletion', () => {
     vi.restoreAllMocks();
   });
 
-  describe('Core Hook Behavior', () => {
-    describe('State Management', () => {
-      it('should initialize with default state', () => {
+  describe("Core Hook Behavior", () => {
+    describe("State Management", () => {
+      it("should initialize with default state", () => {
         const { result } = renderHook(() =>
           useCommandCompletion(
-            useTextBufferForTest(''),
+            useTextBufferForTest(""),
             testRootDir,
             [],
             mockCommandContext,
@@ -128,13 +128,13 @@ describe('useCommandCompletion', () => {
         expect(result.current.isLoadingSuggestions).toBe(false);
       });
 
-      it('should reset state when completion mode becomes IDLE', async () => {
+      it("should reset state when completion mode becomes IDLE", async () => {
         setupMocks({
-          atSuggestions: [{ label: 'src/file.txt', value: 'src/file.txt' }],
+          atSuggestions: [{ label: "src/file.txt", value: "src/file.txt" }],
         });
 
         const { result } = renderHook(() => {
-          const textBuffer = useTextBufferForTest('@file');
+          const textBuffer = useTextBufferForTest("@file");
           const completion = useCommandCompletion(
             textBuffer,
             testRootDir,
@@ -156,7 +156,7 @@ describe('useCommandCompletion', () => {
           result.current.textBuffer.replaceRangeByOffset(
             0,
             5,
-            'just some text',
+            "just some text",
           );
         });
 
@@ -165,10 +165,10 @@ describe('useCommandCompletion', () => {
         });
       });
 
-      it('should reset all state to default values', () => {
+      it("should reset all state to default values", () => {
         const { result } = renderHook(() =>
           useCommandCompletion(
-            useTextBufferForTest('@files'),
+            useTextBufferForTest("@files"),
             testRootDir,
             [],
             mockCommandContext,
@@ -191,8 +191,8 @@ describe('useCommandCompletion', () => {
         expect(result.current.showSuggestions).toBe(false);
       });
 
-      it('should call useAtCompletion with the correct query for an escaped space', async () => {
-        const text = '@src/a\\ file.txt';
+      it("should call useAtCompletion with the correct query for an escaped space", async () => {
+        const text = "@src/a\\ file.txt";
         renderHook(() =>
           useCommandCompletion(
             useTextBufferForTest(text),
@@ -208,14 +208,14 @@ describe('useCommandCompletion', () => {
           expect(useAtCompletion).toHaveBeenLastCalledWith(
             expect.objectContaining({
               enabled: true,
-              pattern: 'src/a\\ file.txt',
+              pattern: "src/a\\ file.txt",
             }),
           );
         });
       });
 
-      it('should correctly identify the completion context with multiple @ symbols', async () => {
-        const text = '@file1 @file2';
+      it("should correctly identify the completion context with multiple @ symbols", async () => {
+        const text = "@file1 @file2";
         const cursorOffset = 3; // @fi|le1 @file2
 
         renderHook(() =>
@@ -233,32 +233,32 @@ describe('useCommandCompletion', () => {
           expect(useAtCompletion).toHaveBeenLastCalledWith(
             expect.objectContaining({
               enabled: true,
-              pattern: 'file1',
+              pattern: "file1",
             }),
           );
         });
       });
     });
 
-    describe('Navigation', () => {
+    describe("Navigation", () => {
       const mockSuggestions = [
-        { label: 'cmd1', value: 'cmd1' },
-        { label: 'cmd2', value: 'cmd2' },
-        { label: 'cmd3', value: 'cmd3' },
-        { label: 'cmd4', value: 'cmd4' },
-        { label: 'cmd5', value: 'cmd5' },
+        { label: "cmd1", value: "cmd1" },
+        { label: "cmd2", value: "cmd2" },
+        { label: "cmd3", value: "cmd3" },
+        { label: "cmd4", value: "cmd4" },
+        { label: "cmd5", value: "cmd5" },
       ];
 
       beforeEach(() => {
         setupMocks({ slashSuggestions: mockSuggestions });
       });
 
-      it('should handle navigateUp with no suggestions', () => {
+      it("should handle navigateUp with no suggestions", () => {
         setupMocks({ slashSuggestions: [] });
 
         const { result } = renderHook(() =>
           useCommandCompletion(
-            useTextBufferForTest('/'),
+            useTextBufferForTest("/"),
             testRootDir,
             [],
             mockCommandContext,
@@ -274,11 +274,11 @@ describe('useCommandCompletion', () => {
         expect(result.current.activeSuggestionIndex).toBe(-1);
       });
 
-      it('should handle navigateDown with no suggestions', () => {
+      it("should handle navigateDown with no suggestions", () => {
         setupMocks({ slashSuggestions: [] });
         const { result } = renderHook(() =>
           useCommandCompletion(
-            useTextBufferForTest('/'),
+            useTextBufferForTest("/"),
             testRootDir,
             [],
             mockCommandContext,
@@ -294,10 +294,10 @@ describe('useCommandCompletion', () => {
         expect(result.current.activeSuggestionIndex).toBe(-1);
       });
 
-      it('should navigate up through suggestions with wrap-around', async () => {
+      it("should navigate up through suggestions with wrap-around", async () => {
         const { result } = renderHook(() =>
           useCommandCompletion(
-            useTextBufferForTest('/'),
+            useTextBufferForTest("/"),
             testRootDir,
             [],
             mockCommandContext,
@@ -319,10 +319,10 @@ describe('useCommandCompletion', () => {
         expect(result.current.activeSuggestionIndex).toBe(4);
       });
 
-      it('should navigate down through suggestions with wrap-around', async () => {
+      it("should navigate down through suggestions with wrap-around", async () => {
         const { result } = renderHook(() =>
           useCommandCompletion(
-            useTextBufferForTest('/'),
+            useTextBufferForTest("/"),
             testRootDir,
             [],
             mockCommandContext,
@@ -347,10 +347,10 @@ describe('useCommandCompletion', () => {
         expect(result.current.activeSuggestionIndex).toBe(0);
       });
 
-      it('should handle navigation with multiple suggestions', async () => {
+      it("should handle navigation with multiple suggestions", async () => {
         const { result } = renderHook(() =>
           useCommandCompletion(
-            useTextBufferForTest('/'),
+            useTextBufferForTest("/"),
             testRootDir,
             [],
             mockCommandContext,
@@ -381,12 +381,12 @@ describe('useCommandCompletion', () => {
         expect(result.current.activeSuggestionIndex).toBe(4);
       });
 
-      it('should automatically select the first item when suggestions are available', async () => {
+      it("should automatically select the first item when suggestions are available", async () => {
         setupMocks({ slashSuggestions: mockSuggestions });
 
         const { result } = renderHook(() =>
           useCommandCompletion(
-            useTextBufferForTest('/'),
+            useTextBufferForTest("/"),
             testRootDir,
             [],
             mockCommandContext,
@@ -405,13 +405,13 @@ describe('useCommandCompletion', () => {
     });
   });
 
-  describe('Completion mode detection', () => {
-    it('should switch to AT mode when typing @ after a slash command (#2518)', async () => {
+  describe("Completion mode detection", () => {
+    it("should switch to AT mode when typing @ after a slash command (#2518)", async () => {
       setupMocks({
-        atSuggestions: [{ label: 'src/file.txt', value: 'src/file.txt' }],
+        atSuggestions: [{ label: "src/file.txt", value: "src/file.txt" }],
       });
 
-      const text = '/qc:create-issue @file';
+      const text = "/qc:create-issue @file";
       renderHook(() =>
         useCommandCompletion(
           useTextBufferForTest(text),
@@ -427,18 +427,18 @@ describe('useCommandCompletion', () => {
         expect(useAtCompletion).toHaveBeenLastCalledWith(
           expect.objectContaining({
             enabled: true,
-            pattern: 'file',
+            pattern: "file",
           }),
         );
       });
     });
 
-    it('should remain in SLASH mode when no @ is typed after slash command', async () => {
+    it("should remain in SLASH mode when no @ is typed after slash command", async () => {
       setupMocks({
-        slashSuggestions: [{ label: 'help', value: 'help' }],
+        slashSuggestions: [{ label: "help", value: "help" }],
       });
 
-      const text = '/help';
+      const text = "/help";
       renderHook(() =>
         useCommandCompletion(
           useTextBufferForTest(text),
@@ -454,18 +454,18 @@ describe('useCommandCompletion', () => {
         expect(useSlashCompletion).toHaveBeenLastCalledWith(
           expect.objectContaining({
             enabled: true,
-            query: '/help',
+            query: "/help",
           }),
         );
       });
     });
 
-    it('should complete a file path when @ appears after a slash command', async () => {
+    it("should complete a file path when @ appears after a slash command", async () => {
       setupMocks({
-        atSuggestions: [{ label: 'src/index.ts', value: 'src/index.ts' }],
+        atSuggestions: [{ label: "src/index.ts", value: "src/index.ts" }],
       });
 
-      const text = '/review @src/ind';
+      const text = "/review @src/ind";
       const { result } = renderHook(() => {
         const textBuffer = useTextBufferForTest(text);
         const completion = useCommandCompletion(
@@ -487,19 +487,19 @@ describe('useCommandCompletion', () => {
         result.current.handleAutocomplete(0);
       });
 
-      expect(result.current.textBuffer.text).toBe('/review @src/index.ts ');
+      expect(result.current.textBuffer.text).toBe("/review @src/index.ts ");
     });
   });
 
-  describe('handleAutocomplete', () => {
-    it('should complete a partial command', async () => {
+  describe("handleAutocomplete", () => {
+    it("should complete a partial command", async () => {
       setupMocks({
-        slashSuggestions: [{ label: 'memory', value: 'memory' }],
+        slashSuggestions: [{ label: "memory", value: "memory" }],
         slashCompletionRange: { completionStart: 1, completionEnd: 4 },
       });
 
       const { result } = renderHook(() => {
-        const textBuffer = useTextBufferForTest('/mem');
+        const textBuffer = useTextBufferForTest("/mem");
         const completion = useCommandCompletion(
           textBuffer,
           testRootDir,
@@ -519,16 +519,16 @@ describe('useCommandCompletion', () => {
         result.current.handleAutocomplete(0);
       });
 
-      expect(result.current.textBuffer.text).toBe('/memory ');
+      expect(result.current.textBuffer.text).toBe("/memory ");
     });
 
-    it('should complete a file path', async () => {
+    it("should complete a file path", async () => {
       setupMocks({
-        atSuggestions: [{ label: 'src/file1.txt', value: 'src/file1.txt' }],
+        atSuggestions: [{ label: "src/file1.txt", value: "src/file1.txt" }],
       });
 
       const { result } = renderHook(() => {
-        const textBuffer = useTextBufferForTest('@src/fi');
+        const textBuffer = useTextBufferForTest("@src/fi");
         const completion = useCommandCompletion(
           textBuffer,
           testRootDir,
@@ -548,15 +548,15 @@ describe('useCommandCompletion', () => {
         result.current.handleAutocomplete(0);
       });
 
-      expect(result.current.textBuffer.text).toBe('@src/file1.txt ');
+      expect(result.current.textBuffer.text).toBe("@src/file1.txt ");
     });
 
-    it('should complete a file path when cursor is not at the end of the line', async () => {
-      const text = '@src/fi is a good file';
+    it("should complete a file path when cursor is not at the end of the line", async () => {
+      const text = "@src/fi is a good file";
       const cursorOffset = 7; // after "i"
 
       setupMocks({
-        atSuggestions: [{ label: 'src/file1.txt', value: 'src/file1.txt' }],
+        atSuggestions: [{ label: "src/file1.txt", value: "src/file1.txt" }],
       });
 
       const { result } = renderHook(() => {
@@ -581,7 +581,7 @@ describe('useCommandCompletion', () => {
       });
 
       expect(result.current.textBuffer.text).toBe(
-        '@src/file1.txt is a good file',
+        "@src/file1.txt is a good file",
       );
     });
   });

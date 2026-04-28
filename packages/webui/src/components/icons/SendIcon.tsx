@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 
 interface SendIconProps {
   size?: number;
@@ -14,8 +14,8 @@ interface SendIconProps {
 
 const SendIcon: FC<SendIconProps> = ({
   size = 24,
-  color = 'currentColor',
-  className = '',
+  color = "currentColor",
+  className = "",
 }) => (
   <svg
     width={size}

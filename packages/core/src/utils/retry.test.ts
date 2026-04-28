@@ -5,17 +5,17 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { HttpError } from './retry.js';
-import { retryWithBackoff } from './retry.js';
-import { getErrorStatus } from './errors.js';
-import { setSimulate429 } from './testUtils.js';
-import { AuthType } from '../core/contentGenerator.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import type { HttpError } from "./retry.js";
+import { retryWithBackoff } from "./retry.js";
+import { getErrorStatus } from "./errors.js";
+import { setSimulate429 } from "./testUtils.js";
+import { AuthType } from "../core/contentGenerator.js";
 
 // Helper to create a mock function that fails a certain number of times
 const createFailingFunction = (
   failures: number,
-  successValue: string = 'success',
+  successValue: string = "success",
 ) => {
   let attempts = 0;
   return vi.fn(async () => {
@@ -34,11 +34,11 @@ const createFailingFunction = (
 class NonRetryableError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'NonRetryableError';
+    this.name = "NonRetryableError";
   }
 }
 
-describe('retryWithBackoff', () => {
+describe("retryWithBackoff", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     // Disable 429 simulation for tests
@@ -52,14 +52,14 @@ describe('retryWithBackoff', () => {
     vi.useRealTimers();
   });
 
-  it('should return the result on the first attempt if successful', async () => {
+  it("should return the result on the first attempt if successful", async () => {
     const mockFn = createFailingFunction(0);
     const result = await retryWithBackoff(mockFn);
-    expect(result).toBe('success');
+    expect(result).toBe("success");
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
-  it('should retry and succeed if failures are within maxAttempts', async () => {
+  it("should retry and succeed if failures are within maxAttempts", async () => {
     const mockFn = createFailingFunction(2);
     const promise = retryWithBackoff(mockFn, {
       maxAttempts: 3,
@@ -69,11 +69,11 @@ describe('retryWithBackoff', () => {
     await vi.runAllTimersAsync(); // Ensure all delays and retries complete
 
     const result = await promise;
-    expect(result).toBe('success');
+    expect(result).toBe("success");
     expect(mockFn).toHaveBeenCalledTimes(3);
   });
 
-  it('should throw an error if all attempts fail', async () => {
+  it("should throw an error if all attempts fail", async () => {
     const mockFn = createFailingFunction(3);
 
     // 1. Start the retryable operation, which returns a promise.
@@ -87,7 +87,7 @@ describe('retryWithBackoff', () => {
     //    The result is a new promise that resolves when the assertion is met.
     // eslint-disable-next-line vitest/valid-expect
     const assertionPromise = expect(promise).rejects.toThrow(
-      'Simulated error attempt 3',
+      "Simulated error attempt 3",
     );
 
     // 3. Now, advance the timers. This will trigger the retries and the
@@ -101,7 +101,7 @@ describe('retryWithBackoff', () => {
     expect(mockFn).toHaveBeenCalledTimes(3);
   });
 
-  it('should default to 7 maxAttempts if no options are provided', async () => {
+  it("should default to 7 maxAttempts if no options are provided", async () => {
     // This function will fail more than 7 times to ensure all retries are used.
     const mockFn = createFailingFunction(10);
 
@@ -110,7 +110,7 @@ describe('retryWithBackoff', () => {
     // Expect it to fail with the error from the 7th attempt.
     // eslint-disable-next-line vitest/valid-expect
     const assertionPromise = expect(promise).rejects.toThrow(
-      'Simulated error attempt 7',
+      "Simulated error attempt 7",
     );
     await vi.runAllTimersAsync();
     await assertionPromise;
@@ -118,7 +118,7 @@ describe('retryWithBackoff', () => {
     expect(mockFn).toHaveBeenCalledTimes(7);
   });
 
-  it('should default to 7 maxAttempts if options.maxAttempts is undefined', async () => {
+  it("should default to 7 maxAttempts if options.maxAttempts is undefined", async () => {
     // This function will fail more than 7 times to ensure all retries are used.
     const mockFn = createFailingFunction(10);
 
@@ -127,7 +127,7 @@ describe('retryWithBackoff', () => {
     // Expect it to fail with the error from the 7th attempt.
     // eslint-disable-next-line vitest/valid-expect
     const assertionPromise = expect(promise).rejects.toThrow(
-      'Simulated error attempt 7',
+      "Simulated error attempt 7",
     );
     await vi.runAllTimersAsync();
     await assertionPromise;
@@ -135,9 +135,9 @@ describe('retryWithBackoff', () => {
     expect(mockFn).toHaveBeenCalledTimes(7);
   });
 
-  it('should not retry if shouldRetry returns false', async () => {
+  it("should not retry if shouldRetry returns false", async () => {
     const mockFn = vi.fn(async () => {
-      throw new NonRetryableError('Non-retryable error');
+      throw new NonRetryableError("Non-retryable error");
     });
     const shouldRetryOnError = (error: Error) =>
       !(error instanceof NonRetryableError);
@@ -147,25 +147,25 @@ describe('retryWithBackoff', () => {
       initialDelayMs: 10,
     });
 
-    await expect(promise).rejects.toThrow('Non-retryable error');
+    await expect(promise).rejects.toThrow("Non-retryable error");
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
-  it('should throw an error if maxAttempts is not a positive number', async () => {
+  it("should throw an error if maxAttempts is not a positive number", async () => {
     const mockFn = createFailingFunction(1);
 
     // Test with 0
     await expect(retryWithBackoff(mockFn, { maxAttempts: 0 })).rejects.toThrow(
-      'maxAttempts must be a positive number.',
+      "maxAttempts must be a positive number.",
     );
 
     // The function should not be called at all if validation fails
     expect(mockFn).not.toHaveBeenCalled();
   });
 
-  it('should use default shouldRetry if not provided, retrying on 429', async () => {
+  it("should use default shouldRetry if not provided, retrying on 429", async () => {
     const mockFn = vi.fn(async () => {
-      const error = new Error('Too Many Requests') as any;
+      const error = new Error("Too Many Requests") as any;
       error.status = 429;
       throw error;
     });
@@ -177,7 +177,7 @@ describe('retryWithBackoff', () => {
 
     // Attach the rejection expectation *before* running timers
     const assertionPromise =
-      expect(promise).rejects.toThrow('Too Many Requests'); // eslint-disable-line vitest/valid-expect
+      expect(promise).rejects.toThrow("Too Many Requests"); // eslint-disable-line vitest/valid-expect
 
     // Run timers to trigger retries and eventual rejection
     await vi.runAllTimersAsync();
@@ -188,9 +188,9 @@ describe('retryWithBackoff', () => {
     expect(mockFn).toHaveBeenCalledTimes(2);
   });
 
-  it('should use default shouldRetry if not provided, not retrying on 400', async () => {
+  it("should use default shouldRetry if not provided, not retrying on 400", async () => {
     const mockFn = vi.fn(async () => {
-      const error = new Error('Bad Request') as any;
+      const error = new Error("Bad Request") as any;
       error.status = 400;
       throw error;
     });
@@ -199,13 +199,13 @@ describe('retryWithBackoff', () => {
       maxAttempts: 2,
       initialDelayMs: 10,
     });
-    await expect(promise).rejects.toThrow('Bad Request');
+    await expect(promise).rejects.toThrow("Bad Request");
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
-  it('should respect maxDelayMs', async () => {
+  it("should respect maxDelayMs", async () => {
     const mockFn = createFailingFunction(3);
-    const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
+    const setTimeoutSpy = vi.spyOn(global, "setTimeout");
 
     const promise = retryWithBackoff(mockFn, {
       maxAttempts: 4,
@@ -230,9 +230,9 @@ describe('retryWithBackoff', () => {
     expect(delays[2]).toBeLessThanOrEqual(250 * 1.3);
   });
 
-  it('should handle jitter correctly, ensuring varied delays', async () => {
+  it("should handle jitter correctly, ensuring varied delays", async () => {
     let mockFn = createFailingFunction(5);
-    const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
+    const setTimeoutSpy = vi.spyOn(global, "setTimeout");
 
     // Run retryWithBackoff multiple times to observe jitter
     const runRetry = () =>
@@ -276,7 +276,7 @@ describe('retryWithBackoff', () => {
       expect(firstDelaySet[0]).not.toBe(secondDelaySet[0]);
     } else {
       // If somehow no delays were captured (e.g. test setup issue), fail explicitly
-      throw new Error('Delays were not captured for jitter test');
+      throw new Error("Delays were not captured for jitter test");
     }
 
     // Ensure delays are within the expected jitter range [70, 130] for initialDelayMs = 100
@@ -286,15 +286,15 @@ describe('retryWithBackoff', () => {
     });
   });
 
-  describe('TRAM OAuth 429 error handling', () => {
-    it('should retry for TRAM OAuth 429 errors that are throttling-related', async () => {
-      const errorWith429: HttpError = new Error('Rate limit exceeded');
+  describe("TRAM OAuth 429 error handling", () => {
+    it("should retry for TRAM OAuth 429 errors that are throttling-related", async () => {
+      const errorWith429: HttpError = new Error("Rate limit exceeded");
       errorWith429.status = 429;
 
       const fn = vi
         .fn()
         .mockRejectedValueOnce(errorWith429)
-        .mockResolvedValue('success');
+        .mockResolvedValue("success");
 
       const promise = retryWithBackoff(fn, {
         maxAttempts: 5,
@@ -306,16 +306,16 @@ describe('retryWithBackoff', () => {
       // Fast-forward time for delays
       await vi.runAllTimersAsync();
 
-      await expect(promise).resolves.toBe('success');
+      await expect(promise).resolves.toBe("success");
 
       // Should be called twice (1 failure + 1 success)
       expect(fn).toHaveBeenCalledTimes(2);
     });
 
-    it('should throw immediately for Qwen OAuth with insufficient_quota message', async () => {
+    it("should throw immediately for Qwen OAuth with insufficient_quota message", async () => {
       const errorWithInsufficientQuota = Object.assign(
-        new Error('Free allocated quota exceeded.'),
-        { status: 429, code: 'insufficient_quota' },
+        new Error("Free allocated quota exceeded."),
+        { status: 429, code: "insufficient_quota" },
       );
 
       const fn = vi.fn().mockRejectedValue(errorWithInsufficientQuota);
@@ -328,17 +328,17 @@ describe('retryWithBackoff', () => {
       });
 
       await expect(promise).rejects.toThrow(
-        /Qwen OAuth free tier has been discontinued/,
+        /tram OAuth free tier has been discontinued/,
       );
 
       // Should be called only once (no retries)
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw immediately for Qwen OAuth with free allocated quota exceeded message', async () => {
+    it("should throw immediately for Qwen OAuth with free allocated quota exceeded message", async () => {
       const errorWithQuotaExceeded = Object.assign(
-        new Error('Free allocated quota exceeded.'),
-        { status: 429, code: 'insufficient_quota' },
+        new Error("Free allocated quota exceeded."),
+        { status: 429, code: "insufficient_quota" },
       );
 
       const fn = vi.fn().mockRejectedValue(errorWithQuotaExceeded);
@@ -351,16 +351,16 @@ describe('retryWithBackoff', () => {
       });
 
       await expect(promise).rejects.toThrow(
-        /Qwen OAuth free tier has been discontinued/,
+        /tram OAuth free tier has been discontinued/,
       );
 
       // Should be called only once (no retries)
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('should retry for TRAM OAuth with throttling message', async () => {
+    it("should retry for TRAM OAuth with throttling message", async () => {
       const throttlingError: HttpError = new Error(
-        'requests throttling triggered',
+        "requests throttling triggered",
       );
       throttlingError.status = 429;
 
@@ -368,7 +368,7 @@ describe('retryWithBackoff', () => {
         .fn()
         .mockRejectedValueOnce(throttlingError)
         .mockRejectedValueOnce(throttlingError)
-        .mockResolvedValue('success');
+        .mockResolvedValue("success");
 
       const promise = retryWithBackoff(fn, {
         maxAttempts: 5,
@@ -380,20 +380,20 @@ describe('retryWithBackoff', () => {
       // Fast-forward time for delays
       await vi.runAllTimersAsync();
 
-      await expect(promise).resolves.toBe('success');
+      await expect(promise).resolves.toBe("success");
 
       // Should be called 3 times (2 failures + 1 success)
       expect(fn).toHaveBeenCalledTimes(3);
     });
 
-    it('should retry for TRAM OAuth with throttling error', async () => {
-      const throttlingError: HttpError = new Error('throttling');
+    it("should retry for TRAM OAuth with throttling error", async () => {
+      const throttlingError: HttpError = new Error("throttling");
       throttlingError.status = 429;
 
       const fn = vi
         .fn()
         .mockRejectedValueOnce(throttlingError)
-        .mockResolvedValue('success');
+        .mockResolvedValue("success");
 
       const promise = retryWithBackoff(fn, {
         maxAttempts: 5,
@@ -405,16 +405,16 @@ describe('retryWithBackoff', () => {
       // Fast-forward time for delays
       await vi.runAllTimersAsync();
 
-      await expect(promise).resolves.toBe('success');
+      await expect(promise).resolves.toBe("success");
 
       // Should be called 2 times (1 failure + 1 success)
       expect(fn).toHaveBeenCalledTimes(2);
     });
 
-    it('should throw immediately for Qwen OAuth with quota message', async () => {
+    it("should throw immediately for Qwen OAuth with quota message", async () => {
       const errorWithQuota = Object.assign(
-        new Error('Free allocated quota exceeded.'),
-        { status: 429, code: 'insufficient_quota' },
+        new Error("Free allocated quota exceeded."),
+        { status: 429, code: "insufficient_quota" },
       );
 
       const fn = vi.fn().mockRejectedValue(errorWithQuota);
@@ -427,22 +427,22 @@ describe('retryWithBackoff', () => {
       });
 
       await expect(promise).rejects.toThrow(
-        /Qwen OAuth free tier has been discontinued/,
+        /tram OAuth free tier has been discontinued/,
       );
 
       // Should be called only once (no retries)
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('should retry normal errors for TRAM OAuth (not quota-related)', async () => {
-      const normalError: HttpError = new Error('Network error');
+    it("should retry normal errors for TRAM OAuth (not quota-related)", async () => {
+      const normalError: HttpError = new Error("Network error");
       normalError.status = 500;
 
-      const fn = createFailingFunction(2, 'success');
+      const fn = createFailingFunction(2, "success");
       // Replace the default 500 error with our normal error
       fn.mockRejectedValueOnce(normalError)
         .mockRejectedValueOnce(normalError)
-        .mockResolvedValue('success');
+        .mockResolvedValue("success");
 
       const promise = retryWithBackoff(fn, {
         maxAttempts: 5,
@@ -454,7 +454,7 @@ describe('retryWithBackoff', () => {
       // Fast-forward time for delays
       await vi.runAllTimersAsync();
 
-      await expect(promise).resolves.toBe('success');
+      await expect(promise).resolves.toBe("success");
 
       // Should be called 3 times (2 failures + 1 success)
       expect(fn).toHaveBeenCalledTimes(3);
@@ -462,30 +462,30 @@ describe('retryWithBackoff', () => {
   });
 });
 
-describe('getErrorStatus', () => {
-  it('should extract status from error.status (OpenAI/Anthropic/Gemini style)', () => {
+describe("getErrorStatus", () => {
+  it("should extract status from error.status (OpenAI/Anthropic/Gemini style)", () => {
     expect(getErrorStatus({ status: 429 })).toBe(429);
     expect(getErrorStatus({ status: 500 })).toBe(500);
     expect(getErrorStatus({ status: 503 })).toBe(503);
     expect(getErrorStatus({ status: 400 })).toBe(400);
   });
 
-  it('should extract status from error.statusCode', () => {
+  it("should extract status from error.statusCode", () => {
     expect(getErrorStatus({ statusCode: 429 })).toBe(429);
     expect(getErrorStatus({ statusCode: 502 })).toBe(502);
   });
 
-  it('should extract status from error.response.status (axios style)', () => {
+  it("should extract status from error.response.status (axios style)", () => {
     expect(getErrorStatus({ response: { status: 429 } })).toBe(429);
     expect(getErrorStatus({ response: { status: 503 } })).toBe(503);
   });
 
-  it('should extract status from error.error.code (nested error style)', () => {
+  it("should extract status from error.error.code (nested error style)", () => {
     expect(getErrorStatus({ error: { code: 429 } })).toBe(429);
     expect(getErrorStatus({ error: { code: 500 } })).toBe(500);
   });
 
-  it('should prefer status over statusCode over response.status over error.code', () => {
+  it("should prefer status over statusCode over response.status over error.code", () => {
     expect(
       getErrorStatus({
         status: 429,
@@ -508,45 +508,45 @@ describe('getErrorStatus', () => {
     ).toBe(502);
   });
 
-  it('should return undefined for out-of-range status codes', () => {
+  it("should return undefined for out-of-range status codes", () => {
     expect(getErrorStatus({ status: 0 })).toBeUndefined();
     expect(getErrorStatus({ status: 99 })).toBeUndefined();
     expect(getErrorStatus({ status: 600 })).toBeUndefined();
     expect(getErrorStatus({ status: -1 })).toBeUndefined();
   });
 
-  it('should return undefined for non-numeric status values', () => {
-    expect(getErrorStatus({ status: 'not_a_number' })).toBeUndefined();
+  it("should return undefined for non-numeric status values", () => {
+    expect(getErrorStatus({ status: "not_a_number" })).toBeUndefined();
     expect(
-      getErrorStatus({ error: { code: 'invalid_api_key' } }),
+      getErrorStatus({ error: { code: "invalid_api_key" } }),
     ).toBeUndefined();
   });
 
-  it('should return undefined for null, undefined, and non-object values', () => {
+  it("should return undefined for null, undefined, and non-object values", () => {
     expect(getErrorStatus(null)).toBeUndefined();
     expect(getErrorStatus(undefined)).toBeUndefined();
     expect(getErrorStatus(true)).toBeUndefined();
     expect(getErrorStatus(429)).toBeUndefined();
-    expect(getErrorStatus('500')).toBeUndefined();
+    expect(getErrorStatus("500")).toBeUndefined();
   });
 
-  it('should handle Error instances with a status property', () => {
-    const error: HttpError = new Error('Too Many Requests');
+  it("should handle Error instances with a status property", () => {
+    const error: HttpError = new Error("Too Many Requests");
     error.status = 429;
     expect(getErrorStatus(error)).toBe(429);
   });
 
-  it('should return undefined for Error instances without a status', () => {
-    expect(getErrorStatus(new Error('generic error'))).toBeUndefined();
+  it("should return undefined for Error instances without a status", () => {
+    expect(getErrorStatus(new Error("generic error"))).toBeUndefined();
   });
 
-  it('should return undefined for empty objects', () => {
+  it("should return undefined for empty objects", () => {
     expect(getErrorStatus({})).toBeUndefined();
     expect(getErrorStatus({ response: {} })).toBeUndefined();
     expect(getErrorStatus({ error: {} })).toBeUndefined();
   });
 
-  it('should parse HTTP_STATUS/NNN from streamed SSE error messages', () => {
+  it("should parse HTTP_STATUS/NNN from streamed SSE error messages", () => {
     // DashScope throttling: error opens with 200 OK, then surfaces as an SSE
     // error frame. The SDK preserves the raw SSE text in error.message.
     const dashscopeThrottle = new Error(
@@ -554,20 +554,20 @@ describe('getErrorStatus', () => {
     );
     expect(getErrorStatus(dashscopeThrottle)).toBe(429);
 
-    expect(getErrorStatus(new Error('upstream :HTTP_STATUS/503'))).toBe(503);
+    expect(getErrorStatus(new Error("upstream :HTTP_STATUS/503"))).toBe(503);
   });
 
-  it('should prefer numeric status fields over HTTP_STATUS/NNN in message', () => {
-    const error: HttpError = new Error(':HTTP_STATUS/500');
+  it("should prefer numeric status fields over HTTP_STATUS/NNN in message", () => {
+    const error: HttpError = new Error(":HTTP_STATUS/500");
     error.status = 429;
     expect(getErrorStatus(error)).toBe(429);
   });
 
-  it('should ignore HTTP_STATUS/NNN outside the valid range', () => {
-    expect(getErrorStatus(new Error('HTTP_STATUS/999'))).toBeUndefined();
+  it("should ignore HTTP_STATUS/NNN outside the valid range", () => {
+    expect(getErrorStatus(new Error("HTTP_STATUS/999"))).toBeUndefined();
   });
 
-  it('should not match HTTP_STATUS/NNN when adjacent to more digits', () => {
-    expect(getErrorStatus(new Error('HTTP_STATUS/4291'))).toBeUndefined();
+  it("should not match HTTP_STATUS/NNN when adjacent to more digits", () => {
+    expect(getErrorStatus(new Error("HTTP_STATUS/4291"))).toBeUndefined();
   });
 });

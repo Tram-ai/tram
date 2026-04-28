@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import { BaseMessageHandler } from './BaseMessageHandler.js';
-import { getFileName } from '../utils/webviewUtils.js';
-import { getErrorMessage } from '../../utils/errorMessage.js';
+import * as vscode from "vscode";
+import { BaseMessageHandler } from "./BaseMessageHandler.js";
+import { getFileName } from "../utils/webviewUtils.js";
+import { getErrorMessage } from "../../utils/errorMessage.js";
 
 /**
  * Editor message handler
@@ -15,22 +15,22 @@ import { getErrorMessage } from '../../utils/errorMessage.js';
  */
 export class EditorMessageHandler extends BaseMessageHandler {
   canHandle(messageType: string): boolean {
-    return ['getActiveEditor', 'focusActiveEditor'].includes(messageType);
+    return ["getActiveEditor", "focusActiveEditor"].includes(messageType);
   }
 
   async handle(message: { type: string; data?: unknown }): Promise<void> {
     switch (message.type) {
-      case 'getActiveEditor':
+      case "getActiveEditor":
         await this.handleGetActiveEditor();
         break;
 
-      case 'focusActiveEditor':
+      case "focusActiveEditor":
         await this.handleFocusActiveEditor();
         break;
 
       default:
         console.warn(
-          '[EditorMessageHandler] Unknown message type:',
+          "[EditorMessageHandler] Unknown message type:",
           message.type,
         );
         break;
@@ -58,18 +58,18 @@ export class EditorMessageHandler extends BaseMessageHandler {
         }
 
         this.sendToWebView({
-          type: 'activeEditorChanged',
+          type: "activeEditorChanged",
           data: { fileName, filePath, selection: selectionInfo },
         });
       } else {
         this.sendToWebView({
-          type: 'activeEditorChanged',
+          type: "activeEditorChanged",
           data: { fileName: null, filePath: null, selection: null },
         });
       }
     } catch (error) {
       console.error(
-        '[EditorMessageHandler] Failed to get active editor:',
+        "[EditorMessageHandler] Failed to get active editor:",
         error,
       );
     }
@@ -94,7 +94,7 @@ export class EditorMessageHandler extends BaseMessageHandler {
           canSelectMany: false,
           canSelectFiles: true,
           canSelectFolders: false,
-          openLabel: 'Open',
+          openLabel: "Open",
         });
 
         if (uri && uri.length > 0) {
@@ -103,7 +103,7 @@ export class EditorMessageHandler extends BaseMessageHandler {
       }
     } catch (error) {
       console.error(
-        '[EditorMessageHandler] Failed to focus active editor:',
+        "[EditorMessageHandler] Failed to focus active editor:",
         error,
       );
       vscode.window.showErrorMessage(

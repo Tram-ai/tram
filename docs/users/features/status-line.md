@@ -114,7 +114,7 @@ The command receives a JSON object via stdin with the following fields:
 | Field                                 | Type             | Description                                                                        |
 | ------------------------------------- | ---------------- | ---------------------------------------------------------------------------------- |
 | `session_id`                          | string           | Unique session identifier                                                          |
-| `version`                             | string           | Qwen Code version                                                                  |
+| `version`                             | string           | TRAM version                                                                  |
 | `model.display_name`                  | string           | Current model name                                                                 |
 | `context_window.context_window_size`  | number           | Total context window size in tokens                                                |
 | `context_window.used_percentage`      | number           | Context window usage as percentage (0–100)                                         |

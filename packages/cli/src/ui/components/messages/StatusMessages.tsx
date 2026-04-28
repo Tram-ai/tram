@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import Link from 'ink-link';
-import stringWidth from 'string-width';
-import { theme } from '../../semantic-colors.js';
-import { RenderInline } from '../../utils/InlineMarkdownRenderer.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import Link from "ink-link";
+import stringWidth from "string-width";
+import { theme } from "../../semantic-colors.js";
+import { RenderInline } from "../../utils/InlineMarkdownRenderer.js";
 
 interface StatusMessageProps {
   text: string;
@@ -38,7 +38,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   children,
   footer,
 }) => {
-  if ((!text || text.trim() === '') && !footer) {
+  if ((!text || text.trim() === "") && !footer) {
     return null;
   }
 
@@ -50,7 +50,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <Text color={prefixColor}>{prefix}</Text>
       </Box>
       <Box flexGrow={1} flexDirection="column">
-        {text && text.trim() !== '' && (
+        {text && text.trim() !== "" && (
           <Text wrap="wrap" color={textColor}>
             <RenderInline text={text} />
             {children}

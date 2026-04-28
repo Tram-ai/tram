@@ -9,20 +9,20 @@
  * and injects them as INFO messages into the conversation history.
  */
 
-import { useEffect, useRef } from 'react';
-import { type Config, DEFAULT_TOKEN_LIMIT } from '@qwen-code/qwen-code-core';
+import { useEffect, useRef } from "react";
+import { type Config, DEFAULT_TOKEN_LIMIT } from "@tram-ai/tram-core";
 import {
   StreamingState,
   MessageType,
   type HistoryItemWithoutId,
-} from '../types.js';
-import { t } from '../../i18n/index.js';
+} from "../types.js";
+import { t } from "../../i18n/index.js";
 import {
   selectTip,
   tipRegistry,
   type TipContext,
   type TipHistory,
-} from '../../services/tips/index.js';
+} from "../../services/tips/index.js";
 
 interface UseContextualTipsOptions {
   streamingState: StreamingState;
@@ -83,7 +83,7 @@ export function useContextualTips({
       platform: process.platform,
     };
 
-    const tip = selectTip('post-response', tipContext, tipRegistry, tipHistory);
+    const tip = selectTip("post-response", tipContext, tipRegistry, tipHistory);
     if (tip) {
       tipHistory.recordShown(tip.id, sessionPromptCount);
       addItem(

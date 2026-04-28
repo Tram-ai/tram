@@ -6,14 +6,14 @@
  * Write tool call component - specialized for file writing operations
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 import {
   ToolCallContainer,
   groupContent,
   mapToolStatusToContainerStatus,
-} from './shared/index.js';
-import type { BaseToolCallProps } from './shared/index.js';
-import { FileLink } from '../layout/FileLink.js';
+} from "./shared/index.js";
+import type { BaseToolCallProps } from "./shared/index.js";
+import { FileLink } from "../layout/FileLink.js";
 
 /**
  * Specialized component for Write tool calls
@@ -30,28 +30,28 @@ export const WriteToolCall: FC<BaseToolCallProps> = ({
   const { errors, textOutputs } = groupContent(content);
 
   // Extract content to write from rawInput
-  let writeContent = '';
-  if (rawInput && typeof rawInput === 'object') {
+  let writeContent = "";
+  if (rawInput && typeof rawInput === "object") {
     const inputObj = rawInput as { content?: string };
-    writeContent = inputObj.content || '';
-  } else if (typeof rawInput === 'string') {
+    writeContent = inputObj.content || "";
+  } else if (typeof rawInput === "string") {
     writeContent = rawInput;
   }
 
   // Error case: show filename + error message + content preview
   if (errors.length > 0) {
-    const path = locations?.[0]?.path || '';
-    const errorMessage = errors.join('\n');
+    const path = locations?.[0]?.path || "";
+    const errorMessage = errors.join("\n");
 
     // Truncate content preview
     const truncatedContent =
       writeContent.length > 200
-        ? writeContent.substring(0, 200) + '...'
+        ? writeContent.substring(0, 200) + "..."
         : writeContent;
 
     return (
       <ToolCallContainer
-        label={'WriteFile'}
+        label={"WriteFile"}
         status="error"
         toolCallId={toolCallId}
         isFirst={isFirst}
@@ -84,11 +84,11 @@ export const WriteToolCall: FC<BaseToolCallProps> = ({
   // Success case: show filename + line count
   if (locations && locations.length > 0) {
     const path = locations[0].path;
-    const lineCount = writeContent.split('\n').length;
+    const lineCount = writeContent.split("\n").length;
     const containerStatus = mapToolStatusToContainerStatus(toolCall.status);
     return (
       <ToolCallContainer
-        label={'WriteFile'}
+        label={"WriteFile"}
         status={containerStatus}
         toolCallId={toolCallId}
         isFirst={isFirst}
@@ -122,7 +122,7 @@ export const WriteToolCall: FC<BaseToolCallProps> = ({
         isFirst={isFirst}
         isLast={isLast}
       >
-        {textOutputs.join('\n')}
+        {textOutputs.join("\n")}
       </ToolCallContainer>
     );
   }

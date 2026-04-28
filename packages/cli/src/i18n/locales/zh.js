@@ -11,629 +11,791 @@ export default {
   // Help / UI Components
   // ============================================================================
   // Attachment hints
-  '↑ to manage attachments': '↑ 管理附件',
-  '← → select, Delete to remove, ↓ to exit': '← → 选择，Delete 删除，↓ 退出',
-  'Attachments: ': '附件：',
+  "↑ to manage attachments": "↑ 管理附件",
+  "← → select, Delete to remove, ↓ to exit": "← → 选择，Delete 删除，↓ 退出",
+  "Attachments: ": "附件：",
 
-  'Basics:': '基础功能：',
-  'Add context': '添加上下文',
-  'Use {{symbol}} to specify files for context (e.g., {{example}}) to target specific files or folders.':
-    '使用 {{symbol}} 指定文件作为上下文（例如，{{example}}），用于定位特定文件或文件夹',
-  '@': '@',
-  '@src/myFile.ts': '@src/myFile.ts',
-  'Shell mode': 'Shell 模式',
-  'YOLO mode': 'YOLO 模式',
-  'plan mode': '规划模式',
-  'auto-accept edits': '自动接受编辑',
-  'Accepting edits': '接受编辑',
-  '(shift + tab to cycle)': '(shift + tab 切换)',
-  '(tab to cycle)': '(按 tab 切换)',
-  'Execute shell commands via {{symbol}} (e.g., {{example1}}) or use natural language (e.g., {{example2}}).':
-    '通过 {{symbol}} 执行 shell 命令（例如，{{example1}}）或使用自然语言（例如，{{example2}}）',
-  '!': '!',
-  '!npm run start': '!npm run start',
-  'start server': 'start server',
-  'Commands:': '命令：',
-  'shell command': 'shell 命令',
-  'Model Context Protocol command (from external servers)':
-    '模型上下文协议命令（来自外部服务器）',
-  'Keyboard Shortcuts:': '键盘快捷键：',
-  'Toggle this help display': '切换此帮助显示',
-  'Toggle shell mode': '切换命令行模式',
-  'Open command menu': '打开命令菜单',
-  'Add file context': '添加文件上下文',
-  'Accept suggestion / Autocomplete': '接受建议 / 自动补全',
-  'Reverse search history': '反向搜索历史',
-  'Press ? again to close': '再次按 ? 关闭',
+  "Basics:": "基础功能：",
+  "Add context": "添加上下文",
+  "Use {{symbol}} to specify files for context (e.g., {{example}}) to target specific files or folders.":
+    "使用 {{symbol}} 指定文件作为上下文（例如，{{example}}），用于定位特定文件或文件夹",
+  "@": "@",
+  "@src/myFile.ts": "@src/myFile.ts",
+  "Shell mode": "Shell 模式",
+  "YOLO mode": "YOLO 模式",
+  "plan mode": "规划模式",
+  "auto-accept edits": "自动接受编辑",
+  "Accepting edits": "接受编辑",
+  "(shift + tab to cycle)": "(shift + tab 切换)",
+  "(tab to cycle)": "(按 tab 切换)",
+  "Execute shell commands via {{symbol}} (e.g., {{example1}}) or use natural language (e.g., {{example2}}).":
+    "通过 {{symbol}} 执行 shell 命令（例如，{{example1}}）或使用自然语言（例如，{{example2}}）",
+  "!": "!",
+  "!npm run start": "!npm run start",
+  "start server": "start server",
+  "Commands:": "命令：",
+  "shell command": "shell 命令",
+  "Model Context Protocol command (from external servers)":
+    "模型上下文协议命令（来自外部服务器）",
+  "Keyboard Shortcuts:": "键盘快捷键：",
+  "Toggle this help display": "切换此帮助显示",
+  "Toggle shell mode": "切换命令行模式",
+  "Open command menu": "打开命令菜单",
+  "Add file context": "添加文件上下文",
+  "Accept suggestion / Autocomplete": "接受建议 / 自动补全",
+  "Reverse search history": "反向搜索历史",
+  "Press ? again to close": "再次按 ? 关闭",
   // Keyboard shortcuts panel descriptions
-  'for shell mode': '命令行模式',
-  'for commands': '命令菜单',
-  'for file paths': '文件路径',
-  'to clear input': '清空输入',
-  'to cycle approvals': '切换审批模式',
-  'to quit': '退出',
-  'for newline': '换行',
-  'to clear screen': '清屏',
-  'to search history': '搜索历史',
-  'to paste images': '粘贴图片',
-  'for external editor': '外部编辑器',
-  'Jump through words in the input': '在输入中按单词跳转',
-  'Close dialogs, cancel requests, or quit application':
-    '关闭对话框、取消请求或退出应用程序',
-  'New line': '换行',
-  'New line (Alt+Enter works for certain linux distros)':
-    '换行（某些 Linux 发行版支持 Alt+Enter）',
-  'Clear the screen': '清屏',
-  'Open input in external editor': '在外部编辑器中打开输入',
-  'Send message': '发送消息',
-  'Initializing...': '正在初始化...',
-  'Connecting to MCP servers... ({{connected}}/{{total}})':
-    '正在连接到 MCP 服务器... ({{connected}}/{{total}})',
-  'Type your message or @path/to/file': '输入您的消息或 @ 文件路径',
-  '? for shortcuts': '按 ? 查看快捷键',
+  "for shell mode": "命令行模式",
+  "for commands": "命令菜单",
+  "for file paths": "文件路径",
+  "to clear input": "清空输入",
+  "to cycle approvals": "切换审批模式",
+  "to quit": "退出",
+  "for newline": "换行",
+  "to clear screen": "清屏",
+  "to search history": "搜索历史",
+  "to paste images": "粘贴图片",
+  "for external editor": "外部编辑器",
+  "Jump through words in the input": "在输入中按单词跳转",
+  "Close dialogs, cancel requests, or quit application":
+    "关闭对话框、取消请求或退出应用程序",
+  "New line": "换行",
+  "New line (Alt+Enter works for certain linux distros)":
+    "换行（某些 Linux 发行版支持 Alt+Enter）",
+  "Clear the screen": "清屏",
+  "Open input in external editor": "在外部编辑器中打开输入",
+  "Send message": "发送消息",
+  "Initializing...": "正在初始化...",
+  "Connecting to MCP servers... ({{connected}}/{{total}})":
+    "正在连接到 MCP 服务器... ({{connected}}/{{total}})",
+  "Type your message or @path/to/file": "输入您的消息或 @ 文件路径",
+  "? for shortcuts": "按 ? 查看快捷键",
   "Press 'i' for INSERT mode and 'Esc' for NORMAL mode.":
     "按 'i' 进入插入模式，按 'Esc' 进入普通模式",
-  'Cancel operation / Clear input (double press)':
-    '取消操作 / 清空输入（双击）',
-  'Cycle approval modes': '循环切换审批模式',
-  'Cycle through your prompt history': '循环浏览提示历史',
-  'For a full list of shortcuts, see {{docPath}}':
-    '完整快捷键列表，请参阅 {{docPath}}',
-  'docs/keyboard-shortcuts.md': 'docs/keyboard-shortcuts.md',
-  'for help on TRAM': '获取 TRAM 帮助',
-  'show version info': '显示版本信息',
-  'submit a bug report': '提交错误报告',
-  'About TRAM': '关于 TRAM',
-  Status: '状态',
-  '(/model to change)': '(输入 /model 切换模型)',
+  "Cancel operation / Clear input (double press)":
+    "取消操作 / 清空输入（双击）",
+  "Cycle approval modes": "循环切换审批模式",
+  "Cycle through your prompt history": "循环浏览提示历史",
+  "For a full list of shortcuts, see {{docPath}}":
+    "完整快捷键列表，请参阅 {{docPath}}",
+  "docs/keyboard-shortcuts.md": "docs/keyboard-shortcuts.md",
+  "for help on TRAM": "获取 TRAM 帮助",
+  "show version info": "显示版本信息",
+  "submit a bug report": "提交错误报告",
+  "About TRAM": "关于 TRAM",
+  Status: "状态",
+  "(/model to change)": "(输入 /model 切换模型)",
 
   // 初始化向导
-  'TRAM Initialization Wizard': 'TRAM 初始化向导',
-  'Esc to cancel at any time.': '随时按 Esc 取消。',
-  'Esc to go back, Esc again at provider list to cancel.':
-    '按 Esc 返回上一步，在供应商列表页再次按 Esc 可取消。',
-  'Initialization: Select providers': '初始化：选择供应商',
-  'OpenAI (Custom)': 'OpenAI（自定义）',
-  'Anthropic Claude': 'Anthropic Claude（克劳德）',
-  'Google Gemini': 'Google Gemini（双子星）',
-  'Google Vertex AI': 'Google Vertex AI（顶点 AI）',
-  'Pollinations': 'Pollinations (自动获取 APIKey)',
-  SiliconFlow: 'SiliconFlow（硅基流动）',
-  Cerebras: 'Cerebras',
-  Groq: 'Groq',
-  'Initialization: Pollinations Authorization': '初始化：Pollinations 授权',
-  'Waiting for browser authorization...': '正在等待浏览器授权...',
-  'If the browser does not open automatically, please click [here]({{url}}).':
-    '如果浏览器没有自动打开，请点击[这里]({{url}})。',
-  'Authorization successful! Returning to wizard...': '授权成功！正在返回向导...',
-  'Authorization failed or timed out.': '授权失败或超时。',
-  'Use ↑↓←→ to move, Space to toggle, Enter to continue. You can configure multiple providers in one run.':
-    '使用 ↑↓←→ 移动，空格勾选，Enter 继续。一次可配置多个供应商。',
-  'Tip: after finishing one provider, you can return here to add more providers.':
-    '提示：完成一个供应商后，你可以回到这里继续添加供应商。',
-  'Select at least one provider.': '请至少选择一个供应商。',
-  'No new provider selected. Please select at least one unconfigured provider.':
-    '没有新增供应商，请至少选择一个尚未配置的供应商。',
-  'No provider selected.': '未选择供应商。',
-  Enabled: '已启用',
-  'Configure provider {{current}}/{{total}}: {{name}}':
-    '配置供应商 {{current}}/{{total}}：{{name}}',
-  'This provider uses OAuth. Press Enter to continue to model selection.':
-    '该供应商使用 OAuth。按 Enter 继续选择模型。',
-  'Use ↑↓←→ to choose a field. Enter to edit. Press N to continue to model selection.':
-    '使用 ↑↓←→ 选择字段，Enter 编辑，按 N 继续到模型选择。',
-  'Use ↑↓←→ to choose a field. Enter to edit inline. Press N to continue to model selection.':
-    '使用 ↑↓←→ 选择字段，Enter 在原位编辑，按 N 继续到模型选择。',
-  'API key env var': 'API 密钥环境变量',
-  'Local model list (comma separated)': '本地模型列表（逗号分隔）',
-  'Editing {{field}}: {{value}}': '正在编辑 {{field}}：{{value}}',
-  'Model selection: {{name}}': '模型选择：{{name}}',
-  'Try OpenAI-compatible /models list first. If unavailable or incomplete, choose custom model.':
-    '先尝试 OpenAI 兼容的 /models 列表；若不可用或不完整，可选自定义模型。',
-  'Use ↑↓←→ to move, Space to toggle model, Enter to continue. Try OpenAI-compatible /models first; use custom if needed.':
-    '使用 ↑↓←→ 移动，空格勾选模型，Enter 继续。优先尝试 OpenAI 兼容 /models，必要时使用自定义模型。',
-  'Continue adding models?': '是否继续添加模型？',
-  'You can keep adding custom models for this provider.': '你可以继续为当前供应商添加自定义模型。',
-  'Yes, add more models': '是，继续添加模型',
-  'No, continue': '否，继续下一步',
-  'Continue adding providers?': '是否继续添加供应商？',
-  'You can return to provider list and add additional providers now.':
-    '你现在可以返回供应商列表并继续添加更多供应商。',
-  'Yes, add another provider': '是，继续添加供应商',
-  'No, continue setup': '否，继续后续配置',
-  'Loading models...': '正在加载模型...',
-  'Select at least one model.': '请至少选择一个模型。',
-  'Custom model...': '自定义模型...',
-  'Enter custom model name': '输入自定义模型名',
-  'Press Enter to confirm.': '按 Enter 确认。',
-  'Press Enter to confirm and keep selecting models.': '按 Enter 确认并继续选择模型。',
-  'Model name cannot be empty.': '模型名不能为空。',
-  'Select approval mode': '选择审批模式',
-  'Recommended: YOLO': '推荐：YOLO',
-  'Plan only': '仅规划',
-  'Only generate plans, no execution. Best safety, lowest automation.':
-    '仅生成计划，不执行操作。最安全，自动化最低。',
-  'Ask every time': '每次询问',
-  'Every action requires confirmation. Safe but slower.':
-    '每个动作都需要确认。更安全但更慢。',
-  'Auto-approve edits': '自动批准编辑',
-  'Edit/write tools are auto-approved, others still ask.':
-    '编辑/写入工具自动批准，其他工具仍需确认。',
-  'YOLO (recommended)': 'YOLO（推荐）',
-  'Fastest workflow. Fully automated execution with higher risk.':
-    '速度最快，全自动执行，但风险更高。',
-  'Proxy configuration': '代理配置',
-  'Use ↑↓←→ to choose.': '使用 ↑↓←→ 选择。',
-  'Follow system proxy': '跟随系统代理',
-  'No proxy': '不使用代理',
-  'Custom proxy': '自定义代理',
-  'Enter custom proxy': '输入自定义代理',
-  'Example: http://127.0.0.1:7890': '示例：http://127.0.0.1:7890',
-  'Select theme': '选择主题',
-  'This list follows built-in /theme options.': '该列表与 /theme 内置选项一致。',
-  'Theme preview': '主题预览',
-  'Preview: info text': '预览：信息文本',
-  'Preview: success text': '预览：成功文本',
-  'Preview: error text': '预览：错误文本',
-  'Review configuration': '确认配置',
-  Providers: '供应商',
-  'Default provider': '默认供应商',
-  'Default model': '默认模型',
-  'Selected models': '已选模型',
-  'Approval mode': '审批模式',
-  'At least one provider must be configured.': '至少需要配置一个供应商。',
-  'Press Enter to save, Esc to cancel.': '按 Enter 保存，Esc 取消。',
-  'Initialization complete.': '初始化完成。',
-  'Settings were saved. Press Enter to continue.': '设置已保存，按 Enter 继续。',
-  'Authentication setup has moved to initialize wizard': '认证配置已迁移到初始化向导',
-  'Please run tram --initialize to configure providers and authentication.':
-    '请运行 tram --initialize 来配置供应商和认证。',
-  'Warning: security.auth.apiKey and security.auth.baseUrl are deprecated. Please migrate credentials to modelProviders with envKey.':
-    'Warning\n弃用 security.auth.apiKey 和 security.auth.baseUrl：\n在 settings.json 中通过 security.auth.apiKey 和 security.auth.baseUrl 直接配置 API 凭据的方式已被弃用。这两个字段将在后续版本中彻底删除。请将模型与凭据配置迁移至 modelProviders，并使用 envKey 引用环境变量以避免硬编码敏感信息。',
+  "TRAM Initialization Wizard": "TRAM 初始化向导",
+  "Esc to cancel at any time.": "随时按 Esc 取消。",
+  "Esc to go back, Esc again at provider list to cancel.":
+    "按 Esc 返回上一步，在供应商列表页再次按 Esc 可取消。",
+  "Initialization: Select providers": "初始化：选择供应商",
+  "OpenAI (Custom)": "OpenAI（自定义）",
+  "Anthropic Claude": "Anthropic Claude（克劳德）",
+  "Google Gemini": "Google Gemini（双子星）",
+  "Google Vertex AI": "Google Vertex AI（顶点 AI）",
+  Pollinations: "Pollinations (自动获取 APIKey)",
+  SiliconFlow: "SiliconFlow（硅基流动）",
+  Cerebras: "Cerebras",
+  Groq: "Groq",
+  "Initialization: Pollinations Authorization": "初始化：Pollinations 授权",
+  "Waiting for browser authorization...": "正在等待浏览器授权...",
+  "If the browser does not open automatically, please click [here]({{url}}).":
+    "如果浏览器没有自动打开，请点击[这里]({{url}})。",
+  "Authorization successful! Returning to wizard...":
+    "授权成功！正在返回向导...",
+  "Authorization failed or timed out.": "授权失败或超时。",
+  "Use ↑↓←→ to move, Space to toggle, Enter to continue. You can configure multiple providers in one run.":
+    "使用 ↑↓←→ 移动，空格勾选，Enter 继续。一次可配置多个供应商。",
+  "Tip: after finishing one provider, you can return here to add more providers.":
+    "提示：完成一个供应商后，你可以回到这里继续添加供应商。",
+  "Select at least one provider.": "请至少选择一个供应商。",
+  "No new provider selected. Please select at least one unconfigured provider.":
+    "没有新增供应商，请至少选择一个尚未配置的供应商。",
+  "No provider selected.": "未选择供应商。",
+  Enabled: "已启用",
+  "Configure provider {{current}}/{{total}}: {{name}}":
+    "配置供应商 {{current}}/{{total}}：{{name}}",
+  "This provider uses OAuth. Press Enter to continue to model selection.":
+    "该供应商使用 OAuth。按 Enter 继续选择模型。",
+  "Use ↑↓←→ to choose a field. Enter to edit. Press N to continue to model selection.":
+    "使用 ↑↓←→ 选择字段，Enter 编辑，按 N 继续到模型选择。",
+  "Use ↑↓←→ to choose a field. Enter to edit inline. Press N to continue to model selection.":
+    "使用 ↑↓←→ 选择字段，Enter 在原位编辑，按 N 继续到模型选择。",
+  "API key env var": "API 密钥环境变量",
+  "Local model list (comma separated)": "本地模型列表（逗号分隔）",
+  "Editing {{field}}: {{value}}": "正在编辑 {{field}}：{{value}}",
+  "Model selection: {{name}}": "模型选择：{{name}}",
+  "Try OpenAI-compatible /models list first. If unavailable or incomplete, choose custom model.":
+    "先尝试 OpenAI 兼容的 /models 列表；若不可用或不完整，可选自定义模型。",
+  "Use ↑↓←→ to move, Space to toggle model, Enter to continue. Try OpenAI-compatible /models first; use custom if needed.":
+    "使用 ↑↓←→ 移动，空格勾选模型，Enter 继续。优先尝试 OpenAI 兼容 /models，必要时使用自定义模型。",
+  "Continue adding models?": "是否继续添加模型？",
+  "You can keep adding custom models for this provider.":
+    "你可以继续为当前供应商添加自定义模型。",
+  "Yes, add more models": "是，继续添加模型",
+  "No, continue": "否，继续下一步",
+  "Continue adding providers?": "是否继续添加供应商？",
+  "You can return to provider list and add additional providers now.":
+    "你现在可以返回供应商列表并继续添加更多供应商。",
+  "Yes, add another provider": "是，继续添加供应商",
+  "No, continue setup": "否，继续后续配置",
+  "Loading models...": "正在加载模型...",
+  "Select at least one model.": "请至少选择一个模型。",
+  "Custom model...": "自定义模型...",
+  "Enter custom model name": "输入自定义模型名",
+  "Press Enter to confirm.": "按 Enter 确认。",
+  "Press Enter to confirm and keep selecting models.":
+    "按 Enter 确认并继续选择模型。",
+  "Model name cannot be empty.": "模型名不能为空。",
+  "Select approval mode": "选择审批模式",
+  "Recommended: YOLO": "推荐：YOLO",
+  "Plan only": "仅规划",
+  "Only generate plans, no execution. Best safety, lowest automation.":
+    "仅生成计划，不执行操作。最安全，自动化最低。",
+  "Ask every time": "每次询问",
+  "Every action requires confirmation. Safe but slower.":
+    "每个动作都需要确认。更安全但更慢。",
+  "Auto-approve edits": "自动批准编辑",
+  "Edit/write tools are auto-approved, others still ask.":
+    "编辑/写入工具自动批准，其他工具仍需确认。",
+  "YOLO (recommended)": "YOLO（推荐）",
+  "Fastest workflow. Fully automated execution with higher risk.":
+    "速度最快，全自动执行，但风险更高。",
+  "Proxy configuration": "代理配置",
+  "Use ↑↓←→ to choose.": "使用 ↑↓←→ 选择。",
+  "Follow system proxy": "跟随系统代理",
+  "No proxy": "不使用代理",
+  "Custom proxy": "自定义代理",
+  "Enter custom proxy": "输入自定义代理",
+  "Example: http://127.0.0.1:7890": "示例：http://127.0.0.1:7890",
+  "Select theme": "选择主题",
+  "This list follows built-in /theme options.":
+    "该列表与 /theme 内置选项一致。",
+  "Theme preview": "主题预览",
+  "Preview: info text": "预览：信息文本",
+  "Preview: success text": "预览：成功文本",
+  "Preview: error text": "预览：错误文本",
+  "Review configuration": "确认配置",
+  Providers: "供应商",
+  "Default provider": "默认供应商",
+  "Default model": "默认模型",
+  "Selected models": "已选模型",
+  "Approval mode": "审批模式",
+  "At least one provider must be configured.": "至少需要配置一个供应商。",
+  "Press Enter to save, Esc to cancel.": "按 Enter 保存，Esc 取消。",
+  "Initialization complete.": "初始化完成。",
+  "Settings were saved. Press Enter to continue.":
+    "设置已保存，按 Enter 继续。",
+  "Authentication setup has moved to initialize wizard":
+    "认证配置已迁移到初始化向导",
+  "Please run tram --initialize to configure providers and authentication.":
+    "请运行 tram --initialize 来配置供应商和认证。",
+  "Warning: security.auth.apiKey and security.auth.baseUrl are deprecated. Please migrate credentials to modelProviders with envKey.":
+    "Warning\n弃用 security.auth.apiKey 和 security.auth.baseUrl：\n在 settings.json 中通过 security.auth.apiKey 和 security.auth.baseUrl 直接配置 API 凭据的方式已被弃用。这两个字段将在后续版本中彻底删除。请将模型与凭据配置迁移至 modelProviders，并使用 envKey 引用环境变量以避免硬编码敏感信息。",
 
   // ============================================================================
   // System Information Fields
   // ============================================================================
-  'TRAM': 'TRAM',
-  Runtime: '运行环境',
-  OS: '操作系统',
-  Auth: '认证',
-  'CLI Version': 'CLI 版本',
-  'Git Commit': 'Git 提交',
-  Model: '模型',
-  'Fast Model': '快速模型',
-  Sandbox: '沙箱',
-  'OS Platform': '操作系统平台',
-  'OS Arch': '操作系统架构',
-  'OS Release': '操作系统版本',
-  'Node.js Version': 'Node.js 版本',
-  'NPM Version': 'NPM 版本',
-  'Session ID': '会话 ID',
-  'Auth Method': '认证方式',
-  'Base URL': '基础 URL',
-  Proxy: '代理',
-  'Memory Usage': '内存使用',
-  'IDE Client': 'IDE 客户端',
+  TRAM: "TRAM",
+  Runtime: "运行环境",
+  OS: "操作系统",
+  Auth: "认证",
+  "CLI Version": "CLI 版本",
+  "Git Commit": "Git 提交",
+  Model: "模型",
+  Sandbox: "沙箱",
+  "OS Platform": "操作系统平台",
+  "OS Arch": "操作系统架构",
+  "OS Release": "操作系统版本",
+  "Node.js Version": "Node.js 版本",
+  "NPM Version": "NPM 版本",
+  "Session ID": "会话 ID",
+  "Auth Method": "认证方式",
+  "Base URL": "基础 URL",
+  Proxy: "代理",
+  "Memory Usage": "内存使用",
+  "IDE Client": "IDE 客户端",
 
   // ============================================================================
   // Commands - General
   // ============================================================================
-  'Analyzes the project and creates a tailored TRAM.md file.':
-    '分析项目并创建定制的 TRAM.md 文件',
-  'List available TRAM tools. Usage: /tools [desc]':
-    '列出可用的 TRAM 工具。用法：/tools [desc]',
-  'List available skills.': '列出可用技能。',
-  'Available TRAM CLI tools:': '可用的 TRAM CLI 工具：',
-  'No tools available': '没有可用工具',
-  'View or change the approval mode for tool usage':
-    '查看或更改工具使用的审批模式',
+  "Analyzes the project and creates a tailored TRAM.md file.":
+    "分析项目并创建定制的 TRAM.md 文件",
+  "List available TRAM tools. Usage: /tools [desc]":
+    "列出可用的 TRAM 工具。用法：/tools [desc]",
+  "List available skills.": "列出可用技能。",
+  "Available TRAM CLI tools:": "可用的 TRAM CLI 工具：",
+  "No tools available": "没有可用工具",
+  "View or change the approval mode for tool usage":
+    "查看或更改工具使用的审批模式",
   'Invalid approval mode "{{arg}}". Valid modes: {{modes}}':
     '无效的审批模式 "{{arg}}"。有效模式：{{modes}}',
   'Approval mode set to "{{mode}}"': '审批模式已设置为 "{{mode}}"',
-  'View or change the language setting': '查看或更改语言设置',
-  'change the theme': '更改主题',
-  'Select Theme': '选择主题',
-  Preview: '预览',
-  '(Use Enter to select, Tab to configure scope)':
-    '（使用 Enter 选择，Tab 配置作用域）',
-  '(Use Enter to apply scope, Tab to go back)':
-    '（使用 Enter 应用作用域，Tab 返回）',
-  'Theme configuration unavailable due to NO_COLOR env variable.':
-    '由于 NO_COLOR 环境变量，主题配置不可用。',
+  "View or change the language setting": "查看或更改语言设置",
+  "change the theme": "更改主题",
+  "Select Theme": "选择主题",
+  Preview: "预览",
+  "(Use Enter to select, Tab to configure scope)":
+    "（使用 Enter 选择，Tab 配置作用域）",
+  "(Use Enter to apply scope, Tab to go back)":
+    "（使用 Enter 应用作用域，Tab 返回）",
+  "Theme configuration unavailable due to NO_COLOR env variable.":
+    "由于 NO_COLOR 环境变量，主题配置不可用。",
   'Theme "{{themeName}}" not found.': '未找到主题 "{{themeName}}"。',
   'Theme "{{themeName}}" not found in selected scope.':
     '在所选作用域中未找到主题 "{{themeName}}"。',
-  'Clear conversation history and free up context': '清除对话历史并释放上下文',
-  'Compresses the context by replacing it with a summary.':
-    '通过摘要替换来压缩上下文',
-  'open full TRAM documentation in your browser':
-    '在浏览器中打开完整的 TRAM 文档',
-  'Configuration not available.': '配置不可用',
-  'change the auth method': '更改认证方法',
-  'Configure authentication information for login': '配置登录认证信息',
-  'Copy the last result or code snippet to clipboard':
-    '将最后的结果或代码片段复制到剪贴板',
+  "Clear conversation history and free up context": "清除对话历史并释放上下文",
+  "Compresses the context by replacing it with a summary.":
+    "通过摘要替换来压缩上下文",
+  "open full TRAM documentation in your browser":
+    "在浏览器中打开完整的 TRAM 文档",
+  "Configuration not available.": "配置不可用",
+  "change the auth method": "更改认证方法",
+  "Configure authentication information for login": "配置登录认证信息",
+  "Copy the last result or code snippet to clipboard":
+    "将最后的结果或代码片段复制到剪贴板",
+
+  // 频道本地配置
+  "Create or edit a channel with a local web configuration flow, including WeChat QR binding.":
+    "通过本地网页配置流程创建或编辑频道，并支持微信扫码绑定。",
+  "Preferred channel type for a new config. Existing channel configs can still be changed in the page.":
+    "为新配置指定优先频道类型；已有频道配置仍可在页面中修改。",
+  "Enter channel name:": "请输入频道名称：",
+  "Channel name cannot be empty.": "频道名称不能为空。",
+  "Channel name is required when not running in an interactive terminal.":
+    "当前不是交互终端，必须显式提供频道名称。",
+  "Channel initialization cancelled.": "已取消频道初始化。",
+  "TRAM Channel Configuration": "TRAM 频道配置",
+  Channel: "频道",
+  "Requested type": "请求的类型",
+  "(choose in page)": "（在页面中选择）",
+  "Local test page": "本地测试页面",
+  "Browser opened. Waiting for save or delete...":
+    "浏览器已打开，等待保存或删除操作...",
+  "Starting local channel config server...":
+    "正在启动本地频道配置服务...",
+  "Channel configuration completed.": "频道配置已完成。",
+  'Request body must contain a "config" object.':
+    '请求体必须包含 "config" 对象。',
+  'Query parameter "bindingId" is required.':
+    '查询参数 "bindingId" 是必填项。',
+  "Not found": "未找到",
+  "Failed to start channel config server.": "启动频道配置服务失败。",
+  "Channel Type": "频道类型",
+  "Built-in or extension-provided channel adapter.":
+    "内置或由扩展提供的频道适配器。",
+  "Sender Policy": "发送者策略",
+  "Controls who can talk to this channel.": "控制谁可以向该频道发送消息。",
+  Allowlist: "白名单",
+  Pairing: "配对",
+  Open: "开放",
+  "Allowed Users": "允许的用户",
+  "User IDs allowed when senderPolicy is allowlist.":
+    "当发送者策略为白名单时允许的用户 ID。",
+  "Session Scope": "会话范围",
+  "How channel messages map to TRAM sessions.":
+    "频道消息映射到 TRAM 会话的方式。",
+  User: "用户",
+  Thread: "线程",
+  Single: "单会话",
+  "Working Directory": "工作目录",
+  "Directory used when the channel starts TRAM sessions.":
+    "频道启动 TRAM 会话时使用的目录。",
+  "Approval Mode": "审批模式",
+  "Permission mode used by the channel service.":
+    "频道服务使用的权限模式。",
+  Plan: "规划",
+  Default: "默认",
+  "Auto Edit": "自动编辑",
+  Yolo: "Yolo",
+  Instructions: "指令",
+  "Extra system instructions appended for this channel.":
+    "追加到该频道的额外系统指令。",
+  "Override the model used by the shared ACP bridge.":
+    "覆盖共享 ACP 桥接所使用的模型。",
+  "Group Policy": "群组策略",
+  "How group chats are handled by the channel.":
+    "频道处理群聊的方式。",
+  Disabled: "禁用",
+  "Groups JSON": "群组 JSON",
+  "Per-group overrides keyed by group ID.":
+    "按群组 ID 键控的群组级覆盖配置。",
+  Token: "令牌",
+  "Bot or access token required by the channel adapter.":
+    "频道适配器所需的机器人或访问令牌。",
+  "Client ID": "客户端 ID",
+  "Client identifier issued by the channel platform.":
+    "频道平台颁发的客户端标识。",
+  "Client Secret": "客户端密钥",
+  "Client secret issued by the channel platform.":
+    "频道平台颁发的客户端密钥。",
+  Port: "端口",
+  "TCP port used by the local channel listener.":
+    "本地频道监听器使用的 TCP 端口。",
+  "Server WebSocket URL": "服务端 WebSocket URL",
+  "WebSocket endpoint used by the plugin example channel.":
+    "插件示例频道使用的 WebSocket 端点。",
+  "Override the WeChat iLink API base URL.":
+    "覆盖微信 iLink API 的基础 URL。",
+  "Channel-specific field: {{key}}": "频道特定字段：{{key}}",
+  "Channel name is required.": "频道名称不能为空。",
+  "Channel config must be a JSON object.": "频道配置必须是 JSON 对象。",
+  "Waiting for WeChat QR code confirmation.": "等待微信二维码确认。",
+  "Unknown WeChat binding: {{bindingId}}": "未知的微信绑定：{{bindingId}}",
+  'Channel type "{{type}}" is not supported by channel initialize. Use settings.json or another CLI flow instead.':
+    'channel initialize 不支持频道类型 "{{type}}"。请改用 settings.json 或其他 CLI 配置流程。',
+  "Failed to get QR code: HTTP {{status}}":
+    "获取二维码失败：HTTP {{status}}",
+  "No qrcode in response": "响应中没有 qrcode 字段",
+  Telegram: "Telegram",
+  DingTalk: "钉钉",
+  WeChat: "微信",
+  "Plugin Example": "插件示例",
+  "TRAM Channel Config": "TRAM 频道配置",
+  "Loading local config backend...": "正在加载本地配置后端...",
+  "Waiting for metadata from the CLI-side server.":
+    "正在等待来自 CLI 本地服务的元数据。",
+  "Current config is invalid.": "当前配置无效。",
+  "No extra fields": "无额外字段",
+  Selected: "已选中",
+  "QR bind": "扫码绑定",
+  "WeChat QR bind": "微信扫码绑定",
+  "Switch the channel type to WeChat to enable QR binding and saved account controls.":
+    "将频道类型切换为微信后，可启用扫码绑定和已保存账号管理。",
+  "Binding status": "绑定状态",
+  "Open QR image": "打开二维码图片",
+  "Connected user": "已连接用户",
+  "Saved account": "已保存账号",
+  Configured: "已配置",
+  "Not configured": "未配置",
+  "User ID": "用户 ID",
+  "Saved at": "保存时间",
+  "Start QR binding": "开始扫码绑定",
+  "The local CLI backend requests the QR code and continues polling the WeChat login API until it succeeds or fails.":
+    "本地 CLI 后端会请求二维码，并持续轮询微信登录 API，直到成功或失败。",
+  "WeChat Base URL": "微信基础 URL",
+  "Start QR Bind": "开始扫码绑定",
+  "Clear Saved Login": "清除已保存登录",
+  "A local browser harness for channel configuration. Save or delete will complete the CLI session after the response returns.":
+    "这是一个用于频道配置的本地浏览器页面。保存或删除成功后，CLI 会话会在响应返回后自动结束。",
+  "Selected Type": "当前选择类型",
+  "Existing Config": "现有配置",
+  "(none)": "（无）",
+  "(choose one)": "（请选择一个）",
+  Present: "已存在",
+  "New channel": "新频道",
+  "Channel Form": "频道表单",
+  "Common TRAM channel settings plus adapter-specific fields derived from the channel registry.":
+    "包含通用 TRAM 频道设置，以及从频道注册表推导出的适配器专属字段。",
+  "Save & Exit": "保存并退出",
+  "Delete Channel": "删除频道",
+  "WeChat QR Binding": "微信扫码绑定",
+  "WeChat login is stored separately from the channel config, matching the existing CLI login behavior.":
+    "微信登录信息与频道配置分开保存，与现有 CLI 登录行为一致。",
+  "Available Channel Types": "可用频道类型",
+  "Returned by the local metadata API.": "由本地元数据 API 返回。",
+  "Current Raw Config": "当前原始配置",
+  "What is currently stored for this channel in user settings.":
+    "当前在用户设置中为该频道保存的内容。",
+  "Saving channel config...": "正在保存频道配置...",
+  "Config saved. The CLI session will close automatically.":
+    "配置已保存，CLI 会话将自动关闭。",
+  "Delete channel {{name}}?": "确认删除频道 {{name}} 吗？",
+  "Deleting channel...": "正在删除频道...",
+  "Channel deleted. The CLI session will close automatically.":
+    "频道已删除，CLI 会话将自动关闭。",
+  "Requesting WeChat QR code...": "正在请求微信二维码...",
+  "QR code requested. Waiting for scan result...":
+    "二维码已请求，正在等待扫码结果...",
+  "Saved WeChat login cleared.": "已清除保存的微信登录信息。",
+  "WeChat account connected successfully.": "微信账号连接成功。",
+  "WeChat binding failed.": "微信绑定失败。",
+  "must be a number.": "必须是数字。",
+  "must be valid JSON": "必须是合法 JSON",
 
   // ============================================================================
   // Commands - Agents
   // ============================================================================
-  'Manage subagents for specialized task delegation.':
-    '管理用于专门任务委派的子智能体',
-  'Manage existing subagents (view, edit, delete).':
-    '管理现有子智能体（查看、编辑、删除）',
-  'Create a new subagent with guided setup.': '通过引导式设置创建新的子智能体',
+  "Manage subagents for specialized task delegation.":
+    "管理用于专门任务委派的子智能体",
+  "Manage existing subagents (view, edit, delete).":
+    "管理现有子智能体（查看、编辑、删除）",
+  "Create a new subagent with guided setup.": "通过引导式设置创建新的子智能体",
 
   // ============================================================================
   // Agents - Management Dialog
   // ============================================================================
-  Agents: '智能体',
-  'Choose Action': '选择操作',
-  'Edit {{name}}': '编辑 {{name}}',
-  'Edit Tools: {{name}}': '编辑工具: {{name}}',
-  'Edit Color: {{name}}': '编辑颜色: {{name}}',
-  'Delete {{name}}': '删除 {{name}}',
-  'Unknown Step': '未知步骤',
-  'Esc to close': '按 Esc 关闭',
-  'Enter to select, ↑↓ to navigate, Esc to close':
-    'Enter 选择，↑↓ 导航，Esc 关闭',
-  'Esc to go back': '按 Esc 返回',
-  'Enter to confirm, Esc to cancel': 'Enter 确认，Esc 取消',
-  'Enter to select, ↑↓ to navigate, Esc to go back':
-    'Enter 选择，↑↓ 导航，Esc 返回',
-  'Enter to submit, Esc to go back': 'Enter 提交，Esc 返回',
-  'Invalid step: {{step}}': '无效步骤: {{step}}',
-  'No subagents found.': '未找到子智能体。',
+  Agents: "智能体",
+  "Choose Action": "选择操作",
+  "Edit {{name}}": "编辑 {{name}}",
+  "Edit Tools: {{name}}": "编辑工具: {{name}}",
+  "Edit Color: {{name}}": "编辑颜色: {{name}}",
+  "Delete {{name}}": "删除 {{name}}",
+  "Unknown Step": "未知步骤",
+  "Esc to close": "按 Esc 关闭",
+  "Enter to select, ↑↓ to navigate, Esc to close":
+    "Enter 选择，↑↓ 导航，Esc 关闭",
+  "Esc to go back": "按 Esc 返回",
+  "Enter to confirm, Esc to cancel": "Enter 确认，Esc 取消",
+  "Enter to select, ↑↓ to navigate, Esc to go back":
+    "Enter 选择，↑↓ 导航，Esc 返回",
+  "Enter to submit, Esc to go back": "Enter 提交，Esc 返回",
+  "Invalid step: {{step}}": "无效步骤: {{step}}",
+  "No subagents found.": "未找到子智能体。",
   "Use '/agents create' to create your first subagent.":
     "使用 '/agents create' 创建您的第一个子智能体。",
-  '(built-in)': '（内置）',
-  '(overridden by project level agent)': '（已被项目级智能体覆盖）',
-  'Project Level ({{path}})': '项目级 ({{path}})',
-  'User Level ({{path}})': '用户级 ({{path}})',
-  'Built-in Agents': '内置智能体',
-  'Extension Agents': '扩展智能体',
-  'Using: {{count}} agents': '使用中: {{count}} 个智能体',
-  'View Agent': '查看智能体',
-  'Edit Agent': '编辑智能体',
-  'Delete Agent': '删除智能体',
-  Back: '返回',
-  'No agent selected': '未选择智能体',
-  'File Path: ': '文件路径: ',
-  'Tools: ': '工具: ',
-  'Color: ': '颜色: ',
-  'Description:': '描述:',
-  'System Prompt:': '系统提示:',
-  'Open in editor': '在编辑器中打开',
-  'Edit tools': '编辑工具',
-  'Edit color': '编辑颜色',
-  '❌ Error:': '❌ 错误:',
+  "(built-in)": "（内置）",
+  "(overridden by project level agent)": "（已被项目级智能体覆盖）",
+  "Project Level ({{path}})": "项目级 ({{path}})",
+  "User Level ({{path}})": "用户级 ({{path}})",
+  "Built-in Agents": "内置智能体",
+  "Extension Agents": "扩展智能体",
+  "Using: {{count}} agents": "使用中: {{count}} 个智能体",
+  "View Agent": "查看智能体",
+  "Edit Agent": "编辑智能体",
+  "Delete Agent": "删除智能体",
+  Back: "返回",
+  "No agent selected": "未选择智能体",
+  "File Path: ": "文件路径: ",
+  "Tools: ": "工具: ",
+  "Color: ": "颜色: ",
+  "Description:": "描述:",
+  "System Prompt:": "系统提示:",
+  "Open in editor": "在编辑器中打开",
+  "Edit tools": "编辑工具",
+  "Edit color": "编辑颜色",
+  "❌ Error:": "❌ 错误:",
   'Are you sure you want to delete agent "{{name}}"?':
     '您确定要删除智能体 "{{name}}" 吗？',
   // ============================================================================
   // Agents - Creation Wizard
   // ============================================================================
-  'Project Level (.tram/agents/)': '项目级 (.tram/agents/)',
-  'User Level (~/.tram/agents/)': '用户级 (~/.tram/agents/)',
-  '✅ Subagent Created Successfully!': '✅ 子智能体创建成功！',
+  "Project Level (.tram/agents/)": "项目级 (.tram/agents/)",
+  "User Level (~/.tram/agents/)": "用户级 (~/.tram/agents/)",
+  "✅ Subagent Created Successfully!": "✅ 子智能体创建成功！",
   'Subagent "{{name}}" has been saved to {{level}} level.':
     '子智能体 "{{name}}" 已保存到 {{level}} 级别。',
-  'Name: ': '名称: ',
-  'Location: ': '位置: ',
-  '❌ Error saving subagent:': '❌ 保存子智能体时出错:',
-  'Warnings:': '警告:',
+  "Name: ": "名称: ",
+  "Location: ": "位置: ",
+  "❌ Error saving subagent:": "❌ 保存子智能体时出错:",
+  "Warnings:": "警告:",
   'Name "{{name}}" already exists at {{level}} level - will overwrite existing subagent':
     '名称 "{{name}}" 在 {{level}} 级别已存在 - 将覆盖现有子智能体',
   'Name "{{name}}" exists at user level - project level will take precedence':
     '名称 "{{name}}" 在用户级别存在 - 项目级别将优先',
   'Name "{{name}}" exists at project level - existing subagent will take precedence':
     '名称 "{{name}}" 在项目级别存在 - 现有子智能体将优先',
-  'Description is over {{length}} characters': '描述超过 {{length}} 个字符',
-  'System prompt is over {{length}} characters':
-    '系统提示超过 {{length}} 个字符',
+  "Description is over {{length}} characters": "描述超过 {{length}} 个字符",
+  "System prompt is over {{length}} characters":
+    "系统提示超过 {{length}} 个字符",
   // Agents - Creation Wizard Steps
-  'Step {{n}}: Choose Location': '步骤 {{n}}: 选择位置',
-  'Step {{n}}: Choose Generation Method': '步骤 {{n}}: 选择生成方式',
-  'Generate with TRAM (Recommended)': '使用 TRAM 生成（推荐）',
-  'Manual Creation': '手动创建',
-  'Describe what this subagent should do and when it should be used. (Be comprehensive for best results)':
-    '描述此子智能体应该做什么以及何时使用它。（为了获得最佳效果，请全面描述）',
-  'e.g., Expert code reviewer that reviews code based on best practices...':
-    '例如：专业的代码审查员，根据最佳实践审查代码...',
-  'Generating subagent configuration...': '正在生成子智能体配置...',
-  'Failed to generate subagent: {{error}}': '生成子智能体失败: {{error}}',
-  'Step {{n}}: Describe Your Subagent': '步骤 {{n}}: 描述您的子智能体',
-  'Step {{n}}: Enter Subagent Name': '步骤 {{n}}: 输入子智能体名称',
-  'Step {{n}}: Enter System Prompt': '步骤 {{n}}: 输入系统提示',
-  'Step {{n}}: Enter Description': '步骤 {{n}}: 输入描述',
+  "Step {{n}}: Choose Location": "步骤 {{n}}: 选择位置",
+  "Step {{n}}: Choose Generation Method": "步骤 {{n}}: 选择生成方式",
+  "Generate with TRAM (Recommended)": "使用 TRAM 生成（推荐）",
+  "Manual Creation": "手动创建",
+  "Describe what this subagent should do and when it should be used. (Be comprehensive for best results)":
+    "描述此子智能体应该做什么以及何时使用它。（为了获得最佳效果，请全面描述）",
+  "e.g., Expert code reviewer that reviews code based on best practices...":
+    "例如：专业的代码审查员，根据最佳实践审查代码...",
+  "Generating subagent configuration...": "正在生成子智能体配置...",
+  "Failed to generate subagent: {{error}}": "生成子智能体失败: {{error}}",
+  "Step {{n}}: Describe Your Subagent": "步骤 {{n}}: 描述您的子智能体",
+  "Step {{n}}: Enter Subagent Name": "步骤 {{n}}: 输入子智能体名称",
+  "Step {{n}}: Enter System Prompt": "步骤 {{n}}: 输入系统提示",
+  "Step {{n}}: Enter Description": "步骤 {{n}}: 输入描述",
   // Agents - Tool Selection
-  'Step {{n}}: Select Tools': '步骤 {{n}}: 选择工具',
-  'All Tools (Default)': '所有工具（默认）',
-  'All Tools': '所有工具',
-  'Read-only Tools': '只读工具',
-  'Read & Edit Tools': '读取和编辑工具',
-  'Read & Edit & Execution Tools': '读取、编辑和执行工具',
-  'All tools selected, including MCP tools': '已选择所有工具，包括 MCP 工具',
-  'Selected tools:': '已选择的工具:',
-  'Read-only tools:': '只读工具:',
-  'Edit tools:': '编辑工具:',
-  'Execution tools:': '执行工具:',
-  'Step {{n}}: Choose Background Color': '步骤 {{n}}: 选择背景颜色',
-  'Step {{n}}: Confirm and Save': '步骤 {{n}}: 确认并保存',
+  "Step {{n}}: Select Tools": "步骤 {{n}}: 选择工具",
+  "All Tools (Default)": "所有工具（默认）",
+  "All Tools": "所有工具",
+  "Read-only Tools": "只读工具",
+  "Read & Edit Tools": "读取和编辑工具",
+  "Read & Edit & Execution Tools": "读取、编辑和执行工具",
+  "All tools selected, including MCP tools": "已选择所有工具，包括 MCP 工具",
+  "Selected tools:": "已选择的工具:",
+  "Read-only tools:": "只读工具:",
+  "Edit tools:": "编辑工具:",
+  "Execution tools:": "执行工具:",
+  "Step {{n}}: Choose Background Color": "步骤 {{n}}: 选择背景颜色",
+  "Step {{n}}: Confirm and Save": "步骤 {{n}}: 确认并保存",
   // Agents - Navigation & Instructions
-  'Esc to cancel': '按 Esc 取消',
-  'Press Enter to save, e to save and edit, Esc to go back':
-    '按 Enter 保存，e 保存并编辑，Esc 返回',
-  'Press Enter to continue, {{navigation}}Esc to {{action}}':
-    '按 Enter 继续，{{navigation}}Esc {{action}}',
-  cancel: '取消',
-  'go back': '返回',
-  '↑↓ to navigate, ': '↑↓ 导航，',
-  'Enter a clear, unique name for this subagent.':
-    '为此子智能体输入一个清晰、唯一的名称。',
-  'e.g., Code Reviewer': '例如：代码审查员',
-  'Name cannot be empty.': '名称不能为空。',
+  "Press Enter to save, e to save and edit, Esc to go back":
+    "按 Enter 保存，e 保存并编辑，Esc 返回",
+  "Press Enter to continue, {{navigation}}Esc to {{action}}":
+    "按 Enter 继续，{{navigation}}Esc {{action}}",
+  cancel: "取消",
+  "go back": "返回",
+  "↑↓ to navigate, ": "↑↓ 导航，",
+  "Enter a clear, unique name for this subagent.":
+    "为此子智能体输入一个清晰、唯一的名称。",
+  "e.g., Code Reviewer": "例如：代码审查员",
+  "Name cannot be empty.": "名称不能为空。",
   "Write the system prompt that defines this subagent's behavior. Be comprehensive for best results.":
-    '编写定义此子智能体行为的系统提示。为了获得最佳效果，请全面描述。',
-  'e.g., You are an expert code reviewer...':
-    '例如：您是一位专业的代码审查员...',
-  'System prompt cannot be empty.': '系统提示不能为空。',
-  'Describe when and how this subagent should be used.':
-    '描述何时以及如何使用此子智能体。',
-  'e.g., Reviews code for best practices and potential bugs.':
-    '例如：审查代码以查找最佳实践和潜在错误。',
-  'Description cannot be empty.': '描述不能为空。',
-  'Failed to launch editor: {{error}}': '启动编辑器失败: {{error}}',
-  'Failed to save and edit subagent: {{error}}':
-    '保存并编辑子智能体失败: {{error}}',
+    "编写定义此子智能体行为的系统提示。为了获得最佳效果，请全面描述。",
+  "e.g., You are an expert code reviewer...":
+    "例如：您是一位专业的代码审查员...",
+  "System prompt cannot be empty.": "系统提示不能为空。",
+  "Describe when and how this subagent should be used.":
+    "描述何时以及如何使用此子智能体。",
+  "e.g., Reviews code for best practices and potential bugs.":
+    "例如：审查代码以查找最佳实践和潜在错误。",
+  "Description cannot be empty.": "描述不能为空。",
+  "Failed to launch editor: {{error}}": "启动编辑器失败: {{error}}",
+  "Failed to save and edit subagent: {{error}}":
+    "保存并编辑子智能体失败: {{error}}",
 
   // ============================================================================
   // Extensions - Management Dialog
   // ============================================================================
-  'Manage Extensions': '管理扩展',
-  'Extension Details': '扩展详情',
-  'View Extension': '查看扩展',
-  'Update Extension': '更新扩展',
-  'Disable Extension': '禁用扩展',
-  'Enable Extension': '启用扩展',
-  'Uninstall Extension': '卸载扩展',
-  'Select Scope': '选择作用域',
-  'User Scope': '用户作用域',
-  'Workspace Scope': '工作区作用域',
-  'No extensions found.': '未找到扩展。',
-  Active: '已启用',
-  Disabled: '已禁用',
-  'Update available': '有可用更新',
-  'Up to date': '已是最新',
-  'Checking...': '检查中...',
-  'Updating...': '更新中...',
-  Unknown: '未知',
-  Error: '错误',
-  'Version:': '版本：',
-  'Status:': '状态：',
+  "Manage Extensions": "管理扩展",
+  "Extension Details": "扩展详情",
+  "View Extension": "查看扩展",
+  "Update Extension": "更新扩展",
+  "Disable Extension": "禁用扩展",
+  "Enable Extension": "启用扩展",
+  "Uninstall Extension": "卸载扩展",
+  "Select Scope": "选择作用域",
+  "User Scope": "用户作用域",
+  "Workspace Scope": "工作区作用域",
+  "No extensions found.": "未找到扩展。",
+  Active: "已启用",
+  Disabled: "已禁用",
+  "Update available": "有可用更新",
+  "Up to date": "已是最新",
+  "Checking...": "检查中...",
+  "Updating...": "更新中...",
+  Unknown: "未知",
+  Error: "错误",
+  "Version:": "版本：",
+  "Status:": "状态：",
   'Are you sure you want to uninstall extension "{{name}}"?':
     '确定要卸载扩展 "{{name}}" 吗？',
-  'This action cannot be undone.': '此操作无法撤销。',
+  "This action cannot be undone.": "此操作无法撤销。",
   'Extension "{{name}}" disabled successfully.': '扩展 "{{name}}" 禁用成功。',
   'Extension "{{name}}" enabled successfully.': '扩展 "{{name}}" 启用成功。',
   'Extension "{{name}}" updated successfully.': '扩展 "{{name}}" 更新成功。',
   'Failed to update extension "{{name}}": {{error}}':
     '更新扩展 "{{name}}" 失败：{{error}}',
-  'Select the scope for this action:': '选择此操作的作用域：',
-  'User - Applies to all projects': '用户 - 应用于所有项目',
-  'Workspace - Applies to current project only': '工作区 - 仅应用于当前项目',
+  "Select the scope for this action:": "选择此操作的作用域：",
+  "User - Applies to all projects": "用户 - 应用于所有项目",
+  "Workspace - Applies to current project only": "工作区 - 仅应用于当前项目",
   // Extension dialog - missing keys
-  'Name:': '名称：',
-  'MCP Servers:': 'MCP 服务器：',
-  'Settings:': '设置：',
-  active: '已启用',
-  'View Details': '查看详情',
-  'Update failed:': '更新失败：',
-  'Updating {{name}}...': '正在更新 {{name}}...',
-  'Update complete!': '更新完成！',
-  'User (global)': '用户（全局）',
-  'Workspace (project-specific)': '工作区（项目特定）',
+  "Name:": "名称：",
+  "MCP Servers:": "MCP 服务器：",
+  "Settings:": "设置：",
+  active: "已启用",
+  "View Details": "查看详情",
+  "Update failed:": "更新失败：",
+  "Updating {{name}}...": "正在更新 {{name}}...",
+  "Update complete!": "更新完成！",
+  "User (global)": "用户（全局）",
+  "Workspace (project-specific)": "工作区（项目特定）",
   'Disable "{{name}}" - Select Scope': '禁用 "{{name}}" - 选择作用域',
   'Enable "{{name}}" - Select Scope': '启用 "{{name}}" - 选择作用域',
-  'No extension selected': '未选择扩展',
-  'Press Y/Enter to confirm, N/Esc to cancel': '按 Y/Enter 确认，N/Esc 取消',
-  'Y/Enter to confirm, N/Esc to cancel': 'Y/Enter 确认，N/Esc 取消',
-  '{{count}} extensions installed': '已安装 {{count}} 个扩展',
+  "No extension selected": "未选择扩展",
+  "Press Y/Enter to confirm, N/Esc to cancel": "按 Y/Enter 确认，N/Esc 取消",
+  "Y/Enter to confirm, N/Esc to cancel": "Y/Enter 确认，N/Esc 取消",
+  "{{count}} extensions installed": "已安装 {{count}} 个扩展",
   "Use '/extensions install' to install your first extension.":
     "使用 '/extensions install' 安装您的第一个扩展。",
   // Update status values
-  'up to date': '已是最新',
-  'update available': '有可用更新',
-  'checking...': '检查中...',
-  'not updatable': '不可更新',
-  error: '错误',
+  "up to date": "已是最新",
+  "update available": "有可用更新",
+  "checking...": "检查中...",
+  "not updatable": "不可更新",
+  error: "错误",
 
   // ============================================================================
   // Commands - General (continued)
   // ============================================================================
-  'View and edit TRAM settings': '查看和编辑 TRAM 设置',
-  Settings: '设置',
-  'To see changes, TRAM must be restarted. Press r to exit and apply changes now.':
-    '要查看更改，必须重启 TRAM。按 r 退出并立即应用更改。',
+  "View and edit TRAM settings": "查看和编辑 TRAM 设置",
+  Settings: "设置",
+  "To see changes, TRAM must be restarted. Press r to exit and apply changes now.":
+    "要查看更改，必须重启 TRAM。按 r 退出并立即应用更改。",
   'The command "/{{command}}" is not supported in non-interactive mode.':
     '不支持在非交互模式下使用命令 "/{{command}}"。',
   // ============================================================================
   // Settings Labels
   // ============================================================================
-  'Vim Mode': 'Vim 模式',
-  'Disable Auto Update': '禁用自动更新',
-  'Attribution: commit': '署名：提交',
-  'Terminal Bell Notification': '终端响铃通知',
-  'Enable Usage Statistics': '启用使用统计',
-  Theme: '主题',
-  'Preferred Editor': '首选编辑器',
-  'Auto-connect to IDE': '自动连接到 IDE',
-  'Enable Prompt Completion': '启用提示补全',
-  'Debug Keystroke Logging': '调试按键记录',
-  'Language: UI': '语言：界面',
-  'Language: Model': '语言：模型',
-  'Output Format': '输出格式',
-  'Hide Window Title': '隐藏窗口标题',
-  'Show Status in Title': '在标题中显示状态',
-  'Hide Tips': '隐藏提示',
-  'Show Line Numbers in Code': '在代码中显示行号',
-  'Show Citations': '显示引用',
-  'Custom Witty Phrases': '自定义诙谐短语',
-  'Show Welcome Back Dialog': '显示欢迎回来对话框',
-  'Enable User Feedback': '启用用户反馈',
-  'How is TRAM doing this session? (optional)': 'TRAM 这次表现如何？（可选）',
-  Bad: '不满意',
-  Fine: '还行',
-  Good: '满意',
-  Dismiss: '忽略',
-  'Not Sure Yet': '暂不评价',
-  'Any other key': '任意其他键',
-  'Disable Loading Phrases': '禁用加载短语',
-  'Screen Reader Mode': '屏幕阅读器模式',
-  'IDE Mode': 'IDE 模式',
-  'Max Session Turns': '最大会话轮次',
-  'Skip Next Speaker Check': '跳过下一个说话者检查',
-  'Skip Loop Detection': '跳过循环检测',
-  'Skip Startup Context': '跳过启动上下文',
-  'Enable OpenAI Logging': '启用 OpenAI 日志',
-  'OpenAI Logging Directory': 'OpenAI 日志目录',
-  Timeout: '超时',
-  'Max Retries': '最大重试次数',
-  'Disable Cache Control': '禁用缓存控制',
-  'Memory Discovery Max Dirs': '内存发现最大目录数',
-  'Load Memory From Include Directories': '从包含目录加载内存',
-  'Respect .gitignore': '遵守 .gitignore',
-  'Respect .tramignore': '遵守 .tramignore',
-  'Enable Recursive File Search': '启用递归文件搜索',
-  'Disable Fuzzy Search': '禁用模糊搜索',
-  'Interactive Shell (PTY)': '交互式 Shell (PTY)',
-  'Show Color': '显示颜色',
-  'Auto Accept': '自动接受',
-  'Use Ripgrep': '使用 Ripgrep',
-  'Use Builtin Ripgrep': '使用内置 Ripgrep',
-  'Enable Tool Output Truncation': '启用工具输出截断',
-  'Tool Output Truncation Threshold': '工具输出截断阈值',
-  'Tool Output Truncation Lines': '工具输出截断行数',
-  'Folder Trust': '文件夹信任',
-  'Vision Model Preview': '视觉模型预览',
-  'Tool Schema Compliance': '工具 Schema 兼容性',
+  "Vim Mode": "Vim 模式",
+  "Disable Auto Update": "禁用自动更新",
+  "Attribution: commit": "署名：提交",
+  "Terminal Bell Notification": "终端响铃通知",
+  "Enable Usage Statistics": "启用使用统计",
+  Theme: "主题",
+  "Preferred Editor": "首选编辑器",
+  "Auto-connect to IDE": "自动连接到 IDE",
+  "Enable Prompt Completion": "启用提示补全",
+  "Debug Keystroke Logging": "调试按键记录",
+  "Language: UI": "语言：界面",
+  "Language: Model": "语言：模型",
+  "Output Format": "输出格式",
+  "Hide Window Title": "隐藏窗口标题",
+  "Show Status in Title": "在标题中显示状态",
+  "Hide Tips": "隐藏提示",
+  "Show Line Numbers in Code": "在代码中显示行号",
+  "Show Citations": "显示引用",
+  "Custom Witty Phrases": "自定义诙谐短语",
+  "Show Welcome Back Dialog": "显示欢迎回来对话框",
+  "Enable User Feedback": "启用用户反馈",
+  "How is TRAM doing this session? (optional)": "TRAM 这次表现如何？（可选）",
+  Bad: "不满意",
+  Fine: "还行",
+  Good: "满意",
+  Dismiss: "忽略",
+  "Not Sure Yet": "暂不评价",
+  "Any other key": "任意其他键",
+  "Disable Loading Phrases": "禁用加载短语",
+  "Screen Reader Mode": "屏幕阅读器模式",
+  "IDE Mode": "IDE 模式",
+  "Max Session Turns": "最大会话轮次",
+  "Skip Next Speaker Check": "跳过下一个说话者检查",
+  "Skip Loop Detection": "跳过循环检测",
+  "Skip Startup Context": "跳过启动上下文",
+  "Enable OpenAI Logging": "启用 OpenAI 日志",
+  "OpenAI Logging Directory": "OpenAI 日志目录",
+  Timeout: "超时",
+  "Max Retries": "最大重试次数",
+  "Disable Cache Control": "禁用缓存控制",
+  "Memory Discovery Max Dirs": "内存发现最大目录数",
+  "Load Memory From Include Directories": "从包含目录加载内存",
+  "Respect .gitignore": "遵守 .gitignore",
+  "Respect .tramignore": "遵守 .tramignore",
+  "Enable Recursive File Search": "启用递归文件搜索",
+  "Disable Fuzzy Search": "禁用模糊搜索",
+  "Interactive Shell (PTY)": "交互式 Shell (PTY)",
+  "Show Color": "显示颜色",
+  "Auto Accept": "自动接受",
+  "Use Ripgrep": "使用 Ripgrep",
+  "Use Builtin Ripgrep": "使用内置 Ripgrep",
+  "Enable Tool Output Truncation": "启用工具输出截断",
+  "Tool Output Truncation Threshold": "工具输出截断阈值",
+  "Tool Output Truncation Lines": "工具输出截断行数",
+  "Folder Trust": "文件夹信任",
+  "Vision Model Preview": "视觉模型预览",
+  "Tool Schema Compliance": "工具 Schema 兼容性",
   // Settings enum options
-  'Auto (detect from system)': '自动（从系统检测）',
-  Text: '文本',
-  JSON: 'JSON',
-  Plan: '规划',
-  Default: '默认',
-  'Auto Edit': '自动编辑',
-  YOLO: 'YOLO',
-  'toggle vim mode on/off': '切换 vim 模式开关',
-  'check session stats. Usage: /stats [model|tools]':
-    '检查会话统计信息。用法：/stats [model|tools]',
-  'Show model-specific usage statistics.': '显示模型相关的使用统计信息',
-  'Show tool-specific usage statistics.': '显示工具相关的使用统计信息',
-  'exit the cli': '退出命令行界面',
-  'Open MCP management dialog, or authenticate with OAuth-enabled servers':
-    '打开 MCP 管理对话框，或在支持 OAuth 的服务器上进行身份验证',
-  'List configured MCP servers and tools, or authenticate with OAuth-enabled servers':
-    '列出已配置的 MCP 服务器和工具，或使用支持 OAuth 的服务器进行身份验证',
-  'Manage workspace directories': '管理工作区目录',
-  'Add directories to the workspace. Use comma to separate multiple paths':
-    '将目录添加到工作区。使用逗号分隔多个路径',
-  'Show all directories in the workspace': '显示工作区中的所有目录',
-  'set external editor preference': '设置外部编辑器首选项',
-  'Select Editor': '选择编辑器',
-  'Editor Preference': '编辑器首选项',
-  'These editors are currently supported. Please note that some editors cannot be used in sandbox mode.':
-    '当前支持以下编辑器。请注意，某些编辑器无法在沙箱模式下使用。',
-  'Your preferred editor is:': '您的首选编辑器是：',
-  'Manage extensions': '管理扩展',
-  'Manage installed extensions': '管理已安装的扩展',
-  'List active extensions': '列出活动扩展',
-  'Update extensions. Usage: update <extension-names>|--all':
-    '更新扩展。用法：update <extension-names>|--all',
-  'Disable an extension': '禁用扩展',
-  'Enable an extension': '启用扩展',
-  'Install an extension from a git repo or local path':
-    '从 Git 仓库或本地路径安装扩展',
-  'Uninstall an extension': '卸载扩展',
-  'No extensions installed.': '未安装扩展。',
-  'Usage: /extensions update <extension-names>|--all':
-    '用法：/extensions update <扩展名>|--all',
+  "Auto (detect from system)": "自动（从系统检测）",
+  Text: "文本",
+  JSON: "JSON",
+  Plan: "规划",
+  Default: "默认",
+  "Auto Edit": "自动编辑",
+  YOLO: "YOLO",
+  "toggle vim mode on/off": "切换 vim 模式开关",
+  "check session stats. Usage: /stats [model|tools]":
+    "检查会话统计信息。用法：/stats [model|tools]",
+  "Show model-specific usage statistics.": "显示模型相关的使用统计信息",
+  "Show tool-specific usage statistics.": "显示工具相关的使用统计信息",
+  "exit the cli": "退出命令行界面",
+  "Open MCP management dialog, or authenticate with OAuth-enabled servers":
+    "打开 MCP 管理对话框，或在支持 OAuth 的服务器上进行身份验证",
+  "List configured MCP servers and tools, or authenticate with OAuth-enabled servers":
+    "列出已配置的 MCP 服务器和工具，或使用支持 OAuth 的服务器进行身份验证",
+  "Manage workspace directories": "管理工作区目录",
+  "Add directories to the workspace. Use comma to separate multiple paths":
+    "将目录添加到工作区。使用逗号分隔多个路径",
+  "Show all directories in the workspace": "显示工作区中的所有目录",
+  "set external editor preference": "设置外部编辑器首选项",
+  "Select Editor": "选择编辑器",
+  "Editor Preference": "编辑器首选项",
+  "These editors are currently supported. Please note that some editors cannot be used in sandbox mode.":
+    "当前支持以下编辑器。请注意，某些编辑器无法在沙箱模式下使用。",
+  "Your preferred editor is:": "您的首选编辑器是：",
+  "Manage extensions": "管理扩展",
+  "Manage installed extensions": "管理已安装的扩展",
+  "List active extensions": "列出活动扩展",
+  "Update extensions. Usage: update <extension-names>|--all":
+    "更新扩展。用法：update <extension-names>|--all",
+  "Disable an extension": "禁用扩展",
+  "Enable an extension": "启用扩展",
+  "Install an extension from a git repo or local path":
+    "从 Git 仓库或本地路径安装扩展",
+  "Uninstall an extension": "卸载扩展",
+  "No extensions installed.": "未安装扩展。",
+  "Usage: /extensions update <extension-names>|--all":
+    "用法：/extensions update <扩展名>|--all",
   'Extension "{{name}}" not found.': '未找到扩展 "{{name}}"。',
-  'No extensions to update.': '没有可更新的扩展。',
-  'Usage: /extensions install <source>': '用法：/extensions install <来源>',
+  "No extensions to update.": "没有可更新的扩展。",
+  "Usage: /extensions install <source>": "用法：/extensions install <来源>",
   'Installing extension from "{{source}}"...':
     '正在从 "{{source}}" 安装扩展...',
   'Extension "{{name}}" installed successfully.': '扩展 "{{name}}" 安装成功。',
   'Failed to install extension from "{{source}}": {{error}}':
     '从 "{{source}}" 安装扩展失败：{{error}}',
-  'Usage: /extensions uninstall <extension-name>':
-    '用法：/extensions uninstall <扩展名>',
+  "Usage: /extensions uninstall <extension-name>":
+    "用法：/extensions uninstall <扩展名>",
   'Uninstalling extension "{{name}}"...': '正在卸载扩展 "{{name}}"...',
   'Extension "{{name}}" uninstalled successfully.':
     '扩展 "{{name}}" 卸载成功。',
   'Failed to uninstall extension "{{name}}": {{error}}':
     '卸载扩展 "{{name}}" 失败：{{error}}',
-  'Usage: /extensions {{command}} <extension> [--scope=<user|workspace>]':
-    '用法：/extensions {{command}} <扩展> [--scope=<user|workspace>]',
+  "Usage: /extensions {{command}} <extension> [--scope=<user|workspace>]":
+    "用法：/extensions {{command}} <扩展> [--scope=<user|workspace>]",
   'Unsupported scope "{{scope}}", should be one of "user" or "workspace"':
     '不支持的作用域 "{{scope}}"，应为 "user" 或 "workspace"',
   'Extension "{{name}}" disabled for scope "{{scope}}"':
     '扩展 "{{name}}" 已在作用域 "{{scope}}" 中禁用',
   'Extension "{{name}}" enabled for scope "{{scope}}"':
     '扩展 "{{name}}" 已在作用域 "{{scope}}" 中启用',
-  'Do you want to continue? [Y/n]: ': '是否继续？[Y/n]：',
-  'Do you want to continue?': '是否继续？',
+  "Do you want to continue? [Y/n]: ": "是否继续？[Y/n]：",
+  "Do you want to continue?": "是否继续？",
   'Installing extension "{{name}}".': '正在安装扩展 "{{name}}"。',
-  '**Extensions may introduce unexpected behavior. Ensure you have investigated the extension source and trust the author.**':
-    '**扩展可能会引入意外行为。请确保您已调查过扩展源并信任作者。**',
-  'This extension will run the following MCP servers:':
-    '此扩展将运行以下 MCP 服务器：',
-  local: '本地',
-  remote: '远程',
-  'This extension will add the following commands: {{commands}}.':
-    '此扩展将添加以下命令：{{commands}}。',
-  'This extension will append info to your TRAM.md context using {{fileName}}':
-    '此扩展将使用 {{fileName}} 向您的 TRAM.md 上下文追加信息',
-  'This extension will exclude the following core tools: {{tools}}':
-    '此扩展将排除以下核心工具：{{tools}}',
-  'This extension will install the following skills:': '此扩展将安装以下技能：',
-  'This extension will install the following subagents:':
-    '此扩展将安装以下子智能体：',
+  "**Extensions may introduce unexpected behavior. Ensure you have investigated the extension source and trust the author.**":
+    "**扩展可能会引入意外行为。请确保您已调查过扩展源并信任作者。**",
+  "This extension will run the following MCP servers:":
+    "此扩展将运行以下 MCP 服务器：",
+  local: "本地",
+  remote: "远程",
+  "This extension will add the following commands: {{commands}}.":
+    "此扩展将添加以下命令：{{commands}}。",
+  "This extension will append info to your TRAM.md context using {{fileName}}":
+    "此扩展将使用 {{fileName}} 向您的 TRAM.md 上下文追加信息",
+  "This extension will exclude the following core tools: {{tools}}":
+    "此扩展将排除以下核心工具：{{tools}}",
+  "This extension will install the following skills:": "此扩展将安装以下技能：",
+  "This extension will install the following subagents:":
+    "此扩展将安装以下子智能体：",
   'Installation cancelled for "{{name}}".': '已取消安装 "{{name}}"。',
-  'You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.':
-    '您正在安装来自 {{originSource}} 的扩展。某些功能可能无法完美兼容 TRAM。',
-  '--ref and --auto-update are not applicable for marketplace extensions.':
-    '--ref 和 --auto-update 不适用于市场扩展。',
+  "You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.":
+    "您正在安装来自 {{originSource}} 的扩展。某些功能可能无法完美兼容 TRAM。",
+  "--ref and --auto-update are not applicable for marketplace extensions.":
+    "--ref 和 --auto-update 不适用于市场扩展。",
   'Extension "{{name}}" installed successfully and enabled.':
     '扩展 "{{name}}" 安装成功并已启用。',
-  'Installs an extension from a git repository URL, local path, or claude marketplace (marketplace-url:plugin-name).':
-    '从 Git 仓库 URL、本地路径或 Claude 市场（marketplace-url:plugin-name）安装扩展。',
-  'The github URL, local path, or marketplace source (marketplace-url:plugin-name) of the extension to install.':
-    '要安装的扩展的 GitHub URL、本地路径或市场源（marketplace-url:plugin-name）。',
-  'The git ref to install from.': '要安装的 Git 引用。',
-  'Enable auto-update for this extension.': '为此扩展启用自动更新。',
-  'Enable pre-release versions for this extension.': '为此扩展启用预发布版本。',
-  'Acknowledge the security risks of installing an extension and skip the confirmation prompt.':
-    '确认安装扩展的安全风险并跳过确认提示。',
-  'The source argument must be provided.': '必须提供来源参数。',
+  "Installs an extension from a git repository URL, local path, or claude marketplace (marketplace-url:plugin-name).":
+    "从 Git 仓库 URL、本地路径或 Claude 市场（marketplace-url:plugin-name）安装扩展。",
+  "The github URL, local path, or marketplace source (marketplace-url:plugin-name) of the extension to install.":
+    "要安装的扩展的 GitHub URL、本地路径或市场源（marketplace-url:plugin-name）。",
+  "The git ref to install from.": "要安装的 Git 引用。",
+  "Enable auto-update for this extension.": "为此扩展启用自动更新。",
+  "Enable pre-release versions for this extension.": "为此扩展启用预发布版本。",
+  "Acknowledge the security risks of installing an extension and skip the confirmation prompt.":
+    "确认安装扩展的安全风险并跳过确认提示。",
+  "The source argument must be provided.": "必须提供来源参数。",
   'Extension "{{name}}" successfully uninstalled.':
     '扩展 "{{name}}" 卸载成功。',
-  'Uninstalls an extension.': '卸载扩展。',
-  'The name or source path of the extension to uninstall.':
-    '要卸载的扩展的名称或源路径。',
-  'Please include the name of the extension to uninstall as a positional argument.':
-    '请将要卸载的扩展名称作为位置参数。',
-  'Enables an extension.': '启用扩展。',
-  'The name of the extension to enable.': '要启用的扩展名称。',
-  'The scope to enable the extenison in. If not set, will be enabled in all scopes.':
-    '启用扩展的作用域。如果未设置，将在所有作用域中启用。',
+  "Uninstalls an extension.": "卸载扩展。",
+  "The name or source path of the extension to uninstall.":
+    "要卸载的扩展的名称或源路径。",
+  "Please include the name of the extension to uninstall as a positional argument.":
+    "请将要卸载的扩展名称作为位置参数。",
+  "Enables an extension.": "启用扩展。",
+  "The name of the extension to enable.": "要启用的扩展名称。",
+  "The scope to enable the extenison in. If not set, will be enabled in all scopes.":
+    "启用扩展的作用域。如果未设置，将在所有作用域中启用。",
   'Extension "{{name}}" successfully enabled for scope "{{scope}}".':
     '扩展 "{{name}}" 已在作用域 "{{scope}}" 中启用。',
   'Extension "{{name}}" successfully enabled in all scopes.':
     '扩展 "{{name}}" 已在所有作用域中启用。',
-  'Invalid scope: {{scope}}. Please use one of {{scopes}}.':
-    '无效的作用域：{{scope}}。请使用 {{scopes}} 之一。',
-  'Disables an extension.': '禁用扩展。',
-  'The name of the extension to disable.': '要禁用的扩展名称。',
-  'The scope to disable the extenison in.': '禁用扩展的作用域。',
+  "Invalid scope: {{scope}}. Please use one of {{scopes}}.":
+    "无效的作用域：{{scope}}。请使用 {{scopes}} 之一。",
+  "Disables an extension.": "禁用扩展。",
+  "The name of the extension to disable.": "要禁用的扩展名称。",
+  "The scope to disable the extenison in.": "禁用扩展的作用域。",
   'Extension "{{name}}" successfully disabled for scope "{{scope}}".':
     '扩展 "{{name}}" 已在作用域 "{{scope}}" 中禁用。',
   'Extension "{{name}}" successfully updated: {{oldVersion}} → {{newVersion}}.':
@@ -642,381 +804,259 @@ export default {
     '由于缺少安装元数据，无法安装扩展 "{{name}}"',
   'Extension "{{name}}" is already up to date.':
     '扩展 "{{name}}" 已是最新版本。',
-  'Updates all extensions or a named extension to the latest version.':
-    '将所有扩展或指定扩展更新到最新版本。',
-  'The name of the extension to update.': '要更新的扩展名称。',
-  'Update all extensions.': '更新所有扩展。',
-  'Either an extension name or --all must be provided':
-    '必须提供扩展名称或 --all',
-  'Lists installed extensions.': '列出已安装的扩展。',
-  'Path:': '路径：',
-  'Source:': '来源：',
-  'Type:': '类型：',
-  'Ref:': '引用：',
-  'Release tag:': '发布标签：',
-  'Enabled (User):': '已启用（用户）：',
-  'Enabled (Workspace):': '已启用（工作区）：',
-  'Context files:': '上下文文件：',
-  'Skills:': '技能：',
-  'Agents:': '智能体：',
-  'MCP servers:': 'MCP 服务器：',
-  'Link extension failed to install.': '链接扩展安装失败。',
+  "Updates all extensions or a named extension to the latest version.":
+    "将所有扩展或指定扩展更新到最新版本。",
+  "The name of the extension to update.": "要更新的扩展名称。",
+  "Update all extensions.": "更新所有扩展。",
+  "Either an extension name or --all must be provided":
+    "必须提供扩展名称或 --all",
+  "Lists installed extensions.": "列出已安装的扩展。",
+  "Path:": "路径：",
+  "Source:": "来源：",
+  "Type:": "类型：",
+  "Ref:": "引用：",
+  "Release tag:": "发布标签：",
+  "Enabled (User):": "已启用（用户）：",
+  "Enabled (Workspace):": "已启用（工作区）：",
+  "Context files:": "上下文文件：",
+  "Skills:": "技能：",
+  "Agents:": "智能体：",
+  "MCP servers:": "MCP 服务器：",
+  "Link extension failed to install.": "链接扩展安装失败。",
   'Extension "{{name}}" linked successfully and enabled.':
     '扩展 "{{name}}" 链接成功并已启用。',
-  'Links an extension from a local path. Updates made to the local path will always be reflected.':
-    '从本地路径链接扩展。对本地路径的更新将始终反映。',
-  'The name of the extension to link.': '要链接的扩展名称。',
-  'Set a specific setting for an extension.': '为扩展设置特定配置。',
-  'Name of the extension to configure.': '要配置的扩展名称。',
-  'The setting to configure (name or env var).':
-    '要配置的设置（名称或环境变量）。',
-  'The scope to set the setting in.': '设置配置的作用域。',
-  'List all settings for an extension.': '列出扩展的所有设置。',
-  'Name of the extension.': '扩展名称。',
+  "Links an extension from a local path. Updates made to the local path will always be reflected.":
+    "从本地路径链接扩展。对本地路径的更新将始终反映。",
+  "The name of the extension to link.": "要链接的扩展名称。",
+  "Set a specific setting for an extension.": "为扩展设置特定配置。",
+  "Name of the extension to configure.": "要配置的扩展名称。",
+  "The setting to configure (name or env var).":
+    "要配置的设置（名称或环境变量）。",
+  "The scope to set the setting in.": "设置配置的作用域。",
+  "List all settings for an extension.": "列出扩展的所有设置。",
+  "Name of the extension.": "扩展名称。",
   'Extension "{{name}}" has no settings to configure.':
     '扩展 "{{name}}" 没有可配置的设置。',
   'Settings for "{{name}}":': '"{{name}}" 的设置：',
-  '(workspace)': '（工作区）',
-  '(user)': '（用户）',
-  '[not set]': '［未设置］',
-  '[value stored in keychain]': '［值存储在钥匙串中］',
-  'Manage extension settings.': '管理扩展设置。',
-  'You need to specify a command (set or list).':
-    '您需要指定命令（set 或 list）。',
+  "(workspace)": "（工作区）",
+  "(user)": "（用户）",
+  "[not set]": "［未设置］",
+  "[value stored in keychain]": "［值存储在钥匙串中］",
+  "Manage extension settings.": "管理扩展设置。",
+  "You need to specify a command (set or list).":
+    "您需要指定命令（set 或 list）。",
   // ============================================================================
   // Plugin Choice / Marketplace
   // ============================================================================
-  'No plugins available in this marketplace.': '此市场中没有可用的插件。',
+  "No plugins available in this marketplace.": "此市场中没有可用的插件。",
   'Select a plugin to install from marketplace "{{name}}":':
     '从市场 "{{name}}" 中选择要安装的插件：',
-  'Plugin selection cancelled.': '插件选择已取消。',
+  "Plugin selection cancelled.": "插件选择已取消。",
   'Select a plugin from "{{name}}"': '从 "{{name}}" 中选择插件',
-  'Use ↑↓ or j/k to navigate, Enter to select, Escape to cancel':
-    '使用 ↑↓ 或 j/k 导航，回车选择，Esc 取消',
-  '{{count}} more above': '上方还有 {{count}} 项',
-  '{{count}} more below': '下方还有 {{count}} 项',
-  'manage IDE integration': '管理 IDE 集成',
-  'check status of IDE integration': '检查 IDE 集成状态',
-  'install required IDE companion for {{ideName}}':
-    '安装 {{ideName}} 所需的 IDE 配套工具',
-  'enable IDE integration': '启用 IDE 集成',
-  'disable IDE integration': '禁用 IDE 集成',
-  'IDE integration is not supported in your current environment. To use this feature, run TRAM in one of these supported IDEs: VS Code or VS Code forks.':
-    '您当前环境不支持 IDE 集成。要使用此功能，请在以下支持的 IDE 之一中运行 TRAM：VS Code 或 VS Code 分支版本。',
-  'Set up GitHub Actions': '设置 GitHub Actions',
-  'Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)':
-    '配置终端按键绑定以支持多行输入（VS Code、Cursor、Windsurf、Trae）',
-  'Please restart your terminal for the changes to take effect.':
-    '请重启终端以使更改生效。',
-  'Failed to configure terminal: {{error}}': '配置终端失败：{{error}}',
-  'Could not determine {{terminalName}} config path on Windows: APPDATA environment variable is not set.':
-    '无法确定 {{terminalName}} 在 Windows 上的配置路径：未设置 APPDATA 环境变量。',
-  '{{terminalName}} keybindings.json exists but is not a valid JSON array. Please fix the file manually or delete it to allow automatic configuration.':
-    '{{terminalName}} keybindings.json 存在但不是有效的 JSON 数组。请手动修复文件或删除它以允许自动配置。',
-  'File: {{file}}': '文件：{{file}}',
-  'Failed to parse {{terminalName}} keybindings.json. The file contains invalid JSON. Please fix the file manually or delete it to allow automatic configuration.':
-    '解析 {{terminalName}} keybindings.json 失败。文件包含无效的 JSON。请手动修复文件或删除它以允许自动配置。',
-  'Error: {{error}}': '错误：{{error}}',
-  'Shift+Enter binding already exists': 'Shift+Enter 绑定已存在',
-  'Ctrl+Enter binding already exists': 'Ctrl+Enter 绑定已存在',
-  'Existing keybindings detected. Will not modify to avoid conflicts.':
-    '检测到现有按键绑定。为避免冲突，不会修改。',
-  'Please check and modify manually if needed: {{file}}':
-    '如有需要，请手动检查并修改：{{file}}',
-  'Added Shift+Enter and Ctrl+Enter keybindings to {{terminalName}}.':
-    '已为 {{terminalName}} 添加 Shift+Enter 和 Ctrl+Enter 按键绑定。',
-  'Modified: {{file}}': '已修改：{{file}}',
-  '{{terminalName}} keybindings already configured.':
-    '{{terminalName}} 按键绑定已配置。',
-  'Failed to configure {{terminalName}}.': '配置 {{terminalName}} 失败。',
-  'Your terminal is already configured for an optimal experience with multiline input (Shift+Enter and Ctrl+Enter).':
-    '您的终端已配置为支持多行输入（Shift+Enter 和 Ctrl+Enter）的最佳体验。',
+  "Use ↑↓ or j/k to navigate, Enter to select, Escape to cancel":
+    "使用 ↑↓ 或 j/k 导航，回车选择，Esc 取消",
+  "{{count}} more above": "上方还有 {{count}} 项",
+  "{{count}} more below": "下方还有 {{count}} 项",
+  "manage IDE integration": "管理 IDE 集成",
+  "check status of IDE integration": "检查 IDE 集成状态",
+  "install required IDE companion for {{ideName}}":
+    "安装 {{ideName}} 所需的 IDE 配套工具",
+  "enable IDE integration": "启用 IDE 集成",
+  "disable IDE integration": "禁用 IDE 集成",
+  "IDE integration is not supported in your current environment. To use this feature, run TRAM in one of these supported IDEs: VS Code or VS Code forks.":
+    "您当前环境不支持 IDE 集成。要使用此功能，请在以下支持的 IDE 之一中运行 TRAM：VS Code 或 VS Code 分支版本。",
+  "Set up GitHub Actions": "设置 GitHub Actions",
+  "Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)":
+    "配置终端按键绑定以支持多行输入（VS Code、Cursor、Windsurf、Trae）",
+  "Please restart your terminal for the changes to take effect.":
+    "请重启终端以使更改生效。",
+  "Failed to configure terminal: {{error}}": "配置终端失败：{{error}}",
+  "Could not determine {{terminalName}} config path on Windows: APPDATA environment variable is not set.":
+    "无法确定 {{terminalName}} 在 Windows 上的配置路径：未设置 APPDATA 环境变量。",
+  "{{terminalName}} keybindings.json exists but is not a valid JSON array. Please fix the file manually or delete it to allow automatic configuration.":
+    "{{terminalName}} keybindings.json 存在但不是有效的 JSON 数组。请手动修复文件或删除它以允许自动配置。",
+  "File: {{file}}": "文件：{{file}}",
+  "Failed to parse {{terminalName}} keybindings.json. The file contains invalid JSON. Please fix the file manually or delete it to allow automatic configuration.":
+    "解析 {{terminalName}} keybindings.json 失败。文件包含无效的 JSON。请手动修复文件或删除它以允许自动配置。",
+  "Error: {{error}}": "错误：{{error}}",
+  "Shift+Enter binding already exists": "Shift+Enter 绑定已存在",
+  "Ctrl+Enter binding already exists": "Ctrl+Enter 绑定已存在",
+  "Existing keybindings detected. Will not modify to avoid conflicts.":
+    "检测到现有按键绑定。为避免冲突，不会修改。",
+  "Please check and modify manually if needed: {{file}}":
+    "如有需要，请手动检查并修改：{{file}}",
+  "Added Shift+Enter and Ctrl+Enter keybindings to {{terminalName}}.":
+    "已为 {{terminalName}} 添加 Shift+Enter 和 Ctrl+Enter 按键绑定。",
+  "Modified: {{file}}": "已修改：{{file}}",
+  "{{terminalName}} keybindings already configured.":
+    "{{terminalName}} 按键绑定已配置。",
+  "Failed to configure {{terminalName}}.": "配置 {{terminalName}} 失败。",
+  "Your terminal is already configured for an optimal experience with multiline input (Shift+Enter and Ctrl+Enter).":
+    "您的终端已配置为支持多行输入（Shift+Enter 和 Ctrl+Enter）的最佳体验。",
   // ============================================================================
   // Commands - Hooks
   // ============================================================================
-  'Manage TRAM hooks': '管理 TRAM Hook',
-  'List all configured hooks': '列出所有已配置的 Hook',
-  'Enable a disabled hook': '启用已禁用的 Hook',
-  'Disable an active hook': '禁用已启用的 Hook',
-  // Hooks - Dialog
-  Hooks: 'Hook',
-  'Loading hooks...': '正在加载 Hook...',
-  'Error loading hooks:': '加载 Hook 出错：',
-  'Press Escape to close': '按 Escape 关闭',
-  'Press Escape, Ctrl+C, or Ctrl+D to cancel':
-    '按 Escape、Ctrl+C 或 Ctrl+D 取消',
-  'Press Space, Enter, or Escape to dismiss': '按空格、回车或 Escape 关闭',
-  'No hook selected': '未选择 Hook',
-  // Hooks - List Step
-  'No hook events found.': '未找到 Hook 事件。',
-  '{{count}} hook configured': '{{count}} 个 Hook 已配置',
-  '{{count}} hooks configured': '{{count}} 个 Hook 已配置',
-  'This menu is read-only. To add or modify hooks, edit settings.json directly or ask Qwen Code.':
-    '此菜单为只读。要添加或修改 Hook，请直接编辑 settings.json 或询问 Qwen Code。',
-  'Enter to select · Esc to cancel': 'Enter 选择 · Esc 取消',
-  // Hooks - Detail Step
-  'Exit codes:': '退出码：',
-  'Configured hooks:': '已配置的 Hook：',
-  'No hooks configured for this event.': '此事件未配置 Hook。',
-  'To add hooks, edit settings.json directly or ask Qwen.':
-    '要添加 Hook，请直接编辑 settings.json 或询问 Qwen。',
-  'Enter to select · Esc to go back': 'Enter 选择 · Esc 返回',
-  // Hooks - Config Detail Step
-  'Hook details': 'Hook 详情',
-  'Event:': '事件：',
-  'Extension:': '扩展：',
-  'Desc:': '描述：',
-  'No hook config selected': '未选择 Hook 配置',
-  'To modify or remove this hook, edit settings.json directly or ask Qwen to help.':
-    '要修改或删除此 Hook，请直接编辑 settings.json 或询问 Qwen。',
-  // Hooks - Disabled Step
-  'Hook Configuration - Disabled': 'Hook 配置 - 已禁用',
-  'All hooks are currently disabled. You have {{count}} that are not running.':
-    '所有 Hook 当前已禁用。您有 {{count}} 未运行。',
-  '{{count}} configured hook': '{{count}} 个已配置的 Hook',
-  '{{count}} configured hooks': '{{count}} 个已配置的 Hook',
-  'When hooks are disabled:': '当 Hook 被禁用时：',
-  'No hook commands will execute': '不会执行任何 Hook 命令',
-  'StatusLine will not be displayed': '不会显示状态栏',
-  'Tool operations will proceed without hook validation':
-    '工具操作将在没有 Hook 验证的情况下继续',
-  'To re-enable hooks, remove "disableAllHooks" from settings.json or ask Qwen Code.':
-    '要重新启用 Hook，请从 settings.json 中删除 "disableAllHooks" 或询问 Qwen Code。',
-  // Hooks - Source
-  Project: '项目',
-  User: '用户',
-  System: '系统',
-  Extension: '扩展',
-  'Local Settings': '本地设置',
-  'User Settings': '用户设置',
-  'System Settings': '系统设置',
-  Extensions: '扩展',
-  // Hooks - Status
-  '✓ Enabled': '✓ 已启用',
-  '✗ Disabled': '✗ 已禁用',
-  // Hooks - Event Descriptions (short)
-  'Before tool execution': '工具执行前',
-  'After tool execution': '工具执行后',
-  'After tool execution fails': '工具执行失败后',
-  'When notifications are sent': '发送通知时',
-  'When the user submits a prompt': '用户提交提示时',
-  'When a new session is started': '新会话开始时',
-  'Right before Qwen Code concludes its response': 'Qwen Code 结束响应之前',
-  'When a subagent (Agent tool call) is started':
-    '子智能体（Agent 工具调用）启动时',
-  'Right before a subagent concludes its response': '子智能体结束响应之前',
-  'Before conversation compaction': '对话压缩前',
-  'When a session is ending': '会话结束时',
-  'When a permission dialog is displayed': '显示权限对话框时',
-  // Hooks - Event Descriptions (detailed)
-  'Input to command is JSON of tool call arguments.':
-    '命令输入为工具调用参数的 JSON。',
-  'Input to command is JSON with fields "inputs" (tool call arguments) and "response" (tool call response).':
-    '命令输入为包含 "inputs"（工具调用参数）和 "response"（工具调用响应）字段的 JSON。',
-  'Input to command is JSON with tool_name, tool_input, tool_use_id, error, error_type, is_interrupt, and is_timeout.':
-    '命令输入为包含 tool_name、tool_input、tool_use_id、error、error_type、is_interrupt 和 is_timeout 的 JSON。',
-  'Input to command is JSON with notification message and type.':
-    '命令输入为包含通知消息和类型的 JSON。',
-  'Input to command is JSON with original user prompt text.':
-    '命令输入为包含原始用户提示文本的 JSON。',
-  'Input to command is JSON with session start source.':
-    '命令输入为包含会话启动来源的 JSON。',
-  'Input to command is JSON with session end reason.':
-    '命令输入为包含会话结束原因的 JSON。',
-  'Input to command is JSON with agent_id and agent_type.':
-    '命令输入为包含 agent_id 和 agent_type 的 JSON。',
-  'Input to command is JSON with agent_id, agent_type, and agent_transcript_path.':
-    '命令输入为包含 agent_id、agent_type 和 agent_transcript_path 的 JSON。',
-  'Input to command is JSON with compaction details.':
-    '命令输入为包含压缩详情的 JSON。',
-  'Input to command is JSON with tool_name, tool_input, and tool_use_id. Output JSON with hookSpecificOutput containing decision to allow or deny.':
-    '命令输入为包含 tool_name、tool_input 和 tool_use_id 的 JSON。输出包含 hookSpecificOutput 的 JSON，其中包含允许或拒绝的决定。',
-  // Hooks - Exit Code Descriptions
-  'stdout/stderr not shown': 'stdout/stderr 不显示',
-  'show stderr to model and continue conversation':
-    '向模型显示 stderr 并继续对话',
-  'show stderr to user only': '仅向用户显示 stderr',
-  'stdout shown in transcript mode (ctrl+o)': 'stdout 以转录模式显示 (ctrl+o)',
-  'show stderr to model immediately': '立即向模型显示 stderr',
-  'show stderr to user only but continue with tool call':
-    '仅向用户显示 stderr 但继续工具调用',
-  'block processing, erase original prompt, and show stderr to user only':
-    '阻止处理，擦除原始提示，仅向用户显示 stderr',
-  'stdout shown to Qwen': '向 Qwen 显示 stdout',
-  'show stderr to user only (blocking errors ignored)':
-    '仅向用户显示 stderr（忽略阻塞错误）',
-  'command completes successfully': '命令成功完成',
-  'stdout shown to subagent': '向子智能体显示 stdout',
-  'show stderr to subagent and continue having it run':
-    '向子智能体显示 stderr 并继续运行',
-  'stdout appended as custom compact instructions':
-    'stdout 作为自定义压缩指令追加',
-  'block compaction': '阻止压缩',
-  'show stderr to user only but continue with compaction':
-    '仅向用户显示 stderr 但继续压缩',
-  'use hook decision if provided': '如果提供则使用 Hook 决定',
-  // Hooks - Messages
-  'Config not loaded.': '配置未加载。',
-  'Hooks are not enabled. Enable hooks in settings to use this feature.':
-    'Hook 未启用。请在设置中启用 Hook 以使用此功能。',
-  'No hooks configured. Add hooks in your settings.json file.':
-    '未配置 Hook。请在 settings.json 文件中添加 Hook。',
-  'Configured Hooks ({{count}} total)': '已配置的 Hook（共 {{count}} 个）',
+  "Manage TRAM hooks": "管理 TRAM Hook",
+  "List all configured hooks": "列出所有已配置的 Hook",
+  "Enable a disabled hook": "启用已禁用的 Hook",
+  "Disable an active hook": "禁用已启用的 Hook",
 
   // ============================================================================
   // Commands - Session Export
   // ============================================================================
-  'Export current session message history to a file':
-    '将当前会话的消息记录导出到文件',
-  'Export session to HTML format': '将会话导出为 HTML 文件',
-  'Export session to JSON format': '将会话导出为 JSON 文件',
-  'Export session to JSONL format (one message per line)':
-    '将会话导出为 JSONL 文件（每行一条消息）',
-  'Export session to markdown format': '将会话导出为 Markdown 文件',
+  "Export current session message history to a file":
+    "将当前会话的消息记录导出到文件",
+  "Export session to HTML format": "将会话导出为 HTML 文件",
+  "Export session to JSON format": "将会话导出为 JSON 文件",
+  "Export session to JSONL format (one message per line)":
+    "将会话导出为 JSONL 文件（每行一条消息）",
+  "Export session to markdown format": "将会话导出为 Markdown 文件",
 
   // ============================================================================
   // Commands - Insights
   // ============================================================================
-  'generate personalized programming insights from your chat history':
-    '根据你的聊天记录生成个性化编程洞察',
+  "generate personalized programming insights from your chat history":
+    "根据你的聊天记录生成个性化编程洞察",
 
   // ============================================================================
   // Commands - Session History
   // ============================================================================
-  'Resume a previous session': '恢复先前会话',
-  'Restore a tool call. This will reset the conversation and file history to the state it was in when the tool call was suggested':
-    '恢复某次工具调用。这将把对话与文件历史重置到提出该工具调用建议时的状态',
-  'Could not detect terminal type. Supported terminals: VS Code, Cursor, Windsurf, and Trae.':
-    '无法检测终端类型。支持的终端：VS Code、Cursor、Windsurf 和 Trae。',
+  "Resume a previous session": "恢复先前会话",
+  "Restore a tool call. This will reset the conversation and file history to the state it was in when the tool call was suggested":
+    "恢复某次工具调用。这将把对话与文件历史重置到提出该工具调用建议时的状态",
+  "Could not detect terminal type. Supported terminals: VS Code, Cursor, Windsurf, and Trae.":
+    "无法检测终端类型。支持的终端：VS Code、Cursor、Windsurf 和 Trae。",
   'Terminal "{{terminal}}" is not supported yet.':
     '终端 "{{terminal}}" 尚未支持。',
 
   // ============================================================================
   // Commands - Language
   // ============================================================================
-  'Invalid language. Available: {{options}}':
-    '无效的语言。可用选项：{{options}}',
-  'Language subcommands do not accept additional arguments.':
-    '语言子命令不接受额外参数',
-  'Current UI language: {{lang}}': '当前 UI 语言：{{lang}}',
-  'Current LLM output language: {{lang}}': '当前 LLM 输出语言：{{lang}}',
-  'LLM output language not set': '未设置 LLM 输出语言',
-  'Set UI language': '设置 UI 语言',
-  'Set LLM output language': '设置 LLM 输出语言',
-  'Usage: /language ui [{{options}}]': '用法：/language ui [{{options}}]',
-  'Usage: /language output <language>': '用法：/language output <语言>',
-  'Example: /language output 中文': '示例：/language output 中文',
-  'Example: /language output English': '示例：/language output English',
-  'Example: /language output 日本語': '示例：/language output 日本語',
-  'Example: /language output Português': '示例：/language output Português',
-  'UI language changed to {{lang}}': 'UI 语言已更改为 {{lang}}',
-  'LLM output language set to {{lang}}': 'LLM 输出语言已设置为 {{lang}}',
-  'LLM output language rule file generated at {{path}}':
-    'LLM 输出语言规则文件已生成于 {{path}}',
-  'Please restart the application for the changes to take effect.':
-    '请重启应用程序以使更改生效。',
-  'Failed to generate LLM output language rule file: {{error}}':
-    '生成 LLM 输出语言规则文件失败：{{error}}',
-  'Invalid command. Available subcommands:': '无效的命令。可用的子命令：',
-  'Available subcommands:': '可用的子命令：',
-  'To request additional UI language packs, please open an issue on GitHub.':
-    '如需请求其他 UI 语言包，请在 GitHub 上提交 issue',
-  'Available options:': '可用选项：',
-  'Set UI language to {{name}}': '将 UI 语言设置为 {{name}}',
+  "Invalid language. Available: {{options}}":
+    "无效的语言。可用选项：{{options}}",
+  "Language subcommands do not accept additional arguments.":
+    "语言子命令不接受额外参数",
+  "Current UI language: {{lang}}": "当前 UI 语言：{{lang}}",
+  "Current LLM output language: {{lang}}": "当前 LLM 输出语言：{{lang}}",
+  "LLM output language not set": "未设置 LLM 输出语言",
+  "Set UI language": "设置 UI 语言",
+  "Set LLM output language": "设置 LLM 输出语言",
+  "Usage: /language ui [{{options}}]": "用法：/language ui [{{options}}]",
+  "Usage: /language output <language>": "用法：/language output <语言>",
+  "Example: /language output 中文": "示例：/language output 中文",
+  "Example: /language output English": "示例：/language output English",
+  "Example: /language output 日本語": "示例：/language output 日本語",
+  "Example: /language output Português": "示例：/language output Português",
+  "UI language changed to {{lang}}": "UI 语言已更改为 {{lang}}",
+  "LLM output language set to {{lang}}": "LLM 输出语言已设置为 {{lang}}",
+  "LLM output language rule file generated at {{path}}":
+    "LLM 输出语言规则文件已生成于 {{path}}",
+  "Please restart the application for the changes to take effect.":
+    "请重启应用程序以使更改生效。",
+  "Failed to generate LLM output language rule file: {{error}}":
+    "生成 LLM 输出语言规则文件失败：{{error}}",
+  "Invalid command. Available subcommands:": "无效的命令。可用的子命令：",
+  "Available subcommands:": "可用的子命令：",
+  "To request additional UI language packs, please open an issue on GitHub.":
+    "如需请求其他 UI 语言包，请在 GitHub 上提交 issue",
+  "Available options:": "可用选项：",
+  "Set UI language to {{name}}": "将 UI 语言设置为 {{name}}",
 
   // ============================================================================
   // Commands - Approval Mode
   // ============================================================================
-  'Tool Approval Mode': '工具审批模式',
-  'Current approval mode: {{mode}}': '当前审批模式：{{mode}}',
-  'Available approval modes:': '可用的审批模式：',
-  'Approval mode changed to: {{mode}}': '审批模式已更改为：{{mode}}',
-  'Approval mode changed to: {{mode}} (saved to {{scope}} settings{{location}})':
-    '审批模式已更改为：{{mode}}（已保存到{{scope}}设置{{location}}）',
-  'Usage: /approval-mode <mode> [--session|--user|--project]':
-    '用法：/approval-mode <mode> [--session|--user|--project]',
+  "Tool Approval Mode": "工具审批模式",
+  "Current approval mode: {{mode}}": "当前审批模式：{{mode}}",
+  "Available approval modes:": "可用的审批模式：",
+  "Approval mode changed to: {{mode}}": "审批模式已更改为：{{mode}}",
+  "Approval mode changed to: {{mode}} (saved to {{scope}} settings{{location}})":
+    "审批模式已更改为：{{mode}}（已保存到{{scope}}设置{{location}}）",
+  "Usage: /approval-mode <mode> [--session|--user|--project]":
+    "用法：/approval-mode <mode> [--session|--user|--project]",
 
-  'Scope subcommands do not accept additional arguments.':
-    '作用域子命令不接受额外参数',
-  'Plan mode - Analyze only, do not modify files or execute commands':
-    '规划模式 - 仅分析，不修改文件或执行命令',
-  'Default mode - Require approval for file edits or shell commands':
-    '默认模式 - 需要批准文件编辑或 shell 命令',
-  'Auto-edit mode - Automatically approve file edits':
-    '自动编辑模式 - 自动批准文件编辑',
-  'YOLO mode - Automatically approve all tools': 'YOLO 模式 - 自动批准所有工具',
-  '{{mode}} mode': '{{mode}} 模式',
-  'Settings service is not available; unable to persist the approval mode.':
-    '设置服务不可用；无法持久化审批模式。',
-  'Failed to save approval mode: {{error}}': '保存审批模式失败：{{error}}',
-  'Failed to change approval mode: {{error}}': '更改审批模式失败：{{error}}',
-  'Apply to current session only (temporary)': '仅应用于当前会话（临时）',
-  'Persist for this project/workspace': '持久化到此项目/工作区',
-  'Persist for this user on this machine': '持久化到此机器上的此用户',
-  'Analyze only, do not modify files or execute commands':
-    '仅分析，不修改文件或执行命令',
-  'Require approval for file edits or shell commands':
-    '需要批准文件编辑或 shell 命令',
-  'Automatically approve file edits': '自动批准文件编辑',
-  'Automatically approve all tools': '自动批准所有工具',
-  'Workspace approval mode exists and takes priority. User-level change will have no effect.':
-    '工作区审批模式已存在并具有优先级。用户级别的更改将无效。',
-  'Apply To': '应用于',
-  'Workspace Settings': '工作区设置',
+  "Scope subcommands do not accept additional arguments.":
+    "作用域子命令不接受额外参数",
+  "Plan mode - Analyze only, do not modify files or execute commands":
+    "规划模式 - 仅分析，不修改文件或执行命令",
+  "Default mode - Require approval for file edits or shell commands":
+    "默认模式 - 需要批准文件编辑或 shell 命令",
+  "Auto-edit mode - Automatically approve file edits":
+    "自动编辑模式 - 自动批准文件编辑",
+  "YOLO mode - Automatically approve all tools": "YOLO 模式 - 自动批准所有工具",
+  "{{mode}} mode": "{{mode}} 模式",
+  "Settings service is not available; unable to persist the approval mode.":
+    "设置服务不可用；无法持久化审批模式。",
+  "Failed to save approval mode: {{error}}": "保存审批模式失败：{{error}}",
+  "Failed to change approval mode: {{error}}": "更改审批模式失败：{{error}}",
+  "Apply to current session only (temporary)": "仅应用于当前会话（临时）",
+  "Persist for this project/workspace": "持久化到此项目/工作区",
+  "Persist for this user on this machine": "持久化到此机器上的此用户",
+  "Analyze only, do not modify files or execute commands":
+    "仅分析，不修改文件或执行命令",
+  "Require approval for file edits or shell commands":
+    "需要批准文件编辑或 shell 命令",
+  "Automatically approve file edits": "自动批准文件编辑",
+  "Automatically approve all tools": "自动批准所有工具",
+  "Workspace approval mode exists and takes priority. User-level change will have no effect.":
+    "工作区审批模式已存在并具有优先级。用户级别的更改将无效。",
+  "Apply To": "应用于",
+  "User Settings": "用户设置",
+  "Workspace Settings": "工作区设置",
 
   // ============================================================================
   // Commands - Memory
   // ============================================================================
-  'Commands for interacting with memory.': '用于与记忆交互的命令',
-  'Show the current memory contents.': '显示当前记忆内容',
-  'Show project-level memory contents.': '显示项目级记忆内容',
-  'Show global memory contents.': '显示全局记忆内容',
-  'Add content to project-level memory.': '添加内容到项目级记忆',
-  'Add content to global memory.': '添加内容到全局记忆',
-  'Refresh the memory from the source.': '从源刷新记忆',
-  'Usage: /memory add --project <text to remember>':
-    '用法：/memory add --project <要记住的文本>',
-  'Usage: /memory add --global <text to remember>':
-    '用法：/memory add --global <要记住的文本>',
+  "Commands for interacting with memory.": "用于与记忆交互的命令",
+  "Show the current memory contents.": "显示当前记忆内容",
+  "Show project-level memory contents.": "显示项目级记忆内容",
+  "Show global memory contents.": "显示全局记忆内容",
+  "Add content to project-level memory.": "添加内容到项目级记忆",
+  "Add content to global memory.": "添加内容到全局记忆",
+  "Refresh the memory from the source.": "从源刷新记忆",
+  "Usage: /memory add --project <text to remember>":
+    "用法：/memory add --project <要记住的文本>",
+  "Usage: /memory add --global <text to remember>":
+    "用法：/memory add --global <要记住的文本>",
   'Attempting to save to project memory: "{{text}}"':
     '正在尝试保存到项目记忆："{{text}}"',
   'Attempting to save to global memory: "{{text}}"':
     '正在尝试保存到全局记忆："{{text}}"',
-  'Current memory content from {{count}} file(s):':
-    '来自 {{count}} 个文件的当前记忆内容：',
-  'Memory is currently empty.': '记忆当前为空',
-  'Project memory file not found or is currently empty.':
-    '项目记忆文件未找到或当前为空',
-  'Global memory file not found or is currently empty.':
-    '全局记忆文件未找到或当前为空',
-  'Global memory is currently empty.': '全局记忆当前为空',
-  'Global memory content:\n\n---\n{{content}}\n---':
-    '全局记忆内容：\n\n---\n{{content}}\n---',
-  'Project memory content from {{path}}:\n\n---\n{{content}}\n---':
-    '项目记忆内容来自 {{path}}：\n\n---\n{{content}}\n---',
-  'Project memory is currently empty.': '项目记忆当前为空',
-  'Refreshing memory from source files...': '正在从源文件刷新记忆...',
-  'Add content to the memory. Use --global for global memory or --project for project memory.':
-    '添加内容到记忆。使用 --global 表示全局记忆，使用 --project 表示项目记忆',
-  'Usage: /memory add [--global|--project] <text to remember>':
-    '用法：/memory add [--global|--project] <要记住的文本>',
+  "Current memory content from {{count}} file(s):":
+    "来自 {{count}} 个文件的当前记忆内容：",
+  "Memory is currently empty.": "记忆当前为空",
+  "Project memory file not found or is currently empty.":
+    "项目记忆文件未找到或当前为空",
+  "Global memory file not found or is currently empty.":
+    "全局记忆文件未找到或当前为空",
+  "Global memory is currently empty.": "全局记忆当前为空",
+  "Global memory content:\n\n---\n{{content}}\n---":
+    "全局记忆内容：\n\n---\n{{content}}\n---",
+  "Project memory content from {{path}}:\n\n---\n{{content}}\n---":
+    "项目记忆内容来自 {{path}}：\n\n---\n{{content}}\n---",
+  "Project memory is currently empty.": "项目记忆当前为空",
+  "Refreshing memory from source files...": "正在从源文件刷新记忆...",
+  "Add content to the memory. Use --global for global memory or --project for project memory.":
+    "添加内容到记忆。使用 --global 表示全局记忆，使用 --project 表示项目记忆",
+  "Usage: /memory add [--global|--project] <text to remember>":
+    "用法：/memory add [--global|--project] <要记住的文本>",
   'Attempting to save to memory {{scope}}: "{{fact}}"':
     '正在尝试保存到记忆 {{scope}}："{{fact}}"',
 
   // ============================================================================
   // Commands - MCP
   // ============================================================================
-  'Authenticate with an OAuth-enabled MCP server':
-    '使用支持 OAuth 的 MCP 服务器进行认证',
-  'List configured MCP servers and tools': '列出已配置的 MCP 服务器和工具',
-  'Restarts MCP servers.': '重启 MCP 服务器',
-  'Open MCP management dialog': '打开 MCP 管理对话框',
-  'Could not retrieve tool registry.': '无法检索工具注册表',
-  'No MCP servers configured with OAuth authentication.':
-    '未配置支持 OAuth 认证的 MCP 服务器',
-  'MCP servers with OAuth authentication:': '支持 OAuth 认证的 MCP 服务器：',
-  'Use /mcp auth <server-name> to authenticate.':
-    '使用 /mcp auth <server-name> 进行认证',
+  "Authenticate with an OAuth-enabled MCP server":
+    "使用支持 OAuth 的 MCP 服务器进行认证",
+  "List configured MCP servers and tools": "列出已配置的 MCP 服务器和工具",
+  "Restarts MCP servers.": "重启 MCP 服务器",
+  "Open MCP management dialog": "打开 MCP 管理对话框",
+  "Config not loaded.": "配置未加载",
+  "Could not retrieve tool registry.": "无法检索工具注册表",
+  "No MCP servers configured with OAuth authentication.":
+    "未配置支持 OAuth 认证的 MCP 服务器",
+  "MCP servers with OAuth authentication:": "支持 OAuth 认证的 MCP 服务器：",
+  "Use /mcp auth <server-name> to authenticate.":
+    "使用 /mcp auth <server-name> 进行认证",
   "MCP server '{{name}}' not found.": "未找到 MCP 服务器 '{{name}}'",
   "Successfully authenticated and refreshed tools for '{{name}}'.":
     "成功认证并刷新了 '{{name}}' 的工具",
@@ -1026,264 +1066,257 @@ export default {
     "正在重新发现 '{{name}}' 的工具...",
   "Discovered {{count}} tool(s) from '{{name}}'.":
     "从 '{{name}}' 发现了 {{count}} 个工具。",
-  'Authentication complete. Returning to server details...':
-    '认证完成，正在返回服务器详情...',
-  'Authentication successful.': '认证成功。',
-  'If the browser does not open, copy and paste this URL into your browser:':
-    '如果浏览器未自动打开，请复制以下 URL 并粘贴到浏览器中：',
-  'Make sure to copy the COMPLETE URL - it may wrap across multiple lines.':
-    '⚠️  请确保复制完整的 URL —— 它可能跨越多行。',
+  "Authentication complete. Returning to server details...":
+    "认证完成，正在返回服务器详情...",
+  "Authentication successful.": "认证成功。",
+  "If the browser does not open, copy and paste this URL into your browser:":
+    "如果浏览器未自动打开，请复制以下 URL 并粘贴到浏览器中：",
+  "Make sure to copy the COMPLETE URL - it may wrap across multiple lines.":
+    "⚠️  请确保复制完整的 URL —— 它可能跨越多行。",
 
   // ============================================================================
   // MCP Management Dialog
   // ============================================================================
-  'Manage MCP servers': '管理 MCP 服务器',
-  'Server Detail': '服务器详情',
-  'Disable Server': '禁用服务器',
-  Tools: '工具',
-  'Tool Detail': '工具详情',
-  'MCP Management': 'MCP 管理',
-  'Loading...': '加载中...',
-  'Unknown step': '未知步骤',
-  'Esc to back': 'Esc 返回',
-  '↑↓ to navigate · Enter to select · Esc to close':
-    '↑↓ 导航 · Enter 选择 · Esc 关闭',
-  '↑↓ to navigate · Enter to select · Esc to back':
-    '↑↓ 导航 · Enter 选择 · Esc 返回',
-  '↑↓ to navigate · Enter to confirm · Esc to back':
-    '↑↓ 导航 · Enter 确认 · Esc 返回',
-  'User Settings (global)': '用户设置（全局）',
-  'Workspace Settings (project-specific)': '工作区设置（项目级）',
-  'Disable server:': '禁用服务器：',
-  'Select where to add the server to the exclude list:':
-    '选择将服务器添加到排除列表的位置：',
-  'Press Enter to confirm, Esc to cancel': '按 Enter 确认，Esc 取消',
-  'View tools': '查看工具',
-  Reconnect: '重新连接',
-  Enable: '启用',
-  Disable: '禁用',
-  Authenticate: '认证',
-  'Re-authenticate': '重新认证',
-  'Clear Authentication': '清空认证',
-  disabled: '已禁用',
-  'Server:': '服务器：',
-  '(disabled)': '(已禁用)',
-  'Error:': '错误：',
-  tool: '工具',
-  tools: '个工具',
-  connected: '已连接',
-  connecting: '连接中',
-  disconnected: '已断开',
+  "Manage MCP servers": "管理 MCP 服务器",
+  "Server Detail": "服务器详情",
+  "Disable Server": "禁用服务器",
+  Tools: "工具",
+  "Tool Detail": "工具详情",
+  "MCP Management": "MCP 管理",
+  "Loading...": "加载中...",
+  "Unknown step": "未知步骤",
+  "Esc to back": "Esc 返回",
+  "↑↓ to navigate · Enter to select · Esc to close":
+    "↑↓ 导航 · Enter 选择 · Esc 关闭",
+  "↑↓ to navigate · Enter to select · Esc to back":
+    "↑↓ 导航 · Enter 选择 · Esc 返回",
+  "↑↓ to navigate · Enter to confirm · Esc to back":
+    "↑↓ 导航 · Enter 确认 · Esc 返回",
+  "User Settings (global)": "用户设置（全局）",
+  "Workspace Settings (project-specific)": "工作区设置（项目级）",
+  "Disable server:": "禁用服务器：",
+  "Select where to add the server to the exclude list:":
+    "选择将服务器添加到排除列表的位置：",
+  "Press Enter to confirm, Esc to cancel": "按 Enter 确认，Esc 取消",
+  "View tools": "查看工具",
+  Reconnect: "重新连接",
+  Enable: "启用",
+  Disable: "禁用",
+  Authenticate: "认证",
+  "Re-authenticate": "重新认证",
+  "Clear Authentication": "清空认证",
+  disabled: "已禁用",
+  "Server:": "服务器：",
+  "(disabled)": "(已禁用)",
+  "Error:": "错误：",
+  Extension: "扩展",
+  tool: "工具",
+  tools: "个工具",
+  connected: "已连接",
+  connecting: "连接中",
+  disconnected: "已断开",
 
   // MCP Server List
-  'User MCPs': '用户 MCP',
-  'Project MCPs': '项目 MCP',
-  'Extension MCPs': '扩展 MCP',
-  server: '个服务器',
-  servers: '个服务器',
-  'Add MCP servers to your settings to get started.':
-    '请在设置中添加 MCP 服务器以开始使用。',
-  'Run tram --debug to see error logs': '运行 tram --debug 查看错误日志',
+  "User MCPs": "用户 MCP",
+  "Project MCPs": "项目 MCP",
+  "Extension MCPs": "扩展 MCP",
+  server: "个服务器",
+  servers: "个服务器",
+  "Add MCP servers to your settings to get started.":
+    "请在设置中添加 MCP 服务器以开始使用。",
+  "Run tram --debug to see error logs": "运行 tram --debug 查看错误日志",
 
   // MCP OAuth Authentication
-  'OAuth Authentication': 'OAuth 认证',
-  'Press Enter to start authentication, Esc to go back':
-    '按 Enter 开始认证，Esc 返回',
-  'Authenticating... Please complete the login in your browser.':
-    '认证中... 请在浏览器中完成登录。',
-  'Press Enter or Esc to go back': '按 Enter 或 Esc 返回',
+  "OAuth Authentication": "OAuth 认证",
+  "Press Enter to start authentication, Esc to go back":
+    "按 Enter 开始认证，Esc 返回",
+  "Authenticating... Please complete the login in your browser.":
+    "认证中... 请在浏览器中完成登录。",
+  "Press Enter or Esc to go back": "按 Enter 或 Esc 返回",
 
   // MCP Server Detail
-  'Command:': '命令：',
-  'Working Directory:': '工作目录：',
-  'Capabilities:': '功能：',
+  "Command:": "命令：",
+  "Working Directory:": "工作目录：",
+  "Capabilities:": "功能：",
 
   // MCP Tool List
-  'No tools available for this server.': '此服务器没有可用工具。',
-  destructive: '破坏性',
-  'read-only': '只读',
-  'open-world': '开放世界',
-  idempotent: '幂等',
-  'Tools for {{name}}': '{{name}} 的工具',
-  'Tools for {{serverName}}': '{{serverName}} 的工具',
-  '{{current}}/{{total}}': '{{current}}/{{total}}',
+  "No tools available for this server.": "此服务器没有可用工具。",
+  destructive: "破坏性",
+  "read-only": "只读",
+  "open-world": "开放世界",
+  idempotent: "幂等",
+  "Tools for {{name}}": "{{name}} 的工具",
+  "Tools for {{serverName}}": "{{serverName}} 的工具",
+  "{{current}}/{{total}}": "{{current}}/{{total}}",
 
   // MCP Tool Detail
-  Type: '类型',
-  Parameters: '参数',
-  'No tool selected': '未选择工具',
-  Annotations: '注解',
-  Title: '标题',
-  'Read Only': '只读',
-  Destructive: '破坏性',
-  Idempotent: '幂等',
-  'Open World': '开放世界',
-  Server: '服务器',
+  Type: "类型",
+  Parameters: "参数",
+  "No tool selected": "未选择工具",
+  Annotations: "注解",
+  Title: "标题",
+  "Read Only": "只读",
+  Destructive: "破坏性",
+  Idempotent: "幂等",
+  "Open World": "开放世界",
+  Server: "服务器",
 
   // Invalid tool related translations
-  '{{count}} invalid tools': '{{count}} 个无效工具',
-  invalid: '无效',
-  'invalid: {{reason}}': '无效：{{reason}}',
-  'missing name': '缺少名称',
-  'missing description': '缺少描述',
-  '(unnamed)': '(未命名)',
-  'Warning: This tool cannot be called by the LLM':
-    '警告：此工具无法被 LLM 调用',
-  Reason: '原因',
-  'Tools must have both name and description to be used by the LLM.':
-    '工具必须同时具有名称和描述才能被 LLM 使用。',
+  "{{count}} invalid tools": "{{count}} 个无效工具",
+  invalid: "无效",
+  "invalid: {{reason}}": "无效：{{reason}}",
+  "missing name": "缺少名称",
+  "missing description": "缺少描述",
+  "(unnamed)": "(未命名)",
+  "Warning: This tool cannot be called by the LLM":
+    "警告：此工具无法被 LLM 调用",
+  Reason: "原因",
+  "Tools must have both name and description to be used by the LLM.":
+    "工具必须同时具有名称和描述才能被 LLM 使用。",
 
   // ============================================================================
   // Commands - Chat
   // ============================================================================
-  'Manage conversation history.': '管理对话历史',
-  'List saved conversation checkpoints': '列出已保存的对话检查点',
-  'No saved conversation checkpoints found.': '未找到已保存的对话检查点',
-  'List of saved conversations:': '已保存的对话列表：',
-  'Note: Newest last, oldest first': '注意：最新的在最后，最旧的在最前',
-  'Save the current conversation as a checkpoint. Usage: /chat save <tag>':
-    '将当前对话保存为检查点。用法：/chat save <tag>',
-  'Missing tag. Usage: /chat save <tag>': '缺少标签。用法：/chat save <tag>',
-  'Delete a conversation checkpoint. Usage: /chat delete <tag>':
-    '删除对话检查点。用法：/chat delete <tag>',
-  'Missing tag. Usage: /chat delete <tag>':
-    '缺少标签。用法：/chat delete <tag>',
+  "Manage conversation history.": "管理对话历史",
+  "List saved conversation checkpoints": "列出已保存的对话检查点",
+  "No saved conversation checkpoints found.": "未找到已保存的对话检查点",
+  "List of saved conversations:": "已保存的对话列表：",
+  "Note: Newest last, oldest first": "注意：最新的在最后，最旧的在最前",
+  "Save the current conversation as a checkpoint. Usage: /chat save <tag>":
+    "将当前对话保存为检查点。用法：/chat save <tag>",
+  "Missing tag. Usage: /chat save <tag>": "缺少标签。用法：/chat save <tag>",
+  "Delete a conversation checkpoint. Usage: /chat delete <tag>":
+    "删除对话检查点。用法：/chat delete <tag>",
+  "Missing tag. Usage: /chat delete <tag>":
+    "缺少标签。用法：/chat delete <tag>",
   "Conversation checkpoint '{{tag}}' has been deleted.":
     "对话检查点 '{{tag}}' 已删除",
   "Error: No checkpoint found with tag '{{tag}}'.":
     "错误：未找到标签为 '{{tag}}' 的检查点",
-  'Resume a conversation from a checkpoint. Usage: /chat resume <tag>':
-    '从检查点恢复对话。用法：/chat resume <tag>',
-  'Missing tag. Usage: /chat resume <tag>':
-    '缺少标签。用法：/chat resume <tag>',
-  'No saved checkpoint found with tag: {{tag}}.':
-    '未找到标签为 {{tag}} 的已保存检查点',
-  'A checkpoint with the tag {{tag}} already exists. Do you want to overwrite it?':
-    '标签为 {{tag}} 的检查点已存在。您要覆盖它吗？',
-  'No chat client available to save conversation.':
-    '没有可用的聊天客户端来保存对话',
-  'Conversation checkpoint saved with tag: {{tag}}.':
-    '对话检查点已保存，标签：{{tag}}',
-  'No conversation found to save.': '未找到要保存的对话',
-  'No chat client available to share conversation.':
-    '没有可用的聊天客户端来分享对话',
-  'Invalid file format. Only .md and .json are supported.':
-    '无效的文件格式。仅支持 .md 和 .json 文件',
-  'Error sharing conversation: {{error}}': '分享对话时出错：{{error}}',
-  'Conversation shared to {{filePath}}': '对话已分享到 {{filePath}}',
-  'No conversation found to share.': '未找到要分享的对话',
-  'Share the current conversation to a markdown or json file. Usage: /chat share <file>':
-    '将当前对话分享到 markdown 或 json 文件。用法：/chat share <file>',
+  "Resume a conversation from a checkpoint. Usage: /chat resume <tag>":
+    "从检查点恢复对话。用法：/chat resume <tag>",
+  "Missing tag. Usage: /chat resume <tag>":
+    "缺少标签。用法：/chat resume <tag>",
+  "No saved checkpoint found with tag: {{tag}}.":
+    "未找到标签为 {{tag}} 的已保存检查点",
+  "A checkpoint with the tag {{tag}} already exists. Do you want to overwrite it?":
+    "标签为 {{tag}} 的检查点已存在。您要覆盖它吗？",
+  "No chat client available to save conversation.":
+    "没有可用的聊天客户端来保存对话",
+  "Conversation checkpoint saved with tag: {{tag}}.":
+    "对话检查点已保存，标签：{{tag}}",
+  "No conversation found to save.": "未找到要保存的对话",
+  "No chat client available to share conversation.":
+    "没有可用的聊天客户端来分享对话",
+  "Invalid file format. Only .md and .json are supported.":
+    "无效的文件格式。仅支持 .md 和 .json 文件",
+  "Error sharing conversation: {{error}}": "分享对话时出错：{{error}}",
+  "Conversation shared to {{filePath}}": "对话已分享到 {{filePath}}",
+  "No conversation found to share.": "未找到要分享的对话",
+  "Share the current conversation to a markdown or json file. Usage: /chat share <file>":
+    "将当前对话分享到 markdown 或 json 文件。用法：/chat share <file>",
 
   // ============================================================================
   // Commands - Summary
   // ============================================================================
-  'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md':
-    '生成项目摘要并保存到 .tram/PROJECT_SUMMARY.md',
-  'No chat client available to generate summary.':
-    '没有可用的聊天客户端来生成摘要',
-  'Already generating summary, wait for previous request to complete':
-    '正在生成摘要，请等待上一个请求完成',
-  'No conversation found to summarize.': '未找到要总结的对话',
-  'Failed to generate project context summary: {{error}}':
-    '生成项目上下文摘要失败：{{error}}',
-  'Saved project summary to {{filePathForDisplay}}.':
-    '项目摘要已保存到 {{filePathForDisplay}}',
-  'Saving project summary...': '正在保存项目摘要...',
-  'Generating project summary...': '正在生成项目摘要...',
-  'Failed to generate summary - no text content received from LLM response':
-    '生成摘要失败 - 未从 LLM 响应中接收到文本内容',
+  "Generate a project summary and save it to .tram/PROJECT_SUMMARY.md":
+    "生成项目摘要并保存到 .tram/PROJECT_SUMMARY.md",
+  "No chat client available to generate summary.":
+    "没有可用的聊天客户端来生成摘要",
+  "Already generating summary, wait for previous request to complete":
+    "正在生成摘要，请等待上一个请求完成",
+  "No conversation found to summarize.": "未找到要总结的对话",
+  "Failed to generate project context summary: {{error}}":
+    "生成项目上下文摘要失败：{{error}}",
+  "Saved project summary to {{filePathForDisplay}}.":
+    "项目摘要已保存到 {{filePathForDisplay}}",
+  "Saving project summary...": "正在保存项目摘要...",
+  "Generating project summary...": "正在生成项目摘要...",
+  "Failed to generate summary - no text content received from LLM response":
+    "生成摘要失败 - 未从 LLM 响应中接收到文本内容",
 
   // ============================================================================
   // Commands - Model
   // ============================================================================
-  'Switch the model for this session (--fast for suggestion model)':
-    '切换此会话的模型（--fast 可设置建议模型）',
-  'Set a lighter model for prompt suggestions and speculative execution':
-    '设置用于输入建议和推测执行的轻量模型',
-  'Content generator configuration not available.': '内容生成器配置不可用',
-  'Authentication type not available.': '认证类型不可用',
-  'No models available for the current authentication type ({{authType}}).':
-    '当前认证类型 ({{authType}}) 没有可用的模型',
+  "Switch the model for this session": "切换此会话的模型",
+  "Content generator configuration not available.": "内容生成器配置不可用",
+  "Authentication type not available.": "认证类型不可用",
+  "No models available for the current authentication type ({{authType}}).":
+    "当前认证类型 ({{authType}}) 没有可用的模型",
 
   // ============================================================================
   // Commands - Clear
   // ============================================================================
-  'Starting a new session, resetting chat, and clearing terminal.':
-    '正在开始新会话，重置聊天并清屏。',
-  'Starting a new session and clearing.': '正在开始新会话并清屏。',
+  "Starting a new session, resetting chat, and clearing terminal.":
+    "正在开始新会话，重置聊天并清屏。",
+  "Starting a new session and clearing.": "正在开始新会话并清屏。",
 
   // ============================================================================
   // Commands - Compress
   // ============================================================================
-  'Already compressing, wait for previous request to complete':
-    '正在压缩中，请等待上一个请求完成',
-  'Failed to compress chat history.': '压缩聊天历史失败',
-  'Failed to compress chat history: {{error}}': '压缩聊天历史失败：{{error}}',
-  'Compressing chat history': '正在压缩聊天历史',
-  'Chat history compressed from {{originalTokens}} to {{newTokens}} tokens.':
-    '聊天历史已从 {{originalTokens}} 个 token 压缩到 {{newTokens}} 个 token。',
-  'Compression was not beneficial for this history size.':
-    '对于此历史记录大小，压缩没有益处。',
-  'Chat history compression did not reduce size. This may indicate issues with the compression prompt.':
-    '聊天历史压缩未能减小大小。这可能表明压缩提示存在问题。',
-  'Could not compress chat history due to a token counting error.':
-    '由于 token 计数错误，无法压缩聊天历史。',
-  'Chat history is already compressed.': '聊天历史已经压缩。',
+  "Already compressing, wait for previous request to complete":
+    "正在压缩中，请等待上一个请求完成",
+  "Failed to compress chat history.": "压缩聊天历史失败",
+  "Failed to compress chat history: {{error}}": "压缩聊天历史失败：{{error}}",
+  "Compressing chat history": "正在压缩聊天历史",
+  "Chat history compressed from {{originalTokens}} to {{newTokens}} tokens.":
+    "聊天历史已从 {{originalTokens}} 个 token 压缩到 {{newTokens}} 个 token。",
+  "Compression was not beneficial for this history size.":
+    "对于此历史记录大小，压缩没有益处。",
+  "Chat history compression did not reduce size. This may indicate issues with the compression prompt.":
+    "聊天历史压缩未能减小大小。这可能表明压缩提示存在问题。",
+  "Could not compress chat history due to a token counting error.":
+    "由于 token 计数错误，无法压缩聊天历史。",
+  "Chat history is already compressed.": "聊天历史已经压缩。",
 
   // ============================================================================
   // Commands - Directory
   // ============================================================================
-  'Configuration is not available.': '配置不可用。',
-  'Please provide at least one path to add.': '请提供至少一个要添加的路径。',
-  'The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.':
-    '/directory add 命令在限制性沙箱配置文件中不受支持。请改为在启动会话时使用 --include-directories。',
+  "Configuration is not available.": "配置不可用。",
+  "Please provide at least one path to add.": "请提供至少一个要添加的路径。",
+  "The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.":
+    "/directory add 命令在限制性沙箱配置文件中不受支持。请改为在启动会话时使用 --include-directories。",
   "Error adding '{{path}}': {{error}}": "添加 '{{path}}' 时出错：{{error}}",
-  'Successfully added TRAM.md files from the following directories if there are:\n- {{directories}}':
-    '如果存在，已成功从以下目录添加 TRAM.md 文件：\n- {{directories}}',
-  'Error refreshing memory: {{error}}': '刷新内存时出错：{{error}}',
-  'Successfully added directories:\n- {{directories}}':
-    '成功添加目录：\n- {{directories}}',
-  'Current workspace directories:\n{{directories}}':
-    '当前工作区目录：\n{{directories}}',
+  "Successfully added TRAM.md files from the following directories if there are:\n- {{directories}}":
+    "如果存在，已成功从以下目录添加 TRAM.md 文件：\n- {{directories}}",
+  "Error refreshing memory: {{error}}": "刷新内存时出错：{{error}}",
+  "Successfully added directories:\n- {{directories}}":
+    "成功添加目录：\n- {{directories}}",
+  "Current workspace directories:\n{{directories}}":
+    "当前工作区目录：\n{{directories}}",
 
   // ============================================================================
   // Commands - Docs
   // ============================================================================
-  'Please open the following URL in your browser to view the documentation:\n{{url}}':
-    '请在浏览器中打开以下 URL 以查看文档：\n{{url}}',
-  'Opening documentation in your browser: {{url}}':
-    '正在浏览器中打开文档：{{url}}',
+  "Please open the following URL in your browser to view the documentation:\n{{url}}":
+    "请在浏览器中打开以下 URL 以查看文档：\n{{url}}",
+  "Opening documentation in your browser: {{url}}":
+    "正在浏览器中打开文档：{{url}}",
 
   // ============================================================================
   // Dialogs - Tool Confirmation
   // ============================================================================
-  'Do you want to proceed?': '是否继续？',
-  'Yes, allow once': '是，允许一次',
-  'Allow always': '总是允许',
-  Yes: '是',
-  No: '否',
-  'No (esc)': '否 (esc)',
-  'Yes, allow always for this session': '是，本次会话总是允许',
-  'Modify in progress:': '正在修改：',
-  'Save and close external editor to continue': '保存并关闭外部编辑器以继续',
-  'Apply this change?': '是否应用此更改？',
-  'Yes, allow always': '是，总是允许',
-  'Modify with external editor': '使用外部编辑器修改',
-  'No, suggest changes (esc)': '否，建议更改 (esc)',
+  "Do you want to proceed?": "是否继续？",
+  "Yes, allow once": "是，允许一次",
+  "Allow always": "总是允许",
+  Yes: "是",
+  No: "否",
+  "No (esc)": "否 (esc)",
+  "Yes, allow always for this session": "是，本次会话总是允许",
+  "Modify in progress:": "正在修改：",
+  "Save and close external editor to continue": "保存并关闭外部编辑器以继续",
+  "Apply this change?": "是否应用此更改？",
+  "Yes, allow always": "是，总是允许",
+  "Modify with external editor": "使用外部编辑器修改",
+  "No, suggest changes (esc)": "否，建议更改 (esc)",
   "Allow execution of: '{{command}}'?": "允许执行：'{{command}}'？",
-  'Yes, allow always ...': '是，总是允许 ...',
-  'Always allow in this project': '在本项目中总是允许',
-  'Always allow {{action}} in this project': '在本项目中总是允许{{action}}',
-  'Always allow for this user': '对该用户总是允许',
-  'Always allow {{action}} for this user': '对该用户总是允许{{action}}',
-  'Yes, restore previous mode ({{mode}})': '是，恢复之前的模式 ({{mode}})',
-  'Yes, and auto-accept edits': '是，并自动接受编辑',
-  'Yes, and manually approve edits': '是，并手动批准编辑',
-  'No, keep planning (esc)': '否，继续规划 (esc)',
-  'URLs to fetch:': '要获取的 URL：',
-  'MCP Server: {{server}}': 'MCP 服务器：{{server}}',
-  'Tool: {{tool}}': '工具：{{tool}}',
+  "Yes, allow always ...": "是，总是允许 ...",
+  "Yes, and auto-accept edits": "是，并自动接受编辑",
+  "Yes, and manually approve edits": "是，并手动批准编辑",
+  "No, keep planning (esc)": "否，继续规划 (esc)",
+  "URLs to fetch:": "要获取的 URL：",
+  "MCP Server: {{server}}": "MCP 服务器：{{server}}",
+  "Tool: {{tool}}": "工具：{{tool}}",
   'Allow execution of MCP tool "{{tool}}" from server "{{server}}"?':
     '允许执行来自服务器 "{{server}}" 的 MCP 工具 "{{tool}}"？',
   'Yes, always allow tool "{{tool}}" from server "{{server}}"':
@@ -1294,398 +1327,301 @@ export default {
   // ============================================================================
   // Dialogs - Shell Confirmation
   // ============================================================================
-  'Shell Command Execution': 'Shell 命令执行',
-  'A custom command wants to run the following shell commands:':
-    '自定义命令想要运行以下 shell 命令：',
+  "Shell Command Execution": "Shell 命令执行",
+  "A custom command wants to run the following shell commands:":
+    "自定义命令想要运行以下 shell 命令：",
 
   // ============================================================================
   // Dialogs - Pro Quota
   // ============================================================================
-  'Pro quota limit reached for {{model}}.': '{{model}} 的 Pro 配额已达到上限',
-  'Change auth (executes the /auth command)': '更改认证（执行 /auth 命令）',
-  'Continue with {{model}}': '使用 {{model}} 继续',
+  "Pro quota limit reached for {{model}}.": "{{model}} 的 Pro 配额已达到上限",
+  "Change auth (executes the /auth command)": "更改认证（执行 /auth 命令）",
+  "Continue with {{model}}": "使用 {{model}} 继续",
 
   // ============================================================================
   // Dialogs - Welcome Back
   // ============================================================================
-  'Current Plan:': '当前计划：',
-  'Progress: {{done}}/{{total}} tasks completed':
-    '进度：已完成 {{done}}/{{total}} 个任务',
-  ', {{inProgress}} in progress': '，{{inProgress}} 个进行中',
-  'Pending Tasks:': '待处理任务：',
-  'What would you like to do?': '您想要做什么？',
-  'Choose how to proceed with your session:': '选择如何继续您的会话：',
-  'Start new chat session': '开始新的聊天会话',
-  'Continue previous conversation': '继续之前的对话',
-  '👋 Welcome back! (Last updated: {{timeAgo}})':
-    '👋 欢迎回来！（最后更新：{{timeAgo}}）',
-  '🎯 Overall Goal:': '🎯 总体目标：',
+  "Current Plan:": "当前计划：",
+  "Progress: {{done}}/{{total}} tasks completed":
+    "进度：已完成 {{done}}/{{total}} 个任务",
+  ", {{inProgress}} in progress": "，{{inProgress}} 个进行中",
+  "Pending Tasks:": "待处理任务：",
+  "What would you like to do?": "您想要做什么？",
+  "Choose how to proceed with your session:": "选择如何继续您的会话：",
+  "Start new chat session": "开始新的聊天会话",
+  "Continue previous conversation": "继续之前的对话",
+  "👋 Welcome back! (Last updated: {{timeAgo}})":
+    "👋 欢迎回来！（最后更新：{{timeAgo}}）",
+  "🎯 Overall Goal:": "🎯 总体目标：",
 
   // ============================================================================
   // Dialogs - Auth
   // ============================================================================
-  'Get started': '开始使用',
-  'Select Authentication Method': '选择认证方式',
-  'OpenAI API key is required to use OpenAI authentication.':
-    '使用 OpenAI 认证需要 OpenAI API 密钥',
-  'You must select an auth method to proceed. Press Ctrl+C again to exit.':
-    '您必须选择认证方法才能继续。再次按 Ctrl+C 退出',
-  'Terms of Services and Privacy Notice': '服务条款和隐私声明',
-<<<<<<< HEAD
-  'TRAM OAuth': 'TRAM OAuth (免费)',
-  'Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models':
-    '免费 \u00B7 每天最多 1,000 次请求 \u00B7 TRAM 最新模型',
-  'Login with TramChat account to use daily free quota.':
-    '使用 TramChat 账号登录，享受每日免费额度。',
-=======
-  'Qwen OAuth': 'Qwen OAuth (免费)',
-  'Discontinued — switch to Coding Plan or API Key':
-    '已停用 — 请切换到 Coding Plan 或 API Key',
-  'Qwen OAuth free tier was discontinued on 2026-04-15. Run /auth to switch provider.':
-    'Qwen OAuth 免费额度已于 2026-04-15 停用。请运行 /auth 切换服务商。',
-  'Qwen OAuth free tier was discontinued on 2026-04-15. Please select Coding Plan or API Key instead.':
-    'Qwen OAuth 免费额度已于 2026-04-15 停用。请选择 Coding Plan 或 API Key。',
-  'Qwen OAuth free tier was discontinued on 2026-04-15. Please select a model from another provider or run /auth to switch.':
-    'Qwen OAuth免费层已于2026-04-15停止服务。请选择其他提供商的模型或运行 /auth 切换。',
-  '\n⚠ Qwen OAuth free tier was discontinued on 2026-04-15. Please select another option.\n':
-    '\n⚠ Qwen OAuth 免费额度已于 2026-04-15 停用。请选择其他选项。\n',
->>>>>>> v0.14.5
-  'Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models':
-    '付费 \u00B7 每 5 小时最多 6,000 次请求 \u00B7 支持阿里云百炼 Coding Plan 全部模型',
-  'Alibaba Cloud Coding Plan': '阿里云百炼 Coding Plan',
-  'Bring your own API key': '使用自己的 API 密钥',
-  'Use coding plan credentials or your own api-keys/providers.':
-    '使用 Coding Plan 凭证或您自己的 API 密钥/提供商。',
-  OpenAI: 'OpenAI',
-  'Failed to login. Message: {{message}}': '登录失败。消息：{{message}}',
-  'Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.':
-    '认证方式被强制设置为 {{enforcedType}}，但您当前使用的是 {{currentType}}',
-  'TRAM OAuth authentication timed out. Please try again.':
-    'TRAM OAuth 认证超时。请重试',
-  'TRAM OAuth authentication cancelled.': 'TRAM OAuth 认证已取消',
-  'TRAM OAuth Authentication': 'TRAM OAuth 认证',
-  'Please visit this URL to authorize:': '请访问此 URL 进行授权：',
-  'Or scan the QR code below:': '或扫描下方的二维码：',
-  'Waiting for authorization': '等待授权中',
-  'Time remaining:': '剩余时间：',
-  '(Press ESC or CTRL+C to cancel)': '（按 ESC 或 CTRL+C 取消）',
-  'TRAM OAuth Authentication Timeout': 'TRAM OAuth 认证超时',
-  'OAuth token expired (over {{seconds}} seconds). Please select authentication method again.':
-    'OAuth 令牌已过期（超过 {{seconds}} 秒）。请重新选择认证方法',
-  'Press any key to return to authentication type selection.':
-    '按任意键返回认证类型选择',
-  'Waiting for TRAM OAuth authentication...': '正在等待 TRAM OAuth 认证...',
-  'Note: Your existing API key in settings.json will not be cleared when using TRAM OAuth. You can switch back to OpenAI authentication later if needed.':
-    '注意：使用 TRAM OAuth 时，settings.json 中现有的 API 密钥不会被清除。如果需要，您可以稍后切换回 OpenAI 认证。',
-  'Note: Your existing API key will not be cleared when using TRAM OAuth.':
-    '注意：使用 TRAM OAuth 时，现有的 API 密钥不会被清除。',
-  'Authentication timed out. Please try again.': '认证超时。请重试。',
-  'Waiting for auth... (Press ESC or CTRL+C to cancel)':
-    '正在等待认证...（按 ESC 或 CTRL+C 取消）',
-  'Missing API key for OpenAI-compatible auth. Set settings.security.auth.apiKey, or set the {{envKeyHint}} environment variable.':
-    '缺少 OpenAI 兼容认证的 API 密钥。请设置 settings.security.auth.apiKey 或设置 {{envKeyHint}} 环境变量。',
-  '{{envKeyHint}} environment variable not found.':
-    '未找到 {{envKeyHint}} 环境变量。',
-  '{{envKeyHint}} environment variable not found. Please set it in your .env file or environment variables.':
-    '未找到 {{envKeyHint}} 环境变量。请在 .env 文件或系统环境变量中进行设置。',
-  '{{envKeyHint}} environment variable not found (or set settings.security.auth.apiKey). Please set it in your .env file or environment variables.':
-    '未找到 {{envKeyHint}} 环境变量（或设置 settings.security.auth.apiKey）。请在 .env 文件或系统环境变量中进行设置。',
-  'Missing API key for OpenAI-compatible auth. Set the {{envKeyHint}} environment variable.':
-    '缺少 OpenAI 兼容认证的 API 密钥。请设置 {{envKeyHint}} 环境变量。',
-  'Anthropic provider missing required baseUrl in modelProviders[].baseUrl.':
-    'Anthropic 提供商缺少必需的 baseUrl，请在 modelProviders[].baseUrl 中配置。',
-  'ANTHROPIC_BASE_URL environment variable not found.':
-    '未找到 ANTHROPIC_BASE_URL 环境变量。',
-  'Invalid auth method selected.': '选择了无效的认证方式。',
-  'Failed to authenticate. Message: {{message}}': '认证失败。消息：{{message}}',
-  'Authenticated successfully with {{authType}} credentials.':
-    '使用 {{authType}} 凭据成功认证。',
+  "Get started": "开始使用",
+  "Select Authentication Method": "选择认证方式",
+  "OpenAI API key is required to use OpenAI authentication.":
+    "使用 OpenAI 认证需要 OpenAI API 密钥",
+  "You must select an auth method to proceed. Press Ctrl+C again to exit.":
+    "您必须选择认证方法才能继续。再次按 Ctrl+C 退出",
+  "Terms of Services and Privacy Notice": "服务条款和隐私声明",
+  "TRAM OAuth": "TRAM OAuth (免费)",
+  "Free \u00B7 Up to 1,000 requests/day \u00B7 TRAM latest models":
+    "免费 \u00B7 每天最多 1,000 次请求 \u00B7 TRAM 最新模型",
+  "Login with TramChat account to use daily free quota.":
+    "使用 TramChat 账号登录，享受每日免费额度。",
+  "Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models":
+    "付费 \u00B7 每 5 小时最多 6,000 次请求 \u00B7 支持阿里云百炼 Coding Plan 全部模型",
+  "Alibaba Cloud Coding Plan": "阿里云百炼 Coding Plan",
+  "Bring your own API key": "使用自己的 API 密钥",
+  "Use coding plan credentials or your own api-keys/providers.":
+    "使用 Coding Plan 凭证或您自己的 API 密钥/提供商。",
+  OpenAI: "OpenAI",
+  "Failed to login. Message: {{message}}": "登录失败。消息：{{message}}",
+  "Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.":
+    "认证方式被强制设置为 {{enforcedType}}，但您当前使用的是 {{currentType}}",
+  "TRAM OAuth authentication timed out. Please try again.":
+    "TRAM OAuth 认证超时。请重试",
+  "TRAM OAuth authentication cancelled.": "TRAM OAuth 认证已取消",
+  "TRAM OAuth Authentication": "TRAM OAuth 认证",
+  "Please visit this URL to authorize:": "请访问此 URL 进行授权：",
+  "Or scan the QR code below:": "或扫描下方的二维码：",
+  "Waiting for authorization": "等待授权中",
+  "Time remaining:": "剩余时间：",
+  "(Press ESC or CTRL+C to cancel)": "（按 ESC 或 CTRL+C 取消）",
+  "TRAM OAuth Authentication Timeout": "TRAM OAuth 认证超时",
+  "OAuth token expired (over {{seconds}} seconds). Please select authentication method again.":
+    "OAuth 令牌已过期（超过 {{seconds}} 秒）。请重新选择认证方法",
+  "Press any key to return to authentication type selection.":
+    "按任意键返回认证类型选择",
+  "Waiting for TRAM OAuth authentication...": "正在等待 TRAM OAuth 认证...",
+  "Note: Your existing API key in settings.json will not be cleared when using TRAM OAuth. You can switch back to OpenAI authentication later if needed.":
+    "注意：使用 TRAM OAuth 时，settings.json 中现有的 API 密钥不会被清除。如果需要，您可以稍后切换回 OpenAI 认证。",
+  "Note: Your existing API key will not be cleared when using TRAM OAuth.":
+    "注意：使用 TRAM OAuth 时，现有的 API 密钥不会被清除。",
+  "Authentication timed out. Please try again.": "认证超时。请重试。",
+  "Waiting for auth... (Press ESC or CTRL+C to cancel)":
+    "正在等待认证...（按 ESC 或 CTRL+C 取消）",
+  "Missing API key for OpenAI-compatible auth. Set settings.security.auth.apiKey, or set the {{envKeyHint}} environment variable.":
+    "缺少 OpenAI 兼容认证的 API 密钥。请设置 settings.security.auth.apiKey 或设置 {{envKeyHint}} 环境变量。",
+  "{{envKeyHint}} environment variable not found.":
+    "未找到 {{envKeyHint}} 环境变量。",
+  "{{envKeyHint}} environment variable not found. Please set it in your .env file or environment variables.":
+    "未找到 {{envKeyHint}} 环境变量。请在 .env 文件或系统环境变量中进行设置。",
+  "{{envKeyHint}} environment variable not found (or set settings.security.auth.apiKey). Please set it in your .env file or environment variables.":
+    "未找到 {{envKeyHint}} 环境变量（或设置 settings.security.auth.apiKey）。请在 .env 文件或系统环境变量中进行设置。",
+  "Missing API key for OpenAI-compatible auth. Set the {{envKeyHint}} environment variable.":
+    "缺少 OpenAI 兼容认证的 API 密钥。请设置 {{envKeyHint}} 环境变量。",
+  "Anthropic provider missing required baseUrl in modelProviders[].baseUrl.":
+    "Anthropic 提供商缺少必需的 baseUrl，请在 modelProviders[].baseUrl 中配置。",
+  "ANTHROPIC_BASE_URL environment variable not found.":
+    "未找到 ANTHROPIC_BASE_URL 环境变量。",
+  "Invalid auth method selected.": "选择了无效的认证方式。",
+  "Failed to authenticate. Message: {{message}}": "认证失败。消息：{{message}}",
+  "Authenticated successfully with {{authType}} credentials.":
+    "使用 {{authType}} 凭据成功认证。",
   'Invalid TRAM_DEFAULT_AUTH_TYPE value: "{{value}}". Valid values are: {{validValues}}':
     '无效的 TRAM_DEFAULT_AUTH_TYPE 值："{{value}}"。有效值为：{{validValues}}',
-  'OpenAI Configuration Required': '需要配置 OpenAI',
-  'Please enter your OpenAI configuration. You can get an API key from':
-    '请输入您的 OpenAI 配置。您可以从以下地址获取 API 密钥：',
-  'API Key:': 'API 密钥：',
-  'Invalid credentials: {{errorMessage}}': '凭据无效：{{errorMessage}}',
-  'Failed to validate credentials': '验证凭据失败',
-  'Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel':
-    '按 Enter 继续，Tab/↑↓ 导航，Esc 取消',
+  "OpenAI Configuration Required": "需要配置 OpenAI",
+  "Please enter your OpenAI configuration. You can get an API key from":
+    "请输入您的 OpenAI 配置。您可以从以下地址获取 API 密钥：",
+  "API Key:": "API 密钥：",
+  "Invalid credentials: {{errorMessage}}": "凭据无效：{{errorMessage}}",
+  "Failed to validate credentials": "验证凭据失败",
+  "Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel":
+    "按 Enter 继续，Tab/↑↓ 导航，Esc 取消",
 
   // ============================================================================
   // Dialogs - Model
   // ============================================================================
-  'Select Model': '选择模型',
-  '(Press Esc to close)': '（按 Esc 关闭）',
-  'Current (effective) configuration': '当前（实际生效）配置',
-  AuthType: '认证方式',
-  'API Key': 'API 密钥',
-  unset: '未设置',
-  '(default)': '(默认)',
-  '(set)': '(已设置)',
-  '(not set)': '(未设置)',
-  Modality: '模态',
-  'Context Window': '上下文窗口',
-  text: '文本',
-  'text-only': '纯文本',
-  image: '图像',
-  pdf: 'PDF',
-  audio: '音频',
-  video: '视频',
-  'not set': '未设置',
-  none: '无',
-  unknown: '未知',
+  "Select Model": "选择模型",
+  "(Press Esc to close)": "（按 Esc 关闭）",
+  "Current (effective) configuration": "当前（实际生效）配置",
+  AuthType: "认证方式",
+  "API Key": "API 密钥",
+  unset: "未设置",
+  "(default)": "(默认)",
+  "(set)": "(已设置)",
+  "(not set)": "(未设置)",
+  Modality: "模态",
+  "Context Window": "上下文窗口",
+  text: "文本",
+  "text-only": "纯文本",
+  image: "图像",
+  pdf: "PDF",
+  audio: "音频",
+  video: "视频",
+  "not set": "未设置",
+  none: "无",
+  unknown: "未知",
   "Failed to switch model to '{{modelId}}'.\n\n{{error}}":
     "无法切换到模型 '{{modelId}}'.\n\n{{error}}",
-<<<<<<< HEAD
-  'Tram 3.5 Plus — efficient hybrid model with leading coding performance':
-    'Tram 3.5 Plus — 高效混合架构，编程性能业界领先',
-  'The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
-    '来自阿里云 ModelStudio 的最新 Tram Vision 模型（版本：qwen3-vl-plus-2025-09-23）',
-=======
-  'Qwen 3.6 Plus — efficient hybrid model with leading coding performance':
-    'Qwen 3.6 Plus — 高效混合架构，编程性能业界领先',
-  'The latest Qwen Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)':
-    '来自阿里云 ModelStudio 的最新 Qwen Vision 模型（版本：qwen3-vl-plus-2025-09-23）',
->>>>>>> v0.14.5
+  "Tram 3.5 Plus — efficient hybrid model with leading coding performance":
+    "Tram 3.5 Plus — 高效混合架构，编程性能业界领先",
+  "The latest Tram Vision model from Alibaba Cloud ModelStudio (version: qwen3-vl-plus-2025-09-23)":
+    "来自阿里云 ModelStudio 的最新 Tram Vision 模型（版本：qwen3-vl-plus-2025-09-23）",
 
   // ============================================================================
   // Dialogs - Permissions
   // ============================================================================
-  'Manage folder trust settings': '管理文件夹信任设置',
-  'Manage permission rules': '管理权限规则',
-  Allow: '允许',
-  Ask: '询问',
-  Deny: '拒绝',
-  Workspace: '工作区',
-  "Qwen Code won't ask before using allowed tools.":
-    'Qwen Code 使用已允许的工具前不会询问。',
-  'Qwen Code will ask before using these tools.':
-    'Qwen Code 使用这些工具前会先询问。',
-  'Qwen Code is not allowed to use denied tools.':
-    'Qwen Code 不允许使用被拒绝的工具。',
-  'Manage trusted directories for this workspace.':
-    '管理此工作区的受信任目录。',
-  'Any use of the {{tool}} tool': '{{tool}} 工具的任何使用',
-  "{{tool}} commands matching '{{pattern}}'":
-    "匹配 '{{pattern}}' 的 {{tool}} 命令",
-  'From user settings': '来自用户设置',
-  'From project settings': '来自项目设置',
-  'From session': '来自会话',
-  'Project settings (local)': '项目设置（本地）',
-  'Saved in .qwen/settings.local.json': '保存在 .qwen/settings.local.json',
-  'Project settings': '项目设置',
-  'Checked in at .qwen/settings.json': '保存在 .qwen/settings.json',
-  'User settings': '用户设置',
-  'Saved in at ~/.qwen/settings.json': '保存在 ~/.qwen/settings.json',
-  'Add a new rule…': '添加新规则…',
-  'Add {{type}} permission rule': '添加{{type}}权限规则',
-  'Permission rules are a tool name, optionally followed by a specifier in parentheses.':
-    '权限规则是一个工具名称，可选地后跟括号中的限定符。',
-  'e.g.,': '例如',
-  or: '或',
-  'Enter permission rule…': '输入权限规则…',
-  'Enter to submit · Esc to cancel': '回车提交 · Esc 取消',
-  'Where should this rule be saved?': '此规则应保存在哪里？',
-  'Enter to confirm · Esc to cancel': '回车确认 · Esc 取消',
-  'Delete {{type}} rule?': '删除{{type}}规则？',
-  'Are you sure you want to delete this permission rule?':
-    '确定要删除此权限规则吗？',
-  'Permissions:': '权限：',
-  '(←/→ or tab to cycle)': '（←/→ 或 tab 切换）',
-  'Press ↑↓ to navigate · Enter to select · Type to search · Esc to cancel':
-    '按 ↑↓ 导航 · 回车选择 · 输入搜索 · Esc 取消',
-  'Search…': '搜索…',
-  'Use /trust to manage folder trust settings for this workspace.':
-    '使用 /trust 管理此工作区的文件夹信任设置。',
-  // Workspace directory management
-  'Add directory…': '添加目录…',
-  'Add directory to workspace': '添加工作区目录',
-  'Qwen Code can read files in the workspace, and make edits when auto-accept edits is on.':
-    'Qwen Code 可以读取工作区中的文件，并在自动接受编辑模式开启时进行编辑。',
-  'Qwen Code will be able to read files in this directory and make edits when auto-accept edits is on.':
-    'Qwen Code 将能够读取此目录中的文件，并在自动接受编辑模式开启时进行编辑。',
-  'Enter the path to the directory:': '输入目录路径：',
-  'Enter directory path…': '输入目录路径…',
-  'Tab to complete · Enter to add · Esc to cancel':
-    'Tab 补全 · 回车添加 · Esc 取消',
-  'Remove directory?': '删除目录？',
-  'Are you sure you want to remove this directory from the workspace?':
-    '确定要将此目录从工作区中移除吗？',
-  '  (Original working directory)': '  （原始工作目录）',
-  '  (from settings)': '  （来自设置）',
-  'Directory does not exist.': '目录不存在。',
-  'Path is not a directory.': '路径不是目录。',
-  'This directory is already in the workspace.': '此目录已在工作区中。',
-  'Already covered by existing directory: {{dir}}': '已被现有目录覆盖：{{dir}}',
+  "Manage folder trust settings": "管理文件夹信任设置",
 
   // ============================================================================
   // Status Bar
   // ============================================================================
-  'Using:': '已加载: ',
-  '{{count}} open file': '{{count}} 个打开的文件',
-  '{{count}} open files': '{{count}} 个打开的文件',
-  '(ctrl+g to view)': '（按 ctrl+g 查看）',
-  '{{count}} {{name}} file': '{{count}} 个 {{name}} 文件',
-  '{{count}} {{name}} files': '{{count}} 个 {{name}} 文件',
-  '{{count}} MCP server': '{{count}} 个 MCP 服务器',
-  '{{count}} MCP servers': '{{count}} 个 MCP 服务器',
-  '{{count}} Blocked': '{{count}} 个已阻止',
-  '(ctrl+t to view)': '（按 ctrl+t 查看）',
-  '(ctrl+t to toggle)': '（按 ctrl+t 切换）',
-  'Press Ctrl+C again to exit.': '再次按 Ctrl+C 退出',
-  'Press Ctrl+D again to exit.': '再次按 Ctrl+D 退出',
-  'Press Esc again to clear.': '再次按 Esc 清除',
-  'Press ↑ to edit queued messages': '按 ↑ 编辑排队消息',
+  "Using:": "已加载: ",
+  "{{count}} open file": "{{count}} 个打开的文件",
+  "{{count}} open files": "{{count}} 个打开的文件",
+  "(ctrl+g to view)": "（按 ctrl+g 查看）",
+  "{{count}} {{name}} file": "{{count}} 个 {{name}} 文件",
+  "{{count}} {{name}} files": "{{count}} 个 {{name}} 文件",
+  "{{count}} MCP server": "{{count}} 个 MCP 服务器",
+  "{{count}} MCP servers": "{{count}} 个 MCP 服务器",
+  "{{count}} Blocked": "{{count}} 个已阻止",
+  "(ctrl+t to view)": "（按 ctrl+t 查看）",
+  "(ctrl+t to toggle)": "（按 ctrl+t 切换）",
+  "Press Ctrl+C again to exit.": "再次按 Ctrl+C 退出",
+  "Press Ctrl+D again to exit.": "再次按 Ctrl+D 退出",
+  "Press Esc again to clear.": "再次按 Esc 清除",
 
   // ============================================================================
   // MCP Status
   // ============================================================================
-  'No MCP servers configured.': '未配置 MCP 服务器',
-  '⏳ MCP servers are starting up ({{count}} initializing)...':
-    '⏳ MCP 服务器正在启动（{{count}} 个正在初始化）...',
-  'Note: First startup may take longer. Tool availability will update automatically.':
-    '注意：首次启动可能需要更长时间。工具可用性将自动更新',
-  'Configured MCP servers:': '已配置的 MCP 服务器：',
-  Ready: '就绪',
-  'Starting... (first startup may take longer)':
-    '正在启动...（首次启动可能需要更长时间）',
-  Disconnected: '已断开连接',
-  '{{count}} tool': '{{count}} 个工具',
-  '{{count}} tools': '{{count}} 个工具',
-  '{{count}} prompt': '{{count}} 个提示',
-  '{{count}} prompts': '{{count}} 个提示',
-  '(from {{extensionName}})': '（来自 {{extensionName}}）',
-  OAuth: 'OAuth',
-  'OAuth expired': 'OAuth 已过期',
-  'OAuth not authenticated': 'OAuth 未认证',
-  'tools and prompts will appear when ready': '工具和提示将在就绪时显示',
-  '{{count}} tools cached': '{{count}} 个工具已缓存',
-  'Tools:': '工具：',
-  'Parameters:': '参数：',
-  'Prompts:': '提示：',
-  Blocked: '已阻止',
-  '💡 Tips:': '💡 提示：',
-  Use: '使用',
-  'to show server and tool descriptions': '显示服务器和工具描述',
-  'to show tool parameter schemas': '显示工具参数架构',
-  'to hide descriptions': '隐藏描述',
-  'to authenticate with OAuth-enabled servers':
-    '使用支持 OAuth 的服务器进行认证',
-  Press: '按',
-  'to toggle tool descriptions on/off': '切换工具描述开关',
+  "No MCP servers configured.": "未配置 MCP 服务器",
+  "⏳ MCP servers are starting up ({{count}} initializing)...":
+    "⏳ MCP 服务器正在启动（{{count}} 个正在初始化）...",
+  "Note: First startup may take longer. Tool availability will update automatically.":
+    "注意：首次启动可能需要更长时间。工具可用性将自动更新",
+  "Configured MCP servers:": "已配置的 MCP 服务器：",
+  Ready: "就绪",
+  "Starting... (first startup may take longer)":
+    "正在启动...（首次启动可能需要更长时间）",
+  Disconnected: "已断开连接",
+  "{{count}} tool": "{{count}} 个工具",
+  "{{count}} tools": "{{count}} 个工具",
+  "{{count}} prompt": "{{count}} 个提示",
+  "{{count}} prompts": "{{count}} 个提示",
+  "(from {{extensionName}})": "（来自 {{extensionName}}）",
+  OAuth: "OAuth",
+  "OAuth expired": "OAuth 已过期",
+  "OAuth not authenticated": "OAuth 未认证",
+  "tools and prompts will appear when ready": "工具和提示将在就绪时显示",
+  "{{count}} tools cached": "{{count}} 个工具已缓存",
+  "Tools:": "工具：",
+  "Parameters:": "参数：",
+  "Prompts:": "提示：",
+  Blocked: "已阻止",
+  "💡 Tips:": "💡 提示：",
+  Use: "使用",
+  "to show server and tool descriptions": "显示服务器和工具描述",
+  "to show tool parameter schemas": "显示工具参数架构",
+  "to hide descriptions": "隐藏描述",
+  "to authenticate with OAuth-enabled servers":
+    "使用支持 OAuth 的服务器进行认证",
+  Press: "按",
+  "to toggle tool descriptions on/off": "切换工具描述开关",
   "Starting OAuth authentication for MCP server '{{name}}'...":
     "正在为 MCP 服务器 '{{name}}' 启动 OAuth 认证...",
-  'Restarting MCP servers...': '正在重启 MCP 服务器...',
+  "Restarting MCP servers...": "正在重启 MCP 服务器...",
 
   // ============================================================================
   // Startup Tips
   // ============================================================================
-  'Tips:': '提示：',
-  'Use /compress when the conversation gets long to summarize history and free up context.':
-    '对话变长时用 /compress，总结历史并释放上下文。',
-  'Start a fresh idea with /clear or /new; the previous session stays available in history.':
-    '用 /clear 或 /new 开启新思路；之前的会话会保留在历史记录中。',
-  'Use /bug to submit issues to the maintainers when something goes off.':
-    '遇到问题时，用 /bug 将问题提交给维护者。',
-  'Switch auth type quickly with /auth.': '用 /auth 快速切换认证方式。',
-  'You can run any shell commands from TRAM using ! (e.g. !ls).':
-    '在 TRAM 中使用 ! 可运行任意 shell 命令（例如 !ls）。',
-  'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.':
-    '输入 / 打开命令弹窗；按 Tab 自动补全斜杠命令和保存的提示词。',
-  'You can resume a previous conversation by running tram --continue or tram --resume.':
-    '运行 tram --continue 或 tram --resume 可继续之前的会话。',
-  'You can switch permission mode quickly with Shift+Tab or /approval-mode.':
-    '按 Shift+Tab 或输入 /approval-mode 可快速切换权限模式。',
-  'You can switch permission mode quickly with Tab or /approval-mode.':
-    '按 Tab 或输入 /approval-mode 可快速切换权限模式。',
-  'Try /insight to generate personalized insights from your chat history.':
-    '试试 /insight，从聊天记录中生成个性化洞察。',
-  'Add a QWEN.md file to give Qwen Code persistent project context.':
-    '添加 QWEN.md 文件，为 Qwen Code 提供持久的项目上下文。',
-  'Use /btw to ask a quick side question without disrupting the conversation.':
-    '用 /btw 快速问一个小问题，不会打断当前对话。',
-  'Context is almost full! Run /compress now or start /new to continue.':
-    '上下文即将用满！请立即执行 /compress 或使用 /new 开启新会话。',
-  'Context is getting full. Use /compress to free up space.':
-    '上下文空间不足，用 /compress 释放空间。',
-  'Long conversation? /compress summarizes history to free context.':
-    '对话太长？用 /compress 总结历史，释放上下文。',
+  "Tips:": "提示：",
+  "Use /compress when the conversation gets long to summarize history and free up context.":
+    "对话变长时用 /compress，总结历史并释放上下文。",
+  "Start a fresh idea with /clear or /new; the previous session stays available in history.":
+    "用 /clear 或 /new 开启新思路；之前的会话会保留在历史记录中。",
+  "Use /bug to submit issues to the maintainers when something goes off.":
+    "遇到问题时，用 /bug 将问题提交给维护者。",
+  "Switch auth type quickly with /auth.": "用 /auth 快速切换认证方式。",
+  "You can run any shell commands from TRAM using ! (e.g. !ls).":
+    "在 TRAM 中使用 ! 可运行任意 shell 命令（例如 !ls）。",
+  "Type / to open the command popup; Tab autocompletes slash commands and saved prompts.":
+    "输入 / 打开命令弹窗；按 Tab 自动补全斜杠命令和保存的提示词。",
+  "You can resume a previous conversation by running tram --continue or tram --resume.":
+    "运行 tram --continue 或 tram --resume 可继续之前的会话。",
+  "You can switch permission mode quickly with Shift+Tab or /approval-mode.":
+    "按 Shift+Tab 或输入 /approval-mode 可快速切换权限模式。",
+  "You can switch permission mode quickly with Tab or /approval-mode.":
+    "按 Tab 或输入 /approval-mode 可快速切换权限模式。",
+  "Try /insight to generate personalized insights from your chat history.":
+    "试试 /insight，从聊天记录中生成个性化洞察。",
 
   // ============================================================================
   // Exit Screen / Stats
   // ============================================================================
-  'Agent powering down. Goodbye!': 'TRAM 正在关闭，再见！',
-  'To continue this session, run': '要继续此会话，请运行',
-  'Interaction Summary': '交互摘要',
-  'Session ID:': '会话 ID：',
-  'Tool Calls:': '工具调用：',
-  'Success Rate:': '成功率：',
-  'User Agreement:': '用户同意率：',
-  reviewed: '已审核',
-  'Code Changes:': '代码变更：',
-  Performance: '性能',
-  'Wall Time:': '总耗时：',
-  'Agent Active:': '智能体活跃时间：',
-  'API Time:': 'API 时间：',
-  'Tool Time:': '工具时间：',
-  'Session Stats': '会话统计',
-  'Model Usage': '模型使用情况',
-  Reqs: '请求数',
-  'Input Tokens': '输入 token 数',
-  'Output Tokens': '输出 token 数',
-  'Savings Highlight:': '节省亮点：',
-  'of input tokens were served from the cache, reducing costs.':
-    '从缓存载入 token ，降低了成本',
-  'Tip: For a full token breakdown, run `/stats model`.':
-    '提示：要查看完整的令牌明细，请运行 `/stats model`',
-  'Model Stats For Nerds': '模型统计（技术细节）',
-  'Tool Stats For Nerds': '工具统计（技术细节）',
-  Metric: '指标',
-  API: 'API',
-  Requests: '请求数',
-  Errors: '错误数',
-  'Avg Latency': '平均延迟',
-  Tokens: '令牌',
-  Total: '总计',
-  Prompt: '提示',
-  Cached: '缓存',
-  Thoughts: '思考',
-  Tool: '工具',
-  Output: '输出',
-  'No API calls have been made in this session.':
-    '本次会话中未进行任何 API 调用',
-  'Tool Name': '工具名称',
-  Calls: '调用次数',
-  'Success Rate': '成功率',
-  'Avg Duration': '平均耗时',
-  'User Decision Summary': '用户决策摘要',
-  'Total Reviewed Suggestions:': '已审核建议总数：',
-  ' » Accepted:': ' » 已接受：',
-  ' » Rejected:': ' » 已拒绝：',
-  ' » Modified:': ' » 已修改：',
-  ' Overall Agreement Rate:': ' 总体同意率：',
-  'No tool calls have been made in this session.':
-    '本次会话中未进行任何工具调用',
-  'Session start time is unavailable, cannot calculate stats.':
-    '会话开始时间不可用，无法计算统计信息',
+  "Agent powering down. Goodbye!": "TRAM 正在关闭，再见！",
+  "To continue this session, run": "要继续此会话，请运行",
+  "Interaction Summary": "交互摘要",
+  "Session ID:": "会话 ID：",
+  "Tool Calls:": "工具调用：",
+  "Success Rate:": "成功率：",
+  "User Agreement:": "用户同意率：",
+  reviewed: "已审核",
+  "Code Changes:": "代码变更：",
+  Performance: "性能",
+  "Wall Time:": "总耗时：",
+  "Agent Active:": "智能体活跃时间：",
+  "API Time:": "API 时间：",
+  "Tool Time:": "工具时间：",
+  "Session Stats": "会话统计",
+  "Model Usage": "模型使用情况",
+  Reqs: "请求数",
+  "Input Tokens": "输入 token 数",
+  "Output Tokens": "输出 token 数",
+  "Savings Highlight:": "节省亮点：",
+  "of input tokens were served from the cache, reducing costs.":
+    "从缓存载入 token ，降低了成本",
+  "Tip: For a full token breakdown, run `/stats model`.":
+    "提示：要查看完整的令牌明细，请运行 `/stats model`",
+  "Model Stats For Nerds": "模型统计（技术细节）",
+  "Tool Stats For Nerds": "工具统计（技术细节）",
+  Metric: "指标",
+  API: "API",
+  Requests: "请求数",
+  Errors: "错误数",
+  "Avg Latency": "平均延迟",
+  Tokens: "令牌",
+  Total: "总计",
+  Prompt: "提示",
+  Cached: "缓存",
+  Thoughts: "思考",
+  Tool: "工具",
+  Output: "输出",
+  "No API calls have been made in this session.":
+    "本次会话中未进行任何 API 调用",
+  "Tool Name": "工具名称",
+  Calls: "调用次数",
+  "Success Rate": "成功率",
+  "Avg Duration": "平均耗时",
+  "User Decision Summary": "用户决策摘要",
+  "Total Reviewed Suggestions:": "已审核建议总数：",
+  " » Accepted:": " » 已接受：",
+  " » Rejected:": " » 已拒绝：",
+  " » Modified:": " » 已修改：",
+  " Overall Agreement Rate:": " 总体同意率：",
+  "No tool calls have been made in this session.":
+    "本次会话中未进行任何工具调用",
+  "Session start time is unavailable, cannot calculate stats.":
+    "会话开始时间不可用，无法计算统计信息",
 
   // ============================================================================
   // Command Format Migration
   // ============================================================================
-  'Command Format Migration': '命令格式迁移',
-  'Found {{count}} TOML command file:': '发现 {{count}} 个 TOML 命令文件：',
-  'Found {{count}} TOML command files:': '发现 {{count}} 个 TOML 命令文件：',
-  '... and {{count}} more': '... 以及其他 {{count}} 个',
-  'The TOML format is deprecated. Would you like to migrate them to Markdown format?':
-    'TOML 格式已弃用。是否将它们迁移到 Markdown 格式？',
-  '(Backups will be created and original files will be preserved)':
-    '（将创建备份，原始文件将保留）',
+  "Command Format Migration": "命令格式迁移",
+  "Found {{count}} TOML command file:": "发现 {{count}} 个 TOML 命令文件：",
+  "Found {{count}} TOML command files:": "发现 {{count}} 个 TOML 命令文件：",
+  "... and {{count}} more": "... 以及其他 {{count}} 个",
+  "The TOML format is deprecated. Would you like to migrate them to Markdown format?":
+    "TOML 格式已弃用。是否将它们迁移到 Markdown 格式？",
+  "(Backups will be created and original files will be preserved)":
+    "（将创建备份，原始文件将保留）",
 
   // ============================================================================
   // Loading Phrases
   // ============================================================================
-  'Waiting for user confirmation...': '等待用户确认...',
-  '(esc to cancel, {{time}})': '（按 esc 取消，{{time}}）',
+  "Waiting for user confirmation...": "等待用户确认...",
+  "(esc to cancel, {{time}})": "（按 esc 取消，{{time}}）",
   WITTY_LOADING_PHRASES: [
     /*
     // --- 职场搬砖系列 ---
@@ -1722,169 +1658,140 @@ export default {
     '哪怕只有 0.1% 的进度，也是在向目标靠近...',
     '加载的是字节，承载的是对技术的热爱...',
     */
-   '生成中'
+    "生成中",
   ],
 
   // ============================================================================
   // Extension Settings Input
   // ============================================================================
-  'Enter value...': '请输入值...',
-  'Enter sensitive value...': '请输入敏感值...',
-  'Press Enter to submit, Escape to cancel': '按 Enter 提交，Escape 取消',
+  "Enter value...": "请输入值...",
+  "Enter sensitive value...": "请输入敏感值...",
+  "Press Enter to submit, Escape to cancel": "按 Enter 提交，Escape 取消",
 
   // ============================================================================
   // Command Migration Tool
   // ============================================================================
-  'Markdown file already exists: {{filename}}':
-    'Markdown 文件已存在：{{filename}}',
-  'TOML Command Format Deprecation Notice': 'TOML 命令格式弃用通知',
-  'Found {{count}} command file(s) in TOML format:':
-    '发现 {{count}} 个 TOML 格式的命令文件：',
-  'The TOML format for commands is being deprecated in favor of Markdown format.':
-    '命令的 TOML 格式正在被弃用，推荐使用 Markdown 格式。',
-  'Markdown format is more readable and easier to edit.':
-    'Markdown 格式更易读、更易编辑。',
-  'You can migrate these files automatically using:':
-    '您可以使用以下命令自动迁移这些文件：',
-  'Or manually convert each file:': '或手动转换每个文件：',
+  "Markdown file already exists: {{filename}}":
+    "Markdown 文件已存在：{{filename}}",
+  "TOML Command Format Deprecation Notice": "TOML 命令格式弃用通知",
+  "Found {{count}} command file(s) in TOML format:":
+    "发现 {{count}} 个 TOML 格式的命令文件：",
+  "The TOML format for commands is being deprecated in favor of Markdown format.":
+    "命令的 TOML 格式正在被弃用，推荐使用 Markdown 格式。",
+  "Markdown format is more readable and easier to edit.":
+    "Markdown 格式更易读、更易编辑。",
+  "You can migrate these files automatically using:":
+    "您可以使用以下命令自动迁移这些文件：",
+  "Or manually convert each file:": "或手动转换每个文件：",
   'TOML: prompt = "..." / description = "..."':
     'TOML：prompt = "..." / description = "..."',
-  'Markdown: YAML frontmatter + content': 'Markdown：YAML frontmatter + 内容',
-  'The migration tool will:': '迁移工具将：',
-  'Convert TOML files to Markdown': '将 TOML 文件转换为 Markdown',
-  'Create backups of original files': '创建原始文件的备份',
-  'Preserve all command functionality': '保留所有命令功能',
-  'TOML format will continue to work for now, but migration is recommended.':
-    'TOML 格式目前仍可使用，但建议迁移。',
+  "Markdown: YAML frontmatter + content": "Markdown：YAML frontmatter + 内容",
+  "The migration tool will:": "迁移工具将：",
+  "Convert TOML files to Markdown": "将 TOML 文件转换为 Markdown",
+  "Create backups of original files": "创建原始文件的备份",
+  "Preserve all command functionality": "保留所有命令功能",
+  "TOML format will continue to work for now, but migration is recommended.":
+    "TOML 格式目前仍可使用，但建议迁移。",
 
   // ============================================================================
   // Extensions - Explore Command
   // ============================================================================
-  'Open extensions page in your browser': '在浏览器中打开扩展市场页面',
-  'Unknown extensions source: {{source}}.': '未知的扩展来源：{{source}}。',
-  'Would open extensions page in your browser: {{url}} (skipped in test environment)':
-    '将在浏览器中打开扩展页面：{{url}}（测试环境中已跳过）',
-  'View available extensions at {{url}}': '在 {{url}} 查看可用扩展',
-  'Opening extensions page in your browser: {{url}}':
-    '正在浏览器中打开扩展页面：{{url}}',
-  'Failed to open browser. Check out the extensions gallery at {{url}}':
-    '打开浏览器失败。请访问扩展市场：{{url}}',
+  "Open extensions page in your browser": "在浏览器中打开扩展市场页面",
+  "Unknown extensions source: {{source}}.": "未知的扩展来源：{{source}}。",
+  "Would open extensions page in your browser: {{url}} (skipped in test environment)":
+    "将在浏览器中打开扩展页面：{{url}}（测试环境中已跳过）",
+  "View available extensions at {{url}}": "在 {{url}} 查看可用扩展",
+  "Opening extensions page in your browser: {{url}}":
+    "正在浏览器中打开扩展页面：{{url}}",
+  "Failed to open browser. Check out the extensions gallery at {{url}}":
+    "打开浏览器失败。请访问扩展市场：{{url}}",
 
   // ============================================================================
   // Retry / Rate Limit
   // ============================================================================
-  'Rate limit error: {{reason}}': '触发限流：{{reason}}',
-  'Retrying in {{seconds}} seconds… (attempt {{attempt}}/{{maxRetries}})':
-    '将于 {{seconds}} 秒后重试…（第 {{attempt}}/{{maxRetries}} 次）',
-  'Press Ctrl+Y to retry': '按 Ctrl+Y 重试。',
-  'No failed request to retry.': '没有可重试的失败请求。',
-  'to retry last request': '重试上一次请求',
+  "Rate limit error: {{reason}}": "触发限流：{{reason}}",
+  "Retrying in {{seconds}} seconds… (attempt {{attempt}}/{{maxRetries}})":
+    "将于 {{seconds}} 秒后重试…（第 {{attempt}}/{{maxRetries}} 次）",
+  "Press Ctrl+Y to retry": "按 Ctrl+Y 重试。",
+  "No failed request to retry.": "没有可重试的失败请求。",
+  "to retry last request": "重试上一次请求",
 
   // ============================================================================
   // Coding Plan Authentication
   // ============================================================================
-  'API key cannot be empty.': 'API Key 不能为空。',
+  "API key cannot be empty.": "API Key 不能为空。",
   'Invalid API key. Coding Plan API keys start with "sk-sp-". Please check.':
     '无效的 API Key，Coding Plan API Key 均以 "sk-sp-" 开头，请检查',
-  'You can get your Coding Plan API key here':
-    '您可以在这里获取 Coding Plan API Key',
-  'API key is stored in settings.env. You can migrate it to a .env file for better security.':
-    'API Key 已存储在 settings.env 中。您可以将其迁移到 .env 文件以获得更好的安全性。',
-  'New model configurations are available for Alibaba Cloud Coding Plan. Update now?':
-    '阿里云百炼 Coding Plan 有新模型配置可用。是否立即更新？',
-  'Coding Plan configuration updated successfully. New models are now available.':
-    'Coding Plan 配置更新成功。新模型现已可用。',
-  'Coding Plan API key not found. Please re-authenticate with Coding Plan.':
-    '未找到 Coding Plan API Key。请重新通过 Coding Plan 认证。',
-  'Failed to update Coding Plan configuration: {{message}}':
-    '更新 Coding Plan 配置失败：{{message}}',
+  "You can get your Coding Plan API key here":
+    "您可以在这里获取 Coding Plan API Key",
+  "API key is stored in settings.env. You can migrate it to a .env file for better security.":
+    "API Key 已存储在 settings.env 中。您可以将其迁移到 .env 文件以获得更好的安全性。",
+  "New model configurations are available for Alibaba Cloud Coding Plan. Update now?":
+    "阿里云百炼 Coding Plan 有新模型配置可用。是否立即更新？",
+  "Coding Plan configuration updated successfully. New models are now available.":
+    "Coding Plan 配置更新成功。新模型现已可用。",
+  "Coding Plan API key not found. Please re-authenticate with Coding Plan.":
+    "未找到 Coding Plan API Key。请重新通过 Coding Plan 认证。",
+  "Failed to update Coding Plan configuration: {{message}}":
+    "更新 Coding Plan 配置失败：{{message}}",
 
   // ============================================================================
   // Custom API Key Configuration
   // ============================================================================
-  'You can configure your API key and models in settings.json':
-    '您可以在 settings.json 中配置 API Key 和模型',
-  'Refer to the documentation for setup instructions': '请参考文档了解配置说明',
+  "You can configure your API key and models in settings.json":
+    "您可以在 settings.json 中配置 API Key 和模型",
+  "Refer to the documentation for setup instructions": "请参考文档了解配置说明",
 
   // ============================================================================
   // Auth Dialog - View Titles and Labels
   // ============================================================================
-  'API-KEY': 'API-KEY',
-  'Coding Plan': 'Coding Plan',
-  "Paste your api key of ModelStudio Coding Plan and you're all set!":
-    '粘贴您的百炼 Coding Plan API Key，即可完成设置！',
-  Custom: '自定义',
-  'More instructions about configuring `modelProviders` manually.':
-    '关于手动配置 `modelProviders` 的更多说明。',
-  'Select API-KEY configuration mode:': '选择 API-KEY 配置模式：',
-  '(Press Escape to go back)': '(按 Escape 键返回)',
-  '(Press Enter to submit, Escape to cancel)': '(按 Enter 提交，Escape 取消)',
-  'Select Region for Coding Plan': '选择 Coding Plan 区域',
-  'Choose based on where your account is registered':
-    '请根据您的账号注册地区选择',
-  'Enter Coding Plan API Key': '输入 Coding Plan API Key',
+  "API-KEY": "API-KEY",
+  "Coding Plan": "Coding Plan",
+  "Paste your api key of Bailian Coding Plan and you're all set!":
+    "粘贴您的百炼 Coding Plan API Key，即可完成设置！",
+  Custom: "自定义",
+  "More instructions about configuring `modelProviders` manually.":
+    "关于手动配置 `modelProviders` 的更多说明。",
+  "Select API-KEY configuration mode:": "选择 API-KEY 配置模式：",
+  "(Press Escape to go back)": "(按 Escape 键返回)",
+  "(Press Enter to submit, Escape to cancel)": "(按 Enter 提交，Escape 取消)",
+  "Select Region for Coding Plan": "选择 Coding Plan 区域",
+  "Choose based on where your account is registered":
+    "请根据您的账号注册地区选择",
+  "Enter Coding Plan API Key": "输入 Coding Plan API Key",
 
   // ============================================================================
   // Coding Plan International Updates
   // ============================================================================
-  'New model configurations are available for {{region}}. Update now?':
-    '{{region}} 有新的模型配置可用。是否立即更新？',
+  "New model configurations are available for {{region}}. Update now?":
+    "{{region}} 有新的模型配置可用。是否立即更新？",
   '{{region}} configuration updated successfully. Model switched to "{{model}}".':
     '{{region}} 配置更新成功。模型已切换至 "{{model}}"。',
-  'Authenticated successfully with {{region}}. API key and model configs saved to settings.json (backed up).':
-    '成功通过 {{region}} 认证。API Key 和模型配置已保存至 settings.json（已备份）。',
-
-  // ============================================================================
-  // Context Usage
-  // ============================================================================
-  'Context Usage': '上下文使用情况',
-  'Context window': '上下文窗口',
-  Used: '已用',
-  Free: '空闲',
-  'Autocompact buffer': '自动压缩缓冲区',
-  'Usage by category': '分类用量',
-  'System prompt': '系统提示',
-  'Built-in tools': '内置工具',
-  'MCP tools': 'MCP 工具',
-  'Memory files': '记忆文件',
-  Skills: '技能',
-  Messages: '消息',
-  tokens: 'tokens',
-  'Estimated pre-conversation overhead': '预估对话前开销',
-  'No API response yet. Send a message to see actual usage.':
-    '暂无 API 响应。发送消息以查看实际使用情况。',
-  'Show context window usage breakdown.': '显示上下文窗口使用情况分解。',
-  'Run /context detail for per-item breakdown.':
-    '运行 /context detail 查看详细分解。',
-  'Show context window usage breakdown. Use "/context detail" for per-item breakdown.':
-    '显示上下文窗口使用情况分解。输入 "/context detail" 查看详细分解。',
-  'body loaded': '内容已加载',
-  memory: '记忆',
-  '{{region}} configuration updated successfully.': '{{region}} 配置更新成功。',
-  'Authenticated successfully with {{region}}. API key and model configs saved to settings.json.':
-    '成功通过 {{region}} 认证。API Key 和模型配置已保存至 settings.json。',
-  'Tip: Use /model to switch between available Coding Plan models.':
-    '提示：使用 /model 切换可用的 Coding Plan 模型。',
+  "{{region}} configuration updated successfully.": "{{region}} 配置更新成功。",
+  "Authenticated successfully with {{region}}. API key and model configs saved to settings.json.":
+    "成功通过 {{region}} 认证。API Key 和模型配置已保存至 settings.json。",
+  "Tip: Use /model to switch between available Coding Plan models.":
+    "提示：使用 /model 切换可用的 Coding Plan 模型。",
 
   // ============================================================================
   // Service Command
   // ============================================================================
-  'Manage persistent background services.': '管理常驻后台服务。',
-  'Tip: Recommended Alt+L to open the ask flow quickly. You can also type /service alert <name>.':
-    '提示：推荐使用 Alt+L 快速打开询问流程，也可以手动输入 /service alert <name>。',
-  'Tip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
-    '提示：按 Ctrl+Tab 切换到 Servers Log，再按一次可切回 Chat。',
-  'No services registered. Use /service register ... to add one.\nCurrent max running services: {{maxRunningServices}}':
-    '当前没有已注册服务。使用 /service register ... 添加。\n当前最大并发服务数：{{maxRunningServices}}',
-  '- {{runningStatus}} {{name}} | autoStart={{autoStart}} | pid={{pid}} | follow={{follow}} | notify={{notify}} | alert={{alert}} | cwd={{cwd}} | cmd={{command}}':
-    '- {{runningStatus}} {{name}} | 自动启动={{autoStart}} | pid={{pid}} | 跟随={{follow}} | 通知={{notify}} | 告警={{alert}} | cwd={{cwd}} | 命令={{command}}',
-  'Registered services ({{count}})\nMax running services: {{maxRunningServices}}\nTo change the limit manually, edit services.json in project storage.\n\n{{listLines}}':
-    '已注册服务（{{count}}）\n最大并发服务数：{{maxRunningServices}}\n如需修改限制，请手动编辑项目存储中的 services.json。\n\n{{listLines}}',
-  'Unknown option: {{option}}': '未知选项：{{option}}',
+  "Manage persistent background services.": "管理常驻后台服务。",
+  "Tip: Recommended Alt+L to open the ask flow quickly. You can also type /service alert <name>.":
+    "提示：推荐使用 Alt+L 快速打开询问流程，也可以手动输入 /service alert <name>。",
+  "Tip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.":
+    "提示：按 Ctrl+Tab 切换到 Servers Log，再按一次可切回 Chat。",
+  "No services registered. Use /service register ... to add one.\nCurrent max running services: {{maxRunningServices}}":
+    "当前没有已注册服务。使用 /service register ... 添加。\n当前最大并发服务数：{{maxRunningServices}}",
+  "- {{runningStatus}} {{name}} | autoStart={{autoStart}} | pid={{pid}} | follow={{follow}} | notify={{notify}} | alert={{alert}} | cwd={{cwd}} | cmd={{command}}":
+    "- {{runningStatus}} {{name}} | 自动启动={{autoStart}} | pid={{pid}} | 跟随={{follow}} | 通知={{notify}} | 告警={{alert}} | cwd={{cwd}} | 命令={{command}}",
+  "Registered services ({{count}})\nMax running services: {{maxRunningServices}}\nTo change the limit manually, edit services.json in project storage.\n\n{{listLines}}":
+    "已注册服务（{{count}}）\n最大并发服务数：{{maxRunningServices}}\n如需修改限制，请手动编辑项目存储中的 services.json。\n\n{{listLines}}",
+  "Unknown option: {{option}}": "未知选项：{{option}}",
   'Service "{{name}}" registered and started.\nautoStart={{autoStart}}, watch={{watchPatterns}}':
     '服务 "{{name}}" 已注册并启动。\n自动启动={{autoStart}}，监控={{watchPatterns}}',
-  'Service name is required for /service {{action}}.':
-    '/service {{action}} 需要服务名。',
+  "Service name is required for /service {{action}}.":
+    "/service {{action}} 需要服务名。",
   'Service "{{name}}" started.': '服务 "{{name}}" 已启动。',
   'Service "{{name}}" stopped.': '服务 "{{name}}" 已停止。',
   'Service "{{name}}" restarted.': '服务 "{{name}}" 已重启。',
@@ -1894,23 +1801,23 @@ export default {
     '服务 "{{name}}" 的实时通知已开启。',
   'Service "{{name}}" realtime notifications muted.\nErrors are still buffered. Use /service alert {{name}} to inspect buffered logs.':
     '服务 "{{name}}" 的实时通知已静默。\n错误日志仍在缓冲中，可使用 /service alert {{name}} 查看缓冲日志。',
-  'Unknown option for log: {{option}}': 'log 子命令未知选项：{{option}}',
-  'Service {{name}} ({{runningStatus}}, pid={{pid}})\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}':
-    '服务 {{name}}（{{runningStatus}}，pid={{pid}}）\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}',
+  "Unknown option for log: {{option}}": "log 子命令未知选项：{{option}}",
+  "Service {{name}} ({{runningStatus}}, pid={{pid}})\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}":
+    "服务 {{name}}（{{runningStatus}}，pid={{pid}}）\nfollow={{followStatus}} notify={{notifyStatus}}\n\n{{logs}}",
   'No pending alert buffer for service "{{name}}".':
     '服务 "{{name}}" 当前没有待处理告警缓冲。',
-  'Service {{name}} has alerts. Choose the next action.\nStart line: {{startLine}}, buffered lines: {{bufferedLines}}, error lines: {{errorLines}}\nRecommended: press Alt+L to open ask flow quickly; command input is also supported.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
-    '服务 {{name}} 出现告警，请选择下一步。\n起始行：{{startLine}}，缓冲行数：{{bufferedLines}}，错误行数：{{errorLines}}\n推荐：按 Alt+L 快速打开询问流程；也支持直接输入命令。\n提示：按 Ctrl+Tab 切换到 Servers Log，再按一次切回 Chat。',
-  'Analyze logs only': '仅分析日志',
-  'Alert handling': '告警处置',
-  'Analyze logs without entering repair flow (equivalent: /service analyze {{name}} all)':
-    '仅分析日志，不进入修复流程（等价于：/service analyze {{name}} all）',
-  'Analyze then fix issue (Recommended)': '分析后并修复问题（推荐）',
-  'Analyze logs and continue to fix. You can run /service analyze {{name}} all first, then ask the model to directly repair in follow-up prompts.':
-    '先分析日志再继续修复。可先执行 /service analyze {{name}} all，再在后续提示中要求模型直接修复。',
-  'Handle later': '稍后处理',
-  'Do not process now; continue buffering subsequent logs in background.':
-    '暂不处理，继续在后台缓冲后续日志。',
+  "Service {{name}} has alerts. Choose the next action.\nStart line: {{startLine}}, buffered lines: {{bufferedLines}}, error lines: {{errorLines}}\nRecommended: press Alt+L to open ask flow quickly; command input is also supported.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.":
+    "服务 {{name}} 出现告警，请选择下一步。\n起始行：{{startLine}}，缓冲行数：{{bufferedLines}}，错误行数：{{errorLines}}\n推荐：按 Alt+L 快速打开询问流程；也支持直接输入命令。\n提示：按 Ctrl+Tab 切换到 Servers Log，再按一次切回 Chat。",
+  "Analyze logs only": "仅分析日志",
+  "Alert handling": "告警处置",
+  "Analyze logs without entering repair flow (equivalent: /service analyze {{name}} all)":
+    "仅分析日志，不进入修复流程（等价于：/service analyze {{name}} all）",
+  "Analyze then fix issue (Recommended)": "分析后并修复问题（推荐）",
+  "Analyze logs and continue to fix. You can run /service analyze {{name}} all first, then ask the model to directly repair in follow-up prompts.":
+    "先分析日志再继续修复。可先执行 /service analyze {{name}} all，再在后续提示中要求模型直接修复。",
+  "Handle later": "稍后处理",
+  "Do not process now; continue buffering subsequent logs in background.":
+    "暂不处理，继续在后台缓冲后续日志。",
   'No pending alert logs for service "{{name}}".':
     '服务 "{{name}}" 当前没有待处理告警日志。',
   'No logs available in selected mode ({{mode}}) for service "{{name}}".':
@@ -1919,8 +1826,8 @@ export default {
     '请分析以下服务 "{{name}}" 的日志。\n模式：{{mode}}。\n请给出：根因、置信度、即时缓解方案、下一步检查项。\n\n',
   'No log patterns configured for service "{{name}}".':
     '服务 "{{name}}" 尚未配置日志模式规则。',
-  '- [{{id}}] Pattern: `{{pattern}}` | Action: {{action}} | Description: {{description}}':
-    '- [{{id}}] 模式：`{{pattern}}` | 动作：{{action}} | 描述：{{description}}',
+  "- [{{id}}] Pattern: `{{pattern}}` | Action: {{action}} | Description: {{description}}":
+    "- [{{id}}] 模式：`{{pattern}}` | 动作：{{action}} | 描述：{{description}}",
   'Log patterns for service "{{name}}":\n{{listText}}':
     '服务 "{{name}}" 的日志模式：\n{{listText}}',
   'To add log patterns for service "{{name}}", LM will use the request_log_pattern tool.':
@@ -1930,186 +1837,105 @@ export default {
   'Pattern rule "{{ruleId}}" not found in service "{{name}}".':
     '服务 "{{name}}" 中未找到规则 "{{ruleId}}"。',
   'Sent input to service "{{name}}".': '已向服务 "{{name}}" 发送输入。',
-  'Unknown subcommand: {{subcommand}}\n\n{{helpText}}':
-    '未知子命令：{{subcommand}}\n\n{{helpText}}',
-  '[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.':
-    '[service/{{name}}] 检测到错误信号：{{sourceLine}}\n日志已从此处开始缓冲。推荐按 Alt+L 快速打开询问流程；也可使用 /service alert {{name}} 查看并决定是否发送日志给 LM。\n随后可使用 /service analyze {{name}} all 或 /service analyze {{name}} errors。\n提示：按 Ctrl+Tab 切换到 Servers Log，再按一次切回 Chat。',
+  "Unknown subcommand: {{subcommand}}\n\n{{helpText}}":
+    "未知子命令：{{subcommand}}\n\n{{helpText}}",
+  "[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.":
+    "[service/{{name}}] 检测到错误信号：{{sourceLine}}\n日志已从此处开始缓冲。推荐按 Alt+L 快速打开询问流程；也可使用 /service alert {{name}} 查看并决定是否发送日志给 LM。\n随后可使用 /service analyze {{name}} all 或 /service analyze {{name}} errors。\n提示：按 Ctrl+Tab 切换到 Servers Log，再按一次切回 Chat。",
 
   // ============================================================================
   // Ask User Question Tool
   // ============================================================================
-  'Please answer the following question(s):': '请回答以下问题：',
-  'Cannot ask user questions in non-interactive mode. Please run in interactive mode to use this tool.':
-    '无法在非交互模式下询问用户问题。请在交互模式下运行以使用此工具。',
-  'User declined to answer the questions.': '用户拒绝回答问题。',
-  'User has provided the following answers:': '用户提供了以下答案：',
-  'Failed to process user answers:': '处理用户答案失败：',
-  'Type something...': '输入内容...',
-  Submit: '提交',
-  'Submit answers': '提交答案',
-  Cancel: '取消',
-  'Your answers:': '您的答案：',
-  '(not answered)': '(未回答)',
-  'Ready to submit your answers?': '准备好提交您的答案了吗？',
-  '↑/↓: Navigate | ←/→: Switch tabs | Enter: Select':
-    '↑/↓: 导航 | ←/→: 切换标签页 | Enter: 选择',
-  '↑/↓: Navigate | ←/→: Switch tabs | Space/Enter: Toggle | Esc: Cancel':
-    '↑/↓: 导航 | ←/→: 切换标签页 | Space/Enter: 切换 | Esc: 取消',
-  '↑/↓: Navigate | Space/Enter: Toggle | Esc: Cancel':
-    '↑/↓: 导航 | Space/Enter: 切换 | Esc: 取消',
-  '↑/↓: Navigate | Enter: Select | Esc: Cancel':
-    '↑/↓: 导航 | Enter: 选择 | Esc: 取消',
-<<<<<<< HEAD
-      '% used': '% 已用',
-  '% context used': '% 上下文已用',
+  "Please answer the following question(s):": "请回答以下问题：",
+  "Cannot ask user questions in non-interactive mode. Please run in interactive mode to use this tool.":
+    "无法在非交互模式下询问用户问题。请在交互模式下运行以使用此工具。",
+  "User declined to answer the questions.": "用户拒绝回答问题。",
+  "User has provided the following answers:": "用户提供了以下答案：",
+  "Failed to process user answers:": "处理用户答案失败：",
+  "Type something...": "输入内容...",
+  Submit: "提交",
+  "Submit answers": "提交答案",
+  Cancel: "取消",
+  "Your answers:": "您的答案：",
+  "(not answered)": "(未回答)",
+  "Ready to submit your answers?": "准备好提交您的答案了吗？",
+  "↑/↓: Navigate | ←/→: Switch tabs | Enter: Select":
+    "↑/↓: 导航 | ←/→: 切换标签页 | Enter: 选择",
+  "↑/↓: Navigate | ←/→: Switch tabs | Space/Enter: Toggle | Esc: Cancel":
+    "↑/↓: 导航 | ←/→: 切换标签页 | Space/Enter: 切换 | Esc: 取消",
+  "↑/↓: Navigate | Space/Enter: Toggle | Esc: Cancel":
+    "↑/↓: 导航 | Space/Enter: 切换 | Esc: 取消",
+  "↑/↓: Navigate | Enter: Select | Esc: Cancel":
+    "↑/↓: 导航 | Enter: 选择 | Esc: 取消",
+  "% used": "% 已用",
+  "% context used": "% 上下文已用",
 
   // ============================================================================
   // 核心工具输出 i18n (service_manage 工具)
   // ============================================================================
-  'Manage service action: {{action}}': '管理服务操作: {{action}}',
-  'No services registered.': '没有已注册的服务。',
-  'Service {{name}} registered successfully.': '服务 {{name}} 注册成功。',
-  'Service {{name}} start initiated.': '服务 {{name}} 启动中。',
-  'Service {{name}} stopped.': '服务 {{name}} 已停止。',
-  'Service {{name}} restarted.': '服务 {{name}} 已重启。',
-  'Service {{name}} removed.': '服务 {{name}} 已移除。',
-  'Now following logs for {{name}} in UI.': '正在 UI 中跟踪 {{name}} 的日志。',
-  'Unfollowed logs for {{name}}.': '已取消跟踪 {{name}} 的日志。',
-  '[No logs for {{name}}]': '[{{name}} 无日志]',
-  'No pending alert for service {{name}}.': '服务 {{name}} 没有待处理的告警。',
-  'Alert detected for {{name}}. Please use analyze action to read alert logs.': '检测到 {{name}} 的告警。请使用 analyze 操作查看告警日志。',
-  'No pending alerts for {{name}}.': '{{name}} 没有待处理的告警。',
-  'Active Alert Logs for {{name}} (mode: {{mode}}):': '{{name}} 的活跃告警日志 (模式: {{mode}}):',
-  'Sent input to {{name}}. Consider checking logs after a brief moment.': '已向 {{name}} 发送输入。请稍后查看日志。',
-  'Unknown action: {{action}}': '未知操作: {{action}}',
-  'Error executing action {{action}}: {{error}}': '执行操作 {{action}} 出错: {{error}}',
-  'name and command required': '需要名称和命令',
-  'name required': '需要名称',
-  'name and input required': '需要名称和输入',
+  "Manage service action: {{action}}": "管理服务操作: {{action}}",
+  "No services registered.": "没有已注册的服务。",
+  "Service {{name}} registered successfully.": "服务 {{name}} 注册成功。",
+  "Service {{name}} start initiated.": "服务 {{name}} 启动中。",
+  "Service {{name}} stopped.": "服务 {{name}} 已停止。",
+  "Service {{name}} restarted.": "服务 {{name}} 已重启。",
+  "Service {{name}} removed.": "服务 {{name}} 已移除。",
+  "Now following logs for {{name}} in UI.": "正在 UI 中跟踪 {{name}} 的日志。",
+  "Unfollowed logs for {{name}}.": "已取消跟踪 {{name}} 的日志。",
+  "[No logs for {{name}}]": "[{{name}} 无日志]",
+  "No pending alert for service {{name}}.": "服务 {{name}} 没有待处理的告警。",
+  "Alert detected for {{name}}. Please use analyze action to read alert logs.":
+    "检测到 {{name}} 的告警。请使用 analyze 操作查看告警日志。",
+  "No pending alerts for {{name}}.": "{{name}} 没有待处理的告警。",
+  "Active Alert Logs for {{name}} (mode: {{mode}}):":
+    "{{name}} 的活跃告警日志 (模式: {{mode}}):",
+  "Sent input to {{name}}. Consider checking logs after a brief moment.":
+    "已向 {{name}} 发送输入。请稍后查看日志。",
+  "Unknown action: {{action}}": "未知操作: {{action}}",
+  "Error executing action {{action}}: {{error}}":
+    "执行操作 {{action}} 出错: {{error}}",
+  "name and command required": "需要名称和命令",
+  "name required": "需要名称",
+  "name and input required": "需要名称和输入",
 
   // ============================================================================
   // 日志过滤规则 (suppress/unsuppress/list-rules)
   // ============================================================================
-  'name and pattern required': '需要名称和匹配模式',
-  'Added suppress rule for {{name}}: {{pattern}}': '已为 {{name}} 添加屏蔽规则: {{pattern}}',
-  'name and ruleId required': '需要名称和规则ID',
-  'Removed suppress rule {{ruleId}} for {{name}}.': '已移除 {{name}} 的屏蔽规则 {{ruleId}}。',
-  'Rule {{ruleId}} not found for {{name}}.': '未找到 {{name}} 的规则 {{ruleId}}。',
-  'No log pattern rules for {{name}}.': '{{name}} 没有日志过滤规则。',
-  'Log pattern rules for {{name}}:': '{{name}} 的日志过滤规则:',
+  "name and pattern required": "需要名称和匹配模式",
+  "Added suppress rule for {{name}}: {{pattern}}":
+    "已为 {{name}} 添加屏蔽规则: {{pattern}}",
+  "name and ruleId required": "需要名称和规则ID",
+  "Removed suppress rule {{ruleId}} for {{name}}.":
+    "已移除 {{name}} 的屏蔽规则 {{ruleId}}。",
+  "Rule {{ruleId}} not found for {{name}}.":
+    "未找到 {{name}} 的规则 {{ruleId}}。",
+  "No log pattern rules for {{name}}.": "{{name}} 没有日志过滤规则。",
+  "Log pattern rules for {{name}}:": "{{name}} 的日志过滤规则:",
 
   // ============================================================================
   // 终端模式切换 (Ctrl+Shift+L)
   // ============================================================================
-  'Switched to service log mode': '已切换到服务日志模式',
-  'Switched to chat mode': '已切换到聊天模式',
-  'Toggle service log mode': '切换服务日志模式',
-  'Service Logs': '服务日志',
-  'Chat': '聊天',
-  'No services running. Register a service first.': '没有运行中的服务。请先注册一个服务。',
+  "Switched to service log mode": "已切换到服务日志模式",
+  "Switched to chat mode": "已切换到聊天模式",
+  "Toggle service log mode": "切换服务日志模式",
+  "Service Logs": "服务日志",
+  Chat: "聊天",
+  "No services running. Register a service first.":
+    "没有运行中的服务。请先注册一个服务。",
 
   // ============================================================================
   // Initialization / WebInitDisplay
   // ============================================================================
-  'TRAM Configuration': 'TRAM 配置',
-  'Esc to cancel': 'Esc 取消',
-  'Configuration page': '配置页面',
-  'Browser opened. Waiting for configuration...': '浏览器已打开，等待配置...',
-  'Starting server...': '正在启动服务器...',
-  'Or paste JSON configuration and press Enter to save': '或粘贴 JSON 配置并按 Enter 保存',
-  'Esc to clear input': 'Esc 清除输入',
-  'Saving configuration...': '正在保存配置...',
-  'Configuration saved successfully!': '配置保存成功！',
-  'Unknown error': '未知错误',
-  'Failed to start configuration server': '配置服务器启动失败',
-  'Invalid JSON': '无效的 JSON',
-=======
-
-  // ============================================================================
-  // Commands - Auth
-  // ============================================================================
-  'Configure Qwen authentication information with Qwen-OAuth or Alibaba Cloud Coding Plan':
-    '使用 Qwen OAuth 或阿里云百炼 Coding Plan 配置 Qwen 认证信息',
-  'Authenticate using Qwen OAuth': '使用 Qwen OAuth 进行认证',
-  'Authenticate using Alibaba Cloud Coding Plan':
-    '使用阿里云百炼 Coding Plan 进行认证',
-  'Region for Coding Plan (china/global)': 'Coding Plan 区域 (china/global)',
-  'API key for Coding Plan': 'Coding Plan 的 API 密钥',
-  'Show current authentication status': '显示当前认证状态',
-  'Authentication completed successfully.': '认证完成。',
-  'Starting Qwen OAuth authentication...': '正在启动 Qwen OAuth 认证...',
-  'Successfully authenticated with Qwen OAuth.': '已成功通过 Qwen OAuth 认证。',
-  'Failed to authenticate with Qwen OAuth: {{error}}':
-    'Qwen OAuth 认证失败：{{error}}',
-  'Processing Alibaba Cloud Coding Plan authentication...':
-    '正在处理阿里云百炼 Coding Plan 认证...',
-  'Successfully authenticated with Alibaba Cloud Coding Plan.':
-    '已成功通过阿里云百炼 Coding Plan 认证。',
-  'Failed to authenticate with Coding Plan: {{error}}':
-    'Coding Plan 认证失败：{{error}}',
-  '中国 (China)': '中国 (China)',
-  '阿里云百炼 (aliyun.com)': '阿里云百炼 (aliyun.com)',
-  Global: '全球',
-  'Alibaba Cloud (alibabacloud.com)': 'Alibaba Cloud (alibabacloud.com)',
-  'Select region for Coding Plan:': '选择 Coding Plan 区域：',
-  'Enter your Coding Plan API key: ': '请输入您的 Coding Plan API 密钥：',
-  'Select authentication method:': '选择认证方式：',
-  '\n=== Authentication Status ===\n': '\n=== 认证状态 ===\n',
-  '⚠️  No authentication method configured.\n': '⚠️  未配置认证方式。\n',
-  'Run one of the following commands to get started:\n':
-    '运行以下命令之一开始配置：\n',
-  '  qwen auth qwen-oauth     - Authenticate with Qwen OAuth (discontinued)':
-    '  qwen auth qwen-oauth     - 使用 Qwen OAuth 登录（已停用）',
-  '  qwen auth coding-plan      - Authenticate with Alibaba Cloud Coding Plan\n':
-    '  qwen auth coding-plan      - 使用阿里云百炼 Coding Plan 认证\n',
-  'Or simply run:': '或者直接运行：',
-  '  qwen auth                - Interactive authentication setup\n':
-    '  qwen auth                - 交互式认证配置\n',
-  '✓ Authentication Method: Qwen OAuth': '✓ 认证方式：Qwen OAuth',
-  '  Type: Free tier (discontinued 2026-04-15)':
-    '  类型：免费额度（2026-04-15 已停用）',
-  '  Limit: No longer available': '  限额：已不可用',
-  'Qwen OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan, OpenRouter, Fireworks AI, or another provider.':
-    'Qwen OAuth 免费额度已于 2026-04-15 停用。请运行 /auth 切换到 Coding Plan、OpenRouter、Fireworks AI 或其他服务商。',
-  '  Models: Qwen latest models\n': '  模型：Qwen 最新模型\n',
-  '✓ Authentication Method: Alibaba Cloud Coding Plan':
-    '✓ 认证方式：阿里云百炼 Coding Plan',
-  '中国 (China) - 阿里云百炼': '中国 (China) - 阿里云百炼',
-  'Global - Alibaba Cloud': '全球 - Alibaba Cloud',
-  '  Region: {{region}}': '  区域：{{region}}',
-  '  Current Model: {{model}}': '  当前模型：{{model}}',
-  '  Config Version: {{version}}': '  配置版本：{{version}}',
-  '  Status: API key configured\n': '  状态：API 密钥已配置\n',
-  '⚠️  Authentication Method: Alibaba Cloud Coding Plan (Incomplete)':
-    '⚠️  认证方式：阿里云百炼 Coding Plan（不完整）',
-  '  Issue: API key not found in environment or settings\n':
-    '  问题：在环境变量或设置中未找到 API 密钥\n',
-  '  Run `qwen auth coding-plan` to re-configure.\n':
-    '  运行 `qwen auth coding-plan` 重新配置。\n',
-  '✓ Authentication Method: {{type}}': '✓ 认证方式：{{type}}',
-  '  Status: Configured\n': '  状态：已配置\n',
-  'Failed to check authentication status: {{error}}':
-    '检查认证状态失败：{{error}}',
-  'Select an option:': '请选择：',
-  'Raw mode not available. Please run in an interactive terminal.':
-    '原始模式不可用。请在交互式终端中运行。',
-  '(Use ↑ ↓ arrows to navigate, Enter to select, Ctrl+C to exit)\n':
-    '(使用 ↑ ↓ 箭头导航，Enter 选择，Ctrl+C 退出)\n',
-  compact: '紧凑',
-  'Hide tool output and thinking for a cleaner view (toggle with Ctrl+O).':
-    '紧凑模式下隐藏工具输出和思考过程，界面更简洁（Ctrl+O 切换）。',
-  'Press Ctrl+O to show full tool output': '按 Ctrl+O 查看详细工具调用结果',
-
-  'Switch to plan mode or exit plan mode': '切换到计划模式或退出计划模式',
-  'Exited plan mode. Previous approval mode restored.':
-    '已退出计划模式，已恢复之前的审批模式。',
-  'Enabled plan mode. The agent will analyze and plan without executing tools.':
-    '启用计划模式。智能体将只分析和规划，而不执行工具。',
-  'Already in plan mode. Use "/plan exit" to exit plan mode.':
-    '已处于计划模式。使用 "/plan exit" 退出计划模式。',
-  'Not in plan mode. Use "/plan" to enter plan mode first.':
-    '未处于计划模式。请先使用 "/plan" 进入计划模式。',
-
-  "Set up Qwen Code's status line UI": '配置 Qwen Code 的状态栏',
->>>>>>> v0.14.5
+  "TRAM Configuration": "TRAM 配置",
+  "Esc to cancel": "Esc 取消",
+  "Configuration page": "配置页面",
+  "Browser opened. Waiting for configuration...": "浏览器已打开，等待配置...",
+  "Starting server...": "正在启动服务器...",
+  "Or paste JSON configuration and press Enter to save":
+    "或粘贴 JSON 配置并按 Enter 保存",
+  "Esc to clear input": "Esc 清除输入",
+  "Saving configuration...": "正在保存配置...",
+  "Configuration saved successfully!": "配置保存成功！",
+  "Unknown error": "未知错误",
+  "Failed to start configuration server": "配置服务器启动失败",
+  "Invalid JSON": "无效的 JSON",
 };

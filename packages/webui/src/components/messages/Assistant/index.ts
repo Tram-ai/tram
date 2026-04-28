@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { AssistantMessage } from './AssistantMessage.js';
+export { AssistantMessage } from "./AssistantMessage.js";
 export type {
   AssistantMessageProps,
   AssistantMessageStatus,
-} from './AssistantMessage.js';
+} from "./AssistantMessage.js";

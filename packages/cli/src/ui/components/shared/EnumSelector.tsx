@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { Colors } from '../../colors.js';
-import type { SettingEnumOption } from '../../../config/settingsSchema.js';
+import { useState, useEffect } from "react";
+import type React from "react";
+import { Box, Text } from "ink";
+import { Colors } from "../../colors.js";
+import type { SettingEnumOption } from "../../../config/settingsSchema.js";
 
 interface EnumSelectorProps {
   options: readonly SettingEnumOption[];
@@ -64,7 +64,7 @@ export function EnumSelector({
       <Text
         color={isActive && canScrollLeft ? Colors.AccentGreen : Colors.Gray}
       >
-        {canScrollLeft ? '←' : ' '}
+        {canScrollLeft ? "←" : " "}
       </Text>
       <Text> </Text>
       <Text
@@ -77,7 +77,7 @@ export function EnumSelector({
       <Text
         color={isActive && canScrollRight ? Colors.AccentGreen : Colors.Gray}
       >
-        {canScrollRight ? '→' : ' '}
+        {canScrollRight ? "→" : " "}
       </Text>
     </Box>
   );

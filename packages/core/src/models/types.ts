@@ -8,8 +8,8 @@ import type {
   AuthType,
   ContentGeneratorConfig,
   InputModalities,
-} from '../core/contentGenerator.js';
-import type { ConfigSources } from '../utils/configResolver.js';
+} from "../core/contentGenerator.js";
+import type { ConfigSources } from "../utils/configResolver.js";
 
 /**
  * Model capabilities configuration
@@ -27,17 +27,17 @@ export interface ModelCapabilities {
  */
 export type ModelGenerationConfig = Pick<
   ContentGeneratorConfig,
-  | 'samplingParams'
-  | 'timeout'
-  | 'maxRetries'
-  | 'retryErrorCodes'
-  | 'enableCacheControl'
-  | 'schemaCompliance'
-  | 'reasoning'
-  | 'customHeaders'
-  | 'extra_body'
-  | 'contextWindowSize'
-  | 'modalities'
+  | "samplingParams"
+  | "timeout"
+  | "maxRetries"
+  | "retryErrorCodes"
+  | "enableCacheControl"
+  | "schemaCompliance"
+  | "reasoning"
+  | "customHeaders"
+  | "extra_body"
+  | "contextWindowSize"
+  | "modalities"
 >;
 
 /**

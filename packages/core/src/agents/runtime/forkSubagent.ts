@@ -1,23 +1,23 @@
-import type { Content } from '@google/genai';
+import type { Content } from "@google/genai";
 
-export const FORK_SUBAGENT_TYPE = 'fork';
+export const FORK_SUBAGENT_TYPE = "fork";
 
-export const FORK_BOILERPLATE_TAG = 'fork-boilerplate';
-export const FORK_DIRECTIVE_PREFIX = 'Directive: ';
+export const FORK_BOILERPLATE_TAG = "fork-boilerplate";
+export const FORK_DIRECTIVE_PREFIX = "Directive: ";
 
 export const FORK_AGENT = {
   name: FORK_SUBAGENT_TYPE,
   description:
-    'Implicit fork — inherits full conversation context. Not selectable via subagent_type; triggered by omitting subagent_type.',
-  tools: ['*'],
+    "Implicit fork — inherits full conversation context. Not selectable via subagent_type; triggered by omitting subagent_type.",
+  tools: ["*"],
   systemPrompt:
-    'You are a forked worker process. Follow the directive in the conversation history. Execute tasks directly using available tools. Do not spawn sub-agents.',
-  level: 'session' as const,
+    "You are a forked worker process. Follow the directive in the conversation history. Execute tasks directly using available tools. Do not spawn sub-agents.",
+  level: "session" as const,
 };
 
 export function isInForkChild(messages: Content[]): boolean {
   return messages.some((m) => {
-    if (m.role !== 'user') return false;
+    if (m.role !== "user") return false;
     return m.parts?.some(
       (part) => part.text && part.text.includes(`<${FORK_BOILERPLATE_TAG}>`),
     );
@@ -25,7 +25,7 @@ export function isInForkChild(messages: Content[]): boolean {
 }
 
 export const FORK_PLACEHOLDER_RESULT =
-  'Fork started — processing in background';
+  "Fork started — processing in background";
 
 /**
  * Build extra history messages for a forked subagent.
@@ -74,7 +74,7 @@ export function buildForkedMessages(
   }));
 
   const toolResultMessage: Content = {
-    role: 'user',
+    role: "user",
     parts: [
       ...toolResultParts,
       {

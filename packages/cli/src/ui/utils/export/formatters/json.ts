@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ExportSessionData } from '../types.js';
+import type { ExportSessionData } from "../types.js";
 
 /**
  * Converts ExportSessionData to JSON format.

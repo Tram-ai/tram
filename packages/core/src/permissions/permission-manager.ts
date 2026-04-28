@@ -10,12 +10,12 @@ import {
   matchesRule,
   resolveToolName,
   splitCompoundCommand,
-} from './rule-parser.js';
-import type { PathMatchContext } from './rule-parser.js';
-import { extractShellOperations } from './shell-semantics.js';
-import type { ShellOperation } from './shell-semantics.js';
-import { isShellCommandReadOnlyAST } from '../utils/shellAstParser.js';
-import { detectCommandSubstitution } from '../utils/shell-utils.js';
+} from "./rule-parser.js";
+import type { PathMatchContext } from "./rule-parser.js";
+import { extractShellOperations } from "./shell-semantics.js";
+import type { ShellOperation } from "./shell-semantics.js";
+import { isShellCommandReadOnlyAST } from "../utils/shellAstParser.js";
+import { detectCommandSubstitution } from "../utils/shell-utils.js";
 import type {
   PermissionCheckContext,
   PermissionDecision,
@@ -24,7 +24,7 @@ import type {
   RuleType,
   RuleWithSource,
   RuleScope,
-} from './types.js';
+} from "./types.js";
 
 /**
  * Numeric priority for each PermissionDecision.
@@ -174,8 +174,8 @@ export class PermissionManager {
     // This ensures 'default' is never returned for shell commands - they always get
     // a concrete permission (deny/ask/allow) based on the command's readonly status.
     if (
-      decision === 'default' &&
-      toolName === 'run_shell_command' &&
+      decision === "default" &&
+      toolName === "run_shell_command" &&
       command !== undefined
     ) {
       return this.resolveDefaultPermission(command);
@@ -223,27 +223,27 @@ export class PermissionManager {
         ...this.sessionRules.deny,
         ...this.persistentRules.deny,
       ]) {
-        if (matchesRule(rule, ...matchArgs)) return 'deny';
+        if (matchesRule(rule, ...matchArgs)) return "deny";
       }
       // Priority 2: ask rules
       for (const rule of [
         ...this.sessionRules.ask,
         ...this.persistentRules.ask,
       ]) {
-        if (matchesRule(rule, ...matchArgs)) return 'ask';
+        if (matchesRule(rule, ...matchArgs)) return "ask";
       }
       // Priority 3: allow rules
       for (const rule of [
         ...this.sessionRules.allow,
         ...this.persistentRules.allow,
       ]) {
-        if (matchesRule(rule, ...matchArgs)) return 'allow';
+        if (matchesRule(rule, ...matchArgs)) return "allow";
       }
-      return 'default';
+      return "default";
     })();
 
     // `deny` is the most restrictive result — no further checks needed.
-    if (baseDecision === 'deny') return 'deny';
+    if (baseDecision === "deny") return "deny";
 
     // For shell commands: evaluate virtual file/network operations extracted
     // from the command string against Read/Edit/Write/WebFetch/ListFiles rules.
@@ -253,14 +253,14 @@ export class PermissionManager {
     // must never downgrade an explicit 'allow' decision from a Bash rule.
     // Example: `git status` has no file ops; an allow rule for `Bash(git *)`
     // should return 'allow', not be downgraded to 'default'.
-    if (toolName === 'run_shell_command' && command !== undefined) {
+    if (toolName === "run_shell_command" && command !== undefined) {
       const cwd = pathCtx?.cwd ?? process.cwd();
       const virtualDecision = this.evaluateShellVirtualOps(
         extractShellOperations(command, cwd),
         pathCtx,
       );
       if (
-        virtualDecision !== 'default' &&
+        virtualDecision !== "default" &&
         DECISION_PRIORITY[virtualDecision] > DECISION_PRIORITY[baseDecision]
       ) {
         return virtualDecision;
@@ -283,9 +283,9 @@ export class PermissionManager {
     ops: ShellOperation[],
     _pathCtx: PathMatchContext | undefined,
   ): PermissionDecision {
-    if (ops.length === 0) return 'default';
+    if (ops.length === 0) return "default";
 
-    let worst: PermissionDecision = 'default';
+    let worst: PermissionDecision = "default";
 
     for (const op of ops) {
       // Evaluate the virtual operation using the standard rule-matching path.
@@ -299,7 +299,7 @@ export class PermissionManager {
 
       if (DECISION_PRIORITY[opDecision] > DECISION_PRIORITY[worst]) {
         worst = opDecision;
-        if (worst === 'deny') return 'deny'; // short-circuit
+        if (worst === "deny") return "deny"; // short-circuit
       }
     }
 
@@ -328,14 +328,14 @@ export class PermissionManager {
     subCommands: string[],
   ): Promise<PermissionDecision> {
     // Type for resolved decisions (excludes 'default' since it's resolved)
-    type ResolvedDecision = 'allow' | 'ask' | 'deny';
+    type ResolvedDecision = "allow" | "ask" | "deny";
     const PRIORITY: Record<ResolvedDecision, number> = {
       deny: 3,
       ask: 2,
       allow: 0,
     };
 
-    let mostRestrictive: ResolvedDecision = 'allow';
+    let mostRestrictive: ResolvedDecision = "allow";
 
     for (const subCmd of subCommands) {
       const subCtx: PermissionCheckContext = {
@@ -347,7 +347,7 @@ export class PermissionManager {
       // Resolve 'default' to actual permission using AST analysis
       // (same logic as ShellToolInvocation.getDefaultPermission)
       const decision: ResolvedDecision =
-        rawDecision === 'default'
+        rawDecision === "default"
           ? await this.resolveDefaultPermission(subCmd)
           : (rawDecision as ResolvedDecision);
 
@@ -356,8 +356,8 @@ export class PermissionManager {
       }
 
       // Short-circuit: deny is the most restrictive possible
-      if (mostRestrictive === 'deny') {
-        return 'deny';
+      if (mostRestrictive === "deny") {
+        return "deny";
       }
     }
 
@@ -373,23 +373,23 @@ export class PermissionManager {
    */
   private async resolveDefaultPermission(
     command: string,
-  ): Promise<'allow' | 'ask' | 'deny'> {
+  ): Promise<"allow" | "ask" | "deny"> {
     // Security: command substitution ($(), ``, <(), >()) → deny
     if (detectCommandSubstitution(command)) {
-      return 'deny';
+      return "deny";
     }
 
     // AST-based read-only detection
     try {
       const isReadOnly = await isShellCommandReadOnlyAST(command);
       if (isReadOnly) {
-        return 'allow';
+        return "allow";
       }
     } catch {
       // AST check failed, fall back to 'ask'
     }
 
-    return 'ask';
+    return "ask";
   }
 
   // ---------------------------------------------------------------------------
@@ -401,21 +401,21 @@ export class PermissionManager {
    * Tools not in this set (MCP, Skill, Agent, etc.) bypass the check.
    */
   private static readonly CORE_TOOLS = new Set([
-    'read_file',
-    'write_file',
-    'edit',
-    'glob',
-    'grep_search',
-    'run_shell_command',
-    'list_directory',
-    'web_fetch',
-    'web_search',
-    'todo_write',
-    'save_memory',
-    'lsp',
-    'cron_create',
-    'cron_list',
-    'cron_delete',
+    "read_file",
+    "write_file",
+    "edit",
+    "glob",
+    "grep_search",
+    "run_shell_command",
+    "list_directory",
+    "web_fetch",
+    "web_search",
+    "todo_write",
+    "save_memory",
+    "lsp",
+    "cron_create",
+    "cron_list",
+    "cron_delete",
   ]);
 
   /**
@@ -443,7 +443,7 @@ export class PermissionManager {
     // Non-core tools bypass coreTools allowlist check
     if (!this.isCoreTool(canonicalName)) {
       const decision = await this.evaluate({ toolName: canonicalName });
-      return decision !== 'deny';
+      return decision !== "deny";
     }
 
     // Core tools: if a coreTools allowlist is active, only explicitly listed
@@ -458,7 +458,7 @@ export class PermissionManager {
     // evaluate({ toolName }) without a command will only match rules that have
     // no specifier, which is the correct registry-level check.
     const decision = await this.evaluate({ toolName: canonicalName });
-    return decision !== 'deny';
+    return decision !== "deny";
   }
 
   /**
@@ -510,7 +510,7 @@ export class PermissionManager {
    */
   async isCommandAllowed(command: string): Promise<PermissionDecision> {
     return this.evaluate({
-      toolName: 'run_shell_command',
+      toolName: "run_shell_command",
       command,
     });
   }
@@ -543,7 +543,7 @@ export class PermissionManager {
   hasRelevantRules(ctx: PermissionCheckContext): boolean {
     const { toolName, command, filePath, domain, specifier } = ctx;
 
-    if (ctx.toolName === 'run_shell_command' && command !== undefined) {
+    if (ctx.toolName === "run_shell_command" && command !== undefined) {
       const subCommands = splitCompoundCommand(command);
       if (subCommands.length > 1) {
         return subCommands.some((subCmd) =>
@@ -584,7 +584,7 @@ export class PermissionManager {
     // extracted from the command has a relevant rule. This ensures the PM is
     // consulted (and the confirmation dialog shown) when Read/Edit/etc. rules
     // would match equivalent shell commands.
-    if (ctx.toolName === 'run_shell_command' && ctx.command !== undefined) {
+    if (ctx.toolName === "run_shell_command" && ctx.command !== undefined) {
       const cwd = pathCtx?.cwd ?? process.cwd();
       const ops = extractShellOperations(ctx.command, cwd);
       if (
@@ -619,7 +619,7 @@ export class PermissionManager {
   hasMatchingAskRule(ctx: PermissionCheckContext): boolean {
     const { toolName, command, filePath, domain, specifier } = ctx;
 
-    if (ctx.toolName === 'run_shell_command' && command !== undefined) {
+    if (ctx.toolName === "run_shell_command" && command !== undefined) {
       const subCommands = splitCompoundCommand(command);
       if (subCommands.length > 1) {
         return subCommands.some((subCmd) =>
@@ -651,7 +651,7 @@ export class PermissionManager {
       return true;
     }
 
-    if (ctx.toolName === 'run_shell_command' && ctx.command !== undefined) {
+    if (ctx.toolName === "run_shell_command" && ctx.command !== undefined) {
       const cwd = pathCtx?.cwd ?? process.cwd();
       const ops = extractShellOperations(ctx.command, cwd);
       return ops.some((op) => {
@@ -753,7 +753,7 @@ export class PermissionManager {
    * determine the actual behavior (ask vs allow).
    */
   getDefaultMode(): string {
-    return this.config.getApprovalMode?.() ?? 'default';
+    return this.config.getApprovalMode?.() ?? "default";
   }
 
   /**
@@ -793,12 +793,12 @@ export class PermissionManager {
       }
     };
 
-    addRules(this.sessionRules.deny, 'deny', 'session');
-    addRules(this.persistentRules.deny, 'deny', 'user');
-    addRules(this.sessionRules.ask, 'ask', 'session');
-    addRules(this.persistentRules.ask, 'ask', 'user');
-    addRules(this.sessionRules.allow, 'allow', 'session');
-    addRules(this.persistentRules.allow, 'allow', 'user');
+    addRules(this.sessionRules.deny, "deny", "session");
+    addRules(this.persistentRules.deny, "deny", "user");
+    addRules(this.sessionRules.ask, "ask", "session");
+    addRules(this.persistentRules.ask, "ask", "user");
+    addRules(this.sessionRules.allow, "allow", "session");
+    addRules(this.persistentRules.allow, "allow", "user");
 
     return result;
   }

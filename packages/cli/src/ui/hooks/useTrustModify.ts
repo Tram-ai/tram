@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
-import * as process from 'node:process';
+import { useState, useCallback } from "react";
+import * as process from "node:process";
 import {
   loadTrustedFolders,
   TrustLevel,
   isWorkspaceTrusted,
-} from '../../config/trustedFolders.js';
-import { useSettings } from '../contexts/SettingsContext.js';
+} from "../../config/trustedFolders.js";
+import { useSettings } from "../contexts/SettingsContext.js";
 
-import { MessageType } from '../types.js';
-import { type UseHistoryManagerReturn } from './useHistoryManager.js';
-import type { LoadedSettings } from '../../config/settings.js';
+import { MessageType } from "../types.js";
+import { type UseHistoryManagerReturn } from "./useHistoryManager.js";
+import type { LoadedSettings } from "../../config/settings.js";
 
 interface TrustState {
   currentTrustLevel: TrustLevel | undefined;
@@ -37,14 +37,14 @@ function getInitialTrustState(
 
   return {
     currentTrustLevel: explicitTrustLevel,
-    isInheritedTrustFromParent: !!(source === 'file' && isInheritedTrust),
-    isInheritedTrustFromIde: !!(source === 'ide' && isInheritedTrust),
+    isInheritedTrustFromParent: !!(source === "file" && isInheritedTrust),
+    isInheritedTrustFromIde: !!(source === "ide" && isInheritedTrust),
   };
 }
 
 export const useTrustModify = (
   onExit: () => void,
-  addItem: UseHistoryManagerReturn['addItem'],
+  addItem: UseHistoryManagerReturn["addItem"],
 ) => {
   const settings = useSettings();
   const cwd = process.cwd();
@@ -82,10 +82,10 @@ export const useTrustModify = (
 
       if (trustLevel === TrustLevel.DO_NOT_TRUST && isTrusted) {
         let message =
-          'Note: This folder is still trusted because the connected IDE workspace is trusted.';
-        if (source === 'file') {
+          "Note: This folder is still trusted because the connected IDE workspace is trusted.";
+        if (source === "file") {
           message =
-            'Note: This folder is still trusted because a parent folder is trusted.';
+            "Note: This folder is still trusted because a parent folder is trusted.";
         }
         addItem(
           {

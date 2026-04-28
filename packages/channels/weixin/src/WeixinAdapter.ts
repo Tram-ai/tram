@@ -1,26 +1,26 @@
 /**
- * WeChat channel adapter for Qwen Code.
+ * WeChat channel adapter for TRAM.
  * Extends ChannelBase with WeChat iLink Bot API integration.
  */
 
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { randomUUID } from 'node:crypto';
-import { basename, join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { ChannelBase } from '@qwen-code/channel-base';
+import { mkdirSync, writeFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
+import { basename, join } from "node:path";
+import { tmpdir } from "node:os";
+import { ChannelBase } from "@tram-ai/channel-base";
 import type {
   ChannelConfig,
   ChannelBaseOptions,
   Envelope,
   AcpBridge,
-} from '@qwen-code/channel-base';
-import { loadAccount, DEFAULT_BASE_URL } from './accounts.js';
-import { startPollLoop, getContextToken } from './monitor.js';
-import type { CdnRef, FileCdnRef } from './monitor.js';
-import { sendText } from './send.js';
-import { downloadAndDecrypt } from './media.js';
-import { getConfig, sendTyping } from './api.js';
-import { TypingStatus } from './types.js';
+} from "@tram-ai/channel-base";
+import { loadAccount, DEFAULT_BASE_URL } from "./accounts.js";
+import { startPollLoop, getContextToken } from "./monitor.js";
+import type { CdnRef, FileCdnRef } from "./monitor.js";
+import { sendText } from "./send.js";
+import { downloadAndDecrypt } from "./media.js";
+import { getConfig, sendTyping } from "./api.js";
+import { TypingStatus } from "./types.js";
 
 /** In-memory typing ticket cache: userId -> typingTicket */
 const typingTickets = new Map<string, string>();
@@ -28,7 +28,7 @@ const typingTickets = new Map<string, string>();
 export class WeixinChannel extends ChannelBase {
   private abortController: AbortController | null = null;
   private baseUrl: string;
-  private token: string = '';
+  private token: string = "";
 
   constructor(
     name: string,
@@ -46,7 +46,7 @@ export class WeixinChannel extends ChannelBase {
     const account = loadAccount();
     if (!account) {
       throw new Error(
-        'WeChat account not configured. Run "qwen channel configure-weixin" first.',
+        'WeChat account not configured. Run "tram channel configure-weixin" first.',
       );
     }
     this.token = account.token;
@@ -114,7 +114,7 @@ export class WeixinChannel extends ChannelBase {
           image.encryptQueryParam,
           image.aesKey,
         );
-        envelope.imageBase64 = imageData.toString('base64');
+        envelope.imageBase64 = imageData.toString("base64");
         envelope.imageMimeType = detectImageMime(imageData);
       } catch (err) {
         process.stderr.write(
@@ -130,7 +130,7 @@ export class WeixinChannel extends ChannelBase {
           file.encryptQueryParam,
           file.aesKey,
         );
-        const dir = join(tmpdir(), 'channel-files', randomUUID());
+        const dir = join(tmpdir(), "channel-files", randomUUID());
         mkdirSync(dir, { recursive: true });
         const filePath = join(
           dir,
@@ -139,9 +139,9 @@ export class WeixinChannel extends ChannelBase {
         writeFileSync(filePath, fileData);
         envelope.attachments = [
           {
-            type: 'file',
+            type: "file",
             filePath,
-            mimeType: 'application/octet-stream',
+            mimeType: "application/octet-stream",
             fileName: file.fileName,
           },
         ];
@@ -157,7 +157,7 @@ export class WeixinChannel extends ChannelBase {
   }
 
   async sendMessage(chatId: string, text: string): Promise<void> {
-    const contextToken = getContextToken(chatId) || '';
+    const contextToken = getContextToken(chatId) || "";
     await sendText({
       to: chatId,
       text,
@@ -206,10 +206,10 @@ export class WeixinChannel extends ChannelBase {
 /** Detect image MIME type from magic bytes. */
 function detectImageMime(data: Buffer): string {
   if (data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4e) {
-    return 'image/png';
+    return "image/png";
   }
   if (data[0] === 0x47 && data[1] === 0x49 && data[2] === 0x46) {
-    return 'image/gif';
+    return "image/gif";
   }
   if (
     data[0] === 0x52 &&
@@ -217,7 +217,7 @@ function detectImageMime(data: Buffer): string {
     data[2] === 0x46 &&
     data[3] === 0x46
   ) {
-    return 'image/webp';
+    return "image/webp";
   }
-  return 'image/jpeg';
+  return "image/jpeg";
 }

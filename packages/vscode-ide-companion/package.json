@@ -2,7 +2,7 @@
   "name": "tram-vscode-ide-companion",
   "displayName": "TRAM Companion",
   "description": "Enable TRAM with direct access to your VS Code workspace.",
-  "version": "0.14.5",
+  "version": "0.0.9-U0145",
   "publisher": "tram-ai",
   "icon": "assets/icon.png",
   "repository": {
@@ -132,6 +132,10 @@
       {
         "command": "tram.quickServiceAlert",
         "title": "TRAM: Quick Service Alert"
+      },
+      {
+        "command": "tram.toggleServiceFollow",
+        "title": "TRAM: Toggle Service Follow"
       }
     ],
     "menus": {
@@ -191,6 +195,11 @@
         "command": "tram.quickServiceAlert",
         "key": "alt+l",
         "mac": "alt+l"
+      },
+      {
+        "command": "tram.toggleServiceFollow",
+        "key": "ctrl+alt+l",
+        "mac": "cmd+alt+l"
       }
     ]
   },

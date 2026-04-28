@@ -7,23 +7,23 @@
  * This allows local ApprovalModeValue to work with webui's EditModeInfo
  */
 
-import type { ClipboardEvent, FC, ReactNode } from 'react';
-import { InputForm as BaseInputForm, getEditModeIcon } from '@tram-ai/webui';
+import type { ClipboardEvent, FC, ReactNode } from "react";
+import { InputForm as BaseInputForm, getEditModeIcon } from "@tram-ai/webui";
 import type {
   InputFormProps as BaseInputFormProps,
   EditModeInfo,
-} from '@tram-ai/webui';
-import type { CompletionItem } from '../../../types/completionItemTypes.js';
-import { getApprovalModeInfoFromString } from '../../../types/acpTypes.js';
-import type { ApprovalModeValue } from '../../../types/approvalModeValueTypes.js';
-import type { ModelInfo } from '@agentclientprotocol/sdk';
-import { ModelSelector } from './ModelSelector.js';
+} from "@tram-ai/webui";
+import type { CompletionItem } from "../../../types/completionItemTypes.js";
+import { getApprovalModeInfoFromString } from "../../../types/acpTypes.js";
+import type { ApprovalModeValue } from "../../../types/approvalModeValueTypes.js";
+import type { ModelInfo } from "@agentclientprotocol/sdk";
+import { ModelSelector } from "./ModelSelector.js";
 
 /**
  * Extended props that accept ApprovalModeValue and ModelSelector
  */
 export interface InputFormProps
-  extends Omit<BaseInputFormProps, 'editModeInfo' | 'onCompletionFill'> {
+  extends Omit<BaseInputFormProps, "editModeInfo" | "onCompletionFill"> {
   /** Edit mode value (local type) */
   editMode: ApprovalModeValue;
   /** Optional paste handler forwarded to the base input */

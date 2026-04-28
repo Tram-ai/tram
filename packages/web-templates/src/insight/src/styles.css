@@ -65,7 +65,7 @@
 
 :before,
 :after {
-  --tw-content: '';
+  --tw-content: "";
 }
 
 html,
@@ -76,8 +76,8 @@ html,
   font-variation-settings: normal;
   -webkit-tap-highlight-color: transparent;
   font-family:
-    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-    'Segoe UI Symbol', 'Noto Color Emoji';
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
   line-height: 1.5;
 }
 

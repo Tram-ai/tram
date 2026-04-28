@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import * as Diff from 'diff';
-import type { Config } from '../config/config.js';
-import { ApprovalMode } from '../config/config.js';
+import fs from "node:fs";
+import path from "node:path";
+import * as Diff from "diff";
+import type { Config } from "../config/config.js";
+import { ApprovalMode } from "../config/config.js";
 import type {
   FileDiff,
   ToolCallConfirmationDetails,
@@ -16,40 +16,40 @@ import type {
   ToolInvocation,
   ToolLocation,
   ToolResult,
-} from './tools.js';
-import type { PermissionDecision } from '../permissions/types.js';
+} from "./tools.js";
+import type { PermissionDecision } from "../permissions/types.js";
 import {
   BaseDeclarativeTool,
   BaseToolInvocation,
   Kind,
   ToolConfirmationOutcome,
-} from './tools.js';
-import { ToolErrorType } from './tool-error.js';
+} from "./tools.js";
+import { ToolErrorType } from "./tool-error.js";
 import {
   FileEncoding,
   needsUtf8Bom,
   detectLineEnding,
-} from '../services/fileSystemService.js';
-import type { LineEnding } from '../services/fileSystemService.js';
-import { makeRelative, shortenPath } from '../utils/paths.js';
-import { getErrorMessage, isNodeError } from '../utils/errors.js';
-import { DEFAULT_DIFF_OPTIONS, getDiffStat } from './diffOptions.js';
-import { ToolNames, ToolDisplayNames } from './tool-names.js';
+} from "../services/fileSystemService.js";
+import type { LineEnding } from "../services/fileSystemService.js";
+import { makeRelative, shortenPath } from "../utils/paths.js";
+import { getErrorMessage, isNodeError } from "../utils/errors.js";
+import { DEFAULT_DIFF_OPTIONS, getDiffStat } from "./diffOptions.js";
+import { ToolNames, ToolDisplayNames } from "./tool-names.js";
 import type {
   ModifiableDeclarativeTool,
   ModifyContext,
-} from './modifiable-tool.js';
-import { logFileOperation } from '../telemetry/loggers.js';
-import { FileOperationEvent } from '../telemetry/types.js';
-import { FileOperation } from '../telemetry/metrics.js';
+} from "./modifiable-tool.js";
+import { logFileOperation } from "../telemetry/loggers.js";
+import { FileOperationEvent } from "../telemetry/types.js";
+import { FileOperation } from "../telemetry/metrics.js";
 import {
   getSpecificMimeType,
   fileExists as isFilefileExists,
-} from '../utils/fileUtils.js';
-import { getLanguageFromFilePath } from '../utils/language-detection.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "../utils/fileUtils.js";
+import { getLanguageFromFilePath } from "../utils/language-detection.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('WRITE_FILE');
+const debugLogger = createDebugLogger("WRITE_FILE");
 
 /**
  * Parameters for the WriteFile tool
@@ -103,7 +103,7 @@ class WriteFileToolInvocation extends BaseToolInvocation<
    * Write operations always need user confirmation.
    */
   override async getDefaultPermission(): Promise<PermissionDecision> {
-    return 'ask';
+    return "ask";
   }
 
   /**
@@ -112,7 +112,7 @@ class WriteFileToolInvocation extends BaseToolInvocation<
   override async getConfirmationDetails(
     _abortSignal: AbortSignal,
   ): Promise<ToolCallConfirmationDetails> {
-    let originalContent = '';
+    let originalContent = "";
     const fileExists = await isFilefileExists(this.params.file_path);
     if (fileExists) {
       try {
@@ -137,13 +137,13 @@ class WriteFileToolInvocation extends BaseToolInvocation<
       fileName,
       originalContent, // Original content (empty if new file or unreadable)
       this.params.content, // Content after potential correction
-      'Current',
-      'Proposed',
+      "Current",
+      "Proposed",
       DEFAULT_DIFF_OPTIONS,
     );
 
     const confirmationDetails: ToolEditConfirmationDetails = {
-      type: 'edit',
+      type: "edit",
       title: `Confirm Write: ${shortenPath(relativePath)}`,
       fileName,
       filePath: this.params.file_path,
@@ -164,7 +164,7 @@ class WriteFileToolInvocation extends BaseToolInvocation<
       this.params;
 
     let fileExists = await isFilefileExists(file_path);
-    let originalContent = '';
+    let originalContent = "";
     let useBOM = false;
     let detectedEncoding: string | undefined;
     let detectedLineEnding: LineEnding | undefined;
@@ -181,12 +181,12 @@ class WriteFileToolInvocation extends BaseToolInvocation<
             fileInfo.content.length > 0 &&
             fileInfo.content.codePointAt(0) === 0xfeff;
         }
-        detectedEncoding = fileInfo._meta?.encoding || 'utf-8';
+        detectedEncoding = fileInfo._meta?.encoding || "utf-8";
         detectedLineEnding = detectLineEnding(fileInfo.content);
         originalContent = fileInfo.content;
         fileExists = true; // File exists and was read
       } catch (err) {
-        if (isNodeError(err) && err.code === 'ENOENT') {
+        if (isNodeError(err) && err.code === "ENOENT") {
           fileExists = false;
         } else {
           const error = {
@@ -246,8 +246,8 @@ class WriteFileToolInvocation extends BaseToolInvocation<
         fileName,
         currentContentForDiff,
         content,
-        'Original',
-        'Written',
+        "Original",
+        "Written",
         DEFAULT_DIFF_OPTIONS,
       );
 
@@ -278,7 +278,7 @@ class WriteFileToolInvocation extends BaseToolInvocation<
         ? FileOperation.CREATE
         : FileOperation.UPDATE;
 
-      const lineCount = content.split('\n').length;
+      const lineCount = content.split("\n").length;
       logFileOperation(
         this.config,
         new FileOperationEvent(
@@ -300,7 +300,7 @@ class WriteFileToolInvocation extends BaseToolInvocation<
       };
 
       return {
-        llmContent: llmSuccessMessageParts.join(' '),
+        llmContent: llmSuccessMessageParts.join(" "),
         returnDisplay: displayResult,
       };
     } catch (error) {
@@ -313,20 +313,20 @@ class WriteFileToolInvocation extends BaseToolInvocation<
         errorMsg = `Error writing to file '${file_path}': ${error.message} (${error.code})`;
 
         // Log specific error types for better debugging
-        if (error.code === 'EACCES') {
+        if (error.code === "EACCES") {
           errorMsg = `Permission denied writing to file: ${file_path} (${error.code})`;
           errorType = ToolErrorType.PERMISSION_DENIED;
-        } else if (error.code === 'ENOSPC') {
+        } else if (error.code === "ENOSPC") {
           errorMsg = `No space left on device: ${file_path} (${error.code})`;
           errorType = ToolErrorType.NO_SPACE_LEFT;
-        } else if (error.code === 'EISDIR') {
+        } else if (error.code === "EISDIR") {
           errorMsg = `Target is a directory, not a file: ${file_path} (${error.code})`;
           errorType = ToolErrorType.TARGET_IS_DIRECTORY;
         }
 
         // Include stack trace in debug mode for better troubleshooting
         if (this.config.getDebugMode() && error.stack) {
-          debugLogger.debug('Write file error stack:', error.stack);
+          debugLogger.debug("Write file error stack:", error.stack);
         }
       } else if (error instanceof Error) {
         errorMsg = `Error writing to file: ${error.message}`;
@@ -368,15 +368,15 @@ export class WriteFileTool
           file_path: {
             description:
               "The absolute path to the file to write to (e.g., '/home/user/project/file.txt'). Relative paths are not supported.",
-            type: 'string',
+            type: "string",
           },
           content: {
-            description: 'The content to write to the file.',
-            type: 'string',
+            description: "The content to write to the file.",
+            type: "string",
           },
         },
-        required: ['file_path', 'content'],
-        type: 'object',
+        required: ["file_path", "content"],
+        type: "object",
       },
     );
   }
@@ -430,11 +430,11 @@ export class WriteFileTool
               .readTextFile({ path: params.file_path });
             return content;
           } catch (err) {
-            if (!isNodeError(err) || err.code !== 'ENOENT') throw err;
-            return '';
+            if (!isNodeError(err) || err.code !== "ENOENT") throw err;
+            return "";
           }
         } else {
-          return '';
+          return "";
         }
       },
       getProposedContent: async (params: WriteFileToolParams) => params.content,

@@ -7,33 +7,33 @@
 import type {
   HistoryItemWithoutId,
   IndividualToolCallDisplay,
-} from '../types.js';
-import { ToolCallStatus } from '../types.js';
-import { useCallback, useState } from 'react';
+} from "../types.js";
+import { ToolCallStatus } from "../types.js";
+import { useCallback, useState } from "react";
 import type {
   AnsiOutput,
   Config,
   GeminiClient,
   ShellExecutionResult,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import {
   createDebugLogger,
   isBinary,
   ShellExecutionService,
-} from '@tram-ai/tram-core';
-import { type PartListUnion } from '@google/genai';
-import type { UseHistoryManagerReturn } from './useHistoryManager.js';
-import { SHELL_COMMAND_NAME } from '../constants.js';
-import { formatMemoryUsage } from '../utils/formatters.js';
-import crypto from 'node:crypto';
-import path from 'node:path';
-import os from 'node:os';
-import fs from 'node:fs';
-import { themeManager } from '../../ui/themes/theme-manager.js';
+} from "@tram-ai/tram-core";
+import { type PartListUnion } from "@google/genai";
+import type { UseHistoryManagerReturn } from "./useHistoryManager.js";
+import { SHELL_COMMAND_NAME } from "../constants.js";
+import { formatMemoryUsage } from "../utils/formatters.js";
+import crypto from "node:crypto";
+import path from "node:path";
+import os from "node:os";
+import fs from "node:fs";
+import { themeManager } from "../../ui/themes/theme-manager.js";
 
 export const OUTPUT_UPDATE_INTERVAL_MS = 1000;
 const MAX_OUTPUT_LENGTH = 10000;
-const debugLogger = createDebugLogger('SHELL_COMMAND_PROCESSOR');
+const debugLogger = createDebugLogger("SHELL_COMMAND_PROCESSOR");
 
 function addShellCommandToGeminiHistory(
   geminiClient: GeminiClient,
@@ -42,11 +42,11 @@ function addShellCommandToGeminiHistory(
 ) {
   const modelContent =
     resultText.length > MAX_OUTPUT_LENGTH
-      ? resultText.substring(0, MAX_OUTPUT_LENGTH) + '\n... (truncated)'
+      ? resultText.substring(0, MAX_OUTPUT_LENGTH) + "\n... (truncated)"
       : resultText;
 
   geminiClient.addHistory({
-    role: 'user',
+    role: "user",
     parts: [
       {
         text: `I ran the following shell command:
@@ -68,7 +68,7 @@ ${modelContent}
  * Orchestrates command execution and updates history and agent context.
  */
 export const useShellCommandProcessor = (
-  addItemToHistory: UseHistoryManagerReturn['addItem'],
+  addItemToHistory: UseHistoryManagerReturn["addItem"],
   setPendingHistoryItem: React.Dispatch<
     React.SetStateAction<HistoryItemWithoutId | null>
   >,
@@ -83,18 +83,18 @@ export const useShellCommandProcessor = (
   const [activeShellPtyId, setActiveShellPtyId] = useState<number | null>(null);
   const handleShellCommand = useCallback(
     (rawQuery: PartListUnion, abortSignal: AbortSignal): boolean => {
-      if (typeof rawQuery !== 'string' || rawQuery.trim() === '') {
+      if (typeof rawQuery !== "string" || rawQuery.trim() === "") {
         return false;
       }
 
       const userMessageTimestamp = Date.now();
       const callId = `shell-${userMessageTimestamp}`;
       addItemToHistory(
-        { type: 'user_shell', text: rawQuery },
+        { type: "user_shell", text: rawQuery },
         userMessageTimestamp,
       );
 
-      const isWindows = os.platform() === 'win32';
+      const isWindows = os.platform() === "win32";
       const targetDir = config.getTargetDir();
       let commandToExecute = rawQuery;
       let pwdFilePath: string | undefined;
@@ -102,11 +102,11 @@ export const useShellCommandProcessor = (
       // On non-windows, wrap the command to capture the final working directory.
       if (!isWindows) {
         let command = rawQuery.trim();
-        const pwdFileName = `shell_pwd_${crypto.randomBytes(6).toString('hex')}.tmp`;
+        const pwdFileName = `shell_pwd_${crypto.randomBytes(6).toString("hex")}.tmp`;
         pwdFilePath = path.join(os.tmpdir(), pwdFileName);
         // Ensure command ends with a separator before adding our own.
-        if (!command.endsWith(';') && !command.endsWith('&')) {
-          command += ';';
+        if (!command.endsWith(";") && !command.endsWith("&")) {
+          command += ";";
         }
         commandToExecute = `{ ${command} }; __code=$?; pwd > "${pwdFilePath}"; exit $__code`;
       }
@@ -115,7 +115,7 @@ export const useShellCommandProcessor = (
         resolve: (value: void | PromiseLike<void>) => void,
       ) => {
         let lastUpdateTime = Date.now();
-        let cumulativeStdout: string | AnsiOutput = '';
+        let cumulativeStdout: string | AnsiOutput = "";
         let isBinaryStream = false;
         let binaryBytesReceived = 0;
 
@@ -124,12 +124,12 @@ export const useShellCommandProcessor = (
           name: SHELL_COMMAND_NAME,
           description: rawQuery,
           status: ToolCallStatus.Executing,
-          resultDisplay: '',
+          resultDisplay: "",
           confirmationDetails: undefined,
         };
 
         setPendingHistoryItem({
-          type: 'tool_group',
+          type: "tool_group",
           tools: [initialToolDisplay],
           isUserInitiated: true,
         });
@@ -138,10 +138,10 @@ export const useShellCommandProcessor = (
 
         const abortHandler = () => {
           onDebugMessage(
-            `Aborting shell command (PID: ${executionPid ?? 'unknown'})`,
+            `Aborting shell command (PID: ${executionPid ?? "unknown"})`,
           );
         };
-        abortSignal.addEventListener('abort', abortHandler, { once: true });
+        abortSignal.addEventListener("abort", abortHandler, { once: true });
 
         onDebugMessage(`Executing in ${targetDir}: ${commandToExecute}`);
 
@@ -161,7 +161,7 @@ export const useShellCommandProcessor = (
             (event) => {
               let shouldUpdate = false;
               switch (event.type) {
-                case 'data':
+                case "data":
                   // Do not process text data if we've already switched to binary mode.
                   if (isBinaryStream) break;
                   // PTY provides the full screen state, so we just replace.
@@ -170,23 +170,23 @@ export const useShellCommandProcessor = (
                     cumulativeStdout = event.chunk;
                     shouldUpdate = true;
                   } else if (
-                    typeof event.chunk === 'string' &&
-                    typeof cumulativeStdout === 'string'
+                    typeof event.chunk === "string" &&
+                    typeof cumulativeStdout === "string"
                   ) {
                     cumulativeStdout += event.chunk;
                   }
                   break;
-                case 'binary_detected':
+                case "binary_detected":
                   isBinaryStream = true;
                   // Force an immediate UI update to show the binary detection message.
                   shouldUpdate = true;
                   break;
-                case 'binary_progress':
+                case "binary_progress":
                   isBinaryStream = true;
                   binaryBytesReceived = event.bytesReceived;
                   break;
                 default: {
-                  throw new Error('An unhandled ShellOutputEvent was found.');
+                  throw new Error("An unhandled ShellOutputEvent was found.");
                 }
               }
 
@@ -199,7 +199,7 @@ export const useShellCommandProcessor = (
                   )} received]`;
                 } else {
                   currentDisplayOutput =
-                    '[Binary output detected. Halting stream...]';
+                    "[Binary output detected. Halting stream...]";
                 }
               } else {
                 currentDisplayOutput = cumulativeStdout;
@@ -211,7 +211,7 @@ export const useShellCommandProcessor = (
                 Date.now() - lastUpdateTime > OUTPUT_UPDATE_INTERVAL_MS
               ) {
                 setPendingHistoryItem((prevItem) => {
-                  if (prevItem?.type === 'tool_group') {
+                  if (prevItem?.type === "tool_group") {
                     return {
                       ...prevItem,
                       tools: prevItem.tools.map((tool) =>
@@ -219,7 +219,7 @@ export const useShellCommandProcessor = (
                           ? {
                               ...tool,
                               resultDisplay:
-                                typeof currentDisplayOutput === 'string'
+                                typeof currentDisplayOutput === "string"
                                   ? currentDisplayOutput
                                   : { ansiOutput: currentDisplayOutput },
                             }
@@ -243,7 +243,7 @@ export const useShellCommandProcessor = (
           if (pid) {
             setActiveShellPtyId(pid);
             setPendingHistoryItem((prevItem) => {
-              if (prevItem?.type === 'tool_group') {
+              if (prevItem?.type === "tool_group") {
                 return {
                   ...prevItem,
                   tools: prevItem.tools.map((tool) =>
@@ -263,10 +263,10 @@ export const useShellCommandProcessor = (
 
               if (isBinary(result.rawOutput)) {
                 mainContent =
-                  '[Command produced binary output, which is not shown.]';
+                  "[Command produced binary output, which is not shown.]";
               } else {
                 mainContent =
-                  result.output.trim() || '(Command produced no output)';
+                  result.output.trim() || "(Command produced no output)";
               }
 
               let finalOutput = mainContent;
@@ -287,7 +287,7 @@ export const useShellCommandProcessor = (
               }
 
               if (pwdFilePath && fs.existsSync(pwdFilePath)) {
-                const finalPwd = fs.readFileSync(pwdFilePath, 'utf8').trim();
+                const finalPwd = fs.readFileSync(pwdFilePath, "utf8").trim();
                 if (finalPwd && finalPwd !== targetDir) {
                   const warning = `WARNING: shell mode is stateless; the directory change to '${finalPwd}' will not persist.`;
                   finalOutput = `${warning}\n\n${finalOutput}`;
@@ -303,7 +303,7 @@ export const useShellCommandProcessor = (
               // Add the complete, contextual result to the local UI history.
               addItemToHistory(
                 {
-                  type: 'tool_group',
+                  type: "tool_group",
                   tools: [finalToolDisplay],
                   isUserInitiated: true,
                 } as HistoryItemWithoutId,
@@ -323,14 +323,14 @@ export const useShellCommandProcessor = (
                 err instanceof Error ? err.message : String(err);
               addItemToHistory(
                 {
-                  type: 'error',
+                  type: "error",
                   text: `An unexpected error occurred: ${errorMessage}`,
                 },
                 userMessageTimestamp,
               );
             })
             .finally(() => {
-              abortSignal.removeEventListener('abort', abortHandler);
+              abortSignal.removeEventListener("abort", abortHandler);
               if (pwdFilePath && fs.existsSync(pwdFilePath)) {
                 fs.unlinkSync(pwdFilePath);
               }
@@ -344,7 +344,7 @@ export const useShellCommandProcessor = (
           const errorMessage = err instanceof Error ? err.message : String(err);
           addItemToHistory(
             {
-              type: 'error',
+              type: "error",
               text: `An unexpected error occurred: ${errorMessage}`,
             },
             userMessageTimestamp,

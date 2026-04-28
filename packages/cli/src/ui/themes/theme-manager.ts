@@ -4,32 +4,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AyuDark } from './ayu.js';
-import { AyuLight } from './ayu-light.js';
-import { AtomOneDark } from './atom-one-dark.js';
-import { Dracula } from './dracula.js';
-import { GitHubDark } from './github-dark.js';
-import { GitHubLight } from './github-light.js';
-import { GoogleCode } from './googlecode.js';
-import { DefaultLight } from './default-light.js';
-import { DefaultDark } from './default.js';
-import { ShadesOfPurple } from './shades-of-purple.js';
-import { XCode } from './xcode.js';
-import { TramLight } from './tram-light.js';
-import { TramDark } from './tram-dark.js';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import * as os from 'node:os';
-import type { Theme, ThemeType, CustomTheme } from './theme.js';
-import { createCustomTheme, validateCustomTheme } from './theme.js';
-import type { SemanticColors } from './semantic-tokens.js';
-import { ANSI } from './ansi.js';
-import { ANSILight } from './ansi-light.js';
-import { NoColorTheme } from './no-color.js';
-import process from 'node:process';
-import { createDebugLogger } from '@tram-ai/tram-core';
+import { AyuDark } from "./ayu.js";
+import { AyuLight } from "./ayu-light.js";
+import { AtomOneDark } from "./atom-one-dark.js";
+import { Dracula } from "./dracula.js";
+import { GitHubDark } from "./github-dark.js";
+import { GitHubLight } from "./github-light.js";
+import { GoogleCode } from "./googlecode.js";
+import { DefaultLight } from "./default-light.js";
+import { DefaultDark } from "./default.js";
+import { ShadesOfPurple } from "./shades-of-purple.js";
+import { XCode } from "./xcode.js";
+import { TramLight } from "./tram-light.js";
+import { TramDark } from "./tram-dark.js";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as os from "node:os";
+import type { Theme, ThemeType, CustomTheme } from "./theme.js";
+import { createCustomTheme, validateCustomTheme } from "./theme.js";
+import type { SemanticColors } from "./semantic-tokens.js";
+import { ANSI } from "./ansi.js";
+import { ANSILight } from "./ansi-light.js";
+import { NoColorTheme } from "./no-color.js";
+import process from "node:process";
+import { createDebugLogger } from "@tram-ai/tram-core";
 
-const debugLogger = createDebugLogger('THEME_MANAGER');
+const debugLogger = createDebugLogger("THEME_MANAGER");
 
 export interface ThemeDisplay {
   name: string;
@@ -88,7 +88,7 @@ class ThemeManager {
           ...DEFAULT_THEME.colors,
           ...customThemeConfig,
           name: customThemeConfig.name || name,
-          type: 'custom',
+          type: "custom",
         };
 
         try {
@@ -104,7 +104,7 @@ class ThemeManager {
     // If the current active theme is a custom theme, keep it if still valid
     if (
       this.activeTheme &&
-      this.activeTheme.type === 'custom' &&
+      this.activeTheme.type === "custom" &&
       this.customThemes.has(this.activeTheme.name)
     ) {
       this.activeTheme = this.customThemes.get(this.activeTheme.name)!;
@@ -130,7 +130,7 @@ class ThemeManager {
    * @returns The active theme.
    */
   getActiveTheme(): Theme {
-    if (process.env['NO_COLOR']) {
+    if (process.env["NO_COLOR"]) {
       return NoColorTheme;
     }
 
@@ -208,13 +208,13 @@ class ThemeManager {
       (a, b) => {
         const typeOrder = (type: ThemeType): number => {
           switch (type) {
-            case 'dark':
+            case "dark":
               return 1;
-            case 'light':
+            case "light":
               return 2;
-            case 'ansi':
+            case "ansi":
               return 3;
-            case 'custom':
+            case "custom":
               return 4; // Custom themes at the end
             default:
               return 5;
@@ -244,8 +244,8 @@ class ThemeManager {
 
   private isPath(themeName: string): boolean {
     return (
-      themeName.endsWith('.json') ||
-      themeName.startsWith('.') ||
+      themeName.endsWith(".json") ||
+      themeName.startsWith(".") ||
       path.isAbsolute(themeName)
     );
   }
@@ -271,7 +271,7 @@ class ThemeManager {
       }
 
       // 3. Read, parse, and validate the theme file.
-      const themeContent = fs.readFileSync(canonicalPath, 'utf-8');
+      const themeContent = fs.readFileSync(canonicalPath, "utf-8");
       const customThemeConfig = JSON.parse(themeContent) as CustomTheme;
 
       const validation = validateCustomTheme(customThemeConfig);
@@ -291,7 +291,7 @@ class ThemeManager {
         ...DEFAULT_THEME.colors,
         ...customThemeConfig,
         name: customThemeConfig.name || canonicalPath,
-        type: 'custom',
+        type: "custom",
       };
 
       const theme = createCustomTheme(themeWithDefaults);
@@ -301,7 +301,7 @@ class ThemeManager {
       // Any error in the process (file not found, bad JSON, etc.) is caught here.
       // We can return undefined silently for file-not-found, and warn for others.
       if (
-        !(error instanceof Error && 'code' in error && error.code === 'ENOENT')
+        !(error instanceof Error && "code" in error && error.code === "ENOENT")
       ) {
         debugLogger.warn(
           `Could not load theme from file "${themePath}":`,

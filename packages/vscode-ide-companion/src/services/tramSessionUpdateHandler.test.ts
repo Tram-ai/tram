@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { TramSessionUpdateHandler } from './tramSessionUpdateHandler.js';
-import type { SessionNotification } from '@agentclientprotocol/sdk';
-import type { ApprovalModeValue } from '../types/approvalModeValueTypes.js';
-import type { TramAgentCallbacks } from '../types/chatTypes.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { TramSessionUpdateHandler } from "./tramSessionUpdateHandler.js";
+import type { SessionNotification } from "@agentclientprotocol/sdk";
+import type { ApprovalModeValue } from "../types/approvalModeValueTypes.js";
+import type { TramAgentCallbacks } from "../types/chatTypes.js";
 
-describe('TramSessionUpdateHandler', () => {
+describe("TramSessionUpdateHandler", () => {
   let handler: TramSessionUpdateHandler;
   let mockCallbacks: TramAgentCallbacks;
 
@@ -28,48 +28,48 @@ describe('TramSessionUpdateHandler', () => {
     handler = new TramSessionUpdateHandler(mockCallbacks);
   });
 
-  describe('current_mode_update handling', () => {
-    it('calls onModeChanged callback with mode id', () => {
+  describe("current_mode_update handling", () => {
+    it("calls onModeChanged callback with mode id", () => {
       const modeUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'current_mode_update',
-          currentModeId: 'auto-edit' as ApprovalModeValue,
+          sessionUpdate: "current_mode_update",
+          currentModeId: "auto-edit" as ApprovalModeValue,
         },
       } as SessionNotification;
 
       handler.handleSessionUpdate(modeUpdate);
 
-      expect(mockCallbacks.onModeChanged).toHaveBeenCalledWith('auto-edit');
+      expect(mockCallbacks.onModeChanged).toHaveBeenCalledWith("auto-edit");
     });
   });
 
-  describe('agent_message_chunk handling', () => {
-    it('calls onStreamChunk callback with text content', () => {
+  describe("agent_message_chunk handling", () => {
+    it("calls onStreamChunk callback with text content", () => {
       const messageUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'agent_message_chunk',
+          sessionUpdate: "agent_message_chunk",
           content: {
-            type: 'text',
-            text: 'Hello, world!',
+            type: "text",
+            text: "Hello, world!",
           },
         },
       };
 
       handler.handleSessionUpdate(messageUpdate);
 
-      expect(mockCallbacks.onStreamChunk).toHaveBeenCalledWith('Hello, world!');
+      expect(mockCallbacks.onStreamChunk).toHaveBeenCalledWith("Hello, world!");
     });
 
-    it('emits usage metadata when present', () => {
+    it("emits usage metadata when present", () => {
       const messageUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'agent_message_chunk',
+          sessionUpdate: "agent_message_chunk",
           content: {
-            type: 'text',
-            text: 'Response',
+            type: "text",
+            text: "Response",
           },
           _meta: {
             usage: {
@@ -101,14 +101,14 @@ describe('TramSessionUpdateHandler', () => {
       });
     });
 
-    it('maps SDK usage field names to both SDK and legacy fields', () => {
+    it("maps SDK usage field names to both SDK and legacy fields", () => {
       const messageUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'agent_message_chunk',
+          sessionUpdate: "agent_message_chunk",
           content: {
-            type: 'text',
-            text: 'Response',
+            type: "text",
+            text: "Response",
           },
           _meta: {
             usage: {
@@ -143,43 +143,43 @@ describe('TramSessionUpdateHandler', () => {
     });
   });
 
-  describe('tool_call handling', () => {
-    it('calls onToolCall callback with tool call data', () => {
+  describe("tool_call handling", () => {
+    it("calls onToolCall callback with tool call data", () => {
       const toolCallUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'tool_call',
-          toolCallId: 'call-123',
-          kind: 'read',
-          title: 'Read file',
-          status: 'pending',
-          rawInput: { path: '/test/file.ts' },
+          sessionUpdate: "tool_call",
+          toolCallId: "call-123",
+          kind: "read",
+          title: "Read file",
+          status: "pending",
+          rawInput: { path: "/test/file.ts" },
         },
       };
 
       handler.handleSessionUpdate(toolCallUpdate);
 
       expect(mockCallbacks.onToolCall).toHaveBeenCalledWith({
-        toolCallId: 'call-123',
-        kind: 'read',
-        title: 'Read file',
-        status: 'pending',
-        rawInput: { path: '/test/file.ts' },
+        toolCallId: "call-123",
+        kind: "read",
+        title: "Read file",
+        status: "pending",
+        rawInput: { path: "/test/file.ts" },
         content: undefined,
         locations: undefined,
       });
     });
   });
 
-  describe('plan handling', () => {
-    it('calls onPlan callback with plan entries', () => {
+  describe("plan handling", () => {
+    it("calls onPlan callback with plan entries", () => {
       const planUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'plan',
+          sessionUpdate: "plan",
           entries: [
-            { content: 'Step 1', priority: 'high', status: 'pending' },
-            { content: 'Step 2', priority: 'medium', status: 'pending' },
+            { content: "Step 1", priority: "high", status: "pending" },
+            { content: "Step 2", priority: "medium", status: "pending" },
           ],
         },
       };
@@ -187,50 +187,50 @@ describe('TramSessionUpdateHandler', () => {
       handler.handleSessionUpdate(planUpdate);
 
       expect(mockCallbacks.onPlan).toHaveBeenCalledWith([
-        { content: 'Step 1', priority: 'high', status: 'pending' },
-        { content: 'Step 2', priority: 'medium', status: 'pending' },
+        { content: "Step 1", priority: "high", status: "pending" },
+        { content: "Step 2", priority: "medium", status: "pending" },
       ]);
     });
 
-    it('falls back to stream chunk when onPlan is not set', () => {
+    it("falls back to stream chunk when onPlan is not set", () => {
       const handlerWithStream = new TramSessionUpdateHandler({
         onStreamChunk: vi.fn(),
       });
 
       const planUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'plan',
-          entries: [{ content: 'Task 1', priority: 'high', status: 'pending' }],
+          sessionUpdate: "plan",
+          entries: [{ content: "Task 1", priority: "high", status: "pending" }],
         },
       };
 
       handlerWithStream.handleSessionUpdate(planUpdate);
 
-      expect(handlerWithStream['callbacks'].onStreamChunk).toHaveBeenCalled();
+      expect(handlerWithStream["callbacks"].onStreamChunk).toHaveBeenCalled();
     });
   });
 
-  describe('available_commands_update handling', () => {
-    it('calls onAvailableCommands callback with commands', () => {
+  describe("available_commands_update handling", () => {
+    it("calls onAvailableCommands callback with commands", () => {
       const commandsUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'available_commands_update',
+          sessionUpdate: "available_commands_update",
           availableCommands: [
             {
-              name: 'compress',
-              description: 'Compress the context',
+              name: "compress",
+              description: "Compress the context",
               input: null,
             },
             {
-              name: 'init',
-              description: 'Initialize the project',
+              name: "init",
+              description: "Initialize the project",
               input: null,
             },
             {
-              name: 'summary',
-              description: 'Generate project summary',
+              name: "summary",
+              description: "Generate project summary",
               input: null,
             },
           ],
@@ -240,26 +240,26 @@ describe('TramSessionUpdateHandler', () => {
       handler.handleSessionUpdate(commandsUpdate);
 
       expect(mockCallbacks.onAvailableCommands).toHaveBeenCalledWith([
-        { name: 'compress', description: 'Compress the context', input: null },
-        { name: 'init', description: 'Initialize the project', input: null },
+        { name: "compress", description: "Compress the context", input: null },
+        { name: "init", description: "Initialize the project", input: null },
         {
-          name: 'summary',
-          description: 'Generate project summary',
+          name: "summary",
+          description: "Generate project summary",
           input: null,
         },
       ]);
     });
 
-    it('handles commands with input hint', () => {
+    it("handles commands with input hint", () => {
       const commandsUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'available_commands_update',
+          sessionUpdate: "available_commands_update",
           availableCommands: [
             {
-              name: 'search',
-              description: 'Search for files',
-              input: { hint: 'Enter search query' },
+              name: "search",
+              description: "Search for files",
+              input: { hint: "Enter search query" },
             },
           ],
         },
@@ -269,22 +269,22 @@ describe('TramSessionUpdateHandler', () => {
 
       expect(mockCallbacks.onAvailableCommands).toHaveBeenCalledWith([
         {
-          name: 'search',
-          description: 'Search for files',
-          input: { hint: 'Enter search query' },
+          name: "search",
+          description: "Search for files",
+          input: { hint: "Enter search query" },
         },
       ]);
     });
 
-    it('does not call callback when onAvailableCommands is not set', () => {
+    it("does not call callback when onAvailableCommands is not set", () => {
       const handlerWithoutCallback = new TramSessionUpdateHandler({});
 
       const commandsUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'available_commands_update',
+          sessionUpdate: "available_commands_update",
           availableCommands: [
-            { name: 'compress', description: 'Compress', input: null },
+            { name: "compress", description: "Compress", input: null },
           ],
         },
       } as SessionNotification;
@@ -295,11 +295,11 @@ describe('TramSessionUpdateHandler', () => {
       ).not.toThrow();
     });
 
-    it('handles empty commands list', () => {
+    it("handles empty commands list", () => {
       const commandsUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'available_commands_update',
+          sessionUpdate: "available_commands_update",
           availableCommands: [],
         },
       } as SessionNotification;
@@ -310,8 +310,8 @@ describe('TramSessionUpdateHandler', () => {
     });
   });
 
-  describe('updateCallbacks', () => {
-    it('updates mode callback and uses new one', () => {
+  describe("updateCallbacks", () => {
+    it("updates mode callback and uses new one", () => {
       const newOnModeChanged = vi.fn();
       handler.updateCallbacks({
         ...mockCallbacks,
@@ -319,10 +319,10 @@ describe('TramSessionUpdateHandler', () => {
       });
 
       const modeUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'current_mode_update',
-          currentModeId: 'yolo' as ApprovalModeValue,
+          sessionUpdate: "current_mode_update",
+          currentModeId: "yolo" as ApprovalModeValue,
         },
       } as SessionNotification;
 
@@ -332,7 +332,7 @@ describe('TramSessionUpdateHandler', () => {
       expect(mockCallbacks.onModeChanged).not.toHaveBeenCalled();
     });
 
-    it('updates onAvailableCommands callback', () => {
+    it("updates onAvailableCommands callback", () => {
       const newOnAvailableCommands = vi.fn();
       handler.updateCallbacks({
         ...mockCallbacks,
@@ -340,11 +340,11 @@ describe('TramSessionUpdateHandler', () => {
       });
 
       const commandsUpdate: SessionNotification = {
-        sessionId: 'test-session',
+        sessionId: "test-session",
         update: {
-          sessionUpdate: 'available_commands_update',
+          sessionUpdate: "available_commands_update",
           availableCommands: [
-            { name: 'test', description: 'Test command', input: null },
+            { name: "test", description: "Test command", input: null },
           ],
         },
       } as SessionNotification;

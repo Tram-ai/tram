@@ -5,13 +5,13 @@
  */
 
 // Main Dialog
-export { MCPManagementDialog } from './MCPManagementDialog.js';
+export { MCPManagementDialog } from "./MCPManagementDialog.js";
 
 // Steps
-export { ServerListStep } from './steps/ServerListStep.js';
-export { ServerDetailStep } from './steps/ServerDetailStep.js';
-export { ToolListStep } from './steps/ToolListStep.js';
-export { ToolDetailStep } from './steps/ToolDetailStep.js';
+export { ServerListStep } from "./steps/ServerListStep.js";
+export { ServerDetailStep } from "./steps/ServerDetailStep.js";
+export { ToolListStep } from "./steps/ToolListStep.js";
+export { ToolDetailStep } from "./steps/ToolDetailStep.js";
 
 // Types
 export type {
@@ -24,7 +24,7 @@ export type {
   ToolListStepProps,
   ToolDetailStepProps,
   MCPManagementStep,
-} from './types.js';
+} from "./types.js";
 
 // Constants
-export { MCP_MANAGEMENT_STEPS } from './types.js';
+export { MCP_MANAGEMENT_STEPS } from "./types.js";

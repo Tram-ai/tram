@@ -10,7 +10,7 @@ from terminal_bench.terminal.models import TerminalCommand
 class QwenCodeAgent(AbstractInstalledAgent):
     @staticmethod
     def name() -> str:
-        return "Qwen Code"
+        return "TRAM"
 
     def __init__(self, model_name: str | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)

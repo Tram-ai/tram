@@ -40,7 +40,7 @@ If you omit `--models`, an interactive model selection dialog appears, letting y
 
 ### What happens when you start
 
-1. **Worktree setup**: Qwen Code creates isolated Git worktrees for each agent at `~/.qwen/arena/<session-id>/worktrees/<model-name>/`. Each worktree mirrors your current working directory state exactly — including staged changes, unstaged changes, and untracked files.
+1. **Worktree setup**: TRAM creates isolated Git worktrees for each agent at `~/.qwen/arena/<session-id>/worktrees/<model-name>/`. Each worktree mirrors your current working directory state exactly — including staged changes, unstaged changes, and untracked files.
 2. **Agent spawning**: Each agent starts in its own worktree with full tool access and its configured model. Agents are launched sequentially but execute in parallel.
 3. **Execution**: All agents work on the task independently with no shared state or communication. You can monitor their progress and interact with any of them.
 4. **Completion**: When all agents finish (or fail), you enter the result comparison phase.
@@ -199,7 +199,7 @@ Agent Arena is experimental. Current limitations:
 
 ## Comparison with other multi-agent modes
 
-Agent Arena is one of several planned multi-agent modes in Qwen Code. **Agent Team** and **Agent Swarm** are not yet implemented — the table below describes their intended design for reference.
+Agent Arena is one of several planned multi-agent modes in TRAM. **Agent Team** and **Agent Swarm** are not yet implemented — the table below describes their intended design for reference.
 
 |                   | **Agent Arena**                                        | **Agent Team** (planned)                           | **Agent Swarm** (planned)                                |
 | :---------------- | :----------------------------------------------------- | :------------------------------------------------- | :------------------------------------------------------- |
@@ -215,4 +215,4 @@ Agent Arena is one of several planned multi-agent modes in Qwen Code. **Agent Te
 Explore related approaches for parallel and delegated work:
 
 - **Lightweight delegation**: [Subagents](/users/features/sub-agents) handle focused subtasks within your session — better when you don't need model comparison
-- **Manual parallel sessions**: Run multiple Qwen Code sessions yourself in separate terminals with [Git worktrees](https://git-scm.com/docs/git-worktree) for full manual control
+- **Manual parallel sessions**: Run multiple TRAM sessions yourself in separate terminals with [Git worktrees](https://git-scm.com/docs/git-worktree) for full manual control

@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ChatRecord, AgentResultDisplay } from '@tram-ai/tram-core';
+import type { ChatRecord, AgentResultDisplay } from "@tram-ai/tram-core";
 import type {
   Content,
   GenerateContentResponseUsageMetadata,
-} from '@google/genai';
-import type { SessionContext } from './types.js';
-import { MessageEmitter } from './emitters/MessageEmitter.js';
-import { ToolCallEmitter } from './emitters/ToolCallEmitter.js';
+} from "@google/genai";
+import type { SessionContext } from "./types.js";
+import { MessageEmitter } from "./emitters/MessageEmitter.js";
+import { ToolCallEmitter } from "./emitters/ToolCallEmitter.js";
 
 /**
  * Handles replaying session history on session load.
@@ -48,17 +48,17 @@ export class HistoryReplayer {
   private async replayRecord(record: ChatRecord): Promise<void> {
     this.setActiveRecordId(record.uuid, record.timestamp);
     switch (record.type) {
-      case 'user':
+      case "user":
         if (record.message) {
-          await this.replayContent(record.message, 'user', record.timestamp);
+          await this.replayContent(record.message, "user", record.timestamp);
         }
         break;
 
-      case 'assistant':
+      case "assistant":
         if (record.message) {
           await this.replayContent(
             record.message,
-            'assistant',
+            "assistant",
             record.timestamp,
           );
         }
@@ -67,7 +67,7 @@ export class HistoryReplayer {
         }
         break;
 
-      case 'tool_result':
+      case "tool_result":
         await this.replayToolResult(record);
         break;
 
@@ -88,12 +88,12 @@ export class HistoryReplayer {
    */
   private async replayContent(
     content: Content,
-    role: 'user' | 'assistant',
+    role: "user" | "assistant",
     timestamp?: string,
   ): Promise<void> {
     for (const part of content.parts ?? []) {
       // Text content
-      if ('text' in part && part.text) {
+      if ("text" in part && part.text) {
         const isThought = (part as { thought?: boolean }).thought ?? false;
         await this.messageEmitter.emitMessage(
           part.text,
@@ -104,15 +104,15 @@ export class HistoryReplayer {
       }
 
       // Function call (tool start)
-      if ('functionCall' in part && part.functionCall) {
-        const functionName = part.functionCall.name ?? '';
+      if ("functionCall" in part && part.functionCall) {
+        const functionName = part.functionCall.name ?? "";
         const callId = part.functionCall.id ?? `${functionName}-${Date.now()}`;
 
         await this.toolCallEmitter.emitStart({
           toolName: functionName,
           callId,
           args: part.functionCall.args as Record<string, unknown>,
-          status: 'in_progress',
+          status: "in_progress",
           timestamp,
         });
       }
@@ -160,9 +160,9 @@ export class HistoryReplayer {
     const { resultDisplay } = result ?? {};
     if (
       !!resultDisplay &&
-      typeof resultDisplay === 'object' &&
-      'type' in resultDisplay &&
-      (resultDisplay as { type?: unknown }).type === 'task_execution'
+      typeof resultDisplay === "object" &&
+      "type" in resultDisplay &&
+      (resultDisplay as { type?: unknown }).type === "task_execution"
     ) {
       await this.emitTaskUsageFromResultDisplay(
         resultDisplay as AgentResultDisplay,
@@ -212,19 +212,19 @@ export class HistoryReplayer {
     // Try to get from functionResponse in message
     if (record.message?.parts) {
       for (const part of record.message.parts) {
-        if ('functionResponse' in part && part.functionResponse?.name) {
+        if ("functionResponse" in part && part.functionResponse?.name) {
           return part.functionResponse.name;
         }
       }
     }
-    return '';
+    return "";
   }
 
   private setActiveRecordId(recordId: string | null, timestamp?: string): void {
     const context = this.ctx as unknown as {
       setActiveRecordId?: (id: string | null, timestamp?: string) => void;
     };
-    if (typeof context.setActiveRecordId === 'function') {
+    if (typeof context.setActiveRecordId === "function") {
       context.setActiveRecordId(recordId, timestamp);
     }
   }

@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { CommandModule } from 'yargs';
-import { loadSettings } from '../../config/settings.js';
-import { writeStdoutLine, writeStderrLine } from '../../utils/stdioHelpers.js';
+import type { CommandModule } from "yargs";
+import { loadSettings } from "../../config/settings.js";
+import { writeStdoutLine, writeStderrLine } from "../../utils/stdioHelpers.js";
 import {
   Config,
   FileDiscoveryService,
   ExtensionManager,
-} from '@qwen-code/qwen-code-core';
-import { isWorkspaceTrusted } from '../../config/trustedFolders.js';
-import type { MCPServerConfig } from '@qwen-code/qwen-code-core';
+} from "@tram-ai/tram-core";
+import { isWorkspaceTrusted } from "../../config/trustedFolders.js";
+import type { MCPServerConfig } from "@tram-ai/tram-core";
 
 async function getMcpServersFromConfig(
   extensionManager?: ExtensionManager,
@@ -55,7 +55,7 @@ async function createMinimalConfig(): Promise<Config> {
   const fileService = new FileDiscoveryService(cwd);
 
   const config = new Config({
-    sessionId: 'mcp-reconnect',
+    sessionId: "mcp-reconnect",
     targetDir: cwd,
     cwd,
     debugMode: false,
@@ -119,11 +119,11 @@ async function reconnectAllMcpServers(): Promise<void> {
   const serverNames = Object.keys(mcpServers);
 
   if (serverNames.length === 0) {
-    writeStdoutLine('No MCP servers configured.');
+    writeStdoutLine("No MCP servers configured.");
     return;
   }
 
-  writeStdoutLine('Reconnecting to all MCP servers...\n');
+  writeStdoutLine("Reconnecting to all MCP servers...\n");
 
   let config: Config | undefined;
   try {
@@ -147,35 +147,35 @@ async function reconnectAllMcpServers(): Promise<void> {
 }
 
 export const reconnectCommand: CommandModule = {
-  command: 'reconnect [server-name]',
-  describe: 'Reconnect MCP server(s)',
+  command: "reconnect [server-name]",
+  describe: "Reconnect MCP server(s)",
   builder: (yargs) =>
     yargs
-      .usage('Usage: qwen mcp reconnect [options] [server-name]')
-      .positional('server-name', {
-        describe: 'Name of the server to reconnect',
-        type: 'string',
+      .usage("Usage: qwen mcp reconnect [options] [server-name]")
+      .positional("server-name", {
+        describe: "Name of the server to reconnect",
+        type: "string",
       })
-      .option('all', {
-        alias: 'a',
-        describe: 'Reconnect all configured servers',
-        type: 'boolean',
+      .option("all", {
+        alias: "a",
+        describe: "Reconnect all configured servers",
+        type: "boolean",
         default: false,
       })
-      .conflicts('server-name', 'all')
+      .conflicts("server-name", "all")
       .check((argv) => {
-        const serverName = argv['server-name'];
-        const all = argv['all'];
+        const serverName = argv["server-name"];
+        const all = argv["all"];
         if (!serverName && !all) {
           throw new Error(
-            'Please specify a server name or use --all to reconnect all servers.',
+            "Please specify a server name or use --all to reconnect all servers.",
           );
         }
         return true;
       }),
   handler: async (argv) => {
-    const serverName = argv['server-name'] as string | undefined;
-    const all = argv['all'] as boolean;
+    const serverName = argv["server-name"] as string | undefined;
+    const all = argv["all"] as boolean;
 
     try {
       if (all) {

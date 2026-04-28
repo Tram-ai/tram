@@ -6,23 +6,23 @@
 
 /** @vitest-environment jsdom */
 
-import { act, createRef } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useWebViewMessages } from './useWebViewMessages.js';
+import { act, createRef } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useWebViewMessages } from "./useWebViewMessages.js";
 
 const { mockPostMessage, mockClearImageResolutions } = vi.hoisted(() => ({
   mockPostMessage: vi.fn(),
   mockClearImageResolutions: vi.fn(),
 }));
 
-vi.mock('./useVSCode.js', () => ({
+vi.mock("./useVSCode.js", () => ({
   useVSCode: () => ({
     postMessage: mockPostMessage,
   }),
 }));
 
-vi.mock('./useImage.js', () => ({
+vi.mock("./useImage.js", () => ({
   useImageResolution: () => ({
     materializeMessages: <T,>(messages: T) => messages,
     materializeMessage: <T,>(message: T) => message,
@@ -36,7 +36,7 @@ function renderHookHarness(overrides?: {
   endStreaming?: ReturnType<typeof vi.fn>;
   clearWaitingForResponse?: ReturnType<typeof vi.fn>;
 }) {
-  const container = document.createElement('div');
+  const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
 
@@ -46,7 +46,7 @@ function renderHookHarness(overrides?: {
 
   const handlers = {
     sessionManagement: {
-      currentSessionId: 'conversation-1',
+      currentSessionId: "conversation-1",
       setQwenSessions: vi.fn(),
       setCurrentSessionId: vi.fn(),
       setCurrentSessionTitle: vi.fn(),
@@ -110,7 +110,7 @@ function renderHookHarness(overrides?: {
   };
 }
 
-describe('useWebViewMessages', () => {
+describe("useWebViewMessages", () => {
   let root: Root | null = null;
   let container: HTMLDivElement | null = null;
 
@@ -134,16 +134,16 @@ describe('useWebViewMessages', () => {
     }
   });
 
-  it('fully resets local UI state when a conversation is cleared', () => {
+  it("fully resets local UI state when a conversation is cleared", () => {
     const rendered = renderHookHarness();
     root = rendered.root;
     container = rendered.container;
 
     act(() => {
       window.dispatchEvent(
-        new MessageEvent('message', {
+        new MessageEvent("message", {
           data: {
-            type: 'conversationCleared',
+            type: "conversationCleared",
             data: {},
           },
         }),
@@ -166,28 +166,28 @@ describe('useWebViewMessages', () => {
     expect(rendered.handlers.handleAskUserQuestion).toHaveBeenCalledWith(null);
     expect(
       rendered.handlers.sessionManagement.setCurrentSessionTitle,
-    ).toHaveBeenCalledWith('Past Conversations');
+    ).toHaveBeenCalledWith("Past Conversations");
     expect(mockPostMessage).toHaveBeenCalledWith({
-      type: 'updatePanelTitle',
-      data: { title: 'Qwen Code' },
+      type: "updatePanelTitle",
+      data: { title: "TRAM" },
     });
   });
 
-  it('clears stale execute-tool tracking before the next session ends', () => {
+  it("clears stale execute-tool tracking before the next session ends", () => {
     const rendered = renderHookHarness();
     root = rendered.root;
     container = rendered.container;
 
     act(() => {
       window.dispatchEvent(
-        new MessageEvent('message', {
+        new MessageEvent("message", {
           data: {
-            type: 'toolCall',
+            type: "toolCall",
             data: {
-              toolCallId: 'exec-1',
-              kind: 'execute',
-              status: 'in_progress',
-              rawInput: 'ls',
+              toolCallId: "exec-1",
+              kind: "execute",
+              status: "in_progress",
+              rawInput: "ls",
             },
           },
         }),
@@ -196,9 +196,9 @@ describe('useWebViewMessages', () => {
 
     act(() => {
       window.dispatchEvent(
-        new MessageEvent('message', {
+        new MessageEvent("message", {
           data: {
-            type: 'conversationCleared',
+            type: "conversationCleared",
             data: {},
           },
         }),
@@ -209,9 +209,9 @@ describe('useWebViewMessages', () => {
 
     act(() => {
       window.dispatchEvent(
-        new MessageEvent('message', {
+        new MessageEvent("message", {
           data: {
-            type: 'streamEnd',
+            type: "streamEnd",
             data: {},
           },
         }),

@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box } from 'ink';
-import { useUIState } from '../contexts/UIStateContext.js';
-import { HistoryItemDisplay } from './HistoryItemDisplay.js';
-import { useTerminalSize } from '../hooks/useTerminalSize.js';
+import { Box } from "ink";
+import { useUIState } from "../contexts/UIStateContext.js";
+import { HistoryItemDisplay } from "./HistoryItemDisplay.js";
+import { useTerminalSize } from "../hooks/useTerminalSize.js";
 
 export const QuittingDisplay = () => {
   const uiState = useUIState();

@@ -4,34 +4,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { homedir } from 'node:os';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { homedir } from "node:os";
 import {
   FatalConfigError,
   getErrorMessage,
   isWithinRoot,
   ideContextStore,
-} from '@tram-ai/tram-core';
-import type { Settings } from './settings.js';
-import stripJsonComments from 'strip-json-comments';
-import { writeStderrLine } from '../utils/stdioHelpers.js';
+} from "@tram-ai/tram-core";
+import type { Settings } from "./settings.js";
+import stripJsonComments from "strip-json-comments";
+import { writeStderrLine } from "../utils/stdioHelpers.js";
 
-export const TRUSTED_FOLDERS_FILENAME = 'trustedFolders.json';
-export const SETTINGS_DIRECTORY_NAME = '.tram';
+export const TRUSTED_FOLDERS_FILENAME = "trustedFolders.json";
+export const SETTINGS_DIRECTORY_NAME = ".tram";
 export const USER_SETTINGS_DIR = path.join(homedir(), SETTINGS_DIRECTORY_NAME);
 
 export function getTrustedFoldersPath(): string {
-  if (process.env['TRAM_CODE_TRUSTED_FOLDERS_PATH']) {
-    return process.env['TRAM_CODE_TRUSTED_FOLDERS_PATH'];
+  if (process.env["TRAM_CODE_TRUSTED_FOLDERS_PATH"]) {
+    return process.env["TRAM_CODE_TRUSTED_FOLDERS_PATH"];
   }
   return path.join(USER_SETTINGS_DIR, TRUSTED_FOLDERS_FILENAME);
 }
 
 export enum TrustLevel {
-  TRUST_FOLDER = 'TRUST_FOLDER',
-  TRUST_PARENT = 'TRUST_PARENT',
-  DO_NOT_TRUST = 'DO_NOT_TRUST',
+  TRUST_FOLDER = "TRUST_FOLDER",
+  TRUST_PARENT = "TRUST_PARENT",
+  DO_NOT_TRUST = "DO_NOT_TRUST",
 }
 
 export interface TrustRule {
@@ -51,7 +51,7 @@ export interface TrustedFoldersFile {
 
 export interface TrustResult {
   isTrusted: boolean | undefined;
-  source: 'ide' | 'file' | undefined;
+  source: "ide" | "file" | undefined;
 }
 
 export class LoadedTrustedFolders {
@@ -139,16 +139,16 @@ export function loadTrustedFolders(): LoadedTrustedFolders {
   // Load user trusted folders
   try {
     if (fs.existsSync(userPath)) {
-      const content = fs.readFileSync(userPath, 'utf-8');
+      const content = fs.readFileSync(userPath, "utf-8");
       const parsed: unknown = JSON.parse(stripJsonComments(content));
 
       if (
-        typeof parsed !== 'object' ||
+        typeof parsed !== "object" ||
         parsed === null ||
         Array.isArray(parsed)
       ) {
         errors.push({
-          message: 'Trusted folders file is not a valid JSON object.',
+          message: "Trusted folders file is not a valid JSON object.",
           path: userPath,
         });
       } else {
@@ -182,10 +182,10 @@ export function saveTrustedFolders(
     fs.writeFileSync(
       trustedFoldersFile.path,
       JSON.stringify(trustedFoldersFile.config, null, 2),
-      { encoding: 'utf-8', mode: 0o600 },
+      { encoding: "utf-8", mode: 0o600 },
     );
   } catch (error) {
-    writeStderrLine('Error saving trusted folders file.');
+    writeStderrLine("Error saving trusted folders file.");
     writeStderrLine(error instanceof Error ? error.message : String(error));
   }
 }
@@ -210,14 +210,14 @@ function getWorkspaceTrustFromLocalConfig(
       (error) => `Error in ${error.path}: ${error.message}`,
     );
     throw new FatalConfigError(
-      `${errorMessages.join('\n')}\nPlease fix the configuration file and try again.`,
+      `${errorMessages.join("\n")}\nPlease fix the configuration file and try again.`,
     );
   }
 
   const isTrusted = folders.isPathTrusted(process.cwd());
   return {
     isTrusted,
-    source: isTrusted !== undefined ? 'file' : undefined,
+    source: isTrusted !== undefined ? "file" : undefined,
   };
 }
 
@@ -231,7 +231,7 @@ export function isWorkspaceTrusted(
 
   const ideTrust = ideContextStore.get()?.workspaceState?.isTrusted;
   if (ideTrust !== undefined) {
-    return { isTrusted: ideTrust, source: 'ide' };
+    return { isTrusted: ideTrust, source: "ide" };
   }
 
   // Fall back to the local user configuration

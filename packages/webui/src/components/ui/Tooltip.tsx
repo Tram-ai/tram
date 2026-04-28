@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 
 /**
  * Tooltip component props
@@ -15,7 +15,7 @@ export interface TooltipProps {
   /** Tooltip content (can be string or ReactNode) */
   content: React.ReactNode;
   /** Tooltip position relative to children */
-  position?: 'top' | 'bottom' | 'left' | 'right';
+  position?: "top" | "bottom" | "left" | "right";
 }
 
 /**
@@ -25,7 +25,7 @@ export interface TooltipProps {
 export const Tooltip: FC<TooltipProps> = ({
   children,
   content,
-  position = 'top',
+  position = "top",
 }) => (
   <div className="relative inline-block">
     <div className="group relative">
@@ -38,13 +38,13 @@ export const Tooltip: FC<TooltipProps> = ({
           opacity-0 group-hover:opacity-100 transition-opacity duration-150
           -translate-x-1/2 left-1/2
           ${
-            position === 'top'
-              ? '-translate-y-1 bottom-full mb-1'
-              : position === 'bottom'
-                ? 'translate-y-1 top-full mt-1'
-                : position === 'left'
-                  ? '-translate-x-full left-0 translate-y-[-50%] top-1/2'
-                  : 'translate-x-0 right-0 translate-y-[-50%] top-1/2'
+            position === "top"
+              ? "-translate-y-1 bottom-full mb-1"
+              : position === "bottom"
+                ? "translate-y-1 top-full mt-1"
+                : position === "left"
+                  ? "-translate-x-full left-0 translate-y-[-50%] top-1/2"
+                  : "translate-x-0 right-0 translate-y-[-50%] top-1/2"
           }
           pointer-events-none
         `}
@@ -55,13 +55,13 @@ export const Tooltip: FC<TooltipProps> = ({
             absolute w-2 h-2 bg-[var(--app-primary-background,#1f2937)] border-l border-b border-[var(--app-input-border,#374151)]
             -rotate-45
             ${
-              position === 'top'
-                ? 'top-full left-1/2 -translate-x-1/2 -translate-y-1/2'
-                : position === 'bottom'
-                  ? 'bottom-full left-1/2 -translate-x-1/2 translate-y-1/2'
-                  : position === 'left'
-                    ? 'right-full top-1/2 translate-x-1/2 -translate-y-1/2'
-                    : 'left-full top-1/2 -translate-x-1/2 -translate-y-1/2'
+              position === "top"
+                ? "top-full left-1/2 -translate-x-1/2 -translate-y-1/2"
+                : position === "bottom"
+                  ? "bottom-full left-1/2 -translate-x-1/2 translate-y-1/2"
+                  : position === "left"
+                    ? "right-full top-1/2 translate-x-1/2 -translate-y-1/2"
+                    : "left-full top-1/2 -translate-x-1/2 -translate-y-1/2"
             }
           `}
         />

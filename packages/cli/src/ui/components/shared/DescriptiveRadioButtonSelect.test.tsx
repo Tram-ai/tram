@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderWithProviders } from '../../../test-utils/render.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { renderWithProviders } from "../../../test-utils/render.js";
 import {
   DescriptiveRadioButtonSelect,
   type DescriptiveRadioSelectItem,
   type DescriptiveRadioButtonSelectProps,
-} from './DescriptiveRadioButtonSelect.js';
+} from "./DescriptiveRadioButtonSelect.js";
 
-vi.mock('./BaseSelectionList.js', async (importOriginal) => {
+vi.mock("./BaseSelectionList.js", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('./BaseSelectionList.js')>();
+    await importOriginal<typeof import("./BaseSelectionList.js")>();
   return {
     ...actual,
     BaseSelectionList: vi.fn(({ children, ...props }) => (
@@ -23,41 +23,41 @@ vi.mock('./BaseSelectionList.js', async (importOriginal) => {
   };
 });
 
-vi.mock('../../semantic-colors.js', () => ({
+vi.mock("../../semantic-colors.js", () => ({
   theme: {
     text: {
-      primary: 'COLOR_PRIMARY',
-      secondary: 'COLOR_SECONDARY',
+      primary: "COLOR_PRIMARY",
+      secondary: "COLOR_SECONDARY",
     },
     status: {
-      success: 'COLOR_SUCCESS',
+      success: "COLOR_SUCCESS",
     },
   },
 }));
 
-describe('DescriptiveRadioButtonSelect', () => {
+describe("DescriptiveRadioButtonSelect", () => {
   const mockOnSelect = vi.fn();
   const mockOnHighlight = vi.fn();
 
   const ITEMS: Array<DescriptiveRadioSelectItem<string>> = [
     {
-      title: 'Foo Title',
-      description: 'This is Foo.',
-      value: 'foo',
-      key: 'foo',
+      title: "Foo Title",
+      description: "This is Foo.",
+      value: "foo",
+      key: "foo",
     },
     {
-      title: 'Bar Title',
-      description: 'This is Bar.',
-      value: 'bar',
-      key: 'bar',
+      title: "Bar Title",
+      description: "This is Bar.",
+      value: "bar",
+      key: "bar",
     },
     {
-      title: 'Baz Title',
-      description: 'This is Baz.',
-      value: 'baz',
+      title: "Baz Title",
+      description: "This is Baz.",
+      value: "baz",
       disabled: true,
-      key: 'baz',
+      key: "baz",
     },
   ];
 
@@ -78,12 +78,12 @@ describe('DescriptiveRadioButtonSelect', () => {
     vi.clearAllMocks();
   });
 
-  it('should render correctly with default props', () => {
+  it("should render correctly with default props", () => {
     const { lastFrame } = renderComponent();
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render correctly with custom props', () => {
+  it("should render correctly with custom props", () => {
     const { lastFrame } = renderComponent({
       initialIndex: 1,
       isFocused: false,

@@ -9,14 +9,14 @@ import {
   getAllGeminiMdFilenames,
   loadServerHierarchicalMemory,
   TRAM_DIR,
-} from '@tram-ai/tram-core';
-import path from 'node:path';
-import os from 'node:os';
-import fs from 'node:fs/promises';
-import { MessageType } from '../types.js';
-import type { SlashCommand, SlashCommandActionReturn } from './types.js';
-import { CommandKind } from './types.js';
-import { t } from '../../i18n/index.js';
+} from "@tram-ai/tram-core";
+import path from "node:path";
+import os from "node:os";
+import fs from "node:fs/promises";
+import { MessageType } from "../types.js";
+import type { SlashCommand, SlashCommandActionReturn } from "./types.js";
+import { CommandKind } from "./types.js";
+import { t } from "../../i18n/index.js";
 
 /**
  * Read all existing memory files from the configured filenames in a directory.
@@ -29,7 +29,7 @@ async function findAllExistingMemoryFiles(
   for (const filename of getAllGeminiMdFilenames()) {
     const filePath = path.join(dir, filename);
     try {
-      const content = await fs.readFile(filePath, 'utf-8');
+      const content = await fs.readFile(filePath, "utf-8");
       if (content.trim().length > 0) {
         results.push({ filePath, content });
       }
@@ -41,26 +41,26 @@ async function findAllExistingMemoryFiles(
 }
 
 export const memoryCommand: SlashCommand = {
-  name: 'memory',
+  name: "memory",
   get description() {
-    return t('Commands for interacting with memory.');
+    return t("Commands for interacting with memory.");
   },
   kind: CommandKind.BUILT_IN,
   subCommands: [
     {
-      name: 'show',
+      name: "show",
       get description() {
-        return t('Show the current memory contents.');
+        return t("Show the current memory contents.");
       },
       kind: CommandKind.BUILT_IN,
       action: async (context) => {
-        const memoryContent = context.services.config?.getUserMemory() || '';
+        const memoryContent = context.services.config?.getUserMemory() || "";
         const fileCount = context.services.config?.getGeminiMdFileCount() || 0;
 
         const messageContent =
           memoryContent.length > 0
-            ? `${t('Current memory content from {{count}} file(s):', { count: String(fileCount) })}\n\n---\n${memoryContent}\n---`
-            : t('Memory is currently empty.');
+            ? `${t("Current memory content from {{count}} file(s):", { count: String(fileCount) })}\n\n---\n${memoryContent}\n---`
+            : t("Memory is currently empty.");
 
         context.ui.addItem(
           {
@@ -72,9 +72,9 @@ export const memoryCommand: SlashCommand = {
       },
       subCommands: [
         {
-          name: '--project',
+          name: "--project",
           get description() {
-            return t('Show project-level memory contents.');
+            return t("Show project-level memory contents.");
           },
           kind: CommandKind.BUILT_IN,
           action: async (context) => {
@@ -86,11 +86,11 @@ export const memoryCommand: SlashCommand = {
               const combined = results
                 .map((r) =>
                   t(
-                    'Project memory content from {{path}}:\n\n---\n{{content}}\n---',
+                    "Project memory content from {{path}}:\n\n---\n{{content}}\n---",
                     { path: r.filePath, content: r.content },
                   ),
                 )
-                .join('\n\n');
+                .join("\n\n");
               context.ui.addItem(
                 {
                   type: MessageType.INFO,
@@ -103,7 +103,7 @@ export const memoryCommand: SlashCommand = {
                 {
                   type: MessageType.INFO,
                   text: t(
-                    'Project memory file not found or is currently empty.',
+                    "Project memory file not found or is currently empty.",
                   ),
                 },
                 Date.now(),
@@ -112,23 +112,23 @@ export const memoryCommand: SlashCommand = {
           },
         },
         {
-          name: '--global',
+          name: "--global",
           get description() {
-            return t('Show global memory contents.');
+            return t("Show global memory contents.");
           },
           kind: CommandKind.BUILT_IN,
           action: async (context) => {
-            const globalDir = path.join(os.homedir(), QWEN_DIR);
+            const globalDir = path.join(os.homedir(), TRAM_DIR);
             const results = await findAllExistingMemoryFiles(globalDir);
 
             if (results.length > 0) {
               const combined = results
                 .map((r) =>
-                  t('Global memory content:\n\n---\n{{content}}\n---', {
+                  t("Global memory content:\n\n---\n{{content}}\n---", {
                     content: r.content,
                   }),
                 )
-                .join('\n\n');
+                .join("\n\n");
               context.ui.addItem(
                 {
                   type: MessageType.INFO,
@@ -141,7 +141,7 @@ export const memoryCommand: SlashCommand = {
                 {
                   type: MessageType.INFO,
                   text: t(
-                    'Global memory file not found or is currently empty.',
+                    "Global memory file not found or is currently empty.",
                   ),
                 },
                 Date.now(),
@@ -152,42 +152,42 @@ export const memoryCommand: SlashCommand = {
       ],
     },
     {
-      name: 'add',
+      name: "add",
       get description() {
         return t(
-          'Add content to the memory. Use --global for global memory or --project for project memory.',
+          "Add content to the memory. Use --global for global memory or --project for project memory.",
         );
       },
       kind: CommandKind.BUILT_IN,
       action: (context, args): SlashCommandActionReturn | void => {
-        if (!args || args.trim() === '') {
+        if (!args || args.trim() === "") {
           return {
-            type: 'message',
-            messageType: 'error',
+            type: "message",
+            messageType: "error",
             content: t(
-              'Usage: /memory add [--global|--project] <text to remember>',
+              "Usage: /memory add [--global|--project] <text to remember>",
             ),
           };
         }
 
         const trimmedArgs = args.trim();
-        let scope: 'global' | 'project' | undefined;
+        let scope: "global" | "project" | undefined;
         let fact: string;
 
         // Check for scope flags
-        if (trimmedArgs.startsWith('--global ')) {
-          scope = 'global';
-          fact = trimmedArgs.substring('--global '.length).trim();
-        } else if (trimmedArgs.startsWith('--project ')) {
-          scope = 'project';
-          fact = trimmedArgs.substring('--project '.length).trim();
-        } else if (trimmedArgs === '--global' || trimmedArgs === '--project') {
+        if (trimmedArgs.startsWith("--global ")) {
+          scope = "global";
+          fact = trimmedArgs.substring("--global ".length).trim();
+        } else if (trimmedArgs.startsWith("--project ")) {
+          scope = "project";
+          fact = trimmedArgs.substring("--project ".length).trim();
+        } else if (trimmedArgs === "--global" || trimmedArgs === "--project") {
           // Flag provided but no text after it
           return {
-            type: 'message',
-            messageType: 'error',
+            type: "message",
+            messageType: "error",
             content: t(
-              'Usage: /memory add [--global|--project] <text to remember>',
+              "Usage: /memory add [--global|--project] <text to remember>",
             ),
           };
         } else {
@@ -195,17 +195,17 @@ export const memoryCommand: SlashCommand = {
           fact = trimmedArgs;
         }
 
-        if (!fact || fact.trim() === '') {
+        if (!fact || fact.trim() === "") {
           return {
-            type: 'message',
-            messageType: 'error',
+            type: "message",
+            messageType: "error",
             content: t(
-              'Usage: /memory add [--global|--project] <text to remember>',
+              "Usage: /memory add [--global|--project] <text to remember>",
             ),
           };
         }
 
-        const scopeText = scope ? `(${scope})` : '';
+        const scopeText = scope ? `(${scope})` : "";
         context.ui.addItem(
           {
             type: MessageType.INFO,
@@ -218,24 +218,24 @@ export const memoryCommand: SlashCommand = {
         );
 
         return {
-          type: 'tool',
-          toolName: 'save_memory',
+          type: "tool",
+          toolName: "save_memory",
           toolArgs: scope ? { fact, scope } : { fact },
         };
       },
       subCommands: [
         {
-          name: '--project',
+          name: "--project",
           get description() {
-            return t('Add content to project-level memory.');
+            return t("Add content to project-level memory.");
           },
           kind: CommandKind.BUILT_IN,
           action: (context, args): SlashCommandActionReturn | void => {
-            if (!args || args.trim() === '') {
+            if (!args || args.trim() === "") {
               return {
-                type: 'message',
-                messageType: 'error',
-                content: t('Usage: /memory add --project <text to remember>'),
+                type: "message",
+                messageType: "error",
+                content: t("Usage: /memory add --project <text to remember>"),
               };
             }
 
@@ -250,24 +250,24 @@ export const memoryCommand: SlashCommand = {
             );
 
             return {
-              type: 'tool',
-              toolName: 'save_memory',
-              toolArgs: { fact: args.trim(), scope: 'project' },
+              type: "tool",
+              toolName: "save_memory",
+              toolArgs: { fact: args.trim(), scope: "project" },
             };
           },
         },
         {
-          name: '--global',
+          name: "--global",
           get description() {
-            return t('Add content to global memory.');
+            return t("Add content to global memory.");
           },
           kind: CommandKind.BUILT_IN,
           action: (context, args): SlashCommandActionReturn | void => {
-            if (!args || args.trim() === '') {
+            if (!args || args.trim() === "") {
               return {
-                type: 'message',
-                messageType: 'error',
-                content: t('Usage: /memory add --global <text to remember>'),
+                type: "message",
+                messageType: "error",
+                content: t("Usage: /memory add --global <text to remember>"),
               };
             }
 
@@ -282,25 +282,25 @@ export const memoryCommand: SlashCommand = {
             );
 
             return {
-              type: 'tool',
-              toolName: 'save_memory',
-              toolArgs: { fact: args.trim(), scope: 'global' },
+              type: "tool",
+              toolName: "save_memory",
+              toolArgs: { fact: args.trim(), scope: "global" },
             };
           },
         },
       ],
     },
     {
-      name: 'refresh',
+      name: "refresh",
       get description() {
-        return t('Refresh the memory from the source.');
+        return t("Refresh the memory from the source.");
       },
       kind: CommandKind.BUILT_IN,
       action: async (context) => {
         context.ui.addItem(
           {
             type: MessageType.INFO,
-            text: t('Refreshing memory from source files...'),
+            text: t("Refreshing memory from source files..."),
           },
           Date.now(),
         );
@@ -318,7 +318,7 @@ export const memoryCommand: SlashCommand = {
                 config.getExtensionContextFilePaths(),
                 config.getFolderTrust(),
                 context.services.settings.merged.context?.importFormat ||
-                  'tree', // Use setting or default to 'tree'
+                  "tree", // Use setting or default to 'tree'
               );
             config.setUserMemory(memoryContent);
             config.setGeminiMdFileCount(fileCount);
@@ -326,7 +326,7 @@ export const memoryCommand: SlashCommand = {
             const successMessage =
               memoryContent.length > 0
                 ? `Memory refreshed successfully. Loaded ${memoryContent.length} characters from ${fileCount} file(s).`
-                : 'Memory refreshed successfully. No memory content found.';
+                : "Memory refreshed successfully. No memory content found.";
 
             context.ui.addItem(
               {

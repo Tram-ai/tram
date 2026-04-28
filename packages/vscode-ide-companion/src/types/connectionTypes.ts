@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ChildProcess } from 'child_process';
+import type { ChildProcess } from "child_process";
 import type {
   RequestPermissionRequest,
   SessionNotification,
-} from '@agentclientprotocol/sdk';
+} from "@agentclientprotocol/sdk";
 import type {
   AuthenticateUpdateNotification,
   AskUserQuestionRequest,
-} from './acpTypes.js';
+} from "./acpTypes.js";
 
 export interface PendingRequest<T = unknown> {
   resolve: (value: T) => void;

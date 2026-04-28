@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   createDebugLogger,
   isDebugLoggingDegraded,
   resetDebugLoggingState,
   setDebugLogSession,
   type DebugLogSession,
-} from './debugLogger.js';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { Storage } from '../config/storage.js';
+} from "./debugLogger.js";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { Storage } from "../config/storage.js";
 
-vi.mock('node:fs', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('node:fs')>();
+vi.mock("node:fs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs")>();
   return {
     ...actual,
     promises: {
@@ -31,19 +31,19 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
-describe('debugLogger', () => {
+describe("debugLogger", () => {
   const mockSession: DebugLogSession = {
-    getSessionId: () => 'test-session-123',
+    getSessionId: () => "test-session-123",
   };
 
-  const previousDebugLogFileEnv = process.env['TRAM_DEBUG_LOG_FILE'];
+  const previousDebugLogFileEnv = process.env["TRAM_DEBUG_LOG_FILE"];
 
   beforeEach(() => {
-    process.env['QWEN_DEBUG_LOG_FILE'] = '1';
+    process.env["QWEN_DEBUG_LOG_FILE"] = "1";
     Storage.setRuntimeBaseDir(null);
     vi.clearAllMocks();
     vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-01-24T10:30:00.000Z'));
+    vi.setSystemTime(new Date("2026-01-24T10:30:00.000Z"));
     resetDebugLoggingState();
     setDebugLogSession(mockSession);
   });
@@ -53,27 +53,27 @@ describe('debugLogger', () => {
     setDebugLogSession(null);
     Storage.setRuntimeBaseDir(null);
     if (previousDebugLogFileEnv === undefined) {
-      delete process.env['TRAM_DEBUG_LOG_FILE'];
+      delete process.env["TRAM_DEBUG_LOG_FILE"];
     } else {
-      process.env['TRAM_DEBUG_LOG_FILE'] = previousDebugLogFileEnv;
+      process.env["TRAM_DEBUG_LOG_FILE"] = previousDebugLogFileEnv;
     }
   });
 
-  describe('createDebugLogger', () => {
-    it('returns no-op logger when session is unset', () => {
+  describe("createDebugLogger", () => {
+    it("returns no-op logger when session is unset", () => {
       setDebugLogSession(null);
       const logger = createDebugLogger();
       // Should not throw
-      logger.debug('test');
-      logger.info('test');
-      logger.warn('test');
-      logger.error('test');
+      logger.debug("test");
+      logger.info("test");
+      logger.warn("test");
+      logger.error("test");
       expect(fs.appendFile).not.toHaveBeenCalled();
     });
 
-    it('writes debug log with correct format', async () => {
+    it("writes debug log with correct format", async () => {
       const logger = createDebugLogger();
-      logger.debug('Hello world');
+      logger.debug("Hello world");
 
       await vi.runAllTimersAsync();
 
@@ -81,142 +81,142 @@ describe('debugLogger', () => {
         recursive: true,
       });
       expect(fs.appendFile).toHaveBeenCalledWith(
-        Storage.getDebugLogPath('test-session-123'),
-        '2026-01-24T10:30:00.000Z [DEBUG] Hello world\n',
-        'utf8',
+        Storage.getDebugLogPath("test-session-123"),
+        "2026-01-24T10:30:00.000Z [DEBUG] Hello world\n",
+        "utf8",
       );
     });
 
-    it('writes log with tag when provided', async () => {
-      const logger = createDebugLogger('STARTUP');
-      logger.info('Server started');
+    it("writes log with tag when provided", async () => {
+      const logger = createDebugLogger("STARTUP");
+      logger.info("Server started");
 
       await vi.runAllTimersAsync();
 
       expect(fs.appendFile).toHaveBeenCalledWith(
-        Storage.getDebugLogPath('test-session-123'),
-        '2026-01-24T10:30:00.000Z [INFO] [STARTUP] Server started\n',
-        'utf8',
+        Storage.getDebugLogPath("test-session-123"),
+        "2026-01-24T10:30:00.000Z [INFO] [STARTUP] Server started\n",
+        "utf8",
       );
     });
 
-    it('writes different log levels correctly', async () => {
+    it("writes different log levels correctly", async () => {
       const logger = createDebugLogger();
 
-      logger.debug('debug message');
-      logger.info('info message');
-      logger.warn('warn message');
-      logger.error('error message');
+      logger.debug("debug message");
+      logger.info("info message");
+      logger.warn("warn message");
+      logger.error("error message");
 
       await vi.runAllTimersAsync();
 
       const calls = vi.mocked(fs.appendFile).mock.calls;
-      expect(calls[0]?.[1]).toContain('[DEBUG]');
-      expect(calls[1]?.[1]).toContain('[INFO]');
-      expect(calls[2]?.[1]).toContain('[WARN]');
-      expect(calls[3]?.[1]).toContain('[ERROR]');
+      expect(calls[0]?.[1]).toContain("[DEBUG]");
+      expect(calls[1]?.[1]).toContain("[INFO]");
+      expect(calls[2]?.[1]).toContain("[WARN]");
+      expect(calls[3]?.[1]).toContain("[ERROR]");
     });
 
-    it('creates a new debug directory after the runtime base dir changes', async () => {
-      Storage.setRuntimeBaseDir(path.resolve('runtime-a'));
+    it("creates a new debug directory after the runtime base dir changes", async () => {
+      Storage.setRuntimeBaseDir(path.resolve("runtime-a"));
       const logger = createDebugLogger();
-      logger.debug('first');
+      logger.debug("first");
       await vi.runAllTimersAsync();
 
-      Storage.setRuntimeBaseDir(path.resolve('runtime-b'));
-      logger.debug('second');
+      Storage.setRuntimeBaseDir(path.resolve("runtime-b"));
+      logger.debug("second");
       await vi.runAllTimersAsync();
 
       const mkdirCalls = vi.mocked(fs.mkdir).mock.calls;
       expect(mkdirCalls).toContainEqual([
-        path.join(path.resolve('runtime-a'), 'debug'),
+        path.join(path.resolve("runtime-a"), "debug"),
         { recursive: true },
       ]);
       expect(mkdirCalls).toContainEqual([
-        path.join(path.resolve('runtime-b'), 'debug'),
+        path.join(path.resolve("runtime-b"), "debug"),
         { recursive: true },
       ]);
     });
 
-    it('formats multiple arguments', async () => {
+    it("formats multiple arguments", async () => {
       const logger = createDebugLogger();
-      logger.debug('Count:', 42, 'items');
+      logger.debug("Count:", 42, "items");
 
       await vi.runAllTimersAsync();
 
       expect(fs.appendFile).toHaveBeenCalledWith(
         expect.any(String),
-        expect.stringContaining('Count: 42 items'),
-        'utf8',
+        expect.stringContaining("Count: 42 items"),
+        "utf8",
       );
     });
 
-    it('formats Error objects with stack trace', async () => {
+    it("formats Error objects with stack trace", async () => {
       const logger = createDebugLogger();
-      const error = new Error('Something went wrong');
-      logger.error('Failed:', error);
+      const error = new Error("Something went wrong");
+      logger.error("Failed:", error);
 
       await vi.runAllTimersAsync();
 
       const call = vi.mocked(fs.appendFile).mock.calls[0];
-      expect(call?.[1]).toContain('Failed:');
-      expect(call?.[1]).toContain('Error: Something went wrong');
+      expect(call?.[1]).toContain("Failed:");
+      expect(call?.[1]).toContain("Error: Something went wrong");
     });
 
-    it('formats objects using util.inspect', async () => {
+    it("formats objects using util.inspect", async () => {
       const logger = createDebugLogger();
-      logger.debug('Data:', { foo: 'bar', count: 123 });
+      logger.debug("Data:", { foo: "bar", count: 123 });
 
       await vi.runAllTimersAsync();
 
       const call = vi.mocked(fs.appendFile).mock.calls[0];
-      expect(call?.[1]).toContain('foo');
-      expect(call?.[1]).toContain('bar');
+      expect(call?.[1]).toContain("foo");
+      expect(call?.[1]).toContain("bar");
     });
   });
 
-  describe('isDebugLoggingDegraded', () => {
-    it('returns false when no failures have occurred', () => {
+  describe("isDebugLoggingDegraded", () => {
+    it("returns false when no failures have occurred", () => {
       expect(isDebugLoggingDegraded()).toBe(false);
     });
 
-    it('returns true when mkdir fails', async () => {
+    it("returns true when mkdir fails", async () => {
       resetDebugLoggingState();
-      vi.mocked(fs.mkdir).mockRejectedValueOnce(new Error('Permission denied'));
+      vi.mocked(fs.mkdir).mockRejectedValueOnce(new Error("Permission denied"));
 
       const logger = createDebugLogger();
-      logger.debug('test');
+      logger.debug("test");
 
       await vi.runAllTimersAsync();
 
       expect(isDebugLoggingDegraded()).toBe(true);
     });
 
-    it('returns true when appendFile fails', async () => {
-      vi.mocked(fs.appendFile).mockRejectedValueOnce(new Error('Disk full'));
+    it("returns true when appendFile fails", async () => {
+      vi.mocked(fs.appendFile).mockRejectedValueOnce(new Error("Disk full"));
 
       const logger = createDebugLogger();
-      logger.debug('test');
+      logger.debug("test");
 
       await vi.runAllTimersAsync();
 
       expect(isDebugLoggingDegraded()).toBe(true);
     });
 
-    it('stays true after failure even if subsequent writes succeed', async () => {
+    it("stays true after failure even if subsequent writes succeed", async () => {
       vi.mocked(fs.appendFile).mockRejectedValueOnce(
-        new Error('Temporary error'),
+        new Error("Temporary error"),
       );
 
       const logger = createDebugLogger();
-      logger.debug('first write fails');
+      logger.debug("first write fails");
       await vi.runAllTimersAsync();
 
       expect(isDebugLoggingDegraded()).toBe(true);
 
       // Reset mock to succeed
       vi.mocked(fs.appendFile).mockResolvedValue(undefined);
-      logger.debug('second write succeeds');
+      logger.debug("second write succeeds");
       await vi.runAllTimersAsync();
 
       // Should still be degraded
@@ -224,10 +224,10 @@ describe('debugLogger', () => {
     });
   });
 
-  describe('latest debug log symlink', () => {
-    const expectedLatestPath = path.join(Storage.getGlobalDebugDir(), 'latest');
+  describe("latest debug log symlink", () => {
+    const expectedLatestPath = path.join(Storage.getGlobalDebugDir(), "latest");
 
-    it('creates a symlink to the current session log file', async () => {
+    it("creates a symlink to the current session log file", async () => {
       resetDebugLoggingState();
       setDebugLogSession(mockSession);
 
@@ -235,12 +235,12 @@ describe('debugLogger', () => {
 
       expect(fs.unlink).toHaveBeenCalledWith(expectedLatestPath);
       expect(fs.symlink).toHaveBeenCalledWith(
-        'test-session-123.txt',
+        "test-session-123.txt",
         expectedLatestPath,
       );
     });
 
-    it('does not create symlink when session is cleared', async () => {
+    it("does not create symlink when session is cleared", async () => {
       vi.clearAllMocks();
       resetDebugLoggingState();
       setDebugLogSession(null);
@@ -250,9 +250,9 @@ describe('debugLogger', () => {
       expect(fs.symlink).not.toHaveBeenCalled();
     });
 
-    it('does not fall back to copy when symlink fails', async () => {
+    it("does not fall back to copy when symlink fails", async () => {
       resetDebugLoggingState();
-      vi.mocked(fs.symlink).mockRejectedValueOnce(new Error('EPERM'));
+      vi.mocked(fs.symlink).mockRejectedValueOnce(new Error("EPERM"));
 
       setDebugLogSession(mockSession);
 
@@ -261,8 +261,8 @@ describe('debugLogger', () => {
       expect(fs.copyFile).not.toHaveBeenCalled();
     });
 
-    it('does not create symlink when debug logging is disabled', async () => {
-      process.env['TRAM_DEBUG_LOG_FILE'] = '0';
+    it("does not create symlink when debug logging is disabled", async () => {
+      process.env["TRAM_DEBUG_LOG_FILE"] = "0";
       vi.clearAllMocks();
       resetDebugLoggingState();
       setDebugLogSession(mockSession);
@@ -273,12 +273,12 @@ describe('debugLogger', () => {
     });
   });
 
-  describe('resetDebugLoggingState', () => {
-    it('resets the degraded state', async () => {
-      vi.mocked(fs.appendFile).mockRejectedValueOnce(new Error('Disk full'));
+  describe("resetDebugLoggingState", () => {
+    it("resets the degraded state", async () => {
+      vi.mocked(fs.appendFile).mockRejectedValueOnce(new Error("Disk full"));
 
       const logger = createDebugLogger();
-      logger.debug('test');
+      logger.debug("test");
       await vi.runAllTimersAsync();
 
       expect(isDebugLoggingDegraded()).toBe(true);

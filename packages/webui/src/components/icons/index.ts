@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type { IconProps } from './types.js';
+export type { IconProps } from "./types.js";
 
 // File icons
 export {
@@ -12,7 +12,7 @@ export {
   FileListIcon,
   SaveDocumentIcon,
   FolderIcon,
-} from './FileIcons.js';
+} from "./FileIcons.js";
 
 // Navigation icons
 export {
@@ -25,7 +25,7 @@ export {
   CloseSmallIcon,
   SearchIcon,
   RefreshIcon,
-} from './NavigationIcons.js';
+} from "./NavigationIcons.js";
 
 // Edit mode icons
 export {
@@ -38,7 +38,7 @@ export {
   LinkIcon,
   OpenDiffIcon,
   UndoIcon,
-} from './EditIcons.js';
+} from "./EditIcons.js";
 
 // Status icons
 export {
@@ -51,10 +51,10 @@ export {
   SelectionIcon,
   CheckIcon,
   ModelIcon,
-} from './StatusIcons.js';
+} from "./StatusIcons.js";
 
 // Special icons
-export { ThinkingIcon, TerminalIcon } from './SpecialIcons.js';
+export { ThinkingIcon, TerminalIcon } from "./SpecialIcons.js";
 
 // Stop icon
-export { StopIcon } from './StopIcon.js';
+export { StopIcon } from "./StopIcon.js";

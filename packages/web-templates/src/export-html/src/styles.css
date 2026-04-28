@@ -9,8 +9,8 @@
 
 body {
   font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
   margin: 0;
   padding: 0;
   background-color: var(--bg-primary);
@@ -68,7 +68,7 @@ body {
 }
 
 .logo-text {
-  font-family: 'Press Start 2P', cursive;
+  font-family: "Press Start 2P", cursive;
   font-weight: 400;
   font-size: 24px;
   letter-spacing: -0.05em;

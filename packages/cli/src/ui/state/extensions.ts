@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { checkExhaustive } from '../../utils/checks.js';
+import { checkExhaustive } from "../../utils/checks.js";
 
 export enum ExtensionUpdateState {
-  CHECKING_FOR_UPDATES = 'checking for updates',
-  UPDATED_NEEDS_RESTART = 'updated, needs restart',
-  UPDATING = 'updating',
-  UPDATED = 'updated',
-  UPDATE_AVAILABLE = 'update available',
-  UP_TO_DATE = 'up to date',
-  ERROR = 'error',
-  NOT_UPDATABLE = 'not updatable',
-  UNKNOWN = 'unknown',
+  CHECKING_FOR_UPDATES = "checking for updates",
+  UPDATED_NEEDS_RESTART = "updated, needs restart",
+  UPDATING = "updating",
+  UPDATED = "updated",
+  UPDATE_AVAILABLE = "update available",
+  UP_TO_DATE = "up to date",
+  ERROR = "error",
+  NOT_UPDATABLE = "not updatable",
+  UNKNOWN = "unknown",
 }
 
 export interface ExtensionUpdateStatus {
@@ -35,22 +35,22 @@ export const initialExtensionUpdatesState: ExtensionUpdatesState = {
 
 export type ExtensionUpdateAction =
   | {
-      type: 'SET_STATE';
+      type: "SET_STATE";
       payload: { name: string; state: ExtensionUpdateState };
     }
   | {
-      type: 'SET_PROCESSED';
+      type: "SET_PROCESSED";
       payload: { name: string; processed: boolean };
     }
-  | { type: 'BATCH_CHECK_START' }
-  | { type: 'BATCH_CHECK_END' };
+  | { type: "BATCH_CHECK_START" }
+  | { type: "BATCH_CHECK_END" };
 
 export function extensionUpdatesReducer(
   state: ExtensionUpdatesState,
   action: ExtensionUpdateAction,
 ): ExtensionUpdatesState {
   switch (action.type) {
-    case 'SET_STATE': {
+    case "SET_STATE": {
       const existing = state.extensionStatuses.get(action.payload.name);
       if (existing?.status === action.payload.state) {
         return state;
@@ -62,7 +62,7 @@ export function extensionUpdatesReducer(
       });
       return { ...state, extensionStatuses: newStatuses };
     }
-    case 'SET_PROCESSED': {
+    case "SET_PROCESSED": {
       const existing = state.extensionStatuses.get(action.payload.name);
       if (!existing || existing.processed === action.payload.processed) {
         return state;
@@ -74,12 +74,12 @@ export function extensionUpdatesReducer(
       });
       return { ...state, extensionStatuses: newStatuses };
     }
-    case 'BATCH_CHECK_START':
+    case "BATCH_CHECK_START":
       return {
         ...state,
         batchChecksInProgress: state.batchChecksInProgress + 1,
       };
-    case 'BATCH_CHECK_END':
+    case "BATCH_CHECK_END":
       return {
         ...state,
         batchChecksInProgress: state.batchChecksInProgress - 1,

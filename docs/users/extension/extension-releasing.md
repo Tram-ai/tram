@@ -32,11 +32,11 @@ You can also cherry pick changes from one branch into another using `git cherry-
 
 ## Releasing through Github releases
 
-Qwen Code extensions can be distributed through [GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases). This provides a faster and more reliable initial installation experience for users, as it avoids the need to clone the repository.
+TRAM extensions can be distributed through [GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases). This provides a faster and more reliable initial installation experience for users, as it avoids the need to clone the repository.
 
 Each release includes at least one archive file, which contains the full contents of the repo at the tag that it was linked to. Releases may also include [pre-built archives](#custom-pre-built-archives) if your extension requires some build step or has platform specific binaries attached to it.
 
-When checking for updates, qwen code will just look for the latest release on github (you must mark it as such when creating the release), unless the user installed a specific release by passing `--ref=<some-release-tag>`. We do not at this time support opting in to pre-release releases or semver.
+When checking for updates, TRAM will just look for the latest release on github (you must mark it as such when creating the release), unless the user installed a specific release by passing `--ref=<some-release-tag>`. We do not at this time support opting in to pre-release releases or semver.
 
 ### Custom pre-built archives
 
@@ -48,7 +48,7 @@ Custom archives may also be used if you want to develop your extension within a 
 
 #### Platform specific archives
 
-To ensure Qwen Code can automatically find the correct release asset for each platform, you must follow this naming convention. The CLI will search for assets in the following order:
+To ensure TRAM can automatically find the correct release asset for each platform, you must follow this naming convention. The CLI will search for assets in the following order:
 
 1.  **Platform and Architecture-Specific:** `{platform}.{arch}.{name}.{extension}`
 2.  **Platform-Specific:** `{platform}.{name}.{extension}`
@@ -79,7 +79,7 @@ The rest of the layout should look exactly the same as a typical extension, see 
 
 #### Example GitHub Actions workflow
 
-Here is an example of a GitHub Actions workflow that builds and releases a Qwen Code extension for multiple platforms:
+Here is an example of a GitHub Actions workflow that builds and releases a TRAM extension for multiple platforms:
 
 ```yaml
 name: Release Extension
@@ -123,7 +123,7 @@ jobs:
 
 ## Releasing through npm registry
 
-You can publish Qwen Code extensions as scoped npm packages (e.g. `@your-org/my-extension`). This is a good fit when:
+You can publish TRAM extensions as scoped npm packages (e.g. `@your-org/my-extension`). This is a good fit when:
 
 - Your team already uses npm for package distribution
 - You need private registry support with existing auth infrastructure
@@ -131,7 +131,7 @@ You can publish Qwen Code extensions as scoped npm packages (e.g. `@your-org/my-
 
 ### Package requirements
 
-Your npm package must include a `qwen-extension.json` file at the package root. This is the same config file used by all Qwen Code extensions — the npm tarball is simply another delivery mechanism.
+Your npm package must include a `qwen-extension.json` file at the package root. This is the same config file used by all TRAM extensions — the npm tarball is simply another delivery mechanism.
 
 A minimal package structure looks like:
 
@@ -182,7 +182,7 @@ qwen extensions install @your-org/my-extension --registry https://your-registry.
 
 ### Authentication for private registries
 
-Qwen Code reads npm auth credentials automatically:
+TRAM reads npm auth credentials automatically:
 
 1. **`NPM_TOKEN` environment variable** — highest priority
 2. **`.npmrc` file** — supports both host-level and path-scoped `_authToken` entries (e.g. `//your-registry.com/:_authToken=TOKEN` or `//pkgs.dev.azure.com/org/_packaging/feed/npm/registry/:_authToken=TOKEN`)

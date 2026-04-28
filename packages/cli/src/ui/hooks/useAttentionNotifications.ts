@@ -4,18 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef } from 'react';
-import { StreamingState } from '../types.js';
+import { useEffect, useRef } from "react";
+import { StreamingState } from "../types.js";
 import {
   notifyTerminalAttention,
+  notifyDesktop,
   AttentionNotificationReason,
-} from '../../utils/attentionNotification.js';
-import type { LoadedSettings } from '../../config/settings.js';
-import type { Config } from '@qwen-code/qwen-code-core';
-import {
-  fireNotificationHook,
-  NotificationType,
-} from '@qwen-code/qwen-code-core';
+} from "../../utils/attentionNotification.js";
+import type { LoadedSettings } from "../../config/settings.js";
+import type { Config } from "@tram-ai/tram-core";
+import { fireNotificationHook, NotificationType } from "@tram-ai/tram-core";
 
 export const LONG_TASK_NOTIFICATION_THRESHOLD_SECONDS = 20;
 
@@ -35,6 +33,8 @@ export const useAttentionNotifications = ({
   config,
 }: UseAttentionNotificationsOptions) => {
   const terminalBellEnabled = settings?.merged?.general?.terminalBell ?? true;
+  const desktopNotificationEnabled =
+    settings?.merged?.general?.desktopNotification ?? true;
   const awaitingNotificationSentRef = useRef(false);
   const respondingElapsedRef = useRef(0);
   const idleNotificationSentRef = useRef(false);
@@ -48,13 +48,16 @@ export const useAttentionNotifications = ({
       notifyTerminalAttention(AttentionNotificationReason.ToolApproval, {
         enabled: terminalBellEnabled,
       });
+      notifyDesktop(AttentionNotificationReason.ToolApproval, {
+        enabled: desktopNotificationEnabled,
+      });
       awaitingNotificationSentRef.current = true;
     }
 
     if (streamingState !== StreamingState.WaitingForConfirmation || isFocused) {
       awaitingNotificationSentRef.current = false;
     }
-  }, [isFocused, streamingState, terminalBellEnabled]);
+  }, [isFocused, streamingState, terminalBellEnabled, desktopNotificationEnabled]);
 
   useEffect(() => {
     if (streamingState === StreamingState.Responding) {
@@ -73,6 +76,13 @@ export const useAttentionNotifications = ({
           enabled: terminalBellEnabled,
         });
       }
+
+      // Send desktop notification whenever conversation enters idle state
+      if (!isFocused && !idleNotificationSentRef.current) {
+        notifyDesktop(AttentionNotificationReason.LongTaskComplete, {
+          enabled: desktopNotificationEnabled,
+        });
+      }
       // Reset tracking for next task
       respondingElapsedRef.current = 0;
 
@@ -83,9 +93,9 @@ export const useAttentionNotifications = ({
         if (hooksEnabled && messageBus) {
           fireNotificationHook(
             messageBus,
-            'Qwen Code is waiting for your input',
+            "TRAM is waiting for your input",
             NotificationType.IdlePrompt,
-            'Waiting for input',
+            "Waiting for input",
           ).catch(() => {
             // Silently ignore errors - fireNotificationHook has internal error handling
             // and notification hooks should not block the idle flow
@@ -98,5 +108,5 @@ export const useAttentionNotifications = ({
 
     // Reset idle notification flag when in WaitingForConfirmation state
     idleNotificationSentRef.current = false;
-  }, [streamingState, elapsedTime, isFocused, terminalBellEnabled, config]);
+  }, [streamingState, elapsedTime, isFocused, terminalBellEnabled, desktopNotificationEnabled, config]);
 };

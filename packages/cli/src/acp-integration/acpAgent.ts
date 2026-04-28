@@ -18,13 +18,13 @@ import {
   type Config,
   type ConversationRecord,
   type DeviceAuthorizationData,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import {
   AgentSideConnection,
   RequestError,
   ndJsonStream,
   PROTOCOL_VERSION,
-} from '@agentclientprotocol/sdk';
+} from "@agentclientprotocol/sdk";
 import type {
   Agent,
   AuthenticateRequest,
@@ -52,22 +52,22 @@ import type {
   SetSessionModelResponse,
   SetSessionModeRequest,
   SetSessionModeResponse,
-} from '@agentclientprotocol/sdk';
-import { buildAuthMethods } from './authMethods.js';
-import { AcpFileSystemService } from './service/filesystem.js';
-import { Readable, Writable } from 'node:stream';
-import type { LoadedSettings } from '../config/settings.js';
-import { loadSettings, SettingScope } from '../config/settings.js';
-import type { ApprovalModeValue } from './session/types.js';
-import { z } from 'zod';
-import type { CliArgs } from '../config/config.js';
-import { loadCliConfig } from '../config/config.js';
-import { Session } from './session/Session.js';
-import { formatAcpModelId } from '../utils/acpModelUtils.js';
-import { runWithAcpRuntimeOutputDir } from './runtimeOutputDirContext.js';
-import { runExitCleanup } from '../utils/cleanup.js';
+} from "@agentclientprotocol/sdk";
+import { buildAuthMethods } from "./authMethods.js";
+import { AcpFileSystemService } from "./service/filesystem.js";
+import { Readable, Writable } from "node:stream";
+import type { LoadedSettings } from "../config/settings.js";
+import { loadSettings, SettingScope } from "../config/settings.js";
+import type { ApprovalModeValue } from "./session/types.js";
+import { z } from "zod";
+import type { CliArgs } from "../config/config.js";
+import { loadCliConfig } from "../config/config.js";
+import { Session } from "./session/Session.js";
+import { formatAcpModelId } from "../utils/acpModelUtils.js";
+import { runWithAcpRuntimeOutputDir } from "./runtimeOutputDirContext.js";
+import { runExitCleanup } from "../utils/cleanup.js";
 
-const debugLogger = createDebugLogger('ACP_AGENT');
+const debugLogger = createDebugLogger("ACP_AGENT");
 
 export async function runAcpAgent(
   config: Config,
@@ -97,7 +97,7 @@ export async function runAcpAgent(
   const shutdownHandler = () => {
     if (shuttingDown) return;
     shuttingDown = true;
-    debugLogger.debug('[ACP] Shutdown signal received, closing streams');
+    debugLogger.debug("[ACP] Shutdown signal received, closing streams");
     try {
       process.stdin.destroy();
     } catch {
@@ -113,23 +113,23 @@ export async function runAcpAgent(
     // and the CLI process never terminates after the IDE disconnects.
     runExitCleanup()
       .catch((err) => {
-        debugLogger.error('[ACP] Cleanup error:', err);
+        debugLogger.error("[ACP] Cleanup error:", err);
       })
       .finally(() => {
         process.exit(0);
       });
   };
-  process.on('SIGTERM', shutdownHandler);
-  process.on('SIGINT', shutdownHandler);
+  process.on("SIGTERM", shutdownHandler);
+  process.on("SIGINT", shutdownHandler);
 
   await connection.closed;
 
-  process.off('SIGTERM', shutdownHandler);
-  process.off('SIGINT', shutdownHandler);
+  process.off("SIGTERM", shutdownHandler);
+  process.off("SIGINT", shutdownHandler);
 }
 
 function toStdioServer(server: McpServer): McpServerStdio | undefined {
-  if ('command' in server && 'args' in server && 'env' in server) {
+  if ("command" in server && "args" in server && "env" in server) {
     return server as McpServerStdio;
   }
   return undefined;
@@ -149,13 +149,13 @@ class TramAgent implements Agent {
   async initialize(args: InitializeRequest): Promise<InitializeResponse> {
     this.clientCapabilities = args.clientCapabilities;
     const authMethods = buildAuthMethods();
-    const version = process.env['CLI_VERSION'] || process.version;
+    const version = process.env["CLI_VERSION"] || process.version;
 
     return {
       protocolVersion: PROTOCOL_VERSION,
       agentInfo: {
-        name: 'tram',
-        title: 'TRAM',
+        name: "tram",
+        title: "TRAM",
         version,
       },
       authMethods,
@@ -180,7 +180,7 @@ class TramAgent implements Agent {
     let authUri: string | undefined;
     const authUriHandler = (deviceAuth: DeviceAuthorizationData) => {
       authUri = deviceAuth.verification_uri_complete;
-      void this.connection.extNotification('authenticate/update', {
+      void this.connection.extNotification("authenticate/update", {
         _meta: { authUri },
       });
     };
@@ -194,7 +194,7 @@ class TramAgent implements Agent {
       await this.config.refreshAuth(method);
       this.settings.setValue(
         SettingScope.User,
-        'security.auth.selectedType',
+        "security.auth.selectedType",
         method,
       );
     } finally {
@@ -273,7 +273,7 @@ class TramAgent implements Agent {
     const sessions: SessionInfo[] = result.items.map((item) => ({
       cwd: item.cwd,
       sessionId: item.sessionId,
-      title: item.prompt || '(session)',
+      title: item.prompt || "(session)",
       updatedAt: new Date(item.mtime).toISOString(),
     }));
 
@@ -324,14 +324,14 @@ class TramAgent implements Agent {
     }
 
     switch (configId) {
-      case 'mode': {
+      case "mode": {
         await this.setSessionMode({
           sessionId,
           modeId: value as string,
         });
         break;
       }
-      case 'model': {
+      case "model": {
         await this.unstable_setSessionModel({
           sessionId,
           modelId: value as string,
@@ -370,14 +370,14 @@ class TramAgent implements Agent {
     method: string,
     params: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
-    if (method === 'getAccountInfo') {
-      const sessionId = params['sessionId'] as string | undefined;
+    if (method === "getAccountInfo") {
+      const sessionId = params["sessionId"] as string | undefined;
       const session = sessionId ? this.sessions.get(sessionId) : undefined;
       const config = session ? session.getConfig() : this.config;
       const cfg = config.getContentGeneratorConfig();
       return {
         authType: cfg?.authType ?? config.getAuthType() ?? null,
-        model: cfg?.model ?? config.getModel() ?? null,
+        model: config.getModelName() ?? cfg?.model ?? config.getModel() ?? null,
         baseUrl: cfg?.baseUrl ?? null,
         apiKeyEnvKey: cfg?.apiKeyEnvKey ?? null,
       };
@@ -429,7 +429,7 @@ class TramAgent implements Agent {
     if (!selectedType) {
       throw RequestError.authRequired(
         { authMethods: this.pickAuthMethodsForAuthRequired() },
-        'Use TRAM CLI to authenticate first.',
+        "Use TRAM CLI to authenticate first.",
       );
     }
 
@@ -441,7 +441,7 @@ class TramAgent implements Agent {
         {
           authMethods: this.pickAuthMethodsForAuthRequired(selectedType, e),
         },
-        'Authentication failed: ' + (e as Error).message,
+        "Authentication failed: " + (e as Error).message,
       );
     }
   }
@@ -453,8 +453,8 @@ class TramAgent implements Agent {
     const authMethods = buildAuthMethods();
     const errorMessage = this.extractErrorMessage(error);
     if (
-      errorMessage?.includes('tram-oauth') ||
-      errorMessage?.includes('TRAM OAuth')
+      errorMessage?.includes("tram-oauth") ||
+      errorMessage?.includes("TRAM OAuth")
     ) {
       const tramOAuthMethods = authMethods.filter(
         (m) => m.id === AuthType.TRAM_OAUTH,
@@ -473,14 +473,14 @@ class TramAgent implements Agent {
   private extractErrorMessage(error?: unknown): string | undefined {
     if (error instanceof Error) return error.message;
     if (
-      typeof error === 'object' &&
+      typeof error === "object" &&
       error != null &&
-      'message' in error &&
-      typeof error.message === 'string'
+      "message" in error &&
+      typeof error.message === "string"
     ) {
       return error.message;
     }
-    if (typeof error === 'string') return error;
+    if (typeof error === "string") return error;
     return undefined;
   }
 
@@ -532,11 +532,11 @@ class TramAgent implements Agent {
     return session;
   }
 
-  private buildAvailableModels(config: Config): NewSessionResponse['models'] {
+  private buildAvailableModels(config: Config): NewSessionResponse["models"] {
     const rawCurrentModelId = (
       config.getModel() ||
       this.config.getModel() ||
-      ''
+      ""
     ).trim();
     const currentAuthType = config.getAuthType();
     const allConfiguredModels = config.getAllConfiguredModels();
@@ -589,7 +589,7 @@ class TramAgent implements Agent {
   private buildConfigOptions(config: Config): SessionConfigOption[] {
     const currentApprovalMode = config.getApprovalMode();
     const allConfiguredModels = config.getAllConfiguredModels();
-    const rawCurrentModelId = (config.getModel() || '').trim();
+    const rawCurrentModelId = (config.getModel() || "").trim();
     const currentAuthType = config.getAuthType?.();
 
     const activeRuntimeSnapshot = config.getActiveRuntimeModelSnapshot?.();
@@ -607,11 +607,11 @@ class TramAgent implements Agent {
     }));
 
     const modeConfigOption: SessionConfigOption = {
-      id: 'mode',
-      name: 'Mode',
-      description: 'Session permission mode',
-      category: 'mode',
-      type: 'select' as const,
+      id: "mode",
+      name: "Mode",
+      description: "Session permission mode",
+      category: "mode",
+      type: "select" as const,
       currentValue: currentApprovalMode,
       options: modeOptions,
     };
@@ -624,16 +624,16 @@ class TramAgent implements Agent {
       return {
         value: formatAcpModelId(effectiveModelId, model.authType),
         name: model.label,
-        description: model.description ?? '',
+        description: model.description ?? "",
       };
     });
 
     const modelConfigOption: SessionConfigOption = {
-      id: 'model',
-      name: 'Model',
-      description: 'AI model to use',
-      category: 'model',
-      type: 'select' as const,
+      id: "model",
+      name: "Model",
+      description: "AI model to use",
+      category: "model",
+      type: "select" as const,
       currentValue: currentModelId,
       options: modelOptions,
     };

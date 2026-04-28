@@ -21,27 +21,27 @@
  * streaming), which avoids per-chunk re-renders and keeps the display simple.
  */
 
-import { Box, Text, Static } from 'ink';
-import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { Box, Text, Static } from "ink";
+import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import {
   AgentStatus,
   AgentEventType,
   getGitBranch,
   type AgentStatusChangeEvent,
-} from '@qwen-code/qwen-code-core';
+} from "@tram-ai/tram-core";
 import {
   useAgentViewState,
   useAgentViewActions,
-} from '../../contexts/AgentViewContext.js';
-import { useUIState } from '../../contexts/UIStateContext.js';
-import { useTerminalSize } from '../../hooks/useTerminalSize.js';
-import { HistoryItemDisplay } from '../HistoryItemDisplay.js';
-import { ToolCallStatus } from '../../types.js';
-import { theme } from '../../semantic-colors.js';
-import { GeminiRespondingSpinner } from '../GeminiRespondingSpinner.js';
-import { useKeypress } from '../../hooks/useKeypress.js';
-import { agentMessagesToHistoryItems } from './agentHistoryAdapter.js';
-import { AgentHeader } from './AgentHeader.js';
+} from "../../contexts/AgentViewContext.js";
+import { useUIState } from "../../contexts/UIStateContext.js";
+import { useTerminalSize } from "../../hooks/useTerminalSize.js";
+import { HistoryItemDisplay } from "../HistoryItemDisplay.js";
+import { ToolCallStatus } from "../../types.js";
+import { theme } from "../../semantic-colors.js";
+import { GeminiRespondingSpinner } from "../GeminiRespondingSpinner.js";
+import { useKeypress } from "../../hooks/useKeypress.js";
+import { agentMessagesToHistoryItems } from "./agentHistoryAdapter.js";
+import { AgentHeader } from "./AgentHeader.js";
 
 // ─── Main Component ─────────────────────────────────────────
 
@@ -134,7 +134,7 @@ export const AgentChatView = ({ agentId }: AgentChatViewProps) => {
   // Ctrl+F: toggle shell input focus when a PTY is active.
   useKeypress(
     (key) => {
-      if (key.ctrl && key.name === 'f') {
+      if (key.ctrl && key.name === "f") {
         if (activePtyId || embeddedShellFocused) {
           setEmbeddedShellFocusedLocal((prev) => !prev);
         }
@@ -174,7 +174,7 @@ export const AgentChatView = ({ agentId }: AgentChatViewProps) => {
     for (let idx = allItems.length - 1; idx >= 0; idx--) {
       const item = allItems[idx]!;
       if (
-        item.type === 'tool_group' &&
+        item.type === "tool_group" &&
         item.tools.some(
           (t) =>
             t.status === ToolCallStatus.Executing ||
@@ -191,11 +191,11 @@ export const AgentChatView = ({ agentId }: AgentChatViewProps) => {
   const pendingItems = allItems.slice(splitIndex);
 
   const core = interactiveAgent?.getCore();
-  const agentWorkingDir = core?.runtimeContext.getTargetDir() ?? '';
+  const agentWorkingDir = core?.runtimeContext.getTargetDir() ?? "";
   // Cache the branch — it won't change during the agent's lifetime and
   // getGitBranch uses synchronous execSync which blocks the render loop.
   const agentGitBranch = useMemo(
-    () => (agentWorkingDir ? getGitBranch(agentWorkingDir) : ''),
+    () => (agentWorkingDir ? getGitBranch(agentWorkingDir) : ""),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [agentId],
   );
@@ -210,7 +210,7 @@ export const AgentChatView = ({ agentId }: AgentChatViewProps) => {
     );
   }
 
-  const agentModelId = core.modelConfig.model ?? '';
+  const agentModelId = core.modelConfig.model ?? "";
 
   return (
     <Box flexDirection="column">

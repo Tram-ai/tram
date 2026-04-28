@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import stringWidth from 'string-width';
-import { createDebugLogger } from '@tram-ai/tram-core';
+import React from "react";
+import { Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import stringWidth from "string-width";
+import { createDebugLogger } from "@tram-ai/tram-core";
 
 // Constants for Markdown parsing
 const BOLD_MARKER_LENGTH = 2; // For "**"
@@ -18,7 +18,7 @@ const INLINE_CODE_MARKER_LENGTH = 1; // For "`"
 const UNDERLINE_TAG_START_LENGTH = 3; // For "<u>"
 const UNDERLINE_TAG_END_LENGTH = 4; // For "</u>"
 
-const debugLogger = createDebugLogger('INLINE_MARKDOWN');
+const debugLogger = createDebugLogger("INLINE_MARKDOWN");
 
 interface RenderInlineProps {
   text: string;
@@ -55,8 +55,8 @@ const RenderInlineInternal: React.FC<RenderInlineProps> = ({
 
     try {
       if (
-        fullMatch.startsWith('**') &&
-        fullMatch.endsWith('**') &&
+        fullMatch.startsWith("**") &&
+        fullMatch.endsWith("**") &&
         fullMatch.length > BOLD_MARKER_LENGTH * 2
       ) {
         renderedNode = (
@@ -66,8 +66,8 @@ const RenderInlineInternal: React.FC<RenderInlineProps> = ({
         );
       } else if (
         fullMatch.length > ITALIC_MARKER_LENGTH * 2 &&
-        ((fullMatch.startsWith('*') && fullMatch.endsWith('*')) ||
-          (fullMatch.startsWith('_') && fullMatch.endsWith('_'))) &&
+        ((fullMatch.startsWith("*") && fullMatch.endsWith("*")) ||
+          (fullMatch.startsWith("_") && fullMatch.endsWith("_"))) &&
         !/\w/.test(text.substring(match.index - 1, match.index)) &&
         !/\w/.test(
           text.substring(inlineRegex.lastIndex, inlineRegex.lastIndex + 1),
@@ -83,8 +83,8 @@ const RenderInlineInternal: React.FC<RenderInlineProps> = ({
           </Text>
         );
       } else if (
-        fullMatch.startsWith('~~') &&
-        fullMatch.endsWith('~~') &&
+        fullMatch.startsWith("~~") &&
+        fullMatch.endsWith("~~") &&
         fullMatch.length > STRIKETHROUGH_MARKER_LENGTH * 2
       ) {
         renderedNode = (
@@ -96,8 +96,8 @@ const RenderInlineInternal: React.FC<RenderInlineProps> = ({
           </Text>
         );
       } else if (
-        fullMatch.startsWith('`') &&
-        fullMatch.endsWith('`') &&
+        fullMatch.startsWith("`") &&
+        fullMatch.endsWith("`") &&
         fullMatch.length > INLINE_CODE_MARKER_LENGTH
       ) {
         const codeMatch = fullMatch.match(/^(`+)(.+?)\1$/s);
@@ -109,9 +109,9 @@ const RenderInlineInternal: React.FC<RenderInlineProps> = ({
           );
         }
       } else if (
-        fullMatch.startsWith('[') &&
-        fullMatch.includes('](') &&
-        fullMatch.endsWith(')')
+        fullMatch.startsWith("[") &&
+        fullMatch.includes("](") &&
+        fullMatch.endsWith(")")
       ) {
         const linkMatch = fullMatch.match(/\[(.*?)\]\((.*?)\)/);
         if (linkMatch) {
@@ -125,8 +125,8 @@ const RenderInlineInternal: React.FC<RenderInlineProps> = ({
           );
         }
       } else if (
-        fullMatch.startsWith('<u>') &&
-        fullMatch.endsWith('</u>') &&
+        fullMatch.startsWith("<u>") &&
+        fullMatch.endsWith("</u>") &&
         fullMatch.length >
           UNDERLINE_TAG_START_LENGTH + UNDERLINE_TAG_END_LENGTH - 1 // -1 because length is compared to combined length of start and end tags
       ) {
@@ -146,7 +146,7 @@ const RenderInlineInternal: React.FC<RenderInlineProps> = ({
         );
       }
     } catch (e) {
-      debugLogger.error('Error parsing inline markdown part:', fullMatch, e);
+      debugLogger.error("Error parsing inline markdown part:", fullMatch, e);
       renderedNode = null;
     }
 
@@ -169,12 +169,12 @@ export const RenderInline = React.memo(RenderInlineInternal);
  */
 export const getPlainTextLength = (text: string): number => {
   const cleanText = text
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/\*(.*?)\*/g, '$1')
-    .replace(/_(.*?)_/g, '$1')
-    .replace(/~~(.*?)~~/g, '$1')
-    .replace(/`(.*?)`/g, '$1')
-    .replace(/<u>(.*?)<\/u>/g, '$1')
-    .replace(/.*\[(.*?)\]\(.*\)/g, '$1');
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/_(.*?)_/g, "$1")
+    .replace(/~~(.*?)~~/g, "$1")
+    .replace(/`(.*?)`/g, "$1")
+    .replace(/<u>(.*?)<\/u>/g, "$1")
+    .replace(/.*\[(.*?)\]\(.*\)/g, "$1");
   return stringWidth(cleanText);
 };

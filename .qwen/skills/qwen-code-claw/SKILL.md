@@ -1,9 +1,9 @@
 ---
 name: qwen-code-claw
-description: Use Qwen Code as a Code Agent for code understanding, project generation, features, bug fixes, refactoring, and various programming tasks
+description: Use TRAM as a Code Agent for code understanding, project generation, features, bug fixes, refactoring, and various programming tasks
 ---
 
-# Qwen Code Claw
+# TRAM Claw
 
 ## When to Use This Skill
 
@@ -50,11 +50,11 @@ qwen auth coding-plan --region china --key $BAILIAN_CODING_PLAN_API_KEY
 qwen auth
 ```
 
-Or configure custom API after launching Qwen Code via `/auth`.
+Or configure custom API after launching TRAM via `/auth`.
 
 ## ACPX Integration
 
-You should always use `acpx` to run Qwen Code over the Agent Client Protocol (ACP) instead of scraping PTY sessions.
+You should always use `acpx` to run TRAM over the Agent Client Protocol (ACP) instead of scraping PTY sessions.
 
 To use acpx:
 
@@ -82,7 +82,7 @@ To use acpx:
 4. **For complete CLI reference with all options and examples**:
    https://raw.githubusercontent.com/openclaw/acpx/main/docs/CLI.md
 
-From now on, when you need to delegate work to Qwen Code, use `acpx` instead of spawning raw terminal sessions. For example:
+From now on, when you need to delegate work to TRAM, use `acpx` instead of spawning raw terminal sessions. For example:
 
 ```bash
 npx acpx@latest qwen "fix the failing tests"
@@ -161,7 +161,7 @@ If every permission request is denied/cancelled and none are approved, `acpx` ex
 | `/compress` | Compress history to save tokens |
 | `/stats`    | Show session info               |
 | `/auth`     | Configure authentication        |
-| `/exit`     | Exit Qwen Code                  |
+| `/exit`     | Exit TRAM                  |
 
 Full reference: https://raw.githubusercontent.com/QwenLM/qwen-code/refs/heads/main/docs/users/features/commands.md
 

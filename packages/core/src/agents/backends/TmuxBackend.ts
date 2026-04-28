@@ -22,10 +22,10 @@
  * using `tiled` layout in a separate session/window.
  */
 
-import { createDebugLogger } from '../../utils/debugLogger.js';
-import type { AnsiOutput } from '../../utils/terminalSerializer.js';
-import { DISPLAY_MODE } from './types.js';
-import type { AgentSpawnConfig, AgentExitCallback, Backend } from './types.js';
+import { createDebugLogger } from "../../utils/debugLogger.js";
+import type { AnsiOutput } from "../../utils/terminalSerializer.js";
+import { DISPLAY_MODE } from "./types.js";
+import type { AgentSpawnConfig, AgentExitCallback, Backend } from "./types.js";
 import {
   verifyTmux,
   tmuxCurrentWindowTarget,
@@ -48,26 +48,26 @@ import {
   tmuxResizePane,
   tmuxGetFirstPaneId,
   type TmuxPaneInfo,
-} from './tmux-commands.js';
+} from "./tmux-commands.js";
 
-const debugLogger = createDebugLogger('TMUX_BACKEND');
+const debugLogger = createDebugLogger("TMUX_BACKEND");
 
 /** Polling interval for exit detection (ms) */
 const EXIT_POLL_INTERVAL_MS = 500;
 
 /** Default tmux server name prefix (for -L) when running outside tmux.
  *  Actual name is `${prefix}-${process.pid}` so each leader process is isolated. */
-const TMUX_SERVER_PREFIX = 'arena-server';
+const TMUX_SERVER_PREFIX = "arena-server";
 /** Default tmux session name when running outside tmux */
-const DEFAULT_TMUX_SESSION = 'arena-view';
+const DEFAULT_TMUX_SESSION = "arena-view";
 /** Default tmux window name when running outside tmux */
-const DEFAULT_TMUX_WINDOW = 'arena-view';
+const DEFAULT_TMUX_WINDOW = "arena-view";
 /** Default leader pane width percent (main pane) */
 const DEFAULT_LEADER_WIDTH_PERCENT = 30;
 /** Default first split percent (right side) */
 const DEFAULT_FIRST_SPLIT_PERCENT = 70;
 /** Default pane border format */
-const DEFAULT_PANE_BORDER_FORMAT = '#{pane_title}';
+const DEFAULT_PANE_BORDER_FORMAT = "#{pane_title}";
 /** Layout settle delays */
 const INTERNAL_LAYOUT_SETTLE_MS = 200;
 const EXTERNAL_LAYOUT_SETTLE_MS = 120;
@@ -75,7 +75,7 @@ const EXTERNAL_LAYOUT_SETTLE_MS = 120;
 interface TmuxAgentPane {
   agentId: string;
   paneId: string;
-  status: 'running' | 'exited';
+  status: "running" | "exited";
   exitCode: number;
 }
 
@@ -87,7 +87,7 @@ interface ResolvedTmuxOptions {
   paneBorderStyle?: string;
   paneActiveBorderStyle?: string;
   paneBorderFormat: string;
-  paneBorderStatus?: 'top' | 'bottom' | 'off';
+  paneBorderStatus?: "top" | "bottom" | "off";
   leaderPaneWidthPercent: number;
   firstSplitPercent: number;
 }
@@ -96,9 +96,9 @@ export class TmuxBackend implements Backend {
   readonly type = DISPLAY_MODE.TMUX;
 
   /** The pane ID where the main process runs (left side) */
-  private mainPaneId = '';
+  private mainPaneId = "";
   /** Window target (session:window) */
-  private windowTarget = '';
+  private windowTarget = "";
   /** Whether we are running inside tmux */
   private insideTmux = false;
   /** External tmux server name (when outside tmux) */
@@ -126,7 +126,7 @@ export class TmuxBackend implements Backend {
     // Verify tmux is available and version is sufficient
     await verifyTmux();
 
-    this.insideTmux = Boolean(process.env['TMUX']);
+    this.insideTmux = Boolean(process.env["TMUX"]);
 
     if (this.insideTmux) {
       // Get the current pane ID (this is where the main process runs)
@@ -137,7 +137,7 @@ export class TmuxBackend implements Backend {
       );
     } else {
       debugLogger.info(
-        'Initialized outside tmux; will use external tmux server',
+        "Initialized outside tmux; will use external tmux server",
       );
     }
 
@@ -148,7 +148,7 @@ export class TmuxBackend implements Backend {
 
   async spawnAgent(config: AgentSpawnConfig): Promise<void> {
     if (!this.initialized) {
-      throw new Error('TmuxBackend not initialized. Call init() first.');
+      throw new Error("TmuxBackend not initialized. Call init() first.");
     }
     if (this.panes.has(config.agentId)) {
       throw new Error(`Agent "${config.agentId}" already exists.`);
@@ -184,7 +184,7 @@ export class TmuxBackend implements Backend {
       `[spawnAgentAsync] Starting spawn for agent "${agentId}", mainPane="${this.mainPaneId}", currentPanesCount=${this.panes.size}`,
     );
     try {
-      let paneId = '';
+      let paneId = "";
       if (this.insideTmux) {
         paneId = await this.spawnInsideTmux(cmd, options);
       } else {
@@ -194,7 +194,7 @@ export class TmuxBackend implements Backend {
       const serverName = this.getServerName();
 
       // Set remain-on-exit so we can detect when the process exits
-      await tmuxSetOption(paneId, 'remain-on-exit', 'on', serverName);
+      await tmuxSetOption(paneId, "remain-on-exit", "on", serverName);
 
       // Apply pane title/border styling
       await this.applyPaneDecorations(paneId, options, serverName);
@@ -213,7 +213,7 @@ export class TmuxBackend implements Backend {
       const agentPane: TmuxAgentPane = {
         agentId,
         paneId,
-        status: 'running',
+        status: "running",
         exitCode: 0,
       };
 
@@ -239,8 +239,8 @@ export class TmuxBackend implements Backend {
       // Still register the agent as failed so exit callback fires
       this.panes.set(agentId, {
         agentId,
-        paneId: '',
-        status: 'exited',
+        paneId: "",
+        status: "exited",
         exitCode: 1,
       });
       this.agentOrder.push(agentId);
@@ -261,15 +261,15 @@ export class TmuxBackend implements Backend {
       try {
         // Method 1: Emit resize event on stdout (Ink listens to this)
         if (process.stdout.isTTY) {
-          process.stdout.emit('resize');
+          process.stdout.emit("resize");
           debugLogger.info(
-            '[triggerMainProcessRedraw] Emitted stdout resize event',
+            "[triggerMainProcessRedraw] Emitted stdout resize event",
           );
         }
 
         // Method 2: Send SIGWINCH signal
-        process.kill(process.pid, 'SIGWINCH');
-        debugLogger.info('[triggerMainProcessRedraw] Sent SIGWINCH');
+        process.kill(process.pid, "SIGWINCH");
+        debugLogger.info("[triggerMainProcessRedraw] Sent SIGWINCH");
       } catch (error) {
         debugLogger.info(`[triggerMainProcessRedraw] Failed: ${error}`);
       }
@@ -278,23 +278,23 @@ export class TmuxBackend implements Backend {
 
   stopAgent(agentId: string): void {
     const pane = this.panes.get(agentId);
-    if (!pane || pane.status !== 'running') return;
+    if (!pane || pane.status !== "running") return;
     // Kill the pane outright — a single Ctrl-C only cancels the current
     // turn in interactive CLI agents and does not reliably exit the process.
     if (pane.paneId) {
       void tmuxKillPane(pane.paneId, this.getServerName());
     }
-    pane.status = 'exited';
+    pane.status = "exited";
     debugLogger.info(`Killed pane for agent "${agentId}"`);
   }
 
   stopAll(): void {
     for (const [agentId, pane] of this.panes.entries()) {
-      if (pane.status === 'running') {
+      if (pane.status === "running") {
         if (pane.paneId) {
           void tmuxKillPane(pane.paneId, this.getServerName());
         }
-        pane.status = 'exited';
+        pane.status = "exited";
         debugLogger.info(`Killed pane for agent "${agentId}"`);
       }
     }
@@ -339,8 +339,8 @@ export class TmuxBackend implements Backend {
     this.serverName = null;
     this.sessionName = null;
     this.windowName = null;
-    this.windowTarget = '';
-    this.mainPaneId = '';
+    this.windowTarget = "";
+    this.mainPaneId = "";
   }
 
   setOnAgentExit(callback: AgentExitCallback): void {
@@ -383,14 +383,14 @@ export class TmuxBackend implements Backend {
 
   switchToNext(): void {
     if (this.agentOrder.length <= 1) return;
-    const currentIndex = this.agentOrder.indexOf(this.activeAgentId ?? '');
+    const currentIndex = this.agentOrder.indexOf(this.activeAgentId ?? "");
     const nextIndex = (currentIndex + 1) % this.agentOrder.length;
     this.switchTo(this.agentOrder[nextIndex]!);
   }
 
   switchToPrevious(): void {
     if (this.agentOrder.length <= 1) return;
-    const currentIndex = this.agentOrder.indexOf(this.activeAgentId ?? '');
+    const currentIndex = this.agentOrder.indexOf(this.activeAgentId ?? "");
     const prevIndex =
       (currentIndex - 1 + this.agentOrder.length) % this.agentOrder.length;
     this.switchTo(this.agentOrder[prevIndex]!);
@@ -432,7 +432,7 @@ export class TmuxBackend implements Backend {
 
   writeToAgent(agentId: string, data: string): boolean {
     const pane = this.panes.get(agentId);
-    if (!pane || pane.status !== 'running') return false;
+    if (!pane || pane.status !== "running") return false;
     void tmuxSendKeys(
       pane.paneId,
       data,
@@ -474,7 +474,7 @@ export class TmuxBackend implements Backend {
       paneActiveBorderStyle: opts.paneActiveBorderStyle,
       paneBorderFormat: opts.paneBorderFormat ?? DEFAULT_PANE_BORDER_FORMAT,
       paneBorderStatus:
-        opts.paneBorderStatus ?? (this.insideTmux ? undefined : 'top'),
+        opts.paneBorderStatus ?? (this.insideTmux ? undefined : "top"),
       leaderPaneWidthPercent:
         opts.leaderPaneWidthPercent ?? DEFAULT_LEADER_WIDTH_PERCENT,
       firstSplitPercent: opts.firstSplitPercent ?? DEFAULT_FIRST_SPLIT_PERCENT,
@@ -537,7 +537,7 @@ export class TmuxBackend implements Backend {
     options: ResolvedTmuxOptions,
   ): Promise<string> {
     if (!this.windowTarget) {
-      throw new Error('Tmux window target not initialized.');
+      throw new Error("Tmux window target not initialized.");
     }
 
     const panes = await tmuxListPanes(this.windowTarget);
@@ -556,7 +556,7 @@ export class TmuxBackend implements Backend {
     const splitTarget = this.pickMiddlePane(panes).paneId;
     const horizontal = this.shouldSplitHorizontally(paneCount);
     debugLogger.info(
-      `[spawnInsideTmux] Split from middle pane ${splitTarget} (${paneCount} panes, ${horizontal ? 'horizontal' : 'vertical'})`,
+      `[spawnInsideTmux] Split from middle pane ${splitTarget} (${paneCount} panes, ${horizontal ? "horizontal" : "vertical"})`,
     );
     return await tmuxSplitWindow(splitTarget, {
       horizontal,
@@ -571,7 +571,7 @@ export class TmuxBackend implements Backend {
   ): Promise<string> {
     await this.ensureExternalSession(config, options);
     if (!this.windowTarget) {
-      throw new Error('External tmux window target not initialized.');
+      throw new Error("External tmux window target not initialized.");
     }
 
     const serverName = this.getServerName();
@@ -593,7 +593,7 @@ export class TmuxBackend implements Backend {
     const splitTarget = this.pickMiddlePane(panes).paneId;
     const horizontal = this.shouldSplitHorizontally(panes.length);
     debugLogger.info(
-      `[spawnOutsideTmux] Split from middle pane ${splitTarget} (${panes.length} panes, ${horizontal ? 'horizontal' : 'vertical'})`,
+      `[spawnOutsideTmux] Split from middle pane ${splitTarget} (${panes.length} panes, ${horizontal ? "horizontal" : "vertical"})`,
     );
     return await tmuxSplitWindow(
       splitTarget,
@@ -604,7 +604,7 @@ export class TmuxBackend implements Backend {
 
   private pickMiddlePane(panes: TmuxPaneInfo[]): TmuxPaneInfo {
     if (panes.length === 0) {
-      throw new Error('No panes available to split.');
+      throw new Error("No panes available to split.");
     }
     return panes[Math.floor(panes.length / 2)]!;
   }
@@ -623,7 +623,7 @@ export class TmuxBackend implements Backend {
     if (options.paneBorderStatus) {
       await tmuxSetOption(
         this.windowTarget,
-        'pane-border-status',
+        "pane-border-status",
         options.paneBorderStatus,
         serverName,
       );
@@ -632,7 +632,7 @@ export class TmuxBackend implements Backend {
     if (options.paneBorderFormat) {
       await tmuxSetOption(
         this.windowTarget,
-        'pane-border-format',
+        "pane-border-format",
         options.paneBorderFormat,
         serverName,
       );
@@ -641,7 +641,7 @@ export class TmuxBackend implements Backend {
     if (options.paneBorderStyle) {
       await tmuxSetOption(
         this.windowTarget,
-        'pane-border-style',
+        "pane-border-style",
         options.paneBorderStyle,
         serverName,
       );
@@ -651,7 +651,7 @@ export class TmuxBackend implements Backend {
     if (options.paneActiveBorderStyle) {
       await tmuxSetOption(
         this.windowTarget,
-        'pane-active-border-style',
+        "pane-active-border-style",
         options.paneActiveBorderStyle,
         serverName,
       );
@@ -662,7 +662,7 @@ export class TmuxBackend implements Backend {
 
   private async applyInsideLayout(options: ResolvedTmuxOptions): Promise<void> {
     if (!this.windowTarget || !this.mainPaneId) return;
-    await tmuxSelectLayout(this.windowTarget, 'main-vertical');
+    await tmuxSelectLayout(this.windowTarget, "main-vertical");
     await tmuxResizePane(this.mainPaneId, {
       width: `${options.leaderPaneWidthPercent}%`,
     });
@@ -670,7 +670,7 @@ export class TmuxBackend implements Backend {
 
   private async applyExternalLayout(serverName?: string): Promise<void> {
     if (!this.windowTarget) return;
-    await tmuxSelectLayout(this.windowTarget, 'tiled', serverName);
+    await tmuxSelectLayout(this.windowTarget, "tiled", serverName);
   }
 
   private async sleep(ms: number): Promise<void> {
@@ -694,12 +694,12 @@ export class TmuxBackend implements Backend {
     // cd to the working directory first
     const parts = [`cd ${shellQuote(config.cwd)}`];
     if (envParts.length > 0) {
-      parts.push(`env ${envParts.join(' ')} ${cmdParts.join(' ')}`);
+      parts.push(`env ${envParts.join(" ")} ${cmdParts.join(" ")}`);
     } else {
-      parts.push(cmdParts.join(' '));
+      parts.push(cmdParts.join(" "));
     }
 
-    const fullCommand = parts.join(' && ');
+    const fullCommand = parts.join(" && ");
     debugLogger.info(
       `[buildShellCommand] agentId=${config.agentId}, command=${config.command}, args=${JSON.stringify(config.args)}, cwd=${config.cwd}`,
     );
@@ -711,7 +711,7 @@ export class TmuxBackend implements Backend {
     if (this.pendingSpawns > 0) return false;
     if (this.panes.size === 0) return true;
     for (const pane of this.panes.values()) {
-      if (pane.status === 'running') return false;
+      if (pane.status === "running") return false;
     }
     return true;
   }
@@ -771,12 +771,12 @@ export class TmuxBackend implements Backend {
     }
 
     for (const agent of this.panes.values()) {
-      if (agent.status !== 'running') continue;
+      if (agent.status !== "running") continue;
 
       const info = paneMap.get(agent.paneId);
       if (!info) {
         // Pane was killed externally — treat as exited
-        agent.status = 'exited';
+        agent.status = "exited";
         agent.exitCode = 1;
         debugLogger.info(
           `[pollPaneStatus] Agent "${agent.agentId}" pane ${agent.paneId} not found in tmux list — marking as exited`,
@@ -786,7 +786,7 @@ export class TmuxBackend implements Backend {
       }
 
       if (info.dead) {
-        agent.status = 'exited';
+        agent.status = "exited";
         agent.exitCode = info.deadStatus;
 
         debugLogger.info(

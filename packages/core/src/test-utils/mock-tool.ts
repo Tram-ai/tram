@@ -7,18 +7,18 @@
 import type {
   ModifiableDeclarativeTool,
   ModifyContext,
-} from '../tools/modifiable-tool.js';
+} from "../tools/modifiable-tool.js";
 import type {
   ToolCallConfirmationDetails,
   ToolInvocation,
   ToolResult,
-} from '../tools/tools.js';
-import type { PermissionDecision } from '../permissions/types.js';
+} from "../tools/tools.js";
+import type { PermissionDecision } from "../permissions/types.js";
 import {
   BaseDeclarativeTool,
   BaseToolInvocation,
   Kind,
-} from '../tools/tools.js';
+} from "../tools/tools.js";
 
 interface MockToolOptions {
   name: string;
@@ -108,7 +108,7 @@ export class MockTool extends BaseDeclarativeTool<
       this.getDefaultPermission = options.getDefaultPermission;
     } else {
       this.getDefaultPermission = () =>
-        Promise.resolve('allow' as PermissionDecision);
+        Promise.resolve("allow" as PermissionDecision);
     }
 
     if (options.getConfirmationDetails) {
@@ -141,14 +141,14 @@ export class MockTool extends BaseDeclarativeTool<
 }
 
 export const MOCK_TOOL_GET_DEFAULT_PERMISSION = () =>
-  Promise.resolve('ask' as PermissionDecision);
+  Promise.resolve("ask" as PermissionDecision);
 
 export const MOCK_TOOL_GET_CONFIRMATION_DETAILS = () =>
   Promise.resolve({
-    type: 'exec' as const,
-    title: 'Confirm mockTool',
-    command: 'mockTool',
-    rootCommand: 'mockTool',
+    type: "exec" as const,
+    title: "Confirm mockTool",
+    command: "mockTool",
+    rootCommand: "mockTool",
     onConfirm: async () => {},
   });
 
@@ -174,20 +174,20 @@ export class MockModifiableToolInvocation extends BaseToolInvocation<
   }
 
   override async getDefaultPermission(): Promise<PermissionDecision> {
-    return this.tool.shouldConfirm ? 'ask' : 'allow';
+    return this.tool.shouldConfirm ? "ask" : "allow";
   }
 
   override async getConfirmationDetails(
     _abortSignal: AbortSignal,
   ): Promise<ToolCallConfirmationDetails> {
     return {
-      type: 'edit',
-      title: 'Confirm Mock Tool',
-      fileName: 'test.txt',
-      filePath: 'test.txt',
-      fileDiff: 'diff',
-      originalContent: 'originalContent',
-      newContent: 'newContent',
+      type: "edit",
+      title: "Confirm Mock Tool",
+      fileName: "test.txt",
+      filePath: "test.txt",
+      fileDiff: "diff",
+      originalContent: "originalContent",
+      newContent: "newContent",
       onConfirm: async () => {},
     };
   }
@@ -210,10 +210,10 @@ export class MockModifiableTool
     undefined;
   shouldConfirm = true;
 
-  constructor(name = 'mockModifiableTool') {
-    super(name, name, 'A mock modifiable tool for testing.', Kind.Other, {
-      type: 'object',
-      properties: { param: { type: 'string' } },
+  constructor(name = "mockModifiableTool") {
+    super(name, name, "A mock modifiable tool for testing.", Kind.Other, {
+      type: "object",
+      properties: { param: { type: "string" } },
     });
   }
 
@@ -221,9 +221,9 @@ export class MockModifiableTool
     _abortSignal: AbortSignal,
   ): ModifyContext<Record<string, unknown>> {
     return {
-      getFilePath: () => 'test.txt',
-      getCurrentContent: async () => 'old content',
-      getProposedContent: async () => 'new content',
+      getFilePath: () => "test.txt",
+      getCurrentContent: async () => "old content",
+      getProposedContent: async () => "new content",
       createUpdatedParams: (
         _oldContent: string,
         modifiedProposedContent: string,

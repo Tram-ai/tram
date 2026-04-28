@@ -4,19 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { mcpCommand } from './mcpCommand.js';
-import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import { mcpCommand } from "./mcpCommand.js";
+import { createMockCommandContext } from "../../test-utils/mockCommandContext.js";
 import {
   MCPServerStatus,
   MCPDiscoveryState,
   getMCPServerStatus,
   getMCPDiscoveryState,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 
-vi.mock('@tram-ai/tram-core', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@tram-ai/tram-core')>();
+vi.mock("@tram-ai/tram-core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tram-ai/tram-core")>();
   const mockAuthenticate = vi.fn();
   return {
     ...actual,
@@ -32,7 +31,7 @@ vi.mock('@tram-ai/tram-core', async (importOriginal) => {
   };
 });
 
-describe('mcpCommand', () => {
+describe("mcpCommand", () => {
   let mockContext: ReturnType<typeof createMockCommandContext>;
   let mockConfig: {
     getToolRegistry: ReturnType<typeof vi.fn>;
@@ -75,78 +74,78 @@ describe('mcpCommand', () => {
     });
   });
 
-  describe('basic functionality', () => {
-    it('should open MCP management dialog by default', async () => {
-      const result = await mcpCommand.action!(mockContext, '');
+  describe("basic functionality", () => {
+    it("should open MCP management dialog by default", async () => {
+      const result = await mcpCommand.action!(mockContext, "");
 
       expect(result).toEqual({
-        type: 'dialog',
-        dialog: 'mcp',
+        type: "dialog",
+        dialog: "mcp",
       });
     });
 
-    it('should open MCP management dialog even if config is not available', async () => {
+    it("should open MCP management dialog even if config is not available", async () => {
       const contextWithoutConfig = createMockCommandContext({
         services: {
           config: null,
         },
       });
 
-      const result = await mcpCommand.action!(contextWithoutConfig, '');
+      const result = await mcpCommand.action!(contextWithoutConfig, "");
 
       expect(result).toEqual({
-        type: 'dialog',
-        dialog: 'mcp',
+        type: "dialog",
+        dialog: "mcp",
       });
     });
 
-    it('should open MCP management dialog even if tool registry is not available', async () => {
+    it("should open MCP management dialog even if tool registry is not available", async () => {
       mockConfig.getToolRegistry = vi.fn().mockReturnValue(undefined);
 
-      const result = await mcpCommand.action!(mockContext, '');
+      const result = await mcpCommand.action!(mockContext, "");
 
       expect(result).toEqual({
-        type: 'dialog',
-        dialog: 'mcp',
+        type: "dialog",
+        dialog: "mcp",
       });
     });
   });
 
-  describe('with configured MCP servers', () => {
+  describe("with configured MCP servers", () => {
     beforeEach(() => {
       const mockMcpServers = {
-        server1: { command: 'cmd1' },
-        server2: { command: 'cmd2' },
-        server3: { command: 'cmd3' },
+        server1: { command: "cmd1" },
+        server2: { command: "cmd2" },
+        server3: { command: "cmd3" },
       };
 
       mockConfig.getMcpServers = vi.fn().mockReturnValue(mockMcpServers);
     });
 
-    it('should open MCP management dialog regardless of server configuration', async () => {
-      const result = await mcpCommand.action!(mockContext, '');
+    it("should open MCP management dialog regardless of server configuration", async () => {
+      const result = await mcpCommand.action!(mockContext, "");
 
       expect(result).toEqual({
-        type: 'dialog',
-        dialog: 'mcp',
+        type: "dialog",
+        dialog: "mcp",
       });
     });
 
-    it('should open MCP management dialog with desc argument', async () => {
-      const result = await mcpCommand.action!(mockContext, 'desc');
+    it("should open MCP management dialog with desc argument", async () => {
+      const result = await mcpCommand.action!(mockContext, "desc");
 
       expect(result).toEqual({
-        type: 'dialog',
-        dialog: 'mcp',
+        type: "dialog",
+        dialog: "mcp",
       });
     });
 
-    it('should open MCP management dialog with nodesc argument', async () => {
-      const result = await mcpCommand.action!(mockContext, 'nodesc');
+    it("should open MCP management dialog with nodesc argument", async () => {
+      const result = await mcpCommand.action!(mockContext, "nodesc");
 
       expect(result).toEqual({
-        type: 'dialog',
-        dialog: 'mcp',
+        type: "dialog",
+        dialog: "mcp",
       });
     });
   });

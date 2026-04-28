@@ -4,23 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ContextIndicator } from './ContextIndicator.js';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { ContextIndicator } from "./ContextIndicator.js";
 
 /**
  * ContextIndicator component shows context usage as a circular progress indicator.
  * Displays token usage information with tooltip on hover.
  */
 const meta: Meta<typeof ContextIndicator> = {
-  title: 'Layout/ContextIndicator',
+  title: "Layout/ContextIndicator",
   component: ContextIndicator,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     contextUsage: {
-      description: 'Context usage data, null to hide indicator',
+      description: "Context usage data, null to hide indicator",
     },
   },
 };

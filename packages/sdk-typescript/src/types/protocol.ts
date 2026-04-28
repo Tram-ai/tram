@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 export interface Annotation {
   type: string;
   value: string;
@@ -41,20 +41,20 @@ export interface CLIPermissionDenial {
 }
 
 export interface TextBlock {
-  type: 'text';
+  type: "text";
   text: string;
   annotations?: Annotation[];
 }
 
 export interface ThinkingBlock {
-  type: 'thinking';
+  type: "thinking";
   thinking: string;
   signature?: string;
   annotations?: Annotation[];
 }
 
 export interface ToolUseBlock {
-  type: 'tool_use';
+  type: "tool_use";
   id: string;
   name: string;
   input: unknown;
@@ -62,7 +62,7 @@ export interface ToolUseBlock {
 }
 
 export interface ToolResultBlock {
-  type: 'tool_result';
+  type: "tool_result";
   tool_use_id: string;
   content?: string | ContentBlock[];
   is_error?: boolean;
@@ -76,14 +76,14 @@ export type ContentBlock =
   | ToolResultBlock;
 
 export interface APIUserMessage {
-  role: 'user';
+  role: "user";
   content: string | ContentBlock[];
 }
 
 export interface APIAssistantMessage {
   id: string;
-  type: 'message';
-  role: 'assistant';
+  type: "message";
+  role: "assistant";
   model: string;
   content: ContentBlock[];
   stop_reason?: string | null;
@@ -91,7 +91,7 @@ export interface APIAssistantMessage {
 }
 
 export interface SDKUserMessage {
-  type: 'user';
+  type: "user";
   uuid?: string;
   session_id: string;
   message: APIUserMessage;
@@ -100,7 +100,7 @@ export interface SDKUserMessage {
 }
 
 export interface SDKAssistantMessage {
-  type: 'assistant';
+  type: "assistant";
   uuid: string;
   session_id: string;
   message: APIAssistantMessage;
@@ -108,7 +108,7 @@ export interface SDKAssistantMessage {
 }
 
 export interface SDKSystemMessage {
-  type: 'system';
+  type: "system";
   subtype: string;
   uuid: string;
   session_id: string;
@@ -128,14 +128,14 @@ export interface SDKSystemMessage {
   skills?: string[];
   capabilities?: Record<string, unknown>;
   compact_metadata?: {
-    trigger: 'manual' | 'auto';
+    trigger: "manual" | "auto";
     pre_tokens: number;
   };
 }
 
 export interface SDKResultMessageSuccess {
-  type: 'result';
-  subtype: 'success';
+  type: "result";
+  subtype: "success";
   uuid: string;
   session_id: string;
   is_error: false;
@@ -150,8 +150,8 @@ export interface SDKResultMessageSuccess {
 }
 
 export interface SDKResultMessageError {
-  type: 'result';
-  subtype: 'error_max_turns' | 'error_during_execution';
+  type: "result";
+  subtype: "error_max_turns" | "error_during_execution";
   uuid: string;
   session_id: string;
   is_error: true;
@@ -172,47 +172,47 @@ export interface SDKResultMessageError {
 export type SDKResultMessage = SDKResultMessageSuccess | SDKResultMessageError;
 
 export interface MessageStartStreamEvent {
-  type: 'message_start';
+  type: "message_start";
   message: {
     id: string;
-    role: 'assistant';
+    role: "assistant";
     model: string;
   };
 }
 
 export interface ContentBlockStartEvent {
-  type: 'content_block_start';
+  type: "content_block_start";
   index: number;
   content_block: ContentBlock;
 }
 
 export type ContentBlockDelta =
   | {
-      type: 'text_delta';
+      type: "text_delta";
       text: string;
     }
   | {
-      type: 'thinking_delta';
+      type: "thinking_delta";
       thinking: string;
     }
   | {
-      type: 'input_json_delta';
+      type: "input_json_delta";
       partial_json: string;
     };
 
 export interface ContentBlockDeltaEvent {
-  type: 'content_block_delta';
+  type: "content_block_delta";
   index: number;
   delta: ContentBlockDelta;
 }
 
 export interface ContentBlockStopEvent {
-  type: 'content_block_stop';
+  type: "content_block_stop";
   index: number;
 }
 
 export interface MessageStopStreamEvent {
-  type: 'message_stop';
+  type: "message_stop";
 }
 
 export type StreamEvent =
@@ -223,31 +223,31 @@ export type StreamEvent =
   | MessageStopStreamEvent;
 
 export interface SDKPartialAssistantMessage {
-  type: 'stream_event';
+  type: "stream_event";
   uuid: string;
   session_id: string;
   event: StreamEvent;
   parent_tool_use_id: string | null;
 }
 
-export type PermissionMode = 'default' | 'plan' | 'auto-edit' | 'yolo';
+export type PermissionMode = "default" | "plan" | "auto-edit" | "yolo";
 
 /**
  * Authentication types supported by the CLI.
  * Aligns with CLI's --auth-type parameter.
  */
 export type AuthType =
-  | 'openai'
-  | 'anthropic'
-  | 'tram-oauth'
-  | 'gemini'
-  | 'vertex-ai';
+  | "openai"
+  | "anthropic"
+  | "tram-oauth"
+  | "gemini"
+  | "vertex-ai";
 
 /**
  * TODO: Align with `ToolCallConfirmationDetails`
  */
 export interface PermissionSuggestion {
-  type: 'allow' | 'deny' | 'modify';
+  type: "allow" | "deny" | "modify";
   label: string;
   description?: string;
   modifiedInput?: unknown;
@@ -266,11 +266,11 @@ export interface HookCallbackResult {
 }
 
 export interface CLIControlInterruptRequest {
-  subtype: 'interrupt';
+  subtype: "interrupt";
 }
 
 export interface CLIControlPermissionRequest {
-  subtype: 'can_use_tool';
+  subtype: "can_use_tool";
   tool_name: string;
   tool_use_id: string;
   input: unknown;
@@ -279,9 +279,9 @@ export interface CLIControlPermissionRequest {
 }
 
 export enum AuthProviderType {
-  DYNAMIC_DISCOVERY = 'dynamic_discovery',
-  GOOGLE_CREDENTIALS = 'google_credentials',
-  SERVICE_ACCOUNT_IMPERSONATION = 'service_account_impersonation',
+  DYNAMIC_DISCOVERY = "dynamic_discovery",
+  GOOGLE_CREDENTIALS = "google_credentials",
+  SERVICE_ACCOUNT_IMPERSONATION = "service_account_impersonation",
 }
 
 export interface MCPServerConfig {
@@ -315,7 +315,7 @@ export interface SDKMcpServerConfig {
   /**
    * Type identifier for SDK MCP servers
    */
-  type: 'sdk';
+  type: "sdk";
   /**
    * Server name for identification and routing
    */
@@ -329,10 +329,10 @@ export interface SDKMcpServerConfig {
 /**
  * Wire format for SDK MCP servers sent to the CLI
  */
-export type WireSDKMcpServerConfig = Omit<SDKMcpServerConfig, 'instance'>;
+export type WireSDKMcpServerConfig = Omit<SDKMcpServerConfig, "instance">;
 
 export interface CLIControlInitializeRequest {
-  subtype: 'initialize';
+  subtype: "initialize";
   hooks?: HookRegistration[] | null;
   /**
    * SDK MCP servers config
@@ -348,19 +348,19 @@ export interface CLIControlInitializeRequest {
 }
 
 export interface CLIControlSetPermissionModeRequest {
-  subtype: 'set_permission_mode';
+  subtype: "set_permission_mode";
   mode: PermissionMode;
 }
 
 export interface CLIHookCallbackRequest {
-  subtype: 'hook_callback';
+  subtype: "hook_callback";
   callback_id: string;
   input: unknown;
   tool_use_id: string | null;
 }
 
 export interface CLIControlMcpMessageRequest {
-  subtype: 'mcp_message';
+  subtype: "mcp_message";
   server_name: string;
   message: {
     jsonrpc?: string;
@@ -371,20 +371,20 @@ export interface CLIControlMcpMessageRequest {
 }
 
 export interface CLIControlSetModelRequest {
-  subtype: 'set_model';
+  subtype: "set_model";
   model: string;
 }
 
 export interface CLIControlMcpStatusRequest {
-  subtype: 'mcp_server_status';
+  subtype: "mcp_server_status";
 }
 
 export interface CLIControlSupportedCommandsRequest {
-  subtype: 'supported_commands';
+  subtype: "supported_commands";
 }
 
 export interface CLIControlGetContextUsageRequest {
-  subtype: 'get_context_usage';
+  subtype: "get_context_usage";
   show_details?: boolean;
 }
 
@@ -401,7 +401,7 @@ export type ControlRequestPayload =
   | CLIControlGetContextUsageRequest;
 
 export interface CLIControlRequest {
-  type: 'control_request';
+  type: "control_request";
   request_id: string;
   request: ControlRequestPayload;
 }
@@ -413,24 +413,24 @@ export interface PermissionApproval {
 }
 
 export interface ControlResponse {
-  subtype: 'success';
+  subtype: "success";
   request_id: string;
   response: unknown;
 }
 
 export interface ControlErrorResponse {
-  subtype: 'error';
+  subtype: "error";
   request_id: string;
   error: string | { message: string; [key: string]: unknown };
 }
 
 export interface CLIControlResponse {
-  type: 'control_response';
+  type: "control_response";
   response: ControlResponse | ControlErrorResponse;
 }
 
 export interface ControlCancelRequest {
-  type: 'control_cancel_request';
+  type: "control_cancel_request";
   request_id?: string;
 }
 
@@ -451,43 +451,43 @@ export type SDKMessage =
 
 export function isSDKUserMessage(msg: any): msg is SDKUserMessage {
   return (
-    msg && typeof msg === 'object' && msg.type === 'user' && 'message' in msg
+    msg && typeof msg === "object" && msg.type === "user" && "message" in msg
   );
 }
 
 export function isSDKAssistantMessage(msg: any): msg is SDKAssistantMessage {
   return (
     msg &&
-    typeof msg === 'object' &&
-    msg.type === 'assistant' &&
-    'uuid' in msg &&
-    'message' in msg &&
-    'session_id' in msg &&
-    'parent_tool_use_id' in msg
+    typeof msg === "object" &&
+    msg.type === "assistant" &&
+    "uuid" in msg &&
+    "message" in msg &&
+    "session_id" in msg &&
+    "parent_tool_use_id" in msg
   );
 }
 
 export function isSDKSystemMessage(msg: any): msg is SDKSystemMessage {
   return (
     msg &&
-    typeof msg === 'object' &&
-    msg.type === 'system' &&
-    'subtype' in msg &&
-    'uuid' in msg &&
-    'session_id' in msg
+    typeof msg === "object" &&
+    msg.type === "system" &&
+    "subtype" in msg &&
+    "uuid" in msg &&
+    "session_id" in msg
   );
 }
 
 export function isSDKResultMessage(msg: any): msg is SDKResultMessage {
   return (
     msg &&
-    typeof msg === 'object' &&
-    msg.type === 'result' &&
-    'subtype' in msg &&
-    'duration_ms' in msg &&
-    'is_error' in msg &&
-    'uuid' in msg &&
-    'session_id' in msg
+    typeof msg === "object" &&
+    msg.type === "result" &&
+    "subtype" in msg &&
+    "duration_ms" in msg &&
+    "is_error" in msg &&
+    "uuid" in msg &&
+    "session_id" in msg
   );
 }
 
@@ -496,60 +496,60 @@ export function isSDKPartialAssistantMessage(
 ): msg is SDKPartialAssistantMessage {
   return (
     msg &&
-    typeof msg === 'object' &&
-    msg.type === 'stream_event' &&
-    'uuid' in msg &&
-    'session_id' in msg &&
-    'event' in msg &&
-    'parent_tool_use_id' in msg
+    typeof msg === "object" &&
+    msg.type === "stream_event" &&
+    "uuid" in msg &&
+    "session_id" in msg &&
+    "event" in msg &&
+    "parent_tool_use_id" in msg
   );
 }
 
 export function isControlRequest(msg: any): msg is CLIControlRequest {
   return (
     msg &&
-    typeof msg === 'object' &&
-    msg.type === 'control_request' &&
-    'request_id' in msg &&
-    'request' in msg
+    typeof msg === "object" &&
+    msg.type === "control_request" &&
+    "request_id" in msg &&
+    "request" in msg
   );
 }
 
 export function isControlResponse(msg: any): msg is CLIControlResponse {
   return (
     msg &&
-    typeof msg === 'object' &&
-    msg.type === 'control_response' &&
-    'response' in msg
+    typeof msg === "object" &&
+    msg.type === "control_response" &&
+    "response" in msg
   );
 }
 
 export function isControlCancel(msg: any): msg is ControlCancelRequest {
   return (
     msg &&
-    typeof msg === 'object' &&
-    msg.type === 'control_cancel_request' &&
-    'request_id' in msg
+    typeof msg === "object" &&
+    msg.type === "control_cancel_request" &&
+    "request_id" in msg
   );
 }
 
 export function isTextBlock(block: any): block is TextBlock {
-  return block && typeof block === 'object' && block.type === 'text';
+  return block && typeof block === "object" && block.type === "text";
 }
 
 export function isThinkingBlock(block: any): block is ThinkingBlock {
-  return block && typeof block === 'object' && block.type === 'thinking';
+  return block && typeof block === "object" && block.type === "thinking";
 }
 
 export function isToolUseBlock(block: any): block is ToolUseBlock {
-  return block && typeof block === 'object' && block.type === 'tool_use';
+  return block && typeof block === "object" && block.type === "tool_use";
 }
 
 export function isToolResultBlock(block: any): block is ToolResultBlock {
-  return block && typeof block === 'object' && block.type === 'tool_result';
+  return block && typeof block === "object" && block.type === "tool_result";
 }
 
-export type SubagentLevel = 'session';
+export type SubagentLevel = "session";
 
 export interface RunConfig {
   max_time_minutes?: number;
@@ -587,20 +587,20 @@ export interface SubagentConfig {
  */
 export enum ControlRequestType {
   // SystemController requests
-  INITIALIZE = 'initialize',
-  INTERRUPT = 'interrupt',
-  SET_MODEL = 'set_model',
-  SUPPORTED_COMMANDS = 'supported_commands',
-  GET_CONTEXT_USAGE = 'get_context_usage',
+  INITIALIZE = "initialize",
+  INTERRUPT = "interrupt",
+  SET_MODEL = "set_model",
+  SUPPORTED_COMMANDS = "supported_commands",
+  GET_CONTEXT_USAGE = "get_context_usage",
 
   // PermissionController requests
-  CAN_USE_TOOL = 'can_use_tool',
-  SET_PERMISSION_MODE = 'set_permission_mode',
+  CAN_USE_TOOL = "can_use_tool",
+  SET_PERMISSION_MODE = "set_permission_mode",
 
   // MCPController requests
-  MCP_MESSAGE = 'mcp_message',
-  MCP_SERVER_STATUS = 'mcp_server_status',
+  MCP_MESSAGE = "mcp_message",
+  MCP_SERVER_STATUS = "mcp_server_status",
 
   // HookController requests
-  HOOK_CALLBACK = 'hook_callback',
+  HOOK_CALLBACK = "hook_callback",
 }

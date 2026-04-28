@@ -17,33 +17,33 @@
  * agent's derived streaming state instead of the main agent's.
  */
 
-import { Box, Text, useStdin } from 'ink';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Box, Text, useStdin } from "ink";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AgentStatus,
   isTerminalStatus,
   ApprovalMode,
   APPROVAL_MODES,
-} from '@qwen-code/qwen-code-core';
+} from "@tram-ai/tram-core";
 import {
   useAgentViewState,
   useAgentViewActions,
-} from '../../contexts/AgentViewContext.js';
-import { useConfig } from '../../contexts/ConfigContext.js';
-import { StreamingContext } from '../../contexts/StreamingContext.js';
-import { StreamingState } from '../../types.js';
-import { useTerminalSize } from '../../hooks/useTerminalSize.js';
-import { useAgentStreamingState } from '../../hooks/useAgentStreamingState.js';
-import { useKeypress, type Key } from '../../hooks/useKeypress.js';
-import { useTextBuffer } from '../shared/text-buffer.js';
-import { calculatePromptWidths } from '../../utils/layoutUtils.js';
-import { BaseTextInput } from '../BaseTextInput.js';
-import { LoadingIndicator } from '../LoadingIndicator.js';
-import { QueuedMessageDisplay } from '../QueuedMessageDisplay.js';
-import { AgentFooter } from './AgentFooter.js';
-import { keyMatchers, Command } from '../../keyMatchers.js';
-import { theme } from '../../semantic-colors.js';
-import { t } from '../../../i18n/index.js';
+} from "../../contexts/AgentViewContext.js";
+import { useConfig } from "../../contexts/ConfigContext.js";
+import { StreamingContext } from "../../contexts/StreamingContext.js";
+import { StreamingState } from "../../types.js";
+import { useTerminalSize } from "../../hooks/useTerminalSize.js";
+import { useAgentStreamingState } from "../../hooks/useAgentStreamingState.js";
+import { useKeypress, type Key } from "../../hooks/useKeypress.js";
+import { useTextBuffer } from "../shared/text-buffer.js";
+import { calculatePromptWidths } from "../../utils/layoutUtils.js";
+import { BaseTextInput } from "../BaseTextInput.js";
+import { LoadingIndicator } from "../LoadingIndicator.js";
+import { QueuedMessageDisplay } from "../QueuedMessageDisplay.js";
+import { AgentFooter } from "./AgentFooter.js";
+import { keyMatchers, Command } from "../../keyMatchers.js";
+import { theme } from "../../semantic-colors.js";
+import { t } from "../../../i18n/index.js";
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -82,7 +82,7 @@ export const AgentComposer: React.FC<AgentComposerProps> = ({ agentId }) => {
   useKeypress(
     (key) => {
       if (
-        key.name === 'escape' &&
+        key.name === "escape" &&
         streamingState === StreamingState.Responding
       ) {
         interactiveAgent?.cancelCurrentRound();
@@ -101,10 +101,10 @@ export const AgentComposer: React.FC<AgentComposerProps> = ({ agentId }) => {
 
   useKeypress(
     (key) => {
-      const isShiftTab = key.shift && key.name === 'tab';
+      const isShiftTab = key.shift && key.name === "tab";
       const isWindowsTab =
-        process.platform === 'win32' &&
-        key.name === 'tab' &&
+        process.platform === "win32" &&
+        key.name === "tab" &&
         !key.ctrl &&
         !key.meta;
       if (isShiftTab || isWindowsTab) {
@@ -122,7 +122,7 @@ export const AgentComposer: React.FC<AgentComposerProps> = ({ agentId }) => {
   const isValidPath = useCallback((): boolean => false, []);
 
   const buffer = useTextBuffer({
-    initialText: '',
+    initialText: "",
     viewport: { height: 3, width: inputWidth },
     stdin,
     setRawMode,
@@ -132,7 +132,7 @@ export const AgentComposer: React.FC<AgentComposerProps> = ({ agentId }) => {
   // Sync agent buffer text to context so AgentTabBar can guard tab switching
   useEffect(() => {
     setAgentInputBufferText(buffer.text);
-    return () => setAgentInputBufferText('');
+    return () => setAgentInputBufferText("");
   }, [buffer.text, setAgentInputBufferText]);
 
   // When agent input is not active (agent running, completed, etc.),
@@ -171,7 +171,7 @@ export const AgentComposer: React.FC<AgentComposerProps> = ({ agentId }) => {
       // Down arrow at the bottom edge (or empty buffer) → focus the tab bar
       if (keyMatchers[Command.NAVIGATION_DOWN](key)) {
         if (
-          buffer.text === '' ||
+          buffer.text === "" ||
           buffer.allVisualLines.length === 1 ||
           buffer.visualCursor[0] === buffer.allVisualLines.length - 1
         ) {
@@ -196,7 +196,7 @@ export const AgentComposer: React.FC<AgentComposerProps> = ({ agentId }) => {
       status !== undefined &&
       !isTerminalStatus(status)
     ) {
-      const combined = messageQueue.join('\n');
+      const combined = messageQueue.join("\n");
       setMessageQueue([]);
       interactiveAgent?.enqueueMessage(combined);
     }
@@ -220,19 +220,19 @@ export const AgentComposer: React.FC<AgentComposerProps> = ({ agentId }) => {
   const statusLabel = useMemo(() => {
     switch (status) {
       case AgentStatus.COMPLETED:
-        return { text: t('Completed'), color: theme.status.success };
+        return { text: t("Completed"), color: theme.status.success };
       case AgentStatus.FAILED:
         return {
-          text: t('Failed: {{error}}', {
+          text: t("Failed: {{error}}", {
             error:
               interactiveAgent?.getError() ??
               interactiveAgent?.getLastRoundError() ??
-              'unknown',
+              "unknown",
           }),
           color: theme.status.error,
         };
       case AgentStatus.CANCELLED:
-        return { text: t('Cancelled'), color: theme.text.secondary };
+        return { text: t("Cancelled"), color: theme.text.secondary };
       default:
         return null;
     }
@@ -255,7 +255,7 @@ export const AgentComposer: React.FC<AgentComposerProps> = ({ agentId }) => {
       : (statusColor ?? theme.border.focused);
 
   const prefixNode = (
-    <Text color={statusColor ?? theme.text.accent}>{isYolo ? '*' : '>'} </Text>
+    <Text color={statusColor ?? theme.text.accent}>{isYolo ? "*" : ">"} </Text>
   );
 
   return (
@@ -266,7 +266,7 @@ export const AgentComposer: React.FC<AgentComposerProps> = ({ agentId }) => {
         <LoadingIndicator
           currentLoadingPhrase={
             streamingState === StreamingState.Responding
-              ? t('Thinking…')
+              ? t("Thinking…")
               : undefined
           }
           elapsedTime={elapsedTime}
@@ -287,7 +287,7 @@ export const AgentComposer: React.FC<AgentComposerProps> = ({ agentId }) => {
           onSubmit={handleSubmit}
           onKeypress={handleKeypress}
           showCursor={isInputActive && !agentTabBarFocused}
-          placeholder={'  ' + t('Send a message to this agent')}
+          placeholder={"  " + t("Send a message to this agent")}
           prefix={prefixNode}
           borderColor={inputBorderColor}
           isActive={isInputActive && !agentShellFocused}

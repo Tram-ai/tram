@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import type { IndividualToolCallDisplay } from '../../types.js';
-import { ToolCallStatus } from '../../types.js';
-import { SHELL_COMMAND_NAME, SHELL_NAME } from '../../constants.js';
-import { theme } from '../../semantic-colors.js';
-import { t } from '../../../i18n/index.js';
-import { ToolStatusIndicator } from '../shared/ToolStatusIndicator.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import type { IndividualToolCallDisplay } from "../../types.js";
+import { ToolCallStatus } from "../../types.js";
+import { SHELL_COMMAND_NAME, SHELL_NAME } from "../../constants.js";
+import { theme } from "../../semantic-colors.js";
+import { t } from "../../../i18n/index.js";
+import { ToolStatusIndicator } from "../shared/ToolStatusIndicator.js";
 
 interface CompactToolGroupDisplayProps {
   toolCalls: IndividualToolCallDisplay[];
@@ -71,8 +71,8 @@ export const CompactToolGroupDisplay: React.FC<
   // from expanding the compact view (wrap="truncate-end" only handles width overflow,
   // not literal \n characters in the content)
   const activeToolDescription = activeTool.description
-    ? activeTool.description.split('\n')[0]
-    : '';
+    ? activeTool.description.split("\n")[0]
+    : "";
 
   return (
     <Box
@@ -91,7 +91,7 @@ export const CompactToolGroupDisplay: React.FC<
             <Text bold>{activeTool.name}</Text>
             {activeToolDescription ? (
               <Text color={theme.text.secondary}>
-                {'  '}
+                {"  "}
                 {activeToolDescription}
               </Text>
             ) : null}
@@ -101,7 +101,7 @@ export const CompactToolGroupDisplay: React.FC<
 
       {/* Hint line */}
       <Text color={theme.text.secondary}>
-        {t('Press Ctrl+O to show full tool output')}
+        {t("Press Ctrl+O to show full tool output")}
       </Text>
     </Box>
   );

@@ -5,10 +5,10 @@
  */
 
 // File for 'tram mcp remove' command
-import type { CommandModule } from 'yargs';
-import { loadSettings, SettingScope } from '../../config/settings.js';
-import { writeStdoutLine } from '../../utils/stdioHelpers.js';
-import { MCPOAuthTokenStorage } from '@tram-ai/tram-core';
+import type { CommandModule } from "yargs";
+import { loadSettings, SettingScope } from "../../config/settings.js";
+import { writeStdoutLine } from "../../utils/stdioHelpers.js";
+import { MCPOAuthTokenStorage } from "@tram-ai/tram-core";
 
 async function removeMcpServer(
   name: string,
@@ -18,7 +18,7 @@ async function removeMcpServer(
 ) {
   const { scope } = options;
   const settingsScope =
-    scope === 'user' ? SettingScope.User : SettingScope.Workspace;
+    scope === "user" ? SettingScope.User : SettingScope.Workspace;
   const settings = loadSettings();
 
   const existingSettings = settings.forScope(settingsScope).settings;
@@ -31,7 +31,7 @@ async function removeMcpServer(
 
   delete mcpServers[name];
 
-  settings.setValue(settingsScope, 'mcpServers', mcpServers);
+  settings.setValue(settingsScope, "mcpServers", mcpServers);
 
   // Clean up any stored OAuth tokens for this server
   try {
@@ -45,26 +45,26 @@ async function removeMcpServer(
 }
 
 export const removeCommand: CommandModule = {
-  command: 'remove <name>',
-  describe: 'Remove a server',
+  command: "remove <name>",
+  describe: "Remove a server",
   builder: (yargs) =>
     yargs
-      .usage('Usage: tram mcp remove [options] <name>')
-      .positional('name', {
-        describe: 'Name of the server',
-        type: 'string',
+      .usage("Usage: tram mcp remove [options] <name>")
+      .positional("name", {
+        describe: "Name of the server",
+        type: "string",
         demandOption: true,
       })
-      .option('scope', {
-        alias: 's',
-        describe: 'Configuration scope (user or project)',
-        type: 'string',
-        default: 'user',
-        choices: ['user', 'project'],
+      .option("scope", {
+        alias: "s",
+        describe: "Configuration scope (user or project)",
+        type: "string",
+        default: "user",
+        choices: ["user", "project"],
       }),
   handler: async (argv) => {
-    await removeMcpServer(argv['name'] as string, {
-      scope: argv['scope'] as string,
+    await removeMcpServer(argv["name"] as string, {
+      scope: argv["scope"] as string,
     });
   },
 };

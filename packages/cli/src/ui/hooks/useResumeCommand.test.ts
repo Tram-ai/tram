@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { act, renderHook } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { useResumeCommand } from './useResumeCommand.js';
+import { act, renderHook } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { useResumeCommand } from "./useResumeCommand.js";
 
 const resumeMocks = vi.hoisted(() => {
   let resolveLoadSession:
@@ -36,18 +36,18 @@ const resumeMocks = vi.hoisted(() => {
   };
 });
 
-vi.mock('../utils/resumeHistoryUtils.js', () => ({
-  buildResumedHistoryItems: vi.fn(() => [{ id: 1, type: 'user', text: 'hi' }]),
+vi.mock("../utils/resumeHistoryUtils.js", () => ({
+  buildResumedHistoryItems: vi.fn(() => [{ id: 1, type: "user", text: "hi" }]),
 }));
 
-vi.mock('@tram-ai/tram-core', () => {
+vi.mock("@tram-ai/tram-core", () => {
   class SessionService {
     constructor(_cwd: string) {}
     async loadSession(_sessionId: string) {
       return (
         resumeMocks.getPendingLoadSession() ??
         Promise.resolve({
-          conversation: [{ role: 'user', parts: [{ text: 'hello' }] }],
+          conversation: [{ role: "user", parts: [{ text: "hello" }] }],
         })
       );
     }
@@ -58,14 +58,14 @@ vi.mock('@tram-ai/tram-core', () => {
   };
 });
 
-describe('useResumeCommand', () => {
-  it('should initialize with dialog closed', () => {
+describe("useResumeCommand", () => {
+  it("should initialize with dialog closed", () => {
     const { result } = renderHook(() => useResumeCommand());
 
     expect(result.current.isResumeDialogOpen).toBe(false);
   });
 
-  it('should open the dialog when openResumeDialog is called', () => {
+  it("should open the dialog when openResumeDialog is called", () => {
     const { result } = renderHook(() => useResumeCommand());
 
     act(() => {
@@ -75,7 +75,7 @@ describe('useResumeCommand', () => {
     expect(result.current.isResumeDialogOpen).toBe(true);
   });
 
-  it('should close the dialog when closeResumeDialog is called', () => {
+  it("should close the dialog when closeResumeDialog is called", () => {
     const { result } = renderHook(() => useResumeCommand());
 
     // Open the dialog first
@@ -93,7 +93,7 @@ describe('useResumeCommand', () => {
     expect(result.current.isResumeDialogOpen).toBe(false);
   });
 
-  it('should maintain stable function references across renders', () => {
+  it("should maintain stable function references across renders", () => {
     const { result, rerender } = renderHook(() => useResumeCommand());
 
     const initialOpenFn = result.current.openResumeDialog;
@@ -107,7 +107,7 @@ describe('useResumeCommand', () => {
     expect(result.current.handleResume).toBe(initialHandleResume);
   });
 
-  it('handleResume no-ops when config is null', async () => {
+  it("handleResume no-ops when config is null", async () => {
     const historyManager = { clearItems: vi.fn(), loadHistory: vi.fn() };
     const startNewSession = vi.fn();
 
@@ -120,7 +120,7 @@ describe('useResumeCommand', () => {
     );
 
     await act(async () => {
-      await result.current.handleResume('session-1');
+      await result.current.handleResume("session-1");
     });
 
     expect(startNewSession).not.toHaveBeenCalled();
@@ -128,7 +128,7 @@ describe('useResumeCommand', () => {
     expect(historyManager.loadHistory).not.toHaveBeenCalled();
   });
 
-  it('handleResume closes the dialog immediately and restores session state', async () => {
+  it("handleResume closes the dialog immediately and restores session state", async () => {
     resumeMocks.reset();
     resumeMocks.createPendingLoadSession();
 
@@ -139,7 +139,7 @@ describe('useResumeCommand', () => {
     };
 
     const config = {
-      getTargetDir: () => '/tmp',
+      getTargetDir: () => "/tmp",
       getGeminiClient: () => geminiClient,
       startNewSession: vi.fn(),
       getDebugLogger: () => ({
@@ -147,7 +147,7 @@ describe('useResumeCommand', () => {
         debug: vi.fn(),
         error: vi.fn(),
       }),
-    } as unknown as import('@tram-ai/tram-core').Config;
+    } as unknown as import("@tram-ai/tram-core").Config;
 
     const { result } = renderHook(() =>
       useResumeCommand({
@@ -167,7 +167,7 @@ describe('useResumeCommand', () => {
     act(() => {
       // Start resume but do not await it yet — we want to assert the dialog
       // closes immediately before the async session load completes.
-      resumePromise = result.current.handleResume('session-2') as unknown as
+      resumePromise = result.current.handleResume("session-2") as unknown as
         | Promise<void>
         | undefined;
     });
@@ -175,19 +175,19 @@ describe('useResumeCommand', () => {
 
     // Now finish the async load and let the handler complete.
     resumeMocks.resolvePendingLoadSession({
-      conversation: [{ role: 'user', parts: [{ text: 'hello' }] }],
+      conversation: [{ role: "user", parts: [{ text: "hello" }] }],
     });
     await act(async () => {
       await resumePromise;
     });
 
     expect(config.startNewSession).toHaveBeenCalledWith(
-      'session-2',
+      "session-2",
       expect.objectContaining({
         conversation: expect.anything(),
       }),
     );
-    expect(startNewSession).toHaveBeenCalledWith('session-2');
+    expect(startNewSession).toHaveBeenCalledWith("session-2");
     expect(geminiClient.initialize).toHaveBeenCalledTimes(1);
     expect(historyManager.clearItems).toHaveBeenCalledTimes(1);
     expect(historyManager.loadHistory).toHaveBeenCalledTimes(1);

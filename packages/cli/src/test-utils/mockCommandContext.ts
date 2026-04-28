@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi } from 'vitest';
-import type { CommandContext } from '../ui/commands/types.js';
-import type { LoadedSettings } from '../config/settings.js';
-import type { GitService } from '@tram-ai/tram-core';
-import type { SessionStatsState } from '../ui/contexts/SessionContext.js';
-import { ToolCallDecision } from '../ui/contexts/SessionContext.js';
+import { vi } from "vitest";
+import type { CommandContext } from "../ui/commands/types.js";
+import type { LoadedSettings } from "../config/settings.js";
+import type { GitService } from "@tram-ai/tram-core";
+import type { SessionStatsState } from "../ui/contexts/SessionContext.js";
+import { ToolCallDecision } from "../ui/contexts/SessionContext.js";
 
 // A utility type to make all properties of an object, and its nested objects, partial.
 type DeepPartial<T> = T extends object
@@ -30,9 +30,9 @@ export const createMockCommandContext = (
 ): CommandContext => {
   const defaultMocks: CommandContext = {
     invocation: {
-      raw: '',
-      name: '',
-      args: '',
+      raw: "",
+      name: "",
+      args: "",
     },
     services: {
       config: null,
@@ -70,7 +70,7 @@ export const createMockCommandContext = (
       sessionShellAllowlist: new Set<string>(),
       startNewSession: vi.fn(),
       stats: {
-        sessionId: '',
+        sessionId: "",
         sessionStartTime: new Date(),
         lastPromptTokenCount: 0,
         metrics: {
@@ -106,8 +106,8 @@ export const createMockCommandContext = (
 
         if (
           // We only want to recursivlty merge plain objects
-          Object.prototype.toString.call(sourceValue) === '[object Object]' &&
-          Object.prototype.toString.call(targetValue) === '[object Object]'
+          Object.prototype.toString.call(sourceValue) === "[object Object]" &&
+          Object.prototype.toString.call(targetValue) === "[object Object]"
         ) {
           output[key] = merge(targetValue, sourceValue);
         } else {

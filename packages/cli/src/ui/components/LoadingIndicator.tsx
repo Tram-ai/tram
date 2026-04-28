@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ThoughtSummary } from '@tram-ai/tram-core';
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { useStreamingContext } from '../contexts/StreamingContext.js';
-import { StreamingState } from '../types.js';
-import { GeminiRespondingSpinner } from './GeminiRespondingSpinner.js';
-import { formatDuration, formatTokenCount } from '../utils/formatters.js';
-import { useTerminalSize } from '../hooks/useTerminalSize.js';
-import { isNarrowWidth } from '../utils/isNarrowWidth.js';
-import { t } from '../../i18n/index.js';
+import type { ThoughtSummary } from "@tram-ai/tram-core";
+import type React from "react";
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import { useStreamingContext } from "../contexts/StreamingContext.js";
+import { StreamingState } from "../types.js";
+import { GeminiRespondingSpinner } from "./GeminiRespondingSpinner.js";
+import { formatDuration, formatTokenCount } from "../utils/formatters.js";
+import { useTerminalSize } from "../hooks/useTerminalSize.js";
+import { isNarrowWidth } from "../utils/isNarrowWidth.js";
+import { t } from "../../i18n/index.js";
 
 interface LoadingIndicatorProps {
   currentLoadingPhrase?: string;
@@ -49,11 +49,11 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
 
   const tokenStr = showTokens
     ? ` · ↓ ${formatTokenCount(outputTokens)} tokens`
-    : '';
+    : "";
 
   const cancelAndTimerContent =
     streamingState !== StreamingState.WaitingForConfirmation
-      ? t('({{time}}{{tokens}} · esc to cancel)', {
+      ? t("({{time}}{{tokens}} · esc to cancel)", {
           time: timeStr,
           tokens: tokenStr,
         })
@@ -64,16 +64,16 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
       {/* Main loading line */}
       <Box
         width="100%"
-        flexDirection={isNarrow ? 'column' : 'row'}
-        alignItems={isNarrow ? 'flex-start' : 'center'}
+        flexDirection={isNarrow ? "column" : "row"}
+        alignItems={isNarrow ? "flex-start" : "center"}
       >
         <Box>
           <Box marginRight={1}>
             <GeminiRespondingSpinner
               nonRespondingDisplay={
                 streamingState === StreamingState.WaitingForConfirmation
-                  ? '⠏'
-                  : ''
+                  ? "⠏"
+                  : ""
               }
             />
           </Box>

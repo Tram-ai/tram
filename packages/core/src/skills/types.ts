@@ -11,7 +11,7 @@
  * - 'extension': Provided by an installed extension
  * - 'bundled': Built-in skills shipped with tram
  */
-export type SkillLevel = 'project' | 'user' | 'extension' | 'bundled';
+export type SkillLevel = "project" | "user" | "extension" | "bundled";
 
 /**
  * Core configuration for a skill as stored in SKILL.md files.
@@ -34,7 +34,7 @@ export interface SkillConfig {
   /**
    * Optional model override for this skill's execution.
    * Uses the same selector syntax as subagent model selectors:
-   * bare model ID (e.g., `qwen-coder-plus`), `authType:modelId`
+   * bare model ID (e.g., `tramr-plus`), `authType:modelId`
    * for cross-provider, or omitted/`inherit` to use the session model.
    */
   model?: string;
@@ -73,15 +73,15 @@ export type SkillRuntimeConfig = SkillConfig;
 export function parseModelField(
   frontmatter: Record<string, unknown>,
 ): string | undefined {
-  const raw = frontmatter['model'];
+  const raw = frontmatter["model"];
   if (raw === undefined) {
     return undefined;
   }
-  if (typeof raw !== 'string') {
+  if (typeof raw !== "string") {
     throw new Error('"model" must be a string');
   }
   const trimmed = raw.trim();
-  if (trimmed === '' || trimmed === 'inherit') {
+  if (trimmed === "" || trimmed === "inherit") {
     return undefined;
   }
   return trimmed;
@@ -122,7 +122,7 @@ export class SkillError extends Error {
     readonly skillName?: string,
   ) {
     super(message);
-    this.name = 'SkillError';
+    this.name = "SkillError";
   }
 }
 
@@ -130,11 +130,11 @@ export class SkillError extends Error {
  * Error codes for skill operations.
  */
 export const SkillErrorCode = {
-  NOT_FOUND: 'NOT_FOUND',
-  INVALID_CONFIG: 'INVALID_CONFIG',
-  INVALID_NAME: 'INVALID_NAME',
-  FILE_ERROR: 'FILE_ERROR',
-  PARSE_ERROR: 'PARSE_ERROR',
+  NOT_FOUND: "NOT_FOUND",
+  INVALID_CONFIG: "INVALID_CONFIG",
+  INVALID_NAME: "INVALID_NAME",
+  FILE_ERROR: "FILE_ERROR",
+  PARSE_ERROR: "PARSE_ERROR",
 } as const;
 
 export type SkillErrorCode =

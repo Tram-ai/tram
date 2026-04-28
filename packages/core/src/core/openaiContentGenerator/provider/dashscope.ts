@@ -1,21 +1,21 @@
-import OpenAI from 'openai';
-import type { GenerateContentConfig } from '@google/genai';
-import type { Config } from '../../../config/config.js';
-import type { ContentGeneratorConfig } from '../../contentGenerator.js';
-import { AuthType } from '../../contentGenerator.js';
+import OpenAI from "openai";
+import type { GenerateContentConfig } from "@google/genai";
+import type { Config } from "../../../config/config.js";
+import type { ContentGeneratorConfig } from "../../contentGenerator.js";
+import { AuthType } from "../../contentGenerator.js";
 import {
   DEFAULT_TIMEOUT,
   DEFAULT_MAX_RETRIES,
   DEFAULT_DASHSCOPE_BASE_URL,
-} from '../constants.js';
+} from "../constants.js";
 import type {
   DashScopeRequestMetadata,
   ChatCompletionContentPartTextWithCache,
   ChatCompletionContentPartWithCache,
   ChatCompletionToolWithCache,
-} from './types.js';
-import { buildRuntimeFetchOptions } from '../../../utils/runtimeFetchOptions.js';
-import { DefaultOpenAICompatibleProvider } from './default.js';
+} from "./types.js";
+import { buildRuntimeFetchOptions } from "../../../utils/runtimeFetchOptions.js";
+import { DefaultOpenAICompatibleProvider } from "./default.js";
 
 export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatibleProvider {
   constructor(
@@ -38,14 +38,14 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
   }
 
   override buildHeaders(): Record<string, string | undefined> {
-    const version = this.cliConfig.getCliVersion() || 'unknown';
+    const version = this.cliConfig.getCliVersion() || "unknown";
     const userAgent = `TramCode/${version} (${process.platform}; ${process.arch})`;
     const { authType, customHeaders } = this.contentGeneratorConfig;
     const defaultHeaders = {
-      'User-Agent': userAgent,
-      'X-DashScope-CacheControl': 'enable',
-      'X-DashScope-UserAgent': userAgent,
-      'X-DashScope-AuthType': authType,
+      "User-Agent": userAgent,
+      "X-DashScope-CacheControl": "enable",
+      "X-DashScope-UserAgent": userAgent,
+      "X-DashScope-AuthType": authType,
     };
 
     return customHeaders
@@ -64,7 +64,7 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
     // Configure fetch options to ensure user-configured timeout works as expected
     // bodyTimeout is always disabled (0) to let OpenAI SDK timeout control the request
     const runtimeOptions = buildRuntimeFetchOptions(
-      'openai',
+      "openai",
       this.cliConfig.getProxy(),
     );
     return new OpenAI({
@@ -103,7 +103,7 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
       const { messages: updatedMessages, tools: updatedTools } =
         this.addDashScopeCacheControl(
           request,
-          request.stream ? 'all' : 'system_only',
+          request.stream ? "all" : "system_only",
         );
       messages = updatedMessages;
       tools = updatedTools;
@@ -158,14 +158,14 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
    */
   private addDashScopeCacheControl(
     request: OpenAI.Chat.ChatCompletionCreateParams,
-    cacheControl: 'system_only' | 'all',
+    cacheControl: "system_only" | "all",
   ): {
     messages: OpenAI.Chat.ChatCompletionMessageParam[];
     tools?: ChatCompletionToolWithCache[];
   } {
     const messages = request.messages;
 
-    const systemIndex = messages.findIndex((msg) => msg.role === 'system');
+    const systemIndex = messages.findIndex((msg) => msg.role === "system");
     const lastIndex = messages.length - 1;
 
     const updatedMessages =
@@ -174,12 +174,12 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
         : messages.map((message, index) => {
             const shouldAddCacheControl = Boolean(
               (index === systemIndex && systemIndex !== -1) ||
-                (index === lastIndex && cacheControl === 'all'),
+                (index === lastIndex && cacheControl === "all"),
             );
 
             if (
               !shouldAddCacheControl ||
-              !('content' in message) ||
+              !("content" in message) ||
               message.content === null ||
               message.content === undefined
             ) {
@@ -193,7 +193,7 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
           });
 
     const updatedTools =
-      cacheControl === 'all' && request.tools?.length
+      cacheControl === "all" && request.tools?.length
         ? this.addCacheControlToTools(request.tools)
         : (request.tools as ChatCompletionToolWithCache[] | undefined);
 
@@ -214,7 +214,7 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
     const lastToolIndex = tools.length - 1;
     updatedTools[lastToolIndex] = {
       ...updatedTools[lastToolIndex],
-      cache_control: { type: 'ephemeral' },
+      cache_control: { type: "ephemeral" },
     };
 
     return updatedTools;
@@ -224,7 +224,7 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
    * Add cache control to message content, handling both string and array formats
    */
   private addCacheControlToContent(
-    content: NonNullable<OpenAI.Chat.ChatCompletionMessageParam['content']>,
+    content: NonNullable<OpenAI.Chat.ChatCompletionMessageParam["content"]>,
   ): ChatCompletionContentPartWithCache[] {
     // Convert content to array format if it's a string
     const contentArray = this.normalizeContentToArray(content);
@@ -237,12 +237,12 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
    * Normalize content to array format
    */
   private normalizeContentToArray(
-    content: NonNullable<OpenAI.Chat.ChatCompletionMessageParam['content']>,
+    content: NonNullable<OpenAI.Chat.ChatCompletionMessageParam["content"]>,
   ): ChatCompletionContentPartWithCache[] {
-    if (typeof content === 'string') {
+    if (typeof content === "string") {
       return [
         {
-          type: 'text',
+          type: "text",
           text: content,
         } as ChatCompletionContentPartTextWithCache,
       ];
@@ -264,7 +264,7 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
     const lastItem = contentArray[contentArray.length - 1];
     contentArray[contentArray.length - 1] = {
       ...lastItem,
-      cache_control: { type: 'ephemeral' },
+      cache_control: { type: "ephemeral" },
     } as ChatCompletionContentPartTextWithCache;
 
     return contentArray;
@@ -274,12 +274,12 @@ export class DashScopeOpenAICompatibleProvider extends DefaultOpenAICompatiblePr
    * Vision-capable model patterns.
    * Supports exact matches and prefix patterns for easy extension.
    */
-  private static readonly VISION_MODEL_EXACT_MATCHES = new Set(['coder-model']);
+  private static readonly VISION_MODEL_EXACT_MATCHES = new Set(["coder-model"]);
 
   private static readonly VISION_MODEL_PREFIX_PATTERNS = [
-    'tram-vl', // tram-vl-max, tram-vl-max-latest, etc.
-    'qwen3-vl-plus', // qwen3-vl-plus variants
-    'qwen3.5-plus', // qwen3.5-plus (has built-in vision capabilities)
+    "tram-vl", // tram-vl-max, tram-vl-max-latest, etc.
+    "qwen3-vl-plus", // qwen3-vl-plus variants
+    "qwen3.5-plus", // qwen3.5-plus (has built-in vision capabilities)
   ];
 
   private isVisionModel(model: string | undefined): boolean {

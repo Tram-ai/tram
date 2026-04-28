@@ -10,10 +10,10 @@ import {
   useImperativeHandle,
   useMemo,
   useRef,
-} from 'react';
-import { UserMessage } from '../messages/UserMessage.js';
-import { AssistantMessage } from '../messages/Assistant/AssistantMessage.js';
-import { ThinkingMessage } from '../messages/ThinkingMessage.js';
+} from "react";
+import { UserMessage } from "../messages/UserMessage.js";
+import { AssistantMessage } from "../messages/Assistant/AssistantMessage.js";
+import { ThinkingMessage } from "../messages/ThinkingMessage.js";
 import {
   GenericToolCall,
   ThinkToolCall,
@@ -26,9 +26,9 @@ import {
   ReadToolCall,
   WebFetchToolCall,
   shouldShowToolCall,
-} from '../toolcalls/index.js';
-import type { ToolCallData as BaseToolCallData } from '../toolcalls/index.js';
-import './ChatViewer.css';
+} from "../toolcalls/index.js";
+import type { ToolCallData as BaseToolCallData } from "../toolcalls/index.js";
+import "./ChatViewer.css";
 
 /**
  * Message part containing text content (TRAM format)
@@ -41,7 +41,7 @@ export interface MessagePart {
  * Claude format content item
  */
 export interface ClaudeContentItem {
-  type: 'text' | 'tool_use' | 'tool_result';
+  type: "text" | "tool_use" | "tool_result";
   text?: string;
   name?: string;
   input?: unknown;
@@ -61,7 +61,7 @@ export interface ChatMessageData {
   parentUuid?: string | null;
   sessionId?: string;
   timestamp: string; // ISO timestamp string
-  type: 'user' | 'assistant' | 'system' | 'tool_call';
+  type: "user" | "assistant" | "system" | "tool_call";
   // TRAM format
   message?: {
     role?: string;
@@ -103,7 +103,7 @@ export interface ChatViewerProps {
   /** Whether to auto-scroll to bottom when new messages arrive (default: true) */
   autoScroll?: boolean;
   /** Theme variant: 'dark' | 'light' | 'auto' (default: 'auto') */
-  theme?: 'dark' | 'light' | 'auto';
+  theme?: "dark" | "light" | "auto";
   /** Show empty state icon (default: true) */
   showEmptyIcon?: boolean;
 }
@@ -111,28 +111,28 @@ export interface ChatViewerProps {
 /**
  * Extract text content from message (supports both TRAM and Claude formats)
  */
-function extractContent(message: ChatMessageData['message']): string {
-  if (!message) return '';
+function extractContent(message: ChatMessageData["message"]): string {
+  if (!message) return "";
 
   // TRAM format: message.parts[].text
   if (message.parts && Array.isArray(message.parts)) {
-    return message.parts.map((part) => part.text || '').join('');
+    return message.parts.map((part) => part.text || "").join("");
   }
 
   // Claude format: message.content as string
-  if (typeof message.content === 'string') {
+  if (typeof message.content === "string") {
     return message.content;
   }
 
   // Claude format: message.content as array of content items
   if (Array.isArray(message.content)) {
     return message.content
-      .filter((item) => item.type === 'text' && item.text)
-      .map((item) => item.text || '')
-      .join('');
+      .filter((item) => item.type === "text" && item.text)
+      .map((item) => item.text || "")
+      .join("");
   }
 
-  return '';
+  return "";
 }
 
 /**
@@ -150,44 +150,44 @@ function getToolCallComponent(kind: string) {
   const normalizedKind = kind.toLowerCase();
 
   switch (normalizedKind) {
-    case 'read':
-    case 'read_file':
-    case 'read_many_files':
-    case 'readmanyfiles':
-    case 'list_directory':
-    case 'listfiles':
+    case "read":
+    case "read_file":
+    case "read_many_files":
+    case "readmanyfiles":
+    case "list_directory":
+    case "listfiles":
       return ReadToolCall;
-    case 'write':
+    case "write":
       return WriteToolCall;
-    case 'edit':
+    case "edit":
       return EditToolCall;
-    case 'execute':
-    case 'bash':
-    case 'command':
+    case "execute":
+    case "bash":
+    case "command":
       return ShellToolCall;
-    case 'updated_plan':
-    case 'updatedplan':
-    case 'todo_write':
-    case 'update_todos':
-    case 'todowrite':
+    case "updated_plan":
+    case "updatedplan":
+    case "todo_write":
+    case "update_todos":
+    case "todowrite":
       return UpdatedPlanToolCall;
-    case 'search':
-    case 'grep':
-    case 'glob':
-    case 'find':
+    case "search":
+    case "grep":
+    case "glob":
+    case "find":
       return SearchToolCall;
-    case 'think':
-    case 'thinking':
+    case "think":
+    case "thinking":
       return ThinkToolCall;
-    case 'save_memory':
-    case 'savememory':
-    case 'memory':
+    case "save_memory":
+    case "savememory":
+    case "memory":
       return SaveMemoryToolCall;
-    case 'fetch':
-    case 'web_fetch':
-    case 'webfetch':
-    case 'web_search':
-    case 'websearch':
+    case "fetch":
+    case "web_fetch":
+    case "webfetch":
+    case "web_search":
+    case "websearch":
       return WebFetchToolCall;
     default:
       return GenericToolCall;
@@ -225,11 +225,11 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
   (
     {
       messages,
-      className = '',
+      className = "",
       onFileClick,
-      emptyMessage = 'No messages to display',
+      emptyMessage = "No messages to display",
       autoScroll = true,
-      theme = 'auto',
+      theme = "auto",
       showEmptyIcon = true,
     },
     ref,
@@ -243,9 +243,9 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
       () =>
         messages
           .filter((msg) => {
-            if (msg.type === 'system') return false;
+            if (msg.type === "system") return false;
             // Filter out hidden tool calls
-            if (msg.type === 'tool_call' && msg.toolCall) {
+            if (msg.type === "tool_call" && msg.toolCall) {
               return shouldShowToolCall(msg.toolCall.kind);
             }
             return true;
@@ -260,7 +260,7 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
     useImperativeHandle(
       ref,
       () => ({
-        scrollToBottom: (behavior: ScrollBehavior = 'smooth') => {
+        scrollToBottom: (behavior: ScrollBehavior = "smooth") => {
           const container = scrollContainerRef.current;
           if (container) {
             container.scrollTo({
@@ -269,7 +269,7 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
             });
           }
         },
-        scrollToTop: (behavior: ScrollBehavior = 'smooth') => {
+        scrollToTop: (behavior: ScrollBehavior = "smooth") => {
           const container = scrollContainerRef.current;
           if (container) {
             container.scrollTo({
@@ -292,7 +292,7 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
 
       // Only auto-scroll when new messages are added
       if (currentCount > prevCount && scrollAnchorRef.current) {
-        scrollAnchorRef.current.scrollIntoView({ behavior: 'smooth' });
+        scrollAnchorRef.current.scrollIntoView({ behavior: "smooth" });
       }
 
       prevMessageCountRef.current = currentCount;
@@ -300,7 +300,7 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
 
     // Determine if previous/next is a user message (breaks the AI sequence)
     const isUserType = (msg: ChatMessageData | undefined) =>
-      !msg || msg.type === 'user';
+      !msg || msg.type === "user";
 
     // Render individual message based on type
     const renderMessage = (
@@ -317,7 +317,7 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
       const isLast = isUserType(next);
 
       // Handle tool calls
-      if (msg.type === 'tool_call' && msg.toolCall) {
+      if (msg.type === "tool_call" && msg.toolCall) {
         const ToolCallComponent = getToolCallComponent(msg.toolCall.kind);
 
         if (!ToolCallComponent) {
@@ -343,7 +343,7 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
       }
 
       switch (msg.type) {
-        case 'user':
+        case "user":
           return (
             <UserMessage
               key={key}
@@ -353,9 +353,9 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
             />
           );
 
-        case 'assistant':
+        case "assistant":
           // Check if this is a thinking message based on role
-          if (msg.message?.role === 'thinking') {
+          if (msg.message?.role === "thinking") {
             return (
               <ThinkingMessage
                 key={key}
@@ -383,13 +383,13 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
 
     // Build container class names
     const containerClasses = [
-      'chat-viewer-container',
-      theme === 'light' ? 'light-theme' : '',
-      theme === 'auto' ? 'auto-theme' : '',
+      "chat-viewer-container",
+      theme === "light" ? "light-theme" : "",
+      theme === "auto" ? "auto-theme" : "",
       className,
     ]
       .filter(Boolean)
-      .join(' ');
+      .join(" ");
 
     return (
       <div className={containerClasses}>
@@ -424,6 +424,6 @@ export const ChatViewer = forwardRef<ChatViewerHandle, ChatViewerProps>(
   },
 );
 
-ChatViewer.displayName = 'ChatViewer';
+ChatViewer.displayName = "ChatViewer";
 
 export default ChatViewer;

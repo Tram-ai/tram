@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from 'react';
-import { DashboardCards, HeatmapSection } from './Charts';
-import type { InsightData, QualitativeData } from './types';
-import { CopyButton, MarkdownText } from './Components';
+import { useState } from "react";
+import { DashboardCards, HeatmapSection } from "./Charts";
+import type { InsightData, QualitativeData } from "./types";
+import { CopyButton, MarkdownText } from "./Components";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React from 'react';
+import React from "react";
 
 // -----------------------------------------------------------------------------
 // Qualitative Insight Components
@@ -19,28 +19,28 @@ export function AtAGlance({ qualitative }: { qualitative: QualitativeData }) {
       <div className="glance-title">At a Glance</div>
       <div className="glance-sections">
         <div className="glance-section">
-          <strong>What&apos;s working:</strong>{' '}
+          <strong>What&apos;s working:</strong>{" "}
           <MarkdownText>{atAGlance.whats_working}</MarkdownText>
           <a href="#section-wins" className="see-more">
             Impressive Things You Did →
           </a>
         </div>
         <div className="glance-section">
-          <strong>What&apos;s hindering you:</strong>{' '}
+          <strong>What&apos;s hindering you:</strong>{" "}
           <MarkdownText>{atAGlance.whats_hindering}</MarkdownText>
           <a href="#section-friction" className="see-more">
             Where Things Go Wrong →
           </a>
         </div>
         <div className="glance-section">
-          <strong>Quick wins to try:</strong>{' '}
+          <strong>Quick wins to try:</strong>{" "}
           <MarkdownText>{atAGlance.quick_wins}</MarkdownText>
           <a href="#section-features" className="see-more">
             Features to Try →
           </a>
         </div>
         <div className="glance-section">
-          <strong>Ambitious workflows:</strong>{' '}
+          <strong>Ambitious workflows:</strong>{" "}
           <MarkdownText>{atAGlance.ambitious_workflows}</MarkdownText>
           <a href="#section-horizon" className="see-more">
             On the Horizon →
@@ -110,10 +110,10 @@ export function ProjectAreas({
 
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '24px',
-          marginBottom: '24px',
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "24px",
+          marginBottom: "24px",
         }}
       >
         {topGoals && Object.keys(topGoals).length > 0 && (
@@ -159,7 +159,7 @@ export function InteractionStyle({
         </p>
         {interactionStyle.key_pattern && (
           <div className="key-insight">
-            <strong>Key pattern:</strong>{' '}
+            <strong>Key pattern:</strong>{" "}
             <MarkdownText>{interactionStyle.key_pattern}</MarkdownText>
           </div>
         )}
@@ -210,11 +210,11 @@ export function ImpressiveWorkflows({
 
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '24px',
-          marginTop: '24px',
-          marginBottom: '24px',
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "24px",
+          marginTop: "24px",
+          marginBottom: "24px",
         }}
       >
         {primarySuccess && Object.keys(primarySuccess).length > 0 && (
@@ -223,12 +223,12 @@ export function ImpressiveWorkflows({
             title="What Helped Most (TRAM's Capabilities)"
             color="#3b82f6"
             allowedKeys={[
-              'fast_accurate_search',
-              'correct_code_edits',
-              'good_explanations',
-              'proactive_help',
-              'multi_file_changes',
-              'good_debugging',
+              "fast_accurate_search",
+              "correct_code_edits",
+              "good_explanations",
+              "proactive_help",
+              "multi_file_changes",
+              "good_debugging",
             ]}
           />
         )}
@@ -238,11 +238,11 @@ export function ImpressiveWorkflows({
             title="Outcomes"
             color="#8b5cf6"
             allowedKeys={[
-              'fully_achieved',
-              'mostly_achieved',
-              'partially_achieved',
-              'not_achieved',
-              'unclear_from_transcript',
+              "fully_achieved",
+              "mostly_achieved",
+              "partially_achieved",
+              "not_achieved",
+              "unclear_from_transcript",
             ]}
           />
         )}
@@ -253,20 +253,20 @@ export function ImpressiveWorkflows({
 
 // Format label for display (capitalize and replace underscores with spaces)
 function formatLabel(label: string) {
-  if (label === 'unclear_from_transcript') {
-    return 'Unclear';
+  if (label === "unclear_from_transcript") {
+    return "Unclear";
   }
   return label
-    .split('_')
+    .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .join(" ");
 }
 
 // Horizontal Bar Chart Component
 function HorizontalBarChart({
   data,
   title,
-  color = '#3b82f6',
+  color = "#3b82f6",
   allowedKeys = null,
 }: {
   data: Record<string, number>;
@@ -296,29 +296,29 @@ function HorizontalBarChart({
       style={{
         flex: 1,
         minWidth: 0,
-        backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        padding: '20px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
-        border: '1px solid #e2e8f0',
+        backgroundColor: "#ffffff",
+        borderRadius: "12px",
+        padding: "20px",
+        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08)",
+        border: "1px solid #e2e8f0",
       }}
     >
       <h3
         style={{
-          fontSize: '13px',
+          fontSize: "13px",
           fontWeight: 700,
-          color: '#64748b',
+          color: "#64748b",
           marginTop: 0,
-          marginBottom: '16px',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
+          marginBottom: "16px",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
         }}
       >
         {title}
       </h3>
       <div
         className="bar-chart"
-        style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
+        style={{ display: "flex", flexDirection: "column", gap: "10px" }}
       >
         {entries.map(([label, count]) => {
           const percentage = maxValue > 0 ? (count / maxValue) * 100 : 0;
@@ -326,19 +326,19 @@ function HorizontalBarChart({
             <div
               key={label}
               className="bar-row"
-              style={{ display: 'flex', alignItems: 'center', gap: '12px' }}
+              style={{ display: "flex", alignItems: "center", gap: "12px" }}
             >
               <div
                 className="bar-label"
                 style={{
-                  width: '130px',
-                  fontSize: '13px',
-                  color: '#475569',
-                  textAlign: 'left',
+                  width: "130px",
+                  fontSize: "13px",
+                  color: "#475569",
+                  textAlign: "left",
                   flexShrink: 0,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
               >
                 {formatLabel(label)}
@@ -347,9 +347,9 @@ function HorizontalBarChart({
                 className="bar-wrapper"
                 style={{
                   flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
                   minWidth: 0,
                 }}
               >
@@ -357,31 +357,31 @@ function HorizontalBarChart({
                   className="bar-bg"
                   style={{
                     flex: 1,
-                    height: '8px',
-                    backgroundColor: '#f1f5f9',
-                    borderRadius: '4px',
-                    overflow: 'hidden',
+                    height: "8px",
+                    backgroundColor: "#f1f5f9",
+                    borderRadius: "4px",
+                    overflow: "hidden",
                   }}
                 >
                   <div
                     className="bar-fill"
                     style={{
                       width: `${percentage}%`,
-                      height: '100%',
+                      height: "100%",
                       backgroundColor: color,
-                      borderRadius: '4px',
-                      transition: 'width 0.3s ease',
+                      borderRadius: "4px",
+                      transition: "width 0.3s ease",
                     }}
                   />
                 </div>
                 <span
                   className="bar-value"
                   style={{
-                    fontSize: '13px',
+                    fontSize: "13px",
                     fontWeight: 600,
-                    color: '#475569',
-                    minWidth: '24px',
-                    textAlign: 'right',
+                    color: "#475569",
+                    minWidth: "24px",
+                    textAlign: "right",
                   }}
                 >
                   {count}
@@ -444,11 +444,11 @@ export function FrictionPoints({
       {/* Facets Data Charts */}
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '24px',
-          marginTop: '24px',
-          marginBottom: '24px',
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "24px",
+          marginTop: "24px",
+          marginBottom: "24px",
         }}
       >
         {friction && Object.keys(friction).length > 0 && (
@@ -457,11 +457,11 @@ export function FrictionPoints({
             title="Primary Friction Types"
             color="#ef4444"
             allowedKeys={[
-              'misunderstood_request',
-              'wrong_approach',
-              'buggy_code',
-              'user_rejected_action',
-              'excessive_changes',
+              "misunderstood_request",
+              "wrong_approach",
+              "buggy_code",
+              "user_rejected_action",
+              "excessive_changes",
             ]}
           />
         )}
@@ -471,11 +471,11 @@ export function FrictionPoints({
             title="Inferred Satisfaction (model-estimated)"
             color="#10b981"
             allowedKeys={[
-              'happy',
-              'satisfied',
-              'likely_satisfied',
-              'dissatisfied',
-              'frustrated',
+              "happy",
+              "satisfied",
+              "likely_satisfied",
+              "dissatisfied",
+              "frustrated",
             ]}
           />
         )}
@@ -489,7 +489,7 @@ function TramMdAdditionsSection({
   additions,
 }: {
   additions: NonNullable<
-    NonNullable<QualitativeData['improvements']>['Tram_md_additions']
+    NonNullable<QualitativeData["improvements"]>["Tram_md_additions"]
   >;
 }) {
   const [checkedState, setCheckedState] = useState(
@@ -508,7 +508,7 @@ function TramMdAdditionsSection({
     const textToCopy = additions
       .filter((_, index) => checkedState[index])
       .map((item: { addition: any }) => item.addition)
-      .join('\n\n');
+      .join("\n\n");
 
     if (!textToCopy) return;
 
@@ -527,13 +527,13 @@ function TramMdAdditionsSection({
         Just copy this into TRAM to add it to your TRAM.md.
       </p>
 
-      <div className="tram-md-actions" style={{ marginBottom: '12px' }}>
+      <div className="tram-md-actions" style={{ marginBottom: "12px" }}>
         <button
-          className={`copy-all-btn ${copiedAll ? 'copied' : ''}`}
+          className={`copy-all-btn ${copiedAll ? "copied" : ""}`}
           onClick={handleCopyAll}
           disabled={checkedCount === 0}
         >
-          {copiedAll ? 'Copied All!' : `Copy All Checked (${checkedCount})`}
+          {copiedAll ? "Copied All!" : `Copy All Checked (${checkedCount})`}
         </button>
       </div>
 
@@ -595,7 +595,7 @@ export function Improvements({
                 <MarkdownText>{feat.one_liner}</MarkdownText>
               </div>
               <div className="feature-why">
-                <strong>Why for you:</strong>{' '}
+                <strong>Why for you:</strong>{" "}
                 <MarkdownText>{feat.why_for_you}</MarkdownText>
               </div>
               <div className="feature-examples">
@@ -676,16 +676,16 @@ export function FutureOpportunities({
                 <MarkdownText>{opp.whats_possible}</MarkdownText>
               </div>
               <div className="horizon-tip">
-                <strong>Getting started:</strong>{' '}
+                <strong>Getting started:</strong>{" "}
                 <MarkdownText>{opp.how_to_try}</MarkdownText>
               </div>
               <div className="pattern-prompt">
                 <div className="prompt-label">Paste into TRAM:</div>
                 <div
                   style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '8px',
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "8px",
                   }}
                 >
                   <code style={{ flex: 1 }}>{opp.copyable_prompt}</code>

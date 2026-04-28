@@ -14,26 +14,26 @@
  * and copies the necessary files into the SDK dist/cli/ directory.
  */
 
-import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const sdkRoot = join(__dirname, '..');
+const sdkRoot = join(__dirname, "..");
 
 function main() {
   // Get CLI package path from environment variable
   const cliPackagePath = process.env.CLI_PACKAGE_PATH;
   if (!cliPackagePath) {
     throw new Error(
-      '[sdk bundle] CLI_PACKAGE_PATH environment variable is required. ' +
-        'Please set it to the path where the CLI npm package was extracted.',
+      "[sdk bundle] CLI_PACKAGE_PATH environment variable is required. " +
+        "Please set it to the path where the CLI npm package was extracted.",
     );
   }
 
   const cliDistDir = cliPackagePath;
-  const sdkCliDistDir = join(sdkRoot, 'dist', 'cli');
+  const sdkCliDistDir = join(sdkRoot, "dist", "cli");
 
   // Verify CLI package exists
   if (!existsSync(cliDistDir)) {
@@ -44,9 +44,9 @@ function main() {
   }
 
   // Verify SDK dist exists
-  if (!existsSync(join(sdkRoot, 'dist'))) {
+  if (!existsSync(join(sdkRoot, "dist"))) {
     throw new Error(
-      '[sdk bundle] SDK dist/ not found. Run `npm run build` in packages/sdk-typescript first.',
+      "[sdk bundle] SDK dist/ not found. Run `npm run build` in packages/sdk-typescript first.",
     );
   }
 
@@ -54,35 +54,35 @@ function main() {
   rmSync(sdkCliDistDir, { recursive: true, force: true });
   mkdirSync(sdkCliDistDir, { recursive: true });
 
-  console.log('[sdk bundle] Copying CLI from npm package...');
+  console.log("[sdk bundle] Copying CLI from npm package...");
   console.log(`[sdk bundle] Source: ${cliDistDir} (package root)`);
   console.log(`[sdk bundle] Destination: ${sdkCliDistDir}`);
 
   // Copy main CLI file
-  const cliJsSource = join(cliDistDir, 'cli.js');
+  const cliJsSource = join(cliDistDir, "cli.js");
   if (!existsSync(cliJsSource)) {
     throw new Error(
       `[sdk bundle] cli.js not found in CLI package at: ${cliJsSource}`,
     );
   }
-  cpSync(cliJsSource, join(sdkCliDistDir, 'cli.js'));
-  console.log('[sdk bundle] ✓ cli.js copied');
+  cpSync(cliJsSource, join(sdkCliDistDir, "cli.js"));
+  console.log("[sdk bundle] ✓ cli.js copied");
 
   // Copy vendor directory if exists
-  const vendorSource = join(cliDistDir, 'vendor');
+  const vendorSource = join(cliDistDir, "vendor");
   if (existsSync(vendorSource)) {
-    cpSync(vendorSource, join(sdkCliDistDir, 'vendor'), { recursive: true });
-    console.log('[sdk bundle] ✓ vendor/ copied');
+    cpSync(vendorSource, join(sdkCliDistDir, "vendor"), { recursive: true });
+    console.log("[sdk bundle] ✓ vendor/ copied");
   }
 
   // Copy locales directory if exists
-  const localesSource = join(cliDistDir, 'locales');
+  const localesSource = join(cliDistDir, "locales");
   if (existsSync(localesSource)) {
-    cpSync(localesSource, join(sdkCliDistDir, 'locales'), { recursive: true });
-    console.log('[sdk bundle] ✓ locales/ copied');
+    cpSync(localesSource, join(sdkCliDistDir, "locales"), { recursive: true });
+    console.log("[sdk bundle] ✓ locales/ copied");
   }
 
-  console.log('[sdk bundle] CLI bundled successfully from npm package');
+  console.log("[sdk bundle] CLI bundled successfully from npm package");
 }
 
 main();

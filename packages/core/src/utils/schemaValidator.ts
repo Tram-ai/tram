@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import AjvPkg, { type AnySchema, type Ajv } from 'ajv';
+import AjvPkg, { type AnySchema, type Ajv } from "ajv";
 // Ajv2020 is the documented way to use draft-2020-12: https://ajv.js.org/json-schema.html#draft-2020-12
 // eslint-disable-next-line import/no-internal-modules
-import Ajv2020Pkg from 'ajv/dist/2020.js';
-import * as addFormats from 'ajv-formats';
-import { createDebugLogger } from './debugLogger.js';
+import Ajv2020Pkg from "ajv/dist/2020.js";
+import * as addFormats from "ajv-formats";
+import { createDebugLogger } from "./debugLogger.js";
 
 // Ajv's ESM/CJS interop: use 'any' for compatibility as recommended by Ajv docs
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,7 +17,7 @@ const AjvClass = (AjvPkg as any).default || AjvPkg;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Ajv2020Class = (Ajv2020Pkg as any).default || Ajv2020Pkg;
 
-const debugLogger = createDebugLogger('SchemaValidator');
+const debugLogger = createDebugLogger("SchemaValidator");
 
 const ajvOptions = {
   // See: https://ajv.js.org/options.html#strict-mode-options
@@ -42,16 +42,16 @@ addFormatsFunc(ajvDefault);
 addFormatsFunc(ajv2020);
 
 // Canonical draft-2020-12 meta-schema URI (used by rmcp MCP servers)
-const DRAFT_2020_12_SCHEMA = 'https://json-schema.org/draft/2020-12/schema';
+const DRAFT_2020_12_SCHEMA = "https://json-schema.org/draft/2020-12/schema";
 
 /**
  * Returns the appropriate validator based on schema's $schema field.
  */
 function getValidator(schema: AnySchema): Ajv {
   if (
-    typeof schema === 'object' &&
+    typeof schema === "object" &&
     schema !== null &&
-    '$schema' in schema &&
+    "$schema" in schema &&
     schema.$schema === DRAFT_2020_12_SCHEMA
   ) {
     return ajv2020;
@@ -72,8 +72,8 @@ export class SchemaValidator {
     if (!schema) {
       return null;
     }
-    if (typeof data !== 'object' || data === null) {
-      return 'Value of params must be an object';
+    if (typeof data !== "object" || data === null) {
+      return "Value of params must be an object";
     }
 
     const anySchema = schema as AnySchema;
@@ -91,9 +91,9 @@ export class SchemaValidator {
       // Skip validation rather than blocking tool usage.
       debugLogger.warn(
         `Failed to compile schema (${
-          (schema as Record<string, unknown>)?.['$schema'] ?? '<no $schema>'
+          (schema as Record<string, unknown>)?.["$schema"] ?? "<no $schema>"
         }): ${error instanceof Error ? error.message : String(error)}. ` +
-          'Skipping parameter validation.',
+          "Skipping parameter validation.",
       );
       return null;
     }
@@ -112,7 +112,7 @@ export class SchemaValidator {
 
       valid = validate(data);
       if (!valid && validate.errors) {
-        return validator.errorsText(validate.errors, { dataVar: 'params' });
+        return validator.errorsText(validate.errors, { dataVar: "params" });
       }
     }
     return null;
@@ -137,22 +137,22 @@ function getAcceptedTypes(
 ): Set<string> | null {
   const types = new Set<string>();
 
-  if (typeof propSchema['type'] === 'string') {
-    types.add(propSchema['type'] as string);
-  } else if (Array.isArray(propSchema['type'])) {
-    for (const t of propSchema['type'] as string[]) {
+  if (typeof propSchema["type"] === "string") {
+    types.add(propSchema["type"] as string);
+  } else if (Array.isArray(propSchema["type"])) {
+    for (const t of propSchema["type"] as string[]) {
       types.add(t);
     }
   }
 
-  for (const keyword of ['anyOf', 'oneOf']) {
+  for (const keyword of ["anyOf", "oneOf"]) {
     const variants = propSchema[keyword];
     if (Array.isArray(variants)) {
       for (const variant of variants as Array<Record<string, unknown>>) {
-        if (typeof variant['type'] === 'string') {
-          types.add(variant['type'] as string);
-        } else if (Array.isArray(variant['type'])) {
-          for (const t of variant['type'] as string[]) {
+        if (typeof variant["type"] === "string") {
+          types.add(variant["type"] as string);
+        } else if (Array.isArray(variant["type"])) {
+          for (const t of variant["type"] as string[]) {
             types.add(t);
           }
         }
@@ -179,7 +179,7 @@ function fixStringifiedJsonValues(
   data: Record<string, unknown>,
   schema: Record<string, unknown>,
 ) {
-  const properties = schema['properties'] as
+  const properties = schema["properties"] as
     | Record<string, Record<string, unknown>>
     | undefined;
   if (!properties) return;
@@ -187,23 +187,23 @@ function fixStringifiedJsonValues(
   for (const key of Object.keys(data)) {
     const value = data[key];
     const propSchema = properties[key];
-    if (!propSchema || typeof value !== 'string') continue;
+    if (!propSchema || typeof value !== "string") continue;
 
     const trimmed = value.trim();
     if (
-      (trimmed.startsWith('[') && trimmed.endsWith(']')) ||
-      (trimmed.startsWith('{') && trimmed.endsWith('}'))
+      (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+      (trimmed.startsWith("{") && trimmed.endsWith("}"))
     ) {
       const accepted = getAcceptedTypes(propSchema);
       if (!accepted) continue;
       // Only coerce if the schema does NOT accept string — otherwise the
       // string value may be intentional.
-      if (accepted.has('string')) continue;
-      if (!accepted.has('array') && !accepted.has('object')) continue;
+      if (accepted.has("string")) continue;
+      if (!accepted.has("array") && !accepted.has("object")) continue;
 
       try {
         const parsed = JSON.parse(trimmed);
-        const parsedType = Array.isArray(parsed) ? 'array' : typeof parsed;
+        const parsedType = Array.isArray(parsed) ? "array" : typeof parsed;
         if (accepted.has(parsedType)) {
           data[key] = parsed;
         }
@@ -219,13 +219,13 @@ function fixBooleanValues(data: Record<string, unknown>) {
     if (!(key in data)) continue;
     const value = data[key];
 
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === "object" && value !== null) {
       fixBooleanValues(value as Record<string, unknown>);
-    } else if (typeof value === 'string') {
+    } else if (typeof value === "string") {
       const lower = value.toLowerCase();
-      if (lower === 'true') {
+      if (lower === "true") {
         data[key] = true;
-      } else if (lower === 'false') {
+      } else if (lower === "false") {
         data[key] = false;
       }
     }

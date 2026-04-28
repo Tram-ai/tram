@@ -10,7 +10,7 @@ import {
   getErrorMessage,
   logAuth,
   AuthEvent,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 
 /**
  * Handles the initial authentication flow.
@@ -32,13 +32,13 @@ export async function performInitialAuth(
     // We can add a dedicated startup message later if needed.
 
     // Log authentication success
-    const authEvent = new AuthEvent(authType, 'auto', 'success');
+    const authEvent = new AuthEvent(authType, "auto", "success");
     logAuth(config, authEvent);
   } catch (e) {
     const errorMessage = `Failed to login. Message: ${getErrorMessage(e)}`;
 
     // Log authentication failure
-    const authEvent = new AuthEvent(authType, 'auto', 'error', errorMessage);
+    const authEvent = new AuthEvent(authType, "auto", "error", errorMessage);
     logAuth(config, authEvent);
 
     return errorMessage;

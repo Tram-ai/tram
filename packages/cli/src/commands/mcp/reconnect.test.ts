@@ -4,29 +4,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { reconnectCommand } from './reconnect.js';
-import { loadSettings } from '../../config/settings.js';
-import { Config, ExtensionManager } from '@qwen-code/qwen-code-core';
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { reconnectCommand } from "./reconnect.js";
+import { loadSettings } from "../../config/settings.js";
+import { Config, ExtensionManager } from "@tram-ai/tram-core";
 
 const mockWriteStdoutLine = vi.hoisted(() => vi.fn());
 const mockWriteStderrLine = vi.hoisted(() => vi.fn());
 const mockProcessExit = vi.hoisted(() => vi.fn());
 
-vi.mock('../../utils/stdioHelpers.js', () => ({
+vi.mock("../../utils/stdioHelpers.js", () => ({
   writeStdoutLine: mockWriteStdoutLine,
   writeStderrLine: mockWriteStderrLine,
 }));
 
-vi.mock('../../config/settings.js', () => ({
+vi.mock("../../config/settings.js", () => ({
   loadSettings: vi.fn(),
 }));
 
-vi.mock('../../config/trustedFolders.js', () => ({
+vi.mock("../../config/trustedFolders.js", () => ({
   isWorkspaceTrusted: vi.fn().mockReturnValue(true),
 }));
 
-vi.mock('@qwen-code/qwen-code-core', () => ({
+vi.mock("@tram-ai/tram-core", () => ({
   Config: vi.fn(),
   FileDiscoveryService: vi.fn(),
   ExtensionManager: vi.fn(),
@@ -37,7 +37,7 @@ const mockedLoadSettings = loadSettings as vi.Mock;
 const MockedConfig = Config as vi.Mock;
 const MockedExtensionManager = ExtensionManager as vi.Mock;
 
-describe('mcp reconnect command', () => {
+describe("mcp reconnect command", () => {
   let mockConfig: {
     getToolRegistry: vi.Mock;
     shutdown: vi.Mock;
@@ -74,7 +74,7 @@ describe('mcp reconnect command', () => {
     MockedConfig.mockImplementation(() => mockConfig);
     MockedExtensionManager.mockImplementation(() => mockExtensionManager);
 
-    Object.defineProperty(process, 'exit', {
+    Object.defineProperty(process, "exit", {
       value: mockProcessExit,
       writable: true,
     });
@@ -84,12 +84,12 @@ describe('mcp reconnect command', () => {
     vi.restoreAllMocks();
   });
 
-  describe('reconnect specific server', () => {
-    it('should successfully reconnect a specific server', async () => {
+  describe("reconnect specific server", () => {
+    it("should successfully reconnect a specific server", async () => {
       mockedLoadSettings.mockReturnValue({
         merged: {
           mcpServers: {
-            'test-server': { command: '/path/to/server' },
+            "test-server": { command: "/path/to/server" },
           },
         },
       });
@@ -97,24 +97,24 @@ describe('mcp reconnect command', () => {
       const handler = reconnectCommand.handler as (
         argv: Record<string, unknown>,
       ) => Promise<void>;
-      await handler({ 'server-name': 'test-server', all: false });
+      await handler({ "server-name": "test-server", all: false });
 
       expect(mockWriteStdoutLine).toHaveBeenCalledWith(
         'Reconnecting to server "test-server"...',
       );
       expect(mockToolRegistry.discoverToolsForServer).toHaveBeenCalledWith(
-        'test-server',
+        "test-server",
       );
       expect(mockWriteStdoutLine).toHaveBeenCalledWith(
         'Successfully reconnected to server "test-server".',
       );
     });
 
-    it('should print error when server not found', async () => {
+    it("should print error when server not found", async () => {
       mockedLoadSettings.mockReturnValue({
         merged: {
           mcpServers: {
-            'other-server': { command: '/path/to/server' },
+            "other-server": { command: "/path/to/server" },
           },
         },
       });
@@ -122,7 +122,7 @@ describe('mcp reconnect command', () => {
       const handler = reconnectCommand.handler as (
         argv: Record<string, unknown>,
       ) => Promise<void>;
-      await handler({ 'server-name': 'nonexistent-server', all: false });
+      await handler({ "server-name": "nonexistent-server", all: false });
 
       expect(mockWriteStderrLine).toHaveBeenCalledWith(
         'Error: Server "nonexistent-server" not found in configuration.',
@@ -130,23 +130,23 @@ describe('mcp reconnect command', () => {
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
-    it('should print error when reconnection fails', async () => {
+    it("should print error when reconnection fails", async () => {
       mockedLoadSettings.mockReturnValue({
         merged: {
           mcpServers: {
-            'test-server': { command: '/path/to/server' },
+            "test-server": { command: "/path/to/server" },
           },
         },
       });
 
       mockToolRegistry.discoverToolsForServer.mockRejectedValue(
-        new Error('Connection refused'),
+        new Error("Connection refused"),
       );
 
       const handler = reconnectCommand.handler as (
         argv: Record<string, unknown>,
       ) => Promise<void>;
-      await handler({ 'server-name': 'test-server', all: false });
+      await handler({ "server-name": "test-server", all: false });
 
       expect(mockWriteStderrLine).toHaveBeenCalledWith(
         'Failed to reconnect to server "test-server": Connection refused',
@@ -155,13 +155,13 @@ describe('mcp reconnect command', () => {
     });
   });
 
-  describe('reconnect all servers', () => {
-    it('should successfully reconnect all servers', async () => {
+  describe("reconnect all servers", () => {
+    it("should successfully reconnect all servers", async () => {
       mockedLoadSettings.mockReturnValue({
         merged: {
           mcpServers: {
-            'server-one': { command: '/path/to/server1' },
-            'server-two': { command: '/path/to/server2' },
+            "server-one": { command: "/path/to/server1" },
+            "server-two": { command: "/path/to/server2" },
           },
         },
       });
@@ -169,26 +169,26 @@ describe('mcp reconnect command', () => {
       const handler = reconnectCommand.handler as (
         argv: Record<string, unknown>,
       ) => Promise<void>;
-      await handler({ 'server-name': undefined, all: true });
+      await handler({ "server-name": undefined, all: true });
 
       expect(mockWriteStdoutLine).toHaveBeenCalledWith(
-        'Reconnecting to all MCP servers...\n',
+        "Reconnecting to all MCP servers...\n",
       );
       expect(mockToolRegistry.discoverToolsForServer).toHaveBeenCalledWith(
-        'server-one',
+        "server-one",
       );
       expect(mockToolRegistry.discoverToolsForServer).toHaveBeenCalledWith(
-        'server-two',
+        "server-two",
       );
       expect(mockWriteStdoutLine).toHaveBeenCalledWith(
-        '✓ server-one: Reconnected successfully',
+        "✓ server-one: Reconnected successfully",
       );
       expect(mockWriteStdoutLine).toHaveBeenCalledWith(
-        '✓ server-two: Reconnected successfully',
+        "✓ server-two: Reconnected successfully",
       );
     });
 
-    it('should print message when no servers configured', async () => {
+    it("should print message when no servers configured", async () => {
       mockedLoadSettings.mockReturnValue({
         merged: {
           mcpServers: {},
@@ -198,37 +198,37 @@ describe('mcp reconnect command', () => {
       const handler = reconnectCommand.handler as (
         argv: Record<string, unknown>,
       ) => Promise<void>;
-      await handler({ 'server-name': undefined, all: true });
+      await handler({ "server-name": undefined, all: true });
 
       expect(mockWriteStdoutLine).toHaveBeenCalledWith(
-        'No MCP servers configured.',
+        "No MCP servers configured.",
       );
     });
 
-    it('should report failure for individual servers when reconnecting all', async () => {
+    it("should report failure for individual servers when reconnecting all", async () => {
       mockedLoadSettings.mockReturnValue({
         merged: {
           mcpServers: {
-            'server-one': { command: '/path/to/server1' },
-            'server-two': { command: '/path/to/server2' },
+            "server-one": { command: "/path/to/server1" },
+            "server-two": { command: "/path/to/server2" },
           },
         },
       });
 
       mockToolRegistry.discoverToolsForServer
         .mockResolvedValueOnce(undefined)
-        .mockRejectedValueOnce(new Error('Timeout'));
+        .mockRejectedValueOnce(new Error("Timeout"));
 
       const handler = reconnectCommand.handler as (
         argv: Record<string, unknown>,
       ) => Promise<void>;
-      await handler({ 'server-name': undefined, all: true });
+      await handler({ "server-name": undefined, all: true });
 
       expect(mockWriteStdoutLine).toHaveBeenCalledWith(
-        '✓ server-one: Reconnected successfully',
+        "✓ server-one: Reconnected successfully",
       );
       expect(mockWriteStdoutLine).toHaveBeenCalledWith(
-        '✗ server-two: Failed - Timeout',
+        "✗ server-two: Failed - Timeout",
       );
     });
   });

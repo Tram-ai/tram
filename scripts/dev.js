@@ -14,9 +14,9 @@
  * Example: npm run dev -- help
  */
 
-import { spawn } from 'node:child_process';
-import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { spawn } from "node:child_process";
+import { dirname, join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   writeFileSync,
   mkdtempSync,
@@ -24,12 +24,12 @@ import {
   existsSync,
   symlinkSync,
   mkdirSync,
-} from 'node:fs';
-import { tmpdir, platform } from 'node:os';
+} from "node:fs";
+import { tmpdir, platform } from "node:os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = join(__dirname, '..');
-const cliPackageDir = join(root, 'packages', 'cli');
+const root = join(__dirname, "..");
+const cliPackageDir = join(root, "packages", "cli");
 
 // Ensure qc-helper bundled skill can find user docs in dev mode.
 // In dev, import.meta.url resolves to the source tree, so the bundled skill
@@ -37,15 +37,15 @@ const cliPackageDir = join(root, 'packages', 'cli');
 // symlink from there to docs/users/ so the skill can read docs at runtime.
 const qcHelperDocsLink = join(
   root,
-  'packages',
-  'core',
-  'src',
-  'skills',
-  'bundled',
-  'qc-helper',
-  'docs',
+  "packages",
+  "core",
+  "src",
+  "skills",
+  "bundled",
+  "qc-helper",
+  "docs",
 );
-const userDocsTarget = join(root, 'docs', 'users');
+const userDocsTarget = join(root, "docs", "users");
 if (existsSync(userDocsTarget) && !existsSync(qcHelperDocsLink)) {
   mkdirSync(dirname(qcHelperDocsLink), { recursive: true });
   try {
@@ -56,13 +56,13 @@ if (existsSync(userDocsTarget) && !existsSync(qcHelperDocsLink)) {
 }
 
 // Entry point for the CLI
-const cliEntry = join(cliPackageDir, 'index.ts');
+const cliEntry = join(cliPackageDir, "index.ts");
 
 // Create a temporary loader file
-const tmpDir = mkdtempSync(join(tmpdir(), 'qwen-dev-'));
-const loaderPath = join(tmpDir, 'loader.mjs');
+const tmpDir = mkdtempSync(join(tmpdir(), "qwen-dev-"));
+const loaderPath = join(tmpDir, "loader.mjs");
 
-const coreSourcePath = join(root, 'packages', 'core', 'index.ts');
+const coreSourcePath = join(root, "packages", "core", "index.ts");
 const coreSourceUrl = pathToFileURL(coreSourcePath).href;
 
 const loaderCode = `
@@ -85,7 +85,7 @@ export function resolve(specifier, context, nextResolve) {
 writeFileSync(loaderPath, loaderCode);
 
 // Create the register script that uses the new register() API
-const registerPath = join(tmpDir, 'register.mjs');
+const registerPath = join(tmpDir, "register.mjs");
 const loaderUrl = pathToFileURL(loaderPath).href;
 const registerCode = `
 import { register } from 'node:module';
@@ -96,31 +96,31 @@ register('${loaderUrl}', pathToFileURL('./'));
 writeFileSync(registerPath, registerCode);
 
 // Preserve existing NODE_OPTIONS (e.g. VS Code debugger injects --inspect flags via NODE_OPTIONS)
-const existingNodeOptions = process.env.NODE_OPTIONS || '';
+const existingNodeOptions = process.env.NODE_OPTIONS || "";
 const importFlag = `--import ${pathToFileURL(registerPath).href}`;
 
 const env = {
   ...process.env,
-  DEV: 'true',
-  CLI_VERSION: 'dev',
-  NODE_ENV: 'development',
+  DEV: "true",
+  CLI_VERSION: "dev",
+  NODE_ENV: "development",
   NODE_OPTIONS: `${existingNodeOptions} ${importFlag}`.trim(),
 };
 
 // On Windows, use tsx.cmd; on Unix, use tsx directly
-const isWin = platform() === 'win32';
-const tsxCmd = isWin ? 'tsx.cmd' : 'tsx';
+const isWin = platform() === "win32";
+const tsxCmd = isWin ? "tsx.cmd" : "tsx";
 const tsxArgs = [cliEntry, ...process.argv.slice(2)];
 
 const child = spawn(tsxCmd, tsxArgs, {
-  stdio: 'inherit',
+  stdio: "inherit",
   env,
   cwd: process.cwd(),
   shell: isWin, // Use shell on Windows to resolve .cmd files
 });
 
-child.on('error', (err) => {
-  console.error('Failed to start dev server:', err.message);
+child.on("error", (err) => {
+  console.error("Failed to start dev server:", err.message);
   try {
     rmSync(tmpDir, { recursive: true, force: true });
   } catch {
@@ -129,7 +129,7 @@ child.on('error', (err) => {
   process.exit(1);
 });
 
-child.on('close', (code) => {
+child.on("close", (code) => {
   // Cleanup temp directory
   try {
     rmSync(tmpDir, { recursive: true, force: true });

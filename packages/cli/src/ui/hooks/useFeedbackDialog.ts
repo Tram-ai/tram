@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import * as fs from 'node:fs';
+import { useState, useCallback, useEffect } from "react";
+import * as fs from "node:fs";
 import {
   type Config,
   createDebugLogger,
@@ -8,16 +8,16 @@ import {
   type UserFeedbackRating,
   isNodeError,
   AuthType,
-} from '@tram-ai/tram-core';
-import { StreamingState, MessageType, type HistoryItem } from '../types.js';
+} from "@tram-ai/tram-core";
+import { StreamingState, MessageType, type HistoryItem } from "../types.js";
 import {
   SettingScope,
   type LoadedSettings,
   USER_SETTINGS_PATH,
-} from '../../config/settings.js';
-import type { SessionStatsState } from '../contexts/SessionContext.js';
-import { FEEDBACK_OPTIONS } from '../FeedbackDialog.js';
-import stripJsonComments from 'strip-json-comments';
+} from "../../config/settings.js";
+import type { SessionStatsState } from "../contexts/SessionContext.js";
+import { FEEDBACK_OPTIONS } from "../FeedbackDialog.js";
+import stripJsonComments from "strip-json-comments";
 
 const FEEDBACK_SHOW_PROBABILITY = 0.25; // 25% probability of showing feedback dialog
 const MIN_TOOL_CALLS = 10; // Minimum tool calls to show feedback dialog
@@ -25,7 +25,7 @@ const MIN_USER_MESSAGES = 5; // Minimum user messages to show feedback dialog
 
 // Fatigue mechanism constants
 const FEEDBACK_COOLDOWN_HOURS = 24; // Hours to wait before showing feedback dialog again
-const debugLogger = createDebugLogger('FEEDBACK_DIALOG');
+const debugLogger = createDebugLogger("FEEDBACK_DIALOG");
 
 /**
  * Check if the last message in the conversation history is an AI response
@@ -39,14 +39,14 @@ const lastMessageIsAIResponse = (history: HistoryItem[]): boolean =>
 const getFeedbackLastShownTimestampFromFile = (): number => {
   try {
     if (fs.existsSync(USER_SETTINGS_PATH)) {
-      const content = fs.readFileSync(USER_SETTINGS_PATH, 'utf-8');
+      const content = fs.readFileSync(USER_SETTINGS_PATH, "utf-8");
       const settings = JSON.parse(stripJsonComments(content));
       return settings?.ui?.feedbackLastShownTimestamp ?? 0;
     }
   } catch (error) {
-    if (isNodeError(error) && error.code !== 'ENOENT') {
+    if (isNodeError(error) && error.code !== "ENOENT") {
       debugLogger.warn(
-        'Failed to read feedbackLastShownTimestamp from settings file:',
+        "Failed to read feedbackLastShownTimestamp from settings file:",
         error,
       );
     }
@@ -134,7 +134,7 @@ export const useFeedbackDialog = ({
       // Record the timestamp when feedback dialog is submitted
       settings.setValue(
         SettingScope.User,
-        'ui.feedbackLastShownTimestamp',
+        "ui.feedbackLastShownTimestamp",
         Date.now(),
       );
 

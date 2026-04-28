@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createContext, useContext } from 'react';
-import { type Key } from '../hooks/useKeypress.js';
-import { type IdeIntegrationNudgeResult } from '../IdeIntegrationNudge.js';
-import { type CommandMigrationNudgeResult } from '../CommandFormatMigrationNudge.js';
-import { type FolderTrustChoice } from '../components/FolderTrustDialog.js';
+import { createContext, useContext } from "react";
+import { type Key } from "../hooks/useKeypress.js";
+import { type IdeIntegrationNudgeResult } from "../IdeIntegrationNudge.js";
+import { type CommandMigrationNudgeResult } from "../CommandFormatMigrationNudge.js";
+import { type FolderTrustChoice } from "../components/FolderTrustDialog.js";
 import {
   type AuthType,
   type EditorType,
   type ApprovalMode,
-} from '@tram-ai/tram-core';
-import { type SettingScope } from '../../config/settings.js';
-import { type CodingPlanRegion } from '../../constants/codingPlan.js';
-import { type AlibabaStandardRegion } from '../../constants/alibabaStandardApiKey.js';
-import type { AuthState } from '../types.js';
-import { type ArenaDialogType } from '../hooks/useArenaCommand.js';
+} from "@tram-ai/tram-core";
+import { type SettingScope } from "../../config/settings.js";
+import { type CodingPlanRegion } from "../../constants/codingPlan.js";
+import { type AlibabaStandardRegion } from "../../constants/alibabaStandardApiKey.js";
+import type { AuthState } from "../types.js";
+import { type ArenaDialogType } from "../hooks/useArenaCommand.js";
 // OpenAICredentials type (previously imported from OpenAIKeyPrompt)
 export interface OpenAICredentials {
   apiKey: string;
@@ -82,7 +82,7 @@ export interface UIActions {
   handleClearScreen: () => void;
   popAllQueuedMessages: () => string | null;
   // Welcome back dialog
-  handleWelcomeBackSelection: (choice: 'continue' | 'restart') => void;
+  handleWelcomeBackSelection: (choice: "continue" | "restart") => void;
   handleWelcomeBackClose: () => void;
   // Subagent dialogs
   closeSubagentCreateDialog: () => void;
@@ -95,6 +95,9 @@ export interface UIActions {
   openHooksDialog: () => void;
   // Hooks dialog
   closeHooksDialog: () => void;
+  // Initialize dialog
+  openInitializeDialog: () => void;
+  closeInitializeDialog: () => void;
   // Resume session dialog
   openResumeDialog: () => void;
   closeResumeDialog: () => void;
@@ -111,7 +114,7 @@ export const UIActionsContext = createContext<UIActions | null>(null);
 export const useUIActions = () => {
   const context = useContext(UIActionsContext);
   if (!context) {
-    throw new Error('useUIActions must be used within a UIActionsProvider');
+    throw new Error("useUIActions must be used within a UIActionsProvider");
   }
   return context;
 };

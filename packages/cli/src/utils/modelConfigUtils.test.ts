@@ -4,37 +4,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   AuthType,
   resolveModelConfig,
   type ProviderModelConfig,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import {
   getAuthTypeFromEnv,
   resolveCliGenerationConfig,
-} from './modelConfigUtils.js';
-import type { Settings } from '../config/settings.js';
+} from "./modelConfigUtils.js";
+import type { Settings } from "../config/settings.js";
 
 const mockWriteStderrLine = vi.hoisted(() => vi.fn());
 
-vi.mock('@tram-ai/tram-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('@tram-ai/tram-core')>();
+vi.mock("@tram-ai/tram-core", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@tram-ai/tram-core")>();
   return {
     ...original,
     resolveModelConfig: vi.fn(),
   };
 });
 
-vi.mock('./stdioHelpers.js', () => ({
+vi.mock("./stdioHelpers.js", () => ({
   writeStderrLine: mockWriteStderrLine,
   writeStdoutLine: vi.fn(),
   clearScreen: vi.fn(),
 }));
 
-describe('modelConfigUtils', () => {
-  describe('getAuthTypeFromEnv', () => {
+describe("modelConfigUtils", () => {
+  describe("getAuthTypeFromEnv", () => {
     const originalEnv = process.env;
 
     beforeEach(() => {
@@ -47,88 +46,88 @@ describe('modelConfigUtils', () => {
       process.env = originalEnv;
     });
 
-    it('should return USE_OPENAI when all OpenAI env vars are set', () => {
-      process.env['OPENAI_API_KEY'] = 'test-key';
-      process.env['OPENAI_MODEL'] = 'gpt-4';
-      process.env['OPENAI_BASE_URL'] = 'https://api.openai.com';
+    it("should return USE_OPENAI when all OpenAI env vars are set", () => {
+      process.env["OPENAI_API_KEY"] = "test-key";
+      process.env["OPENAI_MODEL"] = "gpt-4";
+      process.env["OPENAI_BASE_URL"] = "https://api.openai.com";
 
       expect(getAuthTypeFromEnv()).toBe(AuthType.USE_OPENAI);
     });
 
-    it('should return undefined when OpenAI env vars are incomplete', () => {
-      process.env['OPENAI_API_KEY'] = 'test-key';
-      process.env['OPENAI_MODEL'] = 'gpt-4';
+    it("should return undefined when OpenAI env vars are incomplete", () => {
+      process.env["OPENAI_API_KEY"] = "test-key";
+      process.env["OPENAI_MODEL"] = "gpt-4";
       // Missing OPENAI_BASE_URL
 
       expect(getAuthTypeFromEnv()).toBeUndefined();
     });
 
-    it('should return TRAM_OAUTH when TRAM_OAUTH is set', () => {
-      process.env['TRAM_OAUTH'] = 'true';
+    it("should return TRAM_OAUTH when TRAM_OAUTH is set", () => {
+      process.env["TRAM_OAUTH"] = "true";
 
       expect(getAuthTypeFromEnv()).toBe(AuthType.TRAM_OAUTH);
     });
 
-    it('should return USE_GEMINI when Gemini env vars are set', () => {
-      process.env['GEMINI_API_KEY'] = 'test-key';
-      process.env['GEMINI_MODEL'] = 'gemini-pro';
+    it("should return USE_GEMINI when Gemini env vars are set", () => {
+      process.env["GEMINI_API_KEY"] = "test-key";
+      process.env["GEMINI_MODEL"] = "gemini-pro";
 
       expect(getAuthTypeFromEnv()).toBe(AuthType.USE_GEMINI);
     });
 
-    it('should return undefined when Gemini env vars are incomplete', () => {
-      process.env['GEMINI_API_KEY'] = 'test-key';
+    it("should return undefined when Gemini env vars are incomplete", () => {
+      process.env["GEMINI_API_KEY"] = "test-key";
       // Missing GEMINI_MODEL
 
       expect(getAuthTypeFromEnv()).toBeUndefined();
     });
 
-    it('should return USE_VERTEX_AI when Google env vars are set', () => {
-      process.env['GOOGLE_API_KEY'] = 'test-key';
-      process.env['GOOGLE_MODEL'] = 'vertex-model';
+    it("should return USE_VERTEX_AI when Google env vars are set", () => {
+      process.env["GOOGLE_API_KEY"] = "test-key";
+      process.env["GOOGLE_MODEL"] = "vertex-model";
 
       expect(getAuthTypeFromEnv()).toBe(AuthType.USE_VERTEX_AI);
     });
 
-    it('should return undefined when Google env vars are incomplete', () => {
-      process.env['GOOGLE_API_KEY'] = 'test-key';
+    it("should return undefined when Google env vars are incomplete", () => {
+      process.env["GOOGLE_API_KEY"] = "test-key";
       // Missing GOOGLE_MODEL
 
       expect(getAuthTypeFromEnv()).toBeUndefined();
     });
 
-    it('should return USE_ANTHROPIC when Anthropic env vars are set', () => {
-      process.env['ANTHROPIC_API_KEY'] = 'test-key';
-      process.env['ANTHROPIC_MODEL'] = 'claude-3';
-      process.env['ANTHROPIC_BASE_URL'] = 'https://api.anthropic.com';
+    it("should return USE_ANTHROPIC when Anthropic env vars are set", () => {
+      process.env["ANTHROPIC_API_KEY"] = "test-key";
+      process.env["ANTHROPIC_MODEL"] = "claude-3";
+      process.env["ANTHROPIC_BASE_URL"] = "https://api.anthropic.com";
 
       expect(getAuthTypeFromEnv()).toBe(AuthType.USE_ANTHROPIC);
     });
 
-    it('should return undefined when Anthropic env vars are incomplete', () => {
-      process.env['ANTHROPIC_API_KEY'] = 'test-key';
-      process.env['ANTHROPIC_MODEL'] = 'claude-3';
+    it("should return undefined when Anthropic env vars are incomplete", () => {
+      process.env["ANTHROPIC_API_KEY"] = "test-key";
+      process.env["ANTHROPIC_MODEL"] = "claude-3";
       // Missing ANTHROPIC_BASE_URL
 
       expect(getAuthTypeFromEnv()).toBeUndefined();
     });
 
-    it('should prioritize TRAM_OAUTH over other auth types when explicitly set', () => {
-      process.env['TRAM_OAUTH'] = 'true';
-      process.env['OPENAI_API_KEY'] = 'test-key';
-      process.env['OPENAI_MODEL'] = 'gpt-4';
-      process.env['OPENAI_BASE_URL'] = 'https://api.openai.com';
+    it("should prioritize TRAM_OAUTH over other auth types when explicitly set", () => {
+      process.env["TRAM_OAUTH"] = "true";
+      process.env["OPENAI_API_KEY"] = "test-key";
+      process.env["OPENAI_MODEL"] = "gpt-4";
+      process.env["OPENAI_BASE_URL"] = "https://api.openai.com";
 
       // TRAM_OAUTH is checked first, so it should be returned even when other auth vars are set
       expect(getAuthTypeFromEnv()).toBe(AuthType.TRAM_OAUTH);
     });
 
-    it('should return undefined when no auth env vars are set', () => {
+    it("should return undefined when no auth env vars are set", () => {
       expect(getAuthTypeFromEnv()).toBeUndefined();
     });
   });
 
-  describe('resolveCliGenerationConfig', () => {
+  describe("resolveCliGenerationConfig", () => {
     const originalEnv = process.env;
 
     beforeEach(() => {
@@ -144,36 +143,36 @@ describe('modelConfigUtils', () => {
 
     function makeMockSettings(overrides?: Partial<Settings>): Settings {
       return {
-        model: { name: 'default-model' },
+        model: { name: "default-model" },
         security: {
           auth: {
-            apiKey: 'settings-api-key',
-            baseUrl: 'https://settings.example.com',
+            apiKey: "settings-api-key",
+            baseUrl: "https://settings.example.com",
           },
         },
         ...overrides,
       } as Settings;
     }
 
-    it('should resolve config from argv with highest precedence', () => {
+    it("should resolve config from argv with highest precedence", () => {
       const argv = {
-        model: 'argv-model',
-        openaiApiKey: 'argv-key',
-        openaiBaseUrl: 'https://argv.example.com',
+        model: "argv-model",
+        openaiApiKey: "argv-key",
+        openaiBaseUrl: "https://argv.example.com",
       };
       const settings = makeMockSettings();
       const selectedAuthType = AuthType.USE_OPENAI;
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'argv-model',
-          apiKey: 'argv-key',
-          baseUrl: 'https://argv.example.com',
+          model: "argv-model",
+          apiKey: "argv-key",
+          baseUrl: "https://argv.example.com",
         },
         sources: {
-          model: { kind: 'cli', detail: '--model' },
-          apiKey: { kind: 'cli', detail: '--openaiApiKey' },
-          baseUrl: { kind: 'cli', detail: '--openaiBaseUrl' },
+          model: { kind: "cli", detail: "--model" },
+          apiKey: { kind: "cli", detail: "--openaiApiKey" },
+          baseUrl: { kind: "cli", detail: "--openaiBaseUrl" },
         },
         warnings: [],
       });
@@ -184,28 +183,28 @@ describe('modelConfigUtils', () => {
         selectedAuthType,
       });
 
-      expect(result.model).toBe('argv-model');
-      expect(result.apiKey).toBe('argv-key');
-      expect(result.baseUrl).toBe('https://argv.example.com');
+      expect(result.model).toBe("argv-model");
+      expect(result.apiKey).toBe("argv-key");
+      expect(result.baseUrl).toBe("https://argv.example.com");
       expect(vi.mocked(resolveModelConfig)).toHaveBeenCalledWith(
         expect.objectContaining({
           cli: {
-            model: 'argv-model',
-            apiKey: 'argv-key',
-            baseUrl: 'https://argv.example.com',
+            model: "argv-model",
+            apiKey: "argv-key",
+            baseUrl: "https://argv.example.com",
           },
         }),
       );
     });
 
-    it('should resolve config from settings when argv is not provided', () => {
+    it("should resolve config from settings when argv is not provided", () => {
       const argv = {};
       const settings = makeMockSettings({
-        model: { name: 'settings-model' },
+        model: { name: "settings-model" },
         security: {
           auth: {
-            apiKey: 'settings-key',
-            baseUrl: 'https://settings.example.com',
+            apiKey: "settings-key",
+            baseUrl: "https://settings.example.com",
           },
         },
       });
@@ -213,14 +212,14 @@ describe('modelConfigUtils', () => {
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'settings-model',
-          apiKey: 'settings-key',
-          baseUrl: 'https://settings.example.com',
+          model: "settings-model",
+          apiKey: "settings-key",
+          baseUrl: "https://settings.example.com",
         },
         sources: {
-          model: { kind: 'settings', detail: 'model.name' },
-          apiKey: { kind: 'settings', detail: 'security.auth.apiKey' },
-          baseUrl: { kind: 'settings', detail: 'security.auth.baseUrl' },
+          model: { kind: "settings", detail: "model.name" },
+          apiKey: { kind: "settings", detail: "security.auth.apiKey" },
+          baseUrl: { kind: "settings", detail: "security.auth.baseUrl" },
         },
         warnings: [],
       });
@@ -231,16 +230,16 @@ describe('modelConfigUtils', () => {
         selectedAuthType,
       });
 
-      expect(result.model).toBe('settings-model');
-      expect(result.apiKey).toBe('settings-key');
-      expect(result.baseUrl).toBe('https://settings.example.com');
+      expect(result.model).toBe("settings-model");
+      expect(result.apiKey).toBe("settings-key");
+      expect(result.baseUrl).toBe("https://settings.example.com");
     });
 
-    it('should merge generationConfig from settings', () => {
+    it("should merge generationConfig from settings", () => {
       const argv = {};
       const settings = makeMockSettings({
         model: {
-          name: 'test-model',
+          name: "test-model",
           generationConfig: {
             samplingParams: {
               temperature: 0.7,
@@ -254,9 +253,9 @@ describe('modelConfigUtils', () => {
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'test-model',
-          apiKey: '',
-          baseUrl: '',
+          model: "test-model",
+          apiKey: "",
+          baseUrl: "",
           samplingParams: {
             temperature: 0.7,
             max_tokens: 1000,
@@ -278,19 +277,19 @@ describe('modelConfigUtils', () => {
       expect(result.generationConfig.timeout).toBe(5000);
     });
 
-    it('should resolve OpenAI logging from argv', () => {
+    it("should resolve OpenAI logging from argv", () => {
       const argv = {
         openaiLogging: true,
-        openaiLoggingDir: '/custom/log/dir',
+        openaiLoggingDir: "/custom/log/dir",
       };
       const settings = makeMockSettings();
       const selectedAuthType = AuthType.USE_OPENAI;
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'test-model',
-          apiKey: '',
-          baseUrl: '',
+          model: "test-model",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -303,25 +302,25 @@ describe('modelConfigUtils', () => {
       });
 
       expect(result.generationConfig.enableOpenAILogging).toBe(true);
-      expect(result.generationConfig.openAILoggingDir).toBe('/custom/log/dir');
+      expect(result.generationConfig.openAILoggingDir).toBe("/custom/log/dir");
     });
 
-    it('should resolve OpenAI logging from settings when argv is undefined', () => {
+    it("should resolve OpenAI logging from settings when argv is undefined", () => {
       const argv = {};
       const settings = makeMockSettings({
         model: {
-          name: 'test-model',
+          name: "test-model",
           enableOpenAILogging: true,
-          openAILoggingDir: '/settings/log/dir',
+          openAILoggingDir: "/settings/log/dir",
         },
       });
       const selectedAuthType = AuthType.USE_OPENAI;
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'test-model',
-          apiKey: '',
-          baseUrl: '',
+          model: "test-model",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -335,20 +334,20 @@ describe('modelConfigUtils', () => {
 
       expect(result.generationConfig.enableOpenAILogging).toBe(true);
       expect(result.generationConfig.openAILoggingDir).toBe(
-        '/settings/log/dir',
+        "/settings/log/dir",
       );
     });
 
-    it('should default OpenAI logging to false when not provided', () => {
+    it("should default OpenAI logging to false when not provided", () => {
       const argv = {};
       const settings = makeMockSettings();
       const selectedAuthType = AuthType.USE_OPENAI;
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'test-model',
-          apiKey: '',
-          baseUrl: '',
+          model: "test-model",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -363,11 +362,11 @@ describe('modelConfigUtils', () => {
       expect(result.generationConfig.enableOpenAILogging).toBe(false);
     });
 
-    it('should find modelProvider from settings when authType and model match', () => {
-      const argv = { model: 'provider-model' };
+    it("should find modelProvider from settings when authType and model match", () => {
+      const argv = { model: "provider-model" };
       const modelProvider: ProviderModelConfig = {
-        id: 'provider-model',
-        name: 'Provider Model',
+        id: "provider-model",
+        name: "Provider Model",
         generationConfig: {
           samplingParams: { temperature: 0.8 },
         },
@@ -381,9 +380,9 @@ describe('modelConfigUtils', () => {
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'provider-model',
-          apiKey: '',
-          baseUrl: '',
+          model: "provider-model",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -402,17 +401,17 @@ describe('modelConfigUtils', () => {
       );
     });
 
-    it('should find modelProvider from settings.model.name when argv.model is not provided', () => {
+    it("should find modelProvider from settings.model.name when argv.model is not provided", () => {
       const argv = {};
       const modelProvider: ProviderModelConfig = {
-        id: 'settings-model',
-        name: 'Settings Model',
+        id: "settings-model",
+        name: "Settings Model",
         generationConfig: {
           samplingParams: { temperature: 0.9 },
         },
       };
       const settings = makeMockSettings({
-        model: { name: 'settings-model' },
+        model: { name: "settings-model" },
         modelProviders: {
           [AuthType.USE_OPENAI]: [modelProvider],
         },
@@ -421,9 +420,9 @@ describe('modelConfigUtils', () => {
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'settings-model',
-          apiKey: '',
-          baseUrl: '',
+          model: "settings-model",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -442,20 +441,20 @@ describe('modelConfigUtils', () => {
       );
     });
 
-    it('should not find modelProvider when authType is undefined', () => {
-      const argv = { model: 'test-model' };
+    it("should not find modelProvider when authType is undefined", () => {
+      const argv = { model: "test-model" };
       const settings = makeMockSettings({
         modelProviders: {
-          [AuthType.USE_OPENAI]: [{ id: 'test-model', name: 'Test Model' }],
+          [AuthType.USE_OPENAI]: [{ id: "test-model", name: "Test Model" }],
         },
       });
       const selectedAuthType = undefined;
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'test-model',
-          apiKey: '',
-          baseUrl: '',
+          model: "test-model",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -474,8 +473,8 @@ describe('modelConfigUtils', () => {
       );
     });
 
-    it('should not find modelProvider when modelProviders is not an array', () => {
-      const argv = { model: 'test-model' };
+    it("should not find modelProvider when modelProviders is not an array", () => {
+      const argv = { model: "test-model" };
       const settings = makeMockSettings({
         modelProviders: {
           [AuthType.USE_OPENAI]: null as unknown as ProviderModelConfig[],
@@ -485,9 +484,9 @@ describe('modelConfigUtils', () => {
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'test-model',
-          apiKey: '',
-          baseUrl: '',
+          model: "test-model",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -506,19 +505,19 @@ describe('modelConfigUtils', () => {
       );
     });
 
-    it('should return warnings from resolveModelConfig', () => {
+    it("should return warnings from resolveModelConfig", () => {
       const argv = {};
       const settings = makeMockSettings();
       const selectedAuthType = AuthType.USE_OPENAI;
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'test-model',
-          apiKey: '',
-          baseUrl: '',
+          model: "test-model",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
-        warnings: ['Warning 1', 'Warning 2'],
+        warnings: ["Warning 1", "Warning 2"],
       });
 
       const result = resolveCliGenerationConfig({
@@ -527,23 +526,23 @@ describe('modelConfigUtils', () => {
         selectedAuthType,
       });
 
-      expect(result.warnings).toEqual(['Warning 1', 'Warning 2']);
+      expect(result.warnings).toEqual(["Warning 1", "Warning 2"]);
     });
 
-    it('should use custom env when provided', () => {
+    it("should use custom env when provided", () => {
       const argv = {};
       const settings = makeMockSettings();
       const selectedAuthType = AuthType.USE_OPENAI;
       const customEnv = {
-        OPENAI_API_KEY: 'custom-key',
-        OPENAI_MODEL: 'custom-model',
+        OPENAI_API_KEY: "custom-key",
+        OPENAI_MODEL: "custom-model",
       };
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'custom-model',
-          apiKey: 'custom-key',
-          baseUrl: '',
+          model: "custom-model",
+          apiKey: "custom-key",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -563,16 +562,16 @@ describe('modelConfigUtils', () => {
       );
     });
 
-    it('should use process.env when env is not provided', () => {
+    it("should use process.env when env is not provided", () => {
       const argv = {};
       const settings = makeMockSettings();
       const selectedAuthType = AuthType.USE_OPENAI;
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'test-model',
-          apiKey: '',
-          baseUrl: '',
+          model: "test-model",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -591,16 +590,16 @@ describe('modelConfigUtils', () => {
       );
     });
 
-    it('should return empty strings for missing model, apiKey, and baseUrl', () => {
+    it("should return empty strings for missing model, apiKey, and baseUrl", () => {
       const argv = {};
       const settings = makeMockSettings();
       const selectedAuthType = AuthType.USE_OPENAI;
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: '',
-          apiKey: '',
-          baseUrl: '',
+          model: "",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -612,18 +611,18 @@ describe('modelConfigUtils', () => {
         selectedAuthType,
       });
 
-      expect(result.model).toBe('');
-      expect(result.apiKey).toBe('');
-      expect(result.baseUrl).toBe('');
+      expect(result.model).toBe("");
+      expect(result.apiKey).toBe("");
+      expect(result.baseUrl).toBe("");
     });
 
-    it('should merge resolved config with logging settings', () => {
+    it("should merge resolved config with logging settings", () => {
       const argv = {
         openaiLogging: true,
       };
       const settings = makeMockSettings({
         model: {
-          name: 'test-model',
+          name: "test-model",
           generationConfig: {
             timeout: 5000,
           } as Record<string, unknown>,
@@ -633,9 +632,9 @@ describe('modelConfigUtils', () => {
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: 'test-model',
-          apiKey: 'test-key',
-          baseUrl: 'https://test.com',
+          model: "test-model",
+          apiKey: "test-key",
+          baseUrl: "https://test.com",
           samplingParams: { temperature: 0.5 },
         },
         sources: {},
@@ -649,27 +648,27 @@ describe('modelConfigUtils', () => {
       });
 
       expect(result.generationConfig).toEqual({
-        model: 'test-model',
-        apiKey: 'test-key',
-        baseUrl: 'https://test.com',
+        model: "test-model",
+        apiKey: "test-key",
+        baseUrl: "https://test.com",
         samplingParams: { temperature: 0.5 },
         enableOpenAILogging: true,
         openAILoggingDir: undefined,
       });
     });
 
-    it('should handle settings without model property', () => {
+    it("should handle settings without model property", () => {
       const argv = {};
       const settings = makeMockSettings({
-        model: undefined as unknown as Settings['model'],
+        model: undefined as unknown as Settings["model"],
       });
       const selectedAuthType = AuthType.USE_OPENAI;
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: '',
-          apiKey: '',
-          baseUrl: '',
+          model: "",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],
@@ -681,7 +680,7 @@ describe('modelConfigUtils', () => {
         selectedAuthType,
       });
 
-      expect(result.model).toBe('');
+      expect(result.model).toBe("");
       expect(vi.mocked(resolveModelConfig)).toHaveBeenCalledWith(
         expect.objectContaining({
           settings: expect.objectContaining({
@@ -691,7 +690,7 @@ describe('modelConfigUtils', () => {
       );
     });
 
-    it('should handle settings without security.auth property', () => {
+    it("should handle settings without security.auth property", () => {
       const argv = {};
       const settings = makeMockSettings({
         security: undefined,
@@ -700,9 +699,9 @@ describe('modelConfigUtils', () => {
 
       vi.mocked(resolveModelConfig).mockReturnValue({
         config: {
-          model: '',
-          apiKey: '',
-          baseUrl: '',
+          model: "",
+          apiKey: "",
+          baseUrl: "",
         },
         sources: {},
         warnings: [],

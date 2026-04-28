@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 import {
   CHAT_VIEW_ID_SECONDARY,
   CHAT_VIEW_ID_SIDEBAR,
-} from '../../constants/viewIds.js';
+} from "../../constants/viewIds.js";
 import {
   ChatWebviewViewProvider,
   type WebViewProviderFactory,
-} from './ChatWebviewViewProvider.js';
+} from "./ChatWebviewViewProvider.js";
 
-const SECONDARY_SIDEBAR_CONTEXT_KEY = 'qwen-code:supportsSecondarySidebar';
+const SECONDARY_SIDEBAR_CONTEXT_KEY = "tram:supportsSecondarySidebar";
 
 export function detectSecondarySidebarSupport(vscodeVersion: string): boolean {
-  const [major, minor] = vscodeVersion.split('.').map(Number);
+  const [major, minor] = vscodeVersion.split(".").map(Number);
   return (major ?? 0) > 1 || ((major ?? 0) === 1 && (minor ?? 0) >= 106);
 }
 
@@ -40,7 +40,7 @@ export function registerChatViewProviders(params: {
   // This prevents the "view container not found" warning on older VS Code
   // versions that don't recognise the `secondarySidebar` location.
   void vscode.commands.executeCommand(
-    'setContext',
+    "setContext",
     SECONDARY_SIDEBAR_CONTEXT_KEY,
     supportsSecondarySidebar,
   );

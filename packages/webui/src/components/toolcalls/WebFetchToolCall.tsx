@@ -7,17 +7,17 @@
  * Displays web fetch and search operations with URL/query and output
  */
 
-import { useState, type FC } from 'react';
+import { useState, type FC } from "react";
 import {
   ToolCallContainer,
   safeTitle,
   groupContent,
   mapToolStatusToContainerStatus,
-} from './shared/index.js';
-import type { BaseToolCallProps } from './shared/index.js';
-import { getToolDisplayLabel } from './labelUtils.js';
+} from "./shared/index.js";
+import type { BaseToolCallProps } from "./shared/index.js";
+import { getToolDisplayLabel } from "./labelUtils.js";
 
-type WebVariant = 'fetch' | 'search';
+type WebVariant = "fetch" | "search";
 
 /** Default collapsed height in pixels */
 const COLLAPSED_HEIGHT = 120;
@@ -38,13 +38,13 @@ const getWebTarget = (
   rawInput?: unknown,
 ): string => {
   // Try to extract URL or query from rawInput
-  if (rawInput && typeof rawInput === 'object') {
+  if (rawInput && typeof rawInput === "object") {
     const input = rawInput as Record<string, unknown>;
-    if (variant === 'fetch' && input['url']) {
-      return String(input['url']);
+    if (variant === "fetch" && input["url"]) {
+      return String(input["url"]);
     }
-    if (variant === 'search' && input['query']) {
-      return String(input['query']);
+    if (variant === "search" && input["query"]) {
+      return String(input["query"]);
     }
   }
   return safeTitle(title);
@@ -73,7 +73,7 @@ const OutputCard: FC<{
             className={`whitespace-pre-wrap break-words m-0 p-1 overflow-hidden ${
               !isExpanded && isLongContent
                 ? `max-h-[${COLLAPSED_HEIGHT}px] [mask-image:linear-gradient(to_bottom,var(--app-primary-background)_80px,transparent_${COLLAPSED_HEIGHT}px)]`
-                : ''
+                : ""
             }`}
             style={
               !isExpanded && isLongContent
@@ -83,7 +83,7 @@ const OutputCard: FC<{
           >
             <pre
               className={`m-0 overflow-hidden font-mono text-[0.85em] ${
-                isError ? 'text-[#c74e39]' : ''
+                isError ? "text-[#c74e39]" : ""
               }`}
             >
               {content}
@@ -99,7 +99,7 @@ const OutputCard: FC<{
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-[var(--app-secondary-foreground)] text-[0.8em] hover:text-[var(--app-primary-foreground)] cursor-pointer bg-transparent border-none px-2 py-1 rounded hover:bg-[var(--app-input-background)] transition-colors"
             >
-              {isExpanded ? '▲ Collapse' : '▼ Show more'}
+              {isExpanded ? "▲ Collapse" : "▼ Show more"}
             </button>
           </div>
         )}
@@ -130,7 +130,7 @@ const WebFetchToolCallImpl: FC<BaseToolCallProps & { variant: WebVariant }> = ({
   // Map tool status to container status
   const containerStatus =
     errors.length > 0
-      ? 'error'
+      ? "error"
       : mapToolStatusToContainerStatus(toolCall.status);
 
   // Error case
@@ -144,14 +144,14 @@ const WebFetchToolCallImpl: FC<BaseToolCallProps & { variant: WebVariant }> = ({
         isLast={isLast}
         labelSuffix={webTarget}
       >
-        <OutputCard content={errors.join('\n')} isError />
+        <OutputCard content={errors.join("\n")} isError />
       </ToolCallContainer>
     );
   }
 
   // Success with output
   if (textOutputs.length > 0) {
-    const output = textOutputs.join('\n');
+    const output = textOutputs.join("\n");
 
     return (
       <ToolCallContainer
@@ -189,8 +189,8 @@ const WebFetchToolCallImpl: FC<BaseToolCallProps & { variant: WebVariant }> = ({
 export const WebFetchToolCall: FC<BaseToolCallProps> = (props) => {
   const normalizedKind = props.toolCall.kind.toLowerCase();
   const variant: WebVariant =
-    normalizedKind === 'web_search' || normalizedKind === 'websearch'
-      ? 'search'
-      : 'fetch'; // 'fetch', 'web_fetch', 'webfetch' all map to 'fetch'
+    normalizedKind === "web_search" || normalizedKind === "websearch"
+      ? "search"
+      : "fetch"; // 'fetch', 'web_fetch', 'webfetch' all map to 'fetch'
   return <WebFetchToolCallImpl {...props} variant={variant} />;
 };

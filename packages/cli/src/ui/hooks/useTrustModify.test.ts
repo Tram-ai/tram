@@ -14,12 +14,12 @@ import {
   beforeEach,
   afterEach,
   type Mock,
-} from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useTrustModify } from './useTrustModify.js';
-import { TrustLevel } from '../../config/trustedFolders.js';
-import type { LoadedSettings } from '../../config/settings.js';
-import type { LoadedTrustedFolders } from '../../config/trustedFolders.js';
+} from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import { useTrustModify } from "./useTrustModify.js";
+import { TrustLevel } from "../../config/trustedFolders.js";
+import type { LoadedSettings } from "../../config/settings.js";
+import type { LoadedTrustedFolders } from "../../config/trustedFolders.js";
 
 // Hoist mocks
 const mockedCwd = vi.hoisted(() => vi.fn());
@@ -28,25 +28,25 @@ const mockedIsWorkspaceTrusted = vi.hoisted(() => vi.fn());
 const mockedUseSettings = vi.hoisted(() => vi.fn());
 
 // Mock modules
-vi.mock('node:process', () => ({
+vi.mock("node:process", () => ({
   cwd: mockedCwd,
 }));
 
-vi.mock('../../config/trustedFolders.js', () => ({
+vi.mock("../../config/trustedFolders.js", () => ({
   loadTrustedFolders: mockedLoadTrustedFolders,
   isWorkspaceTrusted: mockedIsWorkspaceTrusted,
   TrustLevel: {
-    TRUST_FOLDER: 'TRUST_FOLDER',
-    TRUST_PARENT: 'TRUST_PARENT',
-    DO_NOT_TRUST: 'DO_NOT_TRUST',
+    TRUST_FOLDER: "TRUST_FOLDER",
+    TRUST_PARENT: "TRUST_PARENT",
+    DO_NOT_TRUST: "DO_NOT_TRUST",
   },
 }));
 
-vi.mock('../contexts/SettingsContext.js', () => ({
+vi.mock("../contexts/SettingsContext.js", () => ({
   useSettings: mockedUseSettings,
 }));
 
-describe('useTrustModify', () => {
+describe("useTrustModify", () => {
   let mockOnExit: Mock;
   let mockAddItem: Mock;
 
@@ -54,7 +54,7 @@ describe('useTrustModify', () => {
     mockAddItem = vi.fn();
     mockOnExit = vi.fn();
 
-    mockedCwd.mockReturnValue('/test/dir');
+    mockedCwd.mockReturnValue("/test/dir");
     mockedUseSettings.mockReturnValue({
       merged: {
         security: {
@@ -74,13 +74,13 @@ describe('useTrustModify', () => {
     vi.resetAllMocks();
   });
 
-  it('should initialize with the correct trust level', () => {
+  it("should initialize with the correct trust level", () => {
     mockedLoadTrustedFolders.mockReturnValue({
-      user: { config: { '/test/dir': TrustLevel.TRUST_FOLDER } },
+      user: { config: { "/test/dir": TrustLevel.TRUST_FOLDER } },
     } as unknown as LoadedTrustedFolders);
     mockedIsWorkspaceTrusted.mockReturnValue({
       isTrusted: true,
-      source: 'file',
+      source: "file",
     });
 
     const { result } = renderHook(() =>
@@ -90,14 +90,14 @@ describe('useTrustModify', () => {
     expect(result.current.currentTrustLevel).toBe(TrustLevel.TRUST_FOLDER);
   });
 
-  it('should detect inherited trust from parent', () => {
+  it("should detect inherited trust from parent", () => {
     mockedLoadTrustedFolders.mockReturnValue({
       user: { config: {} },
       setValue: vi.fn(),
     } as unknown as LoadedTrustedFolders);
     mockedIsWorkspaceTrusted.mockReturnValue({
       isTrusted: true,
-      source: 'file',
+      source: "file",
     });
 
     const { result } = renderHook(() =>
@@ -108,13 +108,13 @@ describe('useTrustModify', () => {
     expect(result.current.isInheritedTrustFromIde).toBe(false);
   });
 
-  it('should detect inherited trust from IDE', () => {
+  it("should detect inherited trust from IDE", () => {
     mockedLoadTrustedFolders.mockReturnValue({
       user: { config: {} }, // No explicit trust
     } as unknown as LoadedTrustedFolders);
     mockedIsWorkspaceTrusted.mockReturnValue({
       isTrusted: true,
-      source: 'ide',
+      source: "ide",
     });
 
     const { result } = renderHook(() =>
@@ -125,7 +125,7 @@ describe('useTrustModify', () => {
     expect(result.current.isInheritedTrustFromParent).toBe(false);
   });
 
-  it('should set needsRestart but not save when trust changes', () => {
+  it("should set needsRestart but not save when trust changes", () => {
     const mockSetValue = vi.fn();
     mockedLoadTrustedFolders.mockReturnValue({
       user: { config: {} },
@@ -133,8 +133,8 @@ describe('useTrustModify', () => {
     } as unknown as LoadedTrustedFolders);
 
     mockedIsWorkspaceTrusted
-      .mockReturnValueOnce({ isTrusted: false, source: 'file' })
-      .mockReturnValueOnce({ isTrusted: true, source: 'file' });
+      .mockReturnValueOnce({ isTrusted: false, source: "file" })
+      .mockReturnValueOnce({ isTrusted: true, source: "file" });
 
     const { result } = renderHook(() =>
       useTrustModify(mockOnExit, mockAddItem),
@@ -148,7 +148,7 @@ describe('useTrustModify', () => {
     expect(mockSetValue).not.toHaveBeenCalled();
   });
 
-  it('should save immediately if trust does not change', () => {
+  it("should save immediately if trust does not change", () => {
     const mockSetValue = vi.fn();
     mockedLoadTrustedFolders.mockReturnValue({
       user: { config: {} },
@@ -157,7 +157,7 @@ describe('useTrustModify', () => {
 
     mockedIsWorkspaceTrusted.mockReturnValue({
       isTrusted: true,
-      source: 'file',
+      source: "file",
     });
 
     const { result } = renderHook(() =>
@@ -170,13 +170,13 @@ describe('useTrustModify', () => {
 
     expect(result.current.needsRestart).toBe(false);
     expect(mockSetValue).toHaveBeenCalledWith(
-      '/test/dir',
+      "/test/dir",
       TrustLevel.TRUST_PARENT,
     );
     expect(mockOnExit).toHaveBeenCalled();
   });
 
-  it('should commit the pending trust level change', () => {
+  it("should commit the pending trust level change", () => {
     const mockSetValue = vi.fn();
     mockedLoadTrustedFolders.mockReturnValue({
       user: { config: {} },
@@ -184,8 +184,8 @@ describe('useTrustModify', () => {
     } as unknown as LoadedTrustedFolders);
 
     mockedIsWorkspaceTrusted
-      .mockReturnValueOnce({ isTrusted: false, source: 'file' })
-      .mockReturnValueOnce({ isTrusted: true, source: 'file' });
+      .mockReturnValueOnce({ isTrusted: false, source: "file" })
+      .mockReturnValueOnce({ isTrusted: true, source: "file" });
 
     const { result } = renderHook(() =>
       useTrustModify(mockOnExit, mockAddItem),
@@ -202,19 +202,19 @@ describe('useTrustModify', () => {
     });
 
     expect(mockSetValue).toHaveBeenCalledWith(
-      '/test/dir',
+      "/test/dir",
       TrustLevel.TRUST_FOLDER,
     );
   });
 
-  it('should add warning when setting DO_NOT_TRUST but still trusted by parent', () => {
+  it("should add warning when setting DO_NOT_TRUST but still trusted by parent", () => {
     mockedLoadTrustedFolders.mockReturnValue({
       user: { config: {} },
       setValue: vi.fn(),
     } as unknown as LoadedTrustedFolders);
     mockedIsWorkspaceTrusted.mockReturnValue({
       isTrusted: true,
-      source: 'file',
+      source: "file",
     });
 
     const { result } = renderHook(() =>
@@ -227,21 +227,21 @@ describe('useTrustModify', () => {
 
     expect(mockAddItem).toHaveBeenCalledWith(
       {
-        type: 'warning',
-        text: 'Note: This folder is still trusted because a parent folder is trusted.',
+        type: "warning",
+        text: "Note: This folder is still trusted because a parent folder is trusted.",
       },
       expect.any(Number),
     );
   });
 
-  it('should add warning when setting DO_NOT_TRUST but still trusted by IDE', () => {
+  it("should add warning when setting DO_NOT_TRUST but still trusted by IDE", () => {
     mockedLoadTrustedFolders.mockReturnValue({
       user: { config: {} },
       setValue: vi.fn(),
     } as unknown as LoadedTrustedFolders);
     mockedIsWorkspaceTrusted.mockReturnValue({
       isTrusted: true,
-      source: 'ide',
+      source: "ide",
     });
 
     const { result } = renderHook(() =>
@@ -254,8 +254,8 @@ describe('useTrustModify', () => {
 
     expect(mockAddItem).toHaveBeenCalledWith(
       {
-        type: 'warning',
-        text: 'Note: This folder is still trusted because the connected IDE workspace is trusted.',
+        type: "warning",
+        text: "Note: This folder is still trusted because the connected IDE workspace is trusted.",
       },
       expect.any(Number),
     );

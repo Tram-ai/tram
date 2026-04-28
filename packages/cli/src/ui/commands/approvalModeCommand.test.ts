@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { approvalModeCommand } from './approvalModeCommand.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { approvalModeCommand } from "./approvalModeCommand.js";
 import {
   type CommandContext,
   CommandKind,
   type OpenDialogActionReturn,
   type MessageActionReturn,
-} from './types.js';
-import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
+} from "./types.js";
+import { createMockCommandContext } from "../../test-utils/mockCommandContext.js";
 
-describe('approvalModeCommand', () => {
+describe("approvalModeCommand", () => {
   let mockContext: CommandContext;
   let mockSetApprovalMode: ReturnType<typeof vi.fn>;
 
@@ -23,153 +23,153 @@ describe('approvalModeCommand', () => {
     mockContext = createMockCommandContext({
       services: {
         config: {
-          getApprovalMode: () => 'default',
+          getApprovalMode: () => "default",
           setApprovalMode: mockSetApprovalMode,
         },
       },
     });
   });
 
-  it('should have correct metadata', () => {
-    expect(approvalModeCommand.name).toBe('approval-mode');
+  it("should have correct metadata", () => {
+    expect(approvalModeCommand.name).toBe("approval-mode");
     expect(approvalModeCommand.description).toBe(
-      'View or change the approval mode for tool usage',
+      "View or change the approval mode for tool usage",
     );
     expect(approvalModeCommand.kind).toBe(CommandKind.BUILT_IN);
   });
 
-  it('should open approval mode dialog when invoked without arguments', async () => {
+  it("should open approval mode dialog when invoked without arguments", async () => {
     const result = (await approvalModeCommand.action?.(
       mockContext,
-      '',
+      "",
     )) as OpenDialogActionReturn;
 
-    expect(result.type).toBe('dialog');
-    expect(result.dialog).toBe('approval-mode');
+    expect(result.type).toBe("dialog");
+    expect(result.dialog).toBe("approval-mode");
   });
 
-  it('should open approval mode dialog when invoked with whitespace only', async () => {
+  it("should open approval mode dialog when invoked with whitespace only", async () => {
     const result = (await approvalModeCommand.action?.(
       mockContext,
-      '   ',
+      "   ",
     )) as OpenDialogActionReturn;
 
-    expect(result.type).toBe('dialog');
-    expect(result.dialog).toBe('approval-mode');
+    expect(result.type).toBe("dialog");
+    expect(result.dialog).toBe("approval-mode");
   });
 
-  describe('direct mode setting (session-only)', () => {
+  describe("direct mode setting (session-only)", () => {
     it('should set approval mode to "plan" when argument is "plan"', async () => {
       const result = (await approvalModeCommand.action?.(
         mockContext,
-        'plan',
+        "plan",
       )) as MessageActionReturn;
 
-      expect(result.type).toBe('message');
-      expect(result.messageType).toBe('info');
-      expect(result.content).toContain('plan');
-      expect(mockSetApprovalMode).toHaveBeenCalledWith('plan');
+      expect(result.type).toBe("message");
+      expect(result.messageType).toBe("info");
+      expect(result.content).toContain("plan");
+      expect(mockSetApprovalMode).toHaveBeenCalledWith("plan");
     });
 
     it('should set approval mode to "yolo" when argument is "yolo"', async () => {
       const result = (await approvalModeCommand.action?.(
         mockContext,
-        'yolo',
+        "yolo",
       )) as MessageActionReturn;
 
-      expect(result.type).toBe('message');
-      expect(result.messageType).toBe('info');
-      expect(result.content).toContain('yolo');
-      expect(mockSetApprovalMode).toHaveBeenCalledWith('yolo');
+      expect(result.type).toBe("message");
+      expect(result.messageType).toBe("info");
+      expect(result.content).toContain("yolo");
+      expect(mockSetApprovalMode).toHaveBeenCalledWith("yolo");
     });
 
     it('should set approval mode to "auto-edit" when argument is "auto-edit"', async () => {
       const result = (await approvalModeCommand.action?.(
         mockContext,
-        'auto-edit',
+        "auto-edit",
       )) as MessageActionReturn;
 
-      expect(result.type).toBe('message');
-      expect(result.messageType).toBe('info');
-      expect(result.content).toContain('auto-edit');
-      expect(mockSetApprovalMode).toHaveBeenCalledWith('auto-edit');
+      expect(result.type).toBe("message");
+      expect(result.messageType).toBe("info");
+      expect(result.content).toContain("auto-edit");
+      expect(mockSetApprovalMode).toHaveBeenCalledWith("auto-edit");
     });
 
     it('should set approval mode to "default" when argument is "default"', async () => {
       const result = (await approvalModeCommand.action?.(
         mockContext,
-        'default',
+        "default",
       )) as MessageActionReturn;
 
-      expect(result.type).toBe('message');
-      expect(result.messageType).toBe('info');
-      expect(result.content).toContain('default');
-      expect(mockSetApprovalMode).toHaveBeenCalledWith('default');
+      expect(result.type).toBe("message");
+      expect(result.messageType).toBe("info");
+      expect(result.content).toContain("default");
+      expect(mockSetApprovalMode).toHaveBeenCalledWith("default");
     });
 
-    it('should be case-insensitive for mode argument', async () => {
+    it("should be case-insensitive for mode argument", async () => {
       const result = (await approvalModeCommand.action?.(
         mockContext,
-        'YOLO',
+        "YOLO",
       )) as MessageActionReturn;
 
-      expect(result.type).toBe('message');
-      expect(result.messageType).toBe('info');
-      expect(mockSetApprovalMode).toHaveBeenCalledWith('yolo');
+      expect(result.type).toBe("message");
+      expect(result.messageType).toBe("info");
+      expect(mockSetApprovalMode).toHaveBeenCalledWith("yolo");
     });
 
-    it('should handle argument with leading/trailing whitespace', async () => {
+    it("should handle argument with leading/trailing whitespace", async () => {
       const result = (await approvalModeCommand.action?.(
         mockContext,
-        '  plan  ',
+        "  plan  ",
       )) as MessageActionReturn;
 
-      expect(result.type).toBe('message');
-      expect(result.messageType).toBe('info');
-      expect(mockSetApprovalMode).toHaveBeenCalledWith('plan');
+      expect(result.type).toBe("message");
+      expect(result.messageType).toBe("info");
+      expect(mockSetApprovalMode).toHaveBeenCalledWith("plan");
     });
   });
 
-  describe('invalid mode argument', () => {
-    it('should return error for invalid mode', async () => {
+  describe("invalid mode argument", () => {
+    it("should return error for invalid mode", async () => {
       const result = (await approvalModeCommand.action?.(
         mockContext,
-        'invalid-mode',
+        "invalid-mode",
       )) as MessageActionReturn;
 
-      expect(result.type).toBe('message');
-      expect(result.messageType).toBe('error');
-      expect(result.content).toContain('invalid-mode');
-      expect(result.content).toContain('plan');
-      expect(result.content).toContain('yolo');
+      expect(result.type).toBe("message");
+      expect(result.messageType).toBe("error");
+      expect(result.content).toContain("invalid-mode");
+      expect(result.content).toContain("plan");
+      expect(result.content).toContain("yolo");
       expect(mockSetApprovalMode).not.toHaveBeenCalled();
     });
   });
 
-  describe('untrusted folder handling', () => {
-    it('should return error when setApprovalMode throws (e.g., untrusted folder)', async () => {
+  describe("untrusted folder handling", () => {
+    it("should return error when setApprovalMode throws (e.g., untrusted folder)", async () => {
       const errorMessage =
-        'Cannot enable privileged approval modes in an untrusted folder.';
+        "Cannot enable privileged approval modes in an untrusted folder.";
       mockSetApprovalMode.mockImplementation(() => {
         throw new Error(errorMessage);
       });
 
       const result = (await approvalModeCommand.action?.(
         mockContext,
-        'yolo',
+        "yolo",
       )) as MessageActionReturn;
 
-      expect(result.type).toBe('message');
-      expect(result.messageType).toBe('error');
+      expect(result.type).toBe("message");
+      expect(result.messageType).toBe("error");
       expect(result.content).toBe(errorMessage);
     });
   });
 
-  it('should not have subcommands', () => {
+  it("should not have subcommands", () => {
     expect(approvalModeCommand.subCommands).toBeUndefined();
   });
 
-  it('should not have completion function', () => {
+  it("should not have completion function", () => {
     expect(approvalModeCommand.completion).toBeUndefined();
   });
 });

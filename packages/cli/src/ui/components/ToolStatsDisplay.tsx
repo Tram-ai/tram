@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { formatDuration } from '../utils/formatters.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import { formatDuration } from "../utils/formatters.js";
 import {
   getStatusColor,
   TOOL_SUCCESS_RATE_HIGH,
   TOOL_SUCCESS_RATE_MEDIUM,
   USER_AGREEMENT_RATE_HIGH,
   USER_AGREEMENT_RATE_MEDIUM,
-} from '../utils/displayUtils.js';
-import { useSessionStats } from '../contexts/SessionContext.js';
-import type { ToolCallStats } from '@tram-ai/tram-core';
-import { t } from '../../i18n/index.js';
+} from "../utils/displayUtils.js";
+import { useSessionStats } from "../contexts/SessionContext.js";
+import type { ToolCallStats } from "@tram-ai/tram-core";
+import { t } from "../../i18n/index.js";
 
 const TOOL_NAME_COL_WIDTH = 25;
 const CALLS_COL_WIDTH = 8;
@@ -76,7 +76,7 @@ export const ToolStatsDisplay: React.FC<ToolStatsDisplayProps> = ({
         width={width}
       >
         <Text color={theme.text.primary}>
-          {t('No tool calls have been made in this session.')}
+          {t("No tool calls have been made in this session.")}
         </Text>
       </Box>
     );
@@ -111,7 +111,7 @@ export const ToolStatsDisplay: React.FC<ToolStatsDisplayProps> = ({
       width={width}
     >
       <Text bold color={theme.text.accent}>
-        {t('Tool Stats For Nerds')}
+        {t("Tool Stats For Nerds")}
       </Text>
       <Box height={1} />
 
@@ -119,22 +119,22 @@ export const ToolStatsDisplay: React.FC<ToolStatsDisplayProps> = ({
       <Box>
         <Box width={TOOL_NAME_COL_WIDTH}>
           <Text bold color={theme.text.primary}>
-            {t('Tool Name')}
+            {t("Tool Name")}
           </Text>
         </Box>
         <Box width={CALLS_COL_WIDTH} justifyContent="flex-end">
           <Text bold color={theme.text.primary}>
-            {t('Calls')}
+            {t("Calls")}
           </Text>
         </Box>
         <Box width={SUCCESS_RATE_COL_WIDTH} justifyContent="flex-end">
           <Text bold color={theme.text.primary}>
-            {t('Success Rate')}
+            {t("Success Rate")}
           </Text>
         </Box>
         <Box width={AVG_DURATION_COL_WIDTH} justifyContent="flex-end">
           <Text bold color={theme.text.primary}>
-            {t('Avg Duration')}
+            {t("Avg Duration")}
           </Text>
         </Box>
       </Box>
@@ -159,14 +159,14 @@ export const ToolStatsDisplay: React.FC<ToolStatsDisplayProps> = ({
 
       {/* User Decision Summary */}
       <Text bold color={theme.text.primary}>
-        {t('User Decision Summary')}
+        {t("User Decision Summary")}
       </Text>
       <Box>
         <Box
           width={TOOL_NAME_COL_WIDTH + CALLS_COL_WIDTH + SUCCESS_RATE_COL_WIDTH}
         >
           <Text color={theme.text.link}>
-            {t('Total Reviewed Suggestions:')}
+            {t("Total Reviewed Suggestions:")}
           </Text>
         </Box>
         <Box width={AVG_DURATION_COL_WIDTH} justifyContent="flex-end">
@@ -177,7 +177,7 @@ export const ToolStatsDisplay: React.FC<ToolStatsDisplayProps> = ({
         <Box
           width={TOOL_NAME_COL_WIDTH + CALLS_COL_WIDTH + SUCCESS_RATE_COL_WIDTH}
         >
-          <Text color={theme.text.primary}>{t(' » Accepted:')}</Text>
+          <Text color={theme.text.primary}>{t(" » Accepted:")}</Text>
         </Box>
         <Box width={AVG_DURATION_COL_WIDTH} justifyContent="flex-end">
           <Text color={theme.status.success}>{totalDecisions.accept}</Text>
@@ -187,7 +187,7 @@ export const ToolStatsDisplay: React.FC<ToolStatsDisplayProps> = ({
         <Box
           width={TOOL_NAME_COL_WIDTH + CALLS_COL_WIDTH + SUCCESS_RATE_COL_WIDTH}
         >
-          <Text color={theme.text.primary}>{t(' » Rejected:')}</Text>
+          <Text color={theme.text.primary}>{t(" » Rejected:")}</Text>
         </Box>
         <Box width={AVG_DURATION_COL_WIDTH} justifyContent="flex-end">
           <Text color={theme.status.error}>{totalDecisions.reject}</Text>
@@ -197,7 +197,7 @@ export const ToolStatsDisplay: React.FC<ToolStatsDisplayProps> = ({
         <Box
           width={TOOL_NAME_COL_WIDTH + CALLS_COL_WIDTH + SUCCESS_RATE_COL_WIDTH}
         >
-          <Text color={theme.text.primary}>{t(' » Modified:')}</Text>
+          <Text color={theme.text.primary}>{t(" » Modified:")}</Text>
         </Box>
         <Box width={AVG_DURATION_COL_WIDTH} justifyContent="flex-end">
           <Text color={theme.status.warning}>{totalDecisions.modify}</Text>
@@ -220,12 +220,12 @@ export const ToolStatsDisplay: React.FC<ToolStatsDisplayProps> = ({
           width={TOOL_NAME_COL_WIDTH + CALLS_COL_WIDTH + SUCCESS_RATE_COL_WIDTH}
         >
           <Text color={theme.text.primary}>
-            {t(' Overall Agreement Rate:')}
+            {t(" Overall Agreement Rate:")}
           </Text>
         </Box>
         <Box width={AVG_DURATION_COL_WIDTH} justifyContent="flex-end">
           <Text bold color={totalReviewed > 0 ? agreementColor : undefined}>
-            {totalReviewed > 0 ? `${agreementRate.toFixed(1)}%` : '--'}
+            {totalReviewed > 0 ? `${agreementRate.toFixed(1)}%` : "--"}
           </Text>
         </Box>
       </Box>

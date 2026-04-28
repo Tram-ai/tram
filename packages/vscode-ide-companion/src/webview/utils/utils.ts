@@ -15,7 +15,7 @@ export {
   groupContent,
   hasToolCallOutput,
   mapToolStatusToContainerStatus,
-} from '@tram-ai/webui';
+} from "@tram-ai/webui";
 
 // Re-export types for backward compatibility
 export type {
@@ -23,4 +23,4 @@ export type {
   GroupedContent,
   ToolCallData,
   ToolCallStatus,
-} from '@tram-ai/webui';
+} from "@tram-ai/webui";

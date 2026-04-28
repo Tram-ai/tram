@@ -150,7 +150,7 @@ Or, after running `/review 123`, type `post comments` to publish findings withou
 - High-confidence Critical and Suggestion findings as inline comments on specific lines
 - For Approve/Request changes verdicts: a review summary with the verdict
 - For Comment verdict with all inline comments posted: no separate summary (inline comments are sufficient)
-- Model attribution footer on each comment (e.g., _— qwen3-coder via Qwen Code /review_)
+- Model attribution footer on each comment (e.g., _— qwen3-coder via TRAM /review_)
 
 **What stays terminal-only:**
 
@@ -174,7 +174,7 @@ Note: `fix these issues` is only available for local reviews. For PR reviews, us
 
 You can customize review criteria per project. `/review` reads rules from these files (in order):
 
-1. `.qwen/review-rules.md` (Qwen Code native)
+1. `.qwen/review-rules.md` (TRAM native)
 2. `.github/copilot-instructions.md` (preferred) or `copilot-instructions.md` (fallback — only one is loaded, not both)
 3. `AGENTS.md` — `## Code Review` section
 4. `QWEN.md` — `## Code Review` section

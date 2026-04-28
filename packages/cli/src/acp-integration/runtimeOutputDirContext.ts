@@ -1,5 +1,5 @@
-import { Storage } from '@qwen-code/qwen-code-core';
-import type { LoadedSettings } from '../config/settings.js';
+import { Storage } from "@tram-ai/tram-core";
+import type { LoadedSettings } from "../config/settings.js";
 
 export function runWithAcpRuntimeOutputDir<T>(
   settings: LoadedSettings,

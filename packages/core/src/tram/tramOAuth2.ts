@@ -4,40 +4,40 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import crypto from 'crypto';
-import path from 'node:path';
-import { promises as fs } from 'node:fs';
-import * as os from 'os';
+import crypto from "crypto";
+import path from "node:path";
+import { promises as fs } from "node:fs";
+import * as os from "os";
 
-import open from 'open';
-import { EventEmitter } from 'events';
-import type { Config } from '../config/config.js';
-import { randomUUID } from 'node:crypto';
-import { formatFetchErrorForUser } from '../utils/fetch.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import open from "open";
+import { EventEmitter } from "events";
+import type { Config } from "../config/config.js";
+import { randomUUID } from "node:crypto";
+import { formatFetchErrorForUser } from "../utils/fetch.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 import {
   SharedTokenManager,
   TokenManagerError,
   TokenError,
-} from './sharedTokenManager.js';
+} from "./sharedTokenManager.js";
 
-const debugLogger = createDebugLogger('TRAM_OAUTH');
+const debugLogger = createDebugLogger("TRAM_OAUTH");
 
 // OAuth Endpoints
-const TRAM_OAUTH_BASE_URL = 'https://chat.tram.ai';
+const TRAM_OAUTH_BASE_URL = "https://chat.tram.ai";
 
 const TRAM_OAUTH_DEVICE_CODE_ENDPOINT = `${TRAM_OAUTH_BASE_URL}/api/v1/oauth2/device/code`;
 const TRAM_OAUTH_TOKEN_ENDPOINT = `${TRAM_OAUTH_BASE_URL}/api/v1/oauth2/token`;
 
 // OAuth Client Configuration
-const TRAM_OAUTH_CLIENT_ID = 'f0304373b74a44d2b584a3fb70ca9e56';
+const TRAM_OAUTH_CLIENT_ID = "f0304373b74a44d2b584a3fb70ca9e56";
 
-const TRAM_OAUTH_SCOPE = 'openid profile email model.completion';
-const TRAM_OAUTH_GRANT_TYPE = 'urn:ietf:params:oauth:grant-type:device_code';
+const TRAM_OAUTH_SCOPE = "openid profile email model.completion";
+const TRAM_OAUTH_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code";
 
 // File System Configuration
-const TRAM_DIR = '.tram';
-const TRAM_CREDENTIAL_FILENAME = 'oauth_creds.json';
+const TRAM_DIR = ".tram";
+const TRAM_CREDENTIAL_FILENAME = "oauth_creds.json";
 
 /**
  * PKCE (Proof Key for Code Exchange) utilities
@@ -49,7 +49,7 @@ const TRAM_CREDENTIAL_FILENAME = 'oauth_creds.json';
  * @returns A random string of 43-128 characters
  */
 export function generateCodeVerifier(): string {
-  return crypto.randomBytes(32).toString('base64url');
+  return crypto.randomBytes(32).toString("base64url");
 }
 
 /**
@@ -58,9 +58,9 @@ export function generateCodeVerifier(): string {
  * @returns The code challenge string
  */
 export function generateCodeChallenge(codeVerifier: string): string {
-  const hash = crypto.createHash('sha256');
+  const hash = crypto.createHash("sha256");
   hash.update(codeVerifier);
-  return hash.digest('base64url');
+  return hash.digest("base64url");
 }
 
 /**
@@ -84,7 +84,7 @@ export function generatePKCEPair(): {
 function objectToUrlEncoded(data: Record<string, string>): string {
   return Object.keys(data)
     .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
-    .join('&');
+    .join("&");
 }
 
 /**
@@ -106,7 +106,7 @@ export class CredentialsClearRequiredError extends Error {
     public originalError?: unknown,
   ) {
     super(message);
-    this.name = 'CredentialsClearRequiredError';
+    this.name = "CredentialsClearRequiredError";
   }
 }
 
@@ -144,7 +144,7 @@ export type DeviceAuthorizationResponse = DeviceAuthorizationData | ErrorData;
 export function isDeviceAuthorizationSuccess(
   response: DeviceAuthorizationResponse,
 ): response is DeviceAuthorizationData {
-  return 'device_code' in response;
+  return "device_code" in response;
 }
 
 /**
@@ -164,7 +164,7 @@ export interface DeviceTokenData {
  * Device token pending response
  */
 export interface DeviceTokenPendingData {
-  status: 'pending';
+  status: "pending";
   slowDown?: boolean; // Indicates if client should increase polling interval
 }
 
@@ -183,10 +183,10 @@ export function isDeviceTokenSuccess(
   response: DeviceTokenResponse,
 ): response is DeviceTokenData {
   return (
-    'access_token' in response &&
+    "access_token" in response &&
     response.access_token !== null &&
     response.access_token !== undefined &&
-    typeof response.access_token === 'string' &&
+    typeof response.access_token === "string" &&
     response.access_token.length > 0
   );
 }
@@ -198,8 +198,8 @@ export function isDeviceTokenPending(
   response: DeviceTokenResponse,
 ): response is DeviceTokenPendingData {
   return (
-    'status' in response &&
-    (response as DeviceTokenPendingData).status === 'pending'
+    "status" in response &&
+    (response as DeviceTokenPendingData).status === "pending"
   );
 }
 
@@ -212,7 +212,7 @@ export function isErrorResponse(
     | DeviceTokenResponse
     | TokenRefreshResponse,
 ): response is ErrorData {
-  return 'error' in response;
+  return "error" in response;
 }
 
 /**
@@ -277,7 +277,7 @@ export class TramOAuth2Client implements ITramOAuth2Client {
       return { token: credentials.access_token };
     } catch (error) {
       debugLogger.warn(
-        'Failed to get access token from shared manager:',
+        "Failed to get access token from shared manager:",
         error,
       );
 
@@ -301,11 +301,11 @@ export class TramOAuth2Client implements ITramOAuth2Client {
     };
 
     const response = await fetch(TRAM_OAUTH_DEVICE_CODE_ENDPOINT, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Accept: 'application/json',
-        'x-request-id': randomUUID(),
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+        "x-request-id": randomUUID(),
       },
       body: objectToUrlEncoded(bodyData),
     });
@@ -318,13 +318,13 @@ export class TramOAuth2Client implements ITramOAuth2Client {
     }
 
     const result = (await response.json()) as DeviceAuthorizationResponse;
-    debugLogger.debug('Device authorization result:', result);
+    debugLogger.debug("Device authorization result:", result);
 
     // Check if the response indicates success
     if (!isDeviceAuthorizationSuccess(result)) {
       const errorData = result as ErrorData;
       throw new Error(
-        `Device authorization failed: ${errorData?.error || 'Unknown error'} - ${errorData?.error_description || 'No details provided'}`,
+        `Device authorization failed: ${errorData?.error || "Unknown error"} - ${errorData?.error_description || "No details provided"}`,
       );
     }
 
@@ -343,10 +343,10 @@ export class TramOAuth2Client implements ITramOAuth2Client {
     };
 
     const response = await fetch(TRAM_OAUTH_TOKEN_ENDPOINT, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Accept: 'application/json',
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
       },
       body: objectToUrlEncoded(bodyData),
     });
@@ -371,16 +371,16 @@ export class TramOAuth2Client implements ITramOAuth2Client {
       // According to OAuth RFC 8628, handle standard polling responses
       if (
         response.status === 400 &&
-        errorData.error === 'authorization_pending'
+        errorData.error === "authorization_pending"
       ) {
         // User has not yet approved the authorization request. Continue polling.
-        return { status: 'pending' } as DeviceTokenPendingData;
+        return { status: "pending" } as DeviceTokenPendingData;
       }
 
-      if (response.status === 429 && errorData.error === 'slow_down') {
+      if (response.status === 429 && errorData.error === "slow_down") {
         // Client is polling too frequently. Return pending with slowDown flag.
         return {
-          status: 'pending',
+          status: "pending",
           slowDown: true,
         } as DeviceTokenPendingData;
       }
@@ -389,7 +389,7 @@ export class TramOAuth2Client implements ITramOAuth2Client {
 
       // For other errors, throw with proper error information
       const error = new Error(
-        `Device token poll failed: ${errorData.error || 'Unknown error'} - ${errorData.error_description}`,
+        `Device token poll failed: ${errorData.error || "Unknown error"} - ${errorData.error_description}`,
       );
       (error as Error & { status?: number }).status = response.status;
       throw error;
@@ -400,35 +400,29 @@ export class TramOAuth2Client implements ITramOAuth2Client {
 
   async refreshAccessToken(): Promise<TokenRefreshResponse> {
     if (!this.credentials.refresh_token) {
-      throw new Error('No refresh token available');
+      throw new Error("No refresh token available");
     }
 
     const bodyData = {
-      grant_type: 'refresh_token',
+      grant_type: "refresh_token",
       refresh_token: this.credentials.refresh_token,
       client_id: TRAM_OAUTH_CLIENT_ID,
     };
 
     const response = await fetch(TRAM_OAUTH_TOKEN_ENDPOINT, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Accept: 'application/json',
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
       },
       body: objectToUrlEncoded(bodyData),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-<<<<<<< HEAD:packages/core/src/tram/tramOAuth2.ts
       // Handle 400 errors which might indicate refresh token expiry
       if (response.status === 400) {
         await clearTramCredentials();
-=======
-      // Handle 400/401 errors which indicate refresh token expiry or invalidity
-      if (response.status === 400 || response.status === 401) {
-        await clearQwenCredentials();
->>>>>>> v0.14.5:packages/core/src/qwen/qwenOAuth2.ts
         throw new CredentialsClearRequiredError(
           "Refresh token expired or invalid. Please use '/auth' to re-authenticate.",
           { status: response.status, response: errorData },
@@ -443,7 +437,7 @@ export class TramOAuth2Client implements ITramOAuth2Client {
     try {
       responseText = await response.text();
     } catch {
-      responseText = '';
+      responseText = "";
     }
 
     let responseData: TokenRefreshResponse;
@@ -451,7 +445,7 @@ export class TramOAuth2Client implements ITramOAuth2Client {
       responseData = JSON.parse(responseText) as TokenRefreshResponse;
     } catch {
       throw new Error(
-        `Qwen OAuth refresh returned invalid JSON: ${responseText || '(empty response body)'}`,
+        `Qwen OAuth refresh returned invalid JSON: ${responseText || "(empty response body)"}`,
       );
     }
 
@@ -459,7 +453,7 @@ export class TramOAuth2Client implements ITramOAuth2Client {
     if (isErrorResponse(responseData)) {
       const errorData = responseData as ErrorData;
       throw new Error(
-        `Token refresh failed: ${errorData?.error || 'Unknown error'} - ${errorData?.error_description || 'No details provided'}`,
+        `Token refresh failed: ${errorData?.error || "Unknown error"} - ${errorData?.error_description || "No details provided"}`,
       );
     }
 
@@ -484,9 +478,9 @@ export class TramOAuth2Client implements ITramOAuth2Client {
 }
 
 export enum TramOAuth2Event {
-  AuthUri = 'auth-uri',
-  AuthProgress = 'auth-progress',
-  AuthCancel = 'auth-cancel',
+  AuthUri = "auth-uri",
+  AuthProgress = "auth-progress",
+  AuthCancel = "auth-cancel",
 }
 
 /**
@@ -496,7 +490,7 @@ export type AuthResult =
   | { success: true }
   | {
       success: false;
-      reason: 'timeout' | 'cancelled' | 'error' | 'rate_limit';
+      reason: "timeout" | "cancelled" | "error" | "rate_limit";
       message?: string; // Detailed error message for better error reporting
     };
 
@@ -525,27 +519,27 @@ export async function getTramOAuthClient(
       switch (error.type) {
         case TokenError.NO_REFRESH_TOKEN:
           debugLogger.debug(
-            'No refresh token available, proceeding with device flow',
+            "No refresh token available, proceeding with device flow",
           );
           break;
         case TokenError.REFRESH_FAILED:
           debugLogger.debug(
-            'Token refresh failed, proceeding with device flow',
+            "Token refresh failed, proceeding with device flow",
           );
           break;
         case TokenError.NETWORK_ERROR:
           debugLogger.warn(
-            'Network error during token refresh, trying device flow',
+            "Network error during token refresh, trying device flow",
           );
           break;
         default:
-          debugLogger.warn('Token manager error:', (error as Error).message);
+          debugLogger.warn("Token manager error:", (error as Error).message);
       }
     }
 
     if (options?.requireCachedCredentials) {
       throw new Error(
-        'TRAM OAuth credentials expired. Please use /auth to re-authenticate with tram-oauth.',
+        "TRAM OAuth credentials expired. Please use /auth to re-authenticate with tram-oauth.",
       );
     }
 
@@ -555,11 +549,11 @@ export async function getTramOAuthClient(
     if (!result.success) {
       // Only emit timeout event if the failure reason is actually timeout
       // Other error types (401, 429, etc.) have already emitted their specific events
-      if (result.reason === 'timeout') {
+      if (result.reason === "timeout") {
         tramOAuth2Events.emit(
           TramOAuth2Event.AuthProgress,
-          'timeout',
-          'Authentication timed out. Please try again or select a different authentication method.',
+          "timeout",
+          "Authentication timed out. Please try again or select a different authentication method.",
         );
       }
 
@@ -568,15 +562,15 @@ export async function getTramOAuthClient(
         result.message ||
         (() => {
           switch (result.reason) {
-            case 'timeout':
-              return 'TRAM OAuth authentication timed out';
-            case 'cancelled':
-              return 'TRAM OAuth authentication was cancelled by user';
-            case 'rate_limit':
-              return 'Too many request for TRAM OAuth authentication, please try again later.';
-            case 'error':
+            case "timeout":
+              return "TRAM OAuth authentication timed out";
+            case "cancelled":
+              return "TRAM OAuth authentication was cancelled by user";
+            case "rate_limit":
+              return "Too many request for TRAM OAuth authentication, please try again later.";
+            case "error":
             default:
-              return 'TRAM OAuth authentication failed';
+              return "TRAM OAuth authentication failed";
           }
         })();
 
@@ -595,7 +589,7 @@ export async function getTramOAuthClient(
  * convention of user-facing messages to stderr.
  */
 function showFallbackMessage(verificationUriComplete: string): void {
-  const title = 'TRAM OAuth Device Authorization';
+  const title = "TRAM OAuth Device Authorization";
   const url = verificationUriComplete;
   const minWidth = 70;
   const maxWidth = 80;
@@ -607,7 +601,7 @@ function showFallbackMessage(verificationUriComplete: string): void {
   // Helper to wrap text to fit within box width
   const wrapText = (text: string, width: number): string[] => {
     // For URLs, break at any character if too long
-    if (text.startsWith('http://') || text.startsWith('https://')) {
+    if (text.startsWith("http://") || text.startsWith("https://")) {
       const lines: string[] = [];
       for (let i = 0; i < text.length; i += width) {
         lines.push(text.substring(i, i + width));
@@ -616,13 +610,13 @@ function showFallbackMessage(verificationUriComplete: string): void {
     }
 
     // For regular text, break at word boundaries
-    const words = text.split(' ');
+    const words = text.split(" ");
     const lines: string[] = [];
-    let currentLine = '';
+    let currentLine = "";
 
     for (const word of words) {
       if (currentLine.length + word.length + 1 <= width) {
-        currentLine += (currentLine ? ' ' : '') + word;
+        currentLine += (currentLine ? " " : "") + word;
       } else {
         if (currentLine) {
           lines.push(currentLine);
@@ -638,56 +632,56 @@ function showFallbackMessage(verificationUriComplete: string): void {
 
   // Build the box borders with title centered in top border
   // Format: +--- Title ---+
-  const titleWithSpaces = ' ' + title + ' ';
+  const titleWithSpaces = " " + title + " ";
   const totalDashes = boxWidth - 2 - titleWithSpaces.length; // Subtract corners and title
   const leftDashes = Math.floor(totalDashes / 2);
   const rightDashes = totalDashes - leftDashes;
   const topBorder =
-    '+' +
-    '-'.repeat(leftDashes) +
+    "+" +
+    "-".repeat(leftDashes) +
     titleWithSpaces +
-    '-'.repeat(rightDashes) +
-    '+';
-  const emptyLine = '|' + ' '.repeat(boxWidth - 2) + '|';
-  const bottomBorder = '+' + '-'.repeat(boxWidth - 2) + '+';
+    "-".repeat(rightDashes) +
+    "+";
+  const emptyLine = "|" + " ".repeat(boxWidth - 2) + "|";
+  const bottomBorder = "+" + "-".repeat(boxWidth - 2) + "+";
 
   // Build content lines
   const instructionLines = wrapText(
-    'Please visit the following URL in your browser to authorize:',
+    "Please visit the following URL in your browser to authorize:",
     contentWidth,
   );
   const urlLines = wrapText(url, contentWidth);
-  const waitingLine = 'Waiting for authorization to complete...';
+  const waitingLine = "Waiting for authorization to complete...";
 
   // Write the box
-  process.stderr.write('\n' + topBorder + '\n');
-  process.stderr.write(emptyLine + '\n');
+  process.stderr.write("\n" + topBorder + "\n");
+  process.stderr.write(emptyLine + "\n");
 
   // Write instructions
   for (const line of instructionLines) {
     process.stderr.write(
-      '| ' + line + ' '.repeat(contentWidth - line.length) + ' |\n',
+      "| " + line + " ".repeat(contentWidth - line.length) + " |\n",
     );
   }
 
-  process.stderr.write(emptyLine + '\n');
+  process.stderr.write(emptyLine + "\n");
 
   // Write URL
   for (const line of urlLines) {
     process.stderr.write(
-      '| ' + line + ' '.repeat(contentWidth - line.length) + ' |\n',
+      "| " + line + " ".repeat(contentWidth - line.length) + " |\n",
     );
   }
 
-  process.stderr.write(emptyLine + '\n');
+  process.stderr.write(emptyLine + "\n");
 
   // Write waiting message
   process.stderr.write(
-    '| ' + waitingLine + ' '.repeat(contentWidth - waitingLine.length) + ' |\n',
+    "| " + waitingLine + " ".repeat(contentWidth - waitingLine.length) + " |\n",
   );
 
-  process.stderr.write(emptyLine + '\n');
-  process.stderr.write(bottomBorder + '\n\n');
+  process.stderr.write(emptyLine + "\n");
+  process.stderr.write(bottomBorder + "\n\n");
 }
 
 async function authWithTramDeviceFlow(
@@ -707,15 +701,15 @@ async function authWithTramDeviceFlow(
     if (!isCancelled) {
       return null;
     }
-    const message = 'Authentication cancelled by user.';
-    debugLogger.debug('\n' + message);
-    tramOAuth2Events.emit(TramOAuth2Event.AuthProgress, 'error', message);
-    return { success: false, reason: 'cancelled', message };
+    const message = "Authentication cancelled by user.";
+    debugLogger.debug("\n" + message);
+    tramOAuth2Events.emit(TramOAuth2Event.AuthProgress, "error", message);
+    return { success: false, reason: "cancelled", message };
   };
 
   // Helper to emit auth progress events
   const emitAuthProgress = (
-    status: 'polling' | 'success' | 'error' | 'timeout' | 'rate_limit',
+    status: "polling" | "success" | "error" | "timeout" | "rate_limit",
     message: string,
   ): void => {
     tramOAuth2Events.emit(TramOAuth2Event.AuthProgress, status, message);
@@ -731,14 +725,14 @@ async function authWithTramDeviceFlow(
       // in a minimal Docker container), it will emit an unhandled 'error' event,
       // causing the entire Node.js process to crash.
       if (childProcess) {
-        childProcess.on('error', (err) => {
-          debugLogger.debug('Browser launch failed:', err.message || err);
+        childProcess.on("error", (err) => {
+          debugLogger.debug("Browser launch failed:", err.message || err);
         });
       }
     } catch (err) {
       debugLogger.debug(
-        'Failed to open browser:',
-        err instanceof Error ? err.message : 'Unknown error',
+        "Failed to open browser:",
+        err instanceof Error ? err.message : "Unknown error",
       );
     }
   };
@@ -751,14 +745,14 @@ async function authWithTramDeviceFlow(
     const deviceAuth = await client.requestDeviceAuthorization({
       scope: TRAM_OAUTH_SCOPE,
       code_challenge,
-      code_challenge_method: 'S256',
+      code_challenge_method: "S256",
     });
 
     // Ensure we have a successful authorization response
     if (!isDeviceAuthorizationSuccess(deviceAuth)) {
       const errorData = deviceAuth as ErrorData;
       throw new Error(
-        `Device authorization failed: ${errorData?.error || 'Unknown error'} - ${errorData?.error_description || 'No details provided'}`,
+        `Device authorization failed: ${errorData?.error || "Unknown error"} - ${errorData?.error_description || "No details provided"}`,
       );
     }
 
@@ -774,8 +768,8 @@ async function authWithTramDeviceFlow(
       await launchBrowser(deviceAuth.verification_uri_complete);
     }
 
-    emitAuthProgress('polling', 'Waiting for authorization...');
-    debugLogger.debug('Waiting for authorization...\n');
+    emitAuthProgress("polling", "Waiting for authorization...");
+    debugLogger.debug("Waiting for authorization...\n");
 
     // Poll for the token
     let pollInterval = 2000; // 2 seconds, can be increased if slow_down is received
@@ -791,7 +785,7 @@ async function authWithTramDeviceFlow(
       }
 
       try {
-        debugLogger.debug('polling for token...');
+        debugLogger.debug("polling for token...");
         const tokenResponse = await client.pollDeviceToken({
           device_code: deviceAuth.device_code,
           code_verifier,
@@ -831,12 +825,12 @@ async function authWithTramDeviceFlow(
           }
 
           emitAuthProgress(
-            'success',
-            'Authentication successful! Access token obtained.',
+            "success",
+            "Authentication successful! Access token obtained.",
           );
 
           debugLogger.debug(
-            'Authentication successful! Access token obtained.',
+            "Authentication successful! Access token obtained.",
           );
           return { success: true };
         }
@@ -856,7 +850,7 @@ async function authWithTramDeviceFlow(
           }
 
           emitAuthProgress(
-            'polling',
+            "polling",
             `Polling... (attempt ${attempt + 1}/${maxAttempts})`,
           );
 
@@ -897,7 +891,7 @@ async function authWithTramDeviceFlow(
         if (isErrorResponse(tokenResponse)) {
           const errorData = tokenResponse as ErrorData;
           throw new Error(
-            `Token polling failed: ${errorData?.error || 'Unknown error'} - ${errorData?.error_description || 'No details provided'}`,
+            `Token polling failed: ${errorData?.error || "Unknown error"} - ${errorData?.error_description || "No details provided"}`,
           );
         }
       } catch (error: unknown) {
@@ -911,9 +905,9 @@ async function authWithTramDeviceFlow(
 
         // Helper function to handle error and stop polling
         const handleError = (
-          reason: 'error' | 'rate_limit',
+          reason: "error" | "rate_limit",
           message: string,
-          eventType: 'error' | 'rate_limit' = 'error',
+          eventType: "error" | "rate_limit" = "error",
         ): AuthResult => {
           emitAuthProgress(eventType, message);
           return { success: false, reason, message };
@@ -926,45 +920,45 @@ async function authWithTramDeviceFlow(
         }
 
         // Handle credential caching failures - stop polling immediately
-        if (errorMessage.includes('Failed to cache credentials')) {
-          return handleError('error', errorMessage);
+        if (errorMessage.includes("Failed to cache credentials")) {
+          return handleError("error", errorMessage);
         }
 
         // Handle 401 Unauthorized - device code expired or invalid
-        if (errorMessage.includes('401') || statusCode === 401) {
+        if (errorMessage.includes("401") || statusCode === 401) {
           return handleError(
-            'error',
-            'Device code expired or invalid, please restart the authorization process.',
+            "error",
+            "Device code expired or invalid, please restart the authorization process.",
           );
         }
 
         // Handle 429 Too Many Requests - rate limiting
-        if (errorMessage.includes('429') || statusCode === 429) {
+        if (errorMessage.includes("429") || statusCode === 429) {
           return handleError(
-            'rate_limit',
-            'Too many requests. The server is rate limiting our requests. Please select a different authentication method or try again later.',
-            'rate_limit',
+            "rate_limit",
+            "Too many requests. The server is rate limiting our requests. Please select a different authentication method or try again later.",
+            "rate_limit",
           );
         }
 
         const message = `Error polling for token: ${errorMessage}`;
-        emitAuthProgress('error', message);
+        emitAuthProgress("error", message);
 
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
       }
     }
 
-    const timeoutMessage = 'Authorization timeout, please restart the process.';
-    emitAuthProgress('timeout', timeoutMessage);
-    return { success: false, reason: 'timeout', message: timeoutMessage };
+    const timeoutMessage = "Authorization timeout, please restart the process.";
+    emitAuthProgress("timeout", timeoutMessage);
+    return { success: false, reason: "timeout", message: timeoutMessage };
   } catch (error: unknown) {
     const fullErrorMessage = formatFetchErrorForUser(error, {
       url: TRAM_OAUTH_BASE_URL,
     });
     const message = `Device authorization flow failed: ${fullErrorMessage}`;
 
-    emitAuthProgress('error', message);
-    return { success: false, reason: 'error', message };
+    emitAuthProgress("error", message);
+    return { success: false, reason: "error", message };
   } finally {
     // Clean up event listener
     tramOAuth2Events.off(TramOAuth2Event.AuthCancel, cancelHandler);
@@ -982,11 +976,11 @@ async function cacheTramCredentials(credentials: TramCredentials) {
     // Handle file system errors (e.g., EACCES permission denied)
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorCode =
-      error instanceof Error && 'code' in error
+      error instanceof Error && "code" in error
         ? (error as Error & { code?: string }).code
         : undefined;
 
-    if (errorCode === 'EACCES') {
+    if (errorCode === "EACCES") {
       throw new Error(
         `Failed to cache credentials: Permission denied (EACCES). Current user has no permission to access \`${filePath}\`. Please check permissions.`,
       );
@@ -1007,16 +1001,16 @@ export async function clearTramCredentials(): Promise<void> {
   try {
     const filePath = getTramCachedCredentialPath();
     await fs.unlink(filePath);
-    debugLogger.debug('Cached TRAM credentials cleared successfully.');
+    debugLogger.debug("Cached TRAM credentials cleared successfully.");
   } catch (error: unknown) {
     // If file doesn't exist or can't be deleted, we consider it cleared
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       // File doesn't exist, already cleared
       return;
     }
     // Log other errors but don't throw - clearing credentials should be non-critical
     debugLogger.warn(
-      'Warning: Failed to clear cached TRAM credentials:',
+      "Warning: Failed to clear cached TRAM credentials:",
       error,
     );
   } finally {

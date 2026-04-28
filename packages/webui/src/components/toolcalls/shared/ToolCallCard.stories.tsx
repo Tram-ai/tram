@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ToolCallCard, ToolCallRow } from './LayoutComponents.js';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { ToolCallCard, ToolCallRow } from "./LayoutComponents.js";
 
 /**
  * ToolCallCard is a card-style container for displaying detailed tool call results.
  * Used when there's more content to show than fits in a compact container.
  */
 const meta: Meta<typeof ToolCallCard> = {
-  title: 'ToolCalls/Shared/ToolCallCard',
+  title: "ToolCalls/Shared/ToolCallCard",
   component: ToolCallCard,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -25,7 +25,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    icon: '🔧',
+    icon: "🔧",
     children: (
       <ToolCallRow label="Task">
         <div>Processing data...</div>
@@ -36,7 +36,7 @@ export const Default: Story = {
 
 export const WithMultipleRows: Story = {
   args: {
-    icon: '📝',
+    icon: "📝",
     children: (
       <>
         <ToolCallRow label="Edit">
@@ -52,7 +52,7 @@ export const WithMultipleRows: Story = {
 
 export const WithError: Story = {
   args: {
-    icon: '❌',
+    icon: "❌",
     children: (
       <>
         <ToolCallRow label="Command">
@@ -68,7 +68,7 @@ export const WithError: Story = {
 
 export const ThinkingCard: Story = {
   args: {
-    icon: '💭',
+    icon: "💭",
     children: (
       <ToolCallRow label="SaveMemory">
         <div className="italic opacity-90">

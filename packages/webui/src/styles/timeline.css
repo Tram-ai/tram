@@ -56,14 +56,14 @@
   bottom: calc(100% - var(--timeline-center-offset, 13px));
 }
 
-.tram-message.message-item[data-first='true']::after {
+.tram-message.message-item[data-first="true"]::after {
   top: var(--timeline-center-offset, 13px);
 }
 
-.tram-message.message-item[data-last='true']::after {
+.tram-message.message-item[data-last="true"]::after {
   bottom: calc(100% - var(--timeline-center-offset, 13px));
 }
 
-.tram-message.message-item[data-first='true'][data-last='true']::after {
+.tram-message.message-item[data-first="true"][data-last="true"]::after {
   display: none;
 }

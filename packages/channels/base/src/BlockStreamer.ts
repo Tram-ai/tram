@@ -27,7 +27,7 @@ export interface BlockStreamerOptions {
 }
 
 export class BlockStreamer {
-  private buffer = '';
+  private buffer = "";
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
   private sending: Promise<void> = Promise.resolve();
   private opts: BlockStreamerOptions;
@@ -55,7 +55,7 @@ export class BlockStreamer {
     this.clearIdleTimer();
     if (this.buffer.length > 0) {
       this.emitBlock(this.buffer);
-      this.buffer = '';
+      this.buffer = "";
     }
     await this.sending;
   }
@@ -86,7 +86,7 @@ export class BlockStreamer {
     this.idleTimer = null;
     if (this.buffer.length >= this.opts.minChars) {
       this.emitBlock(this.buffer);
-      this.buffer = '';
+      this.buffer = "";
     }
   }
 
@@ -105,7 +105,7 @@ export class BlockStreamer {
    * exists at or after minChars.
    */
   private findBlockBoundary(text: string): number {
-    const last = text.lastIndexOf('\n\n');
+    const last = text.lastIndexOf("\n\n");
     if (last < 0 || last < this.opts.minChars) return -1;
     return last + 2;
   }
@@ -116,11 +116,11 @@ export class BlockStreamer {
    */
   private findBreakPoint(text: string, maxPos: number): number {
     const sub = text.slice(0, maxPos);
-    const para = sub.lastIndexOf('\n\n');
+    const para = sub.lastIndexOf("\n\n");
     if (para > 0) return para + 2;
-    const nl = sub.lastIndexOf('\n');
+    const nl = sub.lastIndexOf("\n");
     if (nl > 0) return nl + 1;
-    const sp = sub.lastIndexOf(' ');
+    const sp = sub.lastIndexOf(" ");
     if (sp > 0) return sp + 1;
     return maxPos;
   }

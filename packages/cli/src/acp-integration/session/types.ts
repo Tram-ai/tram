@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Config } from '@tram-ai/tram-core';
-import type { Part } from '@google/genai';
+import type { Config } from "@tram-ai/tram-core";
+import type { Part } from "@google/genai";
 import type {
   SessionUpdate,
   ToolCallLocation,
   ToolKind,
-} from '@agentclientprotocol/sdk';
-import type { MessageRewriteMiddleware } from './rewrite/index.js';
+} from "@agentclientprotocol/sdk";
+import type { MessageRewriteMiddleware } from "./rewrite/index.js";
 
-export type ApprovalModeValue = 'plan' | 'default' | 'auto-edit' | 'yolo';
+export type ApprovalModeValue = "plan" | "default" | "auto-edit" | "yolo";
 
 /**
  * Interface for sending session updates to the ACP client.
@@ -56,7 +56,7 @@ export interface ToolCallStartParams {
   /** Arguments passed to the tool */
   args?: Record<string, unknown>;
   /** Status of the tool call */
-  status?: 'pending' | 'in_progress' | 'completed' | 'failed';
+  status?: "pending" | "in_progress" | "completed" | "failed";
   /** Optional subagent metadata */
   subagentMeta?: SubagentMeta;
   /** Server-side timestamp (ISO string or ms) for message ordering */
@@ -93,7 +93,7 @@ export interface ToolCallResultParams {
 export interface TodoItem {
   id: string;
   content: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: "pending" | "in_progress" | "completed";
 }
 
 /**

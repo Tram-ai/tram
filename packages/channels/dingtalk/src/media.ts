@@ -7,7 +7,7 @@
  */
 
 const DOWNLOAD_API =
-  'https://api.dingtalk.com/v1.0/robot/messageFiles/download';
+  "https://api.dingtalk.com/v1.0/robot/messageFiles/download";
 
 export interface MediaFile {
   buffer: Buffer;
@@ -34,16 +34,16 @@ export async function downloadMedia(
   try {
     // Step 1: Get downloadUrl from DingTalk API
     const apiResp = await fetch(DOWNLOAD_API, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'x-acs-dingtalk-access-token': accessToken,
-        'Content-Type': 'application/json',
+        "x-acs-dingtalk-access-token": accessToken,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ downloadCode, robotCode }),
     });
 
     if (!apiResp.ok) {
-      const detail = await apiResp.text().catch(() => '');
+      const detail = await apiResp.text().catch(() => "");
       process.stderr.write(
         `[DingTalk] downloadMedia API failed: HTTP ${apiResp.status} ${detail}\n`,
       );
@@ -52,8 +52,8 @@ export async function downloadMedia(
 
     const payload = (await apiResp.json()) as Record<string, unknown>;
     const downloadUrl =
-      (payload['downloadUrl'] as string) ??
-      ((payload['data'] as Record<string, unknown>)?.['downloadUrl'] as string);
+      (payload["downloadUrl"] as string) ??
+      ((payload["data"] as Record<string, unknown>)?.["downloadUrl"] as string);
 
     if (!downloadUrl) {
       process.stderr.write(
@@ -72,7 +72,7 @@ export async function downloadMedia(
     }
 
     const mimeType =
-      fileResp.headers.get('content-type') || 'application/octet-stream';
+      fileResp.headers.get("content-type") || "application/octet-stream";
     const buffer = Buffer.from(await fileResp.arrayBuffer());
 
     return { buffer, mimeType };

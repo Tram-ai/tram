@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { HookDefinition, HookConfig } from './types.js';
+import type { HookDefinition, HookConfig } from "./types.js";
 import {
   HookEventName,
   HooksConfigSource,
   HOOKS_CONFIG_FIELDS,
-} from './types.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import { TrustedHooksManager } from './trustedHooks.js';
+} from "./types.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import { TrustedHooksManager } from "./trustedHooks.js";
 
-const debugLogger = createDebugLogger('HOOK_REGISTRY');
+const debugLogger = createDebugLogger("HOOK_REGISTRY");
 
 /**
  * Extension with hooks support
@@ -39,7 +39,7 @@ export interface HookRegistryConfig {
  * Feedback emitter interface for warning/info messages
  */
 export interface FeedbackEmitter {
-  emitFeedback(type: 'warning' | 'info' | 'error', message: string): void;
+  emitFeedback(type: "warning" | "info" | "error", message: string): void;
 }
 
 /**
@@ -113,7 +113,7 @@ export class HookRegistry {
 
     if (updated.length > 0) {
       debugLogger.info(
-        `${enabled ? 'Enabled' : 'Disabled'} ${updated.length} hook(s) matching "${hookName}"`,
+        `${enabled ? "Enabled" : "Disabled"} ${updated.length} hook(s) matching "${hookName}"`,
       );
     } else {
       debugLogger.warn(`No hooks found matching "${hookName}"`);
@@ -126,7 +126,7 @@ export class HookRegistry {
   private getHookName(
     entry: HookRegistryEntry | { config: HookConfig },
   ): string {
-    return entry.config.name || entry.config.command || 'unknown-command';
+    return entry.config.name || entry.config.command || "unknown-command";
   }
 
   /**
@@ -145,11 +145,11 @@ export class HookRegistry {
 
       if (untrusted.length > 0) {
         const message = `WARNING: The following project-level hooks have been detected in this workspace:
-${untrusted.map((h: string) => `  - ${h}`).join('\n')}
+${untrusted.map((h: string) => `  - ${h}`).join("\n")}
 
 These hooks will be executed. If you did not configure these hooks or do not trust this project,
 please review the project settings (.tram/settings.json) and remove them.`;
-        this.feedbackEmitter?.emitFeedback('warning', message);
+        this.feedbackEmitter?.emitFeedback("warning", message);
 
         // Trust them so we don't warn again
         trustedHooksManager.trustHooks(
@@ -158,7 +158,7 @@ please review the project settings (.tram/settings.json) and remove them.`;
         );
       }
     } catch {
-      debugLogger.warn('Failed to check project hooks trust');
+      debugLogger.warn("Failed to check project hooks trust");
     }
   }
 
@@ -177,7 +177,7 @@ please review the project settings (.tram/settings.json) and remove them.`;
         this.processHooksConfiguration(configHooks, HooksConfigSource.Project);
       } else {
         debugLogger.warn(
-          'Project hooks disabled because the folder is not trusted.',
+          "Project hooks disabled because the folder is not trusted.",
         );
       }
     }
@@ -208,7 +208,7 @@ please review the project settings (.tram/settings.json) and remove them.`;
 
       if (!this.isValidEventName(eventName)) {
         this.feedbackEmitter?.emitFeedback(
-          'warning',
+          "warning",
           `Invalid hook event name: "${eventName}" from ${source} config. Skipping.`,
         );
         continue;
@@ -239,7 +239,7 @@ please review the project settings (.tram/settings.json) and remove them.`;
   ): void {
     if (
       !definition ||
-      typeof definition !== 'object' ||
+      typeof definition !== "object" ||
       !Array.isArray(definition.hooks)
     ) {
       debugLogger.warn(
@@ -252,7 +252,7 @@ please review the project settings (.tram/settings.json) and remove them.`;
     for (const hookConfig of definition.hooks) {
       if (
         hookConfig &&
-        typeof hookConfig === 'object' &&
+        typeof hookConfig === "object" &&
         this.validateHookConfig(hookConfig, eventName, source)
       ) {
         const hookName = this.getHookName({ config: hookConfig });
@@ -302,14 +302,14 @@ please review the project settings (.tram/settings.json) and remove them.`;
     eventName: HookEventName,
     source: HooksConfigSource,
   ): boolean {
-    if (!config.type || !['command', 'plugin'].includes(config.type)) {
+    if (!config.type || !["command", "plugin"].includes(config.type)) {
       debugLogger.warn(
         `Invalid hook ${eventName} from ${source} type: ${config.type}`,
       );
       return false;
     }
 
-    if (config.type === 'command' && !config.command) {
+    if (config.type === "command" && !config.command) {
       debugLogger.warn(
         `Command hook ${eventName} from ${source} missing command field`,
       );

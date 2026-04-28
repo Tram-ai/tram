@@ -1,6 +1,6 @@
 # Observability with OpenTelemetry
 
-Learn how to enable and setup OpenTelemetry for Qwen Code.
+Learn how to enable and setup OpenTelemetry for TRAM.
 
 - [Observability with OpenTelemetry](#observability-with-opentelemetry)
   - [Key Benefits](#key-benefits)
@@ -32,7 +32,7 @@ Learn how to enable and setup OpenTelemetry for Qwen Code.
 ## OpenTelemetry Integration
 
 Built on **[OpenTelemetry]** — the vendor-neutral, industry-standard
-observability framework — Qwen Code's observability system provides:
+observability framework — TRAM's observability system provides:
 
 - **Universal Compatibility**: Export to any OpenTelemetry backend (Aliyun,
   Jaeger, Prometheus, Datadog, etc.)
@@ -86,7 +86,7 @@ Sends telemetry directly to Aliyun services. No collector needed.
      }
    }
    ```
-2. Run Qwen Code and send prompts.
+2. Run TRAM and send prompts.
 3. View logs and metrics in the Aliyun Console.
 
 ## Local Telemetry
@@ -106,7 +106,7 @@ For local development and debugging, you can capture telemetry data locally:
      }
    }
    ```
-2. Run Qwen Code and send prompts.
+2. Run TRAM and send prompts.
 3. View logs and metrics in the specified file (e.g., `.qwen/telemetry.log`).
 
 ### Collector-Based Export (Advanced)
@@ -121,20 +121,20 @@ For local development and debugging, you can capture telemetry data locally:
    - Provide a Jaeger UI at http://localhost:16686
    - Save logs/metrics to `~/.qwen/tmp/<projectHash>/otel/collector.log`
    - Stop collector on exit (e.g. `Ctrl+C`)
-2. Run Qwen Code and send prompts.
+2. Run TRAM and send prompts.
 3. View traces at http://localhost:16686 and logs/metrics in the collector log
    file.
 
 ## Logs and Metrics
 
 The following section describes the structure of logs and metrics generated for
-Qwen Code.
+TRAM.
 
 - A `sessionId` is included as a common attribute on all logs and metrics.
 
 ### Logs
 
-Logs are timestamped records of specific events. The following events are logged for Qwen Code:
+Logs are timestamped records of specific events. The following events are logged for TRAM:
 
 - `qwen-code.config`: This event occurs once at startup with the CLI's configuration.
   - **Attributes**:
@@ -228,7 +228,7 @@ Logs are timestamped records of specific events. The following events are logged
   - **Attributes**:
     - `model`
 
-- `qwen-code.flash_fallback`: This event occurs when Qwen Code switches to flash as fallback.
+- `qwen-code.flash_fallback`: This event occurs when TRAM switches to flash as fallback.
   - **Attributes**:
     - `auth_type`
 
@@ -248,7 +248,7 @@ Logs are timestamped records of specific events. The following events are logged
 
 ### Metrics
 
-Metrics are numerical measurements of behavior over time. The following metrics are collected for Qwen Code (metric names remain `qwen-code.*` for compatibility):
+Metrics are numerical measurements of behavior over time. The following metrics are collected for TRAM (metric names remain `qwen-code.*` for compatibility):
 
 - `qwen-code.session.count` (Counter, Int): Incremented once per CLI startup.
 

@@ -13,47 +13,47 @@
  * - Lifecycle hooks (pre/post tool use, stop) for synchronous callbacks
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 import type {
   ToolCallConfirmationDetails,
   ToolConfirmationOutcome,
   ToolResultDisplay,
-} from '../../tools/tools.js';
-import type { Part, GenerateContentResponseUsageMetadata } from '@google/genai';
-import type { AgentStatus } from './agent-types.js';
+} from "../../tools/tools.js";
+import type { Part, GenerateContentResponseUsageMetadata } from "@google/genai";
+import type { AgentStatus } from "./agent-types.js";
 
 // ─── Event Types ────────────────────────────────────────────
 
 export type AgentEvent =
-  | 'start'
-  | 'round_start'
-  | 'round_end'
-  | 'round_text'
-  | 'stream_text'
-  | 'tool_call'
-  | 'tool_result'
-  | 'tool_output_update'
-  | 'tool_waiting_approval'
-  | 'usage_metadata'
-  | 'finish'
-  | 'error'
-  | 'status_change';
+  | "start"
+  | "round_start"
+  | "round_end"
+  | "round_text"
+  | "stream_text"
+  | "tool_call"
+  | "tool_result"
+  | "tool_output_update"
+  | "tool_waiting_approval"
+  | "usage_metadata"
+  | "finish"
+  | "error"
+  | "status_change";
 
 export enum AgentEventType {
-  START = 'start',
-  ROUND_START = 'round_start',
-  ROUND_END = 'round_end',
+  START = "start",
+  ROUND_START = "round_start",
+  ROUND_END = "round_end",
   /** Complete round text, emitted once after streaming before tool calls. */
-  ROUND_TEXT = 'round_text',
-  STREAM_TEXT = 'stream_text',
-  TOOL_CALL = 'tool_call',
-  TOOL_RESULT = 'tool_result',
-  TOOL_OUTPUT_UPDATE = 'tool_output_update',
-  TOOL_WAITING_APPROVAL = 'tool_waiting_approval',
-  USAGE_METADATA = 'usage_metadata',
-  FINISH = 'finish',
-  ERROR = 'error',
-  STATUS_CHANGE = 'status_change',
+  ROUND_TEXT = "round_text",
+  STREAM_TEXT = "stream_text",
+  TOOL_CALL = "tool_call",
+  TOOL_RESULT = "tool_result",
+  TOOL_OUTPUT_UPDATE = "tool_output_update",
+  TOOL_WAITING_APPROVAL = "tool_waiting_approval",
+  USAGE_METADATA = "usage_metadata",
+  FINISH = "finish",
+  ERROR = "error",
+  STATUS_CHANGE = "status_change",
 }
 
 // ─── Event Payloads ─────────────────────────────────────────
@@ -142,12 +142,12 @@ export interface AgentApprovalRequestEvent {
   callId: string;
   name: string;
   description: string;
-  confirmationDetails: Omit<ToolCallConfirmationDetails, 'onConfirm'> & {
-    type: ToolCallConfirmationDetails['type'];
+  confirmationDetails: Omit<ToolCallConfirmationDetails, "onConfirm"> & {
+    type: ToolCallConfirmationDetails["type"];
   };
   respond: (
     outcome: ToolConfirmationOutcome,
-    payload?: Parameters<ToolCallConfirmationDetails['onConfirm']>[1],
+    payload?: Parameters<ToolCallConfirmationDetails["onConfirm"]>[1],
   ) => Promise<void>;
   timestamp: number;
 }

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext } from "react";
 import type {
   HistoryItem,
   HistoryItemBtw,
@@ -16,25 +16,25 @@ import type {
   StreamingState,
   SettingInputRequest,
   PluginChoiceRequest,
-} from '../types.js';
-import type { TramAuthState } from '../hooks/useTramAuth.js';
-import type { CommandContext, SlashCommand } from '../commands/types.js';
-import type { TextBuffer } from '../components/shared/text-buffer.js';
+} from "../types.js";
+import type { TramAuthState } from "../hooks/useTramAuth.js";
+import type { CommandContext, SlashCommand } from "../commands/types.js";
+import type { TextBuffer } from "../components/shared/text-buffer.js";
 import type {
   AuthType,
   IdeContext,
   ApprovalMode,
   IdeInfo,
-} from '@tram-ai/tram-core';
-import type { DOMElement } from 'ink';
-import type { SessionStatsState } from '../contexts/SessionContext.js';
-import type { ExtensionUpdateState } from '../state/extensions.js';
-import type { UpdateObject } from '../utils/updateCheck.js';
+} from "@tram-ai/tram-core";
+import type { DOMElement } from "ink";
+import type { SessionStatsState } from "../contexts/SessionContext.js";
+import type { ExtensionUpdateState } from "../state/extensions.js";
+import type { UpdateObject } from "../utils/updateCheck.js";
 
-import { type UseHistoryManagerReturn } from '../hooks/useHistoryManager.js';
-import { type RestartReason } from '../hooks/useIdeTrustListener.js';
-import { type CodingPlanUpdateRequest } from '../hooks/useCodingPlanUpdates.js';
-import { type ArenaDialogType } from '../hooks/useArenaCommand.js';
+import { type UseHistoryManagerReturn } from "../hooks/useHistoryManager.js";
+import { type RestartReason } from "../hooks/useIdeTrustListener.js";
+import { type CodingPlanUpdateRequest } from "../hooks/useCodingPlanUpdates.js";
+import { type ArenaDialogType } from "../hooks/useArenaCommand.js";
 
 export interface UIState {
   history: HistoryItem[];
@@ -129,7 +129,7 @@ export interface UIState {
     hasHistory: boolean;
     lastPrompt?: string;
   } | null;
-  welcomeBackChoice: 'continue' | 'restart' | null;
+  welcomeBackChoice: "continue" | "restart" | null;
   // Subagent dialogs
   isSubagentCreateDialogOpen: boolean;
   isAgentsManagerDialogOpen: boolean;
@@ -139,6 +139,8 @@ export interface UIState {
   isMcpDialogOpen: boolean;
   // Hooks dialog
   isHooksDialogOpen: boolean;
+  // Initialize dialog
+  isInitializeDialogOpen: boolean;
   // Feedback dialog
   isFeedbackDialogOpen: boolean;
   // Per-task token tracking
@@ -154,7 +156,7 @@ export const UIStateContext = createContext<UIState | null>(null);
 export const useUIState = () => {
   const context = useContext(UIStateContext);
   if (!context) {
-    throw new Error('useUIState must be used within a UIStateProvider');
+    throw new Error("useUIState must be used within a UIStateProvider");
   }
   return context;
 };

@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import * as vscode from 'vscode';
-import { activate } from './extension.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as vscode from "vscode";
+import { activate } from "./extension.js";
 import {
   IDE_DEFINITIONS,
   detectIdeFromEnv,
-} from '@tram-ai/tram-core/src/ide/detect-ide.js';
+} from "@tram-ai/tram-core/src/ide/detect-ide.js";
 
-vi.mock('@tram-ai/tram-core/src/ide/detect-ide.js', async () => {
+vi.mock("@tram-ai/tram-core/src/ide/detect-ide.js", async () => {
   const actual = await vi.importActual(
-    '@tram-ai/tram-core/src/ide/detect-ide.js',
+    "@tram-ai/tram-core/src/ide/detect-ide.js",
   );
   return {
     ...actual,
@@ -22,8 +22,8 @@ vi.mock('@tram-ai/tram-core/src/ide/detect-ide.js', async () => {
   };
 });
 
-vi.mock('vscode', () => ({
-  version: '1.94.0',
+vi.mock("vscode", () => ({
+  version: "1.94.0",
   window: {
     createOutputChannel: vi.fn(() => ({
       appendLine: vi.fn(),
@@ -79,7 +79,7 @@ vi.mock('vscode', () => ({
   },
 }));
 
-describe('activate', () => {
+describe("activate", () => {
   let context: vscode.ExtensionContext;
 
   beforeEach(() => {
@@ -96,11 +96,11 @@ describe('activate', () => {
         update: vi.fn(),
       },
       extensionUri: {
-        fsPath: '/path/to/extension',
+        fsPath: "/path/to/extension",
       },
       extension: {
         packageJSON: {
-          version: '1.1.0',
+          version: "1.1.0",
         },
       },
     } as unknown as vscode.ExtensionContext;
@@ -110,35 +110,35 @@ describe('activate', () => {
     vi.restoreAllMocks();
   });
 
-  it('should show the info message on first activation', async () => {
+  it("should show the info message on first activation", async () => {
     const showInformationMessageMock = vi
       .mocked(vscode.window.showInformationMessage)
       .mockResolvedValue(undefined as never);
     vi.mocked(context.globalState.get).mockReturnValue(undefined);
     vi.mocked(vscode.extensions.getExtension).mockReturnValue({
-      packageJSON: { version: '1.1.0' },
+      packageJSON: { version: "1.1.0" },
     } as vscode.Extension<unknown>);
     await activate(context);
     expect(showInformationMessageMock).toHaveBeenCalledWith(
-      'TRAM Companion extension successfully installed.',
+      "TRAM Companion extension successfully installed.",
     );
   });
 
-  it('should not show the info message on subsequent activations', async () => {
+  it("should not show the info message on subsequent activations", async () => {
     vi.mocked(context.globalState.get).mockReturnValue(true);
     vi.mocked(vscode.extensions.getExtension).mockReturnValue({
-      packageJSON: { version: '1.1.0' },
+      packageJSON: { version: "1.1.0" },
     } as vscode.Extension<unknown>);
     await activate(context);
     expect(vscode.window.showInformationMessage).not.toHaveBeenCalled();
   });
 
-  it('should register a handler for onDidGrantWorkspaceTrust', async () => {
+  it("should register a handler for onDidGrantWorkspaceTrust", async () => {
     await activate(context);
     expect(vscode.workspace.onDidGrantWorkspaceTrust).toHaveBeenCalled();
   });
 
-  it('should register webview view providers for sidebar and secondary positions', async () => {
+  it("should register webview view providers for sidebar and secondary positions", async () => {
     await activate(context);
 
     // Verify registerWebviewViewProvider was called 2 times (sidebar + secondary)
@@ -150,39 +150,39 @@ describe('activate', () => {
     const viewIds = registerCalls.map((call) => call[0]);
 
     // Only sidebar and secondary are registered; panel view was removed
-    expect(viewIds).toContain('tram.chatView.sidebar');
-    expect(viewIds).toContain('tram.chatView.secondary');
+    expect(viewIds).toContain("tram.chatView.sidebar");
+    expect(viewIds).toContain("tram.chatView.secondary");
   });
 
-  it('should launch the TRAM when the user clicks the button', async () => {
+  it("should launch the TRAM when the user clicks the button", async () => {
     const showInformationMessageMock = vi
       .mocked(vscode.window.showInformationMessage)
-      .mockResolvedValue('Run TRAM' as never);
+      .mockResolvedValue("Run TRAM" as never);
     vi.mocked(context.globalState.get).mockReturnValue(undefined);
     vi.mocked(vscode.extensions.getExtension).mockReturnValue({
-      packageJSON: { version: '1.1.0' },
+      packageJSON: { version: "1.1.0" },
     } as vscode.Extension<unknown>);
     await activate(context);
     expect(showInformationMessageMock).toHaveBeenCalledWith(
-      'TRAM Companion extension successfully installed.',
+      "TRAM Companion extension successfully installed.",
     );
   });
 
-  describe('update notification', () => {
+  describe("update notification", () => {
     beforeEach(() => {
       // Prevent the "installed" message from showing
       vi.mocked(context.globalState.get).mockReturnValue(true);
     });
 
-    it('should show an update notification if a newer version is available', async () => {
-      vi.spyOn(global, 'fetch').mockResolvedValue({
+    it("should show an update notification if a newer version is available", async () => {
+      vi.spyOn(global, "fetch").mockResolvedValue({
         ok: true,
         json: async () => ({
           results: [
             {
               extensions: [
                 {
-                  versions: [{ version: '1.2.0' }],
+                  versions: [{ version: "1.2.0" }],
                 },
               ],
             },
@@ -197,20 +197,20 @@ describe('activate', () => {
       await activate(context);
 
       expect(showInformationMessageMock).toHaveBeenCalledWith(
-        'A new version (1.2.0) of the TRAM Companion extension is available.',
-        'Update to latest version',
+        "A new version (1.2.0) of the TRAM Companion extension is available.",
+        "Update to latest version",
       );
     });
 
-    it('should not show an update notification if the version is the same', async () => {
-      vi.spyOn(global, 'fetch').mockResolvedValue({
+    it("should not show an update notification if the version is the same", async () => {
+      vi.spyOn(global, "fetch").mockResolvedValue({
         ok: true,
         json: async () => ({
           results: [
             {
               extensions: [
                 {
-                  versions: [{ version: '1.1.0' }],
+                  versions: [{ version: "1.1.0" }],
                 },
               ],
             },
@@ -232,7 +232,7 @@ describe('activate', () => {
         ide: IDE_DEFINITIONS.cloudshell,
       },
       { ide: IDE_DEFINITIONS.firebasestudio },
-    ])('does not show the notification for $ide.name', async ({ ide }) => {
+    ])("does not show the notification for $ide.name", async ({ ide }) => {
       vi.mocked(detectIdeFromEnv).mockReturnValue(ide);
       vi.mocked(context.globalState.get).mockReturnValue(undefined);
       const showInformationMessageMock = vi.mocked(
@@ -244,15 +244,15 @@ describe('activate', () => {
       expect(showInformationMessageMock).not.toHaveBeenCalled();
     });
 
-    it('should not show an update notification if the version is older', async () => {
-      vi.spyOn(global, 'fetch').mockResolvedValue({
+    it("should not show an update notification if the version is older", async () => {
+      vi.spyOn(global, "fetch").mockResolvedValue({
         ok: true,
         json: async () => ({
           results: [
             {
               extensions: [
                 {
-                  versions: [{ version: '1.0.0' }],
+                  versions: [{ version: "1.0.0" }],
                 },
               ],
             },
@@ -270,14 +270,14 @@ describe('activate', () => {
     });
 
     it('should execute the install command when the user clicks "Update"', async () => {
-      vi.spyOn(global, 'fetch').mockResolvedValue({
+      vi.spyOn(global, "fetch").mockResolvedValue({
         ok: true,
         json: async () => ({
           results: [
             {
               extensions: [
                 {
-                  versions: [{ version: '1.2.0' }],
+                  versions: [{ version: "1.2.0" }],
                 },
               ],
             },
@@ -285,7 +285,7 @@ describe('activate', () => {
         }),
       } as Response);
       vi.mocked(vscode.window.showInformationMessage).mockResolvedValue(
-        'Update to latest version' as never,
+        "Update to latest version" as never,
       );
       const executeCommandMock = vi.mocked(vscode.commands.executeCommand);
 
@@ -295,15 +295,15 @@ describe('activate', () => {
       await new Promise(process.nextTick);
 
       expect(executeCommandMock).toHaveBeenCalledWith(
-        'workbench.extensions.installExtension',
-        'tram-ai.tram-code-vscode-ide-companion',
+        "workbench.extensions.installExtension",
+        "tram-ai.tram-code-vscode-ide-companion",
       );
     });
 
-    it('should handle fetch errors gracefully', async () => {
-      vi.spyOn(global, 'fetch').mockResolvedValue({
+    it("should handle fetch errors gracefully", async () => {
+      vi.spyOn(global, "fetch").mockResolvedValue({
         ok: false,
-        statusText: 'Internal Server Error',
+        statusText: "Internal Server Error",
       } as Response);
 
       const showInformationMessageMock = vi.mocked(

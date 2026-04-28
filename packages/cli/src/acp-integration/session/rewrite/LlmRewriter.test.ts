@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Config } from '@qwen-code/qwen-code-core';
-import type { TurnContent, MessageRewriteConfig } from './types.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { Config } from "@tram-ai/tram-core";
+import type { TurnContent, MessageRewriteConfig } from "./types.js";
 
 // Mock core to avoid Vite https resolution issue
-vi.mock('@qwen-code/qwen-code-core', () => ({
+vi.mock("@tram-ai/tram-core", () => ({
   createDebugLogger: () => ({
     info: vi.fn(),
     warn: vi.fn(),
@@ -23,20 +23,20 @@ const mockGenerateContent = vi.fn().mockResolvedValue({
   candidates: [
     {
       content: {
-        parts: [{ text: 'rewritten output' }],
+        parts: [{ text: "rewritten output" }],
       },
     },
   ],
 });
 
-const { LlmRewriter } = await import('./LlmRewriter.js');
+const { LlmRewriter } = await import("./LlmRewriter.js");
 
 function makeConfig(): Config {
   return {
     getContentGenerator: () => ({
       generateContent: mockGenerateContent,
     }),
-    getModel: () => 'test-model',
+    getModel: () => "test-model",
   } as unknown as Config;
 }
 
@@ -44,143 +44,143 @@ function makeTurn(messages: string[], thoughts: string[] = []): TurnContent {
   return { messages, thoughts, hasToolCalls: false };
 }
 
-describe('LlmRewriter', () => {
+describe("LlmRewriter", () => {
   beforeEach(() => {
     mockGenerateContent.mockClear();
     mockGenerateContent.mockResolvedValue({
-      candidates: [{ content: { parts: [{ text: 'rewritten output' }] } }],
+      candidates: [{ content: { parts: [{ text: "rewritten output" }] } }],
     });
   });
 
-  describe('contextTurns', () => {
-    it('should include last rewrite output by default (contextTurns=1)', async () => {
+  describe("contextTurns", () => {
+    it("should include last rewrite output by default (contextTurns=1)", async () => {
       const rewriter = new LlmRewriter(makeConfig(), {
         enabled: true,
-        target: 'all',
+        target: "all",
       } as MessageRewriteConfig);
 
       // First call — no context
-      await rewriter.rewrite(makeTurn(['first message']));
+      await rewriter.rewrite(makeTurn(["first message"]));
       const firstInput =
         mockGenerateContent.mock.calls[0][0].contents[0].parts[0].text;
-      expect(firstInput).not.toContain('上一轮改写结果');
+      expect(firstInput).not.toContain("上一轮改写结果");
 
       // Second call — should include first rewrite output
-      await rewriter.rewrite(makeTurn(['second message']));
+      await rewriter.rewrite(makeTurn(["second message"]));
       const secondInput =
         mockGenerateContent.mock.calls[1][0].contents[0].parts[0].text;
-      expect(secondInput).toContain('上一轮改写结果');
-      expect(secondInput).toContain('rewritten output');
+      expect(secondInput).toContain("上一轮改写结果");
+      expect(secondInput).toContain("rewritten output");
     });
 
-    it('should include no context when contextTurns=0', async () => {
+    it("should include no context when contextTurns=0", async () => {
       const rewriter = new LlmRewriter(makeConfig(), {
         enabled: true,
-        target: 'all',
+        target: "all",
         contextTurns: 0,
       } as MessageRewriteConfig);
 
-      await rewriter.rewrite(makeTurn(['first']));
-      await rewriter.rewrite(makeTurn(['second']));
+      await rewriter.rewrite(makeTurn(["first"]));
+      await rewriter.rewrite(makeTurn(["second"]));
 
       const secondInput =
         mockGenerateContent.mock.calls[1][0].contents[0].parts[0].text;
-      expect(secondInput).not.toContain('上一轮改写结果');
+      expect(secondInput).not.toContain("上一轮改写结果");
     });
 
-    it('should include last N rewrites when contextTurns=N', async () => {
+    it("should include last N rewrites when contextTurns=N", async () => {
       mockGenerateContent
         .mockResolvedValueOnce({
-          candidates: [{ content: { parts: [{ text: 'rewrite-A' }] } }],
+          candidates: [{ content: { parts: [{ text: "rewrite-A" }] } }],
         })
         .mockResolvedValueOnce({
-          candidates: [{ content: { parts: [{ text: 'rewrite-B' }] } }],
+          candidates: [{ content: { parts: [{ text: "rewrite-B" }] } }],
         })
         .mockResolvedValueOnce({
-          candidates: [{ content: { parts: [{ text: 'rewrite-C' }] } }],
+          candidates: [{ content: { parts: [{ text: "rewrite-C" }] } }],
         })
         .mockResolvedValue({
-          candidates: [{ content: { parts: [{ text: 'rewrite-D' }] } }],
+          candidates: [{ content: { parts: [{ text: "rewrite-D" }] } }],
         });
 
       const rewriter = new LlmRewriter(makeConfig(), {
         enabled: true,
-        target: 'all',
+        target: "all",
         contextTurns: 2,
       } as MessageRewriteConfig);
 
-      await rewriter.rewrite(makeTurn(['msg1']));
-      await rewriter.rewrite(makeTurn(['msg2']));
-      await rewriter.rewrite(makeTurn(['msg3']));
+      await rewriter.rewrite(makeTurn(["msg1"]));
+      await rewriter.rewrite(makeTurn(["msg2"]));
+      await rewriter.rewrite(makeTurn(["msg3"]));
 
       // 4th call — should include rewrite-B and rewrite-C (last 2), not rewrite-A
-      await rewriter.rewrite(makeTurn(['msg4']));
+      await rewriter.rewrite(makeTurn(["msg4"]));
       const input =
         mockGenerateContent.mock.calls[3][0].contents[0].parts[0].text;
-      expect(input).not.toContain('rewrite-A');
-      expect(input).toContain('rewrite-B');
-      expect(input).toContain('rewrite-C');
+      expect(input).not.toContain("rewrite-A");
+      expect(input).toContain("rewrite-B");
+      expect(input).toContain("rewrite-C");
     });
 
     it('should include all rewrites when contextTurns="all"', async () => {
       mockGenerateContent
         .mockResolvedValueOnce({
-          candidates: [{ content: { parts: [{ text: 'rewrite-1' }] } }],
+          candidates: [{ content: { parts: [{ text: "rewrite-1" }] } }],
         })
         .mockResolvedValueOnce({
-          candidates: [{ content: { parts: [{ text: 'rewrite-2' }] } }],
+          candidates: [{ content: { parts: [{ text: "rewrite-2" }] } }],
         })
         .mockResolvedValue({
-          candidates: [{ content: { parts: [{ text: 'rewrite-3' }] } }],
+          candidates: [{ content: { parts: [{ text: "rewrite-3" }] } }],
         });
 
       const rewriter = new LlmRewriter(makeConfig(), {
         enabled: true,
-        target: 'all',
-        contextTurns: 'all',
+        target: "all",
+        contextTurns: "all",
       } as MessageRewriteConfig);
 
-      await rewriter.rewrite(makeTurn(['msg1']));
-      await rewriter.rewrite(makeTurn(['msg2']));
-      await rewriter.rewrite(makeTurn(['msg3']));
+      await rewriter.rewrite(makeTurn(["msg1"]));
+      await rewriter.rewrite(makeTurn(["msg2"]));
+      await rewriter.rewrite(makeTurn(["msg3"]));
 
       const input =
         mockGenerateContent.mock.calls[2][0].contents[0].parts[0].text;
-      expect(input).toContain('rewrite-1');
-      expect(input).toContain('rewrite-2');
+      expect(input).toContain("rewrite-1");
+      expect(input).toContain("rewrite-2");
     });
   });
 
-  describe('model override', () => {
-    it('should use rewriteConfig.model when set', async () => {
+  describe("model override", () => {
+    it("should use rewriteConfig.model when set", async () => {
       const rewriter = new LlmRewriter(makeConfig(), {
         enabled: true,
-        target: 'all',
-        model: 'custom-rewrite-model',
+        target: "all",
+        model: "custom-rewrite-model",
       } as MessageRewriteConfig);
 
-      await rewriter.rewrite(makeTurn(['hello']));
+      await rewriter.rewrite(makeTurn(["hello"]));
       expect(mockGenerateContent.mock.calls[0][0].model).toBe(
-        'custom-rewrite-model',
+        "custom-rewrite-model",
       );
     });
 
-    it('should fall back to config.getModel() when model is empty', async () => {
+    it("should fall back to config.getModel() when model is empty", async () => {
       const rewriter = new LlmRewriter(makeConfig(), {
         enabled: true,
-        target: 'all',
+        target: "all",
       } as MessageRewriteConfig);
 
-      await rewriter.rewrite(makeTurn(['hello']));
-      expect(mockGenerateContent.mock.calls[0][0].model).toBe('test-model');
+      await rewriter.rewrite(makeTurn(["hello"]));
+      expect(mockGenerateContent.mock.calls[0][0].model).toBe("test-model");
     });
   });
 
-  describe('filtering', () => {
-    it('should return null for empty input', async () => {
+  describe("filtering", () => {
+    it("should return null for empty input", async () => {
       const rewriter = new LlmRewriter(makeConfig(), {
         enabled: true,
-        target: 'all',
+        target: "all",
       } as MessageRewriteConfig);
 
       const result = await rewriter.rewrite(makeTurn([], []));
@@ -188,40 +188,40 @@ describe('LlmRewriter', () => {
       expect(mockGenerateContent).not.toHaveBeenCalled();
     });
 
-    it('should return null when LLM returns short text', async () => {
+    it("should return null when LLM returns short text", async () => {
       mockGenerateContent.mockResolvedValueOnce({
-        candidates: [{ content: { parts: [{ text: 'hi' }] } }],
+        candidates: [{ content: { parts: [{ text: "hi" }] } }],
       });
 
       const rewriter = new LlmRewriter(makeConfig(), {
         enabled: true,
-        target: 'all',
+        target: "all",
       } as MessageRewriteConfig);
 
-      const result = await rewriter.rewrite(makeTurn(['some input text here']));
+      const result = await rewriter.rewrite(makeTurn(["some input text here"]));
       expect(result).toBeNull();
     });
 
-    it('should not accumulate failed rewrites in history', async () => {
+    it("should not accumulate failed rewrites in history", async () => {
       mockGenerateContent.mockResolvedValueOnce({
-        candidates: [{ content: { parts: [{ text: '' }] } }],
+        candidates: [{ content: { parts: [{ text: "" }] } }],
       });
       mockGenerateContent.mockResolvedValueOnce({
-        candidates: [{ content: { parts: [{ text: 'second rewrite ok' }] } }],
+        candidates: [{ content: { parts: [{ text: "second rewrite ok" }] } }],
       });
 
       const rewriter = new LlmRewriter(makeConfig(), {
         enabled: true,
-        target: 'all',
+        target: "all",
       } as MessageRewriteConfig);
 
-      await rewriter.rewrite(makeTurn(['first'])); // returns null
-      await rewriter.rewrite(makeTurn(['second']));
+      await rewriter.rewrite(makeTurn(["first"])); // returns null
+      await rewriter.rewrite(makeTurn(["second"]));
 
       // Second call should have no context (first rewrite returned null)
       const input =
         mockGenerateContent.mock.calls[1][0].contents[0].parts[0].text;
-      expect(input).not.toContain('上一轮改写结果');
+      expect(input).not.toContain("上一轮改写结果");
     });
   });
 });

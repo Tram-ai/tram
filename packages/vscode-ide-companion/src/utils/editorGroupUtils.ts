@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import { openChatCommand } from '../commands/index.js';
+import * as vscode from "vscode";
+import { openChatCommand } from "../commands/index.js";
 
 /**
  * Find the editor group immediately to the left of the TRAM chat webview.
@@ -22,10 +22,10 @@ export function findLeftGroupOfChatWebview(): vscode.ViewColumn | undefined {
       group.tabs.some((tab) => {
         const input: unknown = (tab as { input?: unknown }).input;
         const isWebviewInput = (inp: unknown): inp is { viewType: string } =>
-          !!inp && typeof inp === 'object' && 'viewType' in inp;
+          !!inp && typeof inp === "object" && "viewType" in inp;
         return (
           isWebviewInput(input) &&
-          input.viewType === 'mainThreadWebview-tramCode.chat'
+          input.viewType === "mainThreadWebview-tramCode.chat"
         );
       }),
     );
@@ -105,10 +105,10 @@ export async function ensureLeftGroupOfChatWebview(): Promise<
     group.tabs.some((tab) => {
       const input: unknown = (tab as { input?: unknown }).input;
       const isWebviewInput = (inp: unknown): inp is { viewType: string } =>
-        !!inp && typeof inp === 'object' && 'viewType' in inp;
+        !!inp && typeof inp === "object" && "viewType" in inp;
       return (
         isWebviewInput(input) &&
-        input.viewType === 'mainThreadWebview-tramCode.chat'
+        input.viewType === "mainThreadWebview-tramCode.chat"
       );
     }),
   );
@@ -128,7 +128,7 @@ export async function ensureLeftGroupOfChatWebview(): Promise<
 
   // Create a new group to the left of the chat group
   try {
-    await vscode.commands.executeCommand('workbench.action.newGroupLeft');
+    await vscode.commands.executeCommand("workbench.action.newGroupLeft");
   } catch {
     // If we fail to create a group, fall back to default behavior
     return undefined;

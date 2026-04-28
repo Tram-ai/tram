@@ -4,23 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { promises as fs } from 'node:fs';
-import * as path from 'node:path';
-import { Storage } from '../config/storage.js';
-import { getErrorMessage } from '../utils/errors.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
+import { Storage } from "../config/storage.js";
+import { getErrorMessage } from "../utils/errors.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 import type {
   OAuthToken,
   OAuthCredentials,
   TokenStorage,
-} from './token-storage/types.js';
-import { HybridTokenStorage } from './token-storage/hybrid-token-storage.js';
+} from "./token-storage/types.js";
+import { HybridTokenStorage } from "./token-storage/hybrid-token-storage.js";
 import {
   DEFAULT_SERVICE_NAME,
   FORCE_ENCRYPTED_FILE_ENV_VAR,
-} from './token-storage/index.js';
+} from "./token-storage/index.js";
 
-const debugLogger = createDebugLogger('MCP_OAUTH');
+const debugLogger = createDebugLogger("MCP_OAUTH");
 
 /**
  * Class for managing MCP OAuth token storage and retrieval.
@@ -30,7 +30,7 @@ export class MCPOAuthTokenStorage implements TokenStorage {
     DEFAULT_SERVICE_NAME,
   );
   private readonly useEncryptedFile =
-    process.env[FORCE_ENCRYPTED_FILE_ENV_VAR] === 'true';
+    process.env[FORCE_ENCRYPTED_FILE_ENV_VAR] === "true";
 
   /**
    * Get the path to the token storage file.
@@ -62,7 +62,7 @@ export class MCPOAuthTokenStorage implements TokenStorage {
 
     try {
       const tokenFile = this.getTokenFilePath();
-      const data = await fs.readFile(tokenFile, 'utf-8');
+      const data = await fs.readFile(tokenFile, "utf-8");
       const tokens = JSON.parse(data) as OAuthCredentials[];
 
       for (const credential of tokens) {
@@ -70,7 +70,7 @@ export class MCPOAuthTokenStorage implements TokenStorage {
       }
     } catch (error) {
       // File doesn't exist or is invalid, return empty map
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
         debugLogger.error(
           `Failed to load MCP OAuth tokens: ${getErrorMessage(error)}`,
         );
@@ -218,7 +218,7 @@ export class MCPOAuthTokenStorage implements TokenStorage {
       const tokenFile = this.getTokenFilePath();
       await fs.unlink(tokenFile);
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
         debugLogger.error(
           `Failed to clear MCP OAuth tokens: ${getErrorMessage(error)}`,
         );

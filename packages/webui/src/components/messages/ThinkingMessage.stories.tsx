@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ThinkingMessage } from './ThinkingMessage.js';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { ThinkingMessage } from "./ThinkingMessage.js";
 
 /**
  * ThinkingMessage component displays the AI's internal thinking process.
@@ -17,39 +17,39 @@ import { ThinkingMessage } from './ThinkingMessage.js';
  * - Aligned with other message items, with status icon and connector line
  */
 const meta: Meta<typeof ThinkingMessage> = {
-  title: 'Messages/ThinkingMessage',
+  title: "Messages/ThinkingMessage",
   component: ThinkingMessage,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     content: {
-      control: 'text',
-      description: 'Thinking content',
+      control: "text",
+      description: "Thinking content",
     },
     timestamp: {
-      control: 'number',
-      description: 'Message timestamp',
+      control: "number",
+      description: "Message timestamp",
     },
     defaultExpanded: {
-      control: 'boolean',
-      description: 'Whether to expand by default',
+      control: "boolean",
+      description: "Whether to expand by default",
     },
     status: {
-      control: 'select',
-      options: ['default', 'loading'],
+      control: "select",
+      options: ["default", "loading"],
       description:
-        'Status: loading means thinking in progress, default means thinking complete',
+        "Status: loading means thinking in progress, default means thinking complete",
     },
-    onFileClick: { action: 'fileClicked' },
+    onFileClick: { action: "fileClicked" },
   },
   decorators: [
     (Story) => (
       <div
         style={{
-          background: 'var(--app-background, #1e1e1e)',
-          padding: '20px',
+          background: "var(--app-background, #1e1e1e)",
+          padding: "20px",
         }}
       >
         <Story />
@@ -66,10 +66,10 @@ type Story = StoryObj<typeof meta>;
  */
 export const Default: Story = {
   args: {
-    content: 'Let me analyze this code and think about the best approach...',
+    content: "Let me analyze this code and think about the best approach...",
     timestamp: Date.now(),
     defaultExpanded: false,
-    status: 'default',
+    status: "default",
   },
 };
 
@@ -78,10 +78,10 @@ export const Default: Story = {
  */
 export const Expanded: Story = {
   args: {
-    content: 'Let me analyze this code and think about the best approach...',
+    content: "Let me analyze this code and think about the best approach...",
     timestamp: Date.now(),
     defaultExpanded: true,
-    status: 'default',
+    status: "default",
   },
 };
 
@@ -90,10 +90,10 @@ export const Expanded: Story = {
  */
 export const Loading: Story = {
   args: {
-    content: 'Analyzing the codebase structure...',
+    content: "Analyzing the codebase structure...",
     timestamp: Date.now(),
     defaultExpanded: false,
-    status: 'loading',
+    status: "loading",
   },
 };
 
@@ -102,10 +102,10 @@ export const Loading: Story = {
  */
 export const LoadingExpanded: Story = {
   args: {
-    content: 'Analyzing the codebase structure...',
+    content: "Analyzing the codebase structure...",
     timestamp: Date.now(),
     defaultExpanded: true,
-    status: 'loading',
+    status: "loading",
   },
 };
 
@@ -123,7 +123,7 @@ export const LongThought: Story = {
 Let me work through each of these systematically...`,
     timestamp: Date.now(),
     defaultExpanded: true,
-    status: 'default',
+    status: "default",
   },
 };
 
@@ -133,9 +133,9 @@ Let me work through each of these systematically...`,
 export const WithFilePath: Story = {
   args: {
     content:
-      'Looking at the code in `src/utils/helpers.ts` to understand the pattern...',
+      "Looking at the code in `src/utils/helpers.ts` to understand the pattern...",
     timestamp: Date.now(),
     defaultExpanded: true,
-    status: 'default',
+    status: "default",
   },
 };

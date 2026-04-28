@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import type { CanUseTool } from './types.js';
-import type { SubagentConfig } from './protocol.js';
+import { z } from "zod";
+import type { CanUseTool } from "./types.js";
+import type { SubagentConfig } from "./protocol.js";
 
 /**
  * OAuth configuration for MCP servers
@@ -10,7 +10,7 @@ export const McpOAuthConfigSchema = z
     enabled: z.boolean().optional(),
     clientId: z
       .string()
-      .min(1, 'clientId must be a non-empty string')
+      .min(1, "clientId must be a non-empty string")
       .optional(),
     clientSecret: z.string().optional(),
     scopes: z.array(z.string()).optional(),
@@ -57,9 +57,9 @@ export const CLIMcpServerConfigSchema = z.object({
   oauth: McpOAuthConfigSchema.optional(),
   authProviderType: z
     .enum([
-      'dynamic_discovery',
-      'google_credentials',
-      'service_account_impersonation',
+      "dynamic_discovery",
+      "google_credentials",
+      "service_account_impersonation",
     ])
     .optional(),
   // Service Account Configuration
@@ -71,18 +71,18 @@ export const CLIMcpServerConfigSchema = z.object({
  * SDK MCP Server configuration schema
  */
 export const SdkMcpServerConfigSchema = z.object({
-  type: z.literal('sdk'),
-  name: z.string().min(1, 'name must be a non-empty string'),
+  type: z.literal("sdk"),
+  name: z.string().min(1, "name must be a non-empty string"),
   instance: z.custom<{
     connect(transport: unknown): Promise<void>;
     close(): Promise<void>;
   }>(
     (val) =>
       val &&
-      typeof val === 'object' &&
-      'connect' in val &&
-      typeof val.connect === 'function',
-    { message: 'instance must be an MCP Server with connect method' },
+      typeof val === "object" &&
+      "connect" in val &&
+      typeof val.connect === "function",
+    { message: "instance must be an MCP Server with connect method" },
   ),
 });
 
@@ -100,10 +100,10 @@ export const RunConfigSchema = z.object({
 });
 
 export const SubagentConfigSchema = z.object({
-  name: z.string().min(1, 'Name must be a non-empty string'),
-  description: z.string().min(1, 'Description must be a non-empty string'),
+  name: z.string().min(1, "Name must be a non-empty string"),
+  description: z.string().min(1, "Description must be a non-empty string"),
   tools: z.array(z.string()).optional(),
-  systemPrompt: z.string().min(1, 'System prompt must be a non-empty string'),
+  systemPrompt: z.string().min(1, "System prompt must be a non-empty string"),
   model: z.string().optional(),
   runConfig: RunConfigSchema.partial().optional(),
   color: z.string().optional(),
@@ -119,11 +119,11 @@ export const TimeoutConfigSchema = z.object({
 
 const QuerySystemPromptPresetSchema = z
   .object({
-    type: z.literal('preset'),
-    preset: z.literal('qwen_code'),
+    type: z.literal("preset"),
+    preset: z.literal("qwen_code"),
     append: z
       .string()
-      .min(1, 'systemPrompt.append must be a non-empty string')
+      .min(1, "systemPrompt.append must be a non-empty string")
       .optional(),
   })
   .strict();
@@ -136,14 +136,14 @@ export const QueryOptionsSchema = z
     env: z.record(z.string(), z.string()).optional(),
     systemPrompt: z
       .union([
-        z.string().min(1, 'systemPrompt must be a non-empty string'),
+        z.string().min(1, "systemPrompt must be a non-empty string"),
         QuerySystemPromptPresetSchema,
       ])
       .optional(),
-    permissionMode: z.enum(['default', 'plan', 'auto-edit', 'yolo']).optional(),
+    permissionMode: z.enum(["default", "plan", "auto-edit", "yolo"]).optional(),
     canUseTool: z
-      .custom<CanUseTool>((val) => typeof val === 'function', {
-        message: 'canUseTool must be a function',
+      .custom<CanUseTool>((val) => typeof val === "function", {
+        message: "canUseTool must be a function",
       })
       .optional(),
     mcpServers: z.record(z.string(), McpServerConfigSchema).optional(),
@@ -152,26 +152,26 @@ export const QueryOptionsSchema = z
     stderr: z
       .custom<
         (message: string) => void
-      >((val) => typeof val === 'function', { message: 'stderr must be a function' })
+      >((val) => typeof val === "function", { message: "stderr must be a function" })
       .optional(),
-    logLevel: z.enum(['debug', 'info', 'warn', 'error']).optional(),
+    logLevel: z.enum(["debug", "info", "warn", "error"]).optional(),
     maxSessionTurns: z.number().optional(),
     coreTools: z.array(z.string()).optional(),
     excludeTools: z.array(z.string()).optional(),
     allowedTools: z.array(z.string()).optional(),
     authType: z
-      .enum(['openai', 'anthropic', 'tram-oauth', 'gemini', 'vertex-ai'])
+      .enum(["openai", "anthropic", "tram-oauth", "gemini", "vertex-ai"])
       .optional(),
     agents: z
       .array(
         z.custom<SubagentConfig>(
           (val) =>
             val &&
-            typeof val === 'object' &&
-            'name' in val &&
-            'description' in val &&
-            'systemPrompt' in val && {
-              message: 'agents must be an array of SubagentConfig objects',
+            typeof val === "object" &&
+            "name" in val &&
+            "description" in val &&
+            "systemPrompt" in val && {
+              message: "agents must be an array of SubagentConfig objects",
             },
         ),
       )

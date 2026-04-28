@@ -31,8 +31,8 @@
  *   - Complex dynamic expressions: `eval "cat $f"`
  */
 
-import nodePath from 'node:path';
-import os from 'node:os';
+import nodePath from "node:path";
+import os from "node:os";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -49,12 +49,12 @@ export interface ShellOperation {
    * Matches the canonical tool names used in the permission system.
    */
   virtualTool:
-    | 'read_file'
-    | 'list_directory'
-    | 'edit'
-    | 'write_file'
-    | 'web_fetch'
-    | 'grep_search';
+    | "read_file"
+    | "list_directory"
+    | "edit"
+    | "write_file"
+    | "web_fetch"
+    | "grep_search";
   /** Absolute file or directory path (for file operations). */
   filePath?: string;
   /** Domain name without port (for web_fetch operations). */
@@ -74,7 +74,7 @@ export interface ShellOperation {
  */
 function tokenize(command: string): string[] {
   const tokens: string[] = [];
-  let current = '';
+  let current = "";
   let inSingle = false;
   let inDouble = false;
   let escaped = false;
@@ -87,7 +87,7 @@ function tokenize(command: string): string[] {
       escaped = false;
       continue;
     }
-    if (ch === '\\' && !inSingle) {
+    if (ch === "\\" && !inSingle) {
       escaped = true;
       continue;
     }
@@ -99,10 +99,10 @@ function tokenize(command: string): string[] {
       inDouble = !inDouble;
       continue;
     }
-    if (!inSingle && !inDouble && (ch === ' ' || ch === '\t')) {
+    if (!inSingle && !inDouble && (ch === " " || ch === "\t")) {
       if (current) {
         tokens.push(current);
-        current = '';
+        current = "";
       }
       continue;
     }
@@ -126,18 +126,18 @@ function tokenize(command: string): string[] {
  */
 function resolvePath(p: string, cwd: string): string {
   // Normalize inputs to forward slashes for consistent cross-platform handling
-  const normP = p.replace(/\\/g, '/');
-  const normCwd = cwd.replace(/\\/g, '/');
+  const normP = p.replace(/\\/g, "/");
+  const normCwd = cwd.replace(/\\/g, "/");
 
-  if (normP === '~' || normP.startsWith('~/')) {
-    const homeDir = os.homedir().replace(/\\/g, '/');
+  if (normP === "~" || normP.startsWith("~/")) {
+    const homeDir = os.homedir().replace(/\\/g, "/");
     const rest = normP.slice(1); // '' or '/some/path'
     // nodePath.posix.join handles the rest correctly:
     // join('C:/Users/foo', '/.ssh/id_rsa') → 'C:/Users/foo/.ssh/id_rsa'
     return rest ? nodePath.posix.join(homeDir, rest) : homeDir;
   }
   // isAbsolute check: handle both POSIX (/foo) and Windows (C:\foo) absolute paths
-  if (nodePath.isAbsolute(normP) || normP.startsWith('/')) {
+  if (nodePath.isAbsolute(normP) || normP.startsWith("/")) {
     return normP;
   }
   return nodePath.posix.join(normCwd, normP);
@@ -150,15 +150,15 @@ function resolvePath(p: string, cwd: string): string {
 function looksLikePath(s: string): boolean {
   if (!s) return false;
   // Shell variable references
-  if (s.startsWith('$')) return false;
+  if (s.startsWith("$")) return false;
   // Flags
-  if (s.startsWith('-')) return false;
+  if (s.startsWith("-")) return false;
   // Pure integers — likely a count/size/mode argument (e.g. -n 10, chmod 755)
   if (/^\d+$/.test(s)) return false;
   // Script-like expressions (awk/sed programs, brace expansions)
-  if (s.includes('{') || s.includes('}')) return false;
+  if (s.includes("{") || s.includes("}")) return false;
   // URLs are handled separately by the web-fetch handlers
-  if (s.includes('://')) return false;
+  if (s.includes("://")) return false;
   return true;
 }
 
@@ -191,7 +191,7 @@ function extractRedirects(tokens: string[], cwd: string): RedirectResult {
     const tok = tokens[i]!;
 
     // ── Separate-token redirect operators ─────────────────────────────────
-    if (tok === '>' || tok === '1>') {
+    if (tok === ">" || tok === "1>") {
       const target = tokens[i + 1];
       if (target && looksLikePath(target)) {
         writeFiles.push(resolvePath(target, cwd));
@@ -199,7 +199,7 @@ function extractRedirects(tokens: string[], cwd: string): RedirectResult {
         toRemove.add(i + 1);
         i++;
       }
-    } else if (tok === '>>' || tok === '1>>') {
+    } else if (tok === ">>" || tok === "1>>") {
       const target = tokens[i + 1];
       if (target && looksLikePath(target)) {
         writeFiles.push(resolvePath(target, cwd));
@@ -207,7 +207,7 @@ function extractRedirects(tokens: string[], cwd: string): RedirectResult {
         toRemove.add(i + 1);
         i++;
       }
-    } else if (tok === '<') {
+    } else if (tok === "<") {
       const target = tokens[i + 1];
       if (target && looksLikePath(target)) {
         readFiles.push(resolvePath(target, cwd));
@@ -215,11 +215,11 @@ function extractRedirects(tokens: string[], cwd: string): RedirectResult {
         toRemove.add(i + 1);
         i++;
       }
-    } else if (tok === '2>' || tok === '2>>' || tok === '&>' || tok === '&>>') {
+    } else if (tok === "2>" || tok === "2>>" || tok === "&>" || tok === "&>>") {
       // stderr / combined redirect — consume target
       const target = tokens[i + 1];
       if (target) {
-        if (target !== '/dev/null' && looksLikePath(target)) {
+        if (target !== "/dev/null" && looksLikePath(target)) {
           writeFiles.push(resolvePath(target, cwd));
         }
         toRemove.add(i);
@@ -233,8 +233,8 @@ function extractRedirects(tokens: string[], cwd: string): RedirectResult {
       if (m) {
         const op = m[1]!;
         const target = m[2]!;
-        if (target !== '/dev/null' && looksLikePath(target)) {
-          if (op === '<') {
+        if (target !== "/dev/null" && looksLikePath(target)) {
+          if (op === "<") {
             readFiles.push(resolvePath(target, cwd));
           } else {
             writeFiles.push(resolvePath(target, cwd));
@@ -275,7 +275,7 @@ function getPositionalArgs(
       skipNext = false;
       continue;
     }
-    if (!arg.startsWith('-')) {
+    if (!arg.startsWith("-")) {
       positional.push(arg);
       continue;
     }
@@ -305,7 +305,7 @@ function readOps(
   return getPositionalArgs(args, flagsWithValue)
     .filter(looksLikePath)
     .map((p) => ({
-      virtualTool: 'read_file' as const,
+      virtualTool: "read_file" as const,
       filePath: resolvePath(p, cwd),
     }));
 }
@@ -319,9 +319,9 @@ function listOps(
 ): ShellOperation[] {
   const dirs = getPositionalArgs(args, flagsWithValue).filter(looksLikePath);
   if (dirs.length === 0)
-    return [{ virtualTool: 'list_directory', filePath: cwd }];
+    return [{ virtualTool: "list_directory", filePath: cwd }];
   return dirs.map((p) => ({
-    virtualTool: 'list_directory' as const,
+    virtualTool: "list_directory" as const,
     filePath: resolvePath(p, cwd),
   }));
 }
@@ -329,9 +329,9 @@ function listOps(
 /** Extract URL domain and return a web_fetch operation, or null on failure. */
 function webOp(url: string): ShellOperation | null {
   try {
-    const normalized = url.includes('://') ? url : `https://${url}`;
+    const normalized = url.includes("://") ? url : `https://${url}`;
     const domain = new URL(normalized).hostname;
-    return domain ? { virtualTool: 'web_fetch', domain } : null;
+    return domain ? { virtualTool: "web_fetch", domain } : null;
   } catch {
     return null;
   }
@@ -352,18 +352,18 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
   xzcat: (a, d) => readOps(a, d),
   gzcat: (a, d) => readOps(a, d),
   lzcat: (a, d) => readOps(a, d),
-  head: (a, d) => readOps(a, d, new Set(['-n', '-c', '--lines', '--bytes'])),
+  head: (a, d) => readOps(a, d, new Set(["-n", "-c", "--lines", "--bytes"])),
   tail: (a, d) =>
     readOps(
       a,
       d,
-      new Set(['-n', '-c', '-s', '--lines', '--bytes', '--sleep-interval']),
+      new Set(["-n", "-c", "-s", "--lines", "--bytes", "--sleep-interval"]),
     ),
   less: (a, d) =>
     readOps(
       a,
       d,
-      new Set(['-b', '-h', '-j', '-p', '-x', '-y', '-z', '--shift', '--tabs']),
+      new Set(["-b", "-h", "-j", "-p", "-x", "-y", "-z", "--shift", "--tabs"]),
     ),
   more: (a, d) => readOps(a, d),
   most: (a, d) => readOps(a, d),
@@ -373,42 +373,42 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-m',
-        '-e',
-        '-F',
-        '-P',
-        '--magic-file',
-        '--exclude',
-        '--extension',
-        '--separator',
+        "-m",
+        "-e",
+        "-F",
+        "-P",
+        "--magic-file",
+        "--exclude",
+        "--extension",
+        "--separator",
       ]),
     ),
   stat: (a, d) =>
     readOps(
       a,
       d,
-      new Set(['-c', '-f', '--format', '--printf', '--file-system']),
+      new Set(["-c", "-f", "--format", "--printf", "--file-system"]),
     ),
   readlink: (a, d) =>
     readOps(
       a,
       d,
       new Set([
-        '-e',
-        '-f',
-        '-m',
-        '-q',
-        '-s',
-        '-v',
-        '-z',
-        '--canonicalize',
-        '--canonicalize-existing',
-        '--canonicalize-missing',
-        '--no-newline',
-        '--quiet',
-        '--silent',
-        '--verbose',
-        '--zero',
+        "-e",
+        "-f",
+        "-m",
+        "-q",
+        "-s",
+        "-v",
+        "-z",
+        "--canonicalize",
+        "--canonicalize-existing",
+        "--canonicalize-missing",
+        "--no-newline",
+        "--quiet",
+        "--silent",
+        "--verbose",
+        "--zero",
       ]),
     ),
   realpath: (a, d) =>
@@ -416,20 +416,20 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '--relative-to',
-        '--relative-base',
-        '-e',
-        '-m',
-        '-s',
-        '-z',
-        '--canonicalize-existing',
-        '--canonicalize-missing',
-        '--logical',
-        '--physical',
-        '--no-symlinks',
-        '--quiet',
-        '--strip',
-        '--zero',
+        "--relative-to",
+        "--relative-base",
+        "-e",
+        "-m",
+        "-s",
+        "-z",
+        "--canonicalize-existing",
+        "--canonicalize-missing",
+        "--logical",
+        "--physical",
+        "--no-symlinks",
+        "--quiet",
+        "--strip",
+        "--zero",
       ]),
     ),
   diff: (a, d) =>
@@ -437,23 +437,23 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-u',
-        '-U',
-        '-c',
-        '-C',
-        '-I',
-        '-x',
-        '-X',
-        '-W',
-        '--label',
-        '--to-file',
-        '--from-file',
-        '--width',
-        '--horizon-lines',
-        '--strip-trailing-cr',
-        '--ignore-matching-lines',
-        '--exclude',
-        '--exclude-from',
+        "-u",
+        "-U",
+        "-c",
+        "-C",
+        "-I",
+        "-x",
+        "-X",
+        "-W",
+        "--label",
+        "--to-file",
+        "--from-file",
+        "--width",
+        "--horizon-lines",
+        "--strip-trailing-cr",
+        "--ignore-matching-lines",
+        "--exclude",
+        "--exclude-from",
       ]),
     ),
   diff3: (a, d) =>
@@ -461,40 +461,40 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-m',
-        '-T',
-        '-A',
-        '-E',
-        '-e',
-        '-x',
-        '-X',
-        '-3',
-        '-i',
-        '--label',
+        "-m",
+        "-T",
+        "-A",
+        "-E",
+        "-e",
+        "-x",
+        "-X",
+        "-3",
+        "-i",
+        "--label",
       ]),
     ),
   sdiff: (a, d) =>
     readOps(
       a,
       d,
-      new Set(['-o', '-w', '-W', '-s', '-i', '-b', '-B', '-E', '-H']),
+      new Set(["-o", "-w", "-W", "-s", "-i", "-b", "-B", "-E", "-H"]),
     ),
   cmp: (a, d) =>
     readOps(
       a,
       d,
       new Set([
-        '-i',
-        '-l',
-        '-n',
-        '-s',
-        '--ignore-initial',
-        '--bytes',
-        '--print-bytes',
-        '--quiet',
-        '--silent',
-        '--verbose',
-        '--zero',
+        "-i",
+        "-l",
+        "-n",
+        "-s",
+        "--ignore-initial",
+        "--bytes",
+        "--print-bytes",
+        "--quiet",
+        "--silent",
+        "--verbose",
+        "--zero",
       ]),
     ),
   md5sum: (a, d) => readOps(a, d),
@@ -511,18 +511,18 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-n',
-        '-t',
-        '-e',
-        '-o',
-        '-a',
-        '--min-len',
-        '--radix',
-        '--encoding',
-        '--file',
-        '--print-file-name',
-        '--data',
-        '--all',
+        "-n",
+        "-t",
+        "-e",
+        "-o",
+        "-a",
+        "--min-len",
+        "--radix",
+        "--encoding",
+        "--file",
+        "--print-file-name",
+        "--data",
+        "--all",
       ]),
     ),
   hexdump: (a, d) =>
@@ -530,18 +530,18 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-n',
-        '-s',
-        '-l',
-        '-C',
-        '-b',
-        '-c',
-        '-d',
-        '-o',
-        '-x',
-        '-e',
-        '-f',
-        '-v',
+        "-n",
+        "-s",
+        "-l",
+        "-C",
+        "-b",
+        "-c",
+        "-d",
+        "-o",
+        "-x",
+        "-e",
+        "-f",
+        "-v",
       ]),
     ),
   xxd: (a, d) =>
@@ -549,19 +549,19 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-l',
-        '-s',
-        '-c',
-        '-g',
-        '-o',
-        '-n',
-        '-b',
-        '-e',
-        '-i',
-        '-p',
-        '-r',
-        '-u',
-        '-E',
+        "-l",
+        "-s",
+        "-c",
+        "-g",
+        "-o",
+        "-n",
+        "-b",
+        "-e",
+        "-i",
+        "-p",
+        "-r",
+        "-u",
+        "-E",
       ]),
     ),
   od: (a, d) =>
@@ -569,21 +569,21 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-N',
-        '-j',
-        '-w',
-        '-s',
-        '-t',
-        '-A',
-        '-v',
-        '--address-radix',
-        '--endian',
-        '--format',
-        '--read-bytes',
-        '--skip-bytes',
-        '--strings',
-        '--output-duplicates',
-        '--width',
+        "-N",
+        "-j",
+        "-w",
+        "-s",
+        "-t",
+        "-A",
+        "-v",
+        "--address-radix",
+        "--endian",
+        "--format",
+        "--read-bytes",
+        "--skip-bytes",
+        "--strings",
+        "--output-duplicates",
+        "--width",
       ]),
     ),
   sort: (a, d) =>
@@ -591,19 +591,19 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-k',
-        '-t',
-        '-T',
-        '--output',
-        '-o',
-        '--field-separator',
-        '--key',
-        '--temporary-directory',
-        '--compress-program',
-        '--batch-size',
-        '--parallel',
-        '--random-source',
-        '--sort',
+        "-k",
+        "-t",
+        "-T",
+        "--output",
+        "-o",
+        "--field-separator",
+        "--key",
+        "--temporary-directory",
+        "--compress-program",
+        "--batch-size",
+        "--parallel",
+        "--random-source",
+        "--sort",
       ]),
     ),
   uniq: (a, d) =>
@@ -611,13 +611,13 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-f',
-        '-s',
-        '-w',
-        '-n',
-        '--skip-fields',
-        '--skip-chars',
-        '--check-chars',
+        "-f",
+        "-s",
+        "-w",
+        "-n",
+        "--skip-fields",
+        "--skip-chars",
+        "--check-chars",
       ]),
     ),
   cut: (a, d) =>
@@ -625,36 +625,36 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-b',
-        '-c',
-        '-d',
-        '-f',
-        '--delimiter',
-        '--fields',
-        '--bytes',
-        '--characters',
-        '--output-delimiter',
+        "-b",
+        "-c",
+        "-d",
+        "-f",
+        "--delimiter",
+        "--fields",
+        "--bytes",
+        "--characters",
+        "--output-delimiter",
       ]),
     ),
   paste: (a, d) =>
-    readOps(a, d, new Set(['-d', '-s', '--delimiters', '--serial'])),
+    readOps(a, d, new Set(["-d", "-s", "--delimiters", "--serial"])),
   join: (a, d) =>
     readOps(
       a,
       d,
       new Set([
-        '-t',
-        '-1',
-        '-2',
-        '-j',
-        '-o',
-        '-a',
-        '-e',
-        '--field',
-        '--header',
-        '--check-order',
-        '--nocheck-order',
-        '--zero-terminated',
+        "-t",
+        "-1",
+        "-2",
+        "-j",
+        "-o",
+        "-a",
+        "-e",
+        "--field",
+        "--header",
+        "--check-order",
+        "--nocheck-order",
+        "--zero-terminated",
       ]),
     ),
   column: (a, d) =>
@@ -662,38 +662,38 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-t',
-        '-s',
-        '-n',
-        '-c',
-        '-o',
-        '-x',
-        '--table',
-        '--separator',
-        '--output-separator',
-        '--fillrows',
+        "-t",
+        "-s",
+        "-n",
+        "-c",
+        "-o",
+        "-x",
+        "--table",
+        "--separator",
+        "--output-separator",
+        "--fillrows",
       ]),
     ),
   fold: (a, d) =>
     readOps(
       a,
       d,
-      new Set(['-w', '-b', '-s', '--width', '--bytes', '--spaces']),
+      new Set(["-w", "-b", "-s", "--width", "--bytes", "--spaces"]),
     ),
-  expand: (a, d) => readOps(a, d, new Set(['-t', '--tabs', '--initial'])),
+  expand: (a, d) => readOps(a, d, new Set(["-t", "--tabs", "--initial"])),
   unexpand: (a, d) =>
-    readOps(a, d, new Set(['-t', '-a', '--tabs', '--all', '--first-only'])),
+    readOps(a, d, new Set(["-t", "-a", "--tabs", "--all", "--first-only"])),
   base64: (a, d) =>
     readOps(
       a,
       d,
-      new Set(['-d', '-i', '-w', '--decode', '--ignore-garbage', '--wrap']),
+      new Set(["-d", "-i", "-w", "--decode", "--ignore-garbage", "--wrap"]),
     ),
   base32: (a, d) =>
     readOps(
       a,
       d,
-      new Set(['-d', '-i', '-w', '--decode', '--ignore-garbage', '--wrap']),
+      new Set(["-d", "-i", "-w", "--decode", "--ignore-garbage", "--wrap"]),
     ),
   tr: (a, d) => readOps(a, d),
 
@@ -702,33 +702,33 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
   grep: (args, cwd) => {
     const hasPatternFlag = args.some(
       (a) =>
-        a === '-e' || a === '-f' || a.startsWith('-e') || a.startsWith('-f'),
+        a === "-e" || a === "-f" || a.startsWith("-e") || a.startsWith("-f"),
     );
     const isRecursive = args.some((a) =>
-      ['-r', '-R', '--recursive', '--dereference-recursive'].includes(a),
+      ["-r", "-R", "--recursive", "--dereference-recursive"].includes(a),
     );
     const flagsWithValue = new Set([
-      '-e',
-      '-f',
-      '-m',
-      '-A',
-      '-B',
-      '-C',
-      '--context',
-      '--include',
-      '--exclude',
-      '--exclude-dir',
-      '--max-count',
-      '--after-context',
-      '--before-context',
-      '-n',
-      '--line-number',
-      '--label',
-      '-D',
-      '--devices',
-      '--max-depth',
-      '-X',
-      '--exclude-from',
+      "-e",
+      "-f",
+      "-m",
+      "-A",
+      "-B",
+      "-C",
+      "--context",
+      "--include",
+      "--exclude",
+      "--exclude-dir",
+      "--max-count",
+      "--after-context",
+      "--before-context",
+      "-n",
+      "--line-number",
+      "--label",
+      "-D",
+      "--devices",
+      "--max-depth",
+      "-X",
+      "--exclude-from",
     ]);
     const positional = getPositionalArgs(args, flagsWithValue).filter(
       looksLikePath,
@@ -736,98 +736,98 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     // If -e/-f was used, there is no positional pattern; all positionals are paths.
     // Otherwise, the first positional is the pattern and the rest are paths.
     const filePaths = hasPatternFlag ? positional : positional.slice(1);
-    const tool: 'read_file' | 'list_directory' = isRecursive
-      ? 'list_directory'
-      : 'read_file';
+    const tool: "read_file" | "list_directory" = isRecursive
+      ? "list_directory"
+      : "read_file";
     return filePaths.map((p) => ({
       virtualTool: tool,
       filePath: resolvePath(p, cwd),
     }));
   },
-  egrep: (a, d) => (COMMANDS['grep'] as CommandHandler)(a, d),
-  fgrep: (a, d) => (COMMANDS['grep'] as CommandHandler)(a, d),
-  zgrep: (a, d) => (COMMANDS['grep'] as CommandHandler)(a, d),
-  bzgrep: (a, d) => (COMMANDS['grep'] as CommandHandler)(a, d),
+  egrep: (a, d) => (COMMANDS["grep"] as CommandHandler)(a, d),
+  fgrep: (a, d) => (COMMANDS["grep"] as CommandHandler)(a, d),
+  zgrep: (a, d) => (COMMANDS["grep"] as CommandHandler)(a, d),
+  bzgrep: (a, d) => (COMMANDS["grep"] as CommandHandler)(a, d),
 
   rg: (args, cwd) => {
     // ripgrep: recursive by default; first non-flag positional = pattern
-    const hasPatternFlag = args.some((a) => a === '-e' || a === '-f');
+    const hasPatternFlag = args.some((a) => a === "-e" || a === "-f");
     const flagsWithValue = new Set([
-      '-e',
-      '-f',
-      '-m',
-      '-A',
-      '-B',
-      '-C',
-      '-t',
-      '-T',
-      '-g',
-      '--iglob',
-      '--glob',
-      '--type',
-      '--type-not',
-      '--max-count',
-      '--max-depth',
-      '--context',
-      '--after-context',
-      '--before-context',
-      '-M',
-      '--max-columns',
-      '--field-match-separator',
+      "-e",
+      "-f",
+      "-m",
+      "-A",
+      "-B",
+      "-C",
+      "-t",
+      "-T",
+      "-g",
+      "--iglob",
+      "--glob",
+      "--type",
+      "--type-not",
+      "--max-count",
+      "--max-depth",
+      "--context",
+      "--after-context",
+      "--before-context",
+      "-M",
+      "--max-columns",
+      "--field-match-separator",
     ]);
     const positional = getPositionalArgs(args, flagsWithValue).filter(
       looksLikePath,
     );
     const filePaths = hasPatternFlag ? positional : positional.slice(1);
     return filePaths.map((p) => ({
-      virtualTool: 'list_directory' as const,
+      virtualTool: "list_directory" as const,
       filePath: resolvePath(p, cwd),
     }));
   },
 
   ag: (args, cwd) => {
-    const hasPatternFlag = args.some((a) => a === '-e');
+    const hasPatternFlag = args.some((a) => a === "-e");
     const flagsWithValue = new Set([
-      '-e',
-      '-m',
-      '-A',
-      '-B',
-      '-C',
-      '--depth',
-      '--file-search-regex',
-      '--file-search-regex-i',
-      '--ignore',
-      '--ignore-dir',
-      '-n',
+      "-e",
+      "-m",
+      "-A",
+      "-B",
+      "-C",
+      "--depth",
+      "--file-search-regex",
+      "--file-search-regex-i",
+      "--ignore",
+      "--ignore-dir",
+      "-n",
     ]);
     const positional = getPositionalArgs(args, flagsWithValue).filter(
       looksLikePath,
     );
     const filePaths = hasPatternFlag ? positional : positional.slice(1);
     return filePaths.map((p) => ({
-      virtualTool: 'list_directory' as const,
+      virtualTool: "list_directory" as const,
       filePath: resolvePath(p, cwd),
     }));
   },
 
   ack: (args, cwd) => {
     const flagsWithValue = new Set([
-      '-m',
-      '-A',
-      '-B',
-      '-C',
-      '--type',
-      '--ignore-dir',
-      '--ignore-file',
-      '--ignore-directory',
-      '-n',
+      "-m",
+      "-A",
+      "-B",
+      "-C",
+      "--type",
+      "--ignore-dir",
+      "--ignore-file",
+      "--ignore-directory",
+      "-n",
     ]);
     // ack: first positional = pattern, rest = paths
     const positional = getPositionalArgs(args, flagsWithValue).filter(
       looksLikePath,
     );
     return positional.slice(1).map((p) => ({
-      virtualTool: 'list_directory' as const,
+      virtualTool: "list_directory" as const,
       filePath: resolvePath(p, cwd),
     }));
   },
@@ -842,14 +842,14 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-L',
-        '--level',
-        '--sort',
-        '--color',
-        '--colour',
-        '--group',
-        '-I',
-        '--ignore-glob',
+        "-L",
+        "--level",
+        "--sort",
+        "--color",
+        "--colour",
+        "--group",
+        "-I",
+        "--ignore-glob",
       ]),
     ),
   eza: (a, d) =>
@@ -857,14 +857,14 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '-L',
-        '--level',
-        '--sort',
-        '--color',
-        '--colour',
-        '--group',
-        '-I',
-        '--ignore-glob',
+        "-L",
+        "--level",
+        "--sort",
+        "--color",
+        "--colour",
+        "--group",
+        "-I",
+        "--ignore-glob",
       ]),
     ),
   lsd: (a, d) =>
@@ -872,18 +872,18 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       a,
       d,
       new Set([
-        '--depth',
-        '--color',
-        '--icon',
-        '--icon-theme',
-        '--date',
-        '--size',
-        '--blocks',
-        '--header',
-        '--classic',
-        '--no-symlink',
-        '--ignore-glob',
-        '-I',
+        "--depth",
+        "--color",
+        "--icon",
+        "--icon-theme",
+        "--date",
+        "--size",
+        "--blocks",
+        "--header",
+        "--classic",
+        "--no-symlink",
+        "--ignore-glob",
+        "-I",
       ]),
     ),
 
@@ -891,67 +891,67 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     // `find [starting-point...] [expression]`
     // Starting points come before any expression keyword beginning with `-` or `(`.
     const expressionKeywords = new Set([
-      '-name',
-      '-iname',
-      '-path',
-      '-ipath',
-      '-regex',
-      '-iregex',
-      '-type',
-      '-maxdepth',
-      '-mindepth',
-      '-newer',
-      '-mtime',
-      '-atime',
-      '-ctime',
-      '-size',
-      '-user',
-      '-group',
-      '-perm',
-      '-links',
-      '-inum',
-      '-exec',
-      '-execdir',
-      '-ok',
-      '-okdir',
-      '-print',
-      '-print0',
-      '-ls',
-      '-delete',
-      '-prune',
-      '-depth',
-      '-empty',
-      '-readable',
-      '-writable',
-      '-executable',
-      '-follow',
-      '-xdev',
-      '-mount',
-      '-true',
-      '-false',
-      '-not',
-      '!',
-      '-a',
-      '-and',
-      '-o',
-      '-or',
+      "-name",
+      "-iname",
+      "-path",
+      "-ipath",
+      "-regex",
+      "-iregex",
+      "-type",
+      "-maxdepth",
+      "-mindepth",
+      "-newer",
+      "-mtime",
+      "-atime",
+      "-ctime",
+      "-size",
+      "-user",
+      "-group",
+      "-perm",
+      "-links",
+      "-inum",
+      "-exec",
+      "-execdir",
+      "-ok",
+      "-okdir",
+      "-print",
+      "-print0",
+      "-ls",
+      "-delete",
+      "-prune",
+      "-depth",
+      "-empty",
+      "-readable",
+      "-writable",
+      "-executable",
+      "-follow",
+      "-xdev",
+      "-mount",
+      "-true",
+      "-false",
+      "-not",
+      "!",
+      "-a",
+      "-and",
+      "-o",
+      "-or",
     ]);
     const startingPoints: string[] = [];
     for (const arg of args) {
       if (
-        arg.startsWith('-') ||
-        arg === '(' ||
-        arg === ')' ||
+        arg.startsWith("-") ||
+        arg === "(" ||
+        arg === ")" ||
         expressionKeywords.has(arg)
       )
         break;
       if (looksLikePath(arg)) startingPoints.push(resolvePath(arg, cwd));
     }
     if (startingPoints.length === 0) {
-      return [{ virtualTool: 'list_directory', filePath: cwd }];
+      return [{ virtualTool: "list_directory", filePath: cwd }];
     }
     return startingPoints.map((p) => ({
-      virtualTool: 'list_directory' as const,
+      virtualTool: "list_directory" as const,
       filePath: p,
     }));
   },
@@ -961,21 +961,21 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       args,
       cwd,
       new Set([
-        '-L',
-        '-P',
-        '-I',
-        '-o',
-        '-n',
-        '-H',
-        '-T',
-        '--charset',
-        '--filelimit',
-        '--matchdirs',
-        '--dirsfirst',
-        '-J',
-        '-X',
-        '--du',
-        '--si',
+        "-L",
+        "-P",
+        "-I",
+        "-o",
+        "-n",
+        "-H",
+        "-T",
+        "--charset",
+        "--filelimit",
+        "--matchdirs",
+        "--dirsfirst",
+        "-J",
+        "-X",
+        "--du",
+        "--si",
       ]),
     ),
 
@@ -984,17 +984,17 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
       args,
       cwd,
       new Set([
-        '-d',
-        '--max-depth',
-        '--threshold',
-        '-t',
-        '--block-size',
-        '-B',
-        '--time-style',
-        '--exclude',
-        '-X',
-        '--time',
-        '--output',
+        "-d",
+        "--max-depth",
+        "--threshold",
+        "-t",
+        "--block-size",
+        "-B",
+        "--time-style",
+        "--exclude",
+        "-X",
+        "--time",
+        "--output",
       ]),
     ),
 
@@ -1003,27 +1003,27 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
   touch: (args, cwd) =>
     getPositionalArgs(
       args,
-      new Set(['-t', '-r', '--reference', '--date', '-d', '--time']),
+      new Set(["-t", "-r", "--reference", "--date", "-d", "--time"]),
     )
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'write_file' as const,
+        virtualTool: "write_file" as const,
         filePath: resolvePath(p, cwd),
       })),
 
   mkdir: (args, cwd) =>
-    getPositionalArgs(args, new Set(['-m', '--mode', '-Z', '--context']))
+    getPositionalArgs(args, new Set(["-m", "--mode", "-Z", "--context"]))
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'write_file' as const,
+        virtualTool: "write_file" as const,
         filePath: resolvePath(p, cwd),
       })),
 
   mkfifo: (args, cwd) =>
-    getPositionalArgs(args, new Set(['-m', '--mode', '-Z']))
+    getPositionalArgs(args, new Set(["-m", "--mode", "-Z"]))
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'write_file' as const,
+        virtualTool: "write_file" as const,
         filePath: resolvePath(p, cwd),
       })),
 
@@ -1031,23 +1031,23 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     getPositionalArgs(args)
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'write_file' as const,
+        virtualTool: "write_file" as const,
         filePath: resolvePath(p, cwd),
       })),
 
   cp: (args, cwd) => {
     const flagsWithValue = new Set([
-      '-S',
-      '--suffix',
-      '-t',
-      '--target-directory',
-      '--backup',
-      '--no-target-directory',
-      '--sparse',
-      '--reflink',
-      '-Z',
-      '--context',
-      '--copy-contents',
+      "-S",
+      "--suffix",
+      "-t",
+      "--target-directory",
+      "--backup",
+      "--no-target-directory",
+      "--sparse",
+      "--reflink",
+      "-Z",
+      "--context",
+      "--copy-contents",
     ]);
     const positional = getPositionalArgs(args, flagsWithValue).filter(
       looksLikePath,
@@ -1056,7 +1056,7 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     if (positional.length === 1) {
       return [
         {
-          virtualTool: 'read_file',
+          virtualTool: "read_file",
           filePath: resolvePath(positional[0]!, cwd),
         },
       ];
@@ -1065,22 +1065,22 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     const dst = positional[positional.length - 1]!;
     return [
       ...srcs.map((p) => ({
-        virtualTool: 'read_file' as const,
+        virtualTool: "read_file" as const,
         filePath: resolvePath(p, cwd),
       })),
-      { virtualTool: 'write_file' as const, filePath: resolvePath(dst, cwd) },
+      { virtualTool: "write_file" as const, filePath: resolvePath(dst, cwd) },
     ];
   },
 
   mv: (args, cwd) => {
     const flagsWithValue = new Set([
-      '-S',
-      '--suffix',
-      '-t',
-      '--target-directory',
-      '--backup',
-      '-Z',
-      '--context',
+      "-S",
+      "--suffix",
+      "-t",
+      "--target-directory",
+      "--backup",
+      "-Z",
+      "--context",
     ]);
     const positional = getPositionalArgs(args, flagsWithValue).filter(
       looksLikePath,
@@ -1091,54 +1091,54 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     return [
       // The source files are edited (moved away — their original location changes)
       ...srcs.map((p) => ({
-        virtualTool: 'edit' as const,
+        virtualTool: "edit" as const,
         filePath: resolvePath(p, cwd),
       })),
-      { virtualTool: 'write_file' as const, filePath: resolvePath(dst, cwd) },
+      { virtualTool: "write_file" as const, filePath: resolvePath(dst, cwd) },
     ];
   },
 
   install: (args, cwd) => {
     const flagsWithValue = new Set([
-      '-m',
-      '--mode',
-      '-o',
-      '--owner',
-      '-g',
-      '--group',
-      '-S',
-      '--suffix',
-      '-t',
-      '--target-directory',
-      '-T',
-      '--no-target-directory',
-      '-Z',
-      '--context',
-      '-C',
-      '--compare',
+      "-m",
+      "--mode",
+      "-o",
+      "--owner",
+      "-g",
+      "--group",
+      "-S",
+      "--suffix",
+      "-t",
+      "--target-directory",
+      "-T",
+      "--no-target-directory",
+      "-Z",
+      "--context",
+      "-C",
+      "--compare",
     ]);
     const positional = getPositionalArgs(args, flagsWithValue).filter(
       looksLikePath,
     );
     if (positional.length < 2) return [];
     const dst = positional[positional.length - 1]!;
-    return [{ virtualTool: 'write_file', filePath: resolvePath(dst, cwd) }];
+    return [{ virtualTool: "write_file", filePath: resolvePath(dst, cwd) }];
   },
 
   dd: (args, cwd) => {
     // dd if=input of=output — arguments are key=value pairs, not flags
     const ops: ShellOperation[] = [];
     for (const arg of args) {
-      if (arg.startsWith('if=')) {
+      if (arg.startsWith("if=")) {
         const p = arg.slice(3);
         if (looksLikePath(p)) {
-          ops.push({ virtualTool: 'read_file', filePath: resolvePath(p, cwd) });
+          ops.push({ virtualTool: "read_file", filePath: resolvePath(p, cwd) });
         }
-      } else if (arg.startsWith('of=')) {
+      } else if (arg.startsWith("of=")) {
         const p = arg.slice(3);
         if (looksLikePath(p)) {
           ops.push({
-            virtualTool: 'write_file',
+            virtualTool: "write_file",
             filePath: resolvePath(p, cwd),
           });
         }
@@ -1151,33 +1151,33 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     // ln [-s] TARGET LINKNAME — the link being created is a write operation
     const positional = getPositionalArgs(
       args,
-      new Set(['-S', '--suffix', '-t', '--target-directory', '-b', '--backup']),
+      new Set(["-S", "--suffix", "-t", "--target-directory", "-b", "--backup"]),
     ).filter(looksLikePath);
     if (positional.length < 2) return [];
     const linkname = positional[positional.length - 1]!;
     return [
-      { virtualTool: 'write_file', filePath: resolvePath(linkname, cwd) },
+      { virtualTool: "write_file", filePath: resolvePath(linkname, cwd) },
     ];
   },
 
   // ── File-edit commands (modify or delete existing content) ────────────────
 
   rm: (args, cwd) =>
-    getPositionalArgs(args, new Set(['--interactive']))
+    getPositionalArgs(args, new Set(["--interactive"]))
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'edit' as const,
+        virtualTool: "edit" as const,
         filePath: resolvePath(p, cwd),
       })),
 
   rmdir: (args, cwd) =>
     getPositionalArgs(
       args,
-      new Set(['--ignore-fail-on-non-empty', '-p', '--parents']),
+      new Set(["--ignore-fail-on-non-empty", "-p", "--parents"]),
     )
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'edit' as const,
+        virtualTool: "edit" as const,
         filePath: resolvePath(p, cwd),
       })),
 
@@ -1185,18 +1185,18 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     getPositionalArgs(args)
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'edit' as const,
+        virtualTool: "edit" as const,
         filePath: resolvePath(p, cwd),
       })),
 
   shred: (args, cwd) =>
     getPositionalArgs(
       args,
-      new Set(['-n', '--iterations', '-s', '--size', '--random-source']),
+      new Set(["-n", "--iterations", "-s", "--size", "--random-source"]),
     )
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'edit' as const,
+        virtualTool: "edit" as const,
         filePath: resolvePath(p, cwd),
       })),
 
@@ -1204,20 +1204,20 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     getPositionalArgs(
       args,
       new Set([
-        '-s',
-        '--size',
-        '-r',
-        '--reference',
-        '-o',
-        '-I',
-        '-c',
-        '--io-blocks',
-        '--no-create',
+        "-s",
+        "--size",
+        "-r",
+        "--reference",
+        "-o",
+        "-I",
+        "-c",
+        "--io-blocks",
+        "--no-create",
       ]),
     )
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'edit' as const,
+        virtualTool: "edit" as const,
         filePath: resolvePath(p, cwd),
       })),
 
@@ -1227,13 +1227,13 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     // filtered by looksLikePath) don't cause the file path to be dropped.
     const positional = getPositionalArgs(
       args,
-      new Set(['-f', '--reference', '--from']),
+      new Set(["-f", "--reference", "--from"]),
     );
     return positional
       .slice(1)
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'edit' as const,
+        virtualTool: "edit" as const,
         filePath: resolvePath(p, cwd),
       }));
   },
@@ -1242,24 +1242,24 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     // chown [opts] OWNER[:GROUP] file... — the owner spec is the first positional.
     const positional = getPositionalArgs(
       args,
-      new Set(['--from', '--reference']),
+      new Set(["--from", "--reference"]),
     );
     return positional
       .slice(1)
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'edit' as const,
+        virtualTool: "edit" as const,
         filePath: resolvePath(p, cwd),
       }));
   },
 
   chgrp: (args, cwd) => {
-    const positional = getPositionalArgs(args, new Set(['--reference']));
+    const positional = getPositionalArgs(args, new Set(["--reference"]));
     return positional
       .slice(1)
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'edit' as const,
+        virtualTool: "edit" as const,
         filePath: resolvePath(p, cwd),
       }));
   },
@@ -1268,7 +1268,7 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     // rename FROM TO file... — skip first two positionals (the from/to patterns)
     const positional = getPositionalArgs(args).filter(looksLikePath);
     return positional.slice(2).map((p) => ({
-      virtualTool: 'edit' as const,
+      virtualTool: "edit" as const,
       filePath: resolvePath(p, cwd),
     }));
   },
@@ -1276,22 +1276,22 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
   sed: (args, cwd) => {
     // sed [-i] SCRIPT file... or sed -e SCRIPT file...
     // With -i: in-place edit (virtualTool = 'edit'); otherwise read (virtualTool = 'read_file')
-    const hasInPlace = args.some((a) => a === '-i' || a.startsWith('-i'));
+    const hasInPlace = args.some((a) => a === "-i" || a.startsWith("-i"));
     const hasExplicitScript = args.some(
-      (a) => a === '-e' || a === '-f' || a.startsWith('-e'),
+      (a) => a === "-e" || a === "-f" || a.startsWith("-e"),
     );
     const flagsWithValue = new Set([
-      '-e',
-      '-f',
-      '--expression',
-      '--file',
+      "-e",
+      "-f",
+      "--expression",
+      "--file",
       // NOTE: -i is intentionally absent — it is an optional-suffix flag
       // (e.g. `-i`, `-i.bak`) and does NOT consume the next token as a value.
-      '-l',
-      '--line-length',
-      '--sandbox',
-      '-s',
-      '--separate',
+      "-l",
+      "--line-length",
+      "--sandbox",
+      "-s",
+      "--separate",
     ]);
     const positional = getPositionalArgs(args, flagsWithValue).filter(
       looksLikePath,
@@ -1299,7 +1299,7 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     // If -e/-f was used, all positionals are file paths.
     // Otherwise, the first positional is the script expression.
     const filePaths = hasExplicitScript ? positional : positional.slice(1);
-    const tool: 'edit' | 'read_file' = hasInPlace ? 'edit' : 'read_file';
+    const tool: "edit" | "read_file" = hasInPlace ? "edit" : "read_file";
     return filePaths.map((p) => ({
       virtualTool: tool,
       filePath: resolvePath(p, cwd),
@@ -1311,40 +1311,40 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
     // The PROGRAM is the first positional — it will contain `{...}` which is
     // filtered out by looksLikePath, so we don't need special handling.
     const flagsWithValue = new Set([
-      '-F',
-      '-f',
-      '-v',
-      '-m',
-      '-W',
-      '-M',
-      '--source',
-      '--include',
-      '--load',
-      '-b',
-      '--characters-as-bytes',
-      '-c',
-      '--traditional',
-      '-d',
-      '-D',
-      '--debug',
-      '-e',
-      '--exec',
-      '-h',
-      '--help',
-      '-i',
-      '--lint',
-      '-o',
-      '-p',
-      '-r',
-      '-s',
-      '-S',
-      '-t',
-      '-V',
+      "-F",
+      "-f",
+      "-v",
+      "-m",
+      "-W",
+      "-M",
+      "--source",
+      "--include",
+      "--load",
+      "-b",
+      "--characters-as-bytes",
+      "-c",
+      "--traditional",
+      "-d",
+      "-D",
+      "--debug",
+      "-e",
+      "--exec",
+      "-h",
+      "--help",
+      "-i",
+      "--lint",
+      "-o",
+      "-p",
+      "-r",
+      "-s",
+      "-S",
+      "-t",
+      "-V",
     ]);
     return getPositionalArgs(args, flagsWithValue)
       .filter(looksLikePath)
       .map((p) => ({
-        virtualTool: 'read_file' as const,
+        virtualTool: "read_file" as const,
         filePath: resolvePath(p, cwd),
       }));
   },
@@ -1353,69 +1353,69 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
 
   curl: (args) => {
     const flagsWithValue = new Set([
-      '-o',
-      '-O',
-      '--output',
-      '-u',
-      '--user',
-      '-A',
-      '--user-agent',
-      '-H',
-      '--header',
-      '-d',
-      '--data',
-      '--data-binary',
-      '--data-raw',
-      '--data-urlencode',
-      '-X',
-      '--request',
-      '-F',
-      '--form',
-      '-e',
-      '--referer',
-      '-T',
-      '--upload-file',
-      '--cacert',
-      '--capath',
-      '--cert',
-      '--key',
-      '--pass',
-      '-m',
-      '--max-time',
-      '--connect-timeout',
-      '-r',
-      '--range',
-      '--limit-rate',
-      '-b',
-      '--cookie',
-      '-c',
-      '--cookie-jar',
-      '--proxy',
-      '-U',
-      '--proxy-user',
-      '-K',
-      '--config',
-      '--netrc-file',
-      '--resolve',
-      '--connect-to',
-      '-w',
-      '--write-out',
-      '-x',
-      '-Y',
-      '--speed-limit',
-      '--speed-time',
-      '-y',
-      '--max-filesize',
-      '--proto',
-      '--proto-redir',
-      '-E',
-      '--cert-type',
-      '--key-type',
+      "-o",
+      "-O",
+      "--output",
+      "-u",
+      "--user",
+      "-A",
+      "--user-agent",
+      "-H",
+      "--header",
+      "-d",
+      "--data",
+      "--data-binary",
+      "--data-raw",
+      "--data-urlencode",
+      "-X",
+      "--request",
+      "-F",
+      "--form",
+      "-e",
+      "--referer",
+      "-T",
+      "--upload-file",
+      "--cacert",
+      "--capath",
+      "--cert",
+      "--key",
+      "--pass",
+      "-m",
+      "--max-time",
+      "--connect-timeout",
+      "-r",
+      "--range",
+      "--limit-rate",
+      "-b",
+      "--cookie",
+      "-c",
+      "--cookie-jar",
+      "--proxy",
+      "-U",
+      "--proxy-user",
+      "-K",
+      "--config",
+      "--netrc-file",
+      "--resolve",
+      "--connect-to",
+      "-w",
+      "--write-out",
+      "-x",
+      "-Y",
+      "--speed-limit",
+      "--speed-time",
+      "-y",
+      "--max-filesize",
+      "--proto",
+      "--proto-redir",
+      "-E",
+      "--cert-type",
+      "--key-type",
     ]);
     return getPositionalArgs(args, flagsWithValue)
       .filter(
         (p) =>
-          p.includes('://') || /^https?:\/\//.test(p) || /^ftp:\/\//.test(p),
+          p.includes("://") || /^https?:\/\//.test(p) || /^ftp:\/\//.test(p),
       )
       .flatMap((url) => {
         const op = webOp(url);
@@ -1425,58 +1425,58 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
 
   wget: (args) => {
     const flagsWithValue = new Set([
-      '-O',
-      '--output-document',
-      '-P',
-      '--directory-prefix',
-      '-o',
-      '--output-file',
-      '-a',
-      '--append-output',
-      '-U',
-      '--user-agent',
-      '--header',
-      '-e',
-      '--execute',
-      '--tries',
-      '-t',
-      '-T',
-      '--timeout',
-      '--wait',
-      '-w',
-      '--quota',
-      '-Q',
-      '--bind-address',
-      '--limit-rate',
-      '--user',
-      '--password',
-      '--proxy-user',
-      '--proxy-password',
-      '-i',
-      '--input-file',
-      '--base',
-      '--config',
-      '--referer',
-      '-D',
-      '--domains',
-      '--exclude-domains',
-      '-I',
-      '--include-directories',
-      '-X',
-      '--exclude-directories',
-      '--regex-type',
-      '-A',
-      '-R',
-      '--accept',
-      '--reject',
-      '--no-check-certificate',
-      '--ca-certificate',
-      '--ca-directory',
-      '--certificate',
-      '--private-key',
+      "-O",
+      "--output-document",
+      "-P",
+      "--directory-prefix",
+      "-o",
+      "--output-file",
+      "-a",
+      "--append-output",
+      "-U",
+      "--user-agent",
+      "--header",
+      "-e",
+      "--execute",
+      "--tries",
+      "-t",
+      "-T",
+      "--timeout",
+      "--wait",
+      "-w",
+      "--quota",
+      "-Q",
+      "--bind-address",
+      "--limit-rate",
+      "--user",
+      "--password",
+      "--proxy-user",
+      "--proxy-password",
+      "-i",
+      "--input-file",
+      "--base",
+      "--config",
+      "--referer",
+      "-D",
+      "--domains",
+      "--exclude-domains",
+      "-I",
+      "--include-directories",
+      "-X",
+      "--exclude-directories",
+      "--regex-type",
+      "-A",
+      "-R",
+      "--accept",
+      "--reject",
+      "--no-check-certificate",
+      "--ca-certificate",
+      "--ca-directory",
+      "--certificate",
+      "--private-key",
     ]);
     return getPositionalArgs(args, flagsWithValue)
-      .filter((p) => p.includes('://') || /^https?:\/\//.test(p))
+      .filter((p) => p.includes("://") || /^https?:\/\//.test(p))
       .flatMap((url) => {
         const op = webOp(url);
         return op ? [op] : [];
@@ -1486,18 +1486,18 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
   fetch: (args) => {
     // BSD `fetch` utility
     const flagsWithValue = new Set([
-      '-o',
-      '-q',
-      '-v',
-      '-a',
-      '-T',
-      '-S',
-      '--no-verify-peer',
-      '--no-verify-hostname',
-      '--ca-cert',
+      "-o",
+      "-q",
+      "-v",
+      "-a",
+      "-T",
+      "-S",
+      "--no-verify-peer",
+      "--no-verify-hostname",
+      "--ca-cert",
     ]);
     return getPositionalArgs(args, flagsWithValue)
-      .filter((p) => p.includes('://'))
+      .filter((p) => p.includes("://"))
       .flatMap((url) => {
         const op = webOp(url);
         return op ? [op] : [];
@@ -1516,31 +1516,31 @@ const COMMANDS: Readonly<Record<string, CommandHandler>> = {
  */
 const PREFIX_COMMAND_FLAGS_WITH_VALUE = new Map<string, ReadonlySet<string>>([
   [
-    'sudo',
+    "sudo",
     new Set([
-      '-u',
-      '--user',
-      '-g',
-      '--group',
-      '-C',
-      '--close-from',
-      '-c',
-      '--login-class',
-      '-D',
-      '--chdir',
-      '-p',
-      '--prompt',
-      '-r',
-      '--role',
-      '-t',
-      '--type',
-      '-T',
-      '--command-timeout',
-      '-U',
-      '--other-user',
+      "-u",
+      "--user",
+      "-g",
+      "--group",
+      "-C",
+      "--close-from",
+      "-c",
+      "--login-class",
+      "-D",
+      "--chdir",
+      "-p",
+      "--prompt",
+      "-r",
+      "--role",
+      "-t",
+      "--type",
+      "-T",
+      "--command-timeout",
+      "-U",
+      "--other-user",
     ]),
   ],
-  ['timeout', new Set(['-s', '--signal', '-k', '--kill-after'])],
+  ["timeout", new Set(["-s", "--signal", "-k", "--kill-after"])],
 ]);
 
 /**
@@ -1553,16 +1553,16 @@ const PREFIX_COMMAND_FLAGS_WITH_VALUE = new Map<string, ReadonlySet<string>>([
  *   `timeout 10 wget http://…` → analyse `wget http://…`
  */
 const PREFIX_COMMANDS = new Set([
-  'sudo',
-  'doas', // OpenBSD sudo alternative
-  'env',
-  'time',
-  'nice',
-  'ionice',
-  'nohup',
-  'timeout',
-  'unbuffer',
-  'stdbuf',
+  "sudo",
+  "doas", // OpenBSD sudo alternative
+  "env",
+  "time",
+  "nice",
+  "ionice",
+  "nohup",
+  "timeout",
+  "unbuffer",
+  "stdbuf",
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1603,18 +1603,18 @@ export function extractShellOperations(
     // Only redirections were present (e.g. `> file` or `< file`)
     return [
       ...redirectReads.map((p) => ({
-        virtualTool: 'read_file' as const,
+        virtualTool: "read_file" as const,
         filePath: p,
       })),
       ...redirectWrites.map((p) => ({
-        virtualTool: 'write_file' as const,
+        virtualTool: "write_file" as const,
         filePath: p,
       })),
     ];
   }
 
   // Skip pure environment variable assignments: `FOO=bar`, `FOO=bar BAR=baz`
-  if (cmdName.includes('=')) return [];
+  if (cmdName.includes("=")) return [];
 
   const ops: ShellOperation[] = [];
 
@@ -1627,18 +1627,18 @@ export function extractShellOperations(
     let startIdx = 1;
     while (startIdx < tokens.length) {
       const t = tokens[startIdx]!;
-      if (t.startsWith('-')) {
+      if (t.startsWith("-")) {
         // Skip the flag itself
         startIdx++;
         // If this flag takes a separate value argument, skip that too
         if (
           flagsWithVal?.has(t) &&
           startIdx < tokens.length &&
-          !tokens[startIdx]!.startsWith('-')
+          !tokens[startIdx]!.startsWith("-")
         ) {
           startIdx++;
         }
-      } else if (t.includes('=')) {
+      } else if (t.includes("=")) {
         // Environment variable assignment: skip
         startIdx++;
       } else {
@@ -1648,7 +1648,7 @@ export function extractShellOperations(
     // `timeout DURATION command` — the duration is a numeric positional that
     // precedes the actual command.  Skip it.
     if (
-      cmdName === 'timeout' &&
+      cmdName === "timeout" &&
       startIdx < tokens.length &&
       /^\d/.test(tokens[startIdx]!)
     ) {
@@ -1656,7 +1656,7 @@ export function extractShellOperations(
     }
     if (startIdx < tokens.length) {
       // Reconstruct the inner command and recurse
-      const innerCommand = tokens.slice(startIdx).join(' ');
+      const innerCommand = tokens.slice(startIdx).join(" ");
       ops.push(...extractShellOperations(innerCommand, cwd));
     }
   } else {
@@ -1672,11 +1672,11 @@ export function extractShellOperations(
   // Append redirect-derived operations
   ops.push(
     ...redirectReads.map((p) => ({
-      virtualTool: 'read_file' as const,
+      virtualTool: "read_file" as const,
       filePath: p,
     })),
     ...redirectWrites.map((p) => ({
-      virtualTool: 'write_file' as const,
+      virtualTool: "write_file" as const,
       filePath: p,
     })),
   );

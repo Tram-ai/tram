@@ -1,40 +1,40 @@
-import { spawn } from 'node:child_process';
-import { mkdir } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import process from 'node:process';
+import { spawn } from "node:child_process";
+import { mkdir } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
 
-const assetsDir = join(dirname(fileURLToPath(import.meta.url)), 'src');
+const assetsDir = join(dirname(fileURLToPath(import.meta.url)), "src");
 
-await mkdir(join(assetsDir, 'generated'), { recursive: true });
+await mkdir(join(assetsDir, "generated"), { recursive: true });
 
 const assetBuilds = [
   {
-    name: 'insight',
-    assetPath: join(assetsDir, 'insight'),
-    buildPath: join(assetsDir, 'insight', 'build.mjs'),
+    name: "insight",
+    assetPath: join(assetsDir, "insight"),
+    buildPath: join(assetsDir, "insight", "build.mjs"),
   },
   {
-    name: 'export-html',
-    assetPath: join(assetsDir, 'export-html'),
-    buildPath: join(assetsDir, 'export-html', 'build.mjs'),
-  },
+    name: "export-html",
+    assetPath: join(assetsDir, "export-html"),
+    buildPath: join(assetsDir, "export-html", "build.mjs"),
+  }
 ];
 
 const runCommand = ({ command, args, cwd, label }) =>
   new Promise((resolve, reject) => {
-    const useShell = process.platform === 'win32';
+    const useShell = process.platform === "win32";
     // On Windows, quote the command path to handle spaces (e.g., "C:\Program Files\nodejs\node.exe")
     const quotedCommand = useShell ? `"${command}"` : command;
 
     const child = spawn(quotedCommand, args, {
       cwd,
-      stdio: 'inherit',
+      stdio: "inherit",
       shell: useShell,
     });
 
-    child.on('error', reject);
-    child.on('exit', (code) => {
+    child.on("error", reject);
+    child.on("exit", (code) => {
       if (code === 0) {
         resolve();
       } else {
@@ -52,6 +52,6 @@ const runBuild = async (asset) => {
   });
 };
 
-console.log('Building web-templates...');
+console.log("Building web-templates...");
 await Promise.all(assetBuilds.map((asset) => runBuild(asset)));
-console.log('Successfully built all web-templates.');
+console.log("Successfully built all web-templates.");

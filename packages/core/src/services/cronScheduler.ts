@@ -3,8 +3,12 @@
  * process exits. Ticks every second, fires callbacks when jobs are due.
  */
 
-import { matches, nextFireTime } from '../utils/cronParser.js';
-import { humanReadableCron } from '../utils/cronDisplay.js';
+import { matches, nextFireTime } from "../utils/cronParser.js";
+import { humanReadableCron } from "../utils/cronDisplay.js";
+import {
+  cronJobActionSummary,
+  type CronJobAction,
+} from "./cronJobActions.js";
 
 const MAX_JOBS = 50;
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
@@ -16,6 +20,7 @@ const MAX_ONESHOT_JITTER_MS = 90 * 1000;
 export interface CronJob {
   id: string;
   cronExpr: string;
+  action: CronJobAction;
   prompt: string;
   recurring: boolean;
   createdAt: number;
@@ -66,7 +71,7 @@ function computeJitter(
   // One-shot: apply up to 90s early jitter only when minute is :00 or :30
   try {
     const fields = cronExpr.trim().split(/\s+/);
-    const minuteField = fields[0] ?? '';
+    const minuteField = fields[0] ?? "";
     const minuteVal = parseInt(minuteField, 10);
     if (!isNaN(minuteVal) && (minuteVal === 0 || minuteVal === 30)) {
       // Negative jitter = fire early
@@ -80,8 +85,8 @@ function computeJitter(
 }
 
 function generateId(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let id = '';
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let id = "";
   for (let i = 0; i < 8; i++) {
     id += chars[Math.floor(Math.random() * chars.length)];
   }
@@ -97,7 +102,11 @@ export class CronScheduler {
    * Creates a new cron job. Returns the created job.
    * Throws if the max job limit is reached.
    */
-  create(cronExpr: string, prompt: string, recurring: boolean): CronJob {
+  create(
+    cronExpr: string,
+    promptOrAction: string | CronJobAction,
+    recurring: boolean,
+  ): CronJob {
     if (this.jobs.size >= MAX_JOBS) {
       throw new Error(
         `Maximum number of cron jobs (${MAX_JOBS}) reached. Delete some jobs first.`,
@@ -107,11 +116,16 @@ export class CronScheduler {
     const id = generateId();
     const now = Date.now();
     const jitterMs = computeJitter(id, cronExpr, recurring);
+    const action: CronJobAction =
+      typeof promptOrAction === "string"
+        ? { type: "prompt", prompt: promptOrAction }
+        : promptOrAction;
 
     const job: CronJob = {
       id,
       cronExpr,
-      prompt,
+      action,
+      prompt: cronJobActionSummary(action),
       recurring,
       createdAt: now,
       expiresAt: recurring ? now + THREE_DAYS_MS : Infinity,
@@ -260,16 +274,16 @@ export class CronScheduler {
 
     const count = this.jobs.size;
     const lines = [
-      `Session ending. ${count} active loop${count === 1 ? '' : 's'} cancelled:`,
+      `Session ending. ${count} active scheduled job${count === 1 ? "" : "s"} cancelled:`,
     ];
     for (const job of this.jobs.values()) {
       const schedule = humanReadableCron(job.cronExpr);
       // Truncate long prompts
       const prompt =
-        job.prompt.length > 60 ? job.prompt.slice(0, 57) + '...' : job.prompt;
+        job.prompt.length > 60 ? job.prompt.slice(0, 57) + "..." : job.prompt;
       lines.push(`  - [${job.id}] ${schedule}: ${prompt}`);
     }
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**

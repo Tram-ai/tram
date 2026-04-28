@@ -7,7 +7,7 @@
 /**
  * Tool call status
  */
-export type ToolCallStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
+export type ToolCallStatus = "pending" | "in_progress" | "completed" | "failed";
 
 /**
  * Tool call location reference
@@ -21,7 +21,7 @@ export interface ToolCallLocation {
  * Tool call content item
  */
 export interface ToolCallContentItem {
-  type: 'content' | 'diff';
+  type: "content" | "diff";
   content?: {
     type: string;
     text?: string;

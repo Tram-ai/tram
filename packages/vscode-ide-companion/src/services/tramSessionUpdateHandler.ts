@@ -13,13 +13,13 @@
 import type {
   SessionNotification,
   AvailableCommand,
-} from '@agentclientprotocol/sdk';
-import type { SessionUpdateMeta } from '../types/acpTypes.js';
-import type { ApprovalModeValue } from '../types/approvalModeValueTypes.js';
+} from "@agentclientprotocol/sdk";
+import type { SessionUpdateMeta } from "../types/acpTypes.js";
+import type { ApprovalModeValue } from "../types/approvalModeValueTypes.js";
 import type {
   TramAgentCallbacks,
   UsageStatsPayload,
-} from '../types/chatTypes.js';
+} from "../types/chatTypes.js";
 
 /**
  * Tram Session Update Handler class
@@ -50,12 +50,12 @@ export class TramSessionUpdateHandler {
     const update = data.update;
     const sessionUpdate = (update as { sessionUpdate?: string }).sessionUpdate;
     console.log(
-      '[SessionUpdateHandler] Processing update type:',
+      "[SessionUpdateHandler] Processing update type:",
       sessionUpdate,
     );
 
     switch (sessionUpdate) {
-      case 'user_message_chunk': {
+      case "user_message_chunk": {
         const text = this.getTextContent(
           (update as { content?: unknown }).content,
         );
@@ -65,7 +65,7 @@ export class TramSessionUpdateHandler {
         break;
       }
 
-      case 'agent_message_chunk': {
+      case "agent_message_chunk": {
         const text = this.getTextContent(
           (update as { content?: unknown }).content,
         );
@@ -78,7 +78,7 @@ export class TramSessionUpdateHandler {
         break;
       }
 
-      case 'agent_thought_chunk': {
+      case "agent_thought_chunk": {
         const text = this.getTextContent(
           (update as { content?: unknown }).content,
         );
@@ -88,7 +88,7 @@ export class TramSessionUpdateHandler {
           } else if (this.callbacks.onStreamChunk) {
             // Fallback to regular stream processing
             console.log(
-              '[SessionUpdateHandler] 🧠 Falling back to onStreamChunk',
+              "[SessionUpdateHandler] 🧠 Falling back to onStreamChunk",
             );
             this.callbacks.onStreamChunk(text);
           }
@@ -99,12 +99,12 @@ export class TramSessionUpdateHandler {
         break;
       }
 
-      case 'tool_call': {
+      case "tool_call": {
         // Handle new tool call
-        if (this.callbacks.onToolCall && 'toolCallId' in update) {
+        if (this.callbacks.onToolCall && "toolCallId" in update) {
           const meta = update._meta as SessionUpdateMeta | undefined;
           const timestamp =
-            typeof meta?.timestamp === 'number' ? meta.timestamp : undefined;
+            typeof meta?.timestamp === "number" ? meta.timestamp : undefined;
           this.callbacks.onToolCall({
             toolCallId: update.toolCallId as string,
             kind: (update.kind as string) || undefined,
@@ -123,11 +123,11 @@ export class TramSessionUpdateHandler {
         break;
       }
 
-      case 'tool_call_update': {
-        if (this.callbacks.onToolCall && 'toolCallId' in update) {
+      case "tool_call_update": {
+        if (this.callbacks.onToolCall && "toolCallId" in update) {
           const meta = update._meta as SessionUpdateMeta | undefined;
           const timestamp =
-            typeof meta?.timestamp === 'number' ? meta.timestamp : undefined;
+            typeof meta?.timestamp === "number" ? meta.timestamp : undefined;
           this.callbacks.onToolCall({
             toolCallId: update.toolCallId as string,
             kind: (update.kind as string) || undefined,
@@ -146,12 +146,12 @@ export class TramSessionUpdateHandler {
         break;
       }
 
-      case 'plan': {
-        if ('entries' in update) {
+      case "plan": {
+        if ("entries" in update) {
           const entries = update.entries as Array<{
             content: string;
-            priority: 'high' | 'medium' | 'low';
-            status: 'pending' | 'in_progress' | 'completed';
+            priority: "high" | "medium" | "low";
+            status: "pending" | "in_progress" | "completed";
           }>;
 
           if (this.callbacks.onPlan) {
@@ -159,20 +159,20 @@ export class TramSessionUpdateHandler {
           } else if (this.callbacks.onStreamChunk) {
             // Fallback to stream processing
             const planText =
-              '\n📋 Plan:\n' +
+              "\n📋 Plan:\n" +
               entries
                 .map(
                   (entry, i) =>
                     `${i + 1}. [${entry.priority}] ${entry.content}`,
                 )
-                .join('\n');
+                .join("\n");
             this.callbacks.onStreamChunk(planText);
           }
         }
         break;
       }
 
-      case 'current_mode_update': {
+      case "current_mode_update": {
         // Notify UI about mode change
         try {
           const modeId = (
@@ -183,14 +183,14 @@ export class TramSessionUpdateHandler {
           }
         } catch (err) {
           console.warn(
-            '[SessionUpdateHandler] Failed to handle mode update',
+            "[SessionUpdateHandler] Failed to handle mode update",
             err,
           );
         }
         break;
       }
 
-      case 'available_commands_update': {
+      case "available_commands_update": {
         // Notify UI about available commands
         try {
           const commands = (
@@ -201,7 +201,7 @@ export class TramSessionUpdateHandler {
           }
         } catch (err) {
           console.warn(
-            '[SessionUpdateHandler] Failed to handle available commands update',
+            "[SessionUpdateHandler] Failed to handle available commands update",
             err,
           );
         }
@@ -209,17 +209,17 @@ export class TramSessionUpdateHandler {
       }
 
       default:
-        console.log('[TramAgentManager] Unhandled session update type');
+        console.log("[TramAgentManager] Unhandled session update type");
         break;
     }
   }
 
   private getTextContent(content: unknown): string | undefined {
-    if (!content || typeof content !== 'object') {
+    if (!content || typeof content !== "object") {
       return undefined;
     }
     const text = (content as { text?: unknown }).text;
-    return typeof text === 'string' ? text : undefined;
+    return typeof text === "string" ? text : undefined;
   }
 
   private emitUsageMeta(meta?: SessionUpdateMeta | null): void {
@@ -232,35 +232,35 @@ export class TramSessionUpdateHandler {
       ? {
           // SDK field names
           inputTokens:
-            (raw['inputTokens'] as number | null | undefined) ??
-            (raw['promptTokens'] as number | null | undefined),
+            (raw["inputTokens"] as number | null | undefined) ??
+            (raw["promptTokens"] as number | null | undefined),
           outputTokens:
-            (raw['outputTokens'] as number | null | undefined) ??
-            (raw['completionTokens'] as number | null | undefined),
+            (raw["outputTokens"] as number | null | undefined) ??
+            (raw["completionTokens"] as number | null | undefined),
           thoughtTokens:
-            (raw['thoughtTokens'] as number | null | undefined) ??
-            (raw['thoughtsTokens'] as number | null | undefined),
-          totalTokens: raw['totalTokens'] as number | null | undefined,
+            (raw["thoughtTokens"] as number | null | undefined) ??
+            (raw["thoughtsTokens"] as number | null | undefined),
+          totalTokens: raw["totalTokens"] as number | null | undefined,
           cachedReadTokens:
-            (raw['cachedReadTokens'] as number | null | undefined) ??
-            (raw['cachedTokens'] as number | null | undefined),
-          cachedWriteTokens: raw['cachedWriteTokens'] as
+            (raw["cachedReadTokens"] as number | null | undefined) ??
+            (raw["cachedTokens"] as number | null | undefined),
+          cachedWriteTokens: raw["cachedWriteTokens"] as
             | number
             | null
             | undefined,
           // Legacy compat
           promptTokens:
-            (raw['promptTokens'] as number | null | undefined) ??
-            (raw['inputTokens'] as number | null | undefined),
+            (raw["promptTokens"] as number | null | undefined) ??
+            (raw["inputTokens"] as number | null | undefined),
           completionTokens:
-            (raw['completionTokens'] as number | null | undefined) ??
-            (raw['outputTokens'] as number | null | undefined),
+            (raw["completionTokens"] as number | null | undefined) ??
+            (raw["outputTokens"] as number | null | undefined),
           thoughtsTokens:
-            (raw['thoughtsTokens'] as number | null | undefined) ??
-            (raw['thoughtTokens'] as number | null | undefined),
+            (raw["thoughtsTokens"] as number | null | undefined) ??
+            (raw["thoughtTokens"] as number | null | undefined),
           cachedTokens:
-            (raw['cachedTokens'] as number | null | undefined) ??
-            (raw['cachedReadTokens'] as number | null | undefined),
+            (raw["cachedTokens"] as number | null | undefined) ??
+            (raw["cachedReadTokens"] as number | null | undefined),
         }
       : undefined;
 

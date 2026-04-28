@@ -11,8 +11,8 @@ import {
   resolveModelConfig,
   type ModelConfigSourcesInput,
   type ProviderModelConfig,
-} from '@tram-ai/tram-core';
-import type { Settings } from '../config/settings.js';
+} from "@tram-ai/tram-core";
+import type { Settings } from "../config/settings.js";
 
 export interface CliGenerationConfigInputs {
   argv: {
@@ -46,30 +46,30 @@ export interface ResolvedCliGenerationConfig {
 }
 
 export function getAuthTypeFromEnv(): AuthType | undefined {
-  if (process.env['TRAM_OAUTH']) {
+  if (process.env["TRAM_OAUTH"]) {
     return AuthType.TRAM_OAUTH;
   }
 
   if (
-    process.env['OPENAI_API_KEY'] &&
-    process.env['OPENAI_MODEL'] &&
-    process.env['OPENAI_BASE_URL']
+    process.env["OPENAI_API_KEY"] &&
+    process.env["OPENAI_MODEL"] &&
+    process.env["OPENAI_BASE_URL"]
   ) {
     return AuthType.USE_OPENAI;
   }
 
-  if (process.env['GEMINI_API_KEY'] && process.env['GEMINI_MODEL']) {
+  if (process.env["GEMINI_API_KEY"] && process.env["GEMINI_MODEL"]) {
     return AuthType.USE_GEMINI;
   }
 
-  if (process.env['GOOGLE_API_KEY'] && process.env['GOOGLE_MODEL']) {
+  if (process.env["GOOGLE_API_KEY"] && process.env["GOOGLE_MODEL"]) {
     return AuthType.USE_VERTEX_AI;
   }
 
   if (
-    process.env['ANTHROPIC_API_KEY'] &&
-    process.env['ANTHROPIC_MODEL'] &&
-    process.env['ANTHROPIC_BASE_URL']
+    process.env["ANTHROPIC_API_KEY"] &&
+    process.env["ANTHROPIC_MODEL"] &&
+    process.env["ANTHROPIC_BASE_URL"]
   ) {
     return AuthType.USE_ANTHROPIC;
   }
@@ -133,7 +133,7 @@ export function resolveCliGenerationConfig(
 
   // Resolve OpenAI logging config (CLI-specific, not part of core resolver)
   const enableOpenAILogging =
-    (typeof argv.openaiLogging === 'undefined'
+    (typeof argv.openaiLogging === "undefined"
       ? settings.model?.enableOpenAILogging
       : argv.openaiLogging) ?? false;
 
@@ -149,9 +149,9 @@ export function resolveCliGenerationConfig(
   };
 
   return {
-    model: resolved.config.model || '',
-    apiKey: resolved.config.apiKey || '',
-    baseUrl: resolved.config.baseUrl || '',
+    model: resolved.config.model || "",
+    apiKey: resolved.config.apiKey || "",
+    baseUrl: resolved.config.baseUrl || "",
     generationConfig,
     sources: resolved.sources,
     warnings: resolved.warnings,

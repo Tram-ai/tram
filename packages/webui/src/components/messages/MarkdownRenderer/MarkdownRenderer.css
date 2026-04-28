@@ -121,12 +121,12 @@
 .markdown-content code {
   font-family: var(
     --app-monospace-font-family,
-    'SF Mono',
+    "SF Mono",
     Monaco,
-    'Cascadia Code',
-    'Roboto Mono',
+    "Cascadia Code",
+    "Roboto Mono",
     Consolas,
-    'Courier New',
+    "Courier New",
     monospace
   );
   font-size: 0.9em;
@@ -147,12 +147,12 @@
   border-radius: var(--corner-radius-small, 4px);
   font-family: var(
     --app-monospace-font-family,
-    'SF Mono',
+    "SF Mono",
     Monaco,
-    'Cascadia Code',
-    'Roboto Mono',
+    "Cascadia Code",
+    "Roboto Mono",
     Consolas,
-    'Courier New',
+    "Courier New",
     monospace
   );
   font-size: 0.9em;
@@ -173,12 +173,12 @@
   padding: 0;
   font-family: var(
     --app-monospace-font-family,
-    'SF Mono',
+    "SF Mono",
     Monaco,
-    'Cascadia Code',
-    'Roboto Mono',
+    "Cascadia Code",
+    "Roboto Mono",
     Consolas,
-    'Courier New',
+    "Courier New",
     monospace
   );
   font-size: 0.95em;

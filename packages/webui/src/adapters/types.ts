@@ -6,17 +6,17 @@
  * Unified message types for adapter layer
  */
 
-import type { ToolCallData } from '../components/toolcalls/shared/types.js';
-import type { FileContext } from '../components/messages/UserMessage.js';
+import type { ToolCallData } from "../components/toolcalls/shared/types.js";
+import type { FileContext } from "../components/messages/UserMessage.js";
 
 /**
  * Unified message type used by all webui components
  */
 export type UnifiedMessageType =
-  | 'user'
-  | 'assistant'
-  | 'tool_call'
-  | 'thinking';
+  | "user"
+  | "assistant"
+  | "tool_call"
+  | "thinking";
 
 /**
  * Unified message format - normalized from ACP or JSONL sources
@@ -51,7 +51,7 @@ export interface JSONLMessage {
   parentUuid?: string | null;
   sessionId?: string;
   timestamp: string; // ISO timestamp string
-  type: 'user' | 'assistant' | 'system' | 'tool_call';
+  type: "user" | "assistant" | "system" | "tool_call";
   message?: {
     role?: string;
     parts?: Array<{ text: string }>; // TRAM format
@@ -65,7 +65,7 @@ export interface JSONLMessage {
  * ACP message format (vscode-ide-companion input)
  */
 export interface ACPMessage {
-  type: 'message' | 'in-progress-tool-call' | 'completed-tool-call';
+  type: "message" | "in-progress-tool-call" | "completed-tool-call";
   data: ACPMessageData | ToolCallData;
 }
 
@@ -73,7 +73,7 @@ export interface ACPMessage {
  * ACP text message data
  */
 export interface ACPMessageData {
-  role: 'user' | 'assistant' | 'thinking';
+  role: "user" | "assistant" | "thinking";
   content: string;
   timestamp?: number;
   fileContext?: FileContext[];

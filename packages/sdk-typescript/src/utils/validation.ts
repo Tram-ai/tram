@@ -23,7 +23,7 @@ export function isValidUUID(value: string): boolean {
  */
 export function validateSessionId(
   sessionId: string,
-  paramName: string = 'sessionId',
+  paramName: string = "sessionId",
 ): void {
   if (!isValidUUID(sessionId)) {
     throw new Error(

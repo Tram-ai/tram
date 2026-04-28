@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { SessionContext } from '../types.js';
-import type { SessionUpdate } from '@agentclientprotocol/sdk';
+import type { SessionContext } from "../types.js";
+import type { SessionUpdate } from "@agentclientprotocol/sdk";
 
 /**
  * Abstract base class for all session event emitters.
@@ -19,10 +19,10 @@ export abstract class BaseEmitter {
    * Returns undefined if the input is not a valid timestamp.
    */
   protected static toEpochMs(ts?: string | number): number | undefined {
-    if (typeof ts === 'number') {
+    if (typeof ts === "number") {
       return Number.isFinite(ts) ? ts : undefined;
     }
-    if (typeof ts === 'string') {
+    if (typeof ts === "string") {
       const ms = new Date(ts).getTime();
       return Number.isFinite(ms) ? ms : undefined;
     }

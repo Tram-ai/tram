@@ -4,135 +4,135 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { type ColorsTheme, Theme } from './theme.js';
-import { lightSemanticColors } from './semantic-tokens.js';
+import { type ColorsTheme, Theme } from "./theme.js";
+import { lightSemanticColors } from "./semantic-tokens.js";
 
 const tramLightColors: ColorsTheme = {
-  type: 'light',
-  Background: '#f8f9fa',
-  Foreground: '#5c6166',
-  LightBlue: '#55b4d4',
-  AccentBlue: '#399ee6',
-  AccentPurple: '#a37acc',
-  AccentCyan: '#4cbf99',
-  AccentGreen: '#86b300',
-  AccentYellow: '#f2ae49',
-  AccentRed: '#f07171',
-  AccentYellowDim: '#8B7000',
-  AccentRedDim: '#993333',
-  DiffAdded: '#86b300',
-  DiffRemoved: '#f07171',
-  Comment: '#ABADB1',
-  Gray: '#CCCFD3',
-  GradientColors: ['#399ee6', '#86b300'],
+  type: "light",
+  Background: "#f8f9fa",
+  Foreground: "#5c6166",
+  LightBlue: "#55b4d4",
+  AccentBlue: "#399ee6",
+  AccentPurple: "#a37acc",
+  AccentCyan: "#4cbf99",
+  AccentGreen: "#86b300",
+  AccentYellow: "#f2ae49",
+  AccentRed: "#f07171",
+  AccentYellowDim: "#8B7000",
+  AccentRedDim: "#993333",
+  DiffAdded: "#86b300",
+  DiffRemoved: "#f07171",
+  Comment: "#ABADB1",
+  Gray: "#CCCFD3",
+  GradientColors: ["#399ee6", "#86b300"],
 };
 
 export const TramLight: Theme = new Theme(
-  'TRAM Light',
-  'light',
+  "TRAM Light",
+  "light",
   {
     hljs: {
-      display: 'block',
-      overflowX: 'auto',
-      padding: '0.5em',
+      display: "block",
+      overflowX: "auto",
+      padding: "0.5em",
       background: tramLightColors.Background,
       color: tramLightColors.Foreground,
     },
-    'hljs-comment': {
+    "hljs-comment": {
       color: tramLightColors.Comment,
-      fontStyle: 'italic',
+      fontStyle: "italic",
     },
-    'hljs-quote': {
+    "hljs-quote": {
       color: tramLightColors.AccentCyan,
-      fontStyle: 'italic',
+      fontStyle: "italic",
     },
-    'hljs-string': {
+    "hljs-string": {
       color: tramLightColors.AccentGreen,
     },
-    'hljs-constant': {
+    "hljs-constant": {
       color: tramLightColors.AccentCyan,
     },
-    'hljs-number': {
+    "hljs-number": {
       color: tramLightColors.AccentPurple,
     },
-    'hljs-keyword': {
+    "hljs-keyword": {
       color: tramLightColors.AccentYellow,
     },
-    'hljs-selector-tag': {
+    "hljs-selector-tag": {
       color: tramLightColors.AccentYellow,
     },
-    'hljs-attribute': {
+    "hljs-attribute": {
       color: tramLightColors.AccentYellow,
     },
-    'hljs-variable': {
+    "hljs-variable": {
       color: tramLightColors.Foreground,
     },
-    'hljs-variable.language': {
+    "hljs-variable.language": {
       color: tramLightColors.LightBlue,
-      fontStyle: 'italic',
+      fontStyle: "italic",
     },
-    'hljs-title': {
+    "hljs-title": {
       color: tramLightColors.AccentBlue,
     },
-    'hljs-section': {
+    "hljs-section": {
       color: tramLightColors.AccentGreen,
-      fontWeight: 'bold',
+      fontWeight: "bold",
     },
-    'hljs-type': {
+    "hljs-type": {
       color: tramLightColors.LightBlue,
     },
-    'hljs-class .hljs-title': {
+    "hljs-class .hljs-title": {
       color: tramLightColors.AccentBlue,
     },
-    'hljs-tag': {
+    "hljs-tag": {
       color: tramLightColors.LightBlue,
     },
-    'hljs-name': {
+    "hljs-name": {
       color: tramLightColors.AccentBlue,
     },
-    'hljs-builtin-name': {
+    "hljs-builtin-name": {
       color: tramLightColors.AccentYellow,
     },
-    'hljs-meta': {
+    "hljs-meta": {
       color: tramLightColors.AccentYellow,
     },
-    'hljs-symbol': {
+    "hljs-symbol": {
       color: tramLightColors.AccentRed,
     },
-    'hljs-bullet': {
+    "hljs-bullet": {
       color: tramLightColors.AccentYellow,
     },
-    'hljs-regexp': {
+    "hljs-regexp": {
       color: tramLightColors.AccentCyan,
     },
-    'hljs-link': {
+    "hljs-link": {
       color: tramLightColors.LightBlue,
     },
-    'hljs-deletion': {
+    "hljs-deletion": {
       color: tramLightColors.AccentRed,
     },
-    'hljs-addition': {
+    "hljs-addition": {
       color: tramLightColors.AccentGreen,
     },
-    'hljs-emphasis': {
-      fontStyle: 'italic',
+    "hljs-emphasis": {
+      fontStyle: "italic",
     },
-    'hljs-strong': {
-      fontWeight: 'bold',
+    "hljs-strong": {
+      fontWeight: "bold",
     },
-    'hljs-literal': {
+    "hljs-literal": {
       color: tramLightColors.AccentCyan,
     },
-    'hljs-built_in': {
+    "hljs-built_in": {
       color: tramLightColors.AccentRed,
     },
-    'hljs-doctag': {
+    "hljs-doctag": {
       color: tramLightColors.AccentRed,
     },
-    'hljs-template-variable': {
+    "hljs-template-variable": {
       color: tramLightColors.AccentCyan,
     },
-    'hljs-selector-id': {
+    "hljs-selector-id": {
       color: tramLightColors.AccentRed,
     },
   },

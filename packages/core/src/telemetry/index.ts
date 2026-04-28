@@ -5,25 +5,25 @@
  */
 
 export enum TelemetryTarget {
-  GCP = 'gcp',
-  LOCAL = 'local',
-  TRAM = 'tram',
+  GCP = "gcp",
+  LOCAL = "local",
+  TRAM = "tram",
 }
 
 const DEFAULT_TELEMETRY_TARGET = TelemetryTarget.LOCAL;
-const DEFAULT_OTLP_ENDPOINT = 'http://localhost:4317';
+const DEFAULT_OTLP_ENDPOINT = "http://localhost:4317";
 
 export { DEFAULT_TELEMETRY_TARGET, DEFAULT_OTLP_ENDPOINT };
 export {
   initializeTelemetry,
   shutdownTelemetry,
   isTelemetrySdkInitialized,
-} from './sdk.js';
+} from "./sdk.js";
 export {
   resolveTelemetrySettings,
   parseBooleanEnvFlag,
   parseTelemetryTargetValue,
-} from './config.js';
+} from "./config.js";
 export {
   logStartSession,
   logUserPrompt,
@@ -52,8 +52,8 @@ export {
   logArenaSessionStarted,
   logArenaAgentCompleted,
   logArenaSessionEnded,
-} from './loggers.js';
-export type { SlashCommandEvent, ChatCompressionEvent } from './types.js';
+} from "./loggers.js";
+export type { SlashCommandEvent, ChatCompressionEvent } from "./types.js";
 export {
   SlashCommandStatus,
   EndSessionEvent,
@@ -78,19 +78,19 @@ export {
   makeArenaSessionStartedEvent,
   makeArenaAgentCompletedEvent,
   makeArenaSessionEndedEvent,
-} from './types.js';
-export { makeSlashCommandEvent, makeChatCompressionEvent } from './types.js';
+} from "./types.js";
+export { makeSlashCommandEvent, makeChatCompressionEvent } from "./types.js";
 export type {
   ArenaSessionStartedEvent,
   ArenaAgentCompletedEvent,
   ArenaSessionEndedEvent,
   ArenaSessionEndedStatus,
   ArenaAgentCompletedStatus,
-} from './types.js';
-export type { TelemetryEvent } from './types.js';
-export { SpanStatusCode, ValueType } from '@opentelemetry/api';
-export { SemanticAttributes } from '@opentelemetry/semantic-conventions';
-export * from './uiTelemetry.js';
+} from "./types.js";
+export type { TelemetryEvent } from "./types.js";
+export { SpanStatusCode, ValueType } from "@opentelemetry/api";
+export { SemanticAttributes } from "@opentelemetry/semantic-conventions";
+export * from "./uiTelemetry.js";
 export {
   // Core metrics functions
   recordToolCallMetrics,
@@ -123,6 +123,6 @@ export {
   ToolExecutionPhase,
   ApiRequestPhase,
   FileOperation,
-} from './metrics.js';
-export { QwenLogger } from './qwen-logger/qwen-logger.js';
-export { sanitizeHookName } from './sanitize.js';
+} from "./metrics.js";
+export { TramLogger } from "./tram-logger/tram-logger.js";
+export { sanitizeHookName } from "./sanitize.js";

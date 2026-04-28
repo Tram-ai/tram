@@ -26,18 +26,21 @@ export function setCoreTranslations(map: TranslationMap): void {
 /**
  * Translate a tool output string with optional parameter substitution.
  * Falls back to the key itself if no translation is found.
- * 
+ *
  * @param key - The translation key (also serves as the English fallback)
  * @param params - Optional parameters for interpolation (e.g., { name: 'myService' })
  * @returns Translated string
  */
-export function tt(key: string, params?: Record<string, string | number | boolean>): string {
+export function tt(
+  key: string,
+  params?: Record<string, string | number | boolean>,
+): string {
   let result = translations[key] ?? key;
 
   if (params) {
     for (const [paramKey, paramValue] of Object.entries(params)) {
       result = result.replace(
-        new RegExp(`\\{\\{${paramKey}\\}\\}`, 'g'),
+        new RegExp(`\\{\\{${paramKey}\\}\\}`, "g"),
         String(paramValue),
       );
     }

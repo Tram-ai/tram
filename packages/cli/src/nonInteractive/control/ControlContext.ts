@@ -13,10 +13,10 @@
  * runtime state (e.g. permission mode, active MCP clients).
  */
 
-import type { Config, MCPServerConfig } from '@tram-ai/tram-core';
-import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import type { StreamJsonOutputAdapter } from '../io/StreamJsonOutputAdapter.js';
-import type { PermissionMode } from '../types.js';
+import type { Config, MCPServerConfig } from "@tram-ai/tram-core";
+import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import type { StreamJsonOutputAdapter } from "../io/StreamJsonOutputAdapter.js";
+import type { PermissionMode } from "../types.js";
 
 /**
  * Control Context interface
@@ -70,7 +70,7 @@ export class ControlContext implements IControlContext {
     this.sessionId = options.sessionId;
     this.abortSignal = options.abortSignal;
     this.debugMode = options.config.getDebugMode();
-    this.permissionMode = options.permissionMode || 'default';
+    this.permissionMode = options.permissionMode || "default";
     this.sdkMcpServers = new Set();
     this.mcpClients = new Map();
     this.inputClosed = false;

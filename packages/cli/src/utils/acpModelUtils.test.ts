@@ -4,39 +4,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
-import { AuthType } from '@tram-ai/tram-core';
+import { describe, it, expect } from "vitest";
+import { AuthType } from "@tram-ai/tram-core";
 import {
   formatAcpModelId,
   parseAcpBaseModelId,
   parseAcpModelOption,
-} from './acpModelUtils.js';
+} from "./acpModelUtils.js";
 
-describe('acpModelUtils', () => {
-  it('formats modelId(authType)', () => {
-    expect(formatAcpModelId('qwen3', AuthType.TRAM_OAUTH)).toBe(
+describe("acpModelUtils", () => {
+  it("formats modelId(authType)", () => {
+    expect(formatAcpModelId("qwen3", AuthType.TRAM_OAUTH)).toBe(
       `qwen3(${AuthType.TRAM_OAUTH})`,
     );
   });
 
-  it('extracts base model id when string ends with parentheses', () => {
-    expect(parseAcpBaseModelId(`qwen3(${AuthType.USE_OPENAI})`)).toBe('qwen3');
+  it("extracts base model id when string ends with parentheses", () => {
+    expect(parseAcpBaseModelId(`qwen3(${AuthType.USE_OPENAI})`)).toBe("qwen3");
   });
 
-  it('does not strip when parentheses are not a trailing suffix', () => {
-    expect(parseAcpBaseModelId('qwen3(x) y')).toBe('qwen3(x) y');
+  it("does not strip when parentheses are not a trailing suffix", () => {
+    expect(parseAcpBaseModelId("qwen3(x) y")).toBe("qwen3(x) y");
   });
 
-  it('parses modelId and validates authType', () => {
+  it("parses modelId and validates authType", () => {
     expect(parseAcpModelOption(` qwen3(${AuthType.USE_OPENAI}) `)).toEqual({
-      modelId: 'qwen3',
+      modelId: "qwen3",
       authType: AuthType.USE_OPENAI,
     });
   });
 
-  it('returns trimmed input as modelId when authType is invalid', () => {
-    expect(parseAcpModelOption('qwen3(not-a-real-auth)')).toEqual({
-      modelId: 'qwen3(not-a-real-auth)',
+  it("returns trimmed input as modelId when authType is invalid", () => {
+    expect(parseAcpModelOption("qwen3(not-a-real-auth)")).toEqual({
+      modelId: "qwen3(not-a-real-auth)",
     });
   });
 });

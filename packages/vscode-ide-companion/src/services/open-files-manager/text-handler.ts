@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type * as vscode from 'vscode';
-import type { File } from '@tram-ai/tram-core/src/ide/types.js';
-import { MAX_FILES, MAX_SELECTED_TEXT_LENGTH } from './constants.js';
+import type * as vscode from "vscode";
+import type { File } from "@tram-ai/tram-core/src/ide/types.js";
+import { MAX_FILES, MAX_SELECTED_TEXT_LENGTH } from "./constants.js";
 import {
   deactivateCurrentActiveFile,
   enforceMaxFiles,
   truncateSelectedText,
-} from './utils.js';
+} from "./utils.js";
 
 export function addOrMoveToFront(openFiles: File[], editor: vscode.TextEditor) {
   // Deactivate previous active file

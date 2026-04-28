@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { homedir } from 'node:os';
-import { writeStderrLine } from '../utils/stdioHelpers.js';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { homedir } from "node:os";
+import { writeStderrLine } from "../utils/stdioHelpers.js";
 import {
   type SupportedLanguage,
   SUPPORTED_LANGUAGES,
   getLanguageNameFromLocale,
-} from './languages.js';
+} from "./languages.js";
 
 export type { SupportedLanguage };
 export { getLanguageNameFromLocale };
 
 // State
-let currentLanguage: SupportedLanguage = 'en';
+let currentLanguage: SupportedLanguage = "en";
 let translations: Record<string, string | string[]> = {};
 
 // Cache
@@ -30,11 +30,11 @@ const loadingPromises: Record<string, Promise<TranslationDict>> = {};
 // Path helpers
 const getBuiltinLocalesDir = (): string => {
   const __filename = fileURLToPath(import.meta.url);
-  return path.join(path.dirname(__filename), 'locales');
+  return path.join(path.dirname(__filename), "locales");
 };
 
 const getUserLocalesDir = (): string =>
-  path.join(homedir(), '.tram', 'locales');
+  path.join(homedir(), ".tram", "locales");
 
 /**
  * Get the path to the user's custom locales directory.
@@ -55,7 +55,7 @@ const getLocalePath = (
 
 // Language detection
 export function detectSystemLanguage(): SupportedLanguage {
-  const envLang = process.env['TRAM_CODE_LANG'] || process.env['LANG'];
+  const envLang = process.env["TRAM_CODE_LANG"] || process.env["LANG"];
   if (envLang) {
     for (const lang of SUPPORTED_LANGUAGES) {
       if (envLang.startsWith(lang.code)) return lang.code;
@@ -71,7 +71,7 @@ export function detectSystemLanguage(): SupportedLanguage {
     // Fallback to default
   }
 
-  return 'en';
+  return "en";
 }
 
 // Translation loading
@@ -113,13 +113,13 @@ async function loadTranslationsAsync(
           const result = module.default || module;
           if (
             result &&
-            typeof result === 'object' &&
+            typeof result === "object" &&
             Object.keys(result).length > 0
           ) {
             translationCache[lang] = result;
             return result;
           } else {
-            throw new Error('Module loaded but result is empty or invalid');
+            throw new Error("Module loaded but result is empty or invalid");
           }
         } catch {
           // For builtin locales, try alternative import method (relative path)
@@ -129,7 +129,7 @@ async function loadTranslationsAsync(
               const result = module.default || module;
               if (
                 result &&
-                typeof result === 'object' &&
+                typeof result === "object" &&
                 Object.keys(result).length > 0
               ) {
                 translationCache[lang] = result;
@@ -192,12 +192,12 @@ function interpolate(
 }
 
 // Language setting helpers
-function resolveLanguage(lang: SupportedLanguage | 'auto'): SupportedLanguage {
-  return lang === 'auto' ? detectSystemLanguage() : lang;
+function resolveLanguage(lang: SupportedLanguage | "auto"): SupportedLanguage {
+  return lang === "auto" ? detectSystemLanguage() : lang;
 }
 
 // Public API
-export function setLanguage(lang: SupportedLanguage | 'auto'): void {
+export function setLanguage(lang: SupportedLanguage | "auto"): void {
   const resolvedLang = resolveLanguage(lang);
   currentLanguage = resolvedLang;
 
@@ -219,7 +219,7 @@ export function setLanguage(lang: SupportedLanguage | 'auto'): void {
 }
 
 export async function setLanguageAsync(
-  lang: SupportedLanguage | 'auto',
+  lang: SupportedLanguage | "auto",
 ): Promise<void> {
   currentLanguage = resolveLanguage(lang);
   translations = await loadTranslationsAsync(currentLanguage);
@@ -250,12 +250,11 @@ export function ta(key: string): string[] {
   return [];
 }
 
-import { setCoreTranslations } from '@tram-ai/tram-core';
-
 export async function initializeI18n(
-  lang?: SupportedLanguage | 'auto',
+  lang?: SupportedLanguage | "auto",
 ): Promise<void> {
-  await setLanguageAsync(lang ?? 'auto');
+  await setLanguageAsync(lang ?? "auto");
+  const { setCoreTranslations } = await import("@tram-ai/tram-core");
   // Sync translations to core package for tool output i18n
   setCoreTranslations(translations as Record<string, string>);
 }

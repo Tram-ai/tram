@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
-import { createDebugLogger } from '@tram-ai/tram-core';
+import { useState, useCallback } from "react";
+import { createDebugLogger } from "@tram-ai/tram-core";
 
 interface Logger {
   getPreviousUserMessages(): Promise<string[]>;
@@ -17,7 +17,7 @@ export interface UseInputHistoryStoreReturn {
   initializeFromLogger: (logger: Logger | null) => Promise<void>;
 }
 
-const debugLogger = createDebugLogger('INPUT_HISTORY_STORE');
+const debugLogger = createDebugLogger("INPUT_HISTORY_STORE");
 
 /**
  * Hook for independently managing input history.
@@ -73,7 +73,7 @@ export function useInputHistoryStore(): UseInputHistoryStoreReturn {
       } catch (error) {
         // Start with empty history even if logger initialization fails
         debugLogger.warn(
-          'Failed to initialize input history from logger:',
+          "Failed to initialize input history from logger:",
           error,
         );
         setPastSessionMessages([]);

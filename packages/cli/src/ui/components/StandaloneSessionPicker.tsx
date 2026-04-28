@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
-import { render, Box, useApp } from 'ink';
-import { getGitBranch, SessionService } from '@tram-ai/tram-core';
-import { KeypressProvider } from '../contexts/KeypressContext.js';
-import { SessionPicker } from './SessionPicker.js';
-import { writeStdoutLine } from '../../utils/stdioHelpers.js';
+import { useState } from "react";
+import { render, Box, useApp } from "ink";
+import { getGitBranch, SessionService } from "@tram-ai/tram-core";
+import { KeypressProvider } from "../contexts/KeypressContext.js";
+import { SessionPicker } from "./SessionPicker.js";
+import { writeStdoutLine } from "../../utils/stdioHelpers.js";
 
 interface StandalonePickerScreenProps {
   sessionService: SessionService;
@@ -58,7 +58,7 @@ function StandalonePickerScreen({
  */
 function clearScreen(): void {
   // Move cursor to home position and clear screen
-  process.stdout.write('\x1b[2J\x1b[H');
+  process.stdout.write("\x1b[2J\x1b[H");
 }
 
 /**
@@ -71,7 +71,7 @@ export async function showResumeSessionPicker(
   const sessionService = new SessionService(cwd);
   const hasSession = await sessionService.loadLastSession();
   if (!hasSession) {
-    writeStdoutLine('No sessions found. Start a new session with `tram`.');
+    writeStdoutLine("No sessions found. Start a new session with `tram`.");
     return undefined;
   }
 
@@ -91,8 +91,8 @@ export async function showResumeSessionPicker(
       <KeypressProvider
         kittyProtocolEnabled={false}
         pasteWorkaround={
-          process.platform === 'win32' ||
-          parseInt(process.versions.node.split('.')[0], 10) < 20
+          process.platform === "win32" ||
+          parseInt(process.versions.node.split(".")[0], 10) < 20
         }
       >
         <StandalonePickerScreen

@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { useTerminalSize } from '../hooks/useTerminalSize.js';
-import { t } from '../../i18n/index.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import { useTerminalSize } from "../hooks/useTerminalSize.js";
+import { t } from "../../i18n/index.js";
 
 interface Shortcut {
   key: string;
@@ -17,31 +17,31 @@ interface Shortcut {
 
 // Platform-specific key mappings
 const getNewlineKey = () =>
-  process.platform === 'win32' ? 'ctrl+enter' : 'ctrl+j';
+  process.platform === "win32" ? "ctrl+enter" : "ctrl+j";
 const getPasteKey = () => {
-  if (process.platform === 'win32') return 'alt+v';
-  return process.platform === 'darwin' ? 'cmd+v' : 'ctrl+v';
+  if (process.platform === "win32") return "alt+v";
+  return process.platform === "darwin" ? "cmd+v" : "ctrl+v";
 };
 const getExternalEditorKey = () =>
-  process.platform === 'darwin' ? 'ctrl+x' : 'ctrl+x';
+  process.platform === "darwin" ? "ctrl+x" : "ctrl+x";
 
 // Generate shortcuts with translations (called at render time)
 const getShortcuts = (): Shortcut[] => [
-  { key: '!', description: t('for shell mode') },
-  { key: '/', description: t('for commands') },
-  { key: '@', description: t('for file paths') },
-  { key: 'esc esc', description: t('to clear input') },
+  { key: "!", description: t("for shell mode") },
+  { key: "/", description: t("for commands") },
+  { key: "@", description: t("for file paths") },
+  { key: "esc esc", description: t("to clear input") },
   {
-    key: process.platform === 'win32' ? 'tab' : 'shift+tab',
-    description: t('to cycle approvals'),
+    key: process.platform === "win32" ? "tab" : "shift+tab",
+    description: t("to cycle approvals"),
   },
-  { key: 'ctrl+c', description: t('to quit') },
-  { key: getNewlineKey(), description: t('for newline') + ' ⏎' },
-  { key: 'ctrl+l', description: t('to clear screen') },
-  { key: 'ctrl+r', description: t('to search history') },
-  { key: 'ctrl+y', description: t('to retry last request') },
-  { key: getPasteKey(), description: t('to paste images') },
-  { key: getExternalEditorKey(), description: t('for external editor') },
+  { key: "ctrl+c", description: t("to quit") },
+  { key: getNewlineKey(), description: t("for newline") + " ⏎" },
+  { key: "ctrl+l", description: t("to clear screen") },
+  { key: "ctrl+r", description: t("to search history") },
+  { key: "ctrl+y", description: t("to retry last request") },
+  { key: getPasteKey(), description: t("to paste images") },
+  { key: getExternalEditorKey(), description: t("for external editor") },
 ];
 
 const ShortcutItem: React.FC<{ shortcut: Shortcut }> = ({ shortcut }) => (

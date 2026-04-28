@@ -9,28 +9,28 @@ import type {
   CommandContext,
   SlashCommandActionReturn,
   MessageActionReturn,
-} from './types.js';
-import { CommandKind } from './types.js';
-import { SettingScope } from '../../config/settings.js';
+} from "./types.js";
+import { CommandKind } from "./types.js";
+import { SettingScope } from "../../config/settings.js";
 import {
   setLanguageAsync,
   getCurrentLanguage,
   type SupportedLanguage,
   t,
-} from '../../i18n/index.js';
+} from "../../i18n/index.js";
 import {
   SUPPORTED_LANGUAGES,
   getSupportedLanguageIds,
-} from '../../i18n/languages.js';
+} from "../../i18n/languages.js";
 import {
   OUTPUT_LANGUAGE_AUTO,
   isAutoLanguage,
   resolveOutputLanguage,
   updateOutputLanguageFile,
-} from '../../utils/languageUtils.js';
-import { createDebugLogger } from '@tram-ai/tram-core';
+} from "../../utils/languageUtils.js";
+import { createDebugLogger } from "@tram-ai/tram-core";
 
-const debugLogger = createDebugLogger('LANGUAGE_COMMAND');
+const debugLogger = createDebugLogger("LANGUAGE_COMMAND");
 
 /**
  * Gets the current LLM output language setting and its resolved value.
@@ -89,9 +89,9 @@ async function setUiLanguage(
 
   if (!services.config) {
     return {
-      type: 'message',
-      messageType: 'error',
-      content: t('Configuration not available.'),
+      type: "message",
+      messageType: "error",
+      content: t("Configuration not available."),
     };
   }
 
@@ -101,9 +101,9 @@ async function setUiLanguage(
   // Persist to settings
   if (services.settings?.setValue) {
     try {
-      services.settings.setValue(SettingScope.User, 'general.language', lang);
+      services.settings.setValue(SettingScope.User, "general.language", lang);
     } catch (error) {
-      debugLogger.warn('Failed to save language setting:', error);
+      debugLogger.warn("Failed to save language setting:", error);
     }
   }
 
@@ -111,9 +111,9 @@ async function setUiLanguage(
   context.ui.reloadCommands();
 
   return {
-    type: 'message',
-    messageType: 'info',
-    content: t('UI language changed to {{lang}}', {
+    type: "message",
+    messageType: "info",
+    content: t("UI language changed to {{lang}}", {
       lang: formatUiLanguageDisplay(lang),
     }),
   };
@@ -141,34 +141,34 @@ async function setOutputLanguage(
       try {
         context.services.settings.setValue(
           SettingScope.User,
-          'general.outputLanguage',
+          "general.outputLanguage",
           settingValue,
         );
       } catch (error) {
-        debugLogger.warn('Failed to save output language setting:', error);
+        debugLogger.warn("Failed to save output language setting:", error);
       }
     }
 
     // Format display message
     const displayLang = isAuto
-      ? `${t('Auto (detect from system)')} → ${resolved}`
+      ? `${t("Auto (detect from system)")} → ${resolved}`
       : resolved;
 
     return {
-      type: 'message',
-      messageType: 'info',
+      type: "message",
+      messageType: "info",
       content: [
-        t('LLM output language set to {{lang}}', { lang: displayLang }),
-        '',
-        t('Please restart the application for the changes to take effect.'),
-      ].join('\n'),
+        t("LLM output language set to {{lang}}", { lang: displayLang }),
+        "",
+        t("Please restart the application for the changes to take effect."),
+      ].join("\n"),
     };
   } catch (error) {
     return {
-      type: 'message',
-      messageType: 'error',
+      type: "message",
+      messageType: "error",
       content: t(
-        'Failed to generate LLM output language rule file: {{error}}',
+        "Failed to generate LLM output language rule file: {{error}}",
         {
           error: error instanceof Error ? error.message : String(error),
         },
@@ -178,9 +178,9 @@ async function setOutputLanguage(
 }
 
 export const languageCommand: SlashCommand = {
-  name: 'language',
+  name: "language",
   get description() {
-    return t('View or change the language setting');
+    return t("View or change the language setting");
   },
   kind: CommandKind.BUILT_IN,
 
@@ -190,9 +190,9 @@ export const languageCommand: SlashCommand = {
   ): Promise<SlashCommandActionReturn> => {
     if (!context.services.config) {
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('Configuration not available.'),
+        type: "message",
+        messageType: "error",
+        content: t("Configuration not available."),
       };
     }
 
@@ -202,9 +202,9 @@ export const languageCommand: SlashCommand = {
     if (trimmedArgs) {
       const [firstArg, ...rest] = trimmedArgs.split(/\s+/);
       const subCommandName = firstArg.toLowerCase();
-      const subArgs = rest.join(' ');
+      const subArgs = rest.join(" ");
 
-      if (subCommandName === 'ui' || subCommandName === 'output') {
+      if (subCommandName === "ui" || subCommandName === "output") {
         const subCommand = languageCommand.subCommands?.find(
           (s) => s.name === subCommandName,
         );
@@ -224,13 +224,13 @@ export const languageCommand: SlashCommand = {
 
       // Unknown argument
       return {
-        type: 'message',
-        messageType: 'error',
+        type: "message",
+        messageType: "error",
         content: [
-          t('Invalid command. Available subcommands:'),
-          `  - /language ui [${getSupportedLanguageIds()}] - ${t('Set UI language')}`,
-          `  - /language output <language> - ${t('Set LLM output language')}`,
-        ].join('\n'),
+          t("Invalid command. Available subcommands:"),
+          `  - /language ui [${getSupportedLanguageIds()}] - ${t("Set UI language")}`,
+          `  - /language output <language> - ${t("Set LLM output language")}`,
+        ].join("\n"),
       };
     }
 
@@ -241,31 +241,31 @@ export const languageCommand: SlashCommand = {
 
     // Format output language display: show "Auto → English" or just "English"
     const outputLangDisplay = isAutoLanguage(outputSetting)
-      ? `${t('Auto (detect from system)')} → ${outputResolved}`
+      ? `${t("Auto (detect from system)")} → ${outputResolved}`
       : outputResolved;
 
     return {
-      type: 'message',
-      messageType: 'info',
+      type: "message",
+      messageType: "info",
       content: [
-        t('Current UI language: {{lang}}', {
+        t("Current UI language: {{lang}}", {
           lang: formatUiLanguageDisplay(currentUiLang as SupportedLanguage),
         }),
-        t('Current LLM output language: {{lang}}', { lang: outputLangDisplay }),
-        '',
-        t('Available subcommands:'),
-        `  /language ui [${getSupportedLanguageIds()}] - ${t('Set UI language')}`,
-        `  /language output <language> - ${t('Set LLM output language')}`,
-      ].join('\n'),
+        t("Current LLM output language: {{lang}}", { lang: outputLangDisplay }),
+        "",
+        t("Available subcommands:"),
+        `  /language ui [${getSupportedLanguageIds()}] - ${t("Set UI language")}`,
+        `  /language output <language> - ${t("Set LLM output language")}`,
+      ].join("\n"),
     };
   },
 
   subCommands: [
     // /language ui subcommand
     {
-      name: 'ui',
+      name: "ui",
       get description() {
-        return t('Set UI language');
+        return t("Set UI language");
       },
       kind: CommandKind.BUILT_IN,
 
@@ -277,34 +277,34 @@ export const languageCommand: SlashCommand = {
 
         if (!trimmedArgs) {
           return {
-            type: 'message',
-            messageType: 'info',
+            type: "message",
+            messageType: "info",
             content: [
-              t('Set UI language'),
-              '',
-              t('Usage: /language ui [{{options}}]', {
+              t("Set UI language"),
+              "",
+              t("Usage: /language ui [{{options}}]", {
                 options: getSupportedLanguageIds(),
               }),
-              '',
-              t('Available options:'),
+              "",
+              t("Available options:"),
               ...SUPPORTED_LANGUAGES.map(
                 (o) => `  - ${o.id}: ${o.nativeName || o.fullName}`,
               ),
-              '',
+              "",
               t(
-                'To request additional UI language packs, please open an issue on GitHub.',
+                "To request additional UI language packs, please open an issue on GitHub.",
               ),
-            ].join('\n'),
+            ].join("\n"),
           };
         }
 
         const targetLang = parseUiLanguageArg(trimmedArgs);
         if (!targetLang) {
           return {
-            type: 'message',
-            messageType: 'error',
-            content: t('Invalid language. Available: {{options}}', {
-              options: getSupportedLanguageIds(','),
+            type: "message",
+            messageType: "error",
+            content: t("Invalid language. Available: {{options}}", {
+              options: getSupportedLanguageIds(","),
             }),
           };
         }
@@ -317,7 +317,7 @@ export const languageCommand: SlashCommand = {
         (lang): SlashCommand => ({
           name: lang.id,
           get description() {
-            return t('Set UI language to {{name}}', {
+            return t("Set UI language to {{name}}", {
               name: lang.nativeName || lang.fullName,
             });
           },
@@ -325,10 +325,10 @@ export const languageCommand: SlashCommand = {
           action: async (context, args) => {
             if (args.trim()) {
               return {
-                type: 'message',
-                messageType: 'error',
+                type: "message",
+                messageType: "error",
                 content: t(
-                  'Language subcommands do not accept additional arguments.',
+                  "Language subcommands do not accept additional arguments.",
                 ),
               };
             }
@@ -340,9 +340,9 @@ export const languageCommand: SlashCommand = {
 
     // /language output subcommand
     {
-      name: 'output',
+      name: "output",
       get description() {
-        return t('Set LLM output language');
+        return t("Set LLM output language");
       },
       kind: CommandKind.BUILT_IN,
 
@@ -354,16 +354,16 @@ export const languageCommand: SlashCommand = {
 
         if (!trimmedArgs) {
           return {
-            type: 'message',
-            messageType: 'info',
+            type: "message",
+            messageType: "info",
             content: [
-              t('Set LLM output language'),
-              '',
-              t('Usage: /language output <language>'),
-              `  ${t('Example: /language output 中文')}`,
-              `  ${t('Example: /language output English')}`,
-              `  ${t('Example: /language output 日本語')}`,
-            ].join('\n'),
+              t("Set LLM output language"),
+              "",
+              t("Usage: /language output <language>"),
+              `  ${t("Example: /language output 中文")}`,
+              `  ${t("Example: /language output English")}`,
+              `  ${t("Example: /language output 日本語")}`,
+            ].join("\n"),
           };
         }
 

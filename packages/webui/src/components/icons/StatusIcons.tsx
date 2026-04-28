@@ -6,8 +6,8 @@
  * Status and state related icons
  */
 
-import type { FC } from 'react';
-import type { IconProps } from './types.js';
+import type { FC } from "react";
+import type { IconProps } from "./types.js";
 
 /**
  * Plan completed icon (14x14)

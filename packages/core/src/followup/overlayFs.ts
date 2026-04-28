@@ -10,11 +10,11 @@
  * or the real filesystem.
  */
 
-import { mkdir, copyFile, rm } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { join, dirname, relative, isAbsolute } from 'node:path';
-import { tmpdir } from 'node:os';
-import { randomUUID } from 'node:crypto';
+import { mkdir, copyFile, rm } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { join, dirname, relative, isAbsolute } from "node:path";
+import { tmpdir } from "node:os";
+import { randomUUID } from "node:crypto";
 
 /**
  * Copy-on-write overlay filesystem for speculation safety.
@@ -27,7 +27,7 @@ export class OverlayFs {
     const id = randomUUID().slice(0, 8);
     this.overlayDir = join(
       tmpdir(),
-      'qwen-speculation',
+      "qwen-speculation",
       String(process.pid),
       id,
     );
@@ -132,7 +132,7 @@ export class OverlayFs {
       ? inputPath
       : join(this.realCwd, inputPath);
     const rel = relative(this.realCwd, abs);
-    if (isAbsolute(rel) || rel.startsWith('..')) {
+    if (isAbsolute(rel) || rel.startsWith("..")) {
       return null;
     }
     return rel;

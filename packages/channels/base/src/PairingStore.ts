@@ -1,10 +1,10 @@
-import * as crypto from 'node:crypto';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import * as os from 'node:os';
+import * as crypto from "node:crypto";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as os from "node:os";
 
 // Alphabet without ambiguous chars: 0/O, 1/I
-const SAFE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const SAFE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const CODE_LENGTH = 8;
 const EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 const MAX_PENDING = 3;
@@ -22,7 +22,7 @@ export class PairingStore {
   private allowlistPath: string;
 
   constructor(channelName: string) {
-    this.dir = path.join(os.homedir(), '.qwen', 'channels');
+    this.dir = path.join(os.homedir(), ".tram", "channels");
     this.pendingPath = path.join(this.dir, `${channelName}-pairing.json`);
     this.allowlistPath = path.join(this.dir, `${channelName}-allowlist.json`);
   }
@@ -105,7 +105,7 @@ export class PairingStore {
 
   private readPending(): PairingRequest[] {
     try {
-      const data = fs.readFileSync(this.pendingPath, 'utf-8');
+      const data = fs.readFileSync(this.pendingPath, "utf-8");
       return JSON.parse(data) as PairingRequest[];
     } catch {
       return [];
@@ -119,7 +119,7 @@ export class PairingStore {
 
   private readAllowlist(): string[] {
     try {
-      const data = fs.readFileSync(this.allowlistPath, 'utf-8');
+      const data = fs.readFileSync(this.allowlistPath, "utf-8");
       return JSON.parse(data) as string[];
     } catch {
       return [];
@@ -133,7 +133,7 @@ export class PairingStore {
 }
 
 function generateCode(): string {
-  let code = '';
+  let code = "";
   for (let i = 0; i < CODE_LENGTH; i++) {
     code += SAFE_ALPHABET[crypto.randomInt(SAFE_ALPHABET.length)];
   }

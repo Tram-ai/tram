@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import { escapeHtml } from '../utils/webviewUtils.js';
+import * as vscode from "vscode";
+import { escapeHtml } from "../utils/webviewUtils.js";
 
 /** Anything that exposes a `.webview` property (WebviewPanel, WebviewView, etc.) */
 type WebviewHost = vscode.Webview | { webview: vscode.Webview };
@@ -21,7 +21,7 @@ export class WebViewContent {
    * never have to worry about passing the wrong wrapper.
    */
   private static getWebview(host: WebviewHost): vscode.Webview {
-    return 'webview' in host && host.webview instanceof Object
+    return "webview" in host && host.webview instanceof Object
       ? (host as { webview: vscode.Webview }).webview
       : (host as vscode.Webview);
   }
@@ -35,7 +35,7 @@ export class WebViewContent {
   static generate(host: WebviewHost, extensionUri: vscode.Uri): string {
     const webview = this.getWebview(host);
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(extensionUri, 'dist', 'webview.js'),
+      vscode.Uri.joinPath(extensionUri, "dist", "webview.js"),
     );
 
     // Convert extension URI for webview access - this allows frontend to construct resource paths
@@ -50,13 +50,8 @@ export class WebViewContent {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; script-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline';">
   <title>TRAM</title>
-=======
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} data:; script-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline';">
-  <title>Qwen Code</title>
->>>>>>> v0.14.5
 </head>
 <body data-extension-uri="${safeExtensionUri}">
   <div id="root"></div>

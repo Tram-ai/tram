@@ -6,17 +6,17 @@
 
 /** @vitest-environment jsdom */
 
-import type React from 'react';
-import { act, createRef } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createRoot, type Root } from 'react-dom/client';
-import { ApprovalMode } from '../../../types/acpTypes.js';
-import type { CompletionItem } from '../../../types/completionItemTypes.js';
-import { InputForm } from './InputForm.js';
+import type React from "react";
+import { act, createRef } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createRoot, type Root } from "react-dom/client";
+import { ApprovalMode } from "../../../types/acpTypes.js";
+import type { CompletionItem } from "../../../types/completionItemTypes.js";
+import { InputForm } from "./InputForm.js";
 
-vi.mock('@qwen-code/webui', async () => {
+vi.mock("@qwen-code/webui", async () => {
   const actual = await vi.importActual(
-    '../../../../../webui/src/components/layout/InputForm.tsx',
+    "../../../../../webui/src/components/layout/InputForm.tsx",
   );
 
   return {
@@ -26,17 +26,17 @@ vi.mock('@qwen-code/webui', async () => {
 });
 
 const completionItem: CompletionItem = {
-  id: 'create-issue',
-  label: '/create-issue',
-  type: 'command',
-  value: 'create-issue',
+  id: "create-issue",
+  label: "/create-issue",
+  type: "command",
+  value: "create-issue",
 };
 
 function renderInputForm(props?: {
   onCompletionSelect?: (item: CompletionItem) => void;
   onCompletionFill?: (item: CompletionItem) => void;
 }) {
-  const container = document.createElement('div');
+  const container = document.createElement("div");
   document.body.appendChild(container);
 
   const root = createRoot(container);
@@ -87,7 +87,7 @@ function renderInputForm(props?: {
   };
 }
 
-describe('InputForm completion keyboard handling', () => {
+describe("InputForm completion keyboard handling", () => {
   let root: Root | null = null;
   let container: HTMLDivElement | null = null;
 
@@ -96,7 +96,7 @@ describe('InputForm completion keyboard handling', () => {
     (
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true;
-    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
       configurable: true,
       value: vi.fn(),
     });
@@ -115,15 +115,15 @@ describe('InputForm completion keyboard handling', () => {
     }
   });
 
-  it('uses onCompletionFill for Tab without triggering onCompletionSelect', () => {
+  it("uses onCompletionFill for Tab without triggering onCompletionSelect", () => {
     const rendered = renderInputForm();
     root = rendered.root;
     container = rendered.container;
 
     act(() => {
       document.dispatchEvent(
-        new KeyboardEvent('keydown', {
-          key: 'Tab',
+        new KeyboardEvent("keydown", {
+          key: "Tab",
           bubbles: true,
           cancelable: true,
         }),
@@ -134,15 +134,15 @@ describe('InputForm completion keyboard handling', () => {
     expect(rendered.onCompletionSelect).not.toHaveBeenCalled();
   });
 
-  it('keeps Enter mapped to onCompletionSelect', () => {
+  it("keeps Enter mapped to onCompletionSelect", () => {
     const rendered = renderInputForm();
     root = rendered.root;
     container = rendered.container;
 
     act(() => {
       document.dispatchEvent(
-        new KeyboardEvent('keydown', {
-          key: 'Enter',
+        new KeyboardEvent("keydown", {
+          key: "Enter",
           bubbles: true,
           cancelable: true,
         }),

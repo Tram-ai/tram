@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { runExitCleanup } from './cleanup.js';
+import { runExitCleanup } from "./cleanup.js";
 
 /**
  * Exit code used to signal that the CLI should be relaunched.

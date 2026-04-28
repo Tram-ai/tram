@@ -1,11 +1,11 @@
-import { Storage } from '../config/storage.js';
-import path from 'node:path';
-import * as os from 'node:os';
+import { Storage } from "../config/storage.js";
+import path from "node:path";
+import * as os from "node:os";
 import {
   EXTENSION_SETTINGS_FILENAME,
   EXTENSIONS_CONFIG_FILENAME,
-} from './variables.js';
-import * as fs from 'node:fs';
+} from "./variables.js";
+import * as fs from "node:fs";
 
 export class ExtensionStorage {
   private readonly extensionName: string;
@@ -36,15 +36,15 @@ export class ExtensionStorage {
       const tmpDir = os.tmpdir();
       if (!tmpDir) {
         // Ultimate fallback when both os.homedir and os.tmpdir are mocked
-        return '/tmp/.tram/extensions';
+        return "/tmp/.tram/extensions";
       }
-      return path.join(tmpDir, '.tram', 'extensions');
+      return path.join(tmpDir, ".tram", "extensions");
     }
     const storage = new Storage(homeDir);
     return storage.getExtensionsDir();
   }
 
   static async createTmpDir(): Promise<string> {
-    return await fs.promises.mkdtemp(path.join(os.tmpdir(), 'tram-extension'));
+    return await fs.promises.mkdtemp(path.join(os.tmpdir(), "tram-extension"));
   }
 }

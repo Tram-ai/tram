@@ -6,15 +6,15 @@
 
 /** @vitest-environment jsdom */
 
-import { describe, it, expect } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { useState } from 'react';
-import { useSlashCompletion } from './useSlashCompletion.js';
-import type { CommandContext, SlashCommand } from '../commands/types.js';
-import { CommandKind } from '../commands/types.js';
-import type { Suggestion } from '../components/SuggestionsDisplay.js';
+import { describe, it, expect } from "vitest";
+import { renderHook, waitFor } from "@testing-library/react";
+import { useState } from "react";
+import { useSlashCompletion } from "./useSlashCompletion.js";
+import type { CommandContext, SlashCommand } from "../commands/types.js";
+import { CommandKind } from "../commands/types.js";
+import type { Suggestion } from "../components/SuggestionsDisplay.js";
 
-type TestSlashCommand = Omit<SlashCommand, 'kind'> & {
+type TestSlashCommand = Omit<SlashCommand, "kind"> & {
   kind?: CommandKind;
   completionPriority?: number;
 };
@@ -55,30 +55,30 @@ function useTestHarnessForSlashCompletion(
   };
 }
 
-describe('useSlashCompletion integration', () => {
+describe("useSlashCompletion integration", () => {
   const mockCommandContext = {} as CommandContext;
 
-  it('prefers higher completionPriority over weaker fuzzy matches', async () => {
+  it("prefers higher completionPriority over weaker fuzzy matches", async () => {
     const slashCommands = [
       createTestCommand({
-        name: 'approval-mode',
-        description: 'View or change the approval mode for tool usage',
+        name: "approval-mode",
+        description: "View or change the approval mode for tool usage",
       }),
       createTestCommand({
-        name: 'model',
-        description: 'Switch the model for this session',
+        name: "model",
+        description: "Switch the model for this session",
         completionPriority: 100,
       }),
       createTestCommand({
-        name: 'memory',
-        description: 'Manage memory',
+        name: "memory",
+        description: "Manage memory",
       }),
     ];
 
     const { result } = renderHook(() =>
       useTestHarnessForSlashCompletion(
         true,
-        '/mo',
+        "/mo",
         slashCommands,
         mockCommandContext,
       ),
@@ -88,19 +88,19 @@ describe('useSlashCompletion integration', () => {
       expect(result.current.suggestions.length).toBeGreaterThan(1);
     });
 
-    expect(result.current.suggestions[0]?.value).toBe('model');
-    expect(result.current.suggestions[1]?.value).toBe('approval-mode');
+    expect(result.current.suggestions[0]?.value).toBe("model");
+    expect(result.current.suggestions[1]?.value).toBe("approval-mode");
   });
 
-  it('prefers higher completionPriority for same-strength prefix matches', async () => {
+  it("prefers higher completionPriority for same-strength prefix matches", async () => {
     const slashCommands = [
       createTestCommand({
-        name: 'memory',
-        description: 'Manage memory',
+        name: "memory",
+        description: "Manage memory",
       }),
       createTestCommand({
-        name: 'model',
-        description: 'Switch the model for this session',
+        name: "model",
+        description: "Switch the model for this session",
         completionPriority: 100,
       }),
     ];
@@ -108,7 +108,7 @@ describe('useSlashCompletion integration', () => {
     const { result } = renderHook(() =>
       useTestHarnessForSlashCompletion(
         true,
-        '/m',
+        "/m",
         slashCommands,
         mockCommandContext,
       ),
@@ -118,7 +118,7 @@ describe('useSlashCompletion integration', () => {
       expect(result.current.suggestions.length).toBeGreaterThan(1);
     });
 
-    expect(result.current.suggestions[0]?.value).toBe('model');
-    expect(result.current.suggestions[1]?.value).toBe('memory');
+    expect(result.current.suggestions[0]?.value).toBe("model");
+    expect(result.current.suggestions[1]?.value).toBe("memory");
   });
 });

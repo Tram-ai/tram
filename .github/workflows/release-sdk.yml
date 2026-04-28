@@ -1,80 +1,80 @@
-name: 'Release SDK'
+name: "Release SDK"
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'The version to release (e.g., v0.1.11). Required for manual patch releases.'
+        description: "The version to release (e.g., v0.1.11). Required for manual patch releases."
         required: false
-        type: 'string'
+        type: "string"
       ref:
-        description: 'The branch or ref (full git sha) to release SDK from.'
+        description: "The branch or ref (full git sha) to release SDK from."
         required: true
-        type: 'string'
-        default: 'main'
+        type: "string"
+        default: "main"
       cli_source:
         description: 'CLI source to bundle. "build_from_source" builds CLI from the current branch/ref (recommended when releasing CLI and SDK together). "npm_latest" uses the latest stable CLI from npm (recommended for standalone SDK releases).'
         required: true
-        type: 'choice'
+        type: "choice"
         options:
-          - 'build_from_source'
-          - 'npm_latest'
-        default: 'npm_latest'
+          - "build_from_source"
+          - "npm_latest"
+        default: "npm_latest"
       dry_run:
-        description: 'Run a dry-run of the release process; no branches, npm packages or GitHub releases will be created.'
+        description: "Run a dry-run of the release process; no branches, npm packages or GitHub releases will be created."
         required: true
-        type: 'boolean'
+        type: "boolean"
         default: true
       create_nightly_release:
-        description: 'Auto apply the nightly release tag, input version is ignored.'
+        description: "Auto apply the nightly release tag, input version is ignored."
         required: false
-        type: 'boolean'
+        type: "boolean"
         default: false
       create_preview_release:
-        description: 'Auto apply the preview release tag, input version is ignored.'
+        description: "Auto apply the preview release tag, input version is ignored."
         required: false
-        type: 'boolean'
+        type: "boolean"
         default: false
       force_skip_tests:
         description: 'Select to skip the "Run Tests" step in testing. Prod releases should run tests'
         required: false
-        type: 'boolean'
+        type: "boolean"
         default: false
 
 concurrency:
-  group: '${{ github.workflow }}'
+  group: "${{ github.workflow }}"
   cancel-in-progress: false
 
 jobs:
   release-sdk:
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     environment:
-      name: 'production-release'
-      url: '${{ github.server_url }}/${{ github.repository }}/releases/tag/sdk-typescript-${{ steps.version.outputs.RELEASE_TAG }}'
+      name: "production-release"
+      url: "${{ github.server_url }}/${{ github.repository }}/releases/tag/sdk-typescript-${{ steps.version.outputs.RELEASE_TAG }}"
     if: |-
       ${{ github.repository == 'QwenLM/qwen-code' }}
     permissions:
-      contents: 'write'
-      packages: 'write'
-      id-token: 'write'
-      issues: 'write'
-      pull-requests: 'write'
+      contents: "write"
+      packages: "write"
+      id-token: "write"
+      issues: "write"
+      pull-requests: "write"
     outputs:
-      RELEASE_TAG: '${{ steps.version.outputs.RELEASE_TAG }}'
+      RELEASE_TAG: "${{ steps.version.outputs.RELEASE_TAG }}"
 
     steps:
-      - name: 'Checkout'
-        uses: 'actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8' # ratchet:actions/checkout@v5
+      - name: "Checkout"
+        uses: "actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8" # ratchet:actions/checkout@v5
         with:
-          ref: '${{ github.event.inputs.ref || github.sha }}'
+          ref: "${{ github.event.inputs.ref || github.sha }}"
           fetch-depth: 0
 
-      - name: 'Set booleans for simplified logic'
+      - name: "Set booleans for simplified logic"
         env:
-          CREATE_NIGHTLY_RELEASE: '${{ github.event.inputs.create_nightly_release }}'
-          CREATE_PREVIEW_RELEASE: '${{ github.event.inputs.create_preview_release }}'
-          DRY_RUN_INPUT: '${{ github.event.inputs.dry_run }}'
-        id: 'vars'
+          CREATE_NIGHTLY_RELEASE: "${{ github.event.inputs.create_nightly_release }}"
+          CREATE_PREVIEW_RELEASE: "${{ github.event.inputs.create_preview_release }}"
+          DRY_RUN_INPUT: "${{ github.event.inputs.dry_run }}"
+        id: "vars"
         run: |-
           is_nightly="false"
           if [[ "${CREATE_NIGHTLY_RELEASE}" == "true" ]]; then
@@ -94,20 +94,20 @@ jobs:
           fi
           echo "is_dry_run=${is_dry_run}" >> "${GITHUB_OUTPUT}"
 
-      - name: 'Setup Node.js'
-        uses: 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' # ratchet:actions/setup-node@v4
+      - name: "Setup Node.js"
+        uses: "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020" # ratchet:actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@qwen-code'
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
+          scope: "@qwen-code"
 
-      - name: 'Install Dependencies'
+      - name: "Install Dependencies"
         run: |-
           npm ci
 
-      - name: 'Get the version'
-        id: 'version'
+      - name: "Get the version"
+        id: "version"
         run: |
           VERSION_ARGS=()
           if [[ "${IS_NIGHTLY}" == "true" ]]; then
@@ -146,23 +146,23 @@ jobs:
           echo "Previous Release:   ${PREVIOUS_RELEASE_TAG}"
           echo "========================================"
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-          IS_NIGHTLY: '${{ steps.vars.outputs.is_nightly }}'
-          IS_PREVIEW: '${{ steps.vars.outputs.is_preview }}'
-          MANUAL_VERSION: '${{ inputs.version }}'
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          IS_NIGHTLY: "${{ steps.vars.outputs.is_nightly }}"
+          IS_PREVIEW: "${{ steps.vars.outputs.is_preview }}"
+          MANUAL_VERSION: "${{ inputs.version }}"
 
-      - name: 'Set SDK package version (local only)'
+      - name: "Set SDK package version (local only)"
         env:
-          RELEASE_VERSION: '${{ steps.version.outputs.RELEASE_VERSION }}'
+          RELEASE_VERSION: "${{ steps.version.outputs.RELEASE_VERSION }}"
         run: |-
           # Ensure the package version matches the computed release version.
           # This is required for nightly/preview because npm does not allow re-publishing the same version.
           npm version -w @qwen-code/sdk "${RELEASE_VERSION}" --no-git-tag-version --allow-same-version
 
-      - name: 'Determine CLI source and version'
-        id: 'cli_source'
+      - name: "Determine CLI source and version"
+        id: "cli_source"
         env:
-          CLI_SOURCE_INPUT: '${{ github.event.inputs.cli_source }}'
+          CLI_SOURCE_INPUT: "${{ github.event.inputs.cli_source }}"
         run: |
           # Determine CLI source mode
           if [[ "${CLI_SOURCE_INPUT}" == "npm_latest" ]]; then
@@ -173,8 +173,8 @@ jobs:
             echo "Building SDK with CLI built from current branch/ref"
           fi
 
-      - name: 'Get CLI version from npm (for npm_latest mode)'
-        id: 'cli_version_npm'
+      - name: "Get CLI version from npm (for npm_latest mode)"
+        id: "cli_version_npm"
         if: "steps.cli_source.outputs.mode == 'npm_latest'"
         run: |
           CLI_VERSION=$(npm view @qwen-code/qwen-code version --tag=latest)
@@ -185,11 +185,11 @@ jobs:
           echo "CLI_VERSION=${CLI_VERSION}" >> "$GITHUB_OUTPUT"
           echo "Using latest stable CLI version from npm: ${CLI_VERSION}"
 
-      - name: 'Download CLI package from npm'
-        id: 'cli_download'
+      - name: "Download CLI package from npm"
+        id: "cli_download"
         if: "steps.cli_source.outputs.mode == 'npm_latest'"
         env:
-          CLI_VERSION: '${{ steps.cli_version_npm.outputs.CLI_VERSION }}'
+          CLI_VERSION: "${{ steps.cli_version_npm.outputs.CLI_VERSION }}"
         run: |
           # Create temp directory for CLI package
           CLI_TMP_DIR=$(mktemp -d)
@@ -207,8 +207,8 @@ jobs:
           echo "CLI package contents:"
           ls -la "${CLI_TMP_DIR}/package/"
 
-      - name: 'Build CLI from source'
-        id: 'cli_build'
+      - name: "Build CLI from source"
+        id: "cli_build"
         if: "steps.cli_source.outputs.mode == 'build_from_source'"
         run: |
           # Build the CLI bundle from source
@@ -229,53 +229,53 @@ jobs:
           echo "CLI bundle built successfully at ./dist/"
           ls -la ./dist/
 
-      - name: 'Configure Git User'
+      - name: "Configure Git User"
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: 'Build SDK'
-        working-directory: 'packages/sdk-typescript'
+      - name: "Build SDK"
+        working-directory: "packages/sdk-typescript"
         run: |-
           npm run build
 
-      - name: 'Bundle CLI into SDK (from npm)'
+      - name: "Bundle CLI into SDK (from npm)"
         if: "steps.cli_source.outputs.mode == 'npm_latest'"
-        working-directory: 'packages/sdk-typescript'
+        working-directory: "packages/sdk-typescript"
         env:
-          CLI_PACKAGE_PATH: '${{ steps.cli_download.outputs.CLI_TMP_DIR }}/package'
+          CLI_PACKAGE_PATH: "${{ steps.cli_download.outputs.CLI_TMP_DIR }}/package"
         run: |
           node scripts/bundle-cli-from-npm.js
 
-      - name: 'Bundle CLI into SDK (from source)'
+      - name: "Bundle CLI into SDK (from source)"
         if: "steps.cli_source.outputs.mode == 'build_from_source'"
-        working-directory: 'packages/sdk-typescript'
+        working-directory: "packages/sdk-typescript"
         run: |
           node scripts/bundle-cli.js
 
-      - name: 'Run Tests'
+      - name: "Run Tests"
         if: |-
           ${{ github.event.inputs.force_skip_tests != 'true' }}
-        working-directory: 'packages/sdk-typescript'
+        working-directory: "packages/sdk-typescript"
         run: |
           npm run test:ci
         env:
-          OPENAI_API_KEY: '${{ secrets.OPENAI_API_KEY }}'
-          OPENAI_BASE_URL: '${{ secrets.OPENAI_BASE_URL }}'
-          OPENAI_MODEL: '${{ secrets.OPENAI_MODEL }}'
+          OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
+          OPENAI_BASE_URL: "${{ secrets.OPENAI_BASE_URL }}"
+          OPENAI_MODEL: "${{ secrets.OPENAI_MODEL }}"
 
-      - name: 'Run SDK Integration Tests'
+      - name: "Run SDK Integration Tests"
         if: |-
           ${{ github.event.inputs.force_skip_tests != 'true' }}
         run: |
           npm run test:integration:sdk:sandbox:none
           npm run test:integration:sdk:sandbox:docker
         env:
-          OPENAI_API_KEY: '${{ secrets.OPENAI_API_KEY }}'
-          OPENAI_BASE_URL: '${{ secrets.OPENAI_BASE_URL }}'
-          OPENAI_MODEL: '${{ secrets.OPENAI_MODEL }}'
+          OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
+          OPENAI_BASE_URL: "${{ secrets.OPENAI_BASE_URL }}"
+          OPENAI_MODEL: "${{ secrets.OPENAI_MODEL }}"
 
-      - name: 'Record bundled CLI version'
+      - name: "Record bundled CLI version"
         env:
           CLI_VERSION: "${{ steps.cli_source.outputs.mode == 'npm_latest' && steps.cli_version_npm.outputs.CLI_VERSION || steps.cli_build.outputs.CLI_VERSION }}"
         run: |
@@ -283,30 +283,30 @@ jobs:
           echo "${CLI_VERSION}" > packages/sdk-typescript/dist/BUNDLED_CLI_VERSION
           echo "Bundled CLI version: ${CLI_VERSION}"
 
-      - name: 'Publish @qwen-code/sdk'
-        working-directory: 'packages/sdk-typescript'
+      - name: "Publish @qwen-code/sdk"
+        working-directory: "packages/sdk-typescript"
         run: |-
           npm publish --access public --tag=${{ steps.version.outputs.NPM_TAG }} ${{ steps.vars.outputs.is_dry_run == 'true' && '--dry-run' || '' }}
         env:
-          NODE_AUTH_TOKEN: '${{ secrets.NPM_TOKEN }}'
+          NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}"
 
-      - name: 'Create and switch to a release branch'
+      - name: "Create and switch to a release branch"
         if: |-
           ${{ steps.vars.outputs.is_dry_run == 'false' && steps.vars.outputs.is_nightly == 'false' && steps.vars.outputs.is_preview == 'false' }}
-        id: 'release_branch'
+        id: "release_branch"
         env:
-          RELEASE_TAG: '${{ steps.version.outputs.RELEASE_TAG }}'
+          RELEASE_TAG: "${{ steps.version.outputs.RELEASE_TAG }}"
         run: |-
           BRANCH_NAME="release/sdk-typescript/${RELEASE_TAG}"
           git switch -c "${BRANCH_NAME}"
           echo "BRANCH_NAME=${BRANCH_NAME}" >> "${GITHUB_OUTPUT}"
 
-      - name: 'Commit and Push package version (stable only)'
+      - name: "Commit and Push package version (stable only)"
         if: |-
           ${{ steps.vars.outputs.is_dry_run == 'false' && steps.vars.outputs.is_nightly == 'false' && steps.vars.outputs.is_preview == 'false' }}
         env:
-          BRANCH_NAME: '${{ steps.release_branch.outputs.BRANCH_NAME }}'
-          RELEASE_TAG: '${{ steps.version.outputs.RELEASE_TAG }}'
+          BRANCH_NAME: "${{ steps.release_branch.outputs.BRANCH_NAME }}"
+          RELEASE_TAG: "${{ steps.version.outputs.RELEASE_TAG }}"
         run: |-
           # Only persist version bumps after a successful publish.
           git add packages/sdk-typescript/package.json package-lock.json
@@ -318,19 +318,19 @@ jobs:
           echo "Pushing release branch to remote..."
           git push --set-upstream origin "${BRANCH_NAME}" --follow-tags
 
-      - name: 'Create GitHub Release and Tag'
+      - name: "Create GitHub Release and Tag"
         if: |-
           ${{ steps.vars.outputs.is_dry_run == 'false' }}
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-          RELEASE_BRANCH: '${{ steps.release_branch.outputs.BRANCH_NAME }}'
-          RELEASE_TAG: '${{ steps.version.outputs.RELEASE_TAG }}'
-          PREVIOUS_RELEASE_TAG: '${{ steps.version.outputs.PREVIOUS_RELEASE_TAG }}'
-          IS_NIGHTLY: '${{ steps.vars.outputs.is_nightly }}'
-          IS_PREVIEW: '${{ steps.vars.outputs.is_preview }}'
-          REF: '${{ github.event.inputs.ref || github.sha }}'
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          RELEASE_BRANCH: "${{ steps.release_branch.outputs.BRANCH_NAME }}"
+          RELEASE_TAG: "${{ steps.version.outputs.RELEASE_TAG }}"
+          PREVIOUS_RELEASE_TAG: "${{ steps.version.outputs.PREVIOUS_RELEASE_TAG }}"
+          IS_NIGHTLY: "${{ steps.vars.outputs.is_nightly }}"
+          IS_PREVIEW: "${{ steps.vars.outputs.is_preview }}"
+          REF: "${{ github.event.inputs.ref || github.sha }}"
           CLI_VERSION: "${{ steps.cli_source.outputs.mode == 'npm_latest' && steps.cli_version_npm.outputs.CLI_VERSION || steps.cli_build.outputs.CLI_VERSION }}"
-          CLI_SOURCE_MODE: '${{ steps.cli_source.outputs.mode }}'
+          CLI_SOURCE_MODE: "${{ steps.cli_source.outputs.mode }}"
         run: |-
           # For stable releases, use the release branch; for nightly/preview, use the current ref
           if [[ "${IS_NIGHTLY}" == "true" || "${IS_PREVIEW}" == "true" ]]; then
@@ -375,14 +375,14 @@ jobs:
           # Cleanup
           rm -f "${NOTES_FILE}"
 
-      - name: 'Create PR to merge release branch into main'
+      - name: "Create PR to merge release branch into main"
         if: |-
           ${{ steps.vars.outputs.is_dry_run == 'false' && steps.vars.outputs.is_nightly == 'false' && steps.vars.outputs.is_preview == 'false' }}
-        id: 'pr'
+        id: "pr"
         env:
-          GITHUB_TOKEN: '${{ secrets.CI_BOT_PAT }}'
-          RELEASE_BRANCH: '${{ steps.release_branch.outputs.BRANCH_NAME }}'
-          RELEASE_TAG: '${{ steps.version.outputs.RELEASE_TAG }}'
+          GITHUB_TOKEN: "${{ secrets.CI_BOT_PAT }}"
+          RELEASE_BRANCH: "${{ steps.release_branch.outputs.BRANCH_NAME }}"
+          RELEASE_TAG: "${{ steps.version.outputs.RELEASE_TAG }}"
         run: |-
           set -euo pipefail
 
@@ -397,23 +397,23 @@ jobs:
 
           echo "PR_URL=${pr_url}" >> "${GITHUB_OUTPUT}"
 
-      - name: 'Enable auto-merge for release PR'
+      - name: "Enable auto-merge for release PR"
         if: |-
           ${{ steps.vars.outputs.is_dry_run == 'false' && steps.vars.outputs.is_nightly == 'false' && steps.vars.outputs.is_preview == 'false' }}
         env:
-          GITHUB_TOKEN: '${{ secrets.CI_BOT_PAT }}'
-          PR_URL: '${{ steps.pr.outputs.PR_URL }}'
+          GITHUB_TOKEN: "${{ secrets.CI_BOT_PAT }}"
+          PR_URL: "${{ steps.pr.outputs.PR_URL }}"
         run: |-
           set -euo pipefail
           gh pr merge "${PR_URL}" --merge --auto --delete-branch
 
-      - name: 'Create Issue on Failure'
+      - name: "Create Issue on Failure"
         if: |-
           ${{ failure() && steps.vars.outputs.is_dry_run == 'false' }}
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           RELEASE_TAG: "${{ steps.version.outputs.RELEASE_TAG || 'N/A' }}"
-          DETAILS_URL: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          DETAILS_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         run: |-
           gh issue create \
             --title "SDK Release Failed for ${RELEASE_TAG} on $(date +'%Y-%m-%d')" \

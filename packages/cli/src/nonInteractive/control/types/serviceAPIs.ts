@@ -12,9 +12,9 @@
  * for internal CLI code (nonInteractiveCli, session managers, etc.).
  */
 
-import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import type { MCPServerConfig } from '@tram-ai/tram-core';
-import type { PermissionSuggestion } from '../../types.js';
+import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import type { MCPServerConfig } from "@tram-ai/tram-core";
+import type { PermissionSuggestion } from "../../types.js";
 
 /**
  * Permission Service API

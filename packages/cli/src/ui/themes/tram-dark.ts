@@ -4,110 +4,110 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { type ColorsTheme, Theme } from './theme.js';
-import { darkSemanticColors } from './semantic-tokens.js';
+import { type ColorsTheme, Theme } from "./theme.js";
+import { darkSemanticColors } from "./semantic-tokens.js";
 
 const tramDarkColors: ColorsTheme = {
-  type: 'dark',
-  Background: '#0b0e14',
-  Foreground: '#bfbdb6',
-  LightBlue: '#59C2FF',
-  AccentBlue: '#39BAE6',
-  AccentPurple: '#D2A6FF',
-  AccentCyan: '#95E6CB',
-  AccentGreen: '#AAD94C',
-  AccentYellow: '#FFD700',
-  AccentRed: '#F26D78',
-  AccentYellowDim: '#8B7530',
-  AccentRedDim: '#8B3A4A',
-  DiffAdded: '#AAD94C',
-  DiffRemoved: '#F26D78',
-  Comment: '#646A71',
-  Gray: '#3D4149',
-  GradientColors: ['#FFD700', '#da7959'],
+  type: "dark",
+  Background: "#0b0e14",
+  Foreground: "#bfbdb6",
+  LightBlue: "#59C2FF",
+  AccentBlue: "#39BAE6",
+  AccentPurple: "#D2A6FF",
+  AccentCyan: "#95E6CB",
+  AccentGreen: "#AAD94C",
+  AccentYellow: "#FFD700",
+  AccentRed: "#F26D78",
+  AccentYellowDim: "#8B7530",
+  AccentRedDim: "#8B3A4A",
+  DiffAdded: "#AAD94C",
+  DiffRemoved: "#F26D78",
+  Comment: "#646A71",
+  Gray: "#3D4149",
+  GradientColors: ["#FFD700", "#da7959"],
 };
 
 export const TramDark: Theme = new Theme(
-  'TRAM Dark',
-  'dark',
+  "TRAM Dark",
+  "dark",
   {
     hljs: {
-      display: 'block',
-      overflowX: 'auto',
-      padding: '0.5em',
+      display: "block",
+      overflowX: "auto",
+      padding: "0.5em",
       background: tramDarkColors.Background,
       color: tramDarkColors.Foreground,
     },
-    'hljs-keyword': {
+    "hljs-keyword": {
       color: tramDarkColors.AccentYellow,
     },
-    'hljs-literal': {
+    "hljs-literal": {
       color: tramDarkColors.AccentPurple,
     },
-    'hljs-symbol': {
+    "hljs-symbol": {
       color: tramDarkColors.AccentCyan,
     },
-    'hljs-name': {
+    "hljs-name": {
       color: tramDarkColors.LightBlue,
     },
-    'hljs-link': {
+    "hljs-link": {
       color: tramDarkColors.AccentBlue,
     },
-    'hljs-function .hljs-keyword': {
+    "hljs-function .hljs-keyword": {
       color: tramDarkColors.AccentYellow,
     },
-    'hljs-subst': {
+    "hljs-subst": {
       color: tramDarkColors.Foreground,
     },
-    'hljs-string': {
+    "hljs-string": {
       color: tramDarkColors.AccentGreen,
     },
-    'hljs-title': {
+    "hljs-title": {
       color: tramDarkColors.AccentYellow,
     },
-    'hljs-type': {
+    "hljs-type": {
       color: tramDarkColors.AccentBlue,
     },
-    'hljs-attribute': {
+    "hljs-attribute": {
       color: tramDarkColors.AccentYellow,
     },
-    'hljs-bullet': {
+    "hljs-bullet": {
       color: tramDarkColors.AccentYellow,
     },
-    'hljs-addition': {
+    "hljs-addition": {
       color: tramDarkColors.AccentGreen,
     },
-    'hljs-variable': {
+    "hljs-variable": {
       color: tramDarkColors.Foreground,
     },
-    'hljs-template-tag': {
+    "hljs-template-tag": {
       color: tramDarkColors.AccentYellow,
     },
-    'hljs-template-variable': {
+    "hljs-template-variable": {
       color: tramDarkColors.AccentYellow,
     },
-    'hljs-comment': {
+    "hljs-comment": {
       color: tramDarkColors.Comment,
-      fontStyle: 'italic',
+      fontStyle: "italic",
     },
-    'hljs-quote': {
+    "hljs-quote": {
       color: tramDarkColors.AccentCyan,
-      fontStyle: 'italic',
+      fontStyle: "italic",
     },
-    'hljs-deletion': {
+    "hljs-deletion": {
       color: tramDarkColors.AccentRed,
     },
-    'hljs-meta': {
+    "hljs-meta": {
       color: tramDarkColors.AccentYellow,
     },
-    'hljs-doctag': {
-      fontWeight: 'bold',
+    "hljs-doctag": {
+      fontWeight: "bold",
     },
-    'hljs-strong': {
-      fontWeight: 'bold',
+    "hljs-strong": {
+      fontWeight: "bold",
     },
-    'hljs-emphasis': {
-      fontStyle: 'italic',
+    "hljs-emphasis": {
+      fontStyle: "italic",
     },
   },
   tramDarkColors,

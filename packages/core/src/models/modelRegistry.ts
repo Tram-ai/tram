@@ -4,23 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthType } from '../core/contentGenerator.js';
-import { defaultModalities } from '../core/modalityDefaults.js';
-import { tokenLimit } from '../core/tokenLimits.js';
-import { DEFAULT_OPENAI_BASE_URL } from '../core/openaiContentGenerator/constants.js';
+import { AuthType } from "../core/contentGenerator.js";
+import { defaultModalities } from "../core/modalityDefaults.js";
+import { tokenLimit } from "../core/tokenLimits.js";
+import { DEFAULT_OPENAI_BASE_URL } from "../core/openaiContentGenerator/constants.js";
 import {
   type ModelConfig,
   type ModelProvidersConfig,
   type ResolvedModelConfig,
   type AvailableModel,
-} from './types.js';
-import { DEFAULT_TRAM_MODEL } from '../config/models.js';
-import { TRAM_OAUTH_MODELS } from './constants.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "./types.js";
+import { DEFAULT_TRAM_MODEL } from "../config/models.js";
+import { TRAM_OAUTH_MODELS } from "./constants.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('MODEL_REGISTRY');
+const debugLogger = createDebugLogger("MODEL_REGISTRY");
 
-export { TRAM_OAUTH_MODELS } from './constants.js';
+export { TRAM_OAUTH_MODELS } from "./constants.js";
 
 /**
  * Validates if a string key is a valid AuthType enum value.
@@ -47,11 +47,11 @@ export class ModelRegistry {
   private getDefaultBaseUrl(authType: AuthType): string {
     switch (authType) {
       case AuthType.TRAM_OAUTH:
-        return 'DYNAMIC_TRAM_OAUTH_BASE_URL';
+        return "DYNAMIC_TRAM_OAUTH_BASE_URL";
       case AuthType.USE_OPENAI:
         return DEFAULT_OPENAI_BASE_URL;
       default:
-        return '';
+        return "";
     }
   }
 
@@ -68,7 +68,7 @@ export class ModelRegistry {
 
         if (!authType) {
           debugLogger.warn(
-            `Invalid authType key "${rawKey}" in modelProviders config. Expected one of: ${Object.values(AuthType).join(', ')}. Skipping.`,
+            `Invalid authType key "${rawKey}" in modelProviders config. Expected one of: ${Object.values(AuthType).join(", ")}. Skipping.`,
           );
           continue;
         }
@@ -85,7 +85,8 @@ export class ModelRegistry {
 
   /**
    * Register models for an authType.
-   * If multiple models have the same id, the first one takes precedence.
+   * If multiple models have the same id, they will be auto-disambiguated
+   * to avoid conflicts, preserving their upstream API identity.
    */
   private registerAuthTypeModels(
     authType: AuthType,
@@ -94,15 +95,39 @@ export class ModelRegistry {
     const modelMap = new Map<string, ResolvedModelConfig>();
 
     for (const config of models) {
-      // Skip if a model with the same id is already registered (first one wins)
-      if (modelMap.has(config.id)) {
-        debugLogger.warn(
-          `Duplicate model id "${config.id}" for authType "${authType}". Using the first registered config.`,
-        );
-        continue;
+      let uniqueId = config.id;
+      let counter = 1;
+      
+      // Auto-disambiguate duplicated IDs to avoid conflict
+      while (modelMap.has(uniqueId)) {
+        uniqueId = `${config.id}-${counter}`;
+        counter++;
       }
+
+      if (uniqueId !== config.id) {
+        debugLogger.warn(
+          `Duplicate model id "${config.id}" for authType "${authType}". Assigned auto-generated id "${uniqueId}".`,
+        );
+      }
+
       const resolved = this.resolveModelConfig(config, authType);
-      modelMap.set(config.id, resolved);
+      
+      // Assure the resolved config uses our unique ID
+      resolved.id = uniqueId;
+      
+      // If we auto-generated an ID and the name wasn't explicitly provided,
+      // suffix the name to differentiate it in the UI
+      if (uniqueId !== config.id && !config.name) {
+        resolved.name = uniqueId;
+      }
+      
+      // If no upstreamModelId is provided, we must fallback to the original model id,
+      // so we don't accidentally send the generated id (like "z-ai/glm-5-1") to the provider API.
+      if (!resolved.upstreamModelId) {
+        resolved.upstreamModelId = config.id;
+      }
+
+      modelMap.set(uniqueId, resolved);
     }
 
     this.modelsByAuthType.set(authType, modelMap);
@@ -217,7 +242,7 @@ export class ModelRegistry {
 
         if (!authType) {
           debugLogger.warn(
-            `Invalid authType key "${rawKey}" in modelProviders config. Expected one of: ${Object.values(AuthType).join(', ')}. Skipping.`,
+            `Invalid authType key "${rawKey}" in modelProviders config. Expected one of: ${Object.values(AuthType).join(", ")}. Skipping.`,
           );
           continue;
         }
@@ -230,5 +255,57 @@ export class ModelRegistry {
         this.registerAuthTypeModels(authType, models);
       }
     }
+  }
+
+  /**
+   * Resolve a model identifier (id, upstreamModelId, or API-returned model name)
+   * to the user-configured display name.
+   *
+   * Returns the original identifier if no match is found.
+   */
+  resolveDisplayName(identifier: string): string {
+    for (const [, modelMap] of this.modelsByAuthType) {
+      for (const [, model] of modelMap) {
+        if (
+          model.id === identifier ||
+          model.upstreamModelId === identifier
+        ) {
+          return model.name;
+        }
+      }
+    }
+    return identifier;
+  }
+
+  /**
+   * Resolve an internal model ID to its upstream model ID (the real API model name).
+   * This is useful when the internal ID was auto-disambiguated (e.g. `glm-4-1`)
+   * but we need to send the correct API name (`glm-4`).
+   *
+   * When authType is provided, resolution is scoped to that authType first.
+   * This avoids accidental cross-authType collisions for shared local ids.
+   *
+   * Returns the original identifier if no match is found.
+   */
+  resolveUpstreamModelId(identifier: string, authType?: AuthType): string {
+    if (authType) {
+      const scopedMap = this.modelsByAuthType.get(authType);
+      if (scopedMap) {
+        for (const [, model] of scopedMap) {
+          if (model.id === identifier) {
+            return model.upstreamModelId || identifier;
+          }
+        }
+      }
+    }
+
+    for (const [, modelMap] of this.modelsByAuthType) {
+      for (const [, model] of modelMap) {
+        if (model.id === identifier) {
+          return model.upstreamModelId || identifier;
+        }
+      }
+    }
+    return identifier;
   }
 }

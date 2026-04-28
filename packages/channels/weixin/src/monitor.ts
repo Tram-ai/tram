@@ -3,12 +3,12 @@
  * Platform-agnostic: the onMessage callback handles delivery.
  */
 
-import { getUpdates } from './api.js';
-import { MessageType, MessageItemType } from './types.js';
-import type { WeixinMessage } from './types.js';
-import { getStateDir } from './accounts.js';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { getUpdates } from "./api.js";
+import { MessageType, MessageItemType } from "./types.js";
+import type { WeixinMessage } from "./types.js";
+import { getStateDir } from "./accounts.js";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 /** In-memory context token cache: userId -> contextToken */
 const contextTokens = new Map<string, string>();
@@ -18,17 +18,17 @@ export function getContextToken(userId: string): string | undefined {
 }
 
 function cursorPath(): string {
-  return join(getStateDir(), 'cursor.txt');
+  return join(getStateDir(), "cursor.txt");
 }
 
 function loadCursor(): string {
   const p = cursorPath();
-  if (existsSync(p)) return readFileSync(p, 'utf-8').trim();
-  return '';
+  if (existsSync(p)) return readFileSync(p, "utf-8").trim();
+  return "";
 }
 
 function saveCursor(cursor: string): void {
-  writeFileSync(cursorPath(), cursor, 'utf-8');
+  writeFileSync(cursorPath(), cursor, "utf-8");
 }
 
 export interface CdnRef {
@@ -66,7 +66,7 @@ export async function startPollLoop(params: {
   let consecutiveErrors = 0;
   let pollTimeoutMs = 40000;
 
-  process.stderr.write('[weixin] Starting message poll loop...\n');
+  process.stderr.write("[weixin] Starting message poll loop...\n");
 
   while (!abortSignal.aborted) {
     try {
@@ -80,7 +80,7 @@ export async function startPollLoop(params: {
 
       if (resp.errcode === -14) {
         process.stderr.write(
-          '[weixin] Session expired (errcode -14). Pausing 30s...\n',
+          "[weixin] Session expired (errcode -14). Pausing 30s...\n",
         );
         await new Promise((r) => setTimeout(r, 30000));
         continue;
@@ -120,7 +120,7 @@ export async function startPollLoop(params: {
 
       if (consecutiveErrors >= 3) {
         process.stderr.write(
-          '[weixin] Too many consecutive errors, backing off 30s...\n',
+          "[weixin] Too many consecutive errors, backing off 30s...\n",
         );
         await new Promise((r) => setTimeout(r, 30000));
         consecutiveErrors = 0;
@@ -130,7 +130,7 @@ export async function startPollLoop(params: {
     }
   }
 
-  process.stderr.write('[weixin] Poll loop stopped.\n');
+  process.stderr.write("[weixin] Poll loop stopped.\n");
 }
 
 async function processMessage(
@@ -148,7 +148,7 @@ async function processMessage(
   }
 
   // Extract text, image, file CDN references, and referenced message
-  let textContent = '';
+  let textContent = "";
   let image: CdnRef | undefined;
   let file: FileCdnRef | undefined;
   let refText: string | undefined;
@@ -156,7 +156,7 @@ async function processMessage(
   if (msg.item_list) {
     for (const item of msg.item_list) {
       if (item.type === MessageItemType.TEXT && item.text_item?.text) {
-        textContent += (textContent ? '\n' : '') + item.text_item.text;
+        textContent += (textContent ? "\n" : "") + item.text_item.text;
       }
 
       // Extract referenced message text
@@ -195,8 +195,8 @@ async function processMessage(
 
   await onMessage({
     fromUserId,
-    messageId: String(msg.message_id || ''),
-    text: textContent || (file ? `(file: ${file.fileName})` : '(image)'),
+    messageId: String(msg.message_id || ""),
+    text: textContent || (file ? `(file: ${file.fileName})` : "(image)"),
     image,
     file,
     refText,

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { TurnContent } from './types.js';
+import type { TurnContent } from "./types.js";
 
 /**
  * Accumulates thought and message chunks for a single model turn.
@@ -32,8 +32,8 @@ export class TurnBuffer {
    * Returns null if buffer is empty.
    */
   flush(): TurnContent | null {
-    const thoughtText = this.thoughts.join('');
-    const messageText = this.messages.join('');
+    const thoughtText = this.thoughts.join("");
+    const messageText = this.messages.join("");
 
     if (!thoughtText.trim() && !messageText.trim()) {
       this.reset();

@@ -6,7 +6,7 @@
  * Shared utilities for handling diff operations in the webview
  */
 
-import type { VSCodeAPI } from '../hooks/useVSCode.js';
+import type { VSCodeAPI } from "../hooks/useVSCode.js";
 
 /**
  * Handle opening a diff view for a file
@@ -23,8 +23,8 @@ export const handleOpenDiff = (
 ): void => {
   if (path) {
     vscode.postMessage({
-      type: 'openDiff',
-      data: { path, oldText: oldText || '', newText: newText || '' },
+      type: "openDiff",
+      data: { path, oldText: oldText || "", newText: newText || "" },
     });
   }
 };
@@ -37,10 +37,10 @@ export const handleOpenDiff = (
 export const createAndOpenTempFile = (
   vscode: VSCodeAPI,
   content: string,
-  fileName: string = 'temp',
+  fileName: string = "temp",
 ): void => {
   vscode.postMessage({
-    type: 'createAndOpenTempFile',
+    type: "createAndOpenTempFile",
     data: {
       content,
       fileName,

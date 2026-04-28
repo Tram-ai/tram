@@ -11,22 +11,22 @@
  * These types are used across different agent orchestration modes.
  */
 
-import type { Content } from '@google/genai';
-import type { AnsiOutput } from '../../utils/terminalSerializer.js';
+import type { Content } from "@google/genai";
+import type { AnsiOutput } from "../../utils/terminalSerializer.js";
 import type {
   PromptConfig,
   ModelConfig,
   RunConfig,
   ToolConfig,
-} from '../runtime/agent-types.js';
+} from "../runtime/agent-types.js";
 
 /**
  * Canonical display mode values shared across core and CLI.
  */
 export const DISPLAY_MODE = {
-  IN_PROCESS: 'in-process',
-  TMUX: 'tmux',
-  ITERM2: 'iterm2',
+  IN_PROCESS: "in-process",
+  TMUX: "tmux",
+  ITERM2: "iterm2",
 } as const;
 
 /**
@@ -268,7 +268,7 @@ export interface TmuxBackendOptions {
   /** Pane border format (default: "#{pane_title}") */
   paneBorderFormat?: string;
   /** Pane border status location */
-  paneBorderStatus?: 'top' | 'bottom' | 'off';
+  paneBorderStatus?: "top" | "bottom" | "off";
   /** Leader pane width percentage (default: 30) */
   leaderPaneWidthPercent?: number;
   /** First split percent when inside tmux (default: 70) */

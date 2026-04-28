@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useEffect } from 'react';
-import type { Suggestion } from '../components/SuggestionsDisplay.js';
-import type { CommandContext, SlashCommand } from '../commands/types.js';
-import type { TextBuffer } from '../components/shared/text-buffer.js';
-import { logicalPosToOffset } from '../components/shared/text-buffer.js';
-import { isSlashCommand } from '../utils/commandUtils.js';
-import { toCodePoints } from '../utils/textUtils.js';
-import { useAtCompletion } from './useAtCompletion.js';
-import { useSlashCompletion } from './useSlashCompletion.js';
-import type { Config } from '@tram-ai/tram-core';
-import { useCompletion } from './useCompletion.js';
+import { useCallback, useMemo, useEffect } from "react";
+import type { Suggestion } from "../components/SuggestionsDisplay.js";
+import type { CommandContext, SlashCommand } from "../commands/types.js";
+import type { TextBuffer } from "../components/shared/text-buffer.js";
+import { logicalPosToOffset } from "../components/shared/text-buffer.js";
+import { isSlashCommand } from "../utils/commandUtils.js";
+import { toCodePoints } from "../utils/textUtils.js";
+import { useAtCompletion } from "./useAtCompletion.js";
+import { useSlashCompletion } from "./useSlashCompletion.js";
+import type { Config } from "@tram-ai/tram-core";
+import { useCompletion } from "./useCompletion.js";
 
 export enum CompletionMode {
-  IDLE = 'IDLE',
-  AT = 'AT',
-  SLASH = 'SLASH',
+  IDLE = "IDLE",
+  AT = "AT",
+  SLASH = "SLASH",
 }
 
 export interface UseCommandCompletionReturn {
@@ -72,7 +72,7 @@ export function useCommandCompletion(
 
   const { completionMode, query, completionStart, completionEnd } =
     useMemo(() => {
-      const currentLine = buffer.lines[cursorRow] || '';
+      const currentLine = buffer.lines[cursorRow] || "";
 
       // Check for @ completion first, so that typing @ after a slash command
       // still triggers file search (see #2518).
@@ -80,20 +80,20 @@ export function useCommandCompletion(
       for (let i = cursorCol - 1; i >= 0; i--) {
         const char = codePoints[i];
 
-        if (char === ' ') {
+        if (char === " ") {
           let backslashCount = 0;
-          for (let j = i - 1; j >= 0 && codePoints[j] === '\\'; j--) {
+          for (let j = i - 1; j >= 0 && codePoints[j] === "\\"; j--) {
             backslashCount++;
           }
           if (backslashCount % 2 === 0) {
             break;
           }
-        } else if (char === '@') {
+        } else if (char === "@") {
           let end = codePoints.length;
           for (let i = cursorCol; i < codePoints.length; i++) {
-            if (codePoints[i] === ' ') {
+            if (codePoints[i] === " ") {
               let backslashCount = 0;
-              for (let j = i - 1; j >= 0 && codePoints[j] === '\\'; j--) {
+              for (let j = i - 1; j >= 0 && codePoints[j] === "\\"; j--) {
                 backslashCount++;
               }
 
@@ -133,7 +133,7 @@ export function useCommandCompletion(
 
   useAtCompletion({
     enabled: completionMode === CompletionMode.AT,
-    pattern: query || '',
+    pattern: query || "",
     config,
     cwd,
     setSuggestions,
@@ -199,16 +199,16 @@ export function useCommandCompletion(
         if (
           start === end &&
           start > 1 &&
-          (buffer.lines[cursorRow] || '')[start - 1] !== ' '
+          (buffer.lines[cursorRow] || "")[start - 1] !== " "
         ) {
-          suggestionText = ' ' + suggestionText;
+          suggestionText = " " + suggestionText;
         }
       }
 
-      const lineCodePoints = toCodePoints(buffer.lines[cursorRow] || '');
+      const lineCodePoints = toCodePoints(buffer.lines[cursorRow] || "");
       const charAfterCompletion = lineCodePoints[end];
-      if (charAfterCompletion !== ' ') {
-        suggestionText += ' ';
+      if (charAfterCompletion !== " ") {
+        suggestionText += " ";
       }
 
       buffer.replaceRangeByOffset(

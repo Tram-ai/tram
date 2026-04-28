@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import { Storage } from '@qwen-code/qwen-code-core';
+import * as vscode from "vscode";
+import { Storage } from "@tram-ai/tram-core";
 
 export function getLocalResourceRoots(
   extensionUri: vscode.Uri,
   workspaceFolders: readonly vscode.WorkspaceFolder[] | undefined,
 ): vscode.Uri[] {
   const roots = [
-    vscode.Uri.joinPath(extensionUri, 'dist'),
-    vscode.Uri.joinPath(extensionUri, 'assets'),
+    vscode.Uri.joinPath(extensionUri, "dist"),
+    vscode.Uri.joinPath(extensionUri, "assets"),
     vscode.Uri.file(Storage.getGlobalTempDir()),
   ];
 
@@ -52,7 +52,7 @@ export class PanelManager {
    * Set Panel (for restoration)
    */
   setPanel(panel: vscode.WebviewPanel): void {
-    console.log('[PanelManager] Setting panel for restoration');
+    console.log("[PanelManager] Setting panel for restoration");
     this.panel = panel;
   }
 
@@ -71,11 +71,11 @@ export class PanelManager {
     if (existingGroup) {
       // If TRAM webview already exists in a locked group, create the new panel in that same group
       console.log(
-        '[PanelManager] Found existing TRAM group, creating panel in same group',
+        "[PanelManager] Found existing TRAM group, creating panel in same group",
       );
       this.panel = vscode.window.createWebviewPanel(
-        'tramCode.chat',
-        'TRAM',
+        "tramCode.chat",
+        "TRAM",
         { viewColumn: existingGroup.viewColumn, preserveFocus: false },
         {
           enableScripts: true,
@@ -92,18 +92,18 @@ export class PanelManager {
       // If no existing TRAM group, create a new group to the right of the active editor group
       try {
         // Create a new group to the right of the current active group
-        await vscode.commands.executeCommand('workbench.action.newGroupRight');
+        await vscode.commands.executeCommand("workbench.action.newGroupRight");
       } catch (error) {
         console.warn(
-          '[PanelManager] Failed to create right editor group (continuing):',
+          "[PanelManager] Failed to create right editor group (continuing):",
           error,
         );
         // Fallback: create in current group
         const activeColumn =
           vscode.window.activeTextEditor?.viewColumn || vscode.ViewColumn.One;
         this.panel = vscode.window.createWebviewPanel(
-          'tramCode.chat',
-          'TRAM',
+          "tramCode.chat",
+          "TRAM",
           { viewColumn: activeColumn, preserveFocus: false },
           {
             enableScripts: true,
@@ -123,8 +123,8 @@ export class PanelManager {
       const newGroupColumn = vscode.window.tabGroups.activeTabGroup.viewColumn;
 
       this.panel = vscode.window.createWebviewPanel(
-        'tramCode.chat',
-        'TRAM',
+        "tramCode.chat",
+        "TRAM",
         { viewColumn: newGroupColumn, preserveFocus: false },
         {
           enableScripts: true,
@@ -146,8 +146,8 @@ export class PanelManager {
     // Set panel icon to TRAM logo
     this.panel.iconPath = vscode.Uri.joinPath(
       this.extensionUri,
-      'assets',
-      'icon.png',
+      "assets",
+      "icon.png",
     );
 
     // Try to capture Tab info shortly after creation so we can track the
@@ -168,14 +168,14 @@ export class PanelManager {
       for (const tab of group.tabs) {
         const input: unknown = (tab as { input?: unknown }).input;
         const isWebviewInput = (inp: unknown): inp is { viewType: string } =>
-          !!inp && typeof inp === 'object' && 'viewType' in inp;
+          !!inp && typeof inp === "object" && "viewType" in inp;
 
         if (
           isWebviewInput(input) &&
-          input.viewType === 'mainThreadWebview-tramCode.chat'
+          input.viewType === "mainThreadWebview-tramCode.chat"
         ) {
           // Found an existing TRAM tab
-          console.log('[PanelManager] Found existing TRAM group:', {
+          console.log("[PanelManager] Found existing TRAM group:", {
             viewColumn: group.viewColumn,
             tabCount: group.tabs.length,
             isActive: group.isActive,
@@ -206,10 +206,10 @@ export class PanelManager {
     try {
       // The newly created panel is focused (preserveFocus: false), so this
       // locks the correct, active editor group.
-      await vscode.commands.executeCommand('workbench.action.lockEditorGroup');
-      console.log('[PanelManager] Group locked after panel creation');
+      await vscode.commands.executeCommand("workbench.action.lockEditorGroup");
+      console.log("[PanelManager] Group locked after panel creation");
     } catch (error) {
-      console.warn('[PanelManager] Failed to lock editor group:', error);
+      console.warn("[PanelManager] Failed to lock editor group:", error);
     }
   }
 
@@ -259,9 +259,9 @@ export class PanelManager {
         // Type guard for webview tab input
         const input: unknown = (t as { input?: unknown }).input;
         const isWebviewInput = (inp: unknown): inp is { viewType: string } =>
-          !!inp && typeof inp === 'object' && 'viewType' in inp;
+          !!inp && typeof inp === "object" && "viewType" in inp;
         const isWebview = isWebviewInput(input);
-        const sameViewType = isWebview && input.viewType === 'tramCode.chat';
+        const sameViewType = isWebview && input.viewType === "tramCode.chat";
         const sameLabel = t.label === panelTitle;
         return !!(sameViewType || sameLabel);
       });
@@ -328,16 +328,16 @@ export class PanelManager {
                 // Try closeGroup first; fall back to removeActiveEditorGroup
                 try {
                   await vscode.commands.executeCommand(
-                    'workbench.action.closeGroup',
+                    "workbench.action.closeGroup",
                   );
                 } catch {
                   try {
                     await vscode.commands.executeCommand(
-                      'workbench.action.removeActiveEditorGroup',
+                      "workbench.action.removeActiveEditorGroup",
                     );
                   } catch (err) {
                     console.warn(
-                      '[PanelManager] Failed to close empty group after TRAM panel disposed:',
+                      "[PanelManager] Failed to close empty group after TRAM panel disposed:",
                       err,
                     );
                   }
@@ -345,7 +345,7 @@ export class PanelManager {
               }
             } catch (err) {
               console.warn(
-                '[PanelManager] Error while trying to close empty TRAM group:',
+                "[PanelManager] Error while trying to close empty TRAM group:",
                 err,
               );
             }
@@ -371,10 +371,10 @@ export class PanelManager {
       const current = vscode.window.tabGroups.activeTabGroup.viewColumn;
       if (current < target) {
         await vscode.commands.executeCommand(
-          'workbench.action.focusRightGroup',
+          "workbench.action.focusRightGroup",
         );
       } else if (current > target) {
-        await vscode.commands.executeCommand('workbench.action.focusLeftGroup');
+        await vscode.commands.executeCommand("workbench.action.focusLeftGroup");
       } else {
         break;
       }

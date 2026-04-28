@@ -3,7 +3,7 @@ package com.alibaba.qwen.code.cli.protocol.data;
 import com.alibaba.fastjson2.annotation.JSONField;
 
 /**
- * Represents the capabilities of the Qwen Code CLI.
+ * Represents the capabilities of the TRAM CLI.
  *
  * @author skyfire
  * @version $Id: 0.0.1

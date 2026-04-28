@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ServiceAccountImpersonationProvider } from './sa-impersonation-provider.js';
-import type { MCPServerConfig } from '../config/config.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { ServiceAccountImpersonationProvider } from "./sa-impersonation-provider.js";
+import type { MCPServerConfig } from "../config/config.js";
 
 const mockRequest = vi.fn();
 const mockGetClient = vi.fn(() => ({
@@ -14,8 +14,8 @@ const mockGetClient = vi.fn(() => ({
 }));
 
 // Mock the google-auth-library to use a shared mock function
-vi.mock('google-auth-library', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('google-auth-library')>();
+vi.mock("google-auth-library", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("google-auth-library")>();
   return {
     ...actual,
     GoogleAuth: vi.fn().mockImplementation(() => ({
@@ -25,45 +25,45 @@ vi.mock('google-auth-library', async (importOriginal) => {
 });
 
 const defaultSAConfig: MCPServerConfig = {
-  url: 'https://my-iap-service.run.app',
-  targetAudience: 'my-audience',
-  targetServiceAccount: 'my-sa',
+  url: "https://my-iap-service.run.app",
+  targetAudience: "my-audience",
+  targetServiceAccount: "my-sa",
 };
 
-describe('ServiceAccountImpersonationProvider', () => {
+describe("ServiceAccountImpersonationProvider", () => {
   beforeEach(() => {
     // Reset mocks before each test
     vi.clearAllMocks();
   });
 
-  it('should throw an error if no URL is provided', () => {
+  it("should throw an error if no URL is provided", () => {
     const config: MCPServerConfig = {};
     expect(() => new ServiceAccountImpersonationProvider(config)).toThrow(
-      'A url or httpUrl must be provided for the Service Account Impersonation provider',
+      "A url or httpUrl must be provided for the Service Account Impersonation provider",
     );
   });
 
-  it('should throw an error if no targetAudience is provided', () => {
+  it("should throw an error if no targetAudience is provided", () => {
     const config: MCPServerConfig = {
-      url: 'https://my-iap-service.run.app',
+      url: "https://my-iap-service.run.app",
     };
     expect(() => new ServiceAccountImpersonationProvider(config)).toThrow(
-      'targetAudience must be provided for the Service Account Impersonation provider',
+      "targetAudience must be provided for the Service Account Impersonation provider",
     );
   });
 
-  it('should throw an error if no targetSA is provided', () => {
+  it("should throw an error if no targetSA is provided", () => {
     const config: MCPServerConfig = {
-      url: 'https://my-iap-service.run.app',
-      targetAudience: 'my-audience',
+      url: "https://my-iap-service.run.app",
+      targetAudience: "my-audience",
     };
     expect(() => new ServiceAccountImpersonationProvider(config)).toThrow(
-      'targetServiceAccount must be provided for the Service Account Impersonation provider',
+      "targetServiceAccount must be provided for the Service Account Impersonation provider",
     );
   });
 
-  it('should correctly get tokens for a valid config', async () => {
-    const mockToken = 'mock-id-token-123';
+  it("should correctly get tokens for a valid config", async () => {
+    const mockToken = "mock-id-token-123";
     mockRequest.mockResolvedValue({ data: { token: mockToken } });
 
     const provider = new ServiceAccountImpersonationProvider(defaultSAConfig);
@@ -71,10 +71,10 @@ describe('ServiceAccountImpersonationProvider', () => {
 
     expect(tokens).toBeDefined();
     expect(tokens?.access_token).toBe(mockToken);
-    expect(tokens?.token_type).toBe('Bearer');
+    expect(tokens?.token_type).toBe("Bearer");
   });
 
-  it('should return undefined if token acquisition fails', async () => {
+  it("should return undefined if token acquisition fails", async () => {
     mockRequest.mockResolvedValue({ data: { token: null } });
 
     const provider = new ServiceAccountImpersonationProvider(defaultSAConfig);
@@ -83,29 +83,29 @@ describe('ServiceAccountImpersonationProvider', () => {
     expect(tokens).toBeUndefined();
   });
 
-  it('should make a request with the correct parameters', async () => {
-    mockRequest.mockResolvedValue({ data: { token: 'test-token' } });
+  it("should make a request with the correct parameters", async () => {
+    mockRequest.mockResolvedValue({ data: { token: "test-token" } });
 
     const provider = new ServiceAccountImpersonationProvider(defaultSAConfig);
     await provider.tokens();
 
     expect(mockRequest).toHaveBeenCalledWith({
-      url: 'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/my-sa:generateIdToken',
-      method: 'POST',
+      url: "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/my-sa:generateIdToken",
+      method: "POST",
       data: {
-        audience: 'my-audience',
+        audience: "my-audience",
         includeEmail: true,
       },
     });
   });
 
-  it('should return a cached token if it is not expired', async () => {
+  it("should return a cached token if it is not expired", async () => {
     const provider = new ServiceAccountImpersonationProvider(defaultSAConfig);
     vi.useFakeTimers();
 
     // jwt payload with exp set to 1 hour from now
     const payload = { exp: Math.floor(Date.now() / 1000) + 3600 };
-    const jwt = `header.${Buffer.from(JSON.stringify(payload)).toString('base64')}.signature`;
+    const jwt = `header.${Buffer.from(JSON.stringify(payload)).toString("base64")}.signature`;
     mockRequest.mockResolvedValue({ data: { token: jwt } });
 
     const firstTokens = await provider.tokens();
@@ -123,13 +123,13 @@ describe('ServiceAccountImpersonationProvider', () => {
     vi.useRealTimers();
   });
 
-  it('should fetch a new token if the cached token is expired (using fake timers)', async () => {
+  it("should fetch a new token if the cached token is expired (using fake timers)", async () => {
     const provider = new ServiceAccountImpersonationProvider(defaultSAConfig);
     vi.useFakeTimers();
 
     // Get and cache a token that expires in 1 second
     const expiredPayload = { exp: Math.floor(Date.now() / 1000) + 1 };
-    const expiredJwt = `header.${Buffer.from(JSON.stringify(expiredPayload)).toString('base64')}.signature`;
+    const expiredJwt = `header.${Buffer.from(JSON.stringify(expiredPayload)).toString("base64")}.signature`;
 
     mockRequest.mockResolvedValue({ data: { token: expiredJwt } });
     const firstTokens = await provider.tokens();
@@ -138,7 +138,7 @@ describe('ServiceAccountImpersonationProvider', () => {
 
     // Prepare the mock for the *next* call
     const newPayload = { exp: Math.floor(Date.now() / 1000) + 3600 };
-    const newJwt = `header.${Buffer.from(JSON.stringify(newPayload)).toString('base64')}.signature`;
+    const newJwt = `header.${Buffer.from(JSON.stringify(newPayload)).toString("base64")}.signature`;
     mockRequest.mockResolvedValue({ data: { token: newJwt } });
 
     vi.advanceTimersByTime(1001);

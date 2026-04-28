@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../../semantic-colors.js';
-import { useSelectionList } from '../../hooks/useSelectionList.js';
-import { useKeypress } from '../../hooks/useKeypress.js';
-import type { SelectionListItem } from '../../hooks/useSelectionList.js';
+import type React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Box, Text } from "ink";
+import { theme } from "../../semantic-colors.js";
+import { useSelectionList } from "../../hooks/useSelectionList.js";
+import { useKeypress } from "../../hooks/useKeypress.js";
+import type { SelectionListItem } from "../../hooks/useSelectionList.js";
 
 export interface MultiSelectItem<T> extends SelectionListItem<T> {
   label: string;
@@ -111,7 +111,7 @@ export function MultiSelect<T>({
 
   useKeypress(
     (key) => {
-      if (key.name === 'space' || key.sequence === ' ') {
+      if (key.name === "space" || key.sequence === " ") {
         toggleSelectionAtIndex(activeIndex);
       }
     },
@@ -157,7 +157,7 @@ export function MultiSelect<T>({
         const itemNumberText = `${String(itemIndex + 1).padStart(
           numberColumnWidth,
         )}.`;
-        const checkboxText = item.disabled ? '[x]' : isChecked ? '[✓]' : '[ ]';
+        const checkboxText = item.disabled ? "[x]" : isChecked ? "[✓]" : "[ ]";
 
         let textColor = theme.text.primary;
         if (item.disabled) {

@@ -1,56 +1,56 @@
-name: 'Qwen Automated Issue Triage'
+name: "Qwen Automated Issue Triage"
 
 on:
   issues:
     types:
-      - 'opened'
-      - 'reopened'
+      - "opened"
+      - "reopened"
   issue_comment:
     types:
-      - 'created'
+      - "created"
   workflow_dispatch:
     inputs:
       issue_number:
-        description: 'issue number to triage'
+        description: "issue number to triage"
         required: true
-        type: 'number'
+        type: "number"
 
 concurrency:
-  group: '${{ github.workflow }}-${{ github.event.issue.number || github.event.inputs.issue_number }}'
+  group: "${{ github.workflow }}-${{ github.event.issue.number || github.event.inputs.issue_number }}"
   cancel-in-progress: true
 
 defaults:
   run:
-    shell: 'bash'
+    shell: "bash"
 
 permissions:
-  contents: 'read'
-  id-token: 'write'
-  issues: 'write'
-  statuses: 'write'
-  packages: 'read'
-  actions: 'write' # Required for cancelling a workflow run
+  contents: "read"
+  id-token: "write"
+  issues: "write"
+  statuses: "write"
+  packages: "read"
+  actions: "write" # Required for cancelling a workflow run
 
 jobs:
   triage-issue:
     timeout-minutes: 5
     if: |-
       ${{ github.repository == 'QwenLM/qwen-code' }}
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     steps:
-      - name: 'Run Qwen Issue Analysis'
-        uses: 'QwenLM/qwen-code-action@5fd6818d04d64e87d255ee4d5f77995e32fbf4c2'
-        id: 'qwen_issue_analysis'
+      - name: "Run Qwen Issue Analysis"
+        uses: "QwenLM/qwen-code-action@5fd6818d04d64e87d255ee4d5f77995e32fbf4c2"
+        id: "qwen_issue_analysis"
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-          ISSUE_TITLE: '${{ github.event.issue.title }}'
-          ISSUE_BODY: '${{ github.event.issue.body }}'
-          ISSUE_NUMBER: '${{ github.event.issue.number }}'
-          REPOSITORY: '${{ github.repository }}'
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          ISSUE_TITLE: "${{ github.event.issue.title }}"
+          ISSUE_BODY: "${{ github.event.issue.body }}"
+          ISSUE_NUMBER: "${{ github.event.issue.number }}"
+          REPOSITORY: "${{ github.repository }}"
         with:
-          OPENAI_API_KEY: '${{ secrets.OPENAI_API_KEY }}'
-          OPENAI_BASE_URL: '${{ secrets.OPENAI_BASE_URL }}'
-          OPENAI_MODEL: '${{ secrets.OPENAI_MODEL }}'
+          OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
+          OPENAI_BASE_URL: "${{ secrets.OPENAI_BASE_URL }}"
+          OPENAI_MODEL: "${{ secrets.OPENAI_MODEL }}"
           settings_json: |-
             {
               "maxSessionTurns": 25,
@@ -115,7 +115,7 @@ jobs:
             - Severe performance degradation making the application frustratingly slow.
             - No straightforward workaround exists, or the workaround is difficult and non-obvious.
             Qualifier: Is a key feature unusable or giving very wrong results?
-            Example: Qwen Code enters a loop when making read-many-files tool call. I am unable to break out of the loop and qwen doesn't follow instructions subsequently.
+            Example: TRAM enters a loop when making read-many-files tool call. I am unable to break out of the loop and qwen doesn't follow instructions subsequently.
             P2: Medium
             - A P2 bug is a moderately impactful issue. It's a noticeable problem but doesn't prevent the use of the software's main functionality.
             Impact:
@@ -184,20 +184,20 @@ jobs:
             - Issues with build system, testing, CI/CD, documentation
             - Related scopes: scope/build-system, scope/testing, scope/ci-cd, scope/documentation
 
-      - name: 'Post Issue Analysis Failure Comment'
+      - name: "Post Issue Analysis Failure Comment"
         if: |-
-          ${{ failure() && steps.qwen_issue_analysis.outcome == 'failure' }}
-        uses: 'actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea' # ratchet:actions/github-script@v7
+          ${{ failure() && steps.tram_issue_analysis.outcome == 'failure' }}
+        uses: "actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea" # ratchet:actions/github-script@v7
         env:
-          ISSUE_NUMBER: '${{ github.event.issue.number }}'
-          REPOSITORY: '${{ github.repository }}'
-          RUN_URL: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          ISSUE_NUMBER: "${{ github.event.issue.number }}"
+          REPOSITORY: "${{ github.repository }}"
+          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         with:
-          github-token: '${{ secrets.GITHUB_TOKEN }}'
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |-
             github.rest.issues.createComment({
               owner: process.env.REPOSITORY.split('/')[0],
               repo: process.env.REPOSITORY.split('/')[1],
               issue_number: parseInt(process.env.ISSUE_NUMBER),
-              body: 'There is a problem with the Qwen Code issue analysis. Please check the [action logs](${process.env.RUN_URL}) for details.'
+              body: 'There is a problem with the TRAM issue analysis. Please check the [action logs](${process.env.RUN_URL}) for details.'
             })

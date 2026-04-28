@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { StatsDisplay } from './StatsDisplay.js';
-import { useSessionStats } from '../contexts/SessionContext.js';
-import { useConfig } from '../contexts/ConfigContext.js';
-import { theme } from '../semantic-colors.js';
-import { t } from '../../i18n/index.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { StatsDisplay } from "./StatsDisplay.js";
+import { useSessionStats } from "../contexts/SessionContext.js";
+import { useConfig } from "../contexts/ConfigContext.js";
+import { theme } from "../semantic-colors.js";
+import { t } from "../../i18n/index.js";
 
 interface SessionSummaryDisplayProps {
   duration: string;
@@ -32,14 +32,14 @@ export const SessionSummaryDisplay: React.FC<SessionSummaryDisplayProps> = ({
   return (
     <>
       <StatsDisplay
-        title={t('Agent powering down. Goodbye!')}
+        title={t("Agent powering down. Goodbye!")}
         duration={duration}
         width={width}
       />
       {hasMessages && canResume && (
         <Box marginTop={1}>
           <Text color={theme.text.secondary}>
-            {t('To continue this session, run')}{' '}
+            {t("To continue this session, run")}{" "}
             <Text color={theme.text.accent}>
               tram --resume {stats.sessionId}
             </Text>

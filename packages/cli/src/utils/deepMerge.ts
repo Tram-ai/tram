@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MergeStrategy } from '../config/settingsSchema.js';
+import { MergeStrategy } from "../config/settingsSchema.js";
 
 export type Mergeable =
   | string
@@ -18,7 +18,7 @@ export type Mergeable =
 export type MergeableObject = Record<string, Mergeable>;
 
 function isPlainObject(item: unknown): item is MergeableObject {
-  return !!item && typeof item === 'object' && !Array.isArray(item);
+  return !!item && typeof item === "object" && !Array.isArray(item);
 }
 
 function mergeRecursively(
@@ -28,7 +28,7 @@ function mergeRecursively(
   path: string[] = [],
 ) {
   for (const key of Object.keys(source)) {
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+    if (key === "__proto__" || key === "constructor" || key === "prototype") {
       continue;
     }
     const newPath = [...path, key];
@@ -38,9 +38,9 @@ function mergeRecursively(
 
     if (mergeStrategy === MergeStrategy.SHALLOW_MERGE && objValue && srcValue) {
       const obj1 =
-        typeof objValue === 'object' && objValue !== null ? objValue : {};
+        typeof objValue === "object" && objValue !== null ? objValue : {};
       const obj2 =
-        typeof srcValue === 'object' && srcValue !== null ? srcValue : {};
+        typeof srcValue === "object" && srcValue !== null ? srcValue : {};
       target[key] = { ...obj1, ...obj2 };
       continue;
     }

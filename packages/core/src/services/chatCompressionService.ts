@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Content } from '@google/genai';
-import type { Config } from '../config/config.js';
-import type { GeminiChat } from '../core/geminiChat.js';
-import { type ChatCompressionInfo, CompressionStatus } from '../core/turn.js';
-import { uiTelemetryService } from '../telemetry/uiTelemetry.js';
-import { DEFAULT_TOKEN_LIMIT } from '../core/tokenLimits.js';
-import { getCompressionPrompt } from '../core/prompts.js';
-import { getResponseText } from '../utils/partUtils.js';
-import { logChatCompression } from '../telemetry/loggers.js';
-import { makeChatCompressionEvent } from '../telemetry/types.js';
-import type { PermissionMode } from '../hooks/types.js';
+import type { Content } from "@google/genai";
+import type { Config } from "../config/config.js";
+import type { GeminiChat } from "../core/geminiChat.js";
+import { type ChatCompressionInfo, CompressionStatus } from "../core/turn.js";
+import { uiTelemetryService } from "../telemetry/uiTelemetry.js";
+import { DEFAULT_TOKEN_LIMIT } from "../core/tokenLimits.js";
+import { getCompressionPrompt } from "../core/prompts.js";
+import { getResponseText } from "../utils/partUtils.js";
+import { logChatCompression } from "../telemetry/loggers.js";
+import { makeChatCompressionEvent } from "../telemetry/types.js";
+import type { PermissionMode } from "../hooks/types.js";
 import {
   SessionStartSource,
   PreCompactTrigger,
   PostCompactTrigger,
-} from '../hooks/types.js';
+} from "../hooks/types.js";
 
 /**
  * Threshold for compression token count as a fraction of the model's token limit.
@@ -51,7 +51,7 @@ export function findCompressSplitPoint(
   fraction: number,
 ): number {
   if (fraction <= 0 || fraction >= 1) {
-    throw new Error('Fraction must be between 0 and 1');
+    throw new Error("Fraction must be between 0 and 1");
   }
 
   const charCounts = contents.map((content) => JSON.stringify(content).length);
@@ -63,7 +63,7 @@ export function findCompressSplitPoint(
   for (let i = 0; i < contents.length; i++) {
     const content = contents[i];
     if (
-      content.role === 'user' &&
+      content.role === "user" &&
       !content.parts?.some((part) => !!part.functionResponse)
     ) {
       if (cumulativeCharCount >= targetCharCount) {
@@ -78,7 +78,7 @@ export function findCompressSplitPoint(
   // Check if it's safe to compress everything.
   const lastContent = contents[contents.length - 1];
   if (
-    lastContent?.role === 'model' &&
+    lastContent?.role === "model" &&
     !lastContent?.parts?.some((part) => part.functionCall)
   ) {
     return contents.length;
@@ -86,7 +86,7 @@ export function findCompressSplitPoint(
   // Also safe to compress everything if the last message completes a tool call
   // sequence (all function calls have matching responses).
   if (
-    lastContent?.role === 'user' &&
+    lastContent?.role === "user" &&
     lastContent?.parts?.some((part) => !!part.functionResponse)
   ) {
     return contents.length;
@@ -150,7 +150,7 @@ export class ChatCompressionService {
     if (hookSystem) {
       const trigger = force ? PreCompactTrigger.Manual : PreCompactTrigger.Auto;
       try {
-        await hookSystem.firePreCompactEvent(trigger, '', signal);
+        await hookSystem.firePreCompactEvent(trigger, "", signal);
       } catch (err) {
         config.getDebugLogger().warn(`PreCompact hook failed: ${err}`);
       }
@@ -168,7 +168,7 @@ export class ChatCompressionService {
     const lastMessage = curatedHistory[curatedHistory.length - 1];
     const hasOrphanedFuncCall =
       force &&
-      lastMessage?.role === 'model' &&
+      lastMessage?.role === "model" &&
       lastMessage.parts?.some((p) => !!p.functionCall);
     const historyForSplit = hasOrphanedFuncCall
       ? curatedHistory.slice(0, -1)
@@ -228,10 +228,10 @@ export class ChatCompressionService {
         contents: [
           ...historyToCompress,
           {
-            role: 'user',
+            role: "user",
             parts: [
               {
-                text: 'First, reason in your scratchpad. Then, generate the <state_snapshot>.',
+                text: "First, reason in your scratchpad. Then, generate the <state_snapshot>.",
               },
             ],
           },
@@ -242,7 +242,7 @@ export class ChatCompressionService {
       },
       promptId,
     );
-    const summary = getResponseText(summaryResponse) ?? '';
+    const summary = getResponseText(summaryResponse) ?? "";
     const isSummaryEmpty = !summary || summary.trim().length === 0;
     const compressionUsageMetadata = summaryResponse.usageMetadata;
     const compressionInputTokenCount =
@@ -251,8 +251,8 @@ export class ChatCompressionService {
       compressionUsageMetadata?.candidatesTokenCount;
     if (
       compressionOutputTokenCount === undefined &&
-      typeof compressionUsageMetadata?.totalTokenCount === 'number' &&
-      typeof compressionInputTokenCount === 'number'
+      typeof compressionUsageMetadata?.totalTokenCount === "number" &&
+      typeof compressionInputTokenCount === "number"
     ) {
       compressionOutputTokenCount = Math.max(
         0,
@@ -267,12 +267,12 @@ export class ChatCompressionService {
     if (!isSummaryEmpty) {
       extraHistory = [
         {
-          role: 'user',
+          role: "user",
           parts: [{ text: summary }],
         },
         {
-          role: 'model',
-          parts: [{ text: 'Got it. Thanks for the additional context!' }],
+          role: "model",
+          parts: [{ text: "Got it. Thanks for the additional context!" }],
         },
         ...historyToKeep,
       ];
@@ -284,9 +284,9 @@ export class ChatCompressionService {
       // compressionOutputTokenCount may include non-persisted tokens (thoughts).
       // We accept these inaccuracies to avoid local token estimation.
       if (
-        typeof compressionInputTokenCount === 'number' &&
+        typeof compressionInputTokenCount === "number" &&
         compressionInputTokenCount > 0 &&
-        typeof compressionOutputTokenCount === 'number' &&
+        typeof compressionOutputTokenCount === "number" &&
         compressionOutputTokenCount > 0
       ) {
         canCalculateNewTokenCount = true;
@@ -350,7 +350,7 @@ export class ChatCompressionService {
           .getHookSystem()
           ?.fireSessionStartEvent(
             SessionStartSource.Compact,
-            model ?? '',
+            model ?? "",
             permissionMode,
             undefined,
             signal,

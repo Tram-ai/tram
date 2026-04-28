@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback } from 'react';
-import type { VSCodeAPI } from './useVSCode.js';
-import { getRandomLoadingMessage } from '../../constants/loadingMessages.js';
-import type { ImageAttachment } from './useImage.js';
+import { useCallback } from "react";
+import type { VSCodeAPI } from "./useVSCode.js";
+import { getRandomLoadingMessage } from "../../constants/loadingMessages.js";
+import type { ImageAttachment } from "./useImage.js";
 
 interface UseMessageSubmitProps {
   vscode: VSCodeAPI;
@@ -49,7 +49,7 @@ export const shouldSendMessage = ({
     return false;
   }
 
-  const hasText = inputText.replace(/\u200B/g, '').trim().length > 0;
+  const hasText = inputText.replace(/\u200B/g, "").trim().length > 0;
   const hasAttachments = (attachedImages?.length ?? 0) > 0;
   return hasText || hasAttachments;
 };
@@ -90,32 +90,32 @@ export const useMessageSubmit = ({
       }
 
       // Handle /account command - show account info dialog
-      if (textToSend.trim() === '/account') {
-        setInputText('');
+      if (textToSend.trim() === "/account") {
+        setInputText("");
         if (inputFieldRef.current) {
-          inputFieldRef.current.textContent = '\u200B';
-          inputFieldRef.current.setAttribute('data-empty', 'true');
+          inputFieldRef.current.textContent = "\u200B";
+          inputFieldRef.current.setAttribute("data-empty", "true");
         }
-        vscode.postMessage({ type: 'getAccountInfo', data: {} });
+        vscode.postMessage({ type: "getAccountInfo", data: {} });
         return;
       }
 
       // Handle /login command - show inline loading while extension authenticates
-      if (textToSend.trim() === '/login') {
-        setInputText('');
+      if (textToSend.trim() === "/login") {
+        setInputText("");
         if (inputFieldRef.current) {
           // Use a zero-width space to maintain the height of the contentEditable element
-          inputFieldRef.current.textContent = '\u200B';
+          inputFieldRef.current.textContent = "\u200B";
           // Set the data-empty attribute to show the placeholder
-          inputFieldRef.current.setAttribute('data-empty', 'true');
+          inputFieldRef.current.setAttribute("data-empty", "true");
         }
         vscode.postMessage({
-          type: 'login',
+          type: "login",
           data: {},
         });
         // Show a friendly loading message in the chat while logging in
         try {
-          messageHandling.setWaitingForResponse('Logging in to TRAM...');
+          messageHandling.setWaitingForResponse("Logging in to TRAM...");
         } catch (_err) {
           // Best-effort UI hint; ignore if hook not available
         }
@@ -141,7 +141,7 @@ export const useMessageSubmit = ({
 
         if (filePath) {
           context.push({
-            type: 'file',
+            type: "file",
             name: fileName,
             value: filePath,
           });
@@ -150,9 +150,9 @@ export const useMessageSubmit = ({
 
       // Add active file selection context if present and not skipped
       if (fileContext.activeFilePath && !skipAutoActiveContext) {
-        const fileName = fileContext.activeFileName || 'current file';
+        const fileName = fileContext.activeFileName || "current file";
         context.push({
-          type: 'file',
+          type: "file",
           name: fileName,
           value: fileContext.activeFilePath,
           startLine: fileContext.activeSelection?.startLine,
@@ -183,7 +183,7 @@ export const useMessageSubmit = ({
       }
 
       vscode.postMessage({
-        type: 'sendMessage',
+        type: "sendMessage",
         data: {
           text: textToSend,
           context: context.length > 0 ? context : undefined,
@@ -192,12 +192,12 @@ export const useMessageSubmit = ({
         },
       });
 
-      setInputText('');
+      setInputText("");
       if (inputFieldRef.current) {
         // Use a zero-width space to maintain the height of the contentEditable element
-        inputFieldRef.current.textContent = '\u200B';
+        inputFieldRef.current.textContent = "\u200B";
         // Set the data-empty attribute to show the placeholder
-        inputFieldRef.current.setAttribute('data-empty', 'true');
+        inputFieldRef.current.setAttribute("data-empty", "true");
       }
       fileContext.clearFileReferences();
       if (clearImages) {

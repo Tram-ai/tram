@@ -4,25 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Text } from 'ink';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from 'ink-testing-library';
-import { ConsentPrompt } from './ConsentPrompt.js';
-import { RadioButtonSelect } from './shared/RadioButtonSelect.js';
-import { MarkdownDisplay } from '../utils/MarkdownDisplay.js';
+import { Text } from "ink";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render } from "ink-testing-library";
+import { ConsentPrompt } from "./ConsentPrompt.js";
+import { RadioButtonSelect } from "./shared/RadioButtonSelect.js";
+import { MarkdownDisplay } from "../utils/MarkdownDisplay.js";
 
-vi.mock('./shared/RadioButtonSelect.js', () => ({
+vi.mock("./shared/RadioButtonSelect.js", () => ({
   RadioButtonSelect: vi.fn(() => null),
 }));
 
-vi.mock('../utils/MarkdownDisplay.js', () => ({
+vi.mock("../utils/MarkdownDisplay.js", () => ({
   MarkdownDisplay: vi.fn(() => null),
 }));
 
 const MockedRadioButtonSelect = vi.mocked(RadioButtonSelect);
 const MockedMarkdownDisplay = vi.mocked(MarkdownDisplay);
 
-describe('ConsentPrompt', () => {
+describe("ConsentPrompt", () => {
   const onConfirm = vi.fn();
   const terminalWidth = 80;
 
@@ -30,8 +30,8 @@ describe('ConsentPrompt', () => {
     vi.clearAllMocks();
   });
 
-  it('renders a string prompt with MarkdownDisplay', () => {
-    const prompt = 'Are you sure?';
+  it("renders a string prompt with MarkdownDisplay", () => {
+    const prompt = "Are you sure?";
     render(
       <ConsentPrompt
         prompt={prompt}
@@ -50,7 +50,7 @@ describe('ConsentPrompt', () => {
     );
   });
 
-  it('renders a ReactNode prompt directly', () => {
+  it("renders a ReactNode prompt directly", () => {
     const prompt = <Text>Are you sure?</Text>;
     const { lastFrame } = render(
       <ConsentPrompt
@@ -61,11 +61,11 @@ describe('ConsentPrompt', () => {
     );
 
     expect(MockedMarkdownDisplay).not.toHaveBeenCalled();
-    expect(lastFrame()).toContain('Are you sure?');
+    expect(lastFrame()).toContain("Are you sure?");
   });
 
   it('calls onConfirm with true when "Yes" is selected', () => {
-    const prompt = 'Are you sure?';
+    const prompt = "Are you sure?";
     render(
       <ConsentPrompt
         prompt={prompt}
@@ -81,7 +81,7 @@ describe('ConsentPrompt', () => {
   });
 
   it('calls onConfirm with false when "No" is selected', () => {
-    const prompt = 'Are you sure?';
+    const prompt = "Are you sure?";
     render(
       <ConsentPrompt
         prompt={prompt}
@@ -96,8 +96,8 @@ describe('ConsentPrompt', () => {
     expect(onConfirm).toHaveBeenCalledWith(false);
   });
 
-  it('passes correct items to RadioButtonSelect', () => {
-    const prompt = 'Are you sure?';
+  it("passes correct items to RadioButtonSelect", () => {
+    const prompt = "Are you sure?";
     render(
       <ConsentPrompt
         prompt={prompt}
@@ -109,8 +109,8 @@ describe('ConsentPrompt', () => {
     expect(MockedRadioButtonSelect).toHaveBeenCalledWith(
       expect.objectContaining({
         items: [
-          { label: 'Yes', value: true, key: 'Yes' },
-          { label: 'No', value: false, key: 'No' },
+          { label: "Yes", value: true, key: "Yes" },
+          { label: "No", value: false, key: "No" },
         ],
       }),
       undefined,

@@ -10,8 +10,8 @@ const DEFAULT_MCP_REQUEST_TIMEOUT = 60_000;
 const DEFAULT_CONTROL_REQUEST_TIMEOUT = 60_000;
 const DEFAULT_STREAM_CLOSE_TIMEOUT = 60_000;
 
-import { randomUUID } from 'node:crypto';
-import { SdkLogger } from '../utils/logger.js';
+import { randomUUID } from "node:crypto";
+import { SdkLogger } from "../utils/logger.js";
 import type {
   SDKMessage,
   SDKUserMessage,
@@ -20,7 +20,7 @@ import type {
   ControlCancelRequest,
   PermissionSuggestion,
   WireSDKMcpServerConfig,
-} from '../types/protocol.js';
+} from "../types/protocol.js";
 import {
   isSDKUserMessage,
   isSDKAssistantMessage,
@@ -30,20 +30,20 @@ import {
   isControlRequest,
   isControlResponse,
   isControlCancel,
-} from '../types/protocol.js';
-import type { Transport } from '../transport/Transport.js';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { QueryOptions, CLIMcpServerConfig } from '../types/types.js';
-import { isSdkMcpServerConfig } from '../types/types.js';
-import { Stream } from '../utils/Stream.js';
-import { serializeJsonLine } from '../utils/jsonLines.js';
-import { AbortError } from '../types/errors.js';
-import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
+} from "../types/protocol.js";
+import type { Transport } from "../transport/Transport.js";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { QueryOptions, CLIMcpServerConfig } from "../types/types.js";
+import { isSdkMcpServerConfig } from "../types/types.js";
+import { Stream } from "../utils/Stream.js";
+import { serializeJsonLine } from "../utils/jsonLines.js";
+import { AbortError } from "../types/errors.js";
+import type { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
 import {
   SdkControlServerTransport,
   type SdkControlServerTransportOptions,
-} from '../mcp/SdkControlServerTransport.js';
-import { ControlRequestType } from '../types/protocol.js';
+} from "../mcp/SdkControlServerTransport.js";
+import { ControlRequestType } from "../types/protocol.js";
 
 interface PendingControlRequest {
   resolve: (response: Record<string, unknown> | null) => void;
@@ -61,7 +61,7 @@ interface TransportWithEndInput extends Transport {
   endInput(): void;
 }
 
-const logger = SdkLogger.createLogger('Query');
+const logger = SdkLogger.createLogger("Query");
 
 export class Query implements AsyncIterable<SDKMessage> {
   private transport: Transport;
@@ -122,18 +122,18 @@ export class Query implements AsyncIterable<SDKMessage> {
      * and set abort error on the stream before closing.
      */
     if (this.abortController.signal.aborted) {
-      this.inputStream.error(new AbortError('Query aborted by user'));
+      this.inputStream.error(new AbortError("Query aborted by user"));
       this.close().catch((err) => {
-        logger.error('Error during abort cleanup:', err);
+        logger.error("Error during abort cleanup:", err);
       });
     } else {
       this.abortHandler = () => {
-        this.inputStream.error(new AbortError('Query aborted by user'));
+        this.inputStream.error(new AbortError("Query aborted by user"));
         this.close().catch((err) => {
-          logger.error('Error during abort cleanup:', err);
+          logger.error("Error during abort cleanup:", err);
         });
       };
-      this.abortController.signal.addEventListener('abort', this.abortHandler);
+      this.abortController.signal.addEventListener("abort", this.abortHandler);
     }
 
     this.initialized = this.initialize();
@@ -142,7 +142,7 @@ export class Query implements AsyncIterable<SDKMessage> {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       if (
-        errorMessage.includes('Query is closed') &&
+        errorMessage.includes("Query is closed") &&
         this.transport.exitError
       ) {
         // If query was closed due to transport error, propagate the transport error
@@ -209,7 +209,7 @@ export class Query implements AsyncIterable<SDKMessage> {
 
     if (this.sdkMcpServers.size > 0) {
       logger.info(
-        `Initialized ${this.sdkMcpServers.size} SDK MCP server(s): ${Array.from(this.sdkMcpServers.keys()).join(', ')}`,
+        `Initialized ${this.sdkMcpServers.size} SDK MCP server(s): ${Array.from(this.sdkMcpServers.keys()).join(", ")}`,
       );
     }
   }
@@ -225,7 +225,7 @@ export class Query implements AsyncIterable<SDKMessage> {
     message: JSONRPCMessage,
   ): void {
     // Check if this is a response with an id
-    if ('id' in message && message.id !== null && message.id !== undefined) {
+    if ("id" in message && message.id !== null && message.id !== undefined) {
       const key = `${serverName}:${message.id}`;
       const pending = this.pendingMcpResponses.get(key);
       if (pending) {
@@ -254,7 +254,7 @@ export class Query implements AsyncIterable<SDKMessage> {
     const sdkServers: Record<string, WireSDKMcpServerConfig> = {};
 
     for (const [name] of this.sdkMcpServers.entries()) {
-      sdkServers[name] = { type: 'sdk', name };
+      sdkServers[name] = { type: "sdk", name };
     }
 
     return sdkServers;
@@ -282,7 +282,7 @@ export class Query implements AsyncIterable<SDKMessage> {
 
   private async initialize(): Promise<void> {
     try {
-      logger.debug('Initializing Query');
+      logger.debug("Initializing Query");
 
       // Initialize SDK MCP servers and wait for connections
       await this.initializeSdkMcpServers();
@@ -303,9 +303,9 @@ export class Query implements AsyncIterable<SDKMessage> {
             : undefined,
         agents: this.options.agents,
       });
-      logger.info('Query initialized successfully');
+      logger.info("Query initialized successfully");
     } catch (error) {
-      logger.error('Initialization error:', error);
+      logger.error("Initialization error:", error);
       throw error;
     }
   }
@@ -328,7 +328,7 @@ export class Query implements AsyncIterable<SDKMessage> {
         }
 
         if (this.abortController.signal.aborted) {
-          this.inputStream.error(new AbortError('Query aborted'));
+          this.inputStream.error(new AbortError("Query aborted"));
         } else {
           this.inputStream.done();
         }
@@ -373,7 +373,7 @@ export class Query implements AsyncIterable<SDKMessage> {
        * In single-turn mode, automatically close input after receiving result
        * to signal completion to the CLI.
        */
-      if (this.isSingleTurn && 'endInput' in this.transport) {
+      if (this.isSingleTurn && "endInput" in this.transport) {
         (this.transport as TransportWithEndInput).endInput();
       }
       this.inputStream.enqueue(message);
@@ -389,7 +389,7 @@ export class Query implements AsyncIterable<SDKMessage> {
       return;
     }
 
-    logger.warn('Unknown message type:', message);
+    logger.warn("Unknown message type:", message);
     this.inputStream.enqueue(message as SDKMessage);
   }
 
@@ -405,7 +405,7 @@ export class Query implements AsyncIterable<SDKMessage> {
       let response: Record<string, unknown> | null = null;
 
       switch (payload.subtype) {
-        case 'can_use_tool':
+        case "can_use_tool":
           response = await this.handlePermissionRequest(
             payload.tool_name,
             payload.input as Record<string, unknown>,
@@ -414,7 +414,7 @@ export class Query implements AsyncIterable<SDKMessage> {
           );
           break;
 
-        case 'mcp_message':
+        case "mcp_message":
           response = await this.handleMcpMessage(
             payload.server_name,
             payload.message as unknown as JSONRPCMessage,
@@ -444,7 +444,7 @@ export class Query implements AsyncIterable<SDKMessage> {
   ): Promise<Record<string, unknown>> {
     /* Default deny all wildcard tool requests */
     if (!this.options.canUseTool) {
-      return { behavior: 'deny', message: 'Denied' };
+      return { behavior: "deny", message: "Denied" };
     }
 
     try {
@@ -453,7 +453,7 @@ export class Query implements AsyncIterable<SDKMessage> {
       let timeoutId: NodeJS.Timeout | undefined;
       const timeoutPromise = new Promise<never>((_, reject) => {
         timeoutId = setTimeout(
-          () => reject(new Error('Permission callback timeout')),
+          () => reject(new Error("Permission callback timeout")),
           canUseToolTimeout,
         );
       });
@@ -472,15 +472,15 @@ export class Query implements AsyncIterable<SDKMessage> {
         clearTimeout(timeoutId);
       }
 
-      if (result.behavior === 'allow') {
+      if (result.behavior === "allow") {
         return {
-          behavior: 'allow',
+          behavior: "allow",
           updatedInput: result.updatedInput ?? toolInput,
         };
       } else {
         return {
-          behavior: 'deny',
-          message: result.message ?? 'Denied',
+          behavior: "deny",
+          message: result.message ?? "Denied",
           ...(result.interrupt !== undefined
             ? { interrupt: result.interrupt }
             : {}),
@@ -495,11 +495,11 @@ export class Query implements AsyncIterable<SDKMessage> {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       logger.warn(
-        'Permission callback error (denying by default):',
+        "Permission callback error (denying by default):",
         errorMessage,
       );
       return {
-        behavior: 'deny',
+        behavior: "deny",
         message: `Permission check failed: ${errorMessage}`,
       };
     }
@@ -521,7 +521,7 @@ export class Query implements AsyncIterable<SDKMessage> {
      * Requests need to wait for a response, while notifications are just routed.
      */
     const isRequest =
-      'method' in message && 'id' in message && message.id !== null;
+      "method" in message && "id" in message && message.id !== null;
 
     if (isRequest) {
       const response = await this.handleMcpRequest(
@@ -532,7 +532,7 @@ export class Query implements AsyncIterable<SDKMessage> {
       return { mcp_response: response };
     } else {
       transport.handleMessage(message);
-      return { mcp_response: { jsonrpc: '2.0', result: {}, id: 0 } };
+      return { mcp_response: { jsonrpc: "2.0", result: {}, id: 0 } };
     }
   }
 
@@ -541,7 +541,7 @@ export class Query implements AsyncIterable<SDKMessage> {
     message: JSONRPCMessage,
     transport: SdkControlServerTransport,
   ): Promise<JSONRPCMessage> {
-    const messageId = 'id' in message ? message.id : null;
+    const messageId = "id" in message ? message.id : null;
     const key = `${serverName}:${messageId}`;
 
     return new Promise((resolve, reject) => {
@@ -549,7 +549,7 @@ export class Query implements AsyncIterable<SDKMessage> {
         this.options.timeout?.mcpRequest ?? DEFAULT_MCP_REQUEST_TIMEOUT;
       const timeout = setTimeout(() => {
         this.pendingMcpResponses.delete(key);
-        reject(new Error('MCP request timeout'));
+        reject(new Error("MCP request timeout"));
       }, mcpRequestTimeout);
 
       const cleanup = () => {
@@ -587,7 +587,7 @@ export class Query implements AsyncIterable<SDKMessage> {
     const pending = this.pendingControlRequests.get(request_id);
     if (!pending) {
       logger.warn(
-        'Received response for unknown request:',
+        "Received response for unknown request:",
         request_id,
         JSON.stringify(payload),
       );
@@ -597,7 +597,7 @@ export class Query implements AsyncIterable<SDKMessage> {
     clearTimeout(pending.timeout);
     this.pendingControlRequests.delete(request_id);
 
-    if (payload.subtype === 'success') {
+    if (payload.subtype === "success") {
       logger.debug(
         `Control response success for request: ${request_id}: ${JSON.stringify(payload.response)}`,
       );
@@ -608,9 +608,9 @@ export class Query implements AsyncIterable<SDKMessage> {
        * Error can be either a string or an object with a message property.
        */
       const errorMessage =
-        typeof payload.error === 'string'
+        typeof payload.error === "string"
           ? payload.error
-          : (payload.error?.message ?? 'Unknown error');
+          : (payload.error?.message ?? "Unknown error");
       logger.error(
         `Control response error for request ${request_id}:`,
         errorMessage,
@@ -623,7 +623,7 @@ export class Query implements AsyncIterable<SDKMessage> {
     const { request_id } = request;
 
     if (!request_id) {
-      logger.warn('Received cancel request without request_id');
+      logger.warn("Received cancel request without request_id");
       return;
     }
 
@@ -633,7 +633,7 @@ export class Query implements AsyncIterable<SDKMessage> {
       pending.abortController.abort();
       clearTimeout(pending.timeout);
       this.pendingControlRequests.delete(request_id);
-      pending.reject(new AbortError('Request cancelled'));
+      pending.reject(new AbortError("Request cancelled"));
     }
   }
 
@@ -642,7 +642,7 @@ export class Query implements AsyncIterable<SDKMessage> {
     data: Record<string, unknown> = {},
   ): Promise<Record<string, unknown> | null> {
     if (this.closed) {
-      return Promise.reject(new Error('Query is closed'));
+      return Promise.reject(new Error("Query is closed"));
     }
 
     // Check if transport has already exited with an error
@@ -658,12 +658,12 @@ export class Query implements AsyncIterable<SDKMessage> {
     const requestId = randomUUID();
 
     const request: CLIControlRequest = {
-      type: 'control_request',
+      type: "control_request",
       request_id: requestId,
       request: {
         subtype: subtype as never,
         ...data,
-      } as CLIControlRequest['request'],
+      } as CLIControlRequest["request"],
     };
 
     const responsePromise = new Promise<Record<string, unknown> | null>(
@@ -710,15 +710,15 @@ export class Query implements AsyncIterable<SDKMessage> {
     responseOrError: Record<string, unknown> | null | string,
   ): Promise<void> {
     const response: CLIControlResponse = {
-      type: 'control_response',
+      type: "control_response",
       response: success
         ? {
-            subtype: 'success',
+            subtype: "success",
             request_id: requestId,
             response: responseOrError as Record<string, unknown> | null,
           }
         : {
-            subtype: 'error',
+            subtype: "error",
             request_id: requestId,
             error: responseOrError as string,
           },
@@ -745,7 +745,7 @@ export class Query implements AsyncIterable<SDKMessage> {
     // Remove abort listener to prevent memory leak
     if (this.abortHandler) {
       this.abortController.signal.removeEventListener(
-        'abort',
+        "abort",
         this.abortHandler,
       );
       this.abortHandler = null;
@@ -753,7 +753,7 @@ export class Query implements AsyncIterable<SDKMessage> {
 
     // Use transport's exit error if available, otherwise use generic error
     const transportError = this.transport.exitError;
-    const rejectionError = transportError ?? new Error('Query is closed');
+    const rejectionError = transportError ?? new Error("Query is closed");
 
     for (const pending of this.pendingControlRequests.values()) {
       pending.abortController.abort();
@@ -776,7 +776,7 @@ export class Query implements AsyncIterable<SDKMessage> {
      */
     if (this.inputStream.hasError === undefined) {
       if (this.abortController.signal.aborted) {
-        this.inputStream.error(new AbortError('Query aborted'));
+        this.inputStream.error(new AbortError("Query aborted"));
       } else {
         this.inputStream.done();
       }
@@ -786,11 +786,11 @@ export class Query implements AsyncIterable<SDKMessage> {
       try {
         await transport.close();
       } catch (error) {
-        logger.error('Error closing MCP transport:', error);
+        logger.error("Error closing MCP transport:", error);
       }
     }
     this.sdkMcpTransports.clear();
-    logger.info('Query is closed');
+    logger.info("Query is closed");
   }
 
   private async *readSdkMessages(): AsyncGenerator<SDKMessage> {
@@ -817,7 +817,7 @@ export class Query implements AsyncIterable<SDKMessage> {
 
   async streamInput(messages: AsyncIterable<SDKUserMessage>): Promise<void> {
     if (this.closed) {
-      throw new Error('Query is closed');
+      throw new Error("Query is closed");
     }
 
     try {
@@ -855,7 +855,7 @@ export class Query implements AsyncIterable<SDKMessage> {
 
         const timeoutPromise = new Promise<void>((resolve) => {
           timeoutId = setTimeout(() => {
-            logger.info('streamCloseTimeout resolved');
+            logger.info("streamCloseTimeout resolved");
             resolve();
           }, streamCloseTimeout);
         });
@@ -870,9 +870,9 @@ export class Query implements AsyncIterable<SDKMessage> {
       this.endInput();
     } catch (error) {
       if (this.abortController.signal.aborted) {
-        logger.info('Aborted during input streaming');
+        logger.info("Aborted during input streaming");
         this.inputStream.error(
-          new AbortError('Query aborted during input streaming'),
+          new AbortError("Query aborted during input streaming"),
         );
         return;
       }
@@ -882,12 +882,12 @@ export class Query implements AsyncIterable<SDKMessage> {
 
   endInput(): void {
     if (this.closed) {
-      throw new Error('Query is closed');
+      throw new Error("Query is closed");
     }
 
     if (
-      'endInput' in this.transport &&
-      typeof this.transport.endInput === 'function'
+      "endInput" in this.transport &&
+      typeof this.transport.endInput === "function"
     ) {
       (this.transport as TransportWithEndInput).endInput();
     }

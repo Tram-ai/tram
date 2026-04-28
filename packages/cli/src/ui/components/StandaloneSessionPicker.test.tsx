@@ -4,20 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { KeypressProvider } from '../contexts/KeypressContext.js';
-import { SessionPicker } from './SessionPicker.js';
-import type {
-  SessionListItem,
-  ListSessionsResult,
-} from '@tram-ai/tram-core';
+import { render } from "ink-testing-library";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { KeypressProvider } from "../contexts/KeypressContext.js";
+import { SessionPicker } from "./SessionPicker.js";
+import type { SessionListItem, ListSessionsResult } from "@tram-ai/tram-core";
 
-vi.mock('@tram-ai/tram-core', async () => {
-  const actual = await vi.importActual('@tram-ai/tram-core');
+vi.mock("@tram-ai/tram-core", async () => {
+  const actual = await vi.importActual("@tram-ai/tram-core");
   return {
     ...actual,
-    getGitBranch: vi.fn().mockReturnValue('main'),
+    getGitBranch: vi.fn().mockReturnValue("main"),
   };
 });
 
@@ -25,11 +22,11 @@ vi.mock('@tram-ai/tram-core', async () => {
 const mockTerminalSize = { columns: 80, rows: 24 };
 
 beforeEach(() => {
-  Object.defineProperty(process.stdout, 'columns', {
+  Object.defineProperty(process.stdout, "columns", {
     value: mockTerminalSize.columns,
     configurable: true,
   });
-  Object.defineProperty(process.stdout, 'rows', {
+  Object.defineProperty(process.stdout, "rows", {
     value: mockTerminalSize.rows,
     configurable: true,
   });
@@ -40,13 +37,13 @@ function createMockSession(
   overrides: Partial<SessionListItem> = {},
 ): SessionListItem {
   return {
-    sessionId: 'test-session-id',
-    cwd: '/test/path',
-    startTime: '2025-01-01T00:00:00.000Z',
+    sessionId: "test-session-id",
+    cwd: "/test/path",
+    startTime: "2025-01-01T00:00:00.000Z",
     mtime: Date.now(),
-    prompt: 'Test prompt',
-    gitBranch: 'main',
-    filePath: '/test/path/sessions/test-session-id.jsonl',
+    prompt: "Test prompt",
+    gitBranch: "main",
+    filePath: "/test/path/sessions/test-session-id.jsonl",
     messageCount: 5,
     ...overrides,
   };
@@ -70,30 +67,30 @@ function createMockSessionService(
   };
 }
 
-describe('SessionPicker', () => {
+describe("SessionPicker", () => {
   const wait = (ms = 50) => new Promise((resolve) => setTimeout(resolve, ms));
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('Empty Sessions', () => {
-    it('should show sessions with 0 messages', async () => {
+  describe("Empty Sessions", () => {
+    it("should show sessions with 0 messages", async () => {
       const sessions = [
         createMockSession({
-          sessionId: 'empty-1',
+          sessionId: "empty-1",
           messageCount: 0,
-          prompt: '',
+          prompt: "",
         }),
         createMockSession({
-          sessionId: 'with-messages',
+          sessionId: "with-messages",
           messageCount: 5,
-          prompt: 'Hello',
+          prompt: "Hello",
         }),
         createMockSession({
-          sessionId: 'empty-2',
+          sessionId: "empty-2",
           messageCount: 0,
-          prompt: '(empty prompt)',
+          prompt: "(empty prompt)",
         }),
       ];
       const mockService = createMockSessionService(sessions);
@@ -113,15 +110,15 @@ describe('SessionPicker', () => {
       await wait(100);
 
       const output = lastFrame();
-      expect(output).toContain('Hello');
+      expect(output).toContain("Hello");
       // Should show empty sessions too (rendered as "(empty prompt)" + "0 messages")
-      expect(output).toContain('0 messages');
+      expect(output).toContain("0 messages");
     });
 
-    it('should show sessions even when all sessions are empty', async () => {
+    it("should show sessions even when all sessions are empty", async () => {
       const sessions = [
-        createMockSession({ sessionId: 'empty-1', messageCount: 0 }),
-        createMockSession({ sessionId: 'empty-2', messageCount: 0 }),
+        createMockSession({ sessionId: "empty-1", messageCount: 0 }),
+        createMockSession({ sessionId: "empty-2", messageCount: 0 }),
       ];
       const mockService = createMockSessionService(sessions);
       const onSelect = vi.fn();
@@ -140,20 +137,20 @@ describe('SessionPicker', () => {
       await wait(100);
 
       const output = lastFrame();
-      expect(output).toContain('0 messages');
+      expect(output).toContain("0 messages");
     });
 
-    it('should show sessions with 1 or more messages', async () => {
+    it("should show sessions with 1 or more messages", async () => {
       const sessions = [
         createMockSession({
-          sessionId: 'one-msg',
+          sessionId: "one-msg",
           messageCount: 1,
-          prompt: 'Single message',
+          prompt: "Single message",
         }),
         createMockSession({
-          sessionId: 'many-msg',
+          sessionId: "many-msg",
           messageCount: 10,
-          prompt: 'Many messages',
+          prompt: "Many messages",
         }),
       ];
       const mockService = createMockSessionService(sessions);
@@ -173,32 +170,32 @@ describe('SessionPicker', () => {
       await wait(100);
 
       const output = lastFrame();
-      expect(output).toContain('Single message');
-      expect(output).toContain('Many messages');
-      expect(output).toContain('1 message');
-      expect(output).toContain('10 messages');
+      expect(output).toContain("Single message");
+      expect(output).toContain("Many messages");
+      expect(output).toContain("1 message");
+      expect(output).toContain("10 messages");
     });
   });
 
-  describe('Branch Filtering', () => {
-    it('should filter by branch when B is pressed', async () => {
+  describe("Branch Filtering", () => {
+    it("should filter by branch when B is pressed", async () => {
       const sessions = [
         createMockSession({
-          sessionId: 's1',
-          gitBranch: 'main',
-          prompt: 'Main branch',
+          sessionId: "s1",
+          gitBranch: "main",
+          prompt: "Main branch",
           messageCount: 1,
         }),
         createMockSession({
-          sessionId: 's2',
-          gitBranch: 'feature',
-          prompt: 'Feature branch',
+          sessionId: "s2",
+          gitBranch: "feature",
+          prompt: "Feature branch",
           messageCount: 1,
         }),
         createMockSession({
-          sessionId: 's3',
-          gitBranch: 'main',
-          prompt: 'Also main',
+          sessionId: "s3",
+          gitBranch: "main",
+          prompt: "Also main",
           messageCount: 1,
         }),
       ];
@@ -221,39 +218,39 @@ describe('SessionPicker', () => {
 
       // All sessions should be visible initially
       let output = lastFrame();
-      expect(output).toContain('Main branch');
-      expect(output).toContain('Feature branch');
+      expect(output).toContain("Main branch");
+      expect(output).toContain("Feature branch");
 
       // Press B to filter by branch
-      stdin.write('B');
+      stdin.write("B");
       await wait(50);
 
       output = lastFrame();
       // Only main branch sessions should be visible
-      expect(output).toContain('Main branch');
-      expect(output).toContain('Also main');
-      expect(output).not.toContain('Feature branch');
+      expect(output).toContain("Main branch");
+      expect(output).toContain("Also main");
+      expect(output).not.toContain("Feature branch");
     });
 
-    it('should combine empty session filter with branch filter', async () => {
+    it("should combine empty session filter with branch filter", async () => {
       const sessions = [
         createMockSession({
-          sessionId: 's1',
-          gitBranch: 'main',
+          sessionId: "s1",
+          gitBranch: "main",
           messageCount: 0,
-          prompt: 'Empty main',
+          prompt: "Empty main",
         }),
         createMockSession({
-          sessionId: 's2',
-          gitBranch: 'main',
+          sessionId: "s2",
+          gitBranch: "main",
           messageCount: 5,
-          prompt: 'Valid main',
+          prompt: "Valid main",
         }),
         createMockSession({
-          sessionId: 's3',
-          gitBranch: 'feature',
+          sessionId: "s3",
+          gitBranch: "feature",
           messageCount: 5,
-          prompt: 'Valid feature',
+          prompt: "Valid feature",
         }),
       ];
       const mockService = createMockSessionService(sessions);
@@ -274,33 +271,33 @@ describe('SessionPicker', () => {
       await wait(100);
 
       // Press B to filter by branch
-      stdin.write('B');
+      stdin.write("B");
       await wait(50);
 
       const output = lastFrame();
       // Should only show sessions from main branch (including 0-message sessions)
-      expect(output).toContain('Valid main');
-      expect(output).toContain('Empty main');
-      expect(output).not.toContain('Valid feature');
+      expect(output).toContain("Valid main");
+      expect(output).toContain("Empty main");
+      expect(output).not.toContain("Valid feature");
     });
   });
 
-  describe('Keyboard Navigation', () => {
-    it('should navigate with arrow keys', async () => {
+  describe("Keyboard Navigation", () => {
+    it("should navigate with arrow keys", async () => {
       const sessions = [
         createMockSession({
-          sessionId: 's1',
-          prompt: 'First session',
+          sessionId: "s1",
+          prompt: "First session",
           messageCount: 1,
         }),
         createMockSession({
-          sessionId: 's2',
-          prompt: 'Second session',
+          sessionId: "s2",
+          prompt: "Second session",
           messageCount: 1,
         }),
         createMockSession({
-          sessionId: 's3',
-          prompt: 'Third session',
+          sessionId: "s3",
+          prompt: "Third session",
           messageCount: 1,
         }),
       ];
@@ -322,10 +319,10 @@ describe('SessionPicker', () => {
 
       // First session should be selected initially (indicated by >)
       let output = lastFrame();
-      expect(output).toContain('First session');
+      expect(output).toContain("First session");
 
       // Navigate down
-      stdin.write('\u001B[B'); // Down arrow
+      stdin.write("\u001B[B"); // Down arrow
       await wait(50);
 
       output = lastFrame();
@@ -333,16 +330,16 @@ describe('SessionPicker', () => {
       expect(output).toBeDefined();
     });
 
-    it('should navigate with vim keys (j/k)', async () => {
+    it("should navigate with vim keys (j/k)", async () => {
       const sessions = [
         createMockSession({
-          sessionId: 's1',
-          prompt: 'First',
+          sessionId: "s1",
+          prompt: "First",
           messageCount: 1,
         }),
         createMockSession({
-          sessionId: 's2',
-          prompt: 'Second',
+          sessionId: "s2",
+          prompt: "Second",
           messageCount: 1,
         }),
       ];
@@ -363,21 +360,21 @@ describe('SessionPicker', () => {
       await wait(100);
 
       // Navigate with j (down)
-      stdin.write('j');
+      stdin.write("j");
       await wait(50);
 
       // Navigate with k (up)
-      stdin.write('k');
+      stdin.write("k");
       await wait(50);
 
       unmount();
     });
 
-    it('should select session on Enter', async () => {
+    it("should select session on Enter", async () => {
       const sessions = [
         createMockSession({
-          sessionId: 'selected-session',
-          prompt: 'Select me',
+          sessionId: "selected-session",
+          prompt: "Select me",
           messageCount: 1,
         }),
       ];
@@ -398,15 +395,15 @@ describe('SessionPicker', () => {
       await wait(100);
 
       // Press Enter to select
-      stdin.write('\r');
+      stdin.write("\r");
       await wait(50);
 
-      expect(onSelect).toHaveBeenCalledWith('selected-session');
+      expect(onSelect).toHaveBeenCalledWith("selected-session");
     });
 
-    it('should cancel on Escape', async () => {
+    it("should cancel on Escape", async () => {
       const sessions = [
-        createMockSession({ sessionId: 's1', messageCount: 1 }),
+        createMockSession({ sessionId: "s1", messageCount: 1 }),
       ];
       const mockService = createMockSessionService(sessions);
       const onSelect = vi.fn();
@@ -425,7 +422,7 @@ describe('SessionPicker', () => {
       await wait(100);
 
       // Press Escape to cancel
-      stdin.write('\u001B');
+      stdin.write("\u001B");
       await wait(50);
 
       expect(onCancel).toHaveBeenCalled();
@@ -433,14 +430,14 @@ describe('SessionPicker', () => {
     });
   });
 
-  describe('Display', () => {
-    it('should show session metadata', async () => {
+  describe("Display", () => {
+    it("should show session metadata", async () => {
       const sessions = [
         createMockSession({
-          sessionId: 's1',
-          prompt: 'Test prompt text',
+          sessionId: "s1",
+          prompt: "Test prompt text",
           messageCount: 5,
-          gitBranch: 'feature-branch',
+          gitBranch: "feature-branch",
         }),
       ];
       const mockService = createMockSessionService(sessions);
@@ -460,12 +457,12 @@ describe('SessionPicker', () => {
       await wait(100);
 
       const output = lastFrame();
-      expect(output).toContain('Test prompt text');
-      expect(output).toContain('5 messages');
-      expect(output).toContain('feature-branch');
+      expect(output).toContain("Test prompt text");
+      expect(output).toContain("5 messages");
+      expect(output).toContain("feature-branch");
     });
 
-    it('should show header and footer', async () => {
+    it("should show header and footer", async () => {
       const sessions = [createMockSession({ messageCount: 1 })];
       const mockService = createMockSessionService(sessions);
       const onSelect = vi.fn();
@@ -484,12 +481,12 @@ describe('SessionPicker', () => {
       await wait(100);
 
       const output = lastFrame();
-      expect(output).toContain('Resume Session');
-      expect(output).toContain('↑↓ to navigate');
-      expect(output).toContain('Esc to cancel');
+      expect(output).toContain("Resume Session");
+      expect(output).toContain("↑↓ to navigate");
+      expect(output).toContain("Esc to cancel");
     });
 
-    it('should show branch toggle hint when currentBranch is provided', async () => {
+    it("should show branch toggle hint when currentBranch is provided", async () => {
       const sessions = [createMockSession({ messageCount: 1 })];
       const mockService = createMockSessionService(sessions);
       const onSelect = vi.fn();
@@ -509,12 +506,12 @@ describe('SessionPicker', () => {
       await wait(100);
 
       const output = lastFrame();
-      expect(output).toContain('B');
-      expect(output).toContain('toggle branch');
+      expect(output).toContain("B");
+      expect(output).toContain("toggle branch");
     });
 
-    it('should truncate long prompts', async () => {
-      const longPrompt = 'A'.repeat(300);
+    it("should truncate long prompts", async () => {
+      const longPrompt = "A".repeat(300);
       const sessions = [
         createMockSession({ prompt: longPrompt, messageCount: 1 }),
       ];
@@ -536,13 +533,13 @@ describe('SessionPicker', () => {
 
       const output = lastFrame();
       // Should contain ellipsis for truncated text
-      expect(output).toContain('...');
+      expect(output).toContain("...");
       // Should NOT contain the full untruncated prompt (300 A's in a row)
       expect(output).not.toContain(longPrompt);
     });
 
     it('should show "(empty prompt)" for sessions without prompt text', async () => {
-      const sessions = [createMockSession({ prompt: '', messageCount: 1 })];
+      const sessions = [createMockSession({ prompt: "", messageCount: 1 })];
       const mockService = createMockSessionService(sessions);
       const onSelect = vi.fn();
       const onCancel = vi.fn();
@@ -560,12 +557,12 @@ describe('SessionPicker', () => {
       await wait(100);
 
       const output = lastFrame();
-      expect(output).toContain('(empty prompt)');
+      expect(output).toContain("(empty prompt)");
     });
   });
 
-  describe('Pagination', () => {
-    it('should load more sessions when scrolling to bottom', async () => {
+  describe("Pagination", () => {
+    it("should load more sessions when scrolling to bottom", async () => {
       const firstPage = Array.from({ length: 5 }, (_, i) =>
         createMockSession({
           sessionId: `session-${i}`,

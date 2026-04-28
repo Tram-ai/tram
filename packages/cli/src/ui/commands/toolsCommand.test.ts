@@ -4,30 +4,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
-import { toolsCommand } from './toolsCommand.js';
-import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
-import { MessageType } from '../types.js';
-import type { Tool } from '@tram-ai/tram-core';
+import { describe, it, expect } from "vitest";
+import { toolsCommand } from "./toolsCommand.js";
+import { createMockCommandContext } from "../../test-utils/mockCommandContext.js";
+import { MessageType } from "../types.js";
+import type { Tool } from "@tram-ai/tram-core";
 
 // Mock tools for testing
 const mockTools = [
   {
-    name: 'file-reader',
-    displayName: 'File Reader',
-    description: 'Reads files from the local system.',
+    name: "file-reader",
+    displayName: "File Reader",
+    description: "Reads files from the local system.",
     schema: {},
   },
   {
-    name: 'code-editor',
-    displayName: 'Code Editor',
-    description: 'Edits code files.',
+    name: "code-editor",
+    displayName: "Code Editor",
+    description: "Edits code files.",
     schema: {},
   },
 ] as Tool[];
 
-describe('toolsCommand', () => {
-  it('should display an error if the tool registry is unavailable', async () => {
+describe("toolsCommand", () => {
+  it("should display an error if the tool registry is unavailable", async () => {
     const mockContext = createMockCommandContext({
       services: {
         config: {
@@ -36,13 +36,13 @@ describe('toolsCommand', () => {
       },
     });
 
-    if (!toolsCommand.action) throw new Error('Action not defined');
-    await toolsCommand.action(mockContext, '');
+    if (!toolsCommand.action) throw new Error("Action not defined");
+    await toolsCommand.action(mockContext, "");
 
     expect(mockContext.ui.addItem).toHaveBeenCalledWith(
       {
         type: MessageType.ERROR,
-        text: 'Could not retrieve tool registry.',
+        text: "Could not retrieve tool registry.",
       },
       expect.any(Number),
     );
@@ -57,8 +57,8 @@ describe('toolsCommand', () => {
       },
     });
 
-    if (!toolsCommand.action) throw new Error('Action not defined');
-    await toolsCommand.action(mockContext, '');
+    if (!toolsCommand.action) throw new Error("Action not defined");
+    await toolsCommand.action(mockContext, "");
 
     expect(mockContext.ui.addItem).toHaveBeenCalledWith(
       {
@@ -70,7 +70,7 @@ describe('toolsCommand', () => {
     );
   });
 
-  it('should list tools without descriptions by default', async () => {
+  it("should list tools without descriptions by default", async () => {
     const mockContext = createMockCommandContext({
       services: {
         config: {
@@ -79,15 +79,15 @@ describe('toolsCommand', () => {
       },
     });
 
-    if (!toolsCommand.action) throw new Error('Action not defined');
-    await toolsCommand.action(mockContext, '');
+    if (!toolsCommand.action) throw new Error("Action not defined");
+    await toolsCommand.action(mockContext, "");
 
     const [message] = (mockContext.ui.addItem as vi.Mock).mock.calls[0];
     expect(message.type).toBe(MessageType.TOOLS_LIST);
     expect(message.showDescriptions).toBe(false);
     expect(message.tools).toHaveLength(2);
-    expect(message.tools[0].displayName).toBe('File Reader');
-    expect(message.tools[1].displayName).toBe('Code Editor');
+    expect(message.tools[0].displayName).toBe("File Reader");
+    expect(message.tools[1].displayName).toBe("Code Editor");
   });
 
   it('should list tools with descriptions when "desc" arg is passed', async () => {
@@ -99,16 +99,16 @@ describe('toolsCommand', () => {
       },
     });
 
-    if (!toolsCommand.action) throw new Error('Action not defined');
-    await toolsCommand.action(mockContext, 'desc');
+    if (!toolsCommand.action) throw new Error("Action not defined");
+    await toolsCommand.action(mockContext, "desc");
 
     const [message] = (mockContext.ui.addItem as vi.Mock).mock.calls[0];
     expect(message.type).toBe(MessageType.TOOLS_LIST);
     expect(message.showDescriptions).toBe(true);
     expect(message.tools).toHaveLength(2);
     expect(message.tools[0].description).toBe(
-      'Reads files from the local system.',
+      "Reads files from the local system.",
     );
-    expect(message.tools[1].description).toBe('Edits code files.');
+    expect(message.tools[1].description).toBe("Edits code files.");
   });
 });

@@ -11,23 +11,23 @@
  * optionally `npm run prepare:package`).
  */
 
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import fs from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import fs from "node:fs/promises";
+import { existsSync } from "node:fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const extensionRoot = path.resolve(__dirname, '..');
-const repoRoot = path.resolve(extensionRoot, '..', '..');
-const rootDistDir = path.join(repoRoot, 'dist');
-const extensionDistDir = path.join(extensionRoot, 'dist');
-const bundledCliDir = path.join(extensionDistDir, 'tram-cli');
+const extensionRoot = path.resolve(__dirname, "..");
+const repoRoot = path.resolve(extensionRoot, "..", "..");
+const rootDistDir = path.join(repoRoot, "dist");
+const extensionDistDir = path.join(extensionRoot, "dist");
+const bundledCliDir = path.join(extensionDistDir, "tram-cli");
 
 async function main() {
-  const cliJs = path.join(rootDistDir, 'cli.js');
-  const vendorDir = path.join(rootDistDir, 'vendor');
+  const cliJs = path.join(rootDistDir, "cli.js");
+  const vendorDir = path.join(rootDistDir, "vendor");
 
   if (!existsSync(cliJs) || !existsSync(vendorDir)) {
     throw new Error(
@@ -36,10 +36,10 @@ async function main() {
   }
 
   await fs.mkdir(extensionDistDir, { recursive: true });
-  const existingNodeModules = path.join(bundledCliDir, 'node_modules');
+  const existingNodeModules = path.join(bundledCliDir, "node_modules");
   const tmpNodeModules = path.join(
     extensionDistDir,
-    'tram-cli.node_modules.tmp',
+    "tram-cli.node_modules.tmp",
   );
   const keepNodeModules = existsSync(existingNodeModules);
 

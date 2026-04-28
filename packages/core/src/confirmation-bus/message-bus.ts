@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { randomUUID } from 'node:crypto';
-import { EventEmitter } from 'node:events';
-import { MessageBusType, type Message } from './types.js';
-import { safeJsonStringify } from '../utils/safeJsonStringify.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import { randomUUID } from "node:crypto";
+import { EventEmitter } from "node:events";
+import { MessageBusType, type Message } from "./types.js";
+import { safeJsonStringify } from "../utils/safeJsonStringify.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('TRUSTED_HOOKS');
+const debugLogger = createDebugLogger("TRUSTED_HOOKS");
 
 export class MessageBus extends EventEmitter {
   constructor(private readonly debug = false) {
@@ -25,7 +25,7 @@ export class MessageBus extends EventEmitter {
 
     if (
       message.type === MessageBusType.TOOL_CONFIRMATION_REQUEST &&
-      !('correlationId' in message)
+      !("correlationId" in message)
     ) {
       return false;
     }
@@ -63,19 +63,19 @@ export class MessageBus extends EventEmitter {
         this.emitMessage(message);
       }
     } catch (error) {
-      this.emit('error', error);
+      this.emit("error", error);
     }
   }
 
   subscribe<T extends Message>(
-    type: T['type'],
+    type: T["type"],
     listener: (message: T) => void,
   ): void {
     this.on(type, listener);
   }
 
   unsubscribe<T extends Message>(
-    type: T['type'],
+    type: T["type"],
     listener: (message: T) => void,
   ): void {
     this.off(type, listener);
@@ -87,8 +87,8 @@ export class MessageBus extends EventEmitter {
    * The correlation ID is generated internally and added to the request
    */
   async request<TRequest extends Message, TResponse extends Message>(
-    request: Omit<TRequest, 'correlationId'>,
-    responseType: TResponse['type'],
+    request: Omit<TRequest, "correlationId">,
+    responseType: TResponse["type"],
     timeoutMs: number = 60000,
     signal?: AbortSignal,
   ): Promise<TResponse> {
@@ -97,7 +97,7 @@ export class MessageBus extends EventEmitter {
     return new Promise<TResponse>((resolve, reject) => {
       // Check if already aborted
       if (signal?.aborted) {
-        reject(new Error('Request aborted'));
+        reject(new Error("Request aborted"));
         return;
       }
 
@@ -110,23 +110,23 @@ export class MessageBus extends EventEmitter {
         clearTimeout(timeoutId);
         this.unsubscribe(responseType, responseHandler);
         if (signal) {
-          signal.removeEventListener('abort', abortHandler);
+          signal.removeEventListener("abort", abortHandler);
         }
       };
 
       const abortHandler = () => {
         cleanup();
-        reject(new Error('Request aborted'));
+        reject(new Error("Request aborted"));
       };
 
       if (signal) {
-        signal.addEventListener('abort', abortHandler);
+        signal.addEventListener("abort", abortHandler);
       }
 
       const responseHandler = (response: TResponse) => {
         // Check if this response matches our request
         if (
-          'correlationId' in response &&
+          "correlationId" in response &&
           response.correlationId === correlationId
         ) {
           cleanup();

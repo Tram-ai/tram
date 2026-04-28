@@ -11,18 +11,21 @@ import type {
   GenerateContentResponse,
   PartListUnion,
   Tool,
-} from '@google/genai';
+} from "@google/genai";
 
 // Config
-import { ApprovalMode, type Config } from '../config/config.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import { microcompactHistory } from '../services/microcompaction/microcompact.js';
+import {
+  ApprovalMode,
+  type Config,
+  type ModelRequestTarget,
+} from "../config/config.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import { microcompactHistory } from "../services/microcompaction/microcompact.js";
 
-const debugLogger = createDebugLogger('CLIENT');
+const debugLogger = createDebugLogger("CLIENT");
 
 // Core modules
-import type { ContentGenerator } from './contentGenerator.js';
-import { GeminiChat } from './geminiChat.js';
+import { GeminiChat } from "./geminiChat.js";
 import {
   getArenaSystemReminder,
   getCoreSystemPrompt,
@@ -31,78 +34,78 @@ import {
   getPersistentMemorySystemReminder,
   getProactiveInitSystemReminder,
   getSubagentSystemReminder,
-} from './prompts.js';
+} from "./prompts.js";
 import {
   CompressionStatus,
   GeminiEventType,
   Turn,
   type ChatCompressionInfo,
   type ServerGeminiStreamEvent,
-} from './turn.js';
+} from "./turn.js";
 
 // Services
 import {
   ChatCompressionService,
   COMPRESSION_PRESERVE_THRESHOLD,
   COMPRESSION_TOKEN_THRESHOLD,
-} from '../services/chatCompressionService.js';
-import { LoopDetectionService } from '../services/loopDetectionService.js';
+} from "../services/chatCompressionService.js";
+import { LoopDetectionService } from "../services/loopDetectionService.js";
 
 // Tools
-import { AgentTool } from '../tools/agent.js';
+import { AgentTool } from "../tools/agent.js";
 
 // Telemetry
 import {
   NextSpeakerCheckEvent,
   logNextSpeakerCheck,
-} from '../telemetry/index.js';
-import { uiTelemetryService } from '../telemetry/uiTelemetry.js';
+} from "../telemetry/index.js";
+import { uiTelemetryService } from "../telemetry/uiTelemetry.js";
 
 // Forked query cache
 import {
   saveCacheSafeParams,
   clearCacheSafeParams,
-} from '../followup/forkedQuery.js';
+} from "../followup/forkedQuery.js";
 
 // Utilities
 import {
   getDirectoryContextString,
   getInitialChatHistory,
-} from '../utils/environmentContext.js';
+} from "../utils/environmentContext.js";
 import {
   buildApiHistoryFromConversation,
   replayUiTelemetryFromConversation,
-} from '../services/sessionService.js';
-import { reportError } from '../utils/errorReporting.js';
-import { getErrorMessage } from '../utils/errors.js';
-import { checkNextSpeaker } from '../utils/nextSpeakerChecker.js';
-import { flatMapTextParts } from '../utils/partUtils.js';
-import { promptIdContext } from '../utils/promptIdContext.js';
-import { retryWithBackoff } from '../utils/retry.js';
+} from "../services/sessionService.js";
+import { reportError } from "../utils/errorReporting.js";
+import { getErrorMessage } from "../utils/errors.js";
+import { checkNextSpeaker } from "../utils/nextSpeakerChecker.js";
+import { flatMapTextParts } from "../utils/partUtils.js";
+import { promptIdContext } from "../utils/promptIdContext.js";
+import { retryWithBackoff } from "../utils/retry.js";
 
 // Hook types and utilities
 import {
   MessageBusType,
   type HookExecutionRequest,
   type HookExecutionResponse,
-} from '../confirmation-bus/types.js';
-import { partToString } from '../utils/partUtils.js';
-import { createHookOutput } from '../hooks/types.js';
+} from "../confirmation-bus/types.js";
+import { partToString } from "../utils/partUtils.js";
+import { createHookOutput } from "../hooks/types.js";
 
 // IDE integration
-import { ideContextStore } from '../ide/ideContext.js';
-import { type File, type IdeContext } from '../ide/types.js';
-import type { StopHookOutput } from '../hooks/types.js';
+import { ideContextStore } from "../ide/ideContext.js";
+import { type File, type IdeContext } from "../ide/types.js";
+import type { StopHookOutput } from "../hooks/types.js";
 
 const MAX_TURNS = 100;
 
 export enum SendMessageType {
-  UserQuery = 'userQuery',
-  ToolResult = 'toolResult',
-  Retry = 'retry',
-  Hook = 'hook',
+  UserQuery = "userQuery",
+  ToolResult = "toolResult",
+  Retry = "retry",
+  Hook = "hook",
   /** Cron-fired prompt. Behaves like UserQuery but skips UserPromptSubmit hook. */
-  Cron = 'cron',
+  Cron = "cron",
 }
 
 export interface SendMessageOptions {
@@ -124,6 +127,16 @@ export class GeminiClient {
   private lastPromptId: string | undefined = undefined;
   private lastSentIdeContext: IdeContext | undefined;
   private forceFullIdeContext = true;
+
+  /**
+   * Cumulative input token threshold for deferred compression.
+   */
+  static readonly CUMULATIVE_TOKEN_COMPRESSION_THRESHOLD = 500_000;
+
+  /**
+   * Whether deferred compression is pending.
+   */
+  private deferredCompressionPending = false;
 
   /**
    * At any point in this conversation, was compression triggered without
@@ -172,20 +185,13 @@ export class GeminiClient {
     }
   }
 
-  private getContentGeneratorOrFail(): ContentGenerator {
-    if (!this.config.getContentGenerator()) {
-      throw new Error('Content generator not initialized');
-    }
-    return this.config.getContentGenerator();
-  }
-
   async addHistory(content: Content) {
     this.getChat().addHistory(content);
   }
 
   getChat(): GeminiChat {
     if (!this.chat) {
-      throw new Error('Chat not initialized');
+      throw new Error("Chat not initialized");
     }
     return this.chat;
   }
@@ -239,7 +245,7 @@ export class GeminiClient {
     }
 
     this.getChat().addHistory({
-      role: 'user',
+      role: "user",
       parts: [{ text: await getDirectoryContextString(this.config) }],
     });
   }
@@ -248,6 +254,7 @@ export class GeminiClient {
     const userMemory = this.config.getUserMemory();
     const overrideSystemPrompt = this.config.getSystemPrompt();
     const appendSystemPrompt = this.config.getAppendSystemPrompt();
+    const omitToolInstructions = this.config.getOmitToolInstructions();
 
     if (overrideSystemPrompt) {
       return getCustomSystemPrompt(
@@ -261,6 +268,7 @@ export class GeminiClient {
       userMemory,
       this.config.getModel(),
       appendSystemPrompt,
+      omitToolInstructions,
     );
   }
 
@@ -291,9 +299,9 @@ export class GeminiClient {
     } catch (error) {
       await reportError(
         error,
-        'Error initializing chat session.',
+        "Error initializing chat session.",
         history,
-        'startChat',
+        "startChat",
       );
       throw new Error(`Failed to initialize chat: ${getErrorMessage(error)}`);
     }
@@ -319,7 +327,7 @@ export class GeminiClient {
       const contextLines: string[] = [];
 
       if (activeFile) {
-        contextLines.push('Active file:');
+        contextLines.push("Active file:");
         contextLines.push(`  Path: ${activeFile.path}`);
         if (activeFile.cursor) {
           contextLines.push(
@@ -327,18 +335,18 @@ export class GeminiClient {
           );
         }
         if (activeFile.selectedText) {
-          contextLines.push('  Selected text:');
-          contextLines.push('```');
+          contextLines.push("  Selected text:");
+          contextLines.push("```");
           contextLines.push(activeFile.selectedText);
-          contextLines.push('```');
+          contextLines.push("```");
         }
       }
 
       if (otherOpenFiles.length > 0) {
         if (contextLines.length > 0) {
-          contextLines.push('');
+          contextLines.push("");
         }
-        contextLines.push('Other open files:');
+        contextLines.push("Other open files:");
         for (const filePath of otherOpenFiles) {
           contextLines.push(`  - ${filePath}`);
         }
@@ -350,10 +358,10 @@ export class GeminiClient {
 
       const contextParts = [
         "Here is the user's editor context. This is for your information only.",
-        contextLines.join('\n'),
+        contextLines.join("\n"),
       ];
 
-      debugLogger.debug(contextParts.join('\n'));
+      debugLogger.debug(contextParts.join("\n"));
       return {
         contextParts,
         newIdeContext: currentIdeContext,
@@ -381,7 +389,7 @@ export class GeminiClient {
         }
       }
       if (openedFiles.length > 0) {
-        changeLines.push('Files opened:');
+        changeLines.push("Files opened:");
         for (const filePath of openedFiles) {
           changeLines.push(`  - ${filePath}`);
         }
@@ -395,9 +403,9 @@ export class GeminiClient {
       }
       if (closedFiles.length > 0) {
         if (changeLines.length > 0) {
-          changeLines.push('');
+          changeLines.push("");
         }
-        changeLines.push('Files closed:');
+        changeLines.push("Files closed:");
         for (const filePath of closedFiles) {
           changeLines.push(`  - ${filePath}`);
         }
@@ -413,9 +421,9 @@ export class GeminiClient {
       if (currentActiveFile) {
         if (!lastActiveFile || lastActiveFile.path !== currentActiveFile.path) {
           if (changeLines.length > 0) {
-            changeLines.push('');
+            changeLines.push("");
           }
-          changeLines.push('Active file changed:');
+          changeLines.push("Active file changed:");
           changeLines.push(`  Path: ${currentActiveFile.path}`);
           if (currentActiveFile.cursor) {
             changeLines.push(
@@ -423,10 +431,10 @@ export class GeminiClient {
             );
           }
           if (currentActiveFile.selectedText) {
-            changeLines.push('  Selected text:');
-            changeLines.push('```');
+            changeLines.push("  Selected text:");
+            changeLines.push("```");
             changeLines.push(currentActiveFile.selectedText);
-            changeLines.push('```');
+            changeLines.push("```");
           }
         } else {
           const lastCursor = lastActiveFile.cursor;
@@ -438,39 +446,39 @@ export class GeminiClient {
               lastCursor.character !== currentCursor.character)
           ) {
             if (changeLines.length > 0) {
-              changeLines.push('');
+              changeLines.push("");
             }
-            changeLines.push('Cursor moved:');
+            changeLines.push("Cursor moved:");
             changeLines.push(`  Path: ${currentActiveFile.path}`);
             changeLines.push(
               `  New position: line ${currentCursor.line}, character ${currentCursor.character}`,
             );
           }
 
-          const lastSelectedText = lastActiveFile.selectedText || '';
-          const currentSelectedText = currentActiveFile.selectedText || '';
+          const lastSelectedText = lastActiveFile.selectedText || "";
+          const currentSelectedText = currentActiveFile.selectedText || "";
           if (lastSelectedText !== currentSelectedText) {
             if (changeLines.length > 0) {
-              changeLines.push('');
+              changeLines.push("");
             }
-            changeLines.push('Selection changed:');
+            changeLines.push("Selection changed:");
             changeLines.push(`  Path: ${currentActiveFile.path}`);
             if (currentSelectedText) {
-              changeLines.push('  Selected text:');
-              changeLines.push('```');
+              changeLines.push("  Selected text:");
+              changeLines.push("```");
               changeLines.push(currentSelectedText);
-              changeLines.push('```');
+              changeLines.push("```");
             } else {
-              changeLines.push('  Selected text: (none)');
+              changeLines.push("  Selected text: (none)");
             }
           }
         }
       } else if (lastActiveFile) {
         if (changeLines.length > 0) {
-          changeLines.push('');
+          changeLines.push("");
         }
-        changeLines.push('Active file changed:');
-        changeLines.push('  No active file');
+        changeLines.push("Active file changed:");
+        changeLines.push("  No active file");
         changeLines.push(`  Previous path: ${lastActiveFile.path}`);
       }
 
@@ -480,10 +488,10 @@ export class GeminiClient {
 
       const contextParts = [
         "Here is a summary of changes in the user's editor context. This is for your information only.",
-        changeLines.join('\n'),
+        changeLines.join("\n"),
       ];
 
-      debugLogger.debug(contextParts.join('\n'));
+      debugLogger.debug(contextParts.join("\n"));
       return {
         contextParts,
         newIdeContext: currentIdeContext,
@@ -512,7 +520,7 @@ export class GeminiClient {
       messageType !== SendMessageType.Cron &&
       hooksEnabled &&
       messageBus &&
-      this.config.hasHooksForEvent('UserPromptSubmit')
+      this.config.hasHooksForEvent("UserPromptSubmit")
     ) {
       const promptText = partToString(request);
       const response = await messageBus.request<
@@ -521,7 +529,7 @@ export class GeminiClient {
       >(
         {
           type: MessageBusType.HOOK_EXECUTION_REQUEST,
-          eventName: 'UserPromptSubmit',
+          eventName: "UserPromptSubmit",
           input: {
             prompt: promptText,
           },
@@ -529,7 +537,7 @@ export class GeminiClient {
         MessageBusType.HOOK_EXECUTION_RESPONSE,
       );
       const hookOutput = response.output
-        ? createHookOutput('UserPromptSubmit', response.output)
+        ? createHookOutput("UserPromptSubmit", response.output)
         : undefined;
 
       if (
@@ -584,7 +592,7 @@ export class GeminiClient {
       }
       if (this.thinkingClearLatched) {
         this.getChat().stripThoughtsFromHistoryKeepRecent(1);
-        debugLogger.debug('Stripped old thinking blocks (keeping last 1 turn)');
+        debugLogger.debug("Stripped old thinking blocks (keeping last 1 turn)");
       }
 
       // Idle cleanup: clear old tool results when idle > threshold.
@@ -643,7 +651,7 @@ export class GeminiClient {
             limit: sessionTokenLimit,
             message:
               `Session token limit exceeded: ${lastPromptTokenCount} tokens > ${sessionTokenLimit} limit. ` +
-              'Please start a new session or increase the sessionTokenLimit in your settings.json.',
+              "Please start a new session or increase the sessionTokenLimit in your settings.json.",
           },
         };
         return new Turn(this.getChat(), prompt_id);
@@ -660,8 +668,8 @@ export class GeminiClient {
       history.length > 0 ? history[history.length - 1] : undefined;
     const hasPendingToolCall =
       !!lastMessage &&
-      lastMessage.role === 'model' &&
-      (lastMessage.parts?.some((p) => 'functionCall' in p) || false);
+      lastMessage.role === "model" &&
+      (lastMessage.parts?.some((p) => "functionCall" in p) || false);
 
     if (this.config.getIdeMode() && !hasPendingToolCall) {
       const { contextParts, newIdeContext } = this.getIdeContextParts(
@@ -669,8 +677,8 @@ export class GeminiClient {
       );
       if (contextParts.length > 0) {
         this.getChat().addHistory({
-          role: 'user',
-          parts: [{ text: contextParts.join('\n') }],
+          role: "user",
+          parts: [{ text: contextParts.join("\n") }],
         });
       }
       this.lastSentIdeContext = newIdeContext;
@@ -704,16 +712,14 @@ export class GeminiClient {
       const systemReminders = [];
 
       const latestUserMemory = this.config.getUserMemory();
-      const persistentMemoryReminder = getPersistentMemorySystemReminder(
-        latestUserMemory,
-      );
+      const persistentMemoryReminder =
+        getPersistentMemorySystemReminder(latestUserMemory);
       if (persistentMemoryReminder) {
         systemReminders.push(persistentMemoryReminder);
       }
 
-      const proactiveInitReminder = getProactiveInitSystemReminder(
-        latestUserMemory,
-      );
+      const proactiveInitReminder =
+        getProactiveInitSystemReminder(latestUserMemory);
       if (proactiveInitReminder) {
         systemReminders.push(proactiveInitReminder);
       }
@@ -723,7 +729,7 @@ export class GeminiClient {
         .getToolRegistry()
         .getTool(AgentTool.Name);
       const subagents = (await this.config.getSubagentManager().listSubagents())
-        .filter((subagent) => subagent.level !== 'builtin')
+        .filter((subagent) => subagent.level !== "builtin")
         .map((subagent) => subagent.name);
 
       if (hasAgentTool && subagents.length > 0) {
@@ -758,7 +764,7 @@ export class GeminiClient {
         if (this.loopDetector.addAndCheck(event)) {
           yield { type: GeminiEventType.LoopDetected };
           if (arenaAgentClient) {
-            await arenaAgentClient.reportError('Loop detected');
+            await arenaAgentClient.reportError("Loop detected");
           }
           this.lastApiCompletionTimestamp = Date.now();
           return turn;
@@ -776,7 +782,7 @@ export class GeminiClient {
           const errorMsg =
             event.value instanceof Error
               ? event.value.message
-              : 'Unknown error';
+              : "Unknown error";
           await arenaAgentClient.reportError(errorMsg);
         }
         this.lastApiCompletionTimestamp = Date.now();
@@ -795,18 +801,18 @@ export class GeminiClient {
       !turn.pendingToolCalls.length &&
       signal &&
       !signal.aborted &&
-      this.config.hasHooksForEvent('Stop')
+      this.config.hasHooksForEvent("Stop")
     ) {
       // Get response text from the chat history
       const history = this.getHistory();
       const lastModelMessage = history
-        .filter((msg) => msg.role === 'model')
+        .filter((msg) => msg.role === "model")
         .pop();
       const responseText =
         lastModelMessage?.parts
-          ?.filter((p): p is { text: string } => 'text' in p)
+          ?.filter((p): p is { text: string } => "text" in p)
           .map((p) => p.text)
-          .join('') || '[no response text]';
+          .join("") || "[no response text]";
 
       const response = await messageBus.request<
         HookExecutionRequest,
@@ -814,7 +820,7 @@ export class GeminiClient {
       >(
         {
           type: MessageBusType.HOOK_EXECUTION_REQUEST,
-          eventName: 'Stop',
+          eventName: "Stop",
           input: {
             stop_hook_active: true,
             last_assistant_message: responseText,
@@ -830,7 +836,7 @@ export class GeminiClient {
       }
 
       const hookOutput = response.output
-        ? createHookOutput('Stop', response.output)
+        ? createHookOutput("Stop", response.output)
         : undefined;
 
       const stopOutput = hookOutput as StopHookOutput | undefined;
@@ -915,29 +921,25 @@ export class GeminiClient {
         this.config,
         new NextSpeakerCheckEvent(
           prompt_id,
-          turn.finishReason?.toString() || '',
-          nextSpeakerCheck?.next_speaker || '',
+          turn.finishReason?.toString() || "",
+          nextSpeakerCheck?.next_speaker || "",
         ),
       );
-      if (nextSpeakerCheck?.next_speaker === 'model') {
-        const nextRequest = [{ text: 'Please continue.' }];
+      if (nextSpeakerCheck?.next_speaker === "model") {
+        const nextRequest = [{ text: "Please continue." }];
         // This recursive call's events will be yielded out, and the final
         // turn object from the recursive call will be returned.
-        return yield* this.sendMessageStream(
-          nextRequest,
-          signal,
-          prompt_id,
-        );
+        return yield* this.sendMessageStream(nextRequest, signal, prompt_id);
         logNextSpeakerCheck(
           this.config,
           new NextSpeakerCheckEvent(
             prompt_id,
-            turn.finishReason?.toString() || '',
-            nextSpeakerCheck?.next_speaker || '',
+            turn.finishReason?.toString() || "",
+            nextSpeakerCheck?.next_speaker || "",
           ),
         );
-        if (nextSpeakerCheck?.next_speaker === 'model') {
-          const nextRequest = [{ text: 'Please continue.' }];
+        if (nextSpeakerCheck?.next_speaker === "model") {
+          const nextRequest = [{ text: "Please continue." }];
           // This recursive call's events will be yielded out, and the final
           // turn object from the recursive call will be returned.
           return yield* this.sendMessageStream(
@@ -953,8 +955,12 @@ export class GeminiClient {
 
     // Check for deferred compression based on cumulative input token threshold.
     // When cumulative input tokens reach the threshold, mark compression as pending.
-    const cumulativeInputTokens = uiTelemetryService.getCumulativeInputTokenCount();
-    if (cumulativeInputTokens >= GeminiClient.CUMULATIVE_TOKEN_COMPRESSION_THRESHOLD) {
+    const cumulativeInputTokens =
+      uiTelemetryService.getCumulativeInputTokenCount();
+    if (
+      cumulativeInputTokens >=
+      GeminiClient.CUMULATIVE_TOKEN_COMPRESSION_THRESHOLD
+    ) {
       this.deferredCompressionPending = true;
     }
 
@@ -963,11 +969,16 @@ export class GeminiClient {
     if (this.deferredCompressionPending && !turn.pendingToolCalls.length) {
       this.deferredCompressionPending = false;
       const deferredCompressed = await this.tryCompressChat(prompt_id, false);
-      if (deferredCompressed.compressionStatus === CompressionStatus.COMPRESSED) {
-        yield { type: GeminiEventType.ChatCompressed, value: deferredCompressed };
+      if (
+        deferredCompressed.compressionStatus === CompressionStatus.COMPRESSED
+      ) {
+        yield {
+          type: GeminiEventType.ChatCompressed,
+          value: deferredCompressed,
+        };
         debugLogger.debug(
           `Deferred compression triggered at ${cumulativeInputTokens} cumulative input tokens. ` +
-          `Compressed from ${deferredCompressed.originalTokenCount} to ${deferredCompressed.newTokenCount} tokens.`,
+            `Compressed from ${deferredCompressed.originalTokenCount} to ${deferredCompressed.newTokenCount} tokens.`,
         );
       } else if (arenaAgentClient) {
         // No continuation needed — agent completed its task
@@ -1017,7 +1028,6 @@ export class GeminiClient {
 
     try {
       const userMemory = this.config.getUserMemory();
-      const basePrompt = getCoreSystemPrompt(this.config.getModel());
       const finalSystemInstruction = generationConfig.systemInstruction
         ? getCustomSystemPrompt(generationConfig.systemInstruction, userMemory)
         : this.getMainSessionSystemInstruction();
@@ -1028,22 +1038,60 @@ export class GeminiClient {
         systemInstruction: finalSystemInstruction,
       };
 
-      const apiCall = () => {
-        currentAttemptModel = model;
+      const seenTargets = new Set<string>();
+      let lastError: unknown = new Error(
+        "Failed to generate content with all configured models.",
+      );
 
-        return this.getContentGeneratorOrFail().generateContent(
-          {
-            model,
-            config: requestConfig,
-            contents,
-          },
-          promptId,
-        );
-      };
-      const result = await retryWithBackoff(apiCall, {
-        authType: this.config.getContentGeneratorConfig()?.authType,
-      });
-      return result;
+      for (const reference of [model, ...this.config.getFallbackModels()]) {
+        let target: ModelRequestTarget;
+        try {
+          target = await this.config.createRequestModelTarget(reference);
+        } catch (error) {
+          lastError = error;
+          if (abortSignal.aborted) {
+            throw error;
+          }
+          debugLogger.warn(
+            `Skipping fallback model ${reference}: ${getErrorMessage(error)}`,
+          );
+          continue;
+        }
+
+        if (seenTargets.has(target.key)) {
+          continue;
+        }
+        seenTargets.add(target.key);
+
+        currentAttemptModel = target.reference;
+
+        try {
+          const apiCall = () =>
+            target.contentGenerator.generateContent(
+              {
+                model: target.model,
+                config: requestConfig,
+                contents,
+              },
+              promptId,
+            );
+
+          return await retryWithBackoff(apiCall, {
+            authType: target.contentGeneratorConfig.authType,
+          });
+        } catch (error) {
+          lastError = error;
+          if (abortSignal.aborted) {
+            throw error;
+          }
+
+          debugLogger.warn(
+            `Model request failed for ${target.reference}; trying next fallback if available: ${getErrorMessage(error)}`,
+          );
+        }
+      }
+
+      throw lastError;
     } catch (error: unknown) {
       if (abortSignal.aborted) {
         throw error;
@@ -1056,7 +1104,7 @@ export class GeminiClient {
           requestContents: contents,
           requestConfig: generationConfig,
         },
-        'generateContent-api',
+        "generateContent-api",
       );
       throw new Error(
         `Failed to generate content with model ${currentAttemptModel}: ${getErrorMessage(error)}`,

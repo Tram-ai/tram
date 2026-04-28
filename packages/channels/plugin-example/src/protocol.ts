@@ -4,7 +4,7 @@
 
 /** Server → Plugin Channel (WebSocket) */
 export interface InboundMessage {
-  type: 'inbound';
+  type: "inbound";
   messageId: string;
   senderId: string;
   senderName: string;
@@ -14,7 +14,7 @@ export interface InboundMessage {
 
 /** Plugin Channel → Server (WebSocket) — streaming chunk */
 export interface ChunkMessage {
-  type: 'chunk';
+  type: "chunk";
   messageId: string;
   chatId: string;
   text: string;
@@ -22,7 +22,7 @@ export interface ChunkMessage {
 
 /** Plugin Channel → Server (WebSocket) — final response */
 export interface OutboundMessage {
-  type: 'outbound';
+  type: "outbound";
   messageId: string;
   chatId: string;
   text: string;

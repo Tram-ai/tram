@@ -13,15 +13,15 @@ export function safeLiteralReplace(
   oldString: string,
   newString: string,
 ): string {
-  if (oldString === '' || !str.includes(oldString)) {
+  if (oldString === "" || !str.includes(oldString)) {
     return str;
   }
 
-  if (!newString.includes('$')) {
+  if (!newString.includes("$")) {
     return str.replaceAll(oldString, newString);
   }
 
-  const escapedNewString = newString.replaceAll('$', '$$$$');
+  const escapedNewString = newString.replaceAll("$", "$$$$");
   return str.replaceAll(oldString, escapedNewString);
 }
 
@@ -66,10 +66,10 @@ export function isBinary(
  */
 export function normalizeContent(content: string): string {
   // Strip UTF-8 BOM to ensure string processing starts at the first real character.
-  let normalized = content.replace(/^\uFEFF/, '');
+  let normalized = content.replace(/^\uFEFF/, "");
 
   // Normalize line endings to LF (\n).
-  normalized = normalized.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  normalized = normalized.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
   return normalized;
 }

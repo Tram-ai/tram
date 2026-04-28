@@ -10,9 +10,9 @@ import {
   Kind,
   type ToolInvocation,
   type ToolResult,
-} from './tools.js';
-import { ToolDisplayNames, ToolNames } from './tool-names.js';
-import { safeJsonStringify } from '../utils/safeJsonStringify.js';
+} from "./tools.js";
+import { ToolDisplayNames, ToolNames } from "./tool-names.js";
+import { safeJsonStringify } from "../utils/safeJsonStringify.js";
 
 interface OpenApiEntry {
   name: string;
@@ -24,39 +24,46 @@ interface OpenApiEntry {
 
 const COMMON_OPENAPI_ENTRIES: OpenApiEntry[] = [
   {
-    name: 'Modrinth API',
-    category: 'gaming',
-    specUrl: 'https://docs.modrinth.com/openapi.yaml',
-    docsUrl: 'https://docs.modrinth.com/',
-    notes: 'Minecraft mod, plugin, and modpack discovery and management API for server deployment.',
+    name: "Modrinth API",
+    category: "gaming",
+    specUrl: "https://docs.modrinth.com/openapi.yaml",
+    docsUrl: "https://docs.modrinth.com/",
+    notes:
+      "Minecraft mod, plugin, and modpack discovery and management API for server deployment.",
   },
   {
-    name: 'CurseForge API',
-    category: 'gaming',
-    specUrl: 'https://raw.githubusercontent.com/aternosorg/php-curseforge-api/master/openapi.yaml',
-    docsUrl: 'https://docs.curseforge.com/',
-    notes: 'CurseForge mod and plugin API for Minecraft server resource management. Use curseforgeapi.912778.xyz instead of api.curseforge.com to avoid API key requirement.',
+    name: "CurseForge API",
+    category: "gaming",
+    specUrl:
+      "https://raw.githubusercontent.com/aternosorg/php-curseforge-api/master/openapi.yaml",
+    docsUrl: "https://docs.curseforge.com/",
+    notes:
+      "CurseForge mod and plugin API for Minecraft server resource management. Use curseforgeapi.912778.xyz instead of api.curseforge.com to avoid API key requirement.",
   },
   {
-    name: 'MCJars API',
-    category: 'gaming',
-    specUrl: 'https://mcjars.app/openapi.json',
-    docsUrl: 'https://mcjars.app/',
-    notes: 'Minecraft jar file and version information API for server deployment.',
+    name: "MCJars API",
+    category: "gaming",
+    specUrl: "https://mcjars.app/openapi.json",
+    docsUrl: "https://mcjars.app/",
+    notes:
+      "Minecraft jar file and version information API for server deployment.",
   },
   {
-    name: 'SpiGet API',
-    category: 'gaming',
-    specUrl: 'https://raw.githubusercontent.com/SpiGetOrg/Documentation/master/swagger.yml',
-    docsUrl: 'https://spiget.org/',
-    notes: 'Spigot/SpigotMC resource API for Bukkit/Spigot plugins discovery and download.',
+    name: "SpiGet API",
+    category: "gaming",
+    specUrl:
+      "https://raw.githubusercontent.com/SpiGetOrg/Documentation/master/swagger.yml",
+    docsUrl: "https://spiget.org/",
+    notes:
+      "Spigot/SpigotMC resource API for Bukkit/Spigot plugins discovery and download.",
   },
   {
-    name: 'Hangar API',
-    category: 'gaming',
-    specUrl: 'https://hangar.papermc.io/v3/api-docs/public',
-    docsUrl: 'https://hangar.papermc.io/',
-    notes: 'PaperMC Hangar plugin repository API for Paper/Velocity/Waterfall plugins.',
+    name: "Hangar API",
+    category: "gaming",
+    specUrl: "https://hangar.papermc.io/v3/api-docs/public",
+    docsUrl: "https://hangar.papermc.io/",
+    notes:
+      "PaperMC Hangar plugin repository API for Paper/Velocity/Waterfall plugins.",
   },
 ];
 
@@ -76,7 +83,7 @@ class OpenApiLinkListInvocation extends BaseToolInvocation<
       this.params.category ? `category=${this.params.category}` : null,
       this.params.maxResults ? `maxResults=${this.params.maxResults}` : null,
     ].filter(Boolean);
-    const query = queryParts.length > 0 ? queryParts.join(', ') : 'all entries';
+    const query = queryParts.length > 0 ? queryParts.join(", ") : "all entries";
     return `List Minecraft game server API specifications (${query}).`;
   }
 
@@ -104,14 +111,14 @@ class OpenApiLinkListInvocation extends BaseToolInvocation<
     if (entries.length === 0) {
       return {
         llmContent:
-          'No matching Minecraft game server API links were found for the provided filters.',
+          "No matching Minecraft game server API links were found for the provided filters.",
         returnDisplay:
-          'No matching Minecraft game server API links were found for the provided filters.',
+          "No matching Minecraft game server API links were found for the provided filters.",
       };
     }
 
     const lines = entries.map((entry, index) => {
-      const docsLine = entry.docsUrl ? `\n   Docs: ${entry.docsUrl}` : '';
+      const docsLine = entry.docsUrl ? `\n   Docs: ${entry.docsUrl}` : "";
       return `${index + 1}. ${entry.name} [${entry.category}]\n   Spec: ${entry.specUrl}${docsLine}\n   Notes: ${entry.notes}`;
     });
 
@@ -122,7 +129,7 @@ class OpenApiLinkListInvocation extends BaseToolInvocation<
 
     return {
       llmContent: safeJsonStringify(structured),
-      returnDisplay: `Minecraft Game Server API links:\n\n${lines.join('\n\n')}`,
+      returnDisplay: `Minecraft Game Server API links:\n\n${lines.join("\n\n")}`,
     };
   }
 }
@@ -137,24 +144,25 @@ export class OpenApiLinkListTool extends BaseDeclarativeTool<
     super(
       OpenApiLinkListTool.Name,
       ToolDisplayNames.OPENAPI_LINK_LIST,
-      'Returns OpenAPI specification links for Minecraft game server APIs (Modrinth, CurseForge, MCJars) that the game server agent can use for autonomous server resource management and deployment automation. Supports filtering by keyword/category and limiting the number of returned items.',
+      "Returns OpenAPI specification links for Minecraft game server APIs (Modrinth, CurseForge, MCJars) that the game server agent can use for autonomous server resource management and deployment automation. Supports filtering by keyword/category and limiting the number of returned items.",
       Kind.Read,
       {
-        type: 'object',
+        type: "object",
         properties: {
           keyword: {
-            type: 'string',
+            type: "string",
             description:
-              'Optional keyword filter. Matches API name, category, or notes.',
+              "Optional keyword filter. Matches API name, category, or notes.",
           },
           category: {
-            type: 'string',
+            type: "string",
             description:
-              'Optional exact category filter, for example: ai, payments, cloud-native, devops.',
+              "Optional exact category filter, for example: ai, payments, cloud-native, devops.",
           },
           maxResults: {
-            type: 'number',
-            description: 'Optional maximum number of entries to return. Default is all.',
+            type: "number",
+            description:
+              "Optional maximum number of entries to return. Default is all.",
           },
         },
         additionalProperties: false,

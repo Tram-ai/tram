@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { HookRegistry, HookRegistryEntry } from './hookRegistry.js';
-import type { HookExecutionPlan } from './types.js';
-import { getHookKey, HookEventName } from './types.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import type { HookRegistry, HookRegistryEntry } from "./hookRegistry.js";
+import type { HookExecutionPlan } from "./types.js";
+import { getHookKey, HookEventName } from "./types.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('TRUSTED_HOOKS');
+const debugLogger = createDebugLogger("TRUSTED_HOOKS");
 
 /**
  * Hook planner that selects matching hooks and creates execution plans
@@ -80,7 +80,7 @@ export class HookPlanner {
 
     const matcher = entry.matcher.trim();
 
-    if (matcher === '' || matcher === '*') {
+    if (matcher === "" || matcher === "*") {
       return true; // Empty string or wildcard matches all
     }
 

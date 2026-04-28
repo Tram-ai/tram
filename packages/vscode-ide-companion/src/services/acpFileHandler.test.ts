@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Use vi.hoisted so the mocks are accessible inside the vi.mock factory
 // (vi.mock calls are hoisted to the top of the file by Vitest).
@@ -43,7 +43,7 @@ const {
   };
 });
 
-vi.mock('vscode', () => ({
+vi.mock("vscode", () => ({
   Uri: {
     file: (p: string) => ({ fsPath: p, toString: () => p }),
   },
@@ -67,9 +67,9 @@ vi.mock('vscode', () => ({
   },
 }));
 
-import { AcpFileHandler } from './acpFileHandler.js';
+import { AcpFileHandler } from "./acpFileHandler.js";
 
-describe('AcpFileHandler', () => {
+describe("AcpFileHandler", () => {
   let handler: AcpFileHandler;
 
   beforeEach(() => {
@@ -87,115 +87,115 @@ describe('AcpFileHandler', () => {
     mockWriteFile.mockResolvedValue(undefined);
   });
 
-  describe('handleReadTextFile', () => {
-    it('returns full content when no line/limit specified', async () => {
-      mockGetText.mockReturnValue('line1\nline2\nline3\n');
+  describe("handleReadTextFile", () => {
+    it("returns full content when no line/limit specified", async () => {
+      mockGetText.mockReturnValue("line1\nline2\nline3\n");
 
       const result = await handler.handleReadTextFile({
-        path: '/test/file.txt',
-        sessionId: 'sid',
+        path: "/test/file.txt",
+        sessionId: "sid",
         line: null,
         limit: null,
       });
 
-      expect(result.content).toBe('line1\nline2\nline3\n');
+      expect(result.content).toBe("line1\nline2\nline3\n");
     });
 
-    it('uses 1-based line indexing (ACP spec)', async () => {
-      mockGetText.mockReturnValue('line1\nline2\nline3\nline4\nline5');
+    it("uses 1-based line indexing (ACP spec)", async () => {
+      mockGetText.mockReturnValue("line1\nline2\nline3\nline4\nline5");
 
       const result = await handler.handleReadTextFile({
-        path: '/test/file.txt',
-        sessionId: 'sid',
+        path: "/test/file.txt",
+        sessionId: "sid",
         line: 2,
         limit: 2,
       });
 
-      expect(result.content).toBe('line2\nline3');
+      expect(result.content).toBe("line2\nline3");
     });
 
-    it('treats line=1 as first line', async () => {
-      mockGetText.mockReturnValue('first\nsecond\nthird');
+    it("treats line=1 as first line", async () => {
+      mockGetText.mockReturnValue("first\nsecond\nthird");
 
       const result = await handler.handleReadTextFile({
-        path: '/test/file.txt',
-        sessionId: 'sid',
+        path: "/test/file.txt",
+        sessionId: "sid",
         line: 1,
         limit: 1,
       });
 
-      expect(result.content).toBe('first');
+      expect(result.content).toBe("first");
     });
 
-    it('defaults to line=1 when line is null but limit is set', async () => {
-      mockGetText.mockReturnValue('a\nb\nc\nd');
+    it("defaults to line=1 when line is null but limit is set", async () => {
+      mockGetText.mockReturnValue("a\nb\nc\nd");
 
       const result = await handler.handleReadTextFile({
-        path: '/test/file.txt',
-        sessionId: 'sid',
+        path: "/test/file.txt",
+        sessionId: "sid",
         line: null,
         limit: 2,
       });
 
-      expect(result.content).toBe('a\nb');
+      expect(result.content).toBe("a\nb");
     });
 
-    it('clamps negative line values to 0', async () => {
-      mockGetText.mockReturnValue('a\nb\nc');
+    it("clamps negative line values to 0", async () => {
+      mockGetText.mockReturnValue("a\nb\nc");
 
       const result = await handler.handleReadTextFile({
-        path: '/test/file.txt',
-        sessionId: 'sid',
+        path: "/test/file.txt",
+        sessionId: "sid",
         line: -5,
         limit: null,
       });
 
-      expect(result.content).toBe('a\nb\nc');
+      expect(result.content).toBe("a\nb\nc");
     });
 
-    it('propagates ENOENT errors', async () => {
-      const err = new Error('ENOENT') as NodeJS.ErrnoException;
-      err.code = 'ENOENT';
+    it("propagates ENOENT errors", async () => {
+      const err = new Error("ENOENT") as NodeJS.ErrnoException;
+      err.code = "ENOENT";
       mockOpenTextDocument.mockRejectedValue(err);
 
       await expect(
         handler.handleReadTextFile({
-          path: '/missing/file.txt',
-          sessionId: 'sid',
+          path: "/missing/file.txt",
+          sessionId: "sid",
           line: null,
           limit: null,
         }),
-      ).rejects.toThrow('ENOENT');
+      ).rejects.toThrow("ENOENT");
     });
 
-    it('normalises VS Code FileNotFound to ENOENT', async () => {
+    it("normalises VS Code FileNotFound to ENOENT", async () => {
       // vscode.FileSystemError.FileNotFound sets code = 'FileNotFound'
-      const err = new Error('file not found') as NodeJS.ErrnoException;
-      (err as unknown as Record<string, unknown>).code = 'FileNotFound';
+      const err = new Error("file not found") as NodeJS.ErrnoException;
+      (err as unknown as Record<string, unknown>).code = "FileNotFound";
       mockOpenTextDocument.mockRejectedValue(err);
 
       const rejection = handler.handleReadTextFile({
-        path: '/missing/file.txt',
-        sessionId: 'sid',
+        path: "/missing/file.txt",
+        sessionId: "sid",
         line: null,
         limit: null,
       });
 
-      await expect(rejection).rejects.toThrow('ENOENT');
-      await expect(rejection).rejects.toMatchObject({ code: 'ENOENT' });
+      await expect(rejection).rejects.toThrow("ENOENT");
+      await expect(rejection).rejects.toMatchObject({ code: "ENOENT" });
     });
   });
 
-  describe('handleWriteTextFile', () => {
-    it('creates directory and uses WorkspaceEdit for existing file', async () => {
+  describe("handleWriteTextFile", () => {
+    it("creates directory and uses WorkspaceEdit for existing file", async () => {
       // stat resolves → file exists
       mockStatFile.mockResolvedValue({});
-      mockGetText.mockReturnValue('old content');
+      mockGetText.mockReturnValue("old content");
 
       const result = await handler.handleWriteTextFile({
-        path: '/test/dir/file.txt',
-        content: 'hello',
-        sessionId: 'sid',
+        path: "/test/dir/file.txt",
+        content: "hello",
+        sessionId: "sid",
       });
 
       expect(result).toBeNull();
@@ -203,20 +203,20 @@ describe('AcpFileHandler', () => {
       expect(mockApplyEdit).toHaveBeenCalled();
     });
 
-    it('writes bytes directly for new (non-existing) file', async () => {
+    it("writes bytes directly for new (non-existing) file", async () => {
       // stat rejects → file does not exist
-      mockStatFile.mockRejectedValue(new Error('FileNotFound'));
+      mockStatFile.mockRejectedValue(new Error("FileNotFound"));
 
       const result = await handler.handleWriteTextFile({
-        path: '/test/dir/newfile.txt',
-        content: 'hello',
-        sessionId: 'sid',
+        path: "/test/dir/newfile.txt",
+        content: "hello",
+        sessionId: "sid",
       });
 
       expect(result).toBeNull();
       expect(mockCreateDirectory).toHaveBeenCalled();
       expect(mockWriteFile).toHaveBeenCalledWith(
-        expect.objectContaining({ fsPath: '/test/dir/newfile.txt' }),
+        expect.objectContaining({ fsPath: "/test/dir/newfile.txt" }),
         expect.any(Uint8Array),
       );
     });

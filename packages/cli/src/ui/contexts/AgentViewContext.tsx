@@ -21,13 +21,13 @@ import {
   useCallback,
   useMemo,
   useState,
-} from 'react';
+} from "react";
 import {
   type AgentInteractive,
   type ApprovalMode,
   type Config,
-} from '@qwen-code/qwen-code-core';
-import { useArenaInProcess } from '../hooks/useArenaInProcess.js';
+} from "@tram-ai/tram-core";
+import { useArenaInProcess } from "../hooks/useArenaInProcess.js";
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -83,10 +83,10 @@ const AgentViewActionsContext = createContext<AgentViewActions | null>(null);
 // ─── Defaults (used when no provider is mounted) ────────────
 
 const DEFAULT_STATE: AgentViewState = {
-  activeView: 'main',
+  activeView: "main",
   agents: new Map(),
   agentShellFocused: false,
-  agentInputBufferText: '',
+  agentInputBufferText: "",
   agentTabBarFocused: false,
   agentApprovalModes: new Map(),
 };
@@ -130,12 +130,12 @@ export function AgentViewProvider({
   config,
   children,
 }: AgentViewProviderProps) {
-  const [activeView, setActiveView] = useState<string>('main');
+  const [activeView, setActiveView] = useState<string>("main");
   const [agents, setAgents] = useState<Map<string, RegisteredAgent>>(
     () => new Map(),
   );
   const [agentShellFocused, setAgentShellFocused] = useState(false);
-  const [agentInputBufferText, setAgentInputBufferText] = useState('');
+  const [agentInputBufferText, setAgentInputBufferText] = useState("");
   const [agentTabBarFocused, setAgentTabBarFocused] = useState(false);
   const [agentApprovalModes, setAgentApprovalModes] = useState<
     Map<string, ApprovalMode>
@@ -144,7 +144,7 @@ export function AgentViewProvider({
   // ── Navigation ──
 
   const switchToMain = useCallback(() => {
-    setActiveView('main');
+    setActiveView("main");
     setAgentTabBarFocused(false);
   }, []);
 
@@ -158,14 +158,14 @@ export function AgentViewProvider({
   );
 
   const switchToNext = useCallback(() => {
-    const ids = ['main', ...agents.keys()];
+    const ids = ["main", ...agents.keys()];
     const currentIndex = ids.indexOf(activeView);
     const nextIndex = (currentIndex + 1) % ids.length;
     setActiveView(ids[nextIndex]!);
   }, [agents, activeView]);
 
   const switchToPrevious = useCallback(() => {
-    const ids = ['main', ...agents.keys()];
+    const ids = ["main", ...agents.keys()];
     const currentIndex = ids.indexOf(activeView);
     const prevIndex = (currentIndex - 1 + ids.length) % ids.length;
     setActiveView(ids[prevIndex]!);
@@ -215,13 +215,13 @@ export function AgentViewProvider({
       next.delete(agentId);
       return next;
     });
-    setActiveView((current) => (current === agentId ? 'main' : current));
+    setActiveView((current) => (current === agentId ? "main" : current));
   }, []);
 
   const unregisterAll = useCallback(() => {
     setAgents(new Map());
     setAgentApprovalModes(new Map());
-    setActiveView('main');
+    setActiveView("main");
     setAgentTabBarFocused(false);
   }, []);
 

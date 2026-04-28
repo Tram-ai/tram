@@ -19,16 +19,16 @@
  * and AgentComposer (with minimal customization).
  */
 
-import type React from 'react';
-import { useCallback } from 'react';
-import { Box, Text } from 'ink';
-import chalk from 'chalk';
-import type { TextBuffer } from './shared/text-buffer.js';
-import type { Key } from '../hooks/useKeypress.js';
-import { useKeypress } from '../hooks/useKeypress.js';
-import { keyMatchers, Command } from '../keyMatchers.js';
-import { cpSlice, cpLen } from '../utils/textUtils.js';
-import { theme } from '../semantic-colors.js';
+import type React from "react";
+import { useCallback } from "react";
+import { Box, Text } from "ink";
+import chalk from "chalk";
+import type { TextBuffer } from "./shared/text-buffer.js";
+import type { Key } from "../hooks/useKeypress.js";
+import { useKeypress } from "../hooks/useKeypress.js";
+import { keyMatchers, Command } from "../keyMatchers.js";
+import { cpSlice, cpLen } from "../utils/textUtils.js";
+import { theme } from "../semantic-colors.js";
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -91,7 +91,7 @@ export function defaultRenderLine({
   showCursor,
 }: RenderLineOptions): React.ReactNode {
   if (!isOnCursorLine || !showCursor) {
-    return <Text>{lineText || ' '}</Text>;
+    return <Text>{lineText || " "}</Text>;
   }
 
   const len = cpLen(lineText);
@@ -101,7 +101,7 @@ export function defaultRenderLine({
     return (
       <Text>
         {lineText}
-        {chalk.inverse(' ') + '\u200B'}
+        {chalk.inverse(" ") + "\u200B"}
       </Text>
     );
   }
@@ -147,7 +147,7 @@ export const BaseTextInput: React.FC<BaseTextInputProps> = ({
       if (keyMatchers[Command.SUBMIT](key)) {
         if (buffer.text.trim()) {
           const text = buffer.text;
-          buffer.setText('');
+          buffer.setText("");
           onSubmit(text);
         }
         return;
@@ -162,7 +162,7 @@ export const BaseTextInput: React.FC<BaseTextInputProps> = ({
       // Escape → clear input
       if (keyMatchers[Command.ESCAPE](key)) {
         if (buffer.text.length > 0) {
-          buffer.setText('');
+          buffer.setText("");
         }
         return;
       }
@@ -170,20 +170,20 @@ export const BaseTextInput: React.FC<BaseTextInputProps> = ({
       // Ctrl+C → clear input
       if (keyMatchers[Command.CLEAR_INPUT](key)) {
         if (buffer.text.length > 0) {
-          buffer.setText('');
+          buffer.setText("");
         }
         return;
       }
 
       // Ctrl+A → home
       if (keyMatchers[Command.HOME](key)) {
-        buffer.move('home');
+        buffer.move("home");
         return;
       }
 
       // Ctrl+E → end
       if (keyMatchers[Command.END](key)) {
-        buffer.move('end');
+        buffer.move("end");
         return;
       }
 
@@ -213,15 +213,15 @@ export const BaseTextInput: React.FC<BaseTextInputProps> = ({
 
       // Tab — never insert literal tab characters into the buffer;
       // consumers that need Tab behaviour should intercept it via onKeypress.
-      if ((key.name === 'tab' || key.sequence === '\t') && !key.paste) {
+      if ((key.name === "tab" || key.sequence === "\t") && !key.paste) {
         return;
       }
 
       // Backspace
       if (
-        key.name === 'backspace' ||
-        key.sequence === '\x7f' ||
-        (key.ctrl && key.name === 'h')
+        key.name === "backspace" ||
+        key.sequence === "\x7f" ||
+        (key.ctrl && key.name === "h")
       ) {
         buffer.backspace();
         return;
@@ -243,7 +243,7 @@ export const BaseTextInput: React.FC<BaseTextInputProps> = ({
 
   const resolvedBorderColor = borderColor ?? theme.border.focused;
   const resolvedPrefix = prefix ?? (
-    <Text color={theme.text.accent}>{'> '}</Text>
+    <Text color={theme.text.accent}>{"> "}</Text>
   );
 
   return (

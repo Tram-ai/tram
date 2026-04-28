@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
-import { loadRewriteConfig } from './config.js';
-import type { LoadedSettings } from '../../../config/settings.js';
+import { describe, it, expect } from "vitest";
+import { loadRewriteConfig } from "./config.js";
+import type { LoadedSettings } from "../../../config/settings.js";
 
 /**
  * Build a minimal LoadedSettings stub with only the fields
@@ -34,39 +34,39 @@ function makeSettings(
   } as unknown as LoadedSettings;
 }
 
-describe('loadRewriteConfig', () => {
-  it('should return undefined when no config is set', () => {
+describe("loadRewriteConfig", () => {
+  it("should return undefined when no config is set", () => {
     const settings = makeSettings();
     expect(loadRewriteConfig(settings)).toBeUndefined();
   });
 
-  it('should return user config when only user config is set', () => {
+  it("should return user config when only user config is set", () => {
     const settings = makeSettings({
-      userRewrite: { enabled: true, target: 'all', prompt: 'user prompt' },
+      userRewrite: { enabled: true, target: "all", prompt: "user prompt" },
     });
     const config = loadRewriteConfig(settings);
     expect(config).toEqual({
       enabled: true,
-      target: 'all',
-      prompt: 'user prompt',
+      target: "all",
+      prompt: "user prompt",
     });
   });
 
-  it('should return workspace config when trusted', () => {
+  it("should return workspace config when trusted", () => {
     const settings = makeSettings({
-      userRewrite: { enabled: false, target: 'message' },
-      workspaceRewrite: { enabled: true, target: 'all', prompt: 'ws prompt' },
+      userRewrite: { enabled: false, target: "message" },
+      workspaceRewrite: { enabled: true, target: "all", prompt: "ws prompt" },
       isTrusted: true,
     });
     const config = loadRewriteConfig(settings);
     expect(config?.enabled).toBe(true);
-    expect(config?.prompt).toBe('ws prompt');
+    expect(config?.prompt).toBe("ws prompt");
   });
 
-  it('should ignore workspace config when untrusted', () => {
+  it("should ignore workspace config when untrusted", () => {
     const settings = makeSettings({
-      userRewrite: { enabled: false, target: 'message' },
-      workspaceRewrite: { enabled: true, target: 'all', prompt: 'malicious' },
+      userRewrite: { enabled: false, target: "message" },
+      workspaceRewrite: { enabled: true, target: "all", prompt: "malicious" },
       isTrusted: false,
     });
     const config = loadRewriteConfig(settings);
@@ -74,12 +74,12 @@ describe('loadRewriteConfig', () => {
     expect(config?.prompt).toBeUndefined();
   });
 
-  it('should fall back to user config when workspace has no rewrite config', () => {
+  it("should fall back to user config when workspace has no rewrite config", () => {
     const settings = makeSettings({
-      userRewrite: { enabled: true, target: 'thought' },
+      userRewrite: { enabled: true, target: "thought" },
       isTrusted: true,
     });
     const config = loadRewriteConfig(settings);
-    expect(config?.target).toBe('thought');
+    expect(config?.target).toBe("thought");
   });
 });

@@ -1,10 +1,10 @@
-import type { ExportMetadata } from './types.js';
-import { MetadataItem } from './MetadataItem.js';
+import type { ExportMetadata } from "./types.js";
+import { MetadataItem } from "./MetadataItem.js";
 import {
   formatRelativeTime,
   formatExportTime,
   formatTokenLimit,
-} from './utils.js';
+} from "./utils.js";
 
 export type MetadataSidebarProps = {
   metadata: ExportMetadata;

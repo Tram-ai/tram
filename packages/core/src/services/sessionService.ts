@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Storage } from '../config/storage.js';
-import { getProjectHash } from '../utils/paths.js';
-import path from 'node:path';
-import fs from 'node:fs';
-import readline from 'node:readline';
-import type { Content, Part } from '@google/genai';
-import * as jsonl from '../utils/jsonl-utils.js';
+import { Storage } from "../config/storage.js";
+import { getProjectHash } from "../utils/paths.js";
+import path from "node:path";
+import fs from "node:fs";
+import readline from "node:readline";
+import type { Content, Part } from "@google/genai";
+import * as jsonl from "../utils/jsonl-utils.js";
 import type {
   ChatCompressionRecordPayload,
   ChatRecord,
   UiTelemetryRecordPayload,
-} from './chatRecordingService.js';
-import { uiTelemetryService } from '../telemetry/uiTelemetry.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "./chatRecordingService.js";
+import { uiTelemetryService } from "../telemetry/uiTelemetry.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('SESSION');
+const debugLogger = createDebugLogger("SESSION");
 
 /**
  * Session item for list display.
@@ -135,24 +135,24 @@ export class SessionService {
   }
 
   private getChatsDir(): string {
-    return path.join(this.storage.getProjectDir(), 'chats');
+    return path.join(this.storage.getProjectDir(), "chats");
   }
 
   /**
    * Extracts the first user prompt text from a Content object.
    */
   private extractPromptText(message: Content | undefined): string {
-    if (!message?.parts) return '';
+    if (!message?.parts) return "";
 
     for (const part of message.parts as Part[]) {
-      if ('text' in part) {
+      if ("text" in part) {
         const textPart = part as { text: string };
         const text = textPart.text;
         // Truncate long prompts for display
         return text.length > 200 ? `${text.slice(0, 200)}...` : text;
       }
     }
-    return '';
+    return "";
   }
 
   /**
@@ -161,11 +161,11 @@ export class SessionService {
    */
   private extractFirstPromptFromRecords(records: ChatRecord[]): string {
     for (const record of records) {
-      if (record.type !== 'user') continue;
+      if (record.type !== "user") continue;
       const prompt = this.extractPromptText(record.message);
       if (prompt) return prompt;
     }
-    return '';
+    return "";
   }
 
   /**
@@ -186,7 +186,7 @@ export class SessionService {
         if (!trimmed) continue;
         try {
           const record = JSON.parse(trimmed) as ChatRecord;
-          if (record.type === 'user' || record.type === 'assistant') {
+          if (record.type === "user" || record.type === "assistant") {
             uniqueUuids.add(record.uuid);
           }
         } catch {
@@ -236,7 +236,7 @@ export class SessionService {
         }
       }
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         return { items: [], hasMore: false };
       }
       throw error;
@@ -326,8 +326,8 @@ export class SessionService {
     try {
       return await jsonl.read<ChatRecord>(filePath);
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-        debugLogger.error('Error reading session file:', error);
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        debugLogger.error("Error reading session file:", error);
       }
       return [];
     }
@@ -339,7 +339,7 @@ export class SessionService {
    */
   private aggregateRecords(records: ChatRecord[]): ChatRecord {
     if (records.length === 0) {
-      throw new Error('Cannot aggregate empty records array');
+      throw new Error("Cannot aggregate empty records array");
     }
 
     const base = { ...records[0] };
@@ -501,7 +501,7 @@ export class SessionService {
       fs.unlinkSync(filePath);
       return true;
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         return false;
       }
       throw error;
@@ -600,7 +600,7 @@ export function buildApiHistoryFromConversation(
   let compressedHistory: Content[] | undefined;
 
   messages.forEach((record, index) => {
-    if (record.type === 'system' && record.subtype === 'chat_compression') {
+    if (record.type === "system" && record.subtype === "chat_compression") {
       const payload = record.systemPayload as
         | ChatCompressionRecordPayload
         | undefined;
@@ -617,7 +617,7 @@ export function buildApiHistoryFromConversation(
     // Append everything after the compression record (newer turns)
     for (let i = lastCompressionIndex + 1; i < messages.length; i++) {
       const record = messages[i];
-      if (record.type === 'system') continue;
+      if (record.type === "system") continue;
       if (record.message) {
         baseHistory.push(structuredClone(record.message as Content));
       }
@@ -655,7 +655,7 @@ export function replayUiTelemetryFromConversation(
   uiTelemetryService.reset();
 
   for (const record of conversation.messages) {
-    if (record.type !== 'system' || record.subtype !== 'ui_telemetry') {
+    if (record.type !== "system" || record.subtype !== "ui_telemetry") {
       continue;
     }
     const payload = record.systemPayload as
@@ -685,7 +685,7 @@ export function getResumePromptTokenCount(
   for (let i = conversation.messages.length - 1; i >= 0; i--) {
     const record = conversation.messages[i];
 
-    if (record.type === 'assistant') {
+    if (record.type === "assistant") {
       const usage = record.usageMetadata;
       const candidate = usage?.totalTokenCount ?? usage?.promptTokenCount;
       if (candidate) {
@@ -693,7 +693,7 @@ export function getResumePromptTokenCount(
       }
     }
 
-    if (record.type === 'system' && record.subtype === 'chat_compression') {
+    if (record.type === "system" && record.subtype === "chat_compression") {
       const payload = record.systemPayload as
         | ChatCompressionRecordPayload
         | undefined;

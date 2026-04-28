@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ModelInfo } from '@agentclientprotocol/sdk';
-import { knownTokenLimit } from '@qwen-code/qwen-code-core/src/core/tokenLimits.js';
-import type { ApprovalModeValue } from '../types/approvalModeValueTypes.js';
+import type { ModelInfo } from "@agentclientprotocol/sdk";
+import { knownTokenLimit } from "@tram-ai/tram-core/src/core/tokenLimits.js";
+import type { ApprovalModeValue } from "../types/approvalModeValueTypes.js";
 
 type AcpMeta = Record<string, unknown>;
 
@@ -14,7 +14,7 @@ const asMeta = (value: unknown): AcpMeta | null | undefined => {
   if (value === null) {
     return null;
   }
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
     return value as AcpMeta;
   }
   return undefined;
@@ -23,25 +23,25 @@ const asMeta = (value: unknown): AcpMeta | null | undefined => {
 const getContextLimitFromMeta = (
   meta: AcpMeta | null | undefined,
 ): number | null | undefined => {
-  const metaLimit = meta?.['contextLimit'];
-  return typeof metaLimit === 'number' || metaLimit === null
+  const metaLimit = meta?.["contextLimit"];
+  return typeof metaLimit === "number" || metaLimit === null
     ? metaLimit
     : undefined;
 };
 
 const normalizeModelInfo = (value: unknown): ModelInfo | null => {
-  if (!value || typeof value !== 'object') {
+  if (!value || typeof value !== "object") {
     return null;
   }
 
   const obj = value as Record<string, unknown>;
-  const nameRaw = obj['name'];
-  const modelIdRaw = obj['modelId'];
-  const descriptionRaw = obj['description'];
+  const nameRaw = obj["name"];
+  const modelIdRaw = obj["modelId"];
+  const descriptionRaw = obj["description"];
 
-  const name = typeof nameRaw === 'string' ? nameRaw.trim() : '';
+  const name = typeof nameRaw === "string" ? nameRaw.trim() : "";
   const modelId =
-    typeof modelIdRaw === 'string' && modelIdRaw.trim().length > 0
+    typeof modelIdRaw === "string" && modelIdRaw.trim().length > 0
       ? modelIdRaw.trim()
       : name;
 
@@ -50,16 +50,16 @@ const normalizeModelInfo = (value: unknown): ModelInfo | null => {
   }
 
   const description =
-    typeof descriptionRaw === 'string' || descriptionRaw === null
+    typeof descriptionRaw === "string" || descriptionRaw === null
       ? descriptionRaw
       : undefined;
 
-  const metaFromWire = asMeta(obj['_meta']);
+  const metaFromWire = asMeta(obj["_meta"]);
 
   // Back-compat: older implementations used `contextLimit` at the top-level.
-  const legacyContextLimit = obj['contextLimit'];
+  const legacyContextLimit = obj["contextLimit"];
   const legacyLimit =
-    typeof legacyContextLimit === 'number' || legacyContextLimit === null
+    typeof legacyContextLimit === "number" || legacyContextLimit === null
       ? legacyContextLimit
       : undefined;
   const metaLimit = getContextLimitFromMeta(metaFromWire);
@@ -68,21 +68,21 @@ const normalizeModelInfo = (value: unknown): ModelInfo | null => {
   // Priority: legacy numeric > meta numeric > derived from known model > explicit null > undefined.
   // An explicit `null` from the server means "limit intentionally unknown"; `undefined` means "not provided".
   const contextLimit =
-    typeof legacyLimit === 'number'
+    typeof legacyLimit === "number"
       ? legacyLimit
-      : typeof metaLimit === 'number'
+      : typeof metaLimit === "number"
         ? metaLimit
-        : typeof derivedLimit === 'number'
+        : typeof derivedLimit === "number"
           ? derivedLimit
           : legacyLimit === null || metaLimit === null
             ? null
             : undefined;
 
   let mergedMeta: AcpMeta | null | undefined = metaFromWire;
-  if (typeof contextLimit !== 'undefined') {
+  if (typeof contextLimit !== "undefined") {
     if (mergedMeta === null) {
       mergedMeta = { contextLimit };
-    } else if (typeof mergedMeta === 'undefined') {
+    } else if (typeof mergedMeta === "undefined") {
       mergedMeta = { contextLimit };
     } else {
       mergedMeta = { ...mergedMeta, contextLimit };
@@ -92,8 +92,8 @@ const normalizeModelInfo = (value: unknown): ModelInfo | null => {
   return {
     modelId,
     name,
-    ...(typeof description !== 'undefined' ? { description } : {}),
-    ...(typeof mergedMeta !== 'undefined' ? { _meta: mergedMeta } : {}),
+    ...(typeof description !== "undefined" ? { description } : {}),
+    ...(typeof mergedMeta !== "undefined" ? { _meta: mergedMeta } : {}),
   };
 };
 
@@ -115,14 +115,14 @@ export interface SessionModeState {
 }
 
 const APPROVAL_MODE_VALUES: ApprovalModeValue[] = [
-  'plan',
-  'default',
-  'auto-edit',
-  'yolo',
+  "plan",
+  "default",
+  "auto-edit",
+  "yolo",
 ];
 
 const isApprovalModeValue = (value: unknown): value is ApprovalModeValue =>
-  typeof value === 'string' &&
+  typeof value === "string" &&
   APPROVAL_MODE_VALUES.includes(value as ApprovalModeValue);
 
 /**
@@ -133,18 +133,18 @@ const isApprovalModeValue = (value: unknown): value is ApprovalModeValue =>
 export const extractSessionModelState = (
   result: unknown,
 ): SessionModelState | null => {
-  if (!result || typeof result !== 'object') {
+  if (!result || typeof result !== "object") {
     return null;
   }
 
   const obj = result as Record<string, unknown>;
-  const models = obj['models'];
+  const models = obj["models"];
 
   // ACP draft: NewSessionResponse.models is a SessionModelState object.
-  if (models && typeof models === 'object' && !Array.isArray(models)) {
+  if (models && typeof models === "object" && !Array.isArray(models)) {
     const state = models as Record<string, unknown>;
-    const availableModels = state['availableModels'];
-    const currentModelId = state['currentModelId'];
+    const availableModels = state["availableModels"];
+    const currentModelId = state["currentModelId"];
 
     if (Array.isArray(availableModels)) {
       const normalizedModels = availableModels
@@ -152,9 +152,9 @@ export const extractSessionModelState = (
         .filter((m): m is ModelInfo => Boolean(m));
 
       const modelId =
-        typeof currentModelId === 'string' && currentModelId.length > 0
+        typeof currentModelId === "string" && currentModelId.length > 0
           ? currentModelId
-          : normalizedModels[0]?.modelId || '';
+          : normalizedModels[0]?.modelId || "";
 
       return {
         availableModels: normalizedModels,
@@ -183,19 +183,19 @@ export const extractSessionModelState = (
 export const extractSessionModeState = (
   result: unknown,
 ): SessionModeState | null => {
-  if (!result || typeof result !== 'object') {
+  if (!result || typeof result !== "object") {
     return null;
   }
 
   const obj = result as Record<string, unknown>;
-  const modes = obj['modes'];
-  if (!modes || typeof modes !== 'object' || Array.isArray(modes)) {
+  const modes = obj["modes"];
+  if (!modes || typeof modes !== "object" || Array.isArray(modes)) {
     return null;
   }
 
   const state = modes as Record<string, unknown>;
-  const currentModeRaw = state['currentModeId'];
-  const availableModesRaw = state['availableModes'];
+  const currentModeRaw = state["currentModeId"];
+  const availableModesRaw = state["availableModes"];
 
   const currentModeId = isApprovalModeValue(currentModeRaw)
     ? currentModeRaw
@@ -211,19 +211,19 @@ export const extractSessionModeState = (
   if (Array.isArray(availableModesRaw)) {
     availableModes = availableModesRaw
       .map((entry) => {
-        if (!entry || typeof entry !== 'object') {
+        if (!entry || typeof entry !== "object") {
           return null;
         }
         const item = entry as Record<string, unknown>;
-        const idRaw = item['id'];
+        const idRaw = item["id"];
         if (!isApprovalModeValue(idRaw)) {
           return null;
         }
         return {
           id: idRaw,
-          name: typeof item['name'] === 'string' ? item['name'] : idRaw,
+          name: typeof item["name"] === "string" ? item["name"] : idRaw,
           description:
-            typeof item['description'] === 'string' ? item['description'] : '',
+            typeof item["description"] === "string" ? item["description"] : "",
         };
       })
       .filter(
@@ -256,25 +256,25 @@ export const extractSessionModeState = (
 export const extractModelInfoFromNewSessionResult = (
   result: unknown,
 ): ModelInfo | null => {
-  if (!result || typeof result !== 'object') {
+  if (!result || typeof result !== "object") {
     return null;
   }
 
   const obj = result as Record<string, unknown>;
 
-  const models = obj['models'];
+  const models = obj["models"];
 
   // ACP draft: NewSessionResponse.models is a SessionModelState object.
-  if (models && typeof models === 'object' && !Array.isArray(models)) {
+  if (models && typeof models === "object" && !Array.isArray(models)) {
     const state = models as Record<string, unknown>;
-    const availableModels = state['availableModels'];
-    const currentModelId = state['currentModelId'];
+    const availableModels = state["availableModels"];
+    const currentModelId = state["currentModelId"];
     if (Array.isArray(availableModels)) {
       const normalizedModels = availableModels
         .map(normalizeModelInfo)
         .filter((m): m is ModelInfo => Boolean(m));
       if (normalizedModels.length > 0) {
-        if (typeof currentModelId === 'string' && currentModelId.length > 0) {
+        if (typeof currentModelId === "string" && currentModelId.length > 0) {
           const selected = normalizedModels.find(
             (m) => m.modelId === currentModelId,
           );
@@ -298,13 +298,13 @@ export const extractModelInfoFromNewSessionResult = (
   }
 
   // Some implementations may return a single model object.
-  const model = normalizeModelInfo(obj['model']);
+  const model = normalizeModelInfo(obj["model"]);
   if (model) {
     return model;
   }
 
   // Legacy: modelInfo on initialize; allow as a fallback.
-  const legacy = normalizeModelInfo(obj['modelInfo']);
+  const legacy = normalizeModelInfo(obj["modelInfo"]);
   if (legacy) {
     return legacy;
   }

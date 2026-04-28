@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, it, vi } from 'vitest';
-import { ChatProviderRegistry } from './ChatProviderRegistry.js';
+import { describe, expect, it, vi } from "vitest";
+import { ChatProviderRegistry } from "./ChatProviderRegistry.js";
 
-describe('ChatProviderRegistry', () => {
-  it('tracks editor and view providers separately while exposing a combined list', () => {
+describe("ChatProviderRegistry", () => {
+  it("tracks editor and view providers separately while exposing a combined list", () => {
     const factory = vi
       .fn()
-      .mockReturnValueOnce({ dispose: vi.fn(), kind: 'editor-1' })
-      .mockReturnValueOnce({ dispose: vi.fn(), kind: 'view-1' })
-      .mockReturnValueOnce({ dispose: vi.fn(), kind: 'editor-2' });
+      .mockReturnValueOnce({ dispose: vi.fn(), kind: "editor-1" })
+      .mockReturnValueOnce({ dispose: vi.fn(), kind: "view-1" })
+      .mockReturnValueOnce({ dispose: vi.fn(), kind: "editor-2" });
 
     const registry = new ChatProviderRegistry(factory);
 
@@ -30,7 +30,7 @@ describe('ChatProviderRegistry', () => {
     ]);
   });
 
-  it('disposes all tracked providers and resets internal collections', () => {
+  it("disposes all tracked providers and resets internal collections", () => {
     const editorDispose = vi.fn();
     const viewDispose = vi.fn();
     const registry = new ChatProviderRegistry(() => ({ dispose: vi.fn() }));

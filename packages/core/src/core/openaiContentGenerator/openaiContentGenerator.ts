@@ -1,6 +1,6 @@
-import type { ContentGenerator } from '../contentGenerator.js';
-import type { Config } from '../../config/config.js';
-import { type OpenAICompatibleProvider } from './provider/index.js';
+import type { ContentGenerator } from "../contentGenerator.js";
+import type { Config } from "../../config/config.js";
+import { type OpenAICompatibleProvider } from "./provider/index.js";
 import type {
   CountTokensParameters,
   CountTokensResponse,
@@ -8,16 +8,16 @@ import type {
   EmbedContentResponse,
   GenerateContentParameters,
   GenerateContentResponse,
-} from '@google/genai';
-import type { PipelineConfig } from './pipeline.js';
-import { ContentGenerationPipeline } from './pipeline.js';
-import { EnhancedErrorHandler } from './errorHandler.js';
-import { RequestTokenEstimator } from '../../utils/request-tokenizer/index.js';
-import type { ContentGeneratorConfig } from '../contentGenerator.js';
-import { isAbortError } from '../../utils/errors.js';
-import { createDebugLogger } from '../../utils/debugLogger.js';
+} from "@google/genai";
+import type { PipelineConfig } from "./pipeline.js";
+import { ContentGenerationPipeline } from "./pipeline.js";
+import { EnhancedErrorHandler } from "./errorHandler.js";
+import { RequestTokenEstimator } from "../../utils/request-tokenizer/index.js";
+import type { ContentGeneratorConfig } from "../contentGenerator.js";
+import { isAbortError } from "../../utils/errors.js";
+import { createDebugLogger } from "../../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('OPENAI');
+const debugLogger = createDebugLogger("OPENAI");
 
 export class OpenAIContentGenerator implements ContentGenerator {
   protected pipeline: ContentGenerationPipeline;
@@ -92,7 +92,7 @@ export class OpenAIContentGenerator implements ContentGenerator {
       };
     } catch (error) {
       debugLogger.warn(
-        'Failed to calculate tokens with new tokenizer, falling back to simple method:',
+        "Failed to calculate tokens with new tokenizer, falling back to simple method:",
         error,
       );
 
@@ -110,40 +110,40 @@ export class OpenAIContentGenerator implements ContentGenerator {
     request: EmbedContentParameters,
   ): Promise<EmbedContentResponse> {
     // Extract text from contents
-    let text = '';
+    let text = "";
     if (Array.isArray(request.contents)) {
       text = request.contents
         .map((content) => {
-          if (typeof content === 'string') return content;
-          if ('parts' in content && content.parts) {
+          if (typeof content === "string") return content;
+          if ("parts" in content && content.parts) {
             return content.parts
               .map((part) =>
-                typeof part === 'string'
+                typeof part === "string"
                   ? part
-                  : 'text' in part
-                    ? (part as { text?: string }).text || ''
-                    : '',
+                  : "text" in part
+                    ? (part as { text?: string }).text || ""
+                    : "",
               )
-              .join(' ');
+              .join(" ");
           }
-          return '';
+          return "";
         })
-        .join(' ');
+        .join(" ");
     } else if (request.contents) {
-      if (typeof request.contents === 'string') {
+      if (typeof request.contents === "string") {
         text = request.contents;
-      } else if ('parts' in request.contents && request.contents.parts) {
+      } else if ("parts" in request.contents && request.contents.parts) {
         text = request.contents.parts
           .map((part) =>
-            typeof part === 'string' ? part : 'text' in part ? part.text : '',
+            typeof part === "string" ? part : "text" in part ? part.text : "",
           )
-          .join(' ');
+          .join(" ");
       }
     }
 
     try {
       const embedding = await this.pipeline.client.embeddings.create({
-        model: 'text-embedding-ada-002', // Default embedding model
+        model: "text-embedding-ada-002", // Default embedding model
         input: text,
       });
 
@@ -155,7 +155,7 @@ export class OpenAIContentGenerator implements ContentGenerator {
         ],
       };
     } catch (error) {
-      debugLogger.error('OpenAI API Embedding Error:', error);
+      debugLogger.error("OpenAI API Embedding Error:", error);
       throw new Error(
         `OpenAI API error: ${error instanceof Error ? error.message : String(error)}`,
       );

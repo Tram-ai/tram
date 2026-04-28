@@ -4,25 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ModelDialog } from './ModelDialog.js';
-import { useKeypress } from '../hooks/useKeypress.js';
-import { DescriptiveRadioButtonSelect } from './shared/DescriptiveRadioButtonSelect.js';
-import { ConfigContext } from '../contexts/ConfigContext.js';
-import { SettingsContext } from '../contexts/SettingsContext.js';
-import type { Config } from '@tram-ai/tram-core';
-import { AuthType, DEFAULT_TRAM_MODEL } from '@tram-ai/tram-core';
-import type { LoadedSettings } from '../../config/settings.js';
-import { SettingScope } from '../../config/settings.js';
-import { getFilteredTramModels } from '../models/availableModels.js';
+import { render, cleanup } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { ModelDialog } from "./ModelDialog.js";
+import { useKeypress } from "../hooks/useKeypress.js";
+import { DescriptiveRadioButtonSelect } from "./shared/DescriptiveRadioButtonSelect.js";
+import { ConfigContext } from "../contexts/ConfigContext.js";
+import { SettingsContext } from "../contexts/SettingsContext.js";
+import type { Config } from "@tram-ai/tram-core";
+import { AuthType, DEFAULT_TRAM_MODEL } from "@tram-ai/tram-core";
+import type { LoadedSettings } from "../../config/settings.js";
+import { SettingScope } from "../../config/settings.js";
+import { getFilteredTramModels } from "../models/availableModels.js";
 
-vi.mock('../hooks/useKeypress.js', () => ({
+vi.mock("../hooks/useKeypress.js", () => ({
   useKeypress: vi.fn(),
 }));
 const mockedUseKeypress = vi.mocked(useKeypress);
 
-vi.mock('./shared/DescriptiveRadioButtonSelect.js', () => ({
+vi.mock("./shared/DescriptiveRadioButtonSelect.js", () => ({
   DescriptiveRadioButtonSelect: vi.fn(() => null),
 }));
 
@@ -61,19 +61,19 @@ const renderComponent = (
     getModel: vi.fn(() => DEFAULT_TRAM_MODEL),
     setModel: vi.fn().mockResolvedValue(undefined),
     switchModel: vi.fn().mockResolvedValue(undefined),
-    getAuthType: vi.fn(() => 'tram-oauth'),
+    getAuthType: vi.fn(() => "tram-oauth"),
     getAllConfiguredModels: vi.fn(() =>
       getFilteredTramModels().map((m) => ({
         id: m.id,
         label: m.label,
-        description: m.description || '',
+        description: m.description || "",
         authType: AuthType.TRAM_OAUTH,
       })),
     ),
 
     // --- Functions used by ClearcutLogger ---
     getUsageStatisticsEnabled: vi.fn(() => true),
-    getSessionId: vi.fn(() => 'mock-session-id'),
+    getSessionId: vi.fn(() => "mock-session-id"),
     getDebugMode: vi.fn(() => false),
     getContentGeneratorConfig: vi.fn(() => ({
       authType: AuthType.TRAM_OAUTH,
@@ -102,24 +102,24 @@ const renderComponent = (
   };
 };
 
-describe('<ModelDialog />', () => {
+describe("<ModelDialog />", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Ensure env-based fallback models don't leak into this suite from the developer environment.
-    delete process.env['OPENAI_MODEL'];
-    delete process.env['ANTHROPIC_MODEL'];
+    delete process.env["OPENAI_MODEL"];
+    delete process.env["ANTHROPIC_MODEL"];
   });
 
   afterEach(() => {
     cleanup();
   });
 
-  it('renders the title', () => {
+  it("renders the title", () => {
     const { getByText } = renderComponent();
-    expect(getByText('Select Model')).toBeDefined();
+    expect(getByText("Select Model")).toBeDefined();
   });
 
-  it('passes all model options to DescriptiveRadioButtonSelect', () => {
+  it("passes all model options to DescriptiveRadioButtonSelect", () => {
     renderComponent();
     expect(mockedSelect).toHaveBeenCalledTimes(1);
 
@@ -132,7 +132,7 @@ describe('<ModelDialog />', () => {
     expect(props.showNumbers).toBe(true);
   });
 
-  it('initializes with the model from ConfigContext', () => {
+  it("initializes with the model from ConfigContext", () => {
     const mockGetModel = vi.fn(() => DEFAULT_TRAM_MODEL);
     renderComponent(
       {},
@@ -157,7 +157,7 @@ describe('<ModelDialog />', () => {
     );
   });
 
-  it('initializes with default coder model if context is not provided', () => {
+  it("initializes with default coder model if context is not provided", () => {
     renderComponent({}, undefined);
 
     expect(mockedSelect).toHaveBeenCalledWith(
@@ -168,7 +168,7 @@ describe('<ModelDialog />', () => {
     );
   });
 
-  it('initializes with default coder model if getModel returns undefined', () => {
+  it("initializes with default coder model if getModel returns undefined", () => {
     const mockGetModel = vi.fn(() => undefined as unknown as string);
     renderComponent(
       {},
@@ -192,7 +192,7 @@ describe('<ModelDialog />', () => {
     expect(mockedSelect).toHaveBeenCalledTimes(1);
   });
 
-  it('blocks qwen-oauth model selection with an error message (discontinued)', async () => {
+  it("blocks qwen-oauth model selection with an error message (discontinued)", async () => {
     const { props, mockConfig } = renderComponent(
       {},
       {
@@ -220,45 +220,45 @@ describe('<ModelDialog />', () => {
     expect(props.onClose).not.toHaveBeenCalled();
   });
 
-  it('calls config.switchModel and onClose when selecting a non-OAuth model', async () => {
+  it("calls config.switchModel and onClose when selecting a non-OAuth model", async () => {
     const switchModel = vi.fn().mockResolvedValue(undefined);
     const getAuthType = vi.fn(() => AuthType.USE_OPENAI);
     const getAvailableModelsForAuthType = vi.fn((t: AuthType) => {
       if (t === AuthType.USE_OPENAI) {
-        return [{ id: 'gpt-4', label: 'GPT-4', authType: t }];
+        return [{ id: "gpt-4", label: "GPT-4", authType: t }];
       }
-      if (t === AuthType.QWEN_OAUTH) {
-        return getFilteredQwenModels().map((m) => ({
+      if (t === AuthType.TRAM_OAUTH) {
+        return getFilteredTramModels().map((m) => ({
           id: m.id,
           label: m.label,
-          authType: AuthType.QWEN_OAUTH,
+          authType: AuthType.TRAM_OAUTH,
         }));
       }
       return [];
     });
 
     const { props, mockSettings } = renderComponent({}, {
-      getModel: vi.fn(() => 'gpt-4'),
+      getModel: vi.fn(() => "gpt-4"),
       getAuthType,
       switchModel,
       getAvailableModelsForAuthType,
       getAllConfiguredModels: vi.fn(() => [
-        ...getFilteredQwenModels().map((m) => ({
+        ...getFilteredTramModels().map((m) => ({
           id: m.id,
           label: m.label,
-          description: m.description || '',
-          authType: AuthType.QWEN_OAUTH,
+          description: m.description || "",
+          authType: AuthType.TRAM_OAUTH,
         })),
         {
-          id: 'gpt-4',
-          label: 'GPT-4',
-          description: 'GPT-4 model',
+          id: "gpt-4",
+          label: "GPT-4",
+          description: "GPT-4 model",
           authType: AuthType.USE_OPENAI,
         },
       ]),
       getContentGeneratorConfig: vi.fn(() => ({
         authType: AuthType.USE_OPENAI,
-        model: 'gpt-4',
+        model: "gpt-4",
       })),
     } as unknown as Partial<Config>);
 
@@ -270,28 +270,28 @@ describe('<ModelDialog />', () => {
 
     expect(switchModel).toHaveBeenCalledWith(
       AuthType.USE_OPENAI,
-      'gpt-4',
+      "gpt-4",
       undefined,
     );
     expect(mockSettings.setValue).toHaveBeenCalledWith(
       SettingScope.User,
-      'model.name',
-      'gpt-4',
+      "model.name",
+      "gpt-4",
     );
     expect(mockSettings.setValue).toHaveBeenCalledWith(
       SettingScope.User,
-      'security.auth.selectedType',
+      "security.auth.selectedType",
       AuthType.USE_OPENAI,
     );
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('blocks switching to qwen-oauth from another authType (discontinued)', async () => {
+  it("blocks switching to qwen-oauth from another authType (discontinued)", async () => {
     const switchModel = vi.fn().mockResolvedValue(undefined);
     const getAuthType = vi.fn(() => AuthType.USE_OPENAI);
     const getAvailableModelsForAuthType = vi.fn((t: AuthType) => {
       if (t === AuthType.USE_OPENAI) {
-        return [{ id: 'gpt-4', label: 'GPT-4', authType: t }];
+        return [{ id: "gpt-4", label: "GPT-4", authType: t }];
       }
       if (t === AuthType.TRAM_OAUTH) {
         return getFilteredTramModels().map((m) => ({
@@ -305,10 +305,10 @@ describe('<ModelDialog />', () => {
 
     const mockConfigWithSwitchAuthType = {
       getAuthType,
-      getModel: vi.fn(() => 'gpt-4'),
+      getModel: vi.fn(() => "gpt-4"),
       getContentGeneratorConfig: vi.fn(() => ({
         authType: AuthType.USE_OPENAI,
-        model: 'gpt-4',
+        model: "gpt-4",
       })),
       switchModel,
       getAvailableModelsForAuthType,
@@ -328,12 +328,12 @@ describe('<ModelDialog />', () => {
     expect(props.onClose).not.toHaveBeenCalled();
   });
 
-  it('passes onHighlight to DescriptiveRadioButtonSelect', () => {
+  it("passes onHighlight to DescriptiveRadioButtonSelect", () => {
     renderComponent();
 
     const childOnHighlight = mockedSelect.mock.calls[0][0].onHighlight;
     expect(childOnHighlight).toBeDefined();
-    expect(typeof childOnHighlight).toBe('function');
+    expect(typeof childOnHighlight).toBe("function");
   });
 
   it('calls onClose prop when "escape" key is pressed', () => {
@@ -347,29 +347,29 @@ describe('<ModelDialog />', () => {
     expect(options).toEqual({ isActive: true });
 
     keyPressHandler({
-      name: 'escape',
+      name: "escape",
       ctrl: false,
       meta: false,
       shift: false,
       paste: false,
-      sequence: '',
+      sequence: "",
     });
     expect(props.onClose).toHaveBeenCalledTimes(1);
 
     keyPressHandler({
-      name: 'a',
+      name: "a",
       ctrl: false,
       meta: false,
       shift: false,
       paste: false,
-      sequence: '',
+      sequence: "",
     });
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('updates initialIndex when config context changes', () => {
+  it("updates initialIndex when config context changes", () => {
     const mockGetModel = vi.fn(() => DEFAULT_TRAM_MODEL);
-    const mockGetAuthType = vi.fn(() => 'tram-oauth');
+    const mockGetAuthType = vi.fn(() => "tram-oauth");
     const mockSettings = {
       isTrusted: true,
       user: { settings: {} },
@@ -389,7 +389,7 @@ describe('<ModelDialog />', () => {
                 getFilteredTramModels().map((m) => ({
                   id: m.id,
                   label: m.label,
-                  description: m.description || '',
+                  description: m.description || "",
                   authType: AuthType.TRAM_OAUTH,
                 })),
               ),
@@ -413,7 +413,7 @@ describe('<ModelDialog />', () => {
         getFilteredTramModels().map((m) => ({
           id: m.id,
           label: m.label,
-          description: m.description || '',
+          description: m.description || "",
           authType: AuthType.TRAM_OAUTH,
         })),
       ),

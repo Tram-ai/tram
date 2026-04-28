@@ -33,14 +33,14 @@ const FIELD_RANGES: Array<[number, number]> = [
 function parseField(field: string, min: number, max: number): Set<number> {
   const values = new Set<number>();
 
-  for (const part of field.split(',')) {
+  for (const part of field.split(",")) {
     const trimmed = part.trim();
     if (!trimmed) {
       throw new Error(`Empty field segment in "${field}"`);
     }
 
     // Handle step: */N or range/N or value/N
-    const stepParts = trimmed.split('/');
+    const stepParts = trimmed.split("/");
     if (stepParts.length > 2) {
       throw new Error(`Invalid step expression: "${trimmed}"`);
     }
@@ -49,11 +49,11 @@ function parseField(field: string, min: number, max: number): Set<number> {
     let rangeEnd: number;
     const base = stepParts[0]!;
 
-    if (base === '*') {
+    if (base === "*") {
       rangeStart = min;
       rangeEnd = max;
-    } else if (base.includes('-')) {
-      const [startStr, endStr] = base.split('-');
+    } else if (base.includes("-")) {
+      const [startStr, endStr] = base.split("-");
       rangeStart = parseInt(startStr!, 10);
       rangeEnd = parseInt(endStr!, 10);
       if (isNaN(rangeStart) || isNaN(rangeEnd)) {
@@ -113,8 +113,8 @@ export function parseCron(cronExpr: string): CronFields {
     dayOfMonth: parseField(parts[2]!, FIELD_RANGES[2]![0], FIELD_RANGES[2]![1]),
     month: parseField(parts[3]!, FIELD_RANGES[3]![0], FIELD_RANGES[3]![1]),
     dayOfWeek,
-    domIsWild: parts[2]!.trim() === '*',
-    dowIsWild: parts[4]!.trim() === '*',
+    domIsWild: parts[2]!.trim() === "*",
+    dowIsWild: parts[4]!.trim() === "*",
   };
 }
 

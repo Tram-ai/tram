@@ -17,14 +17,14 @@
  * Extensible for domain-specific needs.
  */
 export type ConfigSourceKind =
-  | 'cli'
-  | 'env'
-  | 'settings'
-  | 'modelProviders'
-  | 'default'
-  | 'computed'
-  | 'programmatic'
-  | 'unknown';
+  | "cli"
+  | "env"
+  | "settings"
+  | "modelProviders"
+  | "default"
+  | "computed"
+  | "programmatic"
+  | "unknown";
 
 /**
  * Source metadata for a configuration value.
@@ -44,7 +44,7 @@ export interface ConfigSource {
   /** Model ID if relevant (for modelProviders) */
   modelId?: string;
   /** Indirect source - when a value is derived via another source */
-  via?: Omit<ConfigSource, 'via'>;
+  via?: Omit<ConfigSource, "via">;
 }
 
 /**
@@ -100,7 +100,7 @@ export interface ResolvedField<T> {
 export function resolveField<T>(
   layers: Array<ConfigLayer<T>>,
   defaultValue: T,
-  defaultSource: ConfigSource = { kind: 'default' },
+  defaultSource: ConfigSource = { kind: "default" },
 ): ResolvedField<T> {
   for (const layer of layers) {
     if (isValuePresent(layer.value)) {
@@ -138,7 +138,7 @@ function isValuePresent<T>(value: T | undefined | null): value is T {
     return false;
   }
   // Treat empty strings as not present
-  if (typeof value === 'string' && value.trim() === '') {
+  if (typeof value === "string" && value.trim() === "") {
     return false;
   }
   return true;
@@ -148,21 +148,21 @@ function isValuePresent<T>(value: T | undefined | null): value is T {
  * Create a CLI source descriptor
  */
 export function cliSource(detail: string): ConfigSource {
-  return { kind: 'cli', detail };
+  return { kind: "cli", detail };
 }
 
 /**
  * Create an environment variable source descriptor
  */
 function envSource(envKey: string): ConfigSource {
-  return { kind: 'env', envKey };
+  return { kind: "env", envKey };
 }
 
 /**
  * Create a settings source descriptor
  */
 export function settingsSource(settingsPath: string): ConfigSource {
-  return { kind: 'settings', settingsPath };
+  return { kind: "settings", settingsPath };
 }
 
 /**
@@ -173,21 +173,21 @@ export function modelProvidersSource(
   modelId: string,
   detail?: string,
 ): ConfigSource {
-  return { kind: 'modelProviders', authType, modelId, detail };
+  return { kind: "modelProviders", authType, modelId, detail };
 }
 
 /**
  * Create a default value source descriptor
  */
 export function defaultSource(detail?: string): ConfigSource {
-  return { kind: 'default', detail };
+  return { kind: "default", detail };
 }
 
 /**
  * Create a computed value source descriptor
  */
 export function computedSource(detail?: string): ConfigSource {
-  return { kind: 'computed', detail };
+  return { kind: "computed", detail };
 }
 
 /**

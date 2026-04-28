@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Mock } from 'vitest';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { memoryCommand } from './memoryCommand.js';
-import type { SlashCommand, CommandContext } from './types.js';
-import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
-import { MessageType } from '../types.js';
-import type { LoadedSettings } from '../../config/settings.js';
-import { readFile } from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
+import type { Mock } from "vitest";
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import { memoryCommand } from "./memoryCommand.js";
+import type { SlashCommand, CommandContext } from "./types.js";
+import { createMockCommandContext } from "../../test-utils/mockCommandContext.js";
+import { MessageType } from "../types.js";
+import type { LoadedSettings } from "../../config/settings.js";
+import { readFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import {
   getErrorMessage,
   loadServerHierarchicalMemory,
@@ -21,11 +21,10 @@ import {
   setGeminiMdFilename,
   type FileDiscoveryService,
   type LoadServerHierarchicalMemoryResponse,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 
-vi.mock('@tram-ai/tram-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('@tram-ai/tram-core')>();
+vi.mock("@tram-ai/tram-core", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@tram-ai/tram-core")>();
   return {
     ...original,
     getErrorMessage: vi.fn((error: unknown) => {
@@ -36,7 +35,7 @@ vi.mock('@tram-ai/tram-core', async (importOriginal) => {
   };
 });
 
-vi.mock('node:fs/promises', () => {
+vi.mock("node:fs/promises", () => {
   const readFile = vi.fn();
   return {
     readFile,
@@ -49,10 +48,10 @@ vi.mock('node:fs/promises', () => {
 const mockLoadServerHierarchicalMemory = loadServerHierarchicalMemory as Mock;
 const mockReadFile = readFile as unknown as Mock;
 
-describe('memoryCommand', () => {
+describe("memoryCommand", () => {
   let mockContext: CommandContext;
 
-  const getSubCommand = (name: 'show' | 'add' | 'refresh'): SlashCommand => {
+  const getSubCommand = (name: "show" | "add" | "refresh"): SlashCommand => {
     const subCommand = memoryCommand.subCommands?.find(
       (cmd) => cmd.name === name,
     );
@@ -62,17 +61,17 @@ describe('memoryCommand', () => {
     return subCommand;
   };
 
-  describe('/memory show', () => {
+  describe("/memory show", () => {
     let showCommand: SlashCommand;
     let mockGetUserMemory: Mock;
     let mockGetGeminiMdFileCount: Mock;
 
     beforeEach(() => {
-      setGeminiMdFilename('TRAM.md');
+      setGeminiMdFilename("TRAM.md");
       mockReadFile.mockReset();
       vi.restoreAllMocks();
 
-      showCommand = getSubCommand('show');
+      showCommand = getSubCommand("show");
 
       mockGetUserMemory = vi.fn();
       mockGetGeminiMdFileCount = vi.fn();
@@ -87,32 +86,32 @@ describe('memoryCommand', () => {
       });
     });
 
-    it('should display a message if memory is empty', async () => {
-      if (!showCommand.action) throw new Error('Command has no action');
+    it("should display a message if memory is empty", async () => {
+      if (!showCommand.action) throw new Error("Command has no action");
 
-      mockGetUserMemory.mockReturnValue('');
+      mockGetUserMemory.mockReturnValue("");
       mockGetGeminiMdFileCount.mockReturnValue(0);
 
-      await showCommand.action(mockContext, '');
+      await showCommand.action(mockContext, "");
 
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.INFO,
-          text: 'Memory is currently empty.',
+          text: "Memory is currently empty.",
         },
         expect.any(Number),
       );
     });
 
-    it('should display the memory content and file count if it exists', async () => {
-      if (!showCommand.action) throw new Error('Command has no action');
+    it("should display the memory content and file count if it exists", async () => {
+      if (!showCommand.action) throw new Error("Command has no action");
 
-      const memoryContent = 'This is a test memory.';
+      const memoryContent = "This is a test memory.";
 
       mockGetUserMemory.mockReturnValue(memoryContent);
       mockGetGeminiMdFileCount.mockReturnValue(1);
 
-      await showCommand.action(mockContext, '');
+      await showCommand.action(mockContext, "");
 
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
@@ -123,20 +122,20 @@ describe('memoryCommand', () => {
       );
     });
 
-    it('should show project memory from the configured context file', async () => {
+    it("should show project memory from the configured context file", async () => {
       const projectCommand = showCommand.subCommands?.find(
-        (cmd) => cmd.name === '--project',
+        (cmd) => cmd.name === "--project",
       );
-      if (!projectCommand?.action) throw new Error('Command has no action');
+      if (!projectCommand?.action) throw new Error("Command has no action");
 
-      setGeminiMdFilename('AGENTS.md');
-      vi.spyOn(process, 'cwd').mockReturnValue('/test/project');
-      mockReadFile.mockResolvedValue('project memory');
+      setGeminiMdFilename("AGENTS.md");
+      vi.spyOn(process, "cwd").mockReturnValue("/test/project");
+      mockReadFile.mockResolvedValue("project memory");
 
-      await projectCommand.action(mockContext, '');
+      await projectCommand.action(mockContext, "");
 
-      const expectedProjectPath = path.join('/test/project', 'AGENTS.md');
-      expect(mockReadFile).toHaveBeenCalledWith(expectedProjectPath, 'utf-8');
+      const expectedProjectPath = path.join("/test/project", "AGENTS.md");
+      expect(mockReadFile).toHaveBeenCalledWith(expectedProjectPath, "utf-8");
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.INFO,
@@ -146,165 +145,165 @@ describe('memoryCommand', () => {
       );
     });
 
-    it('should show global memory from the configured context file', async () => {
+    it("should show global memory from the configured context file", async () => {
       const globalCommand = showCommand.subCommands?.find(
-        (cmd) => cmd.name === '--global',
+        (cmd) => cmd.name === "--global",
       );
-      if (!globalCommand?.action) throw new Error('Command has no action');
+      if (!globalCommand?.action) throw new Error("Command has no action");
 
-      setGeminiMdFilename('AGENTS.md');
-      vi.spyOn(os, 'homedir').mockReturnValue('/home/user');
-      mockReadFile.mockResolvedValue('global memory');
+      setGeminiMdFilename("AGENTS.md");
+      vi.spyOn(os, "homedir").mockReturnValue("/home/user");
+      mockReadFile.mockResolvedValue("global memory");
 
-      await globalCommand.action(mockContext, '');
+      await globalCommand.action(mockContext, "");
 
-      const expectedGlobalPath = path.join('/home/user', TRAM_DIR, 'AGENTS.md');
-      expect(mockReadFile).toHaveBeenCalledWith(expectedGlobalPath, 'utf-8');
+      const expectedGlobalPath = path.join("/home/user", TRAM_DIR, "AGENTS.md");
+      expect(mockReadFile).toHaveBeenCalledWith(expectedGlobalPath, "utf-8");
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.INFO,
-          text: expect.stringContaining('Global memory content'),
+          text: expect.stringContaining("Global memory content"),
         },
         expect.any(Number),
       );
     });
 
-    it('should fall back to AGENTS.md when QWEN.md does not exist for --project', async () => {
+    it("should fall back to AGENTS.md when QWEN.md does not exist for --project", async () => {
       const projectCommand = showCommand.subCommands?.find(
-        (cmd) => cmd.name === '--project',
+        (cmd) => cmd.name === "--project",
       );
-      if (!projectCommand?.action) throw new Error('Command has no action');
+      if (!projectCommand?.action) throw new Error("Command has no action");
 
-      setGeminiMdFilename(['QWEN.md', 'AGENTS.md']);
-      vi.spyOn(process, 'cwd').mockReturnValue('/test/project');
+      setGeminiMdFilename(["QWEN.md", "AGENTS.md"]);
+      vi.spyOn(process, "cwd").mockReturnValue("/test/project");
       mockReadFile.mockImplementation(async (filePath: string) => {
-        if (filePath.endsWith('AGENTS.md')) return 'agents memory content';
-        throw new Error('ENOENT');
+        if (filePath.endsWith("AGENTS.md")) return "agents memory content";
+        throw new Error("ENOENT");
       });
 
-      await projectCommand.action(mockContext, '');
+      await projectCommand.action(mockContext, "");
 
-      const expectedPath = path.join('/test/project', 'AGENTS.md');
-      expect(mockReadFile).toHaveBeenCalledWith(expectedPath, 'utf-8');
+      const expectedPath = path.join("/test/project", "AGENTS.md");
+      expect(mockReadFile).toHaveBeenCalledWith(expectedPath, "utf-8");
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.INFO,
-          text: expect.stringContaining('agents memory content'),
+          text: expect.stringContaining("agents memory content"),
         },
         expect.any(Number),
       );
     });
 
-    it('should fall back to AGENTS.md when QWEN.md does not exist for --global', async () => {
+    it("should fall back to AGENTS.md when QWEN.md does not exist for --global", async () => {
       const globalCommand = showCommand.subCommands?.find(
-        (cmd) => cmd.name === '--global',
+        (cmd) => cmd.name === "--global",
       );
-      if (!globalCommand?.action) throw new Error('Command has no action');
+      if (!globalCommand?.action) throw new Error("Command has no action");
 
-      setGeminiMdFilename(['QWEN.md', 'AGENTS.md']);
-      vi.spyOn(os, 'homedir').mockReturnValue('/home/user');
+      setGeminiMdFilename(["QWEN.md", "AGENTS.md"]);
+      vi.spyOn(os, "homedir").mockReturnValue("/home/user");
       mockReadFile.mockImplementation(async (filePath: string) => {
-        if (filePath.endsWith('AGENTS.md')) return 'global agents memory';
-        throw new Error('ENOENT');
+        if (filePath.endsWith("AGENTS.md")) return "global agents memory";
+        throw new Error("ENOENT");
       });
 
-      await globalCommand.action(mockContext, '');
+      await globalCommand.action(mockContext, "");
 
-      const expectedPath = path.join('/home/user', QWEN_DIR, 'AGENTS.md');
-      expect(mockReadFile).toHaveBeenCalledWith(expectedPath, 'utf-8');
+      const expectedPath = path.join("/home/user", QWEN_DIR, "AGENTS.md");
+      expect(mockReadFile).toHaveBeenCalledWith(expectedPath, "utf-8");
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.INFO,
-          text: expect.stringContaining('global agents memory'),
+          text: expect.stringContaining("global agents memory"),
         },
         expect.any(Number),
       );
     });
 
-    it('should show content from both QWEN.md and AGENTS.md for --project when both exist', async () => {
+    it("should show content from both QWEN.md and AGENTS.md for --project when both exist", async () => {
       const projectCommand = showCommand.subCommands?.find(
-        (cmd) => cmd.name === '--project',
+        (cmd) => cmd.name === "--project",
       );
-      if (!projectCommand?.action) throw new Error('Command has no action');
+      if (!projectCommand?.action) throw new Error("Command has no action");
 
-      setGeminiMdFilename(['QWEN.md', 'AGENTS.md']);
-      vi.spyOn(process, 'cwd').mockReturnValue('/test/project');
+      setGeminiMdFilename(["QWEN.md", "AGENTS.md"]);
+      vi.spyOn(process, "cwd").mockReturnValue("/test/project");
       mockReadFile.mockImplementation(async (filePath: string) => {
-        if (filePath.endsWith('QWEN.md')) return 'qwen memory';
-        if (filePath.endsWith('AGENTS.md')) return 'agents memory';
-        throw new Error('ENOENT');
+        if (filePath.endsWith("QWEN.md")) return "qwen memory";
+        if (filePath.endsWith("AGENTS.md")) return "agents memory";
+        throw new Error("ENOENT");
       });
 
-      await projectCommand.action(mockContext, '');
+      await projectCommand.action(mockContext, "");
 
       expect(mockReadFile).toHaveBeenCalledWith(
-        path.join('/test/project', 'QWEN.md'),
-        'utf-8',
+        path.join("/test/project", "QWEN.md"),
+        "utf-8",
       );
       expect(mockReadFile).toHaveBeenCalledWith(
-        path.join('/test/project', 'AGENTS.md'),
-        'utf-8',
+        path.join("/test/project", "AGENTS.md"),
+        "utf-8",
       );
       const addItemCall = (mockContext.ui.addItem as Mock).mock.calls[0][0];
-      expect(addItemCall.text).toContain('qwen memory');
-      expect(addItemCall.text).toContain('agents memory');
+      expect(addItemCall.text).toContain("qwen memory");
+      expect(addItemCall.text).toContain("agents memory");
     });
 
-    it('should show content from both files for --global when both exist', async () => {
+    it("should show content from both files for --global when both exist", async () => {
       const globalCommand = showCommand.subCommands?.find(
-        (cmd) => cmd.name === '--global',
+        (cmd) => cmd.name === "--global",
       );
-      if (!globalCommand?.action) throw new Error('Command has no action');
+      if (!globalCommand?.action) throw new Error("Command has no action");
 
-      setGeminiMdFilename(['QWEN.md', 'AGENTS.md']);
-      vi.spyOn(os, 'homedir').mockReturnValue('/home/user');
+      setGeminiMdFilename(["QWEN.md", "AGENTS.md"]);
+      vi.spyOn(os, "homedir").mockReturnValue("/home/user");
       mockReadFile.mockImplementation(async (filePath: string) => {
-        if (filePath.endsWith('QWEN.md')) return 'global qwen memory';
-        if (filePath.endsWith('AGENTS.md')) return 'global agents memory';
-        throw new Error('ENOENT');
+        if (filePath.endsWith("QWEN.md")) return "global qwen memory";
+        if (filePath.endsWith("AGENTS.md")) return "global agents memory";
+        throw new Error("ENOENT");
       });
 
-      await globalCommand.action(mockContext, '');
+      await globalCommand.action(mockContext, "");
 
       expect(mockReadFile).toHaveBeenCalledWith(
-        path.join('/home/user', QWEN_DIR, 'QWEN.md'),
-        'utf-8',
+        path.join("/home/user", QWEN_DIR, "QWEN.md"),
+        "utf-8",
       );
       expect(mockReadFile).toHaveBeenCalledWith(
-        path.join('/home/user', QWEN_DIR, 'AGENTS.md'),
-        'utf-8',
+        path.join("/home/user", QWEN_DIR, "AGENTS.md"),
+        "utf-8",
       );
       const addItemCall = (mockContext.ui.addItem as Mock).mock.calls[0][0];
-      expect(addItemCall.text).toContain('global qwen memory');
-      expect(addItemCall.text).toContain('global agents memory');
+      expect(addItemCall.text).toContain("global qwen memory");
+      expect(addItemCall.text).toContain("global agents memory");
     });
   });
 
-  describe('/memory add', () => {
+  describe("/memory add", () => {
     let addCommand: SlashCommand;
 
     beforeEach(() => {
-      addCommand = getSubCommand('add');
+      addCommand = getSubCommand("add");
       mockContext = createMockCommandContext();
     });
 
-    it('should return an error message if no arguments are provided', () => {
-      if (!addCommand.action) throw new Error('Command has no action');
+    it("should return an error message if no arguments are provided", () => {
+      if (!addCommand.action) throw new Error("Command has no action");
 
-      const result = addCommand.action(mockContext, '  ');
+      const result = addCommand.action(mockContext, "  ");
       expect(result).toEqual({
-        type: 'message',
-        messageType: 'error',
-        content: 'Usage: /memory add [--global|--project] <text to remember>',
+        type: "message",
+        messageType: "error",
+        content: "Usage: /memory add [--global|--project] <text to remember>",
       });
 
       expect(mockContext.ui.addItem).not.toHaveBeenCalled();
     });
 
-    it('should return a tool action and add an info message when arguments are provided', () => {
-      if (!addCommand.action) throw new Error('Command has no action');
+    it("should return a tool action and add an info message when arguments are provided", () => {
+      if (!addCommand.action) throw new Error("Command has no action");
 
-      const fact = 'remember this';
+      const fact = "remember this";
       const result = addCommand.action(mockContext, `  ${fact}  `);
 
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
@@ -316,16 +315,16 @@ describe('memoryCommand', () => {
       );
 
       expect(result).toEqual({
-        type: 'tool',
-        toolName: 'save_memory',
+        type: "tool",
+        toolName: "save_memory",
         toolArgs: { fact },
       });
     });
 
-    it('should handle --global flag and add scope to tool args', () => {
-      if (!addCommand.action) throw new Error('Command has no action');
+    it("should handle --global flag and add scope to tool args", () => {
+      if (!addCommand.action) throw new Error("Command has no action");
 
-      const fact = 'remember this globally';
+      const fact = "remember this globally";
       const result = addCommand.action(mockContext, `--global ${fact}`);
 
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
@@ -337,16 +336,16 @@ describe('memoryCommand', () => {
       );
 
       expect(result).toEqual({
-        type: 'tool',
-        toolName: 'save_memory',
-        toolArgs: { fact, scope: 'global' },
+        type: "tool",
+        toolName: "save_memory",
+        toolArgs: { fact, scope: "global" },
       });
     });
 
-    it('should handle --project flag and add scope to tool args', () => {
-      if (!addCommand.action) throw new Error('Command has no action');
+    it("should handle --project flag and add scope to tool args", () => {
+      if (!addCommand.action) throw new Error("Command has no action");
 
-      const fact = 'remember this for project';
+      const fact = "remember this for project";
       const result = addCommand.action(mockContext, `--project ${fact}`);
 
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
@@ -358,39 +357,39 @@ describe('memoryCommand', () => {
       );
 
       expect(result).toEqual({
-        type: 'tool',
-        toolName: 'save_memory',
-        toolArgs: { fact, scope: 'project' },
+        type: "tool",
+        toolName: "save_memory",
+        toolArgs: { fact, scope: "project" },
       });
     });
 
-    it('should return error if flag is provided but no fact follows', () => {
-      if (!addCommand.action) throw new Error('Command has no action');
+    it("should return error if flag is provided but no fact follows", () => {
+      if (!addCommand.action) throw new Error("Command has no action");
 
-      const result = addCommand.action(mockContext, '--global   ');
+      const result = addCommand.action(mockContext, "--global   ");
       expect(result).toEqual({
-        type: 'message',
-        messageType: 'error',
-        content: 'Usage: /memory add [--global|--project] <text to remember>',
+        type: "message",
+        messageType: "error",
+        content: "Usage: /memory add [--global|--project] <text to remember>",
       });
 
       expect(mockContext.ui.addItem).not.toHaveBeenCalled();
     });
   });
 
-  describe('/memory refresh', () => {
+  describe("/memory refresh", () => {
     let refreshCommand: SlashCommand;
     let mockSetUserMemory: Mock;
     let mockSetGeminiMdFileCount: Mock;
 
     beforeEach(() => {
-      refreshCommand = getSubCommand('refresh');
+      refreshCommand = getSubCommand("refresh");
       mockSetUserMemory = vi.fn();
       mockSetGeminiMdFileCount = vi.fn();
       const mockConfig = {
         setUserMemory: mockSetUserMemory,
         setGeminiMdFileCount: mockSetGeminiMdFileCount,
-        getWorkingDir: () => '/test/dir',
+        getWorkingDir: () => "/test/dir",
         getDebugMode: () => false,
         getFileService: () => ({}) as FileDiscoveryService,
         getExtensionContextFilePaths: () => [],
@@ -416,21 +415,21 @@ describe('memoryCommand', () => {
       mockLoadServerHierarchicalMemory.mockClear();
     });
 
-    it('should display success message when memory is refreshed with content', async () => {
-      if (!refreshCommand.action) throw new Error('Command has no action');
+    it("should display success message when memory is refreshed with content", async () => {
+      if (!refreshCommand.action) throw new Error("Command has no action");
 
       const refreshResult: LoadServerHierarchicalMemoryResponse = {
-        memoryContent: 'new memory content',
+        memoryContent: "new memory content",
         fileCount: 2,
       };
       mockLoadServerHierarchicalMemory.mockResolvedValue(refreshResult);
 
-      await refreshCommand.action(mockContext, '');
+      await refreshCommand.action(mockContext, "");
 
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.INFO,
-          text: 'Refreshing memory from source files...',
+          text: "Refreshing memory from source files...",
         },
         expect.any(Number),
       );
@@ -446,40 +445,40 @@ describe('memoryCommand', () => {
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.INFO,
-          text: 'Memory refreshed successfully. Loaded 18 characters from 2 file(s).',
+          text: "Memory refreshed successfully. Loaded 18 characters from 2 file(s).",
         },
         expect.any(Number),
       );
     });
 
-    it('should display success message when memory is refreshed with no content', async () => {
-      if (!refreshCommand.action) throw new Error('Command has no action');
+    it("should display success message when memory is refreshed with no content", async () => {
+      if (!refreshCommand.action) throw new Error("Command has no action");
 
-      const refreshResult = { memoryContent: '', fileCount: 0 };
+      const refreshResult = { memoryContent: "", fileCount: 0 };
       mockLoadServerHierarchicalMemory.mockResolvedValue(refreshResult);
 
-      await refreshCommand.action(mockContext, '');
+      await refreshCommand.action(mockContext, "");
 
       expect(loadServerHierarchicalMemory).toHaveBeenCalledOnce();
-      expect(mockSetUserMemory).toHaveBeenCalledWith('');
+      expect(mockSetUserMemory).toHaveBeenCalledWith("");
       expect(mockSetGeminiMdFileCount).toHaveBeenCalledWith(0);
 
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.INFO,
-          text: 'Memory refreshed successfully. No memory content found.',
+          text: "Memory refreshed successfully. No memory content found.",
         },
         expect.any(Number),
       );
     });
 
-    it('should display an error message if refreshing fails', async () => {
-      if (!refreshCommand.action) throw new Error('Command has no action');
+    it("should display an error message if refreshing fails", async () => {
+      if (!refreshCommand.action) throw new Error("Command has no action");
 
-      const error = new Error('Failed to read memory files.');
+      const error = new Error("Failed to read memory files.");
       mockLoadServerHierarchicalMemory.mockRejectedValue(error);
 
-      await refreshCommand.action(mockContext, '');
+      await refreshCommand.action(mockContext, "");
 
       expect(loadServerHierarchicalMemory).toHaveBeenCalledOnce();
       expect(mockSetUserMemory).not.toHaveBeenCalled();
@@ -496,21 +495,21 @@ describe('memoryCommand', () => {
       expect(getErrorMessage).toHaveBeenCalledWith(error);
     });
 
-    it('should not throw if config service is unavailable', async () => {
-      if (!refreshCommand.action) throw new Error('Command has no action');
+    it("should not throw if config service is unavailable", async () => {
+      if (!refreshCommand.action) throw new Error("Command has no action");
 
       const nullConfigContext = createMockCommandContext({
         services: { config: null },
       });
 
       await expect(
-        refreshCommand.action(nullConfigContext, ''),
+        refreshCommand.action(nullConfigContext, ""),
       ).resolves.toBeUndefined();
 
       expect(nullConfigContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.INFO,
-          text: 'Refreshing memory from source files...',
+          text: "Refreshing memory from source files...",
         },
         expect.any(Number),
       );

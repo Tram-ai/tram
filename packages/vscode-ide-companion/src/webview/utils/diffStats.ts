@@ -47,12 +47,12 @@ export function calculateDiffStats(
   newText: string | undefined,
 ): DiffStats {
   // Handle null values
-  const oldContent = oldText || '';
-  const newContent = newText || '';
+  const oldContent = oldText || "";
+  const newContent = newText || "";
 
   // Split by lines
-  const oldLines = oldContent.split('\n').filter((line) => line.trim() !== '');
-  const newLines = newContent.split('\n').filter((line) => line.trim() !== '');
+  const oldLines = oldContent.split("\n").filter((line) => line.trim() !== "");
+  const newLines = newContent.split("\n").filter((line) => line.trim() !== "");
 
   // If one of them is empty, calculate directly
   if (oldLines.length === 0) {
@@ -126,7 +126,7 @@ export function formatDiffStats(stats: DiffStats): string {
     parts.push(`~${stats.changed}`);
   }
 
-  return parts.join(' ') || 'No changes';
+  return parts.join(" ") || "No changes";
 }
 
 /**
@@ -145,16 +145,16 @@ export function formatDiffStatsDetailed(stats: DiffStats): string {
   const parts: string[] = [];
 
   if (stats.added > 0) {
-    parts.push(`+${stats.added} ${stats.added === 1 ? 'line' : 'lines'}`);
+    parts.push(`+${stats.added} ${stats.added === 1 ? "line" : "lines"}`);
   }
 
   if (stats.removed > 0) {
-    parts.push(`-${stats.removed} ${stats.removed === 1 ? 'line' : 'lines'}`);
+    parts.push(`-${stats.removed} ${stats.removed === 1 ? "line" : "lines"}`);
   }
 
   if (stats.changed > 0) {
-    parts.push(`~${stats.changed} ${stats.changed === 1 ? 'line' : 'lines'}`);
+    parts.push(`~${stats.changed} ${stats.changed === 1 ? "line" : "lines"}`);
   }
 
-  return parts.join(', ') || 'No changes';
+  return parts.join(", ") || "No changes";
 }

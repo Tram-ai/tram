@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import type { AuthenticateUpdateNotification } from '../types/acpTypes.js';
+import * as vscode from "vscode";
+import type { AuthenticateUpdateNotification } from "../types/acpTypes.js";
 
 // Store reference to the current notification
 let currentNotification: Thenable<string | undefined> | null = null;
@@ -24,23 +24,23 @@ export function handleAuthenticateUpdate(
   // Store reference to the current notification
   currentNotification = vscode.window.showInformationMessage(
     `TRAM needs authentication. Click an action below:`,
-    'Open in Browser',
-    'Copy Link',
-    'Dismiss',
+    "Open in Browser",
+    "Copy Link",
+    "Dismiss",
   );
 
   currentNotification.then((selection) => {
-    if (selection === 'Open in Browser') {
+    if (selection === "Open in Browser") {
       // Open the authentication URI in the default browser
       vscode.env.openExternal(vscode.Uri.parse(authUri));
       vscode.window.showInformationMessage(
-        'Opening authentication page in your browser...',
+        "Opening authentication page in your browser...",
       );
-    } else if (selection === 'Copy Link') {
+    } else if (selection === "Copy Link") {
       // Copy the authentication URI to clipboard
       vscode.env.clipboard.writeText(authUri);
       vscode.window.showInformationMessage(
-        'Authentication link copied to clipboard!',
+        "Authentication link copied to clipboard!",
       );
     }
 

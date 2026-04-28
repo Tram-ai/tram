@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as crypto from 'node:crypto';
-import * as fs from 'node:fs/promises';
-import { isNodeError } from './errors.js';
+import * as crypto from "node:crypto";
+import * as fs from "node:fs/promises";
+import { isNodeError } from "./errors.js";
 
 export interface AtomicWriteOptions {
   /** Number of rename retries on EPERM/EACCES (default: 3). */
@@ -33,9 +33,9 @@ export async function atomicWriteJSON(
   const retries = options?.retries ?? 3;
   const delayMs = options?.delayMs ?? 50;
 
-  const tmpPath = `${filePath}.${crypto.randomBytes(4).toString('hex')}.tmp`;
+  const tmpPath = `${filePath}.${crypto.randomBytes(4).toString("hex")}.tmp`;
   try {
-    await fs.writeFile(tmpPath, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.writeFile(tmpPath, JSON.stringify(data, null, 2), "utf-8");
     await renameWithRetry(tmpPath, filePath, retries, delayMs);
   } catch (error) {
     try {
@@ -60,7 +60,7 @@ async function renameWithRetry(
     } catch (error: unknown) {
       const isRetryable =
         isNodeError(error) &&
-        (error.code === 'EPERM' || error.code === 'EACCES');
+        (error.code === "EPERM" || error.code === "EACCES");
       if (!isRetryable || attempt === retries) {
         throw error;
       }

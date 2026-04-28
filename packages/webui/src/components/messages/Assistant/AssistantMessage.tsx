@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
-import { MessageContent } from '../MessageContent.js';
-import './AssistantMessage.css';
+import type { FC } from "react";
+import { MessageContent } from "../MessageContent.js";
+import "./AssistantMessage.css";
 
 export type AssistantMessageStatus =
-  | 'default'
-  | 'success'
-  | 'error'
-  | 'warning'
-  | 'loading';
+  | "default"
+  | "success"
+  | "error"
+  | "warning"
+  | "loading";
 
 export interface AssistantMessageProps {
   content: string;
@@ -36,7 +36,7 @@ export const AssistantMessage: FC<AssistantMessageProps> = ({
   content,
   timestamp: _timestamp,
   onFileClick,
-  status = 'default',
+  status = "default",
   hideStatusIcon = false,
   isFirst = false,
   isLast = false,
@@ -48,19 +48,19 @@ export const AssistantMessage: FC<AssistantMessageProps> = ({
 
   const getStatusClass = () => {
     if (hideStatusIcon) {
-      return '';
+      return "";
     }
     switch (status) {
-      case 'success':
-        return 'assistant-message-success';
-      case 'error':
-        return 'assistant-message-error';
-      case 'warning':
-        return 'assistant-message-warning';
-      case 'loading':
-        return 'assistant-message-loading';
+      case "success":
+        return "assistant-message-success";
+      case "error":
+        return "assistant-message-error";
+      case "warning":
+        return "assistant-message-warning";
+      case "loading":
+        return "assistant-message-loading";
       default:
-        return 'assistant-message-default';
+        return "assistant-message-default";
     }
   };
 
@@ -70,21 +70,21 @@ export const AssistantMessage: FC<AssistantMessageProps> = ({
       data-first={isFirst}
       data-last={isLast}
       style={{
-        width: '100%',
-        alignItems: 'flex-start',
-        paddingLeft: '30px',
-        userSelect: 'text',
-        position: 'relative',
+        width: "100%",
+        alignItems: "flex-start",
+        paddingLeft: "30px",
+        userSelect: "text",
+        position: "relative",
       }}
     >
-      <span style={{ width: '100%' }}>
+      <span style={{ width: "100%" }}>
         <div
           style={{
             margin: 0,
-            width: '100%',
-            wordWrap: 'break-word',
-            overflowWrap: 'break-word',
-            whiteSpace: 'normal',
+            width: "100%",
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
+            whiteSpace: "normal",
           }}
         >
           <MessageContent

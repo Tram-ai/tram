@@ -15,7 +15,7 @@ This guide provides solutions to common issues and debugging tips, including top
     - Example: `export NODE_EXTRA_CA_CERTS=/path/to/your/corporate-ca.crt`
 
 - **Error: `Device authorization flow failed: fetch failed`**
-  - **Cause:** Node.js could not reach Qwen OAuth endpoints (often a proxy or SSL/TLS trust issue). When available, Qwen Code will also print the underlying error cause (for example: `UNABLE_TO_VERIFY_LEAF_SIGNATURE`).
+  - **Cause:** Node.js could not reach Qwen OAuth endpoints (often a proxy or SSL/TLS trust issue). When available, TRAM will also print the underlying error cause (for example: `UNABLE_TO_VERIFY_LEAF_SIGNATURE`).
   - **Solution:**
     - Confirm you can access `https://chat.qwen.ai` from the same machine/network.
     - If you are behind a proxy, set it via `qwen --proxy <url>` (or the `proxy` setting in `settings.json`).
@@ -30,18 +30,18 @@ This guide provides solutions to common issues and debugging tips, including top
 
 ## Frequently asked questions (FAQs)
 
-- **Q: How do I update Qwen Code to the latest version?**
+- **Q: How do I update TRAM to the latest version?**
   - A: If you installed it globally via `npm`, update it using the command `npm install -g @qwen-code/qwen-code@latest`. If you compiled it from source, pull the latest changes from the repository, and then rebuild using the command `npm run build`.
 
-- **Q: Where are the Qwen Code configuration or settings files stored?**
-  - A: The Qwen Code configuration is stored in two `settings.json` files:
+- **Q: Where are the TRAM configuration or settings files stored?**
+  - A: The TRAM configuration is stored in two `settings.json` files:
     1. In your home directory: `~/.qwen/settings.json`.
     2. In your project's root directory: `./.qwen/settings.json`.
 
-    Refer to [Qwen Code Configuration](../configuration/settings) for more details.
+    Refer to [TRAM Configuration](../configuration/settings) for more details.
 
 - **Q: Why don't I see cached token counts in my stats output?**
-  - A: Cached token information is only displayed when cached tokens are being used. This feature is available for API key users (Qwen API key or Google Cloud Vertex AI) but not for OAuth users (such as Google Personal/Enterprise accounts like Google Gmail or Google Workspace, respectively). This is because the Qwen Code Assist API does not support cached content creation. You can still view your total token usage using the `/stats` command.
+  - A: Cached token information is only displayed when cached tokens are being used. This feature is available for API key users (Qwen API key or Google Cloud Vertex AI) but not for OAuth users (such as Google Personal/Enterprise accounts like Google Gmail or Google Workspace, respectively). This is because the TRAM Assist API does not support cached content creation. You can still view your total token usage using the `/stats` command.
 
 ## Common error messages and solutions
 
@@ -50,10 +50,10 @@ This guide provides solutions to common issues and debugging tips, including top
   - **Solution:**
     Either stop the other process that is using the port or configure the MCP server to use a different port.
 
-- **Error: Command not found (when attempting to run Qwen Code with `qwen`).**
+- **Error: Command not found (when attempting to run TRAM with `qwen`).**
   - **Cause:** The CLI is not correctly installed or it is not in your system's `PATH`.
   - **Solution:**
-    The update depends on how you installed Qwen Code:
+    The update depends on how you installed TRAM:
     - If you installed `qwen` globally, check that your `npm` global binary directory is in your `PATH`. You can update using the command `npm install -g @qwen-code/qwen-code@latest`.
     - If you are running `qwen` from source, ensure you are using the correct command to invoke it (e.g. `node packages/cli/dist/index.js ...`). To update, pull the latest changes from the repository, and then rebuild using the command `npm run build`.
 
@@ -65,11 +65,11 @@ This guide provides solutions to common issues and debugging tips, including top
     3.  Verify that the build completed successfully with `npm run start`.
 
 - **Error: "Operation not permitted", "Permission denied", or similar.**
-  - **Cause:** When sandboxing is enabled, Qwen Code may attempt operations that are restricted by your sandbox configuration, such as writing outside the project directory or system temp directory.
+  - **Cause:** When sandboxing is enabled, TRAM may attempt operations that are restricted by your sandbox configuration, such as writing outside the project directory or system temp directory.
   - **Solution:** Refer to the [Configuration: Sandboxing](../features/sandbox) documentation for more information, including how to customize your sandbox configuration.
 
-- **Qwen Code is not running in interactive mode in "CI" environments**
-  - **Issue:** Qwen Code does not enter interactive mode (no prompt appears) if an environment variable starting with `CI_` (e.g. `CI_TOKEN`) is set. This is because the `is-in-ci` package, used by the underlying UI framework, detects these variables and assumes a non-interactive CI environment.
+- **TRAM is not running in interactive mode in "CI" environments**
+  - **Issue:** TRAM does not enter interactive mode (no prompt appears) if an environment variable starting with `CI_` (e.g. `CI_TOKEN`) is set. This is because the `is-in-ci` package, used by the underlying UI framework, detects these variables and assumes a non-interactive CI environment.
   - **Cause:** The `is-in-ci` package checks for the presence of `CI`, `CONTINUOUS_INTEGRATION`, or any environment variable with a `CI_` prefix. When any of these are found, it signals that the environment is non-interactive, which prevents the CLI from starting in its interactive mode.
   - **Solution:** If the `CI_` prefixed variable is not needed for the CLI to function, you can temporarily unset it for the command. e.g. `env -u CI_TOKEN qwen`
 
@@ -85,11 +85,11 @@ This guide provides solutions to common issues and debugging tips, including top
   - `QWEN_CODE_IDE_WORKSPACE_PATH`
   - `QWEN_CODE_IDE_SERVER_PORT`
 - If running in a container, verify `host.docker.internal` resolves. Otherwise, map the host appropriately.
-- Reinstall the companion with `/ide install` and use “Qwen Code: Run” in the Command Palette to verify it launches.
+- Reinstall the companion with `/ide install` and use “TRAM: Run” in the Command Palette to verify it launches.
 
 ## Exit Codes
 
-The Qwen Code uses specific exit codes to indicate the reason for termination. This is especially useful for scripting and automation.
+The TRAM uses specific exit codes to indicate the reason for termination. This is especially useful for scripting and automation.
 
 | Exit Code | Error Type                 | Description                                                                                         |
 | --------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -120,4 +120,4 @@ The Qwen Code uses specific exit codes to indicate the reason for termination. T
 
 ## Existing GitHub Issues similar to yours or creating new Issues
 
-If you encounter an issue that was not covered here in this _Troubleshooting guide_, consider searching the Qwen Code [Issue tracker on GitHub](https://github.com/QwenLM/qwen-code/issues). If you can't find an issue similar to yours, consider creating a new GitHub Issue with a detailed description. Pull requests are also welcome!
+If you encounter an issue that was not covered here in this _Troubleshooting guide_, consider searching the TRAM [Issue tracker on GitHub](https://github.com/QwenLM/qwen-code/issues). If you can't find an issue similar to yours, consider creating a new GitHub Issue with a detailed description. Pull requests are also welcome!

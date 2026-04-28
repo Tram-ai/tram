@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import { describe, it, expect, vi } from 'vitest';
-import { ActionSelectionStep } from './ActionSelectionStep.js';
-import { KeypressProvider } from '../../../contexts/KeypressContext.js';
-import type { Extension } from '@tram-ai/tram-core';
+import { render } from "ink-testing-library";
+import { describe, it, expect, vi } from "vitest";
+import { ActionSelectionStep } from "./ActionSelectionStep.js";
+import { KeypressProvider } from "../../../contexts/KeypressContext.js";
+import type { Extension } from "@tram-ai/tram-core";
 
 const createMockExtension = (name: string, isActive = true): Extension =>
   ({
     id: name,
     name,
-    version: '1.0.0',
+    version: "1.0.0",
     path: `/home/user/.tram/extensions/${name}`,
     isActive,
     installMetadata: {
-      type: 'git',
+      type: "git",
       source: `github:user/${name}`,
     },
     mcpServers: {},
@@ -30,18 +30,18 @@ const createMockExtension = (name: string, isActive = true): Extension =>
     contextFiles: [],
   }) as unknown as Extension;
 
-describe('ActionSelectionStep Snapshots', () => {
+describe("ActionSelectionStep Snapshots", () => {
   const baseProps = {
     onNavigateToStep: vi.fn(),
     onNavigateBack: vi.fn(),
     onActionSelect: vi.fn(),
   };
 
-  it('should render for active extension without update', () => {
+  it("should render for active extension without update", () => {
     const { lastFrame } = render(
       <KeypressProvider kittyProtocolEnabled={false}>
         <ActionSelectionStep
-          selectedExtension={createMockExtension('active-ext', true)}
+          selectedExtension={createMockExtension("active-ext", true)}
           hasUpdateAvailable={false}
           {...baseProps}
         />
@@ -51,11 +51,11 @@ describe('ActionSelectionStep Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render for disabled extension', () => {
+  it("should render for disabled extension", () => {
     const { lastFrame } = render(
       <KeypressProvider kittyProtocolEnabled={false}>
         <ActionSelectionStep
-          selectedExtension={createMockExtension('disabled-ext', false)}
+          selectedExtension={createMockExtension("disabled-ext", false)}
           hasUpdateAvailable={false}
           {...baseProps}
         />
@@ -65,11 +65,11 @@ describe('ActionSelectionStep Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render for extension with update available', () => {
+  it("should render for extension with update available", () => {
     const { lastFrame } = render(
       <KeypressProvider kittyProtocolEnabled={false}>
         <ActionSelectionStep
-          selectedExtension={createMockExtension('update-ext', true)}
+          selectedExtension={createMockExtension("update-ext", true)}
           hasUpdateAvailable={true}
           {...baseProps}
         />
@@ -79,11 +79,11 @@ describe('ActionSelectionStep Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render for disabled extension with update', () => {
+  it("should render for disabled extension with update", () => {
     const { lastFrame } = render(
       <KeypressProvider kittyProtocolEnabled={false}>
         <ActionSelectionStep
-          selectedExtension={createMockExtension('disabled-update-ext', false)}
+          selectedExtension={createMockExtension("disabled-update-ext", false)}
           hasUpdateAvailable={true}
           {...baseProps}
         />
@@ -93,7 +93,7 @@ describe('ActionSelectionStep Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render with no extension selected', () => {
+  it("should render with no extension selected", () => {
     const { lastFrame } = render(
       <KeypressProvider kittyProtocolEnabled={false}>
         <ActionSelectionStep

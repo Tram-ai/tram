@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import * as crypto from 'node:crypto';
-import { ReadFileTool } from '../tools/read-file.js';
-import type { Config } from '../config/config.js';
-import { logToolOutputTruncated } from '../telemetry/loggers.js';
-import { ToolOutputTruncatedEvent } from '../telemetry/types.js';
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import * as crypto from "node:crypto";
+import { ReadFileTool } from "../tools/read-file.js";
+import type { Config } from "../config/config.js";
+import { logToolOutputTruncated } from "../telemetry/loggers.js";
+import { ToolOutputTruncatedEvent } from "../telemetry/types.js";
 
 /**
  * Truncates large tool output and saves the full content to a temp file.
@@ -28,7 +28,7 @@ export async function truncateAndSaveToFile(
   threshold: number,
   truncateLines: number,
 ): Promise<{ content: string; outputFile?: string }> {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   // Check both constraints: character threshold and line limit.
   if (content.length <= threshold && lines.length <= truncateLines) {
@@ -39,8 +39,8 @@ export async function truncateAndSaveToFile(
   const effectiveLines = Math.min(truncateLines, lines.length);
   const headCount = Math.max(Math.floor(effectiveLines / 5), 1);
   const tailCount = effectiveLines - headCount;
-  const separator = '\n\n---\n... [CONTENT TRUNCATED] ...\n---\n\n';
-  const ellipsis = '...';
+  const separator = "\n\n---\n... [CONTENT TRUNCATED] ...\n---\n\n";
+  const ellipsis = "...";
 
   // Collect head lines within budget. If a single line exceeds the
   // remaining budget, include a truncated slice of it.
@@ -79,7 +79,7 @@ export async function truncateAndSaveToFile(
     tailChars += lines[i].length + 1;
   }
 
-  const truncatedContent = beginning.join('\n') + separator + end.join('\n');
+  const truncatedContent = beginning.join("\n") + separator + end.join("\n");
 
   // Sanitize fileName to prevent path traversal.
   const safeFileName = `${path.basename(fileName)}.output`;
@@ -127,7 +127,7 @@ export async function truncateToolOutput(
   }
 
   const originalLength = content.length;
-  const fileName = `${toolName}_${crypto.randomBytes(6).toString('hex')}`;
+  const fileName = `${toolName}_${crypto.randomBytes(6).toString("hex")}`;
   const result = await truncateAndSaveToFile(
     content,
     fileName,
@@ -139,7 +139,7 @@ export async function truncateToolOutput(
   if (result.outputFile) {
     logToolOutputTruncated(
       config,
-      new ToolOutputTruncatedEvent('', {
+      new ToolOutputTruncatedEvent("", {
         toolName,
         originalContentLength: originalLength,
         truncatedContentLength: result.content.length,

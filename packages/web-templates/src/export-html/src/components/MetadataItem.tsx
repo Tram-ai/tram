@@ -9,7 +9,7 @@ export const MetadataItem = ({
   value,
   valueClass,
 }: MetadataItemProps) => {
-  if (value === undefined || value === null || value === '') {
+  if (value === undefined || value === null || value === "") {
     return null;
   }
   return (
@@ -17,8 +17,8 @@ export const MetadataItem = ({
       <div className="metadata-content">
         <span className="metadata-label">{label}</span>
         <span
-          className={`metadata-value ${valueClass || ''}`}
-          title={typeof value === 'string' ? value : undefined}
+          className={`metadata-value ${valueClass || ""}`}
+          title={typeof value === "string" ? value : undefined}
         >
           {value}
         </span>

@@ -60,7 +60,7 @@
   --app-font-mono: var(
     --app-monospace-font-family,
     ui-monospace,
-    'SF Mono',
+    "SF Mono",
     monospace
   );
   --app-monospace-font-size: 13px;

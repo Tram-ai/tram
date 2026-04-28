@@ -39,9 +39,9 @@ Seamlessly integrate [TRAM](https://github.com/tram-ai/tram) into Visual Studio 
 
 ## Commands
 
-| Command                          | Description                                            |
-| -------------------------------- | ------------------------------------------------------ |
-| `TRAM: Open`                | Open the TRAM Chat panel                          |
+| Command                     | Description                                            |
+| --------------------------- | ------------------------------------------------------ |
+| `TRAM: Open`                | Open the TRAM Chat panel                               |
 | `TRAM: Run`                 | Launch a classic terminal session with the bundled CLI |
 | `TRAM: Accept Current Diff` | Accept the currently displayed diff                    |
 | `TRAM: Close Diff Editor`   | Close/reject the current diff                          |
@@ -67,7 +67,8 @@ We welcome contributions! See our [Contributing Guide](https://github.com/tram-a
 By installing this extension, you agree to the [Terms of Service](https://github.com/tram-ai/tram/blob/main/docs/tos-privacy.md).
 =======
 By installing this extension, you agree to the [Terms of Service](https://qwenlm.github.io/qwen-code-docs/en/users/support/tos-privacy/).
->>>>>>> v0.14.5
+
+> > > > > > > v0.0.9-U0145
 
 ## License
 

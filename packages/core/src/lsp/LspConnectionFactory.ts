@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as cp from 'node:child_process';
-import * as net from 'node:net';
-import { DEFAULT_LSP_REQUEST_TIMEOUT_MS } from './constants.js';
-import type { JsonRpcMessage } from './types.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import * as cp from "node:child_process";
+import * as net from "node:net";
+import { DEFAULT_LSP_REQUEST_TIMEOUT_MS } from "./constants.js";
+import type { JsonRpcMessage } from "./types.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('LSP');
+const debugLogger = createDebugLogger("LSP");
 
 interface PendingRequest {
   resolve: (value: unknown) => void;
@@ -19,7 +19,7 @@ interface PendingRequest {
 }
 
 class JsonRpcConnection {
-  private buffer = '';
+  private buffer = "";
   private nextId = 1;
   private disposed = false;
   private pendingRequests = new Map<string | number, PendingRequest>();
@@ -35,8 +35,8 @@ class JsonRpcConnection {
   ) {}
 
   listen(readable: NodeJS.ReadableStream): void {
-    readable.on('data', (chunk: Buffer) => this.handleData(chunk));
-    readable.on('error', (error) =>
+    readable.on("data", (chunk: Buffer) => this.handleData(chunk));
+    readable.on("error", (error) =>
       this.disposePending(
         error instanceof Error ? error : new Error(String(error)),
       ),
@@ -56,12 +56,12 @@ class JsonRpcConnection {
   }
 
   async initialize(params: unknown): Promise<unknown> {
-    return this.sendRequest('initialize', params);
+    return this.sendRequest("initialize", params);
   }
 
   async shutdown(): Promise<void> {
     try {
-      await this.sendRequest('shutdown', {});
+      await this.sendRequest("shutdown", {});
     } catch (_error) {
       // Ignore shutdown errors – the server may already be gone.
     } finally {
@@ -89,7 +89,7 @@ class JsonRpcConnection {
 
     const id = this.nextId++;
     const payload: JsonRpcMessage = {
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       id,
       method,
       params,
@@ -112,7 +112,7 @@ class JsonRpcConnection {
     const handler = this.requestHandlers[this.requestHandlers.length - 1];
     if (!handler) {
       this.writeMessage({
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: message.id,
         error: {
           code: -32601,
@@ -125,17 +125,17 @@ class JsonRpcConnection {
     try {
       const result = await handler(message);
       this.writeMessage({
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: message.id,
         result: result ?? null,
       });
     } catch (error) {
       this.writeMessage({
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: message.id,
         error: {
           code: -32603,
-          message: (error as Error).message ?? 'Internal error',
+          message: (error as Error).message ?? "Internal error",
         },
       });
     }
@@ -146,10 +146,10 @@ class JsonRpcConnection {
       return;
     }
 
-    this.buffer += chunk.toString('utf8');
+    this.buffer += chunk.toString("utf8");
 
     while (true) {
-      const headerEnd = this.buffer.indexOf('\r\n\r\n');
+      const headerEnd = this.buffer.indexOf("\r\n\r\n");
       if (headerEnd === -1) {
         break;
       }
@@ -182,7 +182,7 @@ class JsonRpcConnection {
   }
 
   private routeMessage(message: JsonRpcMessage): void {
-    if (typeof message?.id !== 'undefined' && !message.method) {
+    if (typeof message?.id !== "undefined" && !message.method) {
       const pending = this.pendingRequests.get(message.id);
       if (!pending) {
         return;
@@ -191,7 +191,7 @@ class JsonRpcConnection {
       this.pendingRequests.delete(message.id);
       if (message.error) {
         pending.reject(
-          new Error(message.error.message || 'LSP request failed'),
+          new Error(message.error.message || "LSP request failed"),
         );
       } else {
         pending.resolve(message.result);
@@ -199,7 +199,7 @@ class JsonRpcConnection {
       return;
     }
 
-    if (message?.method && typeof message.id !== 'undefined') {
+    if (message?.method && typeof message.id !== "undefined") {
       void this.handleServerRequest(message);
       return;
     }
@@ -220,14 +220,14 @@ class JsonRpcConnection {
       return;
     }
     const json = JSON.stringify(message);
-    const header = `Content-Length: ${Buffer.byteLength(json, 'utf8')}\r\n\r\n`;
+    const header = `Content-Length: ${Buffer.byteLength(json, "utf8")}\r\n\r\n`;
     this.writer(header + json);
   }
 
   private disposePending(error?: Error): void {
     for (const [, pending] of Array.from(this.pendingRequests)) {
       clearTimeout(pending.timer);
-      pending.reject(error ?? new Error('LSP connection closed'));
+      pending.reject(error ?? new Error("LSP connection closed"));
     }
     this.pendingRequests.clear();
   }
@@ -257,28 +257,28 @@ export class LspConnectionFactory {
   ): Promise<LspConnection> {
     return new Promise((resolve, reject) => {
       const spawnOptions: cp.SpawnOptions = {
-        stdio: 'pipe',
+        stdio: "pipe",
         ...options,
       };
       const processInstance = cp.spawn(command, args, spawnOptions);
 
       const timeoutId = setTimeout(() => {
-        reject(new Error('LSP server spawn timeout'));
+        reject(new Error("LSP server spawn timeout"));
         if (!processInstance.killed) {
           processInstance.kill();
         }
       }, timeoutMs);
 
-      processInstance.once('error', (error) => {
+      processInstance.once("error", (error) => {
         clearTimeout(timeoutId);
         reject(new Error(`Failed to spawn LSP server: ${error.message}`));
       });
 
-      processInstance.once('spawn', () => {
+      processInstance.once("spawn", () => {
         clearTimeout(timeoutId);
 
         if (!processInstance.stdout || !processInstance.stdin) {
-          reject(new Error('LSP server stdio not available'));
+          reject(new Error("LSP server stdio not available"));
           return;
         }
 
@@ -288,8 +288,8 @@ export class LspConnectionFactory {
         );
 
         connection.listen(processInstance.stdout);
-        processInstance.once('exit', () => connection.end());
-        processInstance.once('close', () => connection.end());
+        processInstance.once("exit", () => connection.end());
+        processInstance.once("close", () => connection.end());
 
         resolve({
           connection,
@@ -327,11 +327,11 @@ export class LspConnectionFactory {
         socketOptions = { path: options.path };
       } else {
         if (!options.port) {
-          reject(new Error('Socket transport requires port or path'));
+          reject(new Error("Socket transport requires port or path"));
           return;
         }
         socketOptions = {
-          host: options.host ?? '127.0.0.1',
+          host: options.host ?? "127.0.0.1",
           port: options.port,
         };
       }
@@ -339,7 +339,7 @@ export class LspConnectionFactory {
       const socket = net.createConnection(socketOptions);
 
       const timeoutId = setTimeout(() => {
-        reject(new Error('LSP server connection timeout'));
+        reject(new Error("LSP server connection timeout"));
         socket.destroy();
       }, timeoutMs);
 
@@ -348,19 +348,19 @@ export class LspConnectionFactory {
         reject(new Error(`Failed to connect to LSP server: ${error.message}`));
       };
 
-      socket.once('error', onError);
+      socket.once("error", onError);
 
-      socket.on('connect', () => {
+      socket.on("connect", () => {
         clearTimeout(timeoutId);
-        socket.off('error', onError);
+        socket.off("error", onError);
 
         const connection = new JsonRpcConnection(
           (payload) => socket.write(payload),
           () => socket.destroy(),
         );
         connection.listen(socket);
-        socket.once('close', () => connection.end());
-        socket.once('error', () => connection.end());
+        socket.once("close", () => connection.end());
+        socket.once("error", () => connection.end());
 
         resolve({
           connection,
@@ -378,7 +378,7 @@ export class LspConnectionFactory {
       try {
         await lspConnection.connection.shutdown();
       } catch (e) {
-        debugLogger.warn('LSP shutdown failed:', e);
+        debugLogger.warn("LSP shutdown failed:", e);
       } finally {
         lspConnection.connection.end();
       }

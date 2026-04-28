@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { GenerateContentParameters } from '@google/genai';
-import { createDebugLogger } from '../../utils/debugLogger.js';
+import type { GenerateContentParameters } from "@google/genai";
+import { createDebugLogger } from "../../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('OPENAI_ERROR');
+const debugLogger = createDebugLogger("OPENAI_ERROR");
 
 export interface RequestContext {
   userPromptId: string;
@@ -49,8 +49,8 @@ export class EnhancedErrorHandler implements ErrorHandler {
     // Allow subclasses to suppress error logging for specific scenarios
     if (!this.shouldSuppressErrorLogging(error, request)) {
       const logPrefix = context.isStreaming
-        ? 'OpenAI API Streaming Error:'
-        : 'OpenAI API Error:';
+        ? "OpenAI API Streaming Error:"
+        : "OpenAI API Error:";
       debugLogger.error(logPrefix, errorMessage);
     }
 
@@ -85,18 +85,18 @@ export class EnhancedErrorHandler implements ErrorHandler {
 
     // Check for common timeout indicators
     return (
-      errorMessage.includes('timeout') ||
-      errorMessage.includes('timed out') ||
-      errorMessage.includes('connection timeout') ||
-      errorMessage.includes('request timeout') ||
-      errorMessage.includes('read timeout') ||
-      errorMessage.includes('etimedout') ||
-      errorMessage.includes('esockettimedout') ||
-      errorCode === 'ETIMEDOUT' ||
-      errorCode === 'ESOCKETTIMEDOUT' ||
-      errorType === 'timeout' ||
-      errorMessage.includes('request timed out') ||
-      errorMessage.includes('deadline exceeded')
+      errorMessage.includes("timeout") ||
+      errorMessage.includes("timed out") ||
+      errorMessage.includes("connection timeout") ||
+      errorMessage.includes("request timeout") ||
+      errorMessage.includes("read timeout") ||
+      errorMessage.includes("etimedout") ||
+      errorMessage.includes("esockettimedout") ||
+      errorCode === "ETIMEDOUT" ||
+      errorCode === "ESOCKETTIMEDOUT" ||
+      errorType === "timeout" ||
+      errorMessage.includes("request timed out") ||
+      errorMessage.includes("deadline exceeded")
     );
   }
 
@@ -109,8 +109,8 @@ export class EnhancedErrorHandler implements ErrorHandler {
 
     if (isTimeoutError) {
       const prefix = context.isStreaming
-        ? 'Streaming request timeout'
-        : 'Request timeout';
+        ? "Streaming request timeout"
+        : "Request timeout";
       return `${prefix} after ${durationSeconds}s. Try reducing input length or increasing timeout in config.`;
     }
 
@@ -119,22 +119,22 @@ export class EnhancedErrorHandler implements ErrorHandler {
 
   private getTimeoutTroubleshootingTips(context: RequestContext): string {
     const baseTitle = context.isStreaming
-      ? 'Streaming timeout troubleshooting:'
-      : 'Troubleshooting tips:';
+      ? "Streaming timeout troubleshooting:"
+      : "Troubleshooting tips:";
 
     const baseTips = [
-      '- Reduce input length or complexity',
-      '- Increase timeout in config: contentGenerator.timeout',
-      '- Check network connectivity',
+      "- Reduce input length or complexity",
+      "- Increase timeout in config: contentGenerator.timeout",
+      "- Check network connectivity",
     ];
 
     const streamingSpecificTips = context.isStreaming
       ? [
-          '- Check network stability for streaming connections',
-          '- Consider using non-streaming mode for very long inputs',
+          "- Check network stability for streaming connections",
+          "- Consider using non-streaming mode for very long inputs",
         ]
-      : ['- Consider using streaming mode for long responses'];
+      : ["- Consider using streaming mode for long responses"];
 
-    return `${baseTitle}\n${[...baseTips, ...streamingSpecificTips].join('\n')}`;
+    return `${baseTitle}\n${[...baseTips, ...streamingSpecificTips].join("\n")}`;
   }
 }

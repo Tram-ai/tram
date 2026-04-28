@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ExtensionsManagerDialog } from './ExtensionsManagerDialog.js';
-import { UIStateContext } from '../../contexts/UIStateContext.js';
-import { KeypressProvider } from '../../contexts/KeypressContext.js';
-import type { UIState } from '../../contexts/UIStateContext.js';
-import type { Config, Extension } from '@tram-ai/tram-core';
-import { ExtensionUpdateState } from '../../state/extensions.js';
+import { render } from "ink-testing-library";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { ExtensionsManagerDialog } from "./ExtensionsManagerDialog.js";
+import { UIStateContext } from "../../contexts/UIStateContext.js";
+import { KeypressProvider } from "../../contexts/KeypressContext.js";
+import type { UIState } from "../../contexts/UIStateContext.js";
+import type { Config, Extension } from "@tram-ai/tram-core";
+import { ExtensionUpdateState } from "../../state/extensions.js";
 
 const createMockExtension = (
   name: string,
   isActive = true,
-  version = '1.0.0',
+  version = "1.0.0",
 ): Extension =>
   ({
     id: name,
@@ -25,7 +25,7 @@ const createMockExtension = (
     path: `/home/user/.tram/extensions/${name}`,
     isActive,
     installMetadata: {
-      type: 'git',
+      type: "git",
       source: `github:user/${name}`,
     },
     mcpServers: {},
@@ -59,7 +59,7 @@ const createMockUIState = (
     extensionsUpdateState,
   }) as unknown as UIState;
 
-describe('ExtensionsManagerDialog Snapshots', () => {
+describe("ExtensionsManagerDialog Snapshots", () => {
   const baseProps = {
     onClose: vi.fn(),
     config: createMockConfig(),
@@ -73,7 +73,7 @@ describe('ExtensionsManagerDialog Snapshots', () => {
     vi.restoreAllMocks();
   });
 
-  it('should render empty state when no extensions installed', () => {
+  it("should render empty state when no extensions installed", () => {
     const uiState = createMockUIState();
     const { lastFrame } = render(
       <UIStateContext.Provider value={uiState}>
@@ -86,15 +86,15 @@ describe('ExtensionsManagerDialog Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render extension list with extensions', () => {
+  it("should render extension list with extensions", () => {
     const extensions = [
-      createMockExtension('test-extension', true),
-      createMockExtension('another-extension', false),
+      createMockExtension("test-extension", true),
+      createMockExtension("another-extension", false),
     ];
     const uiState = createMockUIState(
       new Map([
-        ['test-extension', ExtensionUpdateState.UP_TO_DATE],
-        ['another-extension', ExtensionUpdateState.UPDATE_AVAILABLE],
+        ["test-extension", ExtensionUpdateState.UP_TO_DATE],
+        ["another-extension", ExtensionUpdateState.UPDATE_AVAILABLE],
       ]),
     );
     const { lastFrame } = render(
@@ -111,10 +111,10 @@ describe('ExtensionsManagerDialog Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render with update available status', () => {
-    const extensions = [createMockExtension('outdated-extension', true)];
+  it("should render with update available status", () => {
+    const extensions = [createMockExtension("outdated-extension", true)];
     const uiState = createMockUIState(
-      new Map([['outdated-extension', ExtensionUpdateState.UPDATE_AVAILABLE]]),
+      new Map([["outdated-extension", ExtensionUpdateState.UPDATE_AVAILABLE]]),
     );
     const { lastFrame } = render(
       <UIStateContext.Provider value={uiState}>
@@ -130,11 +130,11 @@ describe('ExtensionsManagerDialog Snapshots', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render with checking status', () => {
-    const extensions = [createMockExtension('checking-extension', true)];
+  it("should render with checking status", () => {
+    const extensions = [createMockExtension("checking-extension", true)];
     const uiState = createMockUIState(
       new Map([
-        ['checking-extension', ExtensionUpdateState.CHECKING_FOR_UPDATES],
+        ["checking-extension", ExtensionUpdateState.CHECKING_FOR_UPDATES],
       ]),
     );
     const { lastFrame } = render(

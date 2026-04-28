@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../../../semantic-colors.js';
-import { useKeypress } from '../../../hooks/useKeypress.js';
-import { t } from '../../../../i18n/index.js';
-import type { AuthenticateStepProps } from '../types.js';
-import { useConfig } from '../../../contexts/ConfigContext.js';
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Box, Text } from "ink";
+import { theme } from "../../../semantic-colors.js";
+import { useKeypress } from "../../../hooks/useKeypress.js";
+import { t } from "../../../../i18n/index.js";
+import type { AuthenticateStepProps } from "../types.js";
+import { useConfig } from "../../../contexts/ConfigContext.js";
 import {
   MCPOAuthProvider,
   MCPOAuthTokenStorage,
   getErrorMessage,
-} from '@tram-ai/tram-core';
-import type { OAuthDisplayPayload } from '@tram-ai/tram-core';
-import { appEvents, AppEvent } from '../../../../utils/events.js';
+} from "@tram-ai/tram-core";
+import type { OAuthDisplayPayload } from "@tram-ai/tram-core";
+import { appEvents, AppEvent } from "../../../../utils/events.js";
 
-type AuthState = 'idle' | 'authenticating' | 'success' | 'error';
+type AuthState = "idle" | "authenticating" | "success" | "error";
 
 const AUTO_BACK_DELAY_MS = 2000;
 
@@ -28,7 +28,7 @@ export const AuthenticateStep: React.FC<AuthenticateStepProps> = ({
   onBack,
 }) => {
   const config = useConfig();
-  const [authState, setAuthState] = useState<AuthState>('idle');
+  const [authState, setAuthState] = useState<AuthState>("idle");
   const [messages, setMessages] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const isRunning = useRef(false);
@@ -37,7 +37,7 @@ export const AuthenticateStep: React.FC<AuthenticateStepProps> = ({
     if (!server || !config || isRunning.current) return;
     isRunning.current = true;
 
-    setAuthState('authenticating');
+    setAuthState("authenticating");
     setMessages([]);
     setErrorMessage(null);
 
@@ -45,7 +45,7 @@ export const AuthenticateStep: React.FC<AuthenticateStepProps> = ({
     // structured i18n messages ({ key, params }) emitted by the core layer.
     const displayListener = (message: OAuthDisplayPayload) => {
       const text =
-        typeof message === 'string' ? message : t(message.key, message.params);
+        typeof message === "string" ? message : t(message.key, message.params);
       setMessages((prev) => [...prev, text]);
     };
     appEvents.on(AppEvent.OauthDisplayMessage, displayListener);
@@ -108,13 +108,13 @@ export const AuthenticateStep: React.FC<AuthenticateStepProps> = ({
 
       setMessages((prev) => [
         ...prev,
-        t('Authentication complete. Returning to server details...'),
+        t("Authentication complete. Returning to server details..."),
       ]);
 
-      setAuthState('success');
+      setAuthState("success");
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
-      setAuthState('error');
+      setAuthState("error");
     } finally {
       isRunning.current = false;
       appEvents.removeListener(AppEvent.OauthDisplayMessage, displayListener);
@@ -128,7 +128,7 @@ export const AuthenticateStep: React.FC<AuthenticateStepProps> = ({
 
   // Auto-navigate back after authentication succeeds
   useEffect(() => {
-    if (authState !== 'success') return;
+    if (authState !== "success") return;
     const timer = setTimeout(() => {
       onBack();
     }, AUTO_BACK_DELAY_MS);
@@ -137,7 +137,7 @@ export const AuthenticateStep: React.FC<AuthenticateStepProps> = ({
 
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         onBack();
       }
     },
@@ -147,7 +147,7 @@ export const AuthenticateStep: React.FC<AuthenticateStepProps> = ({
   if (!server) {
     return (
       <Box>
-        <Text color={theme.status.error}>{t('No server selected')}</Text>
+        <Text color={theme.status.error}>{t("No server selected")}</Text>
       </Box>
     );
   }
@@ -157,7 +157,7 @@ export const AuthenticateStep: React.FC<AuthenticateStepProps> = ({
       {/* Server info */}
       <Box>
         <Text color={theme.text.secondary}>
-          {t('Server:')} {server.name}
+          {t("Server:")} {server.name}
         </Text>
       </Box>
 
@@ -173,7 +173,7 @@ export const AuthenticateStep: React.FC<AuthenticateStepProps> = ({
       )}
 
       {/* Error message */}
-      {authState === 'error' && errorMessage && (
+      {authState === "error" && errorMessage && (
         <Box>
           <Text color={theme.status.error}>{errorMessage}</Text>
         </Box>
@@ -181,14 +181,14 @@ export const AuthenticateStep: React.FC<AuthenticateStepProps> = ({
 
       {/* Action hints */}
       <Box>
-        {authState === 'authenticating' && (
+        {authState === "authenticating" && (
           <Text color={theme.text.secondary}>
-            {t('Authenticating... Please complete the login in your browser.')}
+            {t("Authenticating... Please complete the login in your browser.")}
           </Text>
         )}
-        {authState === 'success' && (
+        {authState === "success" && (
           <Text color={theme.status.success}>
-            {t('Authentication successful.')}
+            {t("Authentication successful.")}
           </Text>
         )}
       </Box>

@@ -1,6 +1,6 @@
 # DingTalk (Dingtalk)
 
-This guide covers setting up a Qwen Code channel on DingTalk (钉钉).
+This guide covers setting up a TRAM channel on DingTalk (钉钉).
 
 ## Prerequisites
 

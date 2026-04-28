@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import { describe, it, expect, vi } from 'vitest';
-import { SessionSummaryDisplay } from './SessionSummaryDisplay.js';
-import * as SessionContext from '../contexts/SessionContext.js';
-import type { SessionMetrics } from '../contexts/SessionContext.js';
-import { ConfigContext } from '../contexts/ConfigContext.js';
+import { render } from "ink-testing-library";
+import { describe, it, expect, vi } from "vitest";
+import { SessionSummaryDisplay } from "./SessionSummaryDisplay.js";
+import * as SessionContext from "../contexts/SessionContext.js";
+import type { SessionMetrics } from "../contexts/SessionContext.js";
+import { ConfigContext } from "../contexts/ConfigContext.js";
 
-vi.mock('../contexts/SessionContext.js', async (importOriginal) => {
+vi.mock("../contexts/SessionContext.js", async (importOriginal) => {
   const actual = await importOriginal<typeof SessionContext>();
   return {
     ...actual,
@@ -23,7 +23,7 @@ const useSessionStatsMock = vi.mocked(SessionContext.useSessionStats);
 
 const renderWithMockedStats = (
   metrics: SessionMetrics,
-  sessionId: string = 'test-session-id-12345',
+  sessionId: string = "test-session-id-12345",
   promptCount: number = 5,
   chatRecordingEnabled: boolean = true,
 ) => {
@@ -53,11 +53,11 @@ const renderWithMockedStats = (
   );
 };
 
-describe('<SessionSummaryDisplay />', () => {
-  it('renders the summary display with a title', () => {
+describe("<SessionSummaryDisplay />", () => {
+  it("renders the summary display with a title", () => {
     const metrics: SessionMetrics = {
       models: {
-        'gemini-2.5-pro': {
+        "gemini-2.5-pro": {
           api: { totalRequests: 10, totalErrors: 1, totalLatencyMs: 50234 },
           tokens: {
             prompt: 1000,
@@ -86,13 +86,13 @@ describe('<SessionSummaryDisplay />', () => {
     const { lastFrame } = renderWithMockedStats(metrics);
     const output = lastFrame();
 
-    expect(output).toContain('Agent powering down. Goodbye!');
-    expect(output).toContain('To continue this session, run');
-    expect(output).toContain('tram --resume test-session-id-12345');
+    expect(output).toContain("Agent powering down. Goodbye!");
+    expect(output).toContain("To continue this session, run");
+    expect(output).toContain("tram --resume test-session-id-12345");
     expect(output).toMatchSnapshot();
   });
 
-  it('does not show resume message when there are no messages', () => {
+  it("does not show resume message when there are no messages", () => {
     const metrics: SessionMetrics = {
       models: {},
       tools: {
@@ -112,17 +112,17 @@ describe('<SessionSummaryDisplay />', () => {
     // Pass promptCount = 0 to simulate no messages
     const { lastFrame } = renderWithMockedStats(
       metrics,
-      'test-session-id-12345',
+      "test-session-id-12345",
       0,
     );
     const output = lastFrame();
 
-    expect(output).toContain('Agent powering down. Goodbye!');
-    expect(output).not.toContain('To continue this session, run');
-    expect(output).not.toContain('tram --resume');
+    expect(output).toContain("Agent powering down. Goodbye!");
+    expect(output).not.toContain("To continue this session, run");
+    expect(output).not.toContain("tram --resume");
   });
 
-  it('does not show resume message when chat recording is disabled', () => {
+  it("does not show resume message when chat recording is disabled", () => {
     const metrics: SessionMetrics = {
       models: {},
       tools: {
@@ -141,14 +141,14 @@ describe('<SessionSummaryDisplay />', () => {
 
     const { lastFrame } = renderWithMockedStats(
       metrics,
-      'test-session-id-12345',
+      "test-session-id-12345",
       5,
       false,
     );
     const output = lastFrame();
 
-    expect(output).toContain('Agent powering down. Goodbye!');
-    expect(output).not.toContain('To continue this session, run');
-    expect(output).not.toContain('tram --resume');
+    expect(output).toContain("Agent powering down. Goodbye!");
+    expect(output).not.toContain("To continue this session, run");
+    expect(output).not.toContain("tram --resume");
   });
 });

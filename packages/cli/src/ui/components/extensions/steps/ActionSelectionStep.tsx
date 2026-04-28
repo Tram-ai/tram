@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo } from 'react';
-import { Box } from 'ink';
-import { RadioButtonSelect } from '../../shared/RadioButtonSelect.js';
-import { type Extension } from '@tram-ai/tram-core';
-import { t } from '../../../../i18n/index.js';
-import { type ExtensionAction } from '../types.js';
+import { useState, useMemo } from "react";
+import { Box } from "ink";
+import { RadioButtonSelect } from "../../shared/RadioButtonSelect.js";
+import { type Extension } from "@tram-ai/tram-core";
+import { t } from "../../../../i18n/index.js";
+import { type ExtensionAction } from "../types.js";
 
 interface ActionSelectionStepProps {
   selectedExtension: Extension | null;
@@ -33,48 +33,48 @@ export const ActionSelectionStep = ({
   const actions = useMemo(() => {
     const allActions = [
       {
-        key: 'view',
+        key: "view",
         get label() {
-          return t('View Details');
+          return t("View Details");
         },
-        value: 'view' as const,
+        value: "view" as const,
       },
       ...(hasUpdateAvailable
         ? [
             {
-              key: 'update',
+              key: "update",
               get label() {
-                return t('Update Extension');
+                return t("Update Extension");
               },
-              value: 'update' as const,
+              value: "update" as const,
             },
           ]
         : []),
       ...(isActive
         ? [
             {
-              key: 'disable',
+              key: "disable",
               get label() {
-                return t('Disable Extension');
+                return t("Disable Extension");
               },
-              value: 'disable' as const,
+              value: "disable" as const,
             },
           ]
         : [
             {
-              key: 'enable',
+              key: "enable",
               get label() {
-                return t('Enable Extension');
+                return t("Enable Extension");
               },
-              value: 'enable' as const,
+              value: "enable" as const,
             },
           ]),
       {
-        key: 'uninstall',
+        key: "uninstall",
         get label() {
-          return t('Uninstall Extension');
+          return t("Uninstall Extension");
         },
-        value: 'uninstall' as const,
+        value: "uninstall" as const,
       },
     ];
     return allActions;

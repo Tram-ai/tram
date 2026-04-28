@@ -1,7 +1,7 @@
 {
   "name": "@qwen-code/channel-dingtalk",
-  "version": "0.14.5",
-  "description": "DingTalk channel adapter for Qwen Code",
+  "version": "0.0.9-U0145",
+  "description": "DingTalk channel adapter for TRAM",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

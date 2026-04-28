@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../../semantic-colors.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { theme } from "../../semantic-colors.js";
 import type {
   ContextCategoryBreakdown,
   ContextToolDetail,
   ContextMemoryDetail,
   ContextSkillDetail,
-} from '../../types.js';
-import { t } from '../../../i18n/index.js';
+} from "../../types.js";
+import { t } from "../../../i18n/index.js";
 
 // Progress bar characters
-const FILLED = '\u2588'; // █ - filled block
-const BUFFER = '\u2592'; // ▒ - medium shade (autocompact buffer)
-const EMPTY = '\u2591'; // ░ - light shade (free space)
+const FILLED = "\u2588"; // █ - filled block
+const BUFFER = "\u2592"; // ▒ - medium shade (autocompact buffer)
+const EMPTY = "\u2591"; // ░ - light shade (free space)
 
 const CONTENT_WIDTH = 56;
 
@@ -42,7 +42,7 @@ interface ContextUsageProps {
  */
 function truncateName(name: string, maxLen: number): string {
   if (name.length <= maxLen) return name;
-  return name.slice(0, maxLen - 1) + '\u2026';
+  return name.slice(0, maxLen - 1) + "\u2026";
 }
 
 /**
@@ -101,7 +101,7 @@ const CategoryRow: React.FC<{
   symbolColor?: string;
 }> = ({ symbol, label, tokens, contextWindowSize, symbolColor }) => {
   const percentage = ((tokens / contextWindowSize) * 100).toFixed(1);
-  const tokenStr = `${formatTokens(tokens)} ${t('tokens')} (${percentage}%)`;
+  const tokenStr = `${formatTokens(tokens)} ${t("tokens")} (${percentage}%)`;
 
   return (
     <Box width={CONTENT_WIDTH}>
@@ -128,10 +128,10 @@ const DetailRow: React.FC<{
   tokens: number;
 }> = ({ name, tokens }) => {
   const tokenStr =
-    tokens > 0 ? `${formatTokens(tokens)} ${t('tokens')}` : `0 ${t('tokens')}`;
+    tokens > 0 ? `${formatTokens(tokens)} ${t("tokens")}` : `0 ${t("tokens")}`;
   return (
     <Box width={CONTENT_WIDTH} paddingLeft={2}>
-      <Text color={theme.text.secondary}>{'\u2514'} </Text>
+      <Text color={theme.text.secondary}>{"\u2514"} </Text>
       <Box width={32}>
         <Text color={theme.text.link}>
           {truncateName(name, DETAIL_NAME_MAX_LEN)}
@@ -185,7 +185,7 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
     >
       {/* Title */}
       <Text bold color={theme.text.accent}>
-        {t('Context Usage')}
+        {t("Context Usage")}
       </Text>
       <Box height={1} />
 
@@ -194,19 +194,19 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
           {/* No API data yet — show hint instead of progress bar */}
           <Box marginBottom={1}>
             <Text color={theme.status.warning} italic>
-              {t('No API response yet. Send a message to see actual usage.')}
+              {t("No API response yet. Send a message to see actual usage.")}
             </Text>
           </Box>
 
           {/* Estimated overhead categories */}
           <Text bold color={theme.text.primary}>
-            {t('Estimated pre-conversation overhead')}
+            {t("Estimated pre-conversation overhead")}
           </Text>
           <Text color={theme.text.secondary}>
-            {t('Model')}: {modelName}
-            {'  '}
-            {t('Context window')}: {formatTokens(contextWindowSize)}{' '}
-            {t('tokens')}
+            {t("Model")}: {modelName}
+            {"  "}
+            {t("Context window")}: {formatTokens(contextWindowSize)}{" "}
+            {t("tokens")}
           </Text>
           <Box height={1} />
         </>
@@ -215,12 +215,12 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
           {/* Model name + context window info */}
           <Box width={CONTENT_WIDTH} marginBottom={1}>
             <Text color={theme.text.secondary}>
-              {t('Model')}: {modelName}
+              {t("Model")}: {modelName}
             </Text>
             <Box flexGrow={1} justifyContent="flex-end">
               <Text color={theme.text.secondary}>
-                {t('Context window')}: {formatTokens(contextWindowSize)}{' '}
-                {t('tokens')}
+                {t("Context window")}: {formatTokens(contextWindowSize)}{" "}
+                {t("tokens")}
               </Text>
             </Box>
           </Box>
@@ -240,21 +240,21 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
           {/* Legend — same layout as CategoryRow for alignment */}
           <CategoryRow
             symbol={FILLED}
-            label={t('Used')}
+            label={t("Used")}
             tokens={totalTokens}
             contextWindowSize={contextWindowSize}
             symbolColor={theme.text.accent}
           />
           <CategoryRow
             symbol={EMPTY}
-            label={t('Free')}
+            label={t("Free")}
             tokens={breakdown.freeSpace}
             contextWindowSize={contextWindowSize}
             symbolColor={theme.text.secondary}
           />
           <CategoryRow
             symbol={BUFFER}
-            label={t('Autocompact buffer')}
+            label={t("Autocompact buffer")}
             tokens={breakdown.autocompactBuffer}
             contextWindowSize={contextWindowSize}
             symbolColor={theme.status.warning}
@@ -263,21 +263,21 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
 
           {/* Breakdown header */}
           <Text bold color={theme.text.primary}>
-            {t('Usage by category')}
+            {t("Usage by category")}
           </Text>
         </>
       )}
 
       <CategoryRow
         symbol={FILLED}
-        label={t('System prompt')}
+        label={t("System prompt")}
         tokens={breakdown.systemPrompt}
         contextWindowSize={contextWindowSize}
         symbolColor={theme.text.accent}
       />
       <CategoryRow
         symbol={FILLED}
-        label={t('Built-in tools')}
+        label={t("Built-in tools")}
         tokens={breakdown.builtinTools}
         contextWindowSize={contextWindowSize}
         symbolColor={theme.text.accent}
@@ -285,7 +285,7 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
       {breakdown.mcpTools > 0 && (
         <CategoryRow
           symbol={FILLED}
-          label={t('MCP tools')}
+          label={t("MCP tools")}
           tokens={breakdown.mcpTools}
           contextWindowSize={contextWindowSize}
           symbolColor={theme.text.accent}
@@ -293,14 +293,14 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
       )}
       <CategoryRow
         symbol={FILLED}
-        label={t('Memory files')}
+        label={t("Memory files")}
         tokens={breakdown.memoryFiles}
         contextWindowSize={contextWindowSize}
         symbolColor={theme.text.accent}
       />
       <CategoryRow
         symbol={FILLED}
-        label={t('Skills')}
+        label={t("Skills")}
         tokens={breakdown.skills}
         contextWindowSize={contextWindowSize}
         symbolColor={theme.text.accent}
@@ -309,7 +309,7 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
       {!isEstimated && (
         <CategoryRow
           symbol={FILLED}
-          label={t('Messages')}
+          label={t("Messages")}
           tokens={breakdown.messages}
           contextWindowSize={contextWindowSize}
           symbolColor={theme.text.accent}
@@ -322,7 +322,7 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
           {sortedBuiltinTools.length > 0 && (
             <Box flexDirection="column" marginTop={1}>
               <Text bold color={theme.text.primary}>
-                {t('Built-in tools')}
+                {t("Built-in tools")}
               </Text>
               {sortedBuiltinTools.map((tool) => (
                 <DetailRow
@@ -338,7 +338,7 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
           {sortedMcpTools.length > 0 && (
             <Box flexDirection="column" marginTop={1}>
               <Text bold color={theme.text.primary}>
-                {t('MCP tools')}
+                {t("MCP tools")}
               </Text>
               {sortedMcpTools.map((tool) => (
                 <DetailRow
@@ -354,7 +354,7 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
           {sortedMemoryFiles.length > 0 && (
             <Box flexDirection="column" marginTop={1}>
               <Text bold color={theme.text.primary}>
-                {t('Memory files')}
+                {t("Memory files")}
               </Text>
               {sortedMemoryFiles.map((file) => (
                 <DetailRow
@@ -370,23 +370,23 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
           {sortedSkills.length > 0 && (
             <Box flexDirection="column" marginTop={1}>
               <Text bold color={theme.text.primary}>
-                {t('Skills')}
+                {t("Skills")}
               </Text>
               {sortedSkills.map((skill) => (
                 <Box key={skill.name} flexDirection="column">
                   <Box width={CONTENT_WIDTH} paddingLeft={2}>
-                    <Text color={theme.text.secondary}>{'\u2514'} </Text>
+                    <Text color={theme.text.secondary}>{"\u2514"} </Text>
                     <Box width={32}>
                       <Text color={theme.text.link}>
                         {truncateName(skill.name, DETAIL_NAME_MAX_LEN)}
                       </Text>
                       {skill.loaded && (
-                        <Text color={theme.status.success}> {t('active')}</Text>
+                        <Text color={theme.status.success}> {t("active")}</Text>
                       )}
                     </Box>
                     <Box flexGrow={1} justifyContent="flex-end">
                       <Text color={theme.text.secondary}>
-                        {formatTokens(skill.tokens)} {t('tokens')}
+                        {formatTokens(skill.tokens)} {t("tokens")}
                       </Text>
                     </Box>
                   </Box>
@@ -394,15 +394,15 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
                     skill.bodyTokens != null &&
                     skill.bodyTokens > 0 && (
                       <Box width={CONTENT_WIDTH} paddingLeft={4}>
-                        <Text color={theme.text.secondary}>{'  \u2514'} </Text>
+                        <Text color={theme.text.secondary}>{"  \u2514"} </Text>
                         <Box width={30}>
                           <Text color={theme.text.secondary} italic>
-                            {t('body loaded')}
+                            {t("body loaded")}
                           </Text>
                         </Box>
                         <Box flexGrow={1} justifyContent="flex-end">
                           <Text color={theme.status.success}>
-                            +{formatTokens(skill.bodyTokens)} {t('tokens')}
+                            +{formatTokens(skill.bodyTokens)} {t("tokens")}
                           </Text>
                         </Box>
                       </Box>
@@ -415,7 +415,7 @@ export const ContextUsage: React.FC<ContextUsageProps> = ({
       ) : (
         <Box marginTop={1}>
           <Text color={theme.text.secondary} italic>
-            {t('Run /context detail for per-item breakdown.')}
+            {t("Run /context detail for per-item breakdown.")}
           </Text>
         </Box>
       )}

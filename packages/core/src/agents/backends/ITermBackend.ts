@@ -16,13 +16,13 @@
  * polls to detect exits.
  */
 
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import * as os from 'node:os';
-import { createDebugLogger } from '../../utils/debugLogger.js';
-import type { AnsiOutput } from '../../utils/terminalSerializer.js';
-import { DISPLAY_MODE } from './types.js';
-import type { AgentSpawnConfig, AgentExitCallback, Backend } from './types.js';
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import * as os from "node:os";
+import { createDebugLogger } from "../../utils/debugLogger.js";
+import type { AnsiOutput } from "../../utils/terminalSerializer.js";
+import { DISPLAY_MODE } from "./types.js";
+import type { AgentSpawnConfig, AgentExitCallback, Backend } from "./types.js";
 import {
   verifyITerm,
   itermSplitPane,
@@ -30,9 +30,9 @@ import {
   itermSendText,
   itermFocusSession,
   itermCloseSession,
-} from './iterm-it2.js';
+} from "./iterm-it2.js";
 
-const debugLogger = createDebugLogger('ITERM_BACKEND');
+const debugLogger = createDebugLogger("ITERM_BACKEND");
 
 /** Polling interval for exit detection (ms) */
 const EXIT_POLL_INTERVAL_MS = 500;
@@ -41,7 +41,7 @@ interface ITermAgentSession {
   agentId: string;
   sessionId: string;
   exitMarkerPath: string;
-  status: 'running' | 'exited';
+  status: "running" | "exited";
   exitCode: number;
 }
 
@@ -80,14 +80,14 @@ export class ITermBackend implements Backend {
     await fs.mkdir(this.exitMarkerDir, { recursive: true });
 
     this.initialized = true;
-    debugLogger.info('ITermBackend initialized');
+    debugLogger.info("ITermBackend initialized");
   }
 
   // ─── Agent Lifecycle ────────────────────────────────────────
 
   async spawnAgent(config: AgentSpawnConfig): Promise<void> {
     if (!this.initialized) {
-      throw new Error('ITermBackend not initialized. Call init() first.');
+      throw new Error("ITermBackend not initialized. Call init() first.");
     }
     if (this.sessions.has(config.agentId)) {
       throw new Error(`Agent "${config.agentId}" already exists.`);
@@ -115,7 +115,7 @@ export class ITermBackend implements Backend {
 
       if (this.sessions.size === 0) {
         // First agent: split from ITERM_SESSION_ID if present, else active session
-        const leaderSessionId = process.env['ITERM_SESSION_ID'] || undefined;
+        const leaderSessionId = process.env["ITERM_SESSION_ID"] || undefined;
         sessionId = await itermSplitPane(leaderSessionId);
         await itermRunCommand(sessionId, cmd);
       } else {
@@ -128,7 +128,7 @@ export class ITermBackend implements Backend {
         agentId,
         sessionId,
         exitMarkerPath,
-        status: 'running',
+        status: "running",
         exitCode: 0,
       };
 
@@ -147,9 +147,9 @@ export class ITermBackend implements Backend {
       debugLogger.error(`Failed to spawn agent "${agentId}":`, error);
       this.sessions.set(agentId, {
         agentId,
-        sessionId: '',
+        sessionId: "",
         exitMarkerPath,
-        status: 'exited',
+        status: "exited",
         exitCode: 1,
       });
       this.agentOrder.push(agentId);
@@ -161,11 +161,11 @@ export class ITermBackend implements Backend {
 
   stopAgent(agentId: string): void {
     const session = this.sessions.get(agentId);
-    if (!session || session.status !== 'running') return;
+    if (!session || session.status !== "running") return;
     itermCloseSession(session.sessionId).catch((e) =>
       debugLogger.error(`Failed to close session for agent "${agentId}": ${e}`),
     );
-    session.status = 'exited';
+    session.status = "exited";
     session.exitCode = 1;
     this.onExitCallback?.(agentId, 1, null);
     debugLogger.info(`Closed iTerm2 session for agent "${agentId}"`);
@@ -173,13 +173,13 @@ export class ITermBackend implements Backend {
 
   stopAll(): void {
     for (const session of this.sessions.values()) {
-      if (session.status === 'running') {
+      if (session.status === "running") {
         itermCloseSession(session.sessionId).catch((e) =>
           debugLogger.error(
             `Failed to close session for agent "${session.agentId}": ${e}`,
           ),
         );
-        session.status = 'exited';
+        session.status = "exited";
         session.exitCode = 1;
         this.onExitCallback?.(session.agentId, 1, null);
       }
@@ -196,7 +196,7 @@ export class ITermBackend implements Backend {
       try {
         await itermCloseSession(session.sessionId);
       } catch (error) {
-        debugLogger.error('Session cleanup error (ignored):', error);
+        debugLogger.error("Session cleanup error (ignored):", error);
       }
     }
 
@@ -207,7 +207,7 @@ export class ITermBackend implements Backend {
         force: true,
       });
     } catch (error) {
-      debugLogger.error('Exit marker cleanup error (ignored):', error);
+      debugLogger.error("Exit marker cleanup error (ignored):", error);
     }
 
     this.sessions.clear();
@@ -258,14 +258,14 @@ export class ITermBackend implements Backend {
 
   switchToNext(): void {
     if (this.agentOrder.length <= 1) return;
-    const currentIndex = this.agentOrder.indexOf(this.activeAgentId ?? '');
+    const currentIndex = this.agentOrder.indexOf(this.activeAgentId ?? "");
     const nextIndex = (currentIndex + 1) % this.agentOrder.length;
     this.switchTo(this.agentOrder[nextIndex]!);
   }
 
   switchToPrevious(): void {
     if (this.agentOrder.length <= 1) return;
-    const currentIndex = this.agentOrder.indexOf(this.activeAgentId ?? '');
+    const currentIndex = this.agentOrder.indexOf(this.activeAgentId ?? "");
     const prevIndex =
       (currentIndex - 1 + this.agentOrder.length) % this.agentOrder.length;
     this.switchTo(this.agentOrder[prevIndex]!);
@@ -302,7 +302,7 @@ export class ITermBackend implements Backend {
 
   writeToAgent(agentId: string, data: string): boolean {
     const session = this.sessions.get(agentId);
-    if (!session || session.status !== 'running') return false;
+    if (!session || session.status !== "running") return false;
     itermSendText(session.sessionId, data).catch((e) =>
       debugLogger.error(`Failed to send text to agent "${agentId}": ${e}`),
     );
@@ -354,16 +354,16 @@ export class ITermBackend implements Backend {
     // Build: cd <cwd> && [env K=V] command args; echo $? > <marker>
     const parts = [`cd ${shellQuote(config.cwd)}`];
     if (envParts.length > 0) {
-      parts.push(`env ${envParts.join(' ')} ${cmdParts.join(' ')}`);
+      parts.push(`env ${envParts.join(" ")} ${cmdParts.join(" ")}`);
     } else {
-      parts.push(cmdParts.join(' '));
+      parts.push(cmdParts.join(" "));
     }
 
-    const mainCmd = parts.join(' && ');
+    const mainCmd = parts.join(" && ");
     // Write exit code to a temp file first, then atomically rename it
     // to the marker path. This prevents the polling loop from reading
     // a partially-written file.
-    const tmpMarker = shellQuote(exitMarkerPath + '.tmp');
+    const tmpMarker = shellQuote(exitMarkerPath + ".tmp");
     const finalMarker = shellQuote(exitMarkerPath);
     return `${mainCmd}; echo $? > ${tmpMarker} && mv ${tmpMarker} ${finalMarker}`;
   }
@@ -372,7 +372,7 @@ export class ITermBackend implements Backend {
     if (this.pendingSpawns > 0) return false;
     if (this.sessions.size === 0) return true;
     for (const session of this.sessions.values()) {
-      if (session.status === 'running') return false;
+      if (session.status === "running") return false;
     }
     return true;
   }
@@ -395,12 +395,12 @@ export class ITermBackend implements Backend {
 
   private async pollExitStatus(): Promise<void> {
     for (const agent of this.sessions.values()) {
-      if (agent.status !== 'running') continue;
+      if (agent.status !== "running") continue;
 
       try {
-        const content = await fs.readFile(agent.exitMarkerPath, 'utf8');
+        const content = await fs.readFile(agent.exitMarkerPath, "utf8");
         const exitCode = parseInt(content.trim(), 10);
-        agent.status = 'exited';
+        agent.status = "exited";
         agent.exitCode = isNaN(exitCode) ? 1 : exitCode;
 
         debugLogger.info(

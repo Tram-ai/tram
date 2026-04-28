@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
-import { render } from 'ink-testing-library';
-import { PrepareLabel, MAX_WIDTH } from './PrepareLabel.js';
+import { describe, it, expect } from "vitest";
+import { render } from "ink-testing-library";
+import { PrepareLabel, MAX_WIDTH } from "./PrepareLabel.js";
 
-describe('PrepareLabel', () => {
-  const color = 'white';
-  const flat = (s: string | undefined) => (s ?? '').replace(/\n/g, '');
+describe("PrepareLabel", () => {
+  const color = "white";
+  const flat = (s: string | undefined) => (s ?? "").replace(/\n/g, "");
 
-  it('renders plain label when no match (short label)', () => {
+  it("renders plain label when no match (short label)", () => {
     const { lastFrame } = render(
       <PrepareLabel
         label="simple command"
@@ -25,8 +25,8 @@ describe('PrepareLabel', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('truncates long label when collapsed and no match', () => {
-    const long = 'x'.repeat(MAX_WIDTH + 25);
+  it("truncates long label when collapsed and no match", () => {
+    const long = "x".repeat(MAX_WIDTH + 25);
     const { lastFrame } = render(
       <PrepareLabel
         label={long}
@@ -37,13 +37,13 @@ describe('PrepareLabel', () => {
     );
     const out = lastFrame();
     const f = flat(out);
-    expect(f.endsWith('...')).toBe(true);
+    expect(f.endsWith("...")).toBe(true);
     expect(f.length).toBe(MAX_WIDTH + 3);
     expect(out).toMatchSnapshot();
   });
 
-  it('shows full long label when expanded and no match', () => {
-    const long = 'y'.repeat(MAX_WIDTH + 25);
+  it("shows full long label when expanded and no match", () => {
+    const long = "y".repeat(MAX_WIDTH + 25);
     const { lastFrame } = render(
       <PrepareLabel
         label={long}
@@ -58,9 +58,9 @@ describe('PrepareLabel', () => {
     expect(out).toMatchSnapshot();
   });
 
-  it('highlights matched substring when expanded (text only visible)', () => {
+  it("highlights matched substring when expanded (text only visible)", () => {
     const label = 'run: git commit -m "feat: add search"';
-    const userInput = 'commit';
+    const userInput = "commit";
     const matchedIndex = label.indexOf(userInput);
     const { lastFrame } = render(
       <PrepareLabel
@@ -74,10 +74,10 @@ describe('PrepareLabel', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('creates centered window around match when collapsed', () => {
-    const prefix = 'cd /very/long/path/that/keeps/going/'.repeat(3);
-    const core = 'search-here';
-    const suffix = '/and/then/some/more/components/'.repeat(3);
+  it("creates centered window around match when collapsed", () => {
+    const prefix = "cd /very/long/path/that/keeps/going/".repeat(3);
+    const core = "search-here";
+    const suffix = "/and/then/some/more/components/".repeat(3);
     const label = prefix + core + suffix;
     const matchedIndex = prefix.length;
     const { lastFrame } = render(
@@ -92,15 +92,15 @@ describe('PrepareLabel', () => {
     const out = lastFrame();
     const f = flat(out);
     expect(f.includes(core)).toBe(true);
-    expect(f.startsWith('...')).toBe(true);
-    expect(f.endsWith('...')).toBe(true);
+    expect(f.startsWith("...")).toBe(true);
+    expect(f.endsWith("...")).toBe(true);
     expect(out).toMatchSnapshot();
   });
 
-  it('truncates match itself when match is very long', () => {
-    const prefix = 'find ';
-    const core = 'x'.repeat(MAX_WIDTH + 25);
-    const suffix = ' in this text';
+  it("truncates match itself when match is very long", () => {
+    const prefix = "find ";
+    const core = "x".repeat(MAX_WIDTH + 25);
+    const suffix = " in this text";
     const label = prefix + core + suffix;
     const matchedIndex = prefix.length;
     const { lastFrame } = render(
@@ -114,9 +114,9 @@ describe('PrepareLabel', () => {
     );
     const out = lastFrame();
     const f = flat(out);
-    expect(f.includes('...')).toBe(true);
-    expect(f.startsWith('...')).toBe(false);
-    expect(f.endsWith('...')).toBe(true);
+    expect(f.includes("...")).toBe(true);
+    expect(f.startsWith("...")).toBe(false);
+    expect(f.endsWith("...")).toBe(true);
     expect(f.length).toBe(MAX_WIDTH + 2);
     expect(out).toMatchSnapshot();
   });

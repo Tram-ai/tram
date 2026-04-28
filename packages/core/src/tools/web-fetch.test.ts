@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { WebFetchTool } from './web-fetch.js';
-import type { Config } from '../config/config.js';
-import { ApprovalMode } from '../config/config.js';
-import { ToolConfirmationOutcome } from './tools.js';
-import { ToolErrorType } from './tool-error.js';
-import * as fetchUtils from '../utils/fetch.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { WebFetchTool } from "./web-fetch.js";
+import type { Config } from "../config/config.js";
+import { ApprovalMode } from "../config/config.js";
+import { ToolConfirmationOutcome } from "./tools.js";
+import { ToolErrorType } from "./tool-error.js";
+import * as fetchUtils from "../utils/fetch.js";
 
 const mockGenerateContent = vi.fn();
 const mockGetGeminiClient = vi.fn(() => ({
   generateContent: mockGenerateContent,
 }));
 
-vi.mock('../utils/fetch.js', async (importOriginal) => {
+vi.mock("../utils/fetch.js", async (importOriginal) => {
   const actual = await importOriginal<typeof fetchUtils>();
   return {
     ...actual,
@@ -26,7 +26,7 @@ vi.mock('../utils/fetch.js', async (importOriginal) => {
   };
 });
 
-describe('WebFetchTool', () => {
+describe("WebFetchTool", () => {
   let mockConfig: Config;
 
   beforeEach(() => {
@@ -36,124 +36,136 @@ describe('WebFetchTool', () => {
       setApprovalMode: vi.fn(),
       getProxy: vi.fn(),
       getGeminiClient: mockGetGeminiClient,
-      getSessionId: vi.fn(() => 'test-session-id'),
+      getSessionId: vi.fn(() => "test-session-id"),
     } as unknown as Config;
   });
 
-  describe('execute', () => {
-    it('should throw validation error when url parameter is missing', async () => {
+  describe("execute", () => {
+    it("should throw validation error when url parameter is missing", async () => {
       const tool = new WebFetchTool(mockConfig);
-      const params = { prompt: 'no url here' };
+      const params = { prompt: "no url here" };
       /* @ts-expect-error - we are testing validation */
       expect(() => tool.build(params)).toThrow(
         "params must have required property 'url'",
       );
     });
 
-    it('should return WEB_FETCH_FALLBACK_FAILED on fetch failure', async () => {
-      vi.spyOn(fetchUtils, 'isPrivateIp').mockReturnValue(true);
-      vi.spyOn(fetchUtils, 'fetchWithTimeout').mockRejectedValue(
-        new Error('fetch failed'),
+    it("should return WEB_FETCH_FALLBACK_FAILED on fetch failure", async () => {
+      vi.spyOn(fetchUtils, "isPrivateIp").mockReturnValue(true);
+      vi.spyOn(fetchUtils, "fetchWithTimeout").mockRejectedValue(
+        new Error("fetch failed"),
       );
       const tool = new WebFetchTool(mockConfig);
-      const params = { url: 'https://private.ip', prompt: 'summarize this' };
+      const params = { url: "https://private.ip", prompt: "summarize this" };
       const invocation = tool.build(params);
       const result = await invocation.execute(new AbortController().signal);
       expect(result.error?.type).toBe(ToolErrorType.WEB_FETCH_FALLBACK_FAILED);
     });
 
-    it('should return WEB_FETCH_FALLBACK_FAILED on API processing failure', async () => {
-      vi.spyOn(fetchUtils, 'isPrivateIp').mockReturnValue(false);
-      vi.spyOn(fetchUtils, 'fetchWithTimeout').mockResolvedValue({
+    it("should return fetched content without invoking Gemini processing", async () => {
+      vi.spyOn(fetchUtils, "isPrivateIp").mockReturnValue(false);
+      vi.spyOn(fetchUtils, "fetchWithTimeout").mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('<html><body>Test content</body></html>'),
+        text: () => Promise.resolve("<html><body>Test content</body></html>"),
+        headers: new Headers({
+          "content-type": "text/html; charset=utf-8",
+          "content-length": "38",
+        }),
+        status: 200,
+        statusText: "OK",
+        url: "https://public.ip",
+        redirected: false,
       } as Response);
-      mockGenerateContent.mockRejectedValue(new Error('API error'));
       const tool = new WebFetchTool(mockConfig);
-      const params = { url: 'https://public.ip', prompt: 'summarize this' };
+      const params = { url: "https://public.ip", prompt: "summarize this" };
       const invocation = tool.build(params);
       const result = await invocation.execute(new AbortController().signal);
-      expect(result.error?.type).toBe(ToolErrorType.WEB_FETCH_FALLBACK_FAILED);
+      expect(result.error).toBeUndefined();
+      expect(result.returnDisplay).toContain("fetched successfully");
+      expect(result.llmContent).toContain("Requested extraction goal: summarize this");
+      expect(result.llmContent).toContain("Test content");
+      expect(mockGetGeminiClient).not.toHaveBeenCalled();
+      expect(mockGenerateContent).not.toHaveBeenCalled();
     });
   });
 
-  describe('getConfirmationDetails', () => {
-    it('should return confirmation details with the correct prompt and urls', async () => {
+  describe("getConfirmationDetails", () => {
+    it("should return confirmation details with the correct prompt and urls", async () => {
       const tool = new WebFetchTool(mockConfig);
       const params = {
-        url: 'https://example.com',
-        prompt: 'summarize this page',
+        url: "https://example.com",
+        prompt: "summarize this page",
       };
       const invocation = tool.build(params);
-      expect(await invocation.getDefaultPermission()).toBe('ask');
+      expect(await invocation.getDefaultPermission()).toBe("ask");
 
       const confirmationDetails = await invocation.getConfirmationDetails(
         new AbortController().signal,
       );
 
       expect(confirmationDetails).toEqual({
-        type: 'info',
-        title: 'Confirm Web Fetch',
+        type: "info",
+        title: "Confirm Web Fetch",
         prompt:
-          'Fetch content from https://example.com and process with: summarize this page',
-        urls: ['https://example.com'],
-        permissionRules: ['WebFetch(example.com)'],
+          "Fetch content from https://example.com and process with: summarize this page",
+        urls: ["https://example.com"],
+        permissionRules: ["WebFetch(example.com)"],
         onConfirm: expect.any(Function),
       });
     });
 
-    it('should return github urls as-is in confirmation details', async () => {
+    it("should return github urls as-is in confirmation details", async () => {
       const tool = new WebFetchTool(mockConfig);
       const params = {
-        url: 'https://github.com/google/gemini-react/blob/main/README.md',
-        prompt: 'summarize the README',
+        url: "https://github.com/google/gemini-react/blob/main/README.md",
+        prompt: "summarize the README",
       };
       const invocation = tool.build(params);
-      expect(await invocation.getDefaultPermission()).toBe('ask');
+      expect(await invocation.getDefaultPermission()).toBe("ask");
 
       const confirmationDetails = await invocation.getConfirmationDetails(
         new AbortController().signal,
       );
 
       expect(confirmationDetails).toEqual({
-        type: 'info',
-        title: 'Confirm Web Fetch',
+        type: "info",
+        title: "Confirm Web Fetch",
         prompt:
-          'Fetch content from https://github.com/google/gemini-react/blob/main/README.md and process with: summarize the README',
-        urls: ['https://github.com/google/gemini-react/blob/main/README.md'],
-        permissionRules: ['WebFetch(github.com)'],
+          "Fetch content from https://github.com/google/gemini-react/blob/main/README.md and process with: summarize the README",
+        urls: ["https://github.com/google/gemini-react/blob/main/README.md"],
+        permissionRules: ["WebFetch(github.com)"],
         onConfirm: expect.any(Function),
       });
     });
 
-    it('should return ask even if approval mode is AUTO_EDIT (approval mode handled by scheduler)', async () => {
+    it("should return ask even if approval mode is AUTO_EDIT (approval mode handled by scheduler)", async () => {
       const tool = new WebFetchTool({
         ...mockConfig,
         getApprovalMode: () => ApprovalMode.AUTO_EDIT,
       } as unknown as Config);
       const params = {
-        url: 'https://example.com',
-        prompt: 'summarize this page',
+        url: "https://example.com",
+        prompt: "summarize this page",
       };
       const invocation = tool.build(params);
-      expect(await invocation.getDefaultPermission()).toBe('ask');
+      expect(await invocation.getDefaultPermission()).toBe("ask");
 
       const confirmationDetails = await invocation.getConfirmationDetails(
         new AbortController().signal,
       );
 
       expect(confirmationDetails).toEqual({
-        type: 'info',
-        title: 'Confirm Web Fetch',
+        type: "info",
+        title: "Confirm Web Fetch",
         prompt:
-          'Fetch content from https://example.com and process with: summarize this page',
-        urls: ['https://example.com'],
-        permissionRules: ['WebFetch(example.com)'],
+          "Fetch content from https://example.com and process with: summarize this page",
+        urls: ["https://example.com"],
+        permissionRules: ["WebFetch(example.com)"],
         onConfirm: expect.any(Function),
       });
     });
 
-    it('should have onConfirm as a no-op (approval mode handled by scheduler)', async () => {
+    it("should have onConfirm as a no-op (approval mode handled by scheduler)", async () => {
       const setApprovalMode = vi.fn();
       const testConfig = {
         ...mockConfig,
@@ -161,8 +173,8 @@ describe('WebFetchTool', () => {
       } as unknown as Config;
       const tool = new WebFetchTool(testConfig);
       const params = {
-        url: 'https://example.com',
-        prompt: 'summarize this page',
+        url: "https://example.com",
+        prompt: "summarize this page",
       };
       const invocation = tool.build(params);
       const confirmationDetails = await invocation.getConfirmationDetails(
@@ -171,8 +183,8 @@ describe('WebFetchTool', () => {
 
       if (
         confirmationDetails &&
-        typeof confirmationDetails === 'object' &&
-        'onConfirm' in confirmationDetails
+        typeof confirmationDetails === "object" &&
+        "onConfirm" in confirmationDetails
       ) {
         await confirmationDetails.onConfirm(
           ToolConfirmationOutcome.ProceedAlways,

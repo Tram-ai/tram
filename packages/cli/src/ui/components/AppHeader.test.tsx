@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import { describe, expect, it, vi } from 'vitest';
-import { AppHeader } from './AppHeader.js';
-import { ConfigContext } from '../contexts/ConfigContext.js';
-import { SettingsContext } from '../contexts/SettingsContext.js';
-import { type UIState, UIStateContext } from '../contexts/UIStateContext.js';
-import { VimModeProvider } from '../contexts/VimModeContext.js';
-import * as useTerminalSize from '../hooks/useTerminalSize.js';
-import type { LoadedSettings } from '../../config/settings.js';
+import { render } from "ink-testing-library";
+import { describe, expect, it, vi } from "vitest";
+import { AppHeader } from "./AppHeader.js";
+import { ConfigContext } from "../contexts/ConfigContext.js";
+import { SettingsContext } from "../contexts/SettingsContext.js";
+import { type UIState, UIStateContext } from "../contexts/UIStateContext.js";
+import { VimModeProvider } from "../contexts/VimModeContext.js";
+import * as useTerminalSize from "../hooks/useTerminalSize.js";
+import type { LoadedSettings } from "../../config/settings.js";
 
-vi.mock('../hooks/useTerminalSize.js');
+vi.mock("../hooks/useTerminalSize.js");
 const useTerminalSizeMock = vi.mocked(useTerminalSize.useTerminalSize);
 
 const createSettings = (options?: { hideTips?: boolean }): LoadedSettings =>
@@ -28,8 +28,8 @@ const createSettings = (options?: { hideTips?: boolean }): LoadedSettings =>
 
 const createMockConfig = (overrides = {}) => ({
   getContentGeneratorConfig: vi.fn(() => ({ authType: undefined })),
-  getModel: vi.fn(() => 'gemini-pro'),
-  getTargetDir: vi.fn(() => '/projects/tram'),
+  getModel: vi.fn(() => "gemini-pro"),
+  getTargetDir: vi.fn(() => "/projects/tram"),
   getMcpServers: vi.fn(() => ({})),
   getBlockedMcpServers: vi.fn(() => []),
   getDebugMode: vi.fn(() => false),
@@ -39,10 +39,10 @@ const createMockConfig = (overrides = {}) => ({
 
 const createMockUIState = (overrides: Partial<UIState> = {}): UIState =>
   ({
-    branchName: 'main',
+    branchName: "main",
     nightly: false,
-    debugMessage: '',
-    currentModel: 'gemini-pro',
+    debugMessage: "",
+    currentModel: "gemini-pro",
     sessionStats: {
       lastPromptTokenCount: 0,
     },
@@ -68,27 +68,27 @@ const renderWithProviders = (
   );
 };
 
-describe('<AppHeader />', () => {
-  it('shows the working directory', () => {
+describe("<AppHeader />", () => {
+  it("shows the working directory", () => {
     const { lastFrame } = renderWithProviders(createMockUIState());
-    expect(lastFrame()).toContain('/projects/tram');
+    expect(lastFrame()).toContain("/projects/tram");
   });
 
-  it('hides the header when screen reader is enabled', () => {
+  it("hides the header when screen reader is enabled", () => {
     const { lastFrame } = renderWithProviders(
       createMockUIState(),
       createSettings(),
       createMockConfig({ getScreenReader: vi.fn(() => true) }),
     );
     // When screen reader is enabled, header is not rendered
-    expect(lastFrame()).not.toContain('/projects/tram');
-    expect(lastFrame()).not.toContain('TRAM');
+    expect(lastFrame()).not.toContain("/projects/tram");
+    expect(lastFrame()).not.toContain("TRAM");
   });
 
-  it('shows the header with all info when banner is visible', () => {
+  it("shows the header with all info when banner is visible", () => {
     const { lastFrame } = renderWithProviders(createMockUIState());
-    expect(lastFrame()).toContain('>_ TRAM');
-    expect(lastFrame()).toContain('gemini-pro');
-    expect(lastFrame()).toContain('/projects/tram');
+    expect(lastFrame()).toContain(">_ TRAM");
+    expect(lastFrame()).toContain("gemini-pro");
+    expect(lastFrame()).toContain("/projects/tram");
   });
 });

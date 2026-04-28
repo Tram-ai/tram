@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Config as CoreConfig } from '../config/config.js';
-import type { Extension } from '../extension/extensionManager.js';
-import type { IdeContextStore } from '../ide/ideContext.js';
-import type { FileDiscoveryService } from '../services/fileDiscoveryService.js';
-import type { WorkspaceContext } from '../utils/workspaceContext.js';
+import type { Config as CoreConfig } from "../config/config.js";
+import type { Extension } from "../extension/extensionManager.js";
+import type { IdeContextStore } from "../ide/ideContext.js";
+import type { FileDiscoveryService } from "../services/fileDiscoveryService.js";
+import type { WorkspaceContext } from "../utils/workspaceContext.js";
 import type {
   LspCallHierarchyIncomingCall,
   LspCallHierarchyItem,
@@ -25,29 +25,29 @@ import type {
   LspSymbolInformation,
   LspTextEdit,
   LspWorkspaceEdit,
-} from './types.js';
-import type { EventEmitter } from 'events';
+} from "./types.js";
+import type { EventEmitter } from "events";
 import {
   DEFAULT_LSP_DOCUMENT_OPEN_DELAY_MS,
   DEFAULT_LSP_DOCUMENT_RETRY_DELAY_MS,
   DEFAULT_LSP_WORKSPACE_SYMBOL_WARMUP_DELAY_MS,
-} from './constants.js';
-import { LspConfigLoader } from './LspConfigLoader.js';
-import { LspResponseNormalizer } from './LspResponseNormalizer.js';
-import { LspServerManager } from './LspServerManager.js';
+} from "./constants.js";
+import { LspConfigLoader } from "./LspConfigLoader.js";
+import { LspResponseNormalizer } from "./LspResponseNormalizer.js";
+import { LspServerManager } from "./LspServerManager.js";
 import type {
   LspConnectionInterface,
   LspServerHandle,
   LspServerStatus,
   NativeLspServiceOptions,
-} from './types.js';
-import * as path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
-import * as fs from 'node:fs';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import { globSync } from 'glob';
+} from "./types.js";
+import * as path from "path";
+import { fileURLToPath, pathToFileURL } from "url";
+import * as fs from "node:fs";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import { globSync } from "glob";
 
-const debugLogger = createDebugLogger('LSP');
+const debugLogger = createDebugLogger("LSP");
 
 /**
  * Mapping from LSP language identifiers to file extensions, only for cases
@@ -56,20 +56,20 @@ const debugLogger = createDebugLogger('LSP');
  * are handled by the fallback in getWorkspaceSymbolExtensions().
  */
 const LANGUAGE_ID_TO_EXTENSIONS: Record<string, string[]> = {
-  typescript: ['ts', 'tsx'],
-  typescriptreact: ['tsx'],
-  javascript: ['js', 'jsx'],
-  javascriptreact: ['jsx'],
-  python: ['py'],
-  csharp: ['cs'],
-  ruby: ['rb'],
+  typescript: ["ts", "tsx"],
+  typescriptreact: ["tsx"],
+  javascript: ["js", "jsx"],
+  javascriptreact: ["jsx"],
+  python: ["py"],
+  csharp: ["cs"],
+  ruby: ["rb"],
 };
 
 const DEFAULT_EXCLUDE_PATTERNS = [
-  '**/node_modules/**',
-  '**/.git/**',
-  '**/dist/**',
-  '**/build/**',
+  "**/node_modules/**",
+  "**/.git/**",
+  "**/dist/**",
+  "**/build/**",
 ];
 
 export class NativeLspService {
@@ -122,7 +122,7 @@ export class NativeLspService {
     // Check if workspace is trusted
     if (this.requireTrustedWorkspace && !workspaceTrusted) {
       debugLogger.warn(
-        'Workspace is not trusted, skipping LSP server discovery',
+        "Workspace is not trusted, skipping LSP server discovery",
       );
       return;
     }
@@ -145,7 +145,7 @@ export class NativeLspService {
     const configWithExtensions = this.config as unknown as {
       getActiveExtensions?: () => Extension[];
     };
-    return typeof configWithExtensions.getActiveExtensions === 'function'
+    return typeof configWithExtensions.getActiveExtensions === "function"
       ? configWithExtensions.getActiveExtensions()
       : [];
   }
@@ -188,7 +188,7 @@ export class NativeLspService {
         string,
         LspServerHandle & { connection: LspConnectionInterface },
       ] =>
-        entry[1].status === 'READY' &&
+        entry[1].status === "READY" &&
         entry[1].connection !== undefined &&
         (!serverName || entry[0] === serverName),
     );
@@ -216,7 +216,7 @@ export class NativeLspService {
     }
     this.lastConnections.set(serverName, handle.connection);
 
-    if (!uri.startsWith('file://')) {
+    if (!uri.startsWith("file://")) {
       return false;
     }
     const openedForServer = this.openedDocuments.get(serverName);
@@ -234,7 +234,7 @@ export class NativeLspService {
 
     let text: string;
     try {
-      text = fs.readFileSync(filePath, 'utf-8');
+      text = fs.readFileSync(filePath, "utf-8");
     } catch (error) {
       debugLogger.warn(
         `Failed to read file for LSP didOpen: ${filePath}`,
@@ -243,11 +243,11 @@ export class NativeLspService {
       return false;
     }
 
-    const languageId = this.resolveLanguageId(filePath, handle) ?? 'plaintext';
+    const languageId = this.resolveLanguageId(filePath, handle) ?? "plaintext";
 
     handle.connection.send({
-      jsonrpc: '2.0',
-      method: 'textDocument/didOpen',
+      jsonrpc: "2.0",
+      method: "textDocument/didOpen",
       params: {
         textDocument: {
           uri,
@@ -291,7 +291,7 @@ export class NativeLspService {
     const ext = path.extname(filePath).slice(1).toLowerCase();
     if (ext && handle.config.extensionToLanguage) {
       const mapping = handle.config.extensionToLanguage;
-      return mapping[ext] ?? mapping['.' + ext];
+      return mapping[ext] ?? mapping["." + ext];
     }
     if (handle.config.languages && handle.config.languages.length > 0) {
       return handle.config.languages[0];
@@ -345,7 +345,7 @@ export class NativeLspService {
     }
     // Brace expansion requires at least 2 items; use plain glob for a single ext
     const extGlob =
-      extensions.length === 1 ? extensions[0]! : `{${extensions.join(',')}}`;
+      extensions.length === 1 ? extensions[0]! : `{${extensions.join(",")}}`;
     const pattern = `**/*.${extGlob}`;
     const roots = this.workspaceContext.getDirectories();
 
@@ -388,7 +388,7 @@ export class NativeLspService {
     const extMapping = handle.config.extensionToLanguage;
     if (extMapping) {
       for (const key of Object.keys(extMapping)) {
-        const normalized = key.startsWith('.') ? key.slice(1) : key;
+        const normalized = key.startsWith(".") ? key.slice(1) : key;
         if (normalized) {
           extensions.add(normalized.toLowerCase());
         }
@@ -464,7 +464,7 @@ export class NativeLspService {
     for (const [serverName, handle] of Array.from(
       this.serverManager.getHandles(),
     )) {
-      if (handle.status !== 'READY' || !handle.connection) {
+      if (handle.status !== "READY" || !handle.connection) {
         continue;
       }
       try {
@@ -472,7 +472,7 @@ export class NativeLspService {
         const warmedUp = this.serverManager.isTypescriptServer(handle)
           ? false
           : await this.warmupWorkspaceSymbols(serverName, handle);
-        let response = await handle.connection.request('workspace/symbol', {
+        let response = await handle.connection.request("workspace/symbol", {
           query,
         });
         if (
@@ -482,7 +482,7 @@ export class NativeLspService {
           warmedUp
         ) {
           await this.delay(DEFAULT_LSP_WORKSPACE_SYMBOL_WARMUP_DELAY_MS);
-          response = await handle.connection.request('workspace/symbol', {
+          response = await handle.connection.request("workspace/symbol", {
             query,
           });
         }
@@ -491,7 +491,7 @@ export class NativeLspService {
           this.isNoProjectErrorResponse(response)
         ) {
           await this.warmupAndTrack(serverName, handle, true);
-          response = await handle.connection.request('workspace/symbol', {
+          response = await handle.connection.request("workspace/symbol", {
             query,
           });
         }
@@ -545,7 +545,7 @@ export class NativeLspService {
         await this.warmupAndTrack(name, handle);
 
         let response = await handle.connection.request(
-          'textDocument/definition',
+          "textDocument/definition",
           requestParams,
         );
 
@@ -555,7 +555,7 @@ export class NativeLspService {
         ) {
           await this.delay(DEFAULT_LSP_DOCUMENT_RETRY_DELAY_MS);
           response = await handle.connection.request(
-            'textDocument/definition',
+            "textDocument/definition",
             requestParams,
           );
         }
@@ -615,7 +615,7 @@ export class NativeLspService {
         await this.warmupAndTrack(name, handle);
 
         let response = await handle.connection.request(
-          'textDocument/references',
+          "textDocument/references",
           requestParams,
         );
 
@@ -625,7 +625,7 @@ export class NativeLspService {
         ) {
           await this.delay(DEFAULT_LSP_DOCUMENT_RETRY_DELAY_MS);
           response = await handle.connection.request(
-            'textDocument/references',
+            "textDocument/references",
             requestParams,
           );
         }
@@ -680,7 +680,7 @@ export class NativeLspService {
         await this.warmupAndTrack(name, handle);
 
         let response = await handle.connection.request(
-          'textDocument/hover',
+          "textDocument/hover",
           requestParams,
         );
 
@@ -690,7 +690,7 @@ export class NativeLspService {
         ) {
           await this.delay(DEFAULT_LSP_DOCUMENT_RETRY_DELAY_MS);
           response = await handle.connection.request(
-            'textDocument/hover',
+            "textDocument/hover",
             requestParams,
           );
         }
@@ -724,7 +724,7 @@ export class NativeLspService {
         await this.warmupAndTrack(name, handle);
 
         let response = await handle.connection.request(
-          'textDocument/documentSymbol',
+          "textDocument/documentSymbol",
           requestParams,
         );
 
@@ -734,7 +734,7 @@ export class NativeLspService {
         ) {
           await this.delay(DEFAULT_LSP_DOCUMENT_RETRY_DELAY_MS);
           response = await handle.connection.request(
-            'textDocument/documentSymbol',
+            "textDocument/documentSymbol",
             requestParams,
           );
         }
@@ -744,7 +744,7 @@ export class NativeLspService {
         }
         const symbols: LspSymbolInformation[] = [];
         for (const item of response) {
-          if (!item || typeof item !== 'object') {
+          if (!item || typeof item !== "object") {
             continue;
           }
           const itemObj = item as Record<string, unknown>;
@@ -807,7 +807,7 @@ export class NativeLspService {
         await this.warmupAndTrack(name, handle);
 
         let response = await handle.connection.request(
-          'textDocument/implementation',
+          "textDocument/implementation",
           requestParams,
         );
 
@@ -817,7 +817,7 @@ export class NativeLspService {
         ) {
           await this.delay(DEFAULT_LSP_DOCUMENT_RETRY_DELAY_MS);
           response = await handle.connection.request(
-            'textDocument/implementation',
+            "textDocument/implementation",
             requestParams,
           );
         }
@@ -878,7 +878,7 @@ export class NativeLspService {
         await this.warmupAndTrack(name, handle);
 
         let response = await handle.connection.request(
-          'textDocument/prepareCallHierarchy',
+          "textDocument/prepareCallHierarchy",
           requestParams,
         );
 
@@ -888,7 +888,7 @@ export class NativeLspService {
         ) {
           await this.delay(DEFAULT_LSP_DOCUMENT_RETRY_DELAY_MS);
           response = await handle.connection.request(
-            'textDocument/prepareCallHierarchy',
+            "textDocument/prepareCallHierarchy",
             requestParams,
           );
         }
@@ -940,7 +940,7 @@ export class NativeLspService {
       try {
         await this.warmupAndTrack(name, handle);
         const response = await handle.connection.request(
-          'callHierarchy/incomingCalls',
+          "callHierarchy/incomingCalls",
           {
             item: this.normalizer.toCallHierarchyItemParams(item),
           },
@@ -987,7 +987,7 @@ export class NativeLspService {
       try {
         await this.warmupAndTrack(name, handle);
         const response = await handle.connection.request(
-          'callHierarchy/outgoingCalls',
+          "callHierarchy/outgoingCalls",
           {
             item: this.normalizer.toCallHierarchyItemParams(item),
           },
@@ -1036,15 +1036,15 @@ export class NativeLspService {
 
         // Request pull diagnostics if the server supports it
         const response = await handle.connection.request(
-          'textDocument/diagnostic',
+          "textDocument/diagnostic",
           {
             textDocument: { uri },
           },
         );
 
-        if (response && typeof response === 'object') {
+        if (response && typeof response === "object") {
           const responseObj = response as Record<string, unknown>;
-          const items = responseObj['items'];
+          const items = responseObj["items"];
           if (Array.isArray(items)) {
             for (const item of items) {
               const normalized = this.normalizer.normalizeDiagnostic(
@@ -1086,15 +1086,15 @@ export class NativeLspService {
 
         // Request workspace diagnostics if supported
         const response = await handle.connection.request(
-          'workspace/diagnostic',
+          "workspace/diagnostic",
           {
             previousResultIds: [],
           },
         );
 
-        if (response && typeof response === 'object') {
+        if (response && typeof response === "object") {
           const responseObj = response as Record<string, unknown>;
-          const items = responseObj['items'];
+          const items = responseObj["items"];
           if (Array.isArray(items)) {
             for (const item of items) {
               if (results.length >= limit) {
@@ -1145,7 +1145,7 @@ export class NativeLspService {
         );
 
         const response = await handle.connection.request(
-          'textDocument/codeAction',
+          "textDocument/codeAction",
           {
             textDocument: { uri },
             range,
@@ -1153,7 +1153,7 @@ export class NativeLspService {
               diagnostics: lspDiagnostics,
               only: context.only,
               triggerKind:
-                context.triggerKind === 'automatic'
+                context.triggerKind === "automatic"
                   ? 2 // CodeActionTriggerKind.Automatic
                   : 1, // CodeActionTriggerKind.Invoked
             },
@@ -1216,7 +1216,7 @@ export class NativeLspService {
 
       return true;
     } catch (error) {
-      debugLogger.error('Failed to apply workspace edit:', error);
+      debugLogger.error("Failed to apply workspace edit:", error);
       return false;
     }
   }
@@ -1228,7 +1228,7 @@ export class NativeLspService {
     uri: string,
     edits: LspTextEdit[],
   ): Promise<void> {
-    let filePath = uri.startsWith('file://') ? fileURLToPath(uri) : uri;
+    let filePath = uri.startsWith("file://") ? fileURLToPath(uri) : uri;
     if (!path.isAbsolute(filePath)) {
       filePath = path.resolve(this.workspaceRoot, filePath);
     }
@@ -1239,10 +1239,10 @@ export class NativeLspService {
     // Read the current file content
     let content: string;
     try {
-      content = fs.readFileSync(filePath, 'utf-8');
+      content = fs.readFileSync(filePath, "utf-8");
     } catch {
       // File doesn't exist, treat as empty
-      content = '';
+      content = "";
     }
 
     // Sort edits in reverse order to apply from end to start
@@ -1253,7 +1253,7 @@ export class NativeLspService {
       return b.range.start.character - a.range.start.character;
     });
 
-    const lines = content.split('\n');
+    const lines = content.split("\n");
 
     for (const edit of sortedEdits) {
       const { range, newText } = edit;
@@ -1263,22 +1263,22 @@ export class NativeLspService {
       const endChar = range.end.character;
 
       // Get the affected lines
-      const startLineText = lines[startLine] ?? '';
-      const endLineText = lines[endLine] ?? '';
+      const startLineText = lines[startLine] ?? "";
+      const endLineText = lines[endLine] ?? "";
 
       // Build the new content
       const before = startLineText.slice(0, startChar);
       const after = endLineText.slice(endChar);
 
       // Replace the range with new text
-      const newLines = (before + newText + after).split('\n');
+      const newLines = (before + newText + after).split("\n");
 
       // Replace affected lines
       lines.splice(startLine, endLine - startLine + 1, ...newLines);
     }
 
     // Write back to file
-    fs.writeFileSync(filePath, lines.join('\n'), 'utf-8');
+    fs.writeFileSync(filePath, lines.join("\n"), "utf-8");
   }
 
   /**
@@ -1300,11 +1300,11 @@ export class NativeLspService {
       return false;
     }
     const message =
-      typeof response === 'string'
+      typeof response === "string"
         ? response
-        : typeof (response as Record<string, unknown>)['message'] === 'string'
-          ? ((response as Record<string, unknown>)['message'] as string)
-          : '';
-    return message.includes('No Project');
+        : typeof (response as Record<string, unknown>)["message"] === "string"
+          ? ((response as Record<string, unknown>)["message"] as string)
+          : "";
+    return message.includes("No Project");
   }
 }

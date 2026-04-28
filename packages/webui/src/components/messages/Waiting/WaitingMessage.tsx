@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import type { FC } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface WaitingMessageProps {
   loadingMessage: string;
@@ -16,12 +16,12 @@ const ROTATE_INTERVAL_MS = 3000; // rotate every 3s per request
 
 // Default witty loading phrases
 const DEFAULT_LOADING_PHRASES = [
-  'Processing...',
-  'Working on it...',
-  'Just a moment...',
-  'Loading...',
-  'Hold tight...',
-  'Almost there...',
+  "Processing...",
+  "Working on it...",
+  "Just a moment...",
+  "Loading...",
+  "Hold tight...",
+  "Almost there...",
 ];
 
 export const WaitingMessage: FC<WaitingMessageProps> = ({ loadingMessage }) => {

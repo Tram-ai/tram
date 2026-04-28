@@ -4,49 +4,49 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import { IdeIntegrationNudge } from '../IdeIntegrationNudge.js';
-import { CommandFormatMigrationNudge } from '../CommandFormatMigrationNudge.js';
-import { LoopDetectionConfirmation } from './LoopDetectionConfirmation.js';
-import { FolderTrustDialog } from './FolderTrustDialog.js';
-import { ShellConfirmationDialog } from './ShellConfirmationDialog.js';
-import { ConsentPrompt } from './ConsentPrompt.js';
-import { SettingInputPrompt } from './SettingInputPrompt.js';
-import { PluginChoicePrompt } from './PluginChoicePrompt.js';
-import { ThemeDialog } from './ThemeDialog.js';
-import { SettingsDialog } from './SettingsDialog.js';
-import { TramOAuthProgress } from './QwenOAuthProgress.js';
-import { AuthDialog } from '../auth/AuthDialog.js';
-import { EditorSettingsDialog } from './EditorSettingsDialog.js';
-import { TrustDialog } from './TrustDialog.js';
-import { PermissionsDialog } from './PermissionsDialog.js';
-import { ModelDialog } from './ModelDialog.js';
-import { ArenaStartDialog } from './arena/ArenaStartDialog.js';
-import { ArenaSelectDialog } from './arena/ArenaSelectDialog.js';
-import { ArenaStopDialog } from './arena/ArenaStopDialog.js';
-import { ArenaStatusDialog } from './arena/ArenaStatusDialog.js';
-import { ApprovalModeDialog } from './ApprovalModeDialog.js';
-import { theme } from '../semantic-colors.js';
-import { useUIState } from '../contexts/UIStateContext.js';
-import { useUIActions } from '../contexts/UIActionsContext.js';
-import { useConfig } from '../contexts/ConfigContext.js';
-import { useSettings } from '../contexts/SettingsContext.js';
-import { AuthState } from '../types.js';
-import { AuthType } from '@tram-ai/tram-core';
-import process from 'node:process';
-import { type UseHistoryManagerReturn } from '../hooks/useHistoryManager.js';
-import { IdeTrustChangeDialog } from './IdeTrustChangeDialog.js';
-import { WelcomeBackDialog } from './WelcomeBackDialog.js';
-import { AgentCreationWizard } from './subagents/create/AgentCreationWizard.js';
-import { AgentsManagerDialog } from './subagents/manage/AgentsManagerDialog.js';
-import { ExtensionsManagerDialog } from './extensions/ExtensionsManagerDialog.js';
-import { MCPManagementDialog } from './mcp/MCPManagementDialog.js';
-import { HooksManagementDialog } from './hooks/HooksManagementDialog.js';
-import { SessionPicker } from './SessionPicker.js';
-import { InitializeDialog } from './InitializeDialog.js';
+import { Box, Text } from "ink";
+import { IdeIntegrationNudge } from "../IdeIntegrationNudge.js";
+import { CommandFormatMigrationNudge } from "../CommandFormatMigrationNudge.js";
+import { LoopDetectionConfirmation } from "./LoopDetectionConfirmation.js";
+import { FolderTrustDialog } from "./FolderTrustDialog.js";
+import { ShellConfirmationDialog } from "./ShellConfirmationDialog.js";
+import { ConsentPrompt } from "./ConsentPrompt.js";
+import { SettingInputPrompt } from "./SettingInputPrompt.js";
+import { PluginChoicePrompt } from "./PluginChoicePrompt.js";
+import { ThemeDialog } from "./ThemeDialog.js";
+import { SettingsDialog } from "./SettingsDialog.js";
+import { TramOAuthProgress } from "./QwenOAuthProgress.js";
+import { AuthDialog } from "../auth/AuthDialog.js";
+import { EditorSettingsDialog } from "./EditorSettingsDialog.js";
+import { TrustDialog } from "./TrustDialog.js";
+import { PermissionsDialog } from "./PermissionsDialog.js";
+import { ModelDialog } from "./ModelDialog.js";
+import { ArenaStartDialog } from "./arena/ArenaStartDialog.js";
+import { ArenaSelectDialog } from "./arena/ArenaSelectDialog.js";
+import { ArenaStopDialog } from "./arena/ArenaStopDialog.js";
+import { ArenaStatusDialog } from "./arena/ArenaStatusDialog.js";
+import { ApprovalModeDialog } from "./ApprovalModeDialog.js";
+import { theme } from "../semantic-colors.js";
+import { useUIState } from "../contexts/UIStateContext.js";
+import { useUIActions } from "../contexts/UIActionsContext.js";
+import { useConfig } from "../contexts/ConfigContext.js";
+import { useSettings } from "../contexts/SettingsContext.js";
+import { AuthState } from "../types.js";
+import { AuthType } from "@tram-ai/tram-core";
+import process from "node:process";
+import { type UseHistoryManagerReturn } from "../hooks/useHistoryManager.js";
+import { IdeTrustChangeDialog } from "./IdeTrustChangeDialog.js";
+import { WelcomeBackDialog } from "./WelcomeBackDialog.js";
+import { AgentCreationWizard } from "./subagents/create/AgentCreationWizard.js";
+import { AgentsManagerDialog } from "./subagents/manage/AgentsManagerDialog.js";
+import { ExtensionsManagerDialog } from "./extensions/ExtensionsManagerDialog.js";
+import { MCPManagementDialog } from "./mcp/MCPManagementDialog.js";
+import { HooksManagementDialog } from "./hooks/HooksManagementDialog.js";
+import { SessionPicker } from "./SessionPicker.js";
+import { InitializeDialog } from "./InitializeDialog.js";
 
 interface DialogManagerProps {
-  addItem: UseHistoryManagerReturn['addItem'];
+  addItem: UseHistoryManagerReturn["addItem"];
   terminalWidth: number;
 }
 
@@ -217,15 +217,15 @@ export const DialogManager = ({
         <SettingsDialog
           settings={settings}
           onSelect={(settingName) => {
-            if (settingName === 'ui.theme') {
+            if (settingName === "ui.theme") {
               uiActions.openThemeDialog();
               return;
             }
-            if (settingName === 'general.preferredEditor') {
+            if (settingName === "general.preferredEditor") {
               uiActions.openEditorDialog();
               return;
             }
-            if (settingName === 'fastModel') {
+            if (settingName === "fastModel") {
               uiActions.openModelDialog({ fastModelMode: true });
               return;
             }
@@ -253,7 +253,7 @@ export const DialogManager = ({
       </Box>
     );
   }
-  if (uiState.activeArenaDialog === 'start') {
+  if (uiState.activeArenaDialog === "start") {
     return (
       <ArenaStartDialog
         onClose={() => uiActions.closeArenaDialog()}
@@ -261,7 +261,7 @@ export const DialogManager = ({
       />
     );
   }
-  if (uiState.activeArenaDialog === 'status') {
+  if (uiState.activeArenaDialog === "status") {
     const arenaManager = config.getArenaManager();
     if (arenaManager) {
       return (
@@ -273,7 +273,7 @@ export const DialogManager = ({
       );
     }
   }
-  if (uiState.activeArenaDialog === 'stop') {
+  if (uiState.activeArenaDialog === "stop") {
     return (
       <ArenaStopDialog
         config={config}
@@ -282,7 +282,7 @@ export const DialogManager = ({
       />
     );
   }
-  if (uiState.activeArenaDialog === 'select') {
+  if (uiState.activeArenaDialog === "select") {
     const arenaManager = config.getArenaManager();
     if (arenaManager) {
       return (
@@ -294,6 +294,17 @@ export const DialogManager = ({
         />
       );
     }
+  }
+
+  // Initialize dialog takes priority over auth dialog so that /auth
+  // (which opens the initialize wizard) is not blocked by a stale authError.
+  if (uiState.isInitializeDialogOpen) {
+    return (
+      <InitializeDialog
+        settings={settings}
+        onClose={uiActions.closeInitializeDialog}
+      />
+    );
   }
 
   if (uiState.isAuthDialogOpen || uiState.authError) {
@@ -314,7 +325,7 @@ export const DialogManager = ({
           authStatus={uiState.TramAuthState.authStatus}
           authMessage={uiState.TramAuthState.authMessage}
           onTimeout={() => {
-            uiActions.onAuthError('TRAM OAuth authentication timed out.');
+            uiActions.onAuthError("TRAM OAuth authentication timed out.");
             uiActions.cancelAuthentication();
             uiActions.setAuthState(AuthState.Updating);
           }}
@@ -367,15 +378,6 @@ export const DialogManager = ({
   }
   if (uiState.isMcpDialogOpen) {
     return <MCPManagementDialog onClose={uiActions.closeMcpDialog} />;
-  }
-
-  if (uiState.isInitializeDialogOpen) {
-    return (
-      <InitializeDialog
-        settings={settings}
-        onClose={uiActions.closeInitializeDialog}
-      />
-    );
   }
 
   if (uiState.isResumeDialogOpen) {

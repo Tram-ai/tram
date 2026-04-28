@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 /**
  * Readonly file system provider for temporary files
@@ -13,7 +13,7 @@ import * as vscode from 'vscode';
 export class ReadonlyFileSystemProvider
   implements vscode.FileSystemProvider, vscode.Disposable
 {
-  private static readonly scheme = 'tram-readonly';
+  private static readonly scheme = "tram-readonly";
   private static instance: ReadonlyFileSystemProvider | null = null;
 
   private readonly files = new Map<string, Uint8Array>();
@@ -28,7 +28,7 @@ export class ReadonlyFileSystemProvider
     // Ensure only one instance exists
     if (ReadonlyFileSystemProvider.instance !== null) {
       console.warn(
-        '[ReadonlyFileSystemProvider] Instance already exists, replacing with new instance',
+        "[ReadonlyFileSystemProvider] Instance already exists, replacing with new instance",
       );
     }
     this.disposables.push(this.emitter);
@@ -68,7 +68,7 @@ export class ReadonlyFileSystemProvider
 
     // For other cases, keep the original approach with timestamp to avoid collisions.
     const timestamp = Date.now();
-    const hash = Buffer.from(content.substring(0, 100)).toString('base64url');
+    const hash = Buffer.from(content.substring(0, 100)).toString("base64url");
     const uniqueId = `${timestamp}-${hash.substring(0, 8)}`;
     return vscode.Uri.from({
       scheme: ReadonlyFileSystemProvider.scheme,
@@ -87,7 +87,7 @@ export class ReadonlyFileSystemProvider
    * Set content for a URI
    */
   setContent(uri: vscode.Uri, content: string): void {
-    const buffer = Buffer.from(content, 'utf8');
+    const buffer = Buffer.from(content, "utf8");
     const key = uri.toString();
     const existed = this.files.has(key);
     this.files.set(key, buffer);
@@ -106,7 +106,7 @@ export class ReadonlyFileSystemProvider
    */
   getContent(uri: vscode.Uri): string | undefined {
     const buffer = this.files.get(uri.toString());
-    return buffer ? Buffer.from(buffer).toString('utf8') : undefined;
+    return buffer ? Buffer.from(buffer).toString("utf8") : undefined;
   }
 
   // FileSystemProvider implementation
@@ -136,7 +136,7 @@ export class ReadonlyFileSystemProvider
   }
 
   createDirectory(): void {
-    throw vscode.FileSystemError.NoPermissions('Readonly file system');
+    throw vscode.FileSystemError.NoPermissions("Readonly file system");
   }
 
   readFile(uri: vscode.Uri): Uint8Array {
@@ -183,7 +183,7 @@ export class ReadonlyFileSystemProvider
   }
 
   rename(): void {
-    throw vscode.FileSystemError.NoPermissions('Readonly file system');
+    throw vscode.FileSystemError.NoPermissions("Readonly file system");
   }
 
   /**

@@ -4,33 +4,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   AgentTool,
   type AgentParams,
   resolveSubagentApprovalMode,
-} from './agent.js';
-import type { PartListUnion } from '@google/genai';
-import type { ToolResultDisplay, AgentResultDisplay } from './tools.js';
-import { ToolConfirmationOutcome } from './tools.js';
-import { type Config, ApprovalMode } from '../config/config.js';
-import { SubagentManager } from '../subagents/subagent-manager.js';
-import type { SubagentConfig } from '../subagents/types.js';
-import { AgentTerminateMode } from '../agents/runtime/agent-types.js';
+} from "./agent.js";
+import type { PartListUnion } from "@google/genai";
+import type { ToolResultDisplay, AgentResultDisplay } from "./tools.js";
+import { ToolConfirmationOutcome } from "./tools.js";
+import { type Config, ApprovalMode } from "../config/config.js";
+import { SubagentManager } from "../subagents/subagent-manager.js";
+import type { SubagentConfig } from "../subagents/types.js";
+import { AgentTerminateMode } from "../agents/runtime/agent-types.js";
 import {
   type AgentHeadless,
   ContextState,
-} from '../agents/runtime/agent-headless.js';
-import { AgentEventType } from '../agents/runtime/agent-events.js';
+} from "../agents/runtime/agent-headless.js";
+import { AgentEventType } from "../agents/runtime/agent-events.js";
 import type {
   AgentToolCallEvent,
   AgentToolResultEvent,
   AgentApprovalRequestEvent,
   AgentEventEmitter,
-} from '../agents/runtime/agent-events.js';
-import { partToString } from '../utils/partUtils.js';
-import type { HookSystem } from '../hooks/hookSystem.js';
-import { PermissionMode } from '../hooks/types.js';
+} from "../agents/runtime/agent-events.js";
+import { partToString } from "../utils/partUtils.js";
+import type { HookSystem } from "../hooks/hookSystem.js";
+import { PermissionMode } from "../hooks/types.js";
 
 // Type for accessing protected methods in tests
 type AgentToolInvocation = {
@@ -50,13 +50,13 @@ type AgentToolWithProtectedMethods = AgentTool & {
 };
 
 // Mock dependencies
-vi.mock('../subagents/subagent-manager.js');
-vi.mock('../agents/runtime/agent-headless.js');
+vi.mock("../subagents/subagent-manager.js");
+vi.mock("../agents/runtime/agent-headless.js");
 
 const MockedSubagentManager = vi.mocked(SubagentManager);
 const MockedContextState = vi.mocked(ContextState);
 
-describe('AgentTool', () => {
+describe("AgentTool", () => {
   let config: Config;
   let agentTool: AgentTool;
   let mockSubagentManager: SubagentManager;
@@ -64,18 +64,18 @@ describe('AgentTool', () => {
 
   const mockSubagents: SubagentConfig[] = [
     {
-      name: 'file-search',
-      description: 'Specialized agent for searching and analyzing files',
-      systemPrompt: 'You are a file search specialist.',
-      level: 'project',
-      filePath: '/project/.qwen/agents/file-search.md',
+      name: "file-search",
+      description: "Specialized agent for searching and analyzing files",
+      systemPrompt: "You are a file search specialist.",
+      level: "project",
+      filePath: "/project/.tram/agents/file-search.md",
     },
     {
-      name: 'code-review',
-      description: 'Agent for reviewing code quality and best practices',
-      systemPrompt: 'You are a code review specialist.',
-      level: 'user',
-      filePath: '/home/user/.qwen/agents/code-review.md',
+      name: "code-review",
+      description: "Agent for reviewing code quality and best practices",
+      systemPrompt: "You are a code review specialist.",
+      level: "user",
+      filePath: "/home/user/.tram/agents/code-review.md",
     },
   ];
 
@@ -85,13 +85,13 @@ describe('AgentTool', () => {
 
     // Create mock config
     config = {
-      getProjectRoot: vi.fn().mockReturnValue('/test/project'),
-      getSessionId: vi.fn().mockReturnValue('test-session-id'),
+      getProjectRoot: vi.fn().mockReturnValue("/test/project"),
+      getSessionId: vi.fn().mockReturnValue("test-session-id"),
       getSubagentManager: vi.fn(),
       getGeminiClient: vi.fn().mockReturnValue(undefined),
       getHookSystem: vi.fn().mockReturnValue(undefined),
-      getTranscriptPath: vi.fn().mockReturnValue('/test/transcript'),
-      getApprovalMode: vi.fn().mockReturnValue('default'),
+      getTranscriptPath: vi.fn().mockReturnValue("/test/transcript"),
+      getApprovalMode: vi.fn().mockReturnValue("default"),
       isTrustedFolder: vi.fn().mockReturnValue(true),
     } as unknown as Config;
 
@@ -129,59 +129,59 @@ describe('AgentTool', () => {
     vi.useRealTimers();
   });
 
-  describe('initialization', () => {
-    it('should initialize with correct name and properties', () => {
-      expect(agentTool.name).toBe('agent');
-      expect(agentTool.displayName).toBe('Agent');
-      expect(agentTool.kind).toBe('other');
+  describe("initialization", () => {
+    it("should initialize with correct name and properties", () => {
+      expect(agentTool.name).toBe("agent");
+      expect(agentTool.displayName).toBe("Agent");
+      expect(agentTool.kind).toBe("other");
     });
 
-    it('should load available subagents during initialization', () => {
+    it("should load available subagents during initialization", () => {
       expect(mockSubagentManager.listSubagents).toHaveBeenCalled();
     });
 
-    it('should subscribe to subagent manager changes', () => {
+    it("should subscribe to subagent manager changes", () => {
       expect(mockSubagentManager.addChangeListener).toHaveBeenCalledTimes(1);
     });
 
-    it('should update description with available subagents', () => {
-      expect(agentTool.description).toContain('file-search');
+    it("should update description with available subagents", () => {
+      expect(agentTool.description).toContain("file-search");
       expect(agentTool.description).toContain(
-        'Specialized agent for searching and analyzing files',
+        "Specialized agent for searching and analyzing files",
       );
-      expect(agentTool.description).toContain('code-review');
+      expect(agentTool.description).toContain("code-review");
       expect(agentTool.description).toContain(
-        'Agent for reviewing code quality and best practices',
+        "Agent for reviewing code quality and best practices",
       );
     });
 
-    it('should handle empty subagents list gracefully', async () => {
+    it("should handle empty subagents list gracefully", async () => {
       vi.mocked(mockSubagentManager.listSubagents).mockResolvedValue([]);
 
       const emptyAgentTool = new AgentTool(config);
       await vi.runAllTimersAsync();
 
       expect(emptyAgentTool.description).toContain(
-        'No subagents are currently configured',
+        "No subagents are currently configured",
       );
     });
 
-    it('should handle subagent loading errors gracefully', async () => {
+    it("should handle subagent loading errors gracefully", async () => {
       vi.mocked(mockSubagentManager.listSubagents).mockRejectedValue(
-        new Error('Loading failed'),
+        new Error("Loading failed"),
       );
 
       const failedAgentTool = new AgentTool(config);
       await vi.runAllTimersAsync();
 
       // Should fall back to built-in agents instead of showing "no subagents"
-      expect(failedAgentTool.description).toContain('general-purpose');
-      expect(failedAgentTool.description).toContain('Explore');
+      expect(failedAgentTool.description).toContain("general-purpose");
+      expect(failedAgentTool.description).toContain("Explore");
     });
   });
 
-  describe('schema generation', () => {
-    it('should generate schema with subagent names as enum', () => {
+  describe("schema generation", () => {
+    it("should generate schema with subagent names as enum", () => {
       const schema = agentTool.schema;
       const properties = schema.parametersJsonSchema as {
         properties: {
@@ -191,12 +191,12 @@ describe('AgentTool', () => {
         };
       };
       expect(properties.properties.subagent_type.enum).toEqual([
-        'file-search',
-        'code-review',
+        "file-search",
+        "code-review",
       ]);
     });
 
-    it('should generate schema without enum when no subagents available', async () => {
+    it("should generate schema without enum when no subagents available", async () => {
       vi.mocked(mockSubagentManager.listSubagents).mockResolvedValue([]);
 
       const emptyAgentTool = new AgentTool(config);
@@ -214,50 +214,50 @@ describe('AgentTool', () => {
     });
   });
 
-  describe('validateToolParams', () => {
+  describe("validateToolParams", () => {
     const validParams: AgentParams = {
-      description: 'Search files',
-      prompt: 'Find all TypeScript files in the project',
-      subagent_type: 'file-search',
+      description: "Search files",
+      prompt: "Find all TypeScript files in the project",
+      subagent_type: "file-search",
     };
 
-    it('should validate valid parameters', async () => {
+    it("should validate valid parameters", async () => {
       const result = agentTool.validateToolParams(validParams);
       expect(result).toBeNull();
     });
 
-    it('should reject empty description', async () => {
+    it("should reject empty description", async () => {
       const result = agentTool.validateToolParams({
         ...validParams,
-        description: '',
+        description: "",
       });
       expect(result).toBe(
         'Parameter "description" must be a non-empty string.',
       );
     });
 
-    it('should reject empty prompt', async () => {
+    it("should reject empty prompt", async () => {
       const result = agentTool.validateToolParams({
         ...validParams,
-        prompt: '',
+        prompt: "",
       });
       expect(result).toBe('Parameter "prompt" must be a non-empty string.');
     });
 
-    it('should reject empty subagent_type', async () => {
+    it("should reject empty subagent_type", async () => {
       const result = agentTool.validateToolParams({
         ...validParams,
-        subagent_type: '',
+        subagent_type: "",
       });
       expect(result).toBe(
         'Parameter "subagent_type" must be a non-empty string.',
       );
     });
 
-    it('should reject non-existent subagent', async () => {
+    it("should reject non-existent subagent", async () => {
       const result = agentTool.validateToolParams({
         ...validParams,
-        subagent_type: 'non-existent',
+        subagent_type: "non-existent",
       });
       expect(result).toBe(
         'Subagent "non-existent" not found. Available subagents: file-search, code-review',
@@ -265,15 +265,15 @@ describe('AgentTool', () => {
     });
   });
 
-  describe('refreshSubagents', () => {
-    it('should refresh when change listener fires', async () => {
+  describe("refreshSubagents", () => {
+    it("should refresh when change listener fires", async () => {
       const newSubagents: SubagentConfig[] = [
         {
-          name: 'new-agent',
-          description: 'A brand new agent',
-          systemPrompt: 'Do new things.',
-          level: 'project',
-          filePath: '/project/.qwen/agents/new-agent.md',
+          name: "new-agent",
+          description: "A brand new agent",
+          systemPrompt: "Do new things.",
+          level: "project",
+          filePath: "/project/.tram/agents/new-agent.md",
         },
       ];
 
@@ -287,18 +287,18 @@ describe('AgentTool', () => {
       listener?.();
       await vi.runAllTimersAsync();
 
-      expect(agentTool.description).toContain('new-agent');
-      expect(agentTool.description).toContain('A brand new agent');
+      expect(agentTool.description).toContain("new-agent");
+      expect(agentTool.description).toContain("A brand new agent");
     });
 
-    it('should refresh available subagents and update description', async () => {
+    it("should refresh available subagents and update description", async () => {
       const newSubagents: SubagentConfig[] = [
         {
-          name: 'test-agent',
-          description: 'A test agent',
-          systemPrompt: 'Test prompt',
-          level: 'project',
-          filePath: '/project/.qwen/agents/test-agent.md',
+          name: "test-agent",
+          description: "A test agent",
+          systemPrompt: "Test prompt",
+          level: "project",
+          filePath: "/project/.tram/agents/test-agent.md",
         },
       ];
 
@@ -308,25 +308,25 @@ describe('AgentTool', () => {
 
       await agentTool.refreshSubagents();
 
-      expect(agentTool.description).toContain('test-agent');
-      expect(agentTool.description).toContain('A test agent');
+      expect(agentTool.description).toContain("test-agent");
+      expect(agentTool.description).toContain("A test agent");
     });
   });
 
-  describe('AgentToolInvocation', () => {
+  describe("AgentToolInvocation", () => {
     let mockAgent: AgentHeadless;
     let mockContextState: ContextState;
 
     beforeEach(() => {
       mockAgent = {
         execute: vi.fn().mockResolvedValue(undefined),
-        result: 'Task completed successfully',
+        result: "Task completed successfully",
         terminateMode: AgentTerminateMode.GOAL,
-        getFinalText: vi.fn().mockReturnValue('Task completed successfully'),
+        getFinalText: vi.fn().mockReturnValue("Task completed successfully"),
         formatCompactResult: vi
           .fn()
           .mockReturnValue(
-            '✅ Success: Search files completed with GOAL termination',
+            "✅ Success: Search files completed with GOAL termination",
           ),
         getExecutionSummary: vi.fn().mockReturnValue({
           rounds: 2,
@@ -340,7 +340,7 @@ describe('AgentTool', () => {
           totalTokens: 1500,
           toolUsage: [
             {
-              name: 'grep',
+              name: "grep",
               count: 2,
               success: 2,
               failure: 0,
@@ -348,7 +348,7 @@ describe('AgentTool', () => {
               averageDurationMs: 400,
             },
             {
-              name: 'read_file',
+              name: "read_file",
               count: 1,
               success: 1,
               failure: 0,
@@ -381,11 +381,11 @@ describe('AgentTool', () => {
       );
     });
 
-    it('should execute subagent successfully', async () => {
+    it("should execute subagent successfully", async () => {
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -394,7 +394,7 @@ describe('AgentTool', () => {
       const result = await invocation.execute();
 
       expect(mockSubagentManager.loadSubagent).toHaveBeenCalledWith(
-        'file-search',
+        "file-search",
       );
       expect(mockSubagentManager.createAgentHeadless).toHaveBeenCalledWith(
         mockSubagents[0],
@@ -413,20 +413,20 @@ describe('AgentTool', () => {
       );
 
       const llmText = partToString(result.llmContent);
-      expect(llmText).toBe('Task completed successfully');
+      expect(llmText).toBe("Task completed successfully");
       const display = result.returnDisplay as AgentResultDisplay;
-      expect(display.type).toBe('task_execution');
-      expect(display.status).toBe('completed');
-      expect(display.subagentName).toBe('file-search');
+      expect(display.type).toBe("task_execution");
+      expect(display.status).toBe("completed");
+      expect(display.subagentName).toBe("file-search");
     });
 
-    it('should handle subagent not found error', async () => {
+    it("should handle subagent not found error", async () => {
       vi.mocked(mockSubagentManager.loadSubagent).mockResolvedValue(null);
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'non-existent',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "non-existent",
       };
 
       const invocation = (
@@ -437,19 +437,19 @@ describe('AgentTool', () => {
       const llmText = partToString(result.llmContent);
       expect(llmText).toContain('Subagent "non-existent" not found');
       const display = result.returnDisplay as AgentResultDisplay;
-      expect(display.status).toBe('failed');
-      expect(display.subagentName).toBe('non-existent');
+      expect(display.status).toBe("failed");
+      expect(display.subagentName).toBe("non-existent");
     });
 
-    it('should handle execution errors gracefully', async () => {
+    it("should handle execution errors gracefully", async () => {
       vi.mocked(mockSubagentManager.createAgentHeadless).mockRejectedValue(
-        new Error('Creation failed'),
+        new Error("Creation failed"),
       );
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -458,17 +458,17 @@ describe('AgentTool', () => {
       const result = await invocation.execute();
 
       const llmText = partToString(result.llmContent);
-      expect(llmText).toContain('Failed to run subagent: Creation failed');
+      expect(llmText).toContain("Failed to run subagent: Creation failed");
       const display = result.returnDisplay as AgentResultDisplay;
 
-      expect(display.status).toBe('failed');
+      expect(display.status).toBe("failed");
     });
 
-    it('should execute subagent without live output callback', async () => {
+    it("should execute subagent without live output callback", async () => {
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -482,17 +482,17 @@ describe('AgentTool', () => {
 
       // Verify the result has the expected structure
       const text = partToString(result.llmContent);
-      expect(text).toBe('Task completed successfully');
+      expect(text).toBe("Task completed successfully");
       const display = result.returnDisplay as AgentResultDisplay;
-      expect(display.status).toBe('completed');
-      expect(display.subagentName).toBe('file-search');
+      expect(display.status).toBe("completed");
+      expect(display.subagentName).toBe("file-search");
     });
 
-    it('should set context variables correctly', async () => {
+    it("should set context variables correctly", async () => {
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -501,16 +501,16 @@ describe('AgentTool', () => {
       await invocation.execute();
 
       expect(mockContextState.set).toHaveBeenCalledWith(
-        'task_prompt',
-        'Find all TypeScript files',
+        "task_prompt",
+        "Find all TypeScript files",
       );
     });
 
-    it('should return structured display object', async () => {
+    it("should return structured display object", async () => {
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -518,24 +518,24 @@ describe('AgentTool', () => {
       ).createInvocation(params);
       const result = await invocation.execute();
 
-      expect(typeof result.returnDisplay).toBe('object');
-      expect(result.returnDisplay).toHaveProperty('type', 'task_execution');
+      expect(typeof result.returnDisplay).toBe("object");
+      expect(result.returnDisplay).toHaveProperty("type", "task_execution");
       expect(result.returnDisplay).toHaveProperty(
-        'subagentName',
-        'file-search',
+        "subagentName",
+        "file-search",
       );
       expect(result.returnDisplay).toHaveProperty(
-        'taskDescription',
-        'Search files',
+        "taskDescription",
+        "Search files",
       );
-      expect(result.returnDisplay).toHaveProperty('status', 'completed');
+      expect(result.returnDisplay).toHaveProperty("status", "completed");
     });
 
-    it('should not require confirmation', async () => {
+    it("should not require confirmation", async () => {
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -543,14 +543,14 @@ describe('AgentTool', () => {
       ).createInvocation(params);
       const permission = await invocation.getDefaultPermission();
 
-      expect(permission).toBe('allow');
+      expect(permission).toBe("allow");
     });
 
-    it('should provide correct description', async () => {
+    it("should provide correct description", async () => {
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -558,11 +558,11 @@ describe('AgentTool', () => {
       ).createInvocation(params);
       const description = invocation.getDescription();
 
-      expect(description).toBe('Search files');
+      expect(description).toBe("Search files");
     });
   });
 
-  describe('SubagentStart hook integration', () => {
+  describe("SubagentStart hook integration", () => {
     let mockAgent: AgentHeadless;
     let mockContextState: ContextState;
     let mockHookSystem: HookSystem;
@@ -570,10 +570,10 @@ describe('AgentTool', () => {
     beforeEach(() => {
       mockAgent = {
         execute: vi.fn().mockResolvedValue(undefined),
-        result: 'Task completed successfully',
+        result: "Task completed successfully",
         terminateMode: AgentTerminateMode.GOAL,
-        getFinalText: vi.fn().mockReturnValue('Task completed successfully'),
-        formatCompactResult: vi.fn().mockReturnValue('✅ Success'),
+        getFinalText: vi.fn().mockReturnValue("Task completed successfully"),
+        formatCompactResult: vi.fn().mockReturnValue("✅ Success"),
         getExecutionSummary: vi.fn().mockReturnValue({
           rounds: 1,
           totalDurationMs: 500,
@@ -616,19 +616,19 @@ describe('AgentTool', () => {
       } as unknown as HookSystem;
 
       vi.mocked(config.getGeminiClient).mockReturnValue(undefined as never);
-      (config as unknown as Record<string, unknown>)['getHookSystem'] = vi
+      (config as unknown as Record<string, unknown>)["getHookSystem"] = vi
         .fn()
         .mockReturnValue(mockHookSystem);
-      (config as unknown as Record<string, unknown>)['getTranscriptPath'] = vi
+      (config as unknown as Record<string, unknown>)["getTranscriptPath"] = vi
         .fn()
-        .mockReturnValue('/test/transcript');
+        .mockReturnValue("/test/transcript");
     });
 
-    it('should call fireSubagentStartEvent before execution', async () => {
+    it("should call fireSubagentStartEvent before execution", async () => {
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -637,27 +637,27 @@ describe('AgentTool', () => {
       await invocation.execute();
 
       expect(mockHookSystem.fireSubagentStartEvent).toHaveBeenCalledWith(
-        expect.stringContaining('file-search-'),
-        'file-search',
+        expect.stringContaining("file-search-"),
+        "file-search",
         PermissionMode.AutoEdit,
         undefined,
       );
     });
 
-    it('should inject additionalContext from SubagentStart hook into context', async () => {
+    it("should inject additionalContext from SubagentStart hook into context", async () => {
       const mockStartOutput = {
         getAdditionalContext: vi
           .fn()
-          .mockReturnValue('Extra context from hook'),
+          .mockReturnValue("Extra context from hook"),
       };
       vi.mocked(mockHookSystem.fireSubagentStartEvent).mockResolvedValue(
         mockStartOutput as never,
       );
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -666,12 +666,12 @@ describe('AgentTool', () => {
       await invocation.execute();
 
       expect(mockContextState.set).toHaveBeenCalledWith(
-        'hook_context',
-        'Extra context from hook',
+        "hook_context",
+        "Extra context from hook",
       );
     });
 
-    it('should not inject hook_context when additionalContext is undefined', async () => {
+    it("should not inject hook_context when additionalContext is undefined", async () => {
       const mockStartOutput = {
         getAdditionalContext: vi.fn().mockReturnValue(undefined),
       };
@@ -680,9 +680,9 @@ describe('AgentTool', () => {
       );
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -691,20 +691,20 @@ describe('AgentTool', () => {
       await invocation.execute();
 
       expect(mockContextState.set).not.toHaveBeenCalledWith(
-        'hook_context',
+        "hook_context",
         expect.anything(),
       );
     });
 
-    it('should continue execution when SubagentStart hook fails', async () => {
+    it("should continue execution when SubagentStart hook fails", async () => {
       vi.mocked(mockHookSystem.fireSubagentStartEvent).mockRejectedValue(
-        new Error('Hook failed'),
+        new Error("Hook failed"),
       );
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -714,20 +714,20 @@ describe('AgentTool', () => {
 
       // Should still complete successfully despite hook failure
       const llmText = partToString(result.llmContent);
-      expect(llmText).toBe('Task completed successfully');
+      expect(llmText).toBe("Task completed successfully");
       const display = result.returnDisplay as AgentResultDisplay;
-      expect(display.status).toBe('completed');
+      expect(display.status).toBe("completed");
     });
 
-    it('should skip hooks when hookSystem is not available', async () => {
-      (config as unknown as Record<string, unknown>)['getHookSystem'] = vi
+    it("should skip hooks when hookSystem is not available", async () => {
+      (config as unknown as Record<string, unknown>)["getHookSystem"] = vi
         .fn()
         .mockReturnValue(undefined);
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -737,11 +737,11 @@ describe('AgentTool', () => {
 
       expect(mockHookSystem.fireSubagentStartEvent).not.toHaveBeenCalled();
       const llmText = partToString(result.llmContent);
-      expect(llmText).toBe('Task completed successfully');
+      expect(llmText).toBe("Task completed successfully");
     });
   });
 
-  describe('SubagentStop hook integration', () => {
+  describe("SubagentStop hook integration", () => {
     let mockAgent: AgentHeadless;
     let mockContextState: ContextState;
     let mockHookSystem: HookSystem;
@@ -749,10 +749,10 @@ describe('AgentTool', () => {
     beforeEach(() => {
       mockAgent = {
         execute: vi.fn().mockResolvedValue(undefined),
-        result: 'Task completed successfully',
+        result: "Task completed successfully",
         terminateMode: AgentTerminateMode.GOAL,
-        getFinalText: vi.fn().mockReturnValue('Task completed successfully'),
-        formatCompactResult: vi.fn().mockReturnValue('✅ Success'),
+        getFinalText: vi.fn().mockReturnValue("Task completed successfully"),
+        formatCompactResult: vi.fn().mockReturnValue("✅ Success"),
         getExecutionSummary: vi.fn().mockReturnValue({
           rounds: 1,
           totalDurationMs: 500,
@@ -795,19 +795,19 @@ describe('AgentTool', () => {
       } as unknown as HookSystem;
 
       vi.mocked(config.getGeminiClient).mockReturnValue(undefined as never);
-      (config as unknown as Record<string, unknown>)['getHookSystem'] = vi
+      (config as unknown as Record<string, unknown>)["getHookSystem"] = vi
         .fn()
         .mockReturnValue(mockHookSystem);
-      (config as unknown as Record<string, unknown>)['getTranscriptPath'] = vi
+      (config as unknown as Record<string, unknown>)["getTranscriptPath"] = vi
         .fn()
-        .mockReturnValue('/test/transcript');
+        .mockReturnValue("/test/transcript");
     });
 
-    it('should call fireSubagentStopEvent after execution', async () => {
+    it("should call fireSubagentStopEvent after execution", async () => {
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -816,17 +816,17 @@ describe('AgentTool', () => {
       await invocation.execute();
 
       expect(mockHookSystem.fireSubagentStopEvent).toHaveBeenCalledWith(
-        expect.stringContaining('file-search-'),
-        'file-search',
-        '/test/transcript',
-        'Task completed successfully',
+        expect.stringContaining("file-search-"),
+        "file-search",
+        "/test/transcript",
+        "Task completed successfully",
         false,
         PermissionMode.AutoEdit,
         undefined,
       );
     });
 
-    it('should re-execute subagent when stop hook returns blocking decision', async () => {
+    it("should re-execute subagent when stop hook returns blocking decision", async () => {
       const mockBlockOutput = {
         isBlockingDecision: vi
           .fn()
@@ -835,7 +835,7 @@ describe('AgentTool', () => {
         shouldStopExecution: vi.fn().mockReturnValue(false),
         getEffectiveReason: vi
           .fn()
-          .mockReturnValue('Continue working on the task'),
+          .mockReturnValue("Continue working on the task"),
       };
 
       // First call returns block, second call returns allow (no output)
@@ -844,9 +844,9 @@ describe('AgentTool', () => {
         .mockResolvedValueOnce(undefined as never);
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -861,21 +861,21 @@ describe('AgentTool', () => {
       // Second call should have stopHookActive=true
       expect(mockHookSystem.fireSubagentStopEvent).toHaveBeenNthCalledWith(
         2,
-        expect.stringContaining('file-search-'),
-        'file-search',
-        '/test/transcript',
-        'Task completed successfully',
+        expect.stringContaining("file-search-"),
+        "file-search",
+        "/test/transcript",
+        "Task completed successfully",
         true,
         PermissionMode.AutoEdit,
         undefined,
       );
     });
 
-    it('should re-execute subagent when stop hook returns shouldStopExecution', async () => {
+    it("should re-execute subagent when stop hook returns shouldStopExecution", async () => {
       const mockStopOutput = {
         isBlockingDecision: vi.fn().mockReturnValue(false),
         shouldStopExecution: vi.fn().mockReturnValueOnce(true),
-        getEffectiveReason: vi.fn().mockReturnValue('Output is incomplete'),
+        getEffectiveReason: vi.fn().mockReturnValue("Output is incomplete"),
       };
 
       vi.mocked(mockHookSystem.fireSubagentStopEvent)
@@ -883,9 +883,9 @@ describe('AgentTool', () => {
         .mockResolvedValueOnce(undefined as never);
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -896,15 +896,15 @@ describe('AgentTool', () => {
       expect(mockAgent.execute).toHaveBeenCalledTimes(2);
     });
 
-    it('should allow stop when SubagentStop hook fails', async () => {
+    it("should allow stop when SubagentStop hook fails", async () => {
       vi.mocked(mockHookSystem.fireSubagentStopEvent).mockRejectedValue(
-        new Error('Stop hook failed'),
+        new Error("Stop hook failed"),
       );
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -914,19 +914,19 @@ describe('AgentTool', () => {
 
       // Should still complete successfully despite hook failure
       const llmText = partToString(result.llmContent);
-      expect(llmText).toBe('Task completed successfully');
+      expect(llmText).toBe("Task completed successfully");
       const display = result.returnDisplay as AgentResultDisplay;
-      expect(display.status).toBe('completed');
+      expect(display.status).toBe("completed");
     });
 
-    it('should skip SubagentStop hook when signal is aborted', async () => {
+    it("should skip SubagentStop hook when signal is aborted", async () => {
       const abortController = new AbortController();
       abortController.abort();
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -937,13 +937,13 @@ describe('AgentTool', () => {
       expect(mockHookSystem.fireSubagentStopEvent).not.toHaveBeenCalled();
     });
 
-    it('should stop re-execution loop when signal is aborted during block handling', async () => {
+    it("should stop re-execution loop when signal is aborted during block handling", async () => {
       const abortController = new AbortController();
 
       const mockBlockOutput = {
         isBlockingDecision: vi.fn().mockReturnValue(true),
         shouldStopExecution: vi.fn().mockReturnValue(false),
-        getEffectiveReason: vi.fn().mockReturnValue('Keep working'),
+        getEffectiveReason: vi.fn().mockReturnValue("Keep working"),
       };
 
       vi.mocked(mockHookSystem.fireSubagentStopEvent).mockResolvedValue(
@@ -959,9 +959,9 @@ describe('AgentTool', () => {
       });
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -973,26 +973,26 @@ describe('AgentTool', () => {
       expect(mockAgent.execute).toHaveBeenCalledTimes(2);
     });
 
-    it('should call both start and stop hooks in correct order', async () => {
+    it("should call both start and stop hooks in correct order", async () => {
       const callOrder: string[] = [];
 
       vi.mocked(mockHookSystem.fireSubagentStartEvent).mockImplementation(
         async () => {
-          callOrder.push('start');
+          callOrder.push("start");
           return undefined;
         },
       );
       vi.mocked(mockHookSystem.fireSubagentStopEvent).mockImplementation(
         async () => {
-          callOrder.push('stop');
+          callOrder.push("stop");
           return undefined;
         },
       );
 
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -1000,14 +1000,14 @@ describe('AgentTool', () => {
       ).createInvocation(params);
       await invocation.execute();
 
-      expect(callOrder).toEqual(['start', 'stop']);
+      expect(callOrder).toEqual(["start", "stop"]);
     });
 
-    it('should pass consistent agentId to both start and stop hooks', async () => {
+    it("should pass consistent agentId to both start and stop hooks", async () => {
       const params: AgentParams = {
-        description: 'Search files',
-        prompt: 'Find all TypeScript files',
-        subagent_type: 'file-search',
+        description: "Search files",
+        prompt: "Find all TypeScript files",
+        subagent_type: "file-search",
       };
 
       const invocation = (
@@ -1025,7 +1025,7 @@ describe('AgentTool', () => {
     });
   });
 
-  describe('IDE diff-tab confirmation clears pendingConfirmation', () => {
+  describe("IDE diff-tab confirmation clears pendingConfirmation", () => {
     let mockAgent: AgentHeadless;
     let mockContextState: ContextState;
 
@@ -1052,10 +1052,10 @@ describe('AgentTool', () => {
       // eventEmitter, simulating a real subagent lifecycle.
       mockAgent = {
         execute: vi.fn(),
-        result: 'Done',
+        result: "Done",
         terminateMode: AgentTerminateMode.GOAL,
-        getFinalText: vi.fn().mockReturnValue('Done'),
-        formatCompactResult: vi.fn().mockReturnValue('✅ Success'),
+        getFinalText: vi.fn().mockReturnValue("Done"),
+        formatCompactResult: vi.fn().mockReturnValue("✅ Success"),
         getExecutionSummary: vi.fn().mockReturnValue({
           rounds: 1,
           totalDurationMs: 100,
@@ -1087,9 +1087,9 @@ describe('AgentTool', () => {
       );
 
       const params: AgentParams = {
-        description: 'Edit files',
-        prompt: 'Fix the bug',
-        subagent_type: 'file-search',
+        description: "Edit files",
+        prompt: "Fix the bug",
+        subagent_type: "file-search",
       };
 
       capturedInvocation = (
@@ -1099,7 +1099,7 @@ describe('AgentTool', () => {
       return capturedInvocation;
     }
 
-    it('should clear pendingConfirmation when TOOL_RESULT arrives for the pending tool (IDE accept path)', async () => {
+    it("should clear pendingConfirmation when TOOL_RESULT arrives for the pending tool (IDE accept path)", async () => {
       // Track whether pendingConfirmation was set then cleared, using
       // snapshots that safely handle function properties (structuredClone
       // can't serialize functions).
@@ -1110,41 +1110,41 @@ describe('AgentTool', () => {
 
       const invocation = createInvocationWithEventDrivenAgent((emitter) => {
         emitter.emit(AgentEventType.TOOL_CALL, {
-          subagentId: 'sub-1',
+          subagentId: "sub-1",
           round: 1,
-          callId: 'call-edit-1',
-          name: 'edit_file',
-          args: { path: '/test.ts' },
-          description: 'Editing test.ts',
+          callId: "call-edit-1",
+          name: "edit_file",
+          args: { path: "/test.ts" },
+          description: "Editing test.ts",
           timestamp: Date.now(),
         } satisfies AgentToolCallEvent);
 
         // Tool needs approval → pendingConfirmation is set
         emitter.emit(AgentEventType.TOOL_WAITING_APPROVAL, {
-          subagentId: 'sub-1',
+          subagentId: "sub-1",
           round: 1,
-          callId: 'call-edit-1',
-          name: 'edit_file',
-          description: 'Editing test.ts',
+          callId: "call-edit-1",
+          name: "edit_file",
+          description: "Editing test.ts",
           timestamp: Date.now(),
           confirmationDetails: {
-            type: 'edit' as const,
-            title: 'Edit file',
-            fileName: 'test.ts',
-            filePath: '/test.ts',
-            fileDiff: '',
-            originalContent: 'old',
-            newContent: 'new',
+            type: "edit" as const,
+            title: "Edit file",
+            fileName: "test.ts",
+            filePath: "/test.ts",
+            fileDiff: "",
+            originalContent: "old",
+            newContent: "new",
           },
           respond: vi.fn(),
         } as unknown as AgentApprovalRequestEvent);
 
         // IDE diff-tab accepted → TOOL_RESULT arrives without onConfirm
         emitter.emit(AgentEventType.TOOL_RESULT, {
-          subagentId: 'sub-1',
+          subagentId: "sub-1",
           round: 1,
-          callId: 'call-edit-1',
-          name: 'edit_file',
+          callId: "call-edit-1",
+          name: "edit_file",
           success: true,
           timestamp: Date.now(),
         } satisfies AgentToolResultEvent);
@@ -1170,13 +1170,13 @@ describe('AgentTool', () => {
         (s) =>
           !s.hasPendingConfirmation &&
           s.toolStatuses.some(
-            (tc) => tc.callId === 'call-edit-1' && tc.status === 'success',
+            (tc) => tc.callId === "call-edit-1" && tc.status === "success",
           ),
       );
       expect(resultSnapshot).toBeDefined();
     });
 
-    it('should NOT clear pendingConfirmation when TOOL_RESULT is for a different tool', async () => {
+    it("should NOT clear pendingConfirmation when TOOL_RESULT is for a different tool", async () => {
       const snapshots: Array<{
         hasPendingConfirmation: boolean;
         toolStatuses: Array<{ callId: string; status: string }>;
@@ -1185,52 +1185,52 @@ describe('AgentTool', () => {
       const invocation = createInvocationWithEventDrivenAgent((emitter) => {
         // Tool A starts
         emitter.emit(AgentEventType.TOOL_CALL, {
-          subagentId: 'sub-1',
+          subagentId: "sub-1",
           round: 1,
-          callId: 'call-read-1',
-          name: 'read_file',
+          callId: "call-read-1",
+          name: "read_file",
           args: {},
-          description: 'Reading',
+          description: "Reading",
           timestamp: Date.now(),
         } satisfies AgentToolCallEvent);
 
         // Tool B starts
         emitter.emit(AgentEventType.TOOL_CALL, {
-          subagentId: 'sub-1',
+          subagentId: "sub-1",
           round: 1,
-          callId: 'call-edit-1',
-          name: 'edit_file',
+          callId: "call-edit-1",
+          name: "edit_file",
           args: {},
-          description: 'Editing',
+          description: "Editing",
           timestamp: Date.now(),
         } satisfies AgentToolCallEvent);
 
         // Tool B needs approval
         emitter.emit(AgentEventType.TOOL_WAITING_APPROVAL, {
-          subagentId: 'sub-1',
+          subagentId: "sub-1",
           round: 1,
-          callId: 'call-edit-1',
-          name: 'edit_file',
-          description: 'Editing',
+          callId: "call-edit-1",
+          name: "edit_file",
+          description: "Editing",
           timestamp: Date.now(),
           confirmationDetails: {
-            type: 'edit' as const,
-            title: 'Edit',
-            fileName: 'test.ts',
-            filePath: '/test.ts',
-            fileDiff: '',
-            originalContent: '',
-            newContent: 'new',
+            type: "edit" as const,
+            title: "Edit",
+            fileName: "test.ts",
+            filePath: "/test.ts",
+            fileDiff: "",
+            originalContent: "",
+            newContent: "new",
           },
           respond: vi.fn(),
         } as unknown as AgentApprovalRequestEvent);
 
         // Tool A finishes (different callId)
         emitter.emit(AgentEventType.TOOL_RESULT, {
-          subagentId: 'sub-1',
+          subagentId: "sub-1",
           round: 1,
-          callId: 'call-read-1',
-          name: 'read_file',
+          callId: "call-read-1",
+          name: "read_file",
           success: true,
           timestamp: Date.now(),
         } satisfies AgentToolResultEvent);
@@ -1251,14 +1251,14 @@ describe('AgentTool', () => {
       // pendingConfirmation because the result was for a different tool.
       const readResultSnapshot = snapshots.find((s) =>
         s.toolStatuses.some(
-          (tc) => tc.callId === 'call-read-1' && tc.status === 'success',
+          (tc) => tc.callId === "call-read-1" && tc.status === "success",
         ),
       );
       expect(readResultSnapshot).toBeDefined();
       expect(readResultSnapshot!.hasPendingConfirmation).toBe(true);
     });
 
-    it('should clear pendingConfirmation via onConfirm callback (terminal UI path)', async () => {
+    it("should clear pendingConfirmation via onConfirm callback (terminal UI path)", async () => {
       let capturedOnConfirm:
         | ((outcome: ToolConfirmationOutcome) => Promise<void>)
         | undefined;
@@ -1266,30 +1266,30 @@ describe('AgentTool', () => {
 
       const invocation = createInvocationWithEventDrivenAgent((emitter) => {
         emitter.emit(AgentEventType.TOOL_CALL, {
-          subagentId: 'sub-1',
+          subagentId: "sub-1",
           round: 1,
-          callId: 'call-edit-1',
-          name: 'edit_file',
+          callId: "call-edit-1",
+          name: "edit_file",
           args: {},
-          description: 'Editing',
+          description: "Editing",
           timestamp: Date.now(),
         } satisfies AgentToolCallEvent);
 
         emitter.emit(AgentEventType.TOOL_WAITING_APPROVAL, {
-          subagentId: 'sub-1',
+          subagentId: "sub-1",
           round: 1,
-          callId: 'call-edit-1',
-          name: 'edit_file',
-          description: 'Editing',
+          callId: "call-edit-1",
+          name: "edit_file",
+          description: "Editing",
           timestamp: Date.now(),
           confirmationDetails: {
-            type: 'edit' as const,
-            title: 'Edit',
-            fileName: 'test.ts',
-            filePath: '/test.ts',
-            fileDiff: '',
-            originalContent: '',
-            newContent: 'new',
+            type: "edit" as const,
+            title: "Edit",
+            fileName: "test.ts",
+            filePath: "/test.ts",
+            fileDiff: "",
+            originalContent: "",
+            newContent: "new",
           },
           respond: vi.fn(),
         } as unknown as AgentApprovalRequestEvent);
@@ -1317,9 +1317,9 @@ describe('AgentTool', () => {
   });
 });
 
-describe('resolveSubagentApprovalMode', () => {
-  it('should return yolo when parent is yolo, regardless of agent config', () => {
-    expect(resolveSubagentApprovalMode(ApprovalMode.YOLO, 'plan', true)).toBe(
+describe("resolveSubagentApprovalMode", () => {
+  it("should return yolo when parent is yolo, regardless of agent config", () => {
+    expect(resolveSubagentApprovalMode(ApprovalMode.YOLO, "plan", true)).toBe(
       PermissionMode.Yolo,
     );
     expect(
@@ -1327,46 +1327,46 @@ describe('resolveSubagentApprovalMode', () => {
     ).toBe(PermissionMode.Yolo);
   });
 
-  it('should return auto-edit when parent is auto-edit, regardless of agent config', () => {
+  it("should return auto-edit when parent is auto-edit, regardless of agent config", () => {
     expect(
-      resolveSubagentApprovalMode(ApprovalMode.AUTO_EDIT, 'plan', true),
+      resolveSubagentApprovalMode(ApprovalMode.AUTO_EDIT, "plan", true),
     ).toBe(PermissionMode.AutoEdit);
     expect(
-      resolveSubagentApprovalMode(ApprovalMode.AUTO_EDIT, 'default', false),
+      resolveSubagentApprovalMode(ApprovalMode.AUTO_EDIT, "default", false),
     ).toBe(PermissionMode.AutoEdit);
   });
 
-  it('should respect agent-declared mode when parent is default and folder is trusted', () => {
+  it("should respect agent-declared mode when parent is default and folder is trusted", () => {
     expect(
-      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, 'plan', true),
+      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, "plan", true),
     ).toBe(PermissionMode.Plan);
     expect(
-      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, 'auto-edit', true),
+      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, "auto-edit", true),
     ).toBe(PermissionMode.AutoEdit);
     expect(
-      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, 'yolo', true),
+      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, "yolo", true),
     ).toBe(PermissionMode.Yolo);
   });
 
-  it('should block privileged agent-declared modes in untrusted folders', () => {
+  it("should block privileged agent-declared modes in untrusted folders", () => {
     expect(
-      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, 'auto-edit', false),
+      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, "auto-edit", false),
     ).toBe(PermissionMode.Default);
     expect(
-      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, 'yolo', false),
+      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, "yolo", false),
     ).toBe(PermissionMode.Default);
   });
 
-  it('should allow non-privileged agent-declared modes in untrusted folders', () => {
+  it("should allow non-privileged agent-declared modes in untrusted folders", () => {
     expect(
-      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, 'plan', false),
+      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, "plan", false),
     ).toBe(PermissionMode.Plan);
     expect(
-      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, 'default', false),
+      resolveSubagentApprovalMode(ApprovalMode.DEFAULT, "default", false),
     ).toBe(PermissionMode.Default);
   });
 
-  it('should default to plan when parent is plan and no agent config', () => {
+  it("should default to plan when parent is plan and no agent config", () => {
     expect(
       resolveSubagentApprovalMode(ApprovalMode.PLAN, undefined, true),
     ).toBe(PermissionMode.Plan);
@@ -1375,19 +1375,19 @@ describe('resolveSubagentApprovalMode', () => {
     ).toBe(PermissionMode.Plan);
   });
 
-  it('should allow agent-declared mode to override plan parent', () => {
+  it("should allow agent-declared mode to override plan parent", () => {
     expect(
-      resolveSubagentApprovalMode(ApprovalMode.PLAN, 'auto-edit', true),
+      resolveSubagentApprovalMode(ApprovalMode.PLAN, "auto-edit", true),
     ).toBe(PermissionMode.AutoEdit);
   });
 
-  it('should default to auto-edit when parent is default and folder is trusted', () => {
+  it("should default to auto-edit when parent is default and folder is trusted", () => {
     expect(
       resolveSubagentApprovalMode(ApprovalMode.DEFAULT, undefined, true),
     ).toBe(PermissionMode.AutoEdit);
   });
 
-  it('should default to parent mode when parent is default and folder is untrusted', () => {
+  it("should default to parent mode when parent is default and folder is untrusted", () => {
     expect(
       resolveSubagentApprovalMode(ApprovalMode.DEFAULT, undefined, false),
     ).toBe(PermissionMode.Default);

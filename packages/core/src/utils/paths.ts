@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
-import * as crypto from 'node:crypto';
-import type { Config } from '../config/config.js';
-import { isNodeError } from './errors.js';
+import fs from "node:fs";
+import path from "node:path";
+import os from "node:os";
+import * as crypto from "node:crypto";
+import type { Config } from "../config/config.js";
+import { isNodeError } from "./errors.js";
 
-export const TRAM_DIR = '.tram';
-export const GOOGLE_ACCOUNTS_FILENAME = 'google_accounts.json';
+export const TRAM_DIR = ".tram";
+export const GOOGLE_ACCOUNTS_FILENAME = "google_accounts.json";
 
 /**
  * Special characters that need to be escaped in file paths for shell compatibility.
@@ -29,7 +29,7 @@ export const SHELL_SPECIAL_CHARS = /[ \t()[\]{};|*?$`'"#&<>!~]/;
 export function tildeifyPath(path: string): string {
   const homeDir = os.homedir();
   if (path.startsWith(homeDir)) {
-    return path.replace(homeDir, '~');
+    return path.replace(homeDir, "~");
   }
   return path;
 }
@@ -45,7 +45,7 @@ export function shortenPath(filePath: string, maxLen: number = 80): string {
   }
 
   const separator = path.sep;
-  const ellipsis = '...';
+  const ellipsis = "...";
 
   // Simple fallback for very short maxLen
   if (maxLen < 10) {
@@ -55,7 +55,7 @@ export function shortenPath(filePath: string, maxLen: number = 80): string {
   const parsedPath = path.parse(filePath);
   const root = parsedPath.root;
   const relativePath = filePath.substring(root.length);
-  const segments = relativePath.split(separator).filter((s) => s !== '');
+  const segments = relativePath.split(separator).filter((s) => s !== "");
 
   // Handle edge cases: no segments or single segment
   if (segments.length === 0) {
@@ -145,7 +145,7 @@ export function makeRelative(
   const relativePath = path.relative(resolvedRootDirectory, resolvedTargetPath);
 
   // If the paths are the same, path.relative returns '', return '.' instead
-  return relativePath || '.';
+  return relativePath || ".";
 }
 
 /**
@@ -154,13 +154,13 @@ export function makeRelative(
  * asterisks, question marks, dollar signs, backticks, quotes, hash, and other shell metacharacters.
  */
 export function escapePath(filePath: string): string {
-  let result = '';
+  let result = "";
   for (let i = 0; i < filePath.length; i++) {
     const char = filePath[i];
 
     // Count consecutive backslashes before this character
     let backslashCount = 0;
-    for (let j = i - 1; j >= 0 && filePath[j] === '\\'; j--) {
+    for (let j = i - 1; j >= 0 && filePath[j] === "\\"; j--) {
       backslashCount++;
     }
 
@@ -169,7 +169,7 @@ export function escapePath(filePath: string): string {
 
     // Only escape if not already escaped
     if (!isAlreadyEscaped && SHELL_SPECIAL_CHARS.test(char)) {
-      result += '\\' + char;
+      result += "\\" + char;
     } else {
       result += char;
     }
@@ -183,8 +183,8 @@ export function escapePath(filePath: string): string {
  */
 export function unescapePath(filePath: string): string {
   return filePath.replace(
-    new RegExp(`\\\\([${SHELL_SPECIAL_CHARS.source.slice(1, -1)}])`, 'g'),
-    '$1',
+    new RegExp(`\\\\([${SHELL_SPECIAL_CHARS.source.slice(1, -1)}])`, "g"),
+    "$1",
   );
 }
 
@@ -198,8 +198,8 @@ export function unescapePath(filePath: string): string {
 export function getProjectHash(projectRoot: string): string {
   // On Windows, normalize path to lowercase for case-insensitive matching
   const normalizedPath =
-    os.platform() === 'win32' ? projectRoot.toLowerCase() : projectRoot;
-  return crypto.createHash('sha256').update(normalizedPath).digest('hex');
+    os.platform() === "win32" ? projectRoot.toLowerCase() : projectRoot;
+  return crypto.createHash("sha256").update(normalizedPath).digest("hex");
 }
 
 /**
@@ -217,8 +217,8 @@ export function getProjectHash(projectRoot: string): string {
  */
 export function sanitizeCwd(cwd: string): string {
   // On Windows, normalize to lowercase for case-insensitive matching
-  const normalizedCwd = os.platform() === 'win32' ? cwd.toLowerCase() : cwd;
-  return normalizedCwd.replace(/[^a-zA-Z0-9]/g, '-');
+  const normalizedCwd = os.platform() === "win32" ? cwd.toLowerCase() : cwd;
+  return normalizedCwd.replace(/[^a-zA-Z0-9]/g, "-");
 }
 
 /**
@@ -228,7 +228,7 @@ export function sanitizeCwd(cwd: string): string {
  * @returns True if childPath is a subpath of parentPath, false otherwise.
  */
 export function isSubpath(parentPath: string, childPath: string): boolean {
-  const isWindows = os.platform() === 'win32';
+  const isWindows = os.platform() === "win32";
   const pathModule = isWindows ? path.win32 : path;
 
   // On Windows, path.relative is case-insensitive. On POSIX, it's case-sensitive.
@@ -236,7 +236,7 @@ export function isSubpath(parentPath: string, childPath: string): boolean {
 
   return (
     !relative.startsWith(`..${pathModule.sep}`) &&
-    relative !== '..' &&
+    relative !== ".." &&
     !pathModule.isAbsolute(relative)
   );
 }
@@ -260,9 +260,9 @@ export function resolvePath(
 ): string {
   const homeDir = os.homedir();
 
-  if (relativePath === '~') {
+  if (relativePath === "~") {
     return homeDir;
-  } else if (relativePath.startsWith('~/')) {
+  } else if (relativePath.startsWith("~/")) {
     return path.join(homeDir, relativePath.slice(2));
   } else if (path.isAbsolute(relativePath)) {
     return relativePath;
@@ -304,7 +304,7 @@ export function validatePath(
     workspaceContext.isPathWithinWorkspace(resolvedPath);
 
   if (!allowExternalPaths && !isWithinWorkspace) {
-    throw new Error('Path is not within workspace');
+    throw new Error("Path is not within workspace");
   }
 
   // For external paths where allowExternalPaths is true, skip filesystem checks.
@@ -320,7 +320,7 @@ export function validatePath(
       throw new Error(`Path is not a directory: ${resolvedPath}`);
     }
   } catch (error: unknown) {
-    if (isNodeError(error) && error.code === 'ENOENT') {
+    if (isNodeError(error) && error.code === "ENOENT") {
       throw new Error(`Path does not exist: ${resolvedPath}`);
     }
     throw error;

@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { FC } from 'react';
-import type { ModelInfo } from '@agentclientprotocol/sdk';
-import { PlanCompletedIcon } from '@tram-ai/webui';
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { FC } from "react";
+import type { ModelInfo } from "@agentclientprotocol/sdk";
+import { PlanCompletedIcon } from "@tram-ai/webui";
 
 interface ModelSelectorProps {
   visible: boolean;
@@ -59,15 +59,15 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       switch (event.key) {
-        case 'ArrowDown':
+        case "ArrowDown":
           event.preventDefault();
           setSelected((prev) => Math.min(prev + 1, models.length - 1));
           break;
-        case 'ArrowUp':
+        case "ArrowUp":
           event.preventDefault();
           setSelected((prev) => Math.max(prev - 1, 0));
           break;
-        case 'Enter':
+        case "Enter":
           // Prevent form submission AND stop propagation so the input form
           // does not treat this Enter as a message send.
           event.preventDefault();
@@ -77,7 +77,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
             onClose();
           }
           break;
-        case 'Escape':
+        case "Escape":
           event.preventDefault();
           onClose();
           break;
@@ -86,15 +86,15 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     // Use capture phase so Enter is handled before bubble-phase handlers
     // (e.g. the InputForm's Enter-to-submit) and stopPropagation can
     // prevent an empty user message.
-    document.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener("keydown", handleKeyDown, true);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown, true);
     };
   }, [visible, models, selected, onSelectModel, onClose]);
 
@@ -104,7 +104,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       `[data-index="${selected}"]`,
     );
     if (selectedEl) {
-      selectedEl.scrollIntoView({ block: 'nearest' });
+      selectedEl.scrollIntoView({ block: "nearest" });
     }
   }, [selected]);
 
@@ -125,14 +125,14 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       ref={containerRef}
       role="menu"
       className={[
-        'model-selector',
+        "model-selector",
         // Positioning controlled by parent container
-        'flex flex-col overflow-hidden',
-        'rounded-large border bg-[var(--app-menu-background)]',
-        'border-[var(--app-input-border)] max-h-[50vh] z-[1000]',
+        "flex flex-col overflow-hidden",
+        "rounded-large border bg-[var(--app-menu-background)]",
+        "border-[var(--app-input-border)] max-h-[50vh] z-[1000]",
         // Mount animation
-        mounted ? 'animate-completion-menu-enter' : '',
-      ].join(' ')}
+        mounted ? "animate-completion-menu-enter" : "",
+      ].join(" ")}
     >
       {/* Header */}
       <div className="px-3 py-1.5 text-[var(--app-secondary-foreground)] text-[0.8em] uppercase tracking-wider">
@@ -157,21 +157,21 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                 onClick={() => handleModelSelect(model.modelId)}
                 onMouseEnter={() => setSelected(index)}
                 className={[
-                  'model-selector-item',
-                  'mx-1 cursor-pointer rounded-[var(--app-list-border-radius)]',
-                  'p-[var(--app-list-item-padding)]',
-                  isActive ? 'bg-[var(--app-list-active-background)]' : '',
-                ].join(' ')}
+                  "model-selector-item",
+                  "mx-1 cursor-pointer rounded-[var(--app-list-border-radius)]",
+                  "p-[var(--app-list-item-padding)]",
+                  isActive ? "bg-[var(--app-list-active-background)]" : "",
+                ].join(" ")}
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <span
                       className={[
-                        'block truncate',
+                        "block truncate",
                         isActive
-                          ? 'text-[var(--app-list-active-foreground)]'
-                          : 'text-[var(--app-primary-foreground)]',
-                      ].join(' ')}
+                          ? "text-[var(--app-list-active-foreground)]"
+                          : "text-[var(--app-primary-foreground)]",
+                      ].join(" ")}
                     >
                       {model.name}
                     </span>

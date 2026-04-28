@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 import type {
   Config,
   ToolCallRequestInfo,
   McpToolProgressData,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import type {
   CLIAssistantMessage,
   CLIMessage,
@@ -19,13 +19,13 @@ import type {
   TextBlock,
   ThinkingBlock,
   ToolUseBlock,
-} from '../types.js';
+} from "../types.js";
 import {
   BaseJsonOutputAdapter,
   type MessageState,
   type ResultOptions,
   type JsonOutputAdapterInterface,
-} from './BaseJsonOutputAdapter.js';
+} from "./BaseJsonOutputAdapter.js";
 
 /**
  * Stream JSON output adapter that emits messages immediately
@@ -51,10 +51,10 @@ export class StreamJsonOutputAdapter
   protected emitMessageImpl(message: CLIMessage | ControlMessage): void {
     // Track assistant messages for result generation
     if (
-      typeof message === 'object' &&
+      typeof message === "object" &&
       message !== null &&
-      'type' in message &&
-      message.type === 'assistant'
+      "type" in message &&
+      message.type === "assistant"
     ) {
       this.updateLastAssistantMessage(message as CLIAssistantMessage);
     }
@@ -82,11 +82,11 @@ export class StreamJsonOutputAdapter
     );
     if (this.mainTurnMessageStartEmitted && this.includePartialMessages) {
       const partial: CLIPartialAssistantMessage = {
-        type: 'stream_event',
+        type: "stream_event",
         uuid: randomUUID(),
         session_id: this.getSessionId(),
         parent_tool_use_id: null,
-        event: { type: 'message_stop' },
+        event: { type: "message_stop" },
       };
       this.emitMessageImpl(partial);
     }
@@ -122,7 +122,7 @@ export class StreamJsonOutputAdapter
   ): void {
     this.emitStreamEventIfEnabled(
       {
-        type: 'content_block_start',
+        type: "content_block_start",
         index,
         content_block: block,
       },
@@ -141,9 +141,9 @@ export class StreamJsonOutputAdapter
   ): void {
     this.emitStreamEventIfEnabled(
       {
-        type: 'content_block_delta',
+        type: "content_block_delta",
         index,
-        delta: { type: 'text_delta', text: fragment },
+        delta: { type: "text_delta", text: fragment },
       },
       parentToolUseId,
     );
@@ -160,7 +160,7 @@ export class StreamJsonOutputAdapter
   ): void {
     this.emitStreamEventIfEnabled(
       {
-        type: 'content_block_start',
+        type: "content_block_start",
         index,
         content_block: block,
       },
@@ -179,9 +179,9 @@ export class StreamJsonOutputAdapter
   ): void {
     this.emitStreamEventIfEnabled(
       {
-        type: 'content_block_delta',
+        type: "content_block_delta",
         index,
-        delta: { type: 'thinking_delta', thinking: fragment },
+        delta: { type: "thinking_delta", thinking: fragment },
       },
       parentToolUseId,
     );
@@ -198,7 +198,7 @@ export class StreamJsonOutputAdapter
   ): void {
     this.emitStreamEventIfEnabled(
       {
-        type: 'content_block_start',
+        type: "content_block_start",
         index,
         content_block: block,
       },
@@ -217,10 +217,10 @@ export class StreamJsonOutputAdapter
   ): void {
     this.emitStreamEventIfEnabled(
       {
-        type: 'content_block_delta',
+        type: "content_block_delta",
         index,
         delta: {
-          type: 'input_json_delta',
+          type: "input_json_delta",
           partial_json: JSON.stringify(input),
         },
       },
@@ -239,7 +239,7 @@ export class StreamJsonOutputAdapter
     if (this.includePartialMessages) {
       this.emitStreamEventIfEnabled(
         {
-          type: 'content_block_stop',
+          type: "content_block_stop",
           index,
         },
         parentToolUseId,
@@ -260,11 +260,11 @@ export class StreamJsonOutputAdapter
       this.mainTurnMessageStartEmitted = true;
       this.emitStreamEventIfEnabled(
         {
-          type: 'message_start',
+          type: "message_start",
           message: {
             id: state.messageId!,
-            role: 'assistant',
-            model: this.config.getModel(),
+            role: "assistant",
+            model: this.config.getModelName(),
             content: [],
           },
         },
@@ -286,12 +286,12 @@ export class StreamJsonOutputAdapter
     }
 
     const partial: CLIPartialAssistantMessage = {
-      type: 'stream_event',
+      type: "stream_event",
       uuid: randomUUID(),
       session_id: this.getSessionId(),
       parent_tool_use_id: null,
       event: {
-        type: 'tool_progress',
+        type: "tool_progress",
         tool_use_id: request.callId,
         content: progress,
       },
@@ -314,7 +314,7 @@ export class StreamJsonOutputAdapter
     }
 
     const partial: CLIPartialAssistantMessage = {
-      type: 'stream_event',
+      type: "stream_event",
       uuid: randomUUID(),
       session_id: this.getSessionId(),
       parent_tool_use_id: parentToolUseId,

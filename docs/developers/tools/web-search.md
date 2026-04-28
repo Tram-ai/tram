@@ -65,7 +65,7 @@ export GOOGLE_SEARCH_ENGINE_ID="your-engine-id"
 
 ### Method 3: Command Line Arguments
 
-Pass API keys when running Qwen Code:
+Pass API keys when running TRAM:
 
 ```bash
 # Tavily
@@ -104,7 +104,7 @@ If you want to disable the web search functionality, you can exclude the `web_se
 }
 ```
 
-**Note:** This setting requires a restart of Qwen Code to take effect. Once disabled, the `web_search` tool will not be available to the model, even if web search providers are configured.
+**Note:** This setting requires a restart of TRAM to take effect. Once disabled, the `web_search` tool will not be available to the model, even if web search providers are configured.
 
 ## Usage Examples
 

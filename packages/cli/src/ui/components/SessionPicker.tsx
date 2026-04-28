@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
+import { Box, Text } from "ink";
 import type {
   SessionListItem as SessionData,
   SessionService,
-} from '@tram-ai/tram-core';
-import { theme } from '../semantic-colors.js';
-import { useSessionPicker } from '../hooks/useSessionPicker.js';
-import { formatRelativeTime } from '../utils/formatters.js';
+} from "@tram-ai/tram-core";
+import { theme } from "../semantic-colors.js";
+import { useSessionPicker } from "../hooks/useSessionPicker.js";
+import { formatRelativeTime } from "../utils/formatters.js";
 import {
   formatMessageCount,
   truncateText,
-} from '../utils/sessionPickerUtils.js';
-import { useTerminalSize } from '../hooks/useTerminalSize.js';
-import { t } from '../../i18n/index.js';
+} from "../utils/sessionPickerUtils.js";
+import { useTerminalSize } from "../hooks/useTerminalSize.js";
+import { t } from "../../i18n/index.js";
 
 export interface SessionPickerProps {
   sessionService: SessionService | null;
@@ -33,10 +33,10 @@ export interface SessionPickerProps {
 }
 
 const PREFIX_CHARS = {
-  selected: '› ',
-  scrollUp: '↑ ',
-  scrollDown: '↓ ',
-  normal: '  ',
+  selected: "› ",
+  scrollUp: "↑ ",
+  scrollDown: "↓ ",
+  normal: "  ",
 };
 
 interface SessionListItemViewProps {
@@ -81,7 +81,7 @@ function SessionListItemView({
         ? prefixChars.scrollDown
         : prefixChars.normal;
 
-  const promptText = session.prompt || '(empty prompt)';
+  const promptText = session.prompt || "(empty prompt)";
   const truncatedPrompt = truncateText(promptText, maxPromptWidth);
 
   return (
@@ -167,19 +167,19 @@ export function SessionPicker(props: SessionPickerProps) {
         {/* Header row */}
         <Box paddingX={1}>
           <Text bold color={theme.text.primary}>
-            {t('Resume Session')}
+            {t("Resume Session")}
           </Text>
           {picker.filterByBranch && currentBranch && (
             <Text color={theme.text.secondary}>
-              {' '}
-              {t('(branch: {{branch}})', { branch: currentBranch })}
+              {" "}
+              {t("(branch: {{branch}})", { branch: currentBranch })}
             </Text>
           )}
         </Box>
 
         {/* Separator */}
         <Box>
-          <Text color={theme.border.default}>{'─'.repeat(boxWidth - 2)}</Text>
+          <Text color={theme.border.default}>{"─".repeat(boxWidth - 2)}</Text>
         </Box>
 
         {/* Session list */}
@@ -187,7 +187,7 @@ export function SessionPicker(props: SessionPickerProps) {
           {!sessionService || picker.isLoading ? (
             <Box paddingY={1} justifyContent="center">
               <Text color={theme.text.secondary}>
-                {t('Loading sessions...')}
+                {t("Loading sessions...")}
               </Text>
             </Box>
           ) : picker.filteredSessions.length === 0 ? (
@@ -195,9 +195,9 @@ export function SessionPicker(props: SessionPickerProps) {
               <Text color={theme.text.secondary}>
                 {picker.filterByBranch
                   ? t('No sessions found for branch "{{branch}}"', {
-                      branch: currentBranch ?? '',
+                      branch: currentBranch ?? "",
                     })
-                  : t('No sessions found')}
+                  : t("No sessions found")}
               </Text>
             </Box>
           ) : (
@@ -223,7 +223,7 @@ export function SessionPicker(props: SessionPickerProps) {
 
         {/* Separator */}
         <Box>
-          <Text color={theme.border.default}>{'─'.repeat(boxWidth - 2)}</Text>
+          <Text color={theme.border.default}>{"─".repeat(boxWidth - 2)}</Text>
         </Box>
 
         {/* Footer */}
@@ -237,11 +237,11 @@ export function SessionPicker(props: SessionPickerProps) {
                 >
                   B
                 </Text>
-                {t(' to toggle branch')} ·
+                {t(" to toggle branch")} ·
               </Text>
             )}
             <Text color={theme.text.secondary}>
-              {t('↑↓ to navigate · Esc to cancel')}
+              {t("↑↓ to navigate · Esc to cancel")}
             </Text>
           </Box>
         </Box>

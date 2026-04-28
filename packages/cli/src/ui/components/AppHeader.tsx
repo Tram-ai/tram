@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box } from 'ink';
-import { AuthType } from '@tram-ai/tram-core';
-import { Header, AuthDisplayType } from './Header.js';
-import { Tips } from './Tips.js';
-import { useSettings } from '../contexts/SettingsContext.js';
-import { useConfig } from '../contexts/ConfigContext.js';
-import { useUIState } from '../contexts/UIStateContext.js';
-import { isCodingPlanConfig } from '../../constants/codingPlan.js';
+import { Box } from "ink";
+import { AuthType } from "@tram-ai/tram-core";
+import { Header, AuthDisplayType } from "./Header.js";
+import { Tips } from "./Tips.js";
+import { useSettings } from "../contexts/SettingsContext.js";
+import { useConfig } from "../contexts/ConfigContext.js";
+import { useUIState } from "../contexts/UIStateContext.js";
+import { isCodingPlanConfig } from "../../constants/codingPlan.js";
 
 interface AppHeaderProps {
   version: string;

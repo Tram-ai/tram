@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { TramAgentManager } from '../../services/tramAgentManager.js';
-import type { ConversationStore } from '../../services/conversationStore.js';
-import { FileMessageHandler } from './FileMessageHandler.js';
-import * as vscode from 'vscode';
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { TramAgentManager } from "../../services/tramAgentManager.js";
+import type { ConversationStore } from "../../services/conversationStore.js";
+import { FileMessageHandler } from "./FileMessageHandler.js";
+import * as vscode from "vscode";
 
 const shouldIgnoreFileMock = vi.hoisted(() => vi.fn());
 const fileSearchMock = vi.hoisted(() => ({
@@ -26,7 +26,7 @@ const vscodeMock = vi.hoisted(() => {
       return new Uri(fsPath);
     }
     static joinPath(base: Uri, ...pathSegments: string[]) {
-      return new Uri(`${base.fsPath}/${pathSegments.join('/')}`);
+      return new Uri(`${base.fsPath}/${pathSegments.join("/")}`);
     }
   }
 
@@ -54,58 +54,55 @@ const vscodeMock = vi.hoisted(() => {
   };
 });
 
-vi.mock('vscode', () => vscodeMock);
-vi.mock(
-  '@tram-ai/tram-core/src/services/fileDiscoveryService.js',
-  () => ({
-    FileDiscoveryService: class {
-      shouldIgnoreFile(filePath: string, options?: unknown) {
-        return shouldIgnoreFileMock(filePath, options);
-      }
-    },
-  }),
-);
-vi.mock('@qwen-code/qwen-code-core/src/utils/filesearch/fileSearch.js', () => ({
+vi.mock("vscode", () => vscodeMock);
+vi.mock("@tram-ai/tram-core/src/services/fileDiscoveryService.js", () => ({
+  FileDiscoveryService: class {
+    shouldIgnoreFile(filePath: string, options?: unknown) {
+      return shouldIgnoreFileMock(filePath, options);
+    }
+  },
+}));
+vi.mock("@tram-ai/tram-core/src/utils/filesearch/fileSearch.js", () => ({
   FileSearchFactory: {
     create: () => fileSearchMock,
   },
 }));
-vi.mock('@qwen-code/qwen-code-core/src/utils/filesearch/crawlCache.js', () => ({
+vi.mock("@tram-ai/tram-core/src/utils/filesearch/crawlCache.js", () => ({
   clear: vi.fn(),
 }));
 
-describe('FileMessageHandler', () => {
+describe("FileMessageHandler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('searches files using fuzzy search when query is provided', async () => {
-    const rootPath = '/workspace';
+  it("searches files using fuzzy search when query is provided", async () => {
+    const rootPath = "/workspace";
 
     vscodeMock.workspace.workspaceFolders = [
-      { uri: vscode.Uri.file(rootPath), name: 'workspace', index: 0 },
+      { uri: vscode.Uri.file(rootPath), name: "workspace", index: 0 },
     ];
 
     fileSearchMock.initialize.mockResolvedValue(undefined);
     fileSearchMock.search.mockResolvedValue([
-      'src/test.txt',
-      'docs/readme.txt',
+      "src/test.txt",
+      "docs/readme.txt",
     ]);
 
     const sendToWebView = vi.fn();
     const handler = new FileMessageHandler(
-      {} as QwenAgentManager,
+      {} as TramAgentManager,
       {} as ConversationStore,
       null,
       sendToWebView,
     );
 
     await handler.handle({
-      type: 'getWorkspaceFiles',
-      data: { query: 'txt', requestId: 7 },
+      type: "getWorkspaceFiles",
+      data: { query: "txt", requestId: 7 },
     });
 
-    expect(fileSearchMock.search).toHaveBeenCalledWith('txt', {
+    expect(fileSearchMock.search).toHaveBeenCalledWith("txt", {
       maxResults: 50,
     });
 
@@ -119,14 +116,14 @@ describe('FileMessageHandler', () => {
       };
     };
 
-    expect(payload.type).toBe('workspaceFiles');
+    expect(payload.type).toBe("workspaceFiles");
     expect(payload.data.requestId).toBe(7);
-    expect(payload.data.query).toBe('txt');
+    expect(payload.data.query).toBe("txt");
     expect(payload.data.files).toHaveLength(2);
   });
 
-  it('filters ignored paths in non-query mode', async () => {
-    const rootPath = '/workspace';
+  it("filters ignored paths in non-query mode", async () => {
+    const rootPath = "/workspace";
     const allowedPath = `${rootPath}/allowed.txt`;
     const ignoredPath = `${rootPath}/ignored.log`;
 
@@ -139,11 +136,11 @@ describe('FileMessageHandler', () => {
       uri: vscode.Uri.file(rootPath),
     }));
     vscodeMock.workspace.asRelativePath.mockImplementation((uri: vscode.Uri) =>
-      uri.fsPath.replace(`${rootPath}/`, ''),
+      uri.fsPath.replace(`${rootPath}/`, ""),
     );
 
     shouldIgnoreFileMock.mockImplementation((filePath: string) =>
-      filePath.includes('ignored'),
+      filePath.includes("ignored"),
     );
 
     const sendToWebView = vi.fn();
@@ -155,13 +152,13 @@ describe('FileMessageHandler', () => {
     );
 
     await handler.handle({
-      type: 'getWorkspaceFiles',
+      type: "getWorkspaceFiles",
       data: { requestId: 7 },
     });
 
     expect(vscodeMock.workspace.findFiles).toHaveBeenCalledWith(
-      '**/*',
-      '**/{.git,node_modules}/**',
+      "**/*",
+      "**/{.git,node_modules}/**",
       20,
     );
     expect(shouldIgnoreFileMock).toHaveBeenCalledWith(ignoredPath, {
@@ -180,7 +177,7 @@ describe('FileMessageHandler', () => {
       };
     };
 
-    expect(payload.type).toBe('workspaceFiles');
+    expect(payload.type).toBe("workspaceFiles");
     expect(payload.data.requestId).toBe(7);
   });
 });

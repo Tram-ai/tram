@@ -1,4 +1,4 @@
-import './TempFileModal.css';
+import "./TempFileModal.css";
 
 const React = window.React;
 
@@ -19,7 +19,7 @@ export const TempFileModal = ({
   React.useEffect(() => {
     if (state.visible) {
       const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
       return () => {
         document.body.style.overflow = originalOverflow;
       };
@@ -46,12 +46,12 @@ export const TempFileModal = ({
 export const useModalState = () => {
   const [modalState, setModalState] = React.useState<ModalState>({
     visible: false,
-    content: '',
-    fileName: '',
+    content: "",
+    fileName: "",
   });
 
   const openModal = React.useCallback(
-    (content: string, fileName: string = 'temp') => {
+    (content: string, fileName: string = "temp") => {
       setModalState({ visible: true, content, fileName });
     },
     [],

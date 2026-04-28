@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { Box } from 'ink';
-import { theme } from '../semantic-colors.js';
+import React from "react";
+import { Box } from "ink";
+import { theme } from "../semantic-colors.js";
 
 interface YoloBorderBoxProps {
   children: React.ReactNode;

@@ -10,10 +10,10 @@
  * with their corresponding user-facing display names
  */
 export enum ApprovalMode {
-  PLAN = 'plan',
-  DEFAULT = 'default',
-  AUTO_EDIT = 'auto-edit',
-  YOLO = 'yolo',
+  PLAN = "plan",
+  DEFAULT = "default",
+  AUTO_EDIT = "auto-edit",
+  YOLO = "yolo",
 }
 
 /**
@@ -22,7 +22,7 @@ export enum ApprovalMode {
 export const APPROVAL_MODE_MAP: Record<string, ApprovalMode> = {
   plan: ApprovalMode.PLAN,
   default: ApprovalMode.DEFAULT,
-  'auto-edit': ApprovalMode.AUTO_EDIT,
+  "auto-edit": ApprovalMode.AUTO_EDIT,
   yolo: ApprovalMode.YOLO,
 };
 
@@ -34,28 +34,28 @@ export const APPROVAL_MODE_INFO: Record<
   {
     label: string;
     title: string;
-    iconType?: 'edit' | 'auto' | 'plan' | 'yolo';
+    iconType?: "edit" | "auto" | "plan" | "yolo";
   }
 > = {
   [ApprovalMode.PLAN]: {
-    label: 'Plan mode',
-    title: 'TRAM will plan before executing. Click to switch modes.',
-    iconType: 'plan',
+    label: "Plan mode",
+    title: "TRAM will plan before executing. Click to switch modes.",
+    iconType: "plan",
   },
   [ApprovalMode.DEFAULT]: {
-    label: 'Ask before edits',
-    title: 'TRAM will ask before each edit. Click to switch modes.',
-    iconType: 'edit',
+    label: "Ask before edits",
+    title: "TRAM will ask before each edit. Click to switch modes.",
+    iconType: "edit",
   },
   [ApprovalMode.AUTO_EDIT]: {
-    label: 'Edit automatically',
-    title: 'TRAM will edit files automatically. Click to switch modes.',
-    iconType: 'auto',
+    label: "Edit automatically",
+    title: "TRAM will edit files automatically. Click to switch modes.",
+    iconType: "auto",
   },
   [ApprovalMode.YOLO]: {
-    label: 'YOLO',
-    title: 'Automatically approve all tools. Click to switch modes.',
-    iconType: 'yolo',
+    label: "YOLO",
+    title: "Automatically approve all tools. Click to switch modes.",
+    iconType: "yolo",
   },
 };
 
@@ -65,15 +65,15 @@ export const APPROVAL_MODE_INFO: Record<
 export function getApprovalModeInfoFromString(mode: string): {
   label: string;
   title: string;
-  iconType?: 'edit' | 'auto' | 'plan' | 'yolo';
+  iconType?: "edit" | "auto" | "plan" | "yolo";
 } {
   const enumValue = APPROVAL_MODE_MAP[mode];
   if (enumValue !== undefined) {
     return APPROVAL_MODE_INFO[enumValue];
   }
   return {
-    label: 'Unknown mode',
-    title: 'Unknown edit mode',
+    label: "Unknown mode",
+    title: "Unknown edit mode",
     iconType: undefined,
   };
 }

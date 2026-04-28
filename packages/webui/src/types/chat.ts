@@ -7,7 +7,7 @@
 /**
  * Chat message role types
  */
-export type MessageRole = 'user' | 'assistant' | 'system';
+export type MessageRole = "user" | "assistant" | "system";
 
 /**
  * Basic chat message structure
@@ -23,6 +23,6 @@ export interface ChatMessage {
  */
 export interface PlanEntry {
   content: string;
-  priority?: 'high' | 'medium' | 'low';
-  status: 'pending' | 'in_progress' | 'completed';
+  priority?: "high" | "medium" | "low";
+  status: "pending" | "in_progress" | "completed";
 }

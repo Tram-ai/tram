@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import { theme } from '../../semantic-colors.js';
-import { t } from '../../../i18n/index.js';
+import { Box, Text } from "ink";
+import { theme } from "../../semantic-colors.js";
+import { t } from "../../../i18n/index.js";
 
 interface HooksDisabledStepProps {
   configuredHooksCount: number;
@@ -20,8 +20,8 @@ export function HooksDisabledStep({
   // based on the count, since the i18n system doesn't support ICU MessageFormat.
   const hooksText =
     configuredHooksCount === 1
-      ? t('{{count}} configured hook', { count: String(configuredHooksCount) })
-      : t('{{count}} configured hooks', {
+      ? t("{{count}} configured hook", { count: String(configuredHooksCount) })
+      : t("{{count}} configured hooks", {
           count: String(configuredHooksCount),
         });
 
@@ -30,7 +30,7 @@ export function HooksDisabledStep({
       {/* Title */}
       <Box marginBottom={1}>
         <Text bold color={theme.status.warning}>
-          {t('Hook Configuration - Disabled')}
+          {t("Hook Configuration - Disabled")}
         </Text>
       </Box>
 
@@ -38,7 +38,7 @@ export function HooksDisabledStep({
       <Box marginBottom={1}>
         <Text color={theme.text.primary}>
           {t(
-            'All hooks are currently disabled. You have {{count}} that are not running.',
+            "All hooks are currently disabled. You have {{count}} that are not running.",
             {
               count: hooksText,
             },
@@ -49,24 +49,24 @@ export function HooksDisabledStep({
       {/* Explanation */}
       <Box flexDirection="column" marginBottom={1}>
         <Text bold color={theme.text.primary}>
-          {t('When hooks are disabled:')}
+          {t("When hooks are disabled:")}
         </Text>
         {/* Note: Using middle dot (·) as bullet character. This is consistent with
             other CLI components. If a design system evolves, consider extracting
             to a shared constant or using a BulletList component. */}
         <Box>
           <Text color={theme.text.secondary}>
-            {`  · ${t('No hook commands will execute')}`}
+            {`  · ${t("No hook commands will execute")}`}
           </Text>
         </Box>
         <Box>
           <Text color={theme.text.secondary}>
-            {`  · ${t('StatusLine will not be displayed')}`}
+            {`  · ${t("StatusLine will not be displayed")}`}
           </Text>
         </Box>
         <Box>
           <Text color={theme.text.secondary}>
-            {`  · ${t('Tool operations will proceed without hook validation')}`}
+            {`  · ${t("Tool operations will proceed without hook validation")}`}
           </Text>
         </Box>
       </Box>
@@ -75,14 +75,14 @@ export function HooksDisabledStep({
       <Box marginBottom={1}>
         <Text color={theme.text.secondary}>
           {t(
-            'To re-enable hooks, remove "disableAllHooks" from settings.json or ask Qwen Code.',
+            'To re-enable hooks, remove "disableAllHooks" from settings.json or ask TRAM.',
           )}
         </Text>
       </Box>
 
       {/* Footer hint */}
       <Box marginTop={1}>
-        <Text color={theme.text.secondary}>{t('Esc to close')}</Text>
+        <Text color={theme.text.secondary}>{t("Esc to close")}</Text>
       </Box>
     </Box>
   );

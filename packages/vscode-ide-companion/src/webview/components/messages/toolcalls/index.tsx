@@ -7,7 +7,7 @@
  * All UI components are now imported from @tram-ai/webui
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 import {
   shouldShowToolCall,
   // All ToolCall components from webui
@@ -21,8 +21,8 @@ import {
   ShellToolCall,
   ReadToolCall,
   WebFetchToolCall,
-} from '@tram-ai/webui';
-import type { BaseToolCallProps } from '@tram-ai/webui';
+} from "@tram-ai/webui";
+import type { BaseToolCallProps } from "@tram-ai/webui";
 
 /**
  * Factory function that returns the appropriate tool call component based on kind
@@ -32,52 +32,52 @@ export const getToolCallComponent = (kind: string): FC<BaseToolCallProps> => {
 
   // Route to specialized components
   switch (normalizedKind) {
-    case 'read':
-    case 'read_file':
-    case 'read_many_files':
-    case 'readmanyfiles':
-    case 'list_directory':
-    case 'listfiles':
+    case "read":
+    case "read_file":
+    case "read_many_files":
+    case "readmanyfiles":
+    case "list_directory":
+    case "listfiles":
       return ReadToolCall;
 
-    case 'write':
+    case "write":
       return WriteToolCall;
 
-    case 'edit':
+    case "edit":
       return EditToolCall;
 
-    case 'execute':
-    case 'bash':
-    case 'command':
+    case "execute":
+    case "bash":
+    case "command":
       return ShellToolCall;
 
-    case 'updated_plan':
-    case 'updatedplan':
-    case 'todo_write':
-    case 'update_todos':
-    case 'todowrite':
+    case "updated_plan":
+    case "updatedplan":
+    case "todo_write":
+    case "update_todos":
+    case "todowrite":
       return UpdatedPlanToolCall;
 
-    case 'search':
-    case 'grep':
-    case 'glob':
-    case 'find':
+    case "search":
+    case "grep":
+    case "glob":
+    case "find":
       return SearchToolCall;
 
-    case 'think':
-    case 'thinking':
+    case "think":
+    case "thinking":
       return ThinkToolCall;
 
-    case 'save_memory':
-    case 'savememory':
-    case 'memory':
+    case "save_memory":
+    case "savememory":
+    case "memory":
       return SaveMemoryToolCall;
 
-    case 'fetch':
-    case 'web_fetch':
-    case 'webfetch':
-    case 'web_search':
-    case 'websearch':
+    case "fetch":
+    case "web_fetch":
+    case "webfetch":
+    case "web_search":
+    case "websearch":
       return WebFetchToolCall;
 
     default:
@@ -103,4 +103,4 @@ export const ToolCallRouter: React.FC<BaseToolCallProps> = ({ toolCall }) => {
 };
 
 // Re-export types for convenience
-export type { BaseToolCallProps, ToolCallData } from '@tram-ai/webui';
+export type { BaseToolCallProps, ToolCallData } from "@tram-ai/webui";

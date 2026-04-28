@@ -13,7 +13,7 @@ import type {
   ToolCallData,
   ToolCallStatus,
   ContainerStatus,
-} from './types.js';
+} from "./types.js";
 
 /**
  * Extract output from command execution result text
@@ -34,7 +34,7 @@ export const extractCommandOutput = (text: string): string => {
     const parsed = JSON.parse(text) as { output?: unknown; Output?: unknown };
     const output = parsed.output ?? parsed.Output;
     if (output !== undefined && output !== null) {
-      return typeof output === 'string'
+      return typeof output === "string"
         ? output
         : JSON.stringify(output, null, 2);
     }
@@ -48,49 +48,49 @@ export const extractCommandOutput = (text: string): string => {
   );
   if (outputMatch && outputMatch[1]) {
     const output = outputMatch[1].trim();
-    if (output && output !== '(none)' && output.length > 0) {
+    if (output && output !== "(none)" && output.length > 0) {
       return output;
     }
   }
 
   // Third try: Check if text starts with structured format
   if (text.match(/^Command:/)) {
-    const lines = text.split('\n');
+    const lines = text.split("\n");
     const outputLines: string[] = [];
     let inOutput = false;
 
     for (const line of lines) {
       if (
-        line.startsWith('Error:') ||
-        line.startsWith('Exit Code:') ||
-        line.startsWith('Signal:') ||
-        line.startsWith('Background PIDs:') ||
-        line.startsWith('Process Group PGID:')
+        line.startsWith("Error:") ||
+        line.startsWith("Exit Code:") ||
+        line.startsWith("Signal:") ||
+        line.startsWith("Background PIDs:") ||
+        line.startsWith("Process Group PGID:")
       ) {
         break;
       }
-      if (line.startsWith('Command:') || line.startsWith('Directory:')) {
+      if (line.startsWith("Command:") || line.startsWith("Directory:")) {
         continue;
       }
-      if (line.startsWith('Output:')) {
+      if (line.startsWith("Output:")) {
         inOutput = true;
-        const content = line.substring('Output:'.length).trim();
-        if (content && content !== '(none)') {
+        const content = line.substring("Output:".length).trim();
+        if (content && content !== "(none)") {
           outputLines.push(content);
         }
         continue;
       }
       if (
         inOutput ||
-        (!line.startsWith('Command:') && !line.startsWith('Directory:'))
+        (!line.startsWith("Command:") && !line.startsWith("Directory:"))
       ) {
         outputLines.push(line);
       }
     }
 
     if (outputLines.length > 0) {
-      const result = outputLines.join('\n').trim();
-      if (result && result !== '(none)') {
+      const result = outputLines.join("\n").trim();
+      if (result && result !== "(none)") {
         return result;
       }
     }
@@ -105,19 +105,19 @@ export const extractCommandOutput = (text: string): string => {
  */
 export const formatValue = (value: unknown): string => {
   if (value === null || value === undefined) {
-    return '';
+    return "";
   }
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return extractCommandOutput(value);
   }
   if (value instanceof Error) {
     return value.message || value.toString();
   }
-  if (typeof value === 'object' && value !== null && 'message' in value) {
+  if (typeof value === "object" && value !== null && "message" in value) {
     const errorObj = value as { message?: string; stack?: string };
     return errorObj.message || String(value);
   }
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     try {
       return JSON.stringify(value, null, 2);
     } catch (_e) {
@@ -133,10 +133,10 @@ export const formatValue = (value: unknown): string => {
  * Uses try/catch to handle circular references safely
  */
 export const safeTitle = (title: unknown): string => {
-  if (typeof title === 'string' && title.trim()) {
+  if (typeof title === "string" && title.trim()) {
     return title;
   }
-  if (title && typeof title === 'object') {
+  if (title && typeof title === "object") {
     try {
       return JSON.stringify(title);
     } catch (_e) {
@@ -144,7 +144,7 @@ export const safeTitle = (title: unknown): string => {
       return String(title);
     }
   }
-  return '';
+  return "";
 };
 
 /**
@@ -152,7 +152,7 @@ export const safeTitle = (title: unknown): string => {
  * Hides internal tool calls
  */
 export const shouldShowToolCall = (kind: string): boolean =>
-  !kind.includes('internal');
+  !kind.includes("internal");
 
 /**
  * Group tool call content by type to avoid duplicate labels
@@ -168,7 +168,7 @@ export const groupContent = (content?: ToolCallContent[]): GroupedContent => {
   const otherData: unknown[] = [];
 
   content?.forEach((item) => {
-    if (item.type === 'diff') {
+    if (item.type === "diff") {
       diffs.push(item);
     } else if (item.content) {
       const contentObj = item.content;
@@ -178,19 +178,19 @@ export const groupContent = (content?: ToolCallContent[]): GroupedContent => {
       // 2. type is 'error' AND has actual content (text or error field)
       const hasErrorField = contentObj.error != null;
       const isErrorType =
-        contentObj.type === 'error' &&
+        contentObj.type === "error" &&
         (contentObj.text != null || contentObj.error != null);
       const hasError = hasErrorField || isErrorType;
 
       if (hasError) {
-        let errorMsg = '';
+        let errorMsg = "";
 
-        if (typeof contentObj.error === 'string') {
+        if (typeof contentObj.error === "string") {
           errorMsg = contentObj.error;
         } else if (
           contentObj.error &&
-          typeof contentObj.error === 'object' &&
-          'message' in contentObj.error
+          typeof contentObj.error === "object" &&
+          "message" in contentObj.error
         ) {
           errorMsg = (contentObj.error as { message: string }).message;
         } else if (contentObj.text) {
@@ -198,7 +198,7 @@ export const groupContent = (content?: ToolCallContent[]): GroupedContent => {
         } else if (contentObj.error) {
           errorMsg = formatValue(contentObj.error);
         } else {
-          errorMsg = 'An error occurred';
+          errorMsg = "An error occurred";
         }
 
         errors.push(errorMsg);
@@ -218,15 +218,15 @@ export const groupContent = (content?: ToolCallContent[]): GroupedContent => {
  * Returns false for tool calls that completed successfully but have no visible output
  */
 export const hasToolCallOutput = (toolCall: ToolCallData): boolean => {
-  if (toolCall.status === 'failed') {
+  if (toolCall.status === "failed") {
     return true;
   }
 
   const kind = toolCall.kind.toLowerCase();
-  if (kind === 'execute' || kind === 'bash' || kind === 'command') {
+  if (kind === "execute" || kind === "bash" || kind === "command") {
     if (
       toolCall.title &&
-      typeof toolCall.title === 'string' &&
+      typeof toolCall.title === "string" &&
       toolCall.title.trim()
     ) {
       return true;
@@ -251,7 +251,7 @@ export const hasToolCallOutput = (toolCall: ToolCallData): boolean => {
 
   if (
     toolCall.title &&
-    typeof toolCall.title === 'string' &&
+    typeof toolCall.title === "string" &&
     toolCall.title.trim()
   ) {
     return true;
@@ -271,14 +271,14 @@ export const mapToolStatusToContainerStatus = (
   status: ToolCallStatus,
 ): ContainerStatus => {
   switch (status) {
-    case 'pending':
-    case 'in_progress':
-      return 'loading';
-    case 'failed':
-      return 'error';
-    case 'completed':
-      return 'success';
+    case "pending":
+    case "in_progress":
+      return "loading";
+    case "failed":
+      return "error";
+    case "completed":
+      return "success";
     default:
-      return 'default';
+      return "default";
   }
 };

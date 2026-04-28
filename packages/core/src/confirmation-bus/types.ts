@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { type FunctionCall } from '@google/genai';
+import { type FunctionCall } from "@google/genai";
 import type {
   ToolConfirmationOutcome,
   ToolConfirmationPayload,
-} from '../tools/tools.js';
+} from "../tools/tools.js";
 
 export enum MessageBusType {
-  TOOL_CONFIRMATION_REQUEST = 'tool-confirmation-request',
-  TOOL_CONFIRMATION_RESPONSE = 'tool-confirmation-response',
-  TOOL_EXECUTION_SUCCESS = 'tool-execution-success',
-  TOOL_EXECUTION_FAILURE = 'tool-execution-failure',
-  HOOK_EXECUTION_REQUEST = 'hook-execution-request',
-  HOOK_EXECUTION_RESPONSE = 'hook-execution-response',
+  TOOL_CONFIRMATION_REQUEST = "tool-confirmation-request",
+  TOOL_CONFIRMATION_RESPONSE = "tool-confirmation-response",
+  TOOL_EXECUTION_SUCCESS = "tool-execution-success",
+  TOOL_EXECUTION_FAILURE = "tool-execution-failure",
+  HOOK_EXECUTION_REQUEST = "hook-execution-request",
+  HOOK_EXECUTION_RESPONSE = "hook-execution-response",
 }
 
 export interface ToolConfirmationRequest {
@@ -56,13 +56,13 @@ export interface ToolConfirmationResponse {
  */
 export type SerializableConfirmationDetails =
   | {
-      type: 'info';
+      type: "info";
       title: string;
       prompt: string;
       urls?: string[];
     }
   | {
-      type: 'edit';
+      type: "edit";
       title: string;
       fileName: string;
       filePath: string;
@@ -72,7 +72,7 @@ export type SerializableConfirmationDetails =
       isModifying?: boolean;
     }
   | {
-      type: 'exec';
+      type: "exec";
       title: string;
       command: string;
       rootCommand: string;
@@ -80,14 +80,14 @@ export type SerializableConfirmationDetails =
       commands?: string[];
     }
   | {
-      type: 'mcp';
+      type: "mcp";
       title: string;
       serverName: string;
       toolName: string;
       toolDisplayName: string;
     }
   | {
-      type: 'exit_plan_mode';
+      type: "exit_plan_mode";
       title: string;
       planPath: string;
     };

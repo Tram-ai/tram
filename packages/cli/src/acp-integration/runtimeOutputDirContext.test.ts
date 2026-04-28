@@ -1,32 +1,32 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import path from 'node:path';
-import { Storage } from '@qwen-code/qwen-code-core';
-import type { LoadedSettings } from '../config/settings.js';
-import { runWithAcpRuntimeOutputDir } from './runtimeOutputDirContext.js';
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import path from "node:path";
+import { Storage } from "@tram-ai/tram-core";
+import type { LoadedSettings } from "../config/settings.js";
+import { runWithAcpRuntimeOutputDir } from "./runtimeOutputDirContext.js";
 
-describe('runWithAcpRuntimeOutputDir', () => {
+describe("runWithAcpRuntimeOutputDir", () => {
   beforeEach(() => {
     Storage.setRuntimeBaseDir(null);
-    delete process.env['QWEN_RUNTIME_DIR'];
+    delete process.env["QWEN_RUNTIME_DIR"];
   });
 
   afterEach(() => {
     Storage.setRuntimeBaseDir(null);
-    delete process.env['QWEN_RUNTIME_DIR'];
+    delete process.env["QWEN_RUNTIME_DIR"];
   });
 
-  it('uses the merged runtimeOutputDir relative to cwd within the async context', async () => {
-    const cwd = path.resolve('workspace', 'project-a');
+  it("uses the merged runtimeOutputDir relative to cwd within the async context", async () => {
+    const cwd = path.resolve("workspace", "project-a");
     const settings = {
       merged: {
         advanced: {
-          runtimeOutputDir: '.qwen-runtime',
+          runtimeOutputDir: ".tram-runtime",
         },
       },
     } as LoadedSettings;
 
     await runWithAcpRuntimeOutputDir(settings, cwd, async () => {
-      expect(Storage.getRuntimeBaseDir()).toBe(path.join(cwd, '.qwen-runtime'));
+      expect(Storage.getRuntimeBaseDir()).toBe(path.join(cwd, ".tram-runtime"));
     });
 
     expect(Storage.getRuntimeBaseDir()).toBe(Storage.getGlobalQwenDir());

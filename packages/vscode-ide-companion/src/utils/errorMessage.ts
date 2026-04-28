@@ -6,7 +6,7 @@
 
 export function getErrorMessage(
   error: unknown,
-  fallback = 'Unknown error',
+  fallback = "Unknown error",
 ): string {
   const combineMessageAndDetails = (
     message: string | null,
@@ -21,26 +21,26 @@ export function getErrorMessage(
   };
 
   const extractDetailsMessage = (value: unknown): string | null => {
-    if (typeof value === 'string' && value) {
+    if (typeof value === "string" && value) {
       return value;
     }
 
-    if (typeof value !== 'object' || value === null) {
+    if (typeof value !== "object" || value === null) {
       return null;
     }
 
     const record = value as Record<string, unknown>;
-    const details = record['details'];
-    if (typeof details === 'string' && details) {
+    const details = record["details"];
+    if (typeof details === "string" && details) {
       return details;
     }
-    if (typeof details === 'object' && details !== null) {
+    if (typeof details === "object" && details !== null) {
       const detailsRecord = details as Record<string, unknown>;
       if (
-        typeof detailsRecord['message'] === 'string' &&
-        detailsRecord['message']
+        typeof detailsRecord["message"] === "string" &&
+        detailsRecord["message"]
       ) {
-        return detailsRecord['message'];
+        return detailsRecord["message"];
       }
       try {
         return JSON.stringify(details);
@@ -54,16 +54,16 @@ export function getErrorMessage(
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  if (typeof error === 'string' && error) {
+  if (typeof error === "string" && error) {
     return error;
   }
-  if (typeof error === 'object' && error !== null) {
+  if (typeof error === "object" && error !== null) {
     const record = error as Record<string, unknown>;
     const topLevelMessage =
-      typeof record['message'] === 'string' && record['message']
-        ? record['message']
+      typeof record["message"] === "string" && record["message"]
+        ? record["message"]
         : null;
-    const topLevelDetailsMessage = extractDetailsMessage(record['data']);
+    const topLevelDetailsMessage = extractDetailsMessage(record["data"]);
     const combinedTopLevelMessage = combineMessageAndDetails(
       topLevelMessage,
       topLevelDetailsMessage,
@@ -71,14 +71,14 @@ export function getErrorMessage(
     if (combinedTopLevelMessage) {
       return combinedTopLevelMessage;
     }
-    const nested = record['error'];
-    if (typeof nested === 'object' && nested !== null) {
+    const nested = record["error"];
+    if (typeof nested === "object" && nested !== null) {
       const nestedRecord = nested as Record<string, unknown>;
       const nestedMessage =
-        typeof nestedRecord['message'] === 'string' && nestedRecord['message']
-          ? nestedRecord['message']
+        typeof nestedRecord["message"] === "string" && nestedRecord["message"]
+          ? nestedRecord["message"]
           : null;
-      const nestedDetailsMessage = extractDetailsMessage(nestedRecord['data']);
+      const nestedDetailsMessage = extractDetailsMessage(nestedRecord["data"]);
       const combinedNestedMessage = combineMessageAndDetails(
         nestedMessage,
         nestedDetailsMessage,

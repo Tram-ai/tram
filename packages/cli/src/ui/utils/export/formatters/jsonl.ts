@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ExportSessionData } from '../types.js';
+import type { ExportSessionData } from "../types.js";
 
 /**
  * Converts ExportSessionData to JSONL (JSON Lines) format.
@@ -16,53 +16,53 @@ export function toJsonl(sessionData: ExportSessionData): string {
 
   // Add session metadata as the first line
   const metadata: Record<string, unknown> = {
-    type: 'session_metadata',
+    type: "session_metadata",
     sessionId: sessionData.sessionId,
     startTime: sessionData.startTime,
   };
 
   // Add all metadata fields if available
   if (sourceMetadata?.exportTime) {
-    metadata['exportTime'] = sourceMetadata.exportTime;
+    metadata["exportTime"] = sourceMetadata.exportTime;
   }
   if (sourceMetadata?.cwd) {
-    metadata['cwd'] = sourceMetadata.cwd;
+    metadata["cwd"] = sourceMetadata.cwd;
   }
   if (sourceMetadata?.gitRepo) {
-    metadata['gitRepo'] = sourceMetadata.gitRepo;
+    metadata["gitRepo"] = sourceMetadata.gitRepo;
   }
   if (sourceMetadata?.gitBranch) {
-    metadata['gitBranch'] = sourceMetadata.gitBranch;
+    metadata["gitBranch"] = sourceMetadata.gitBranch;
   }
   if (sourceMetadata?.model) {
-    metadata['model'] = sourceMetadata.model;
+    metadata["model"] = sourceMetadata.model;
   }
   if (sourceMetadata?.channel) {
-    metadata['channel'] = sourceMetadata.channel;
+    metadata["channel"] = sourceMetadata.channel;
   }
   if (sourceMetadata?.promptCount !== undefined) {
-    metadata['promptCount'] = sourceMetadata.promptCount;
+    metadata["promptCount"] = sourceMetadata.promptCount;
   }
   if (sourceMetadata?.contextUsagePercent !== undefined) {
-    metadata['contextUsagePercent'] = sourceMetadata.contextUsagePercent;
+    metadata["contextUsagePercent"] = sourceMetadata.contextUsagePercent;
   }
   if (sourceMetadata?.contextWindowSize !== undefined) {
-    metadata['contextWindowSize'] = sourceMetadata.contextWindowSize;
+    metadata["contextWindowSize"] = sourceMetadata.contextWindowSize;
   }
   if (sourceMetadata?.totalTokens !== undefined) {
-    metadata['totalTokens'] = sourceMetadata.totalTokens;
+    metadata["totalTokens"] = sourceMetadata.totalTokens;
   }
   if (sourceMetadata?.filesWritten !== undefined) {
-    metadata['filesWritten'] = sourceMetadata.filesWritten;
+    metadata["filesWritten"] = sourceMetadata.filesWritten;
   }
   if (sourceMetadata?.linesAdded !== undefined) {
-    metadata['linesAdded'] = sourceMetadata.linesAdded;
+    metadata["linesAdded"] = sourceMetadata.linesAdded;
   }
   if (sourceMetadata?.linesRemoved !== undefined) {
-    metadata['linesRemoved'] = sourceMetadata.linesRemoved;
+    metadata["linesRemoved"] = sourceMetadata.linesRemoved;
   }
   if (sourceMetadata?.uniqueFiles && sourceMetadata.uniqueFiles.length > 0) {
-    metadata['uniqueFiles'] = sourceMetadata.uniqueFiles;
+    metadata["uniqueFiles"] = sourceMetadata.uniqueFiles;
   }
 
   lines.push(JSON.stringify(metadata));
@@ -72,5 +72,5 @@ export function toJsonl(sessionData: ExportSessionData): string {
     lines.push(JSON.stringify(message));
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

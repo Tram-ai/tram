@@ -19,22 +19,22 @@ npm install @tram-ai/sdk
 ## Quick Start
 
 ```typescript
-import { query } from '@tram-ai/sdk';
+import { query } from "@tram-ai/sdk";
 
 // Single-turn query
 const result = query({
-  prompt: 'What files are in the current directory?',
+  prompt: "What files are in the current directory?",
   options: {
-    cwd: '/path/to/project',
+    cwd: "/path/to/project",
   },
 });
 
 // Iterate over messages
 for await (const message of result) {
-  if (message.type === 'assistant') {
-    console.log('Assistant:', message.message.content);
-  } else if (message.type === 'result') {
-    console.log('Result:', message.result);
+  if (message.type === "assistant") {
+    console.log("Assistant:", message.message.content);
+  } else if (message.type === "result") {
+    console.log("Result:", message.result);
   }
 }
 ```
@@ -52,38 +52,27 @@ Creates a new query session with the TRAM.
 
 #### QueryOptions
 
-| Option                   | Type                                           | Default          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ------------------------ | ---------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cwd`                    | `string`                                       | `process.cwd()`  | The working directory for the query session. Determines the context in which file operations and commands are executed.                                                                                                                                                                                                                                                                                                                                                               |
-| `model`                  | `string`                                       | -                | The AI model to use (e.g., `'qwen-max'`, `'qwen-plus'`, `'qwen-turbo'`). Takes precedence over `OPENAI_MODEL` and `QWEN_MODEL` environment variables.                                                                                                                                                                                                                                                                                                                                 |
+| Option                   | Type                                           | Default          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------ | ---------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cwd`                    | `string`                                       | `process.cwd()`  | The working directory for the query session. Determines the context in which file operations and commands are executed.                                                                                                                                                                                                                                                                                                                                                          |
+| `model`                  | `string`                                       | -                | The AI model to use (e.g., `'qwen-max'`, `'qwen-plus'`, `'qwen-turbo'`). Takes precedence over `OPENAI_MODEL` and `QWEN_MODEL` environment variables.                                                                                                                                                                                                                                                                                                                            |
 | `pathToQwenExecutable`   | `string`                                       | Auto-detected    | Path to the TRAM executable. Supports multiple formats: `'qwen'` (native binary from PATH), `'/path/to/qwen'` (explicit path), `'/path/to/cli.js'` (Node.js bundle), `'node:/path/to/cli.js'` (force Node.js runtime), `'bun:/path/to/cli.js'` (force Bun runtime). If not provided, auto-detects from: `QWEN_CODE_CLI_PATH` env var, `~/.volta/bin/qwen`, `~/.npm-global/bin/qwen`, `/usr/local/bin/qwen`, `~/.local/bin/qwen`, `~/node_modules/.bin/qwen`, `~/.yarn/bin/qwen`. |
-| `permissionMode`         | `'default' \| 'plan' \| 'auto-edit' \| 'yolo'` | `'default'`      | Permission mode controlling tool execution approval. See [Permission Modes](#permission-modes) for details.                                                                                                                                                                                                                                                                                                                                                                           |
-| `canUseTool`             | `CanUseTool`                                   | -                | Custom permission handler for tool execution approval. Invoked when a tool requires confirmation. Must respond within 60 seconds or the request will be auto-denied. See [Custom Permission Handler](#custom-permission-handler).                                                                                                                                                                                                                                                     |
-<<<<<<< HEAD
+| `permissionMode`         | `'default' \| 'plan' \| 'auto-edit' \| 'yolo'` | `'default'`      | Permission mode controlling tool execution approval. See [Permission Modes](#permission-modes) for details.                                                                                                                                                                                                                                                                                                                                                                      |
+| `canUseTool`             | `CanUseTool`                                   | -                | Custom permission handler for tool execution approval. Invoked when a tool requires confirmation. Must respond within 60 seconds or the request will be auto-denied. See [Custom Permission Handler](#custom-permission-handler).                                                                                                                                                                                                                                                |
 | `env`                    | `Record<string, string>`                       | -                | Environment variables to pass to the TRAM process. Merged with the current process environment.                                                                                                                                                                                                                                                                                                                                                                                  |
-=======
-| `env`                    | `Record<string, string>`                       | -                | Environment variables to pass to the Qwen Code process. Merged with the current process environment.                                                                                                                                                                                                                                                                                                                                                                                  |
-| `systemPrompt`           | `string \| QuerySystemPromptPreset`            | -                | System prompt configuration for the main session. Use a string to fully override the built-in Qwen Code system prompt, or a preset object to keep the built-in prompt and append extra instructions.                                                                                                                                                                                                                                                                                  |
->>>>>>> v0.14.5
-| `mcpServers`             | `Record<string, McpServerConfig>`              | -                | MCP (Model Context Protocol) servers to connect. Supports external servers (stdio/SSE/HTTP) and SDK-embedded servers. External servers are configured with transport options like `command`, `args`, `url`, `httpUrl`, etc. SDK servers use `{ type: 'sdk', name: string, instance: Server }`.                                                                                                                                                                                        |
-| `abortController`        | `AbortController`                              | -                | Controller to cancel the query session. Call `abortController.abort()` to terminate the session and cleanup resources.                                                                                                                                                                                                                                                                                                                                                                |
-| `debug`                  | `boolean`                                      | `false`          | Enable debug mode for verbose logging from the CLI process.                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `maxSessionTurns`        | `number`                                       | `-1` (unlimited) | Maximum number of conversation turns before the session automatically terminates. A turn consists of a user message and an assistant response.                                                                                                                                                                                                                                                                                                                                        |
-<<<<<<< HEAD
-| `coreTools`              | `string[]`                                     | -                | Equivalent to `tool.core` in settings.json. If specified, only these tools will be available to the AI. Example: `['read_file', 'write_file', 'run_terminal_cmd']`.                                                                                                                                                                                                                                                                                                                   |
-| `excludeTools`           | `string[]`                                     | -                | Equivalent to `tool.exclude` in settings.json. Excluded tools return a permission error immediately. Takes highest priority over all other permission settings. Supports pattern matching: tool name (`'write_file'`), tool class (`'ShellTool'`), or shell command prefix (`'ShellTool(rm )'`).                                                                                                                                                                                      |
-| `allowedTools`           | `string[]`                                     | -                | Equivalent to `tool.allowed` in settings.json. Matching tools bypass `canUseTool` callback and execute automatically. Only applies when tool requires confirmation. Supports same pattern matching as `excludeTools`.                                                                                                                                                                                                                                                                 |
-| `authType`               | `'openai' \| 'qwen-oauth'`                     | `'openai'`       | Authentication type for the AI service. Using `'qwen-oauth'` in SDK is not recommended as credentials are stored in `~/.tram` and may need periodic refresh.                                                                                                                                                                                                                                                                                                                          |
-=======
-| `coreTools`              | `string[]`                                     | -                | Equivalent to `permissions.allow` in settings.json as an allowlist. If specified, only these tools will be available to the AI (all other tools are disabled at registry level). Supports tool name aliases and pattern matching. Example: `['Read', 'Edit', 'Bash(git *)']`.                                                                                                                                                                                                         |
-| `excludeTools`           | `string[]`                                     | -                | Equivalent to `permissions.deny` in settings.json. Excluded tools return a permission error immediately. Takes highest priority over all other permission settings. Supports tool name aliases and pattern matching: tool name (`'write_file'`), shell command prefix (`'Bash(rm *)'`), or path patterns (`'Read(.env)'`, `'Edit(/src/**)'`).                                                                                                                                         |
-| `allowedTools`           | `string[]`                                     | -                | Equivalent to `permissions.allow` in settings.json. Matching tools bypass `canUseTool` callback and execute automatically. Only applies when tool requires confirmation. Supports same pattern matching as `excludeTools`. Example: `['ShellTool(git status)', 'ShellTool(npm test)']`.                                                                                                                                                                                               |
-| `authType`               | `'openai' \| 'qwen-oauth'`                     | `'openai'`       | Authentication type for the AI service. Using `'qwen-oauth'` in SDK is not recommended as credentials are stored in `~/.qwen` and may need periodic refresh.                                                                                                                                                                                                                                                                                                                          |
->>>>>>> v0.14.5
-| `agents`                 | `SubagentConfig[]`                             | -                | Configuration for subagents that can be invoked during the session. Subagents are specialized AI agents for specific tasks or domains.                                                                                                                                                                                                                                                                                                                                                |
-| `includePartialMessages` | `boolean`                                      | `false`          | When `true`, the SDK emits incomplete messages as they are being generated, allowing real-time streaming of the AI's response.                                                                                                                                                                                                                                                                                                                                                        |
-| `resume`                 | `string`                                       | -                | Resume a previous session by providing its session ID. Equivalent to CLI's `--resume` flag.                                                                                                                                                                                                                                                                                                                                                                                           |
-| `sessionId`              | `string`                                       | -                | Specify a session ID for the new session. Ensures SDK and CLI use the same ID without resuming history. Equivalent to CLI's `--session-id` flag.                                                                                                                                                                                                                                                                                                                                      |
+| `systemPrompt`           | `string \| QuerySystemPromptPreset`            | -                | System prompt configuration for the main session. Use a string to fully override the built-in TRAM system prompt, or a preset object to keep the built-in prompt and append extra instructions.                                                                                                                                                                                                                                                                                  |
+| `mcpServers`             | `Record<string, McpServerConfig>`              | -                | MCP (Model Context Protocol) servers to connect. Supports external servers (stdio/SSE/HTTP) and SDK-embedded servers. External servers are configured with transport options like `command`, `args`, `url`, `httpUrl`, etc. SDK servers use `{ type: 'sdk', name: string, instance: Server }`.                                                                                                                                                                                   |
+| `abortController`        | `AbortController`                              | -                | Controller to cancel the query session. Call `abortController.abort()` to terminate the session and cleanup resources.                                                                                                                                                                                                                                                                                                                                                           |
+| `debug`                  | `boolean`                                      | `false`          | Enable debug mode for verbose logging from the CLI process.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `maxSessionTurns`        | `number`                                       | `-1` (unlimited) | Maximum number of conversation turns before the session automatically terminates. A turn consists of a user message and an assistant response.                                                                                                                                                                                                                                                                                                                                   |
+| `coreTools`              | `string[]`                                     | -                | Equivalent to `permissions.allow` in settings.json as an allowlist. If specified, only these tools will be available to the AI (all other tools are disabled at registry level). Supports tool name aliases and pattern matching. Example: `['Read', 'Edit', 'Bash(git *)']`.                                                                                                                                                                                                    |
+| `excludeTools`           | `string[]`                                     | -                | Equivalent to `permissions.deny` in settings.json. Excluded tools return a permission error immediately. Takes highest priority over all other permission settings. Supports tool name aliases and pattern matching: tool name (`'write_file'`), shell command prefix (`'Bash(rm *)'`), or path patterns (`'Read(.env)'`, `'Edit(/src/**)'`).                                                                                                                                    |
+| `allowedTools`           | `string[]`                                     | -                | Equivalent to `permissions.allow` in settings.json. Matching tools bypass `canUseTool` callback and execute automatically. Only applies when tool requires confirmation. Supports same pattern matching as `excludeTools`. Example: `['ShellTool(git status)', 'ShellTool(npm test)']`.                                                                                                                                                                                          |
+| `authType`               | `'openai' \| 'qwen-oauth'`                     | `'openai'`       | Authentication type for the AI service. Using `'qwen-oauth'` in SDK is not recommended as credentials are stored in `~/.qwen` and may need periodic refresh.                                                                                                                                                                                                                                                                                                                     |
+| `agents`                 | `SubagentConfig[]`                             | -                | Configuration for subagents that can be invoked during the session. Subagents are specialized AI agents for specific tasks or domains.                                                                                                                                                                                                                                                                                                                                           |
+| `includePartialMessages` | `boolean`                                      | `false`          | When `true`, the SDK emits incomplete messages as they are being generated, allowing real-time streaming of the AI's response.                                                                                                                                                                                                                                                                                                                                                   |
+| `resume`                 | `string`                                       | -                | Resume a previous session by providing its session ID. Equivalent to CLI's `--resume` flag.                                                                                                                                                                                                                                                                                                                                                                                      |
+| `sessionId`              | `string`                                       | -                | Specify a session ID for the new session. Ensures SDK and CLI use the same ID without resuming history. Equivalent to CLI's `--session-id` flag.                                                                                                                                                                                                                                                                                                                                 |
 
 > [!tip]
 > If you need to configure `coreTools`, `excludeTools`, or `allowedTools`, it is **strongly recommended** to read the [permissions configuration documentation](../docs/users/configuration/settings.md#permissions) first, especially the **Tool name aliases** and **Rule syntax examples** sections, to understand the available aliases and pattern matching syntax (e.g., `Bash(git *)`, `Read(.env)`, `Edit(/src/**)`).
@@ -102,7 +91,7 @@ The SDK enforces the following default timeouts:
 You can customize these timeouts via the `timeout` option:
 
 ```typescript
-const query = qwen.query('Your prompt', {
+const query = qwen.query("Your prompt", {
   timeout: {
     canUseTool: 60000, // 60 seconds for permission callback
     mcpRequest: 600000, // 10 minutes for MCP tool calls
@@ -123,7 +112,7 @@ import {
   isSDKSystemMessage,
   isSDKResultMessage,
   isSDKPartialAssistantMessage,
-} from '@tram-ai/sdk';
+} from "@tram-ai/sdk";
 
 for await (const message of result) {
   if (isSDKAssistantMessage(message)) {
@@ -139,7 +128,7 @@ for await (const message of result) {
 The `Query` instance returned by `query()` provides several methods:
 
 ```typescript
-const q = query({ prompt: 'Hello', options: {} });
+const q = query({ prompt: "Hello", options: {} });
 
 // Get session ID
 const sessionId = q.getSessionId();
@@ -151,10 +140,10 @@ const closed = q.isClosed();
 await q.interrupt();
 
 // Change permission mode mid-session
-await q.setPermissionMode('yolo');
+await q.setPermissionMode("yolo");
 
 // Change model mid-session
-await q.setModel('qwen-max');
+await q.setModel("qwen-max");
 
 // Close the session
 await q.close();
@@ -188,21 +177,21 @@ The first matching rule wins.
 ### Multi-turn Conversation
 
 ```typescript
-import { query, type SDKUserMessage } from '@tram-ai/sdk';
+import { query, type SDKUserMessage } from "@tram-ai/sdk";
 
 async function* generateMessages(): AsyncIterable<SDKUserMessage> {
   yield {
-    type: 'user',
-    session_id: 'my-session',
-    message: { role: 'user', content: 'Create a hello.txt file' },
+    type: "user",
+    session_id: "my-session",
+    message: { role: "user", content: "Create a hello.txt file" },
     parent_tool_use_id: null,
   };
 
   // Wait for some condition or user input
   yield {
-    type: 'user',
-    session_id: 'my-session',
-    message: { role: 'user', content: 'Now read the file back' },
+    type: "user",
+    session_id: "my-session",
+    message: { role: "user", content: "Now read the file back" },
     parent_tool_use_id: null,
   };
 }
@@ -210,7 +199,7 @@ async function* generateMessages(): AsyncIterable<SDKUserMessage> {
 const result = query({
   prompt: generateMessages(),
   options: {
-    permissionMode: 'auto-edit',
+    permissionMode: "auto-edit",
   },
 });
 
@@ -222,26 +211,26 @@ for await (const message of result) {
 ### Custom Permission Handler
 
 ```typescript
-import { query, type CanUseTool } from '@tram-ai/sdk';
+import { query, type CanUseTool } from "@tram-ai/sdk";
 
 const canUseTool: CanUseTool = async (toolName, input, { signal }) => {
   // Allow all read operations
-  if (toolName.startsWith('read_')) {
-    return { behavior: 'allow', updatedInput: input };
+  if (toolName.startsWith("read_")) {
+    return { behavior: "allow", updatedInput: input };
   }
 
   // Prompt user for write operations (in a real app)
   const userApproved = await promptUser(`Allow ${toolName}?`);
 
   if (userApproved) {
-    return { behavior: 'allow', updatedInput: input };
+    return { behavior: "allow", updatedInput: input };
   }
 
-  return { behavior: 'deny', message: 'User denied the operation' };
+  return { behavior: "deny", message: "User denied the operation" };
 };
 
 const result = query({
-  prompt: 'Create a new file',
+  prompt: "Create a new file",
   options: {
     canUseTool,
   },
@@ -251,16 +240,16 @@ const result = query({
 ### With External MCP Servers
 
 ```typescript
-import { query } from '@tram-ai/sdk';
+import { query } from "@tram-ai/sdk";
 
 const result = query({
-  prompt: 'Use the custom tool from my MCP server',
+  prompt: "Use the custom tool from my MCP server",
   options: {
     mcpServers: {
-      'my-server': {
-        command: 'node',
-        args: ['path/to/mcp-server.js'],
-        env: { PORT: '3000' },
+      "my-server": {
+        command: "node",
+        args: ["path/to/mcp-server.js"],
+        env: { PORT: "3000" },
       },
     },
   },
@@ -270,12 +259,12 @@ const result = query({
 ### Override the System Prompt
 
 ```typescript
-import { query } from '@qwen-code/sdk';
+import { query } from "@qwen-code/sdk";
 
 const result = query({
-  prompt: 'Say hello in one sentence.',
+  prompt: "Say hello in one sentence.",
   options: {
-    systemPrompt: 'You are a terse assistant. Answer in exactly one sentence.',
+    systemPrompt: "You are a terse assistant. Answer in exactly one sentence.",
   },
 });
 ```
@@ -283,15 +272,15 @@ const result = query({
 ### Append to the Built-in System Prompt
 
 ```typescript
-import { query } from '@qwen-code/sdk';
+import { query } from "@qwen-code/sdk";
 
 const result = query({
-  prompt: 'Review the current directory.',
+  prompt: "Review the current directory.",
   options: {
     systemPrompt: {
-      type: 'preset',
-      preset: 'qwen_code',
-      append: 'Be terse and focus on concrete findings.',
+      type: "preset",
+      preset: "qwen_code",
+      append: "Be terse and focus on concrete findings.",
     },
   },
 });
@@ -340,30 +329,30 @@ Returns a `McpSdkServerConfigWithInstance` object that can be passed directly to
 #### Example
 
 ```typescript
-import { z } from 'zod';
-import { query, tool, createSdkMcpServer } from '@tram-ai/sdk';
+import { z } from "zod";
+import { query, tool, createSdkMcpServer } from "@tram-ai/sdk";
 
 // Define a tool with Zod schema
 const calculatorTool = tool(
-  'calculate_sum',
-  'Add two numbers',
+  "calculate_sum",
+  "Add two numbers",
   { a: z.number(), b: z.number() },
   async (args) => ({
-    content: [{ type: 'text', text: String(args.a + args.b) }],
+    content: [{ type: "text", text: String(args.a + args.b) }],
   }),
 );
 
 // Create the MCP server
 const server = createSdkMcpServer({
-  name: 'calculator',
+  name: "calculator",
   tools: [calculatorTool],
 });
 
 // Use the server in a query
 const result = query({
-  prompt: 'What is 42 + 17?',
+  prompt: "What is 42 + 17?",
   options: {
-    permissionMode: 'yolo',
+    permissionMode: "yolo",
     mcpServers: {
       calculator: server,
     },
@@ -378,12 +367,12 @@ for await (const message of result) {
 ### Abort a Query
 
 ```typescript
-import { query, isAbortError } from '@tram-ai/sdk';
+import { query, isAbortError } from "@tram-ai/sdk";
 
 const abortController = new AbortController();
 
 const result = query({
-  prompt: 'Long running task...',
+  prompt: "Long running task...",
   options: {
     abortController,
   },
@@ -398,7 +387,7 @@ try {
   }
 } catch (error) {
   if (isAbortError(error)) {
-    console.log('Query was aborted');
+    console.log("Query was aborted");
   } else {
     throw error;
   }
@@ -410,7 +399,7 @@ try {
 The SDK provides an `AbortError` class for handling aborted queries:
 
 ```typescript
-import { AbortError, isAbortError } from '@tram-ai/sdk';
+import { AbortError, isAbortError } from "@tram-ai/sdk";
 
 try {
   // ... query operations

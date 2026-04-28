@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import type { ToolInvocation, ToolResult } from './tools.js';
-import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
-import { ToolDisplayNames, ToolNames } from './tool-names.js';
-import type { Config } from '../config/config.js';
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import type { ToolInvocation, ToolResult } from "./tools.js";
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from "./tools.js";
+import { ToolDisplayNames, ToolNames } from "./tool-names.js";
+import type { Config } from "../config/config.js";
 import type {
   LspCallHierarchyIncomingCall,
   LspCallHierarchyItem,
@@ -25,24 +25,24 @@ import type {
   LspRange,
   LspReference,
   LspSymbolInformation,
-} from '../lsp/types.js';
+} from "../lsp/types.js";
 
 /**
  * Supported LSP operations.
  */
 export type LspOperation =
-  | 'goToDefinition'
-  | 'findReferences'
-  | 'hover'
-  | 'documentSymbol'
-  | 'workspaceSymbol'
-  | 'goToImplementation'
-  | 'prepareCallHierarchy'
-  | 'incomingCalls'
-  | 'outgoingCalls'
-  | 'diagnostics'
-  | 'workspaceDiagnostics'
-  | 'codeActions';
+  | "goToDefinition"
+  | "findReferences"
+  | "hover"
+  | "documentSymbol"
+  | "workspaceSymbol"
+  | "goToImplementation"
+  | "prepareCallHierarchy"
+  | "incomingCalls"
+  | "outgoingCalls"
+  | "diagnostics"
+  | "workspaceDiagnostics"
+  | "codeActions";
 
 /**
  * Parameters for the unified LSP tool.
@@ -85,30 +85,30 @@ type ResolvedTarget =
 
 /** Operations that require filePath and line. */
 const LOCATION_REQUIRED_OPERATIONS = new Set<LspOperation>([
-  'goToDefinition',
-  'findReferences',
-  'hover',
-  'goToImplementation',
-  'prepareCallHierarchy',
+  "goToDefinition",
+  "findReferences",
+  "hover",
+  "goToImplementation",
+  "prepareCallHierarchy",
 ]);
 
 /** Operations that only require filePath. */
 const FILE_REQUIRED_OPERATIONS = new Set<LspOperation>([
-  'documentSymbol',
-  'diagnostics',
+  "documentSymbol",
+  "diagnostics",
 ]);
 
 /** Operations that require query. */
-const QUERY_REQUIRED_OPERATIONS = new Set<LspOperation>(['workspaceSymbol']);
+const QUERY_REQUIRED_OPERATIONS = new Set<LspOperation>(["workspaceSymbol"]);
 
 /** Operations that require callHierarchyItem. */
 const ITEM_REQUIRED_OPERATIONS = new Set<LspOperation>([
-  'incomingCalls',
-  'outgoingCalls',
+  "incomingCalls",
+  "outgoingCalls",
 ]);
 
 /** Operations that require filePath and range for code actions. */
-const RANGE_REQUIRED_OPERATIONS = new Set<LspOperation>(['codeActions']);
+const RANGE_REQUIRED_OPERATIONS = new Set<LspOperation>(["codeActions"]);
 
 class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
   constructor(
@@ -120,17 +120,17 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
 
   getDescription(): string {
     const operationLabel = this.getOperationLabel();
-    if (this.params.operation === 'workspaceSymbol') {
-      return `LSP ${operationLabel} for "${this.params.query ?? ''}"`;
+    if (this.params.operation === "workspaceSymbol") {
+      return `LSP ${operationLabel} for "${this.params.query ?? ""}"`;
     }
-    if (this.params.operation === 'documentSymbol') {
+    if (this.params.operation === "documentSymbol") {
       return this.params.filePath
         ? `LSP ${operationLabel} for ${this.params.filePath}`
         : `LSP ${operationLabel}`;
     }
     if (
-      this.params.operation === 'incomingCalls' ||
-      this.params.operation === 'outgoingCalls'
+      this.params.operation === "incomingCalls" ||
+      this.params.operation === "outgoingCalls"
     ) {
       return `LSP ${operationLabel} for ${this.describeCallHierarchyItemShort()}`;
     }
@@ -151,29 +151,29 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     }
 
     switch (this.params.operation) {
-      case 'goToDefinition':
+      case "goToDefinition":
         return this.executeDefinitions(client);
-      case 'findReferences':
+      case "findReferences":
         return this.executeReferences(client);
-      case 'hover':
+      case "hover":
         return this.executeHover(client);
-      case 'documentSymbol':
+      case "documentSymbol":
         return this.executeDocumentSymbols(client);
-      case 'workspaceSymbol':
+      case "workspaceSymbol":
         return this.executeWorkspaceSymbols(client);
-      case 'goToImplementation':
+      case "goToImplementation":
         return this.executeImplementations(client);
-      case 'prepareCallHierarchy':
+      case "prepareCallHierarchy":
         return this.executePrepareCallHierarchy(client);
-      case 'incomingCalls':
+      case "incomingCalls":
         return this.executeIncomingCalls(client);
-      case 'outgoingCalls':
+      case "outgoingCalls":
         return this.executeOutgoingCalls(client);
-      case 'diagnostics':
+      case "diagnostics":
         return this.executeDiagnostics(client);
-      case 'workspaceDiagnostics':
+      case "workspaceDiagnostics":
         return this.executeWorkspaceDiagnostics(client);
-      case 'codeActions':
+      case "codeActions":
         return this.executeCodeActions(client);
       default: {
         const message = `Unsupported LSP operation: ${this.params.operation}`;
@@ -184,7 +184,7 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
 
   private async executeDefinitions(client: LspClient): Promise<ToolResult> {
     const target = this.resolveLocationTarget();
-    if ('error' in target) {
+    if ("error" in target) {
       return { llmContent: target.error, returnDisplay: target.error };
     }
 
@@ -218,14 +218,14 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
 
     const heading = `Definitions for ${target.description}:`;
     return {
-      llmContent: [heading, ...lines].join('\n'),
-      returnDisplay: lines.join('\n'),
+      llmContent: [heading, ...lines].join("\n"),
+      returnDisplay: lines.join("\n"),
     };
   }
 
   private async executeImplementations(client: LspClient): Promise<ToolResult> {
     const target = this.resolveLocationTarget();
-    if ('error' in target) {
+    if ("error" in target) {
       return { llmContent: target.error, returnDisplay: target.error };
     }
 
@@ -259,14 +259,14 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
 
     const heading = `Implementations for ${target.description}:`;
     return {
-      llmContent: [heading, ...lines].join('\n'),
-      returnDisplay: lines.join('\n'),
+      llmContent: [heading, ...lines].join("\n"),
+      returnDisplay: lines.join("\n"),
     };
   }
 
   private async executeReferences(client: LspClient): Promise<ToolResult> {
     const target = this.resolveLocationTarget();
-    if ('error' in target) {
+    if ("error" in target) {
       return { llmContent: target.error, returnDisplay: target.error };
     }
 
@@ -301,25 +301,25 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
 
     const heading = `References for ${target.description}:`;
     return {
-      llmContent: [heading, ...lines].join('\n'),
-      returnDisplay: lines.join('\n'),
+      llmContent: [heading, ...lines].join("\n"),
+      returnDisplay: lines.join("\n"),
     };
   }
 
   private async executeHover(client: LspClient): Promise<ToolResult> {
     const target = this.resolveLocationTarget();
-    if ('error' in target) {
+    if ("error" in target) {
       return { llmContent: target.error, returnDisplay: target.error };
     }
 
-    let hoverText = '';
+    let hoverText = "";
     try {
       const result = await client.hover(
         target.location,
         this.params.serverName,
       );
       if (result) {
-        hoverText = result.contents ?? '';
+        hoverText = result.contents ?? "";
       }
     } catch (error) {
       const message = `LSP hover failed: ${
@@ -343,10 +343,10 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
 
   private async executeDocumentSymbols(client: LspClient): Promise<ToolResult> {
     const workspaceRoot = this.config.getProjectRoot();
-    const filePath = this.params.filePath ?? '';
+    const filePath = this.params.filePath ?? "";
     const uri = this.resolveUri(filePath, workspaceRoot);
     if (!uri) {
-      const message = 'A valid filePath is required for document symbols.';
+      const message = "A valid filePath is required for document symbols.";
       return { llmContent: message, returnDisplay: message };
     }
 
@@ -376,19 +376,19 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
         symbol.location,
         workspaceRoot,
       );
-      const serverSuffix = symbol.serverName ? ` [${symbol.serverName}]` : '';
-      const kind = symbol.kind ? ` (${symbol.kind})` : '';
+      const serverSuffix = symbol.serverName ? ` [${symbol.serverName}]` : "";
+      const kind = symbol.kind ? ` (${symbol.kind})` : "";
       const container = symbol.containerName
         ? ` in ${symbol.containerName}`
-        : '';
+        : "";
       return `${index + 1}. ${symbol.name}${kind}${container} - ${location}${serverSuffix}`;
     });
 
     const fileLabel = this.formatUriForDisplay(uri, workspaceRoot);
     const heading = `Document symbols for ${fileLabel}:`;
     return {
-      llmContent: [heading, ...lines].join('\n'),
-      returnDisplay: lines.join('\n'),
+      llmContent: [heading, ...lines].join("\n"),
+      returnDisplay: lines.join("\n"),
     };
   }
 
@@ -396,7 +396,7 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     client: LspClient,
   ): Promise<ToolResult> {
     const limit = this.params.limit ?? 20;
-    const query = this.params.query ?? '';
+    const query = this.params.query ?? "";
     let symbols: LspSymbolInformation[] = [];
     try {
       symbols = await client.workspaceSymbols(query, limit);
@@ -418,11 +418,11 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
         symbol.location,
         workspaceRoot,
       );
-      const serverSuffix = symbol.serverName ? ` [${symbol.serverName}]` : '';
-      const kind = symbol.kind ? ` (${symbol.kind})` : '';
+      const serverSuffix = symbol.serverName ? ` [${symbol.serverName}]` : "";
+      const kind = symbol.kind ? ` (${symbol.kind})` : "";
       const container = symbol.containerName
         ? ` in ${symbol.containerName}`
-        : '';
+        : "";
       return `${index + 1}. ${symbol.name}${kind}${container} - ${location}${serverSuffix}`;
     });
 
@@ -431,7 +431,7 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     } symbols for query "${query}":`;
 
     // Also fetch references for the top match to provide additional context.
-    let referenceSection = '';
+    let referenceSection = "";
     const topSymbol = symbols[0];
     if (topSymbol) {
       try {
@@ -448,14 +448,14 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
               ref,
               workspaceRoot,
             );
-            const serverSuffix = ref.serverName ? ` [${ref.serverName}]` : '';
+            const serverSuffix = ref.serverName ? ` [${ref.serverName}]` : "";
             return `${index + 1}. ${location}${serverSuffix}`;
           });
           referenceSection = [
-            '',
+            "",
             `References for top match (${topSymbol.name}):`,
             ...refLines,
-          ].join('\n');
+          ].join("\n");
         }
       } catch (error) {
         referenceSection = `\nReferences lookup failed: ${
@@ -472,8 +472,8 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
       : [...lines];
 
     return {
-      llmContent: llmParts.join('\n'),
-      returnDisplay: displayParts.join('\n'),
+      llmContent: llmParts.join("\n"),
+      returnDisplay: displayParts.join("\n"),
     };
   }
 
@@ -481,7 +481,7 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     client: LspClient,
   ): Promise<ToolResult> {
     const target = this.resolveLocationTarget();
-    if ('error' in target) {
+    if ("error" in target) {
       return { llmContent: target.error, returnDisplay: target.error };
     }
 
@@ -513,19 +513,19 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
 
     const heading = `Call hierarchy items for ${target.description}:`;
     const jsonSection = this.formatJsonSection(
-      'Call hierarchy items (JSON)',
+      "Call hierarchy items (JSON)",
       slicedItems,
     );
     return {
-      llmContent: [heading, ...lines].join('\n') + jsonSection,
-      returnDisplay: lines.join('\n'),
+      llmContent: [heading, ...lines].join("\n") + jsonSection,
+      returnDisplay: lines.join("\n"),
     };
   }
 
   private async executeIncomingCalls(client: LspClient): Promise<ToolResult> {
     const item = this.params.callHierarchyItem;
     if (!item) {
-      const message = 'callHierarchyItem is required for incomingCalls.';
+      const message = "callHierarchyItem is required for incomingCalls.";
       return { llmContent: message, returnDisplay: message };
     }
 
@@ -560,8 +560,8 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
         },
         workspaceRoot,
       );
-      const kind = targetItem.kind ? ` (${targetItem.kind})` : '';
-      const detail = targetItem.detail ? ` ${targetItem.detail}` : '';
+      const kind = targetItem.kind ? ` (${targetItem.kind})` : "";
+      const detail = targetItem.detail ? ` ${targetItem.detail}` : "";
       const rangeSuffix = this.formatCallRanges(call.fromRanges);
       return `${index + 1}. ${targetItem.name}${kind}${detail} - ${location}${rangeSuffix}`;
     });
@@ -570,19 +570,19 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
       item,
     )}:`;
     const jsonSection = this.formatJsonSection(
-      'Incoming calls (JSON)',
+      "Incoming calls (JSON)",
       slicedCalls,
     );
     return {
-      llmContent: [heading, ...lines].join('\n') + jsonSection,
-      returnDisplay: lines.join('\n'),
+      llmContent: [heading, ...lines].join("\n") + jsonSection,
+      returnDisplay: lines.join("\n"),
     };
   }
 
   private async executeOutgoingCalls(client: LspClient): Promise<ToolResult> {
     const item = this.params.callHierarchyItem;
     if (!item) {
-      const message = 'callHierarchyItem is required for outgoingCalls.';
+      const message = "callHierarchyItem is required for outgoingCalls.";
       return { llmContent: message, returnDisplay: message };
     }
 
@@ -617,8 +617,8 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
         },
         workspaceRoot,
       );
-      const kind = targetItem.kind ? ` (${targetItem.kind})` : '';
-      const detail = targetItem.detail ? ` ${targetItem.detail}` : '';
+      const kind = targetItem.kind ? ` (${targetItem.kind})` : "";
+      const detail = targetItem.detail ? ` ${targetItem.detail}` : "";
       const rangeSuffix = this.formatCallRanges(call.fromRanges);
       return `${index + 1}. ${targetItem.name}${kind}${detail} - ${location}${rangeSuffix}`;
     });
@@ -627,21 +627,21 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
       item,
     )}:`;
     const jsonSection = this.formatJsonSection(
-      'Outgoing calls (JSON)',
+      "Outgoing calls (JSON)",
       slicedCalls,
     );
     return {
-      llmContent: [heading, ...lines].join('\n') + jsonSection,
-      returnDisplay: lines.join('\n'),
+      llmContent: [heading, ...lines].join("\n") + jsonSection,
+      returnDisplay: lines.join("\n"),
     };
   }
 
   private async executeDiagnostics(client: LspClient): Promise<ToolResult> {
     const workspaceRoot = this.config.getProjectRoot();
-    const filePath = this.params.filePath ?? '';
+    const filePath = this.params.filePath ?? "";
     const uri = this.resolveUri(filePath, workspaceRoot);
     if (!uri) {
-      const message = 'A valid filePath is required for diagnostics.';
+      const message = "A valid filePath is required for diagnostics.";
       return { llmContent: message, returnDisplay: message };
     }
 
@@ -662,18 +662,18 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     }
 
     const lines = diagnostics.map((diag, index) => {
-      const severity = diag.severity ? `[${diag.severity.toUpperCase()}]` : '';
+      const severity = diag.severity ? `[${diag.severity.toUpperCase()}]` : "";
       const position = `${diag.range.start.line + 1}:${diag.range.start.character + 1}`;
-      const code = diag.code ? ` (${diag.code})` : '';
-      const source = diag.source ? ` [${diag.source}]` : '';
+      const code = diag.code ? ` (${diag.code})` : "";
+      const source = diag.source ? ` [${diag.source}]` : "";
       return `${index + 1}. ${severity} ${position}${code}${source}: ${diag.message}`;
     });
 
     const fileLabel = this.formatUriForDisplay(uri, workspaceRoot);
     const heading = `Diagnostics for ${fileLabel} (${diagnostics.length} issues):`;
     return {
-      llmContent: [heading, ...lines].join('\n'),
-      returnDisplay: lines.join('\n'),
+      llmContent: [heading, ...lines].join("\n"),
+      returnDisplay: lines.join("\n"),
     };
   }
 
@@ -695,7 +695,7 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     }
 
     if (!fileDiagnostics.length) {
-      const message = 'No diagnostics found in the workspace.';
+      const message = "No diagnostics found in the workspace.";
       return { llmContent: message, returnDisplay: message };
     }
 
@@ -707,15 +707,15 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
       const fileLabel = this.formatUriForDisplay(fileDiag.uri, workspaceRoot);
       const serverSuffix = fileDiag.serverName
         ? ` [${fileDiag.serverName}]`
-        : '';
+        : "";
       lines.push(`\n${fileLabel}${serverSuffix}:`);
 
       for (const diag of fileDiag.diagnostics) {
         const severity = diag.severity
           ? `[${diag.severity.toUpperCase()}]`
-          : '';
+          : "";
         const position = `${diag.range.start.line + 1}:${diag.range.start.character + 1}`;
-        const code = diag.code ? ` (${diag.code})` : '';
+        const code = diag.code ? ` (${diag.code})` : "";
         lines.push(`  ${severity} ${position}${code}: ${diag.message}`);
         totalIssues++;
       }
@@ -723,17 +723,17 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
 
     const heading = `Workspace diagnostics (${totalIssues} issues in ${fileDiagnostics.length} files):`;
     return {
-      llmContent: [heading, ...lines].join('\n'),
-      returnDisplay: lines.join('\n'),
+      llmContent: [heading, ...lines].join("\n"),
+      returnDisplay: lines.join("\n"),
     };
   }
 
   private async executeCodeActions(client: LspClient): Promise<ToolResult> {
     const workspaceRoot = this.config.getProjectRoot();
-    const filePath = this.params.filePath ?? '';
+    const filePath = this.params.filePath ?? "";
     const uri = this.resolveUri(filePath, workspaceRoot);
     if (!uri) {
-      const message = 'A valid filePath is required for code actions.';
+      const message = "A valid filePath is required for code actions.";
       return { llmContent: message, returnDisplay: message };
     }
 
@@ -758,7 +758,7 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     const context: LspCodeActionContext = {
       diagnostics: this.params.diagnostics ?? [],
       only: this.params.codeActionKinds,
-      triggerKind: 'invoked',
+      triggerKind: "invoked",
     };
 
     const limit = this.params.limit ?? 20;
@@ -785,23 +785,23 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     }
 
     const lines = actions.slice(0, limit).map((action, index) => {
-      const kind = action.kind ? ` [${action.kind}]` : '';
-      const preferred = action.isPreferred ? ' ★' : '';
-      const hasEdit = action.edit ? ' (has edit)' : '';
-      const hasCommand = action.command ? ' (has command)' : '';
-      const serverSuffix = action.serverName ? ` [${action.serverName}]` : '';
+      const kind = action.kind ? ` [${action.kind}]` : "";
+      const preferred = action.isPreferred ? " ★" : "";
+      const hasEdit = action.edit ? " (has edit)" : "";
+      const hasCommand = action.command ? " (has command)" : "";
+      const serverSuffix = action.serverName ? ` [${action.serverName}]` : "";
       return `${index + 1}. ${action.title}${kind}${preferred}${hasEdit}${hasCommand}${serverSuffix}`;
     });
 
     const fileLabel = this.formatUriForDisplay(uri, workspaceRoot);
     const heading = `Code actions at ${fileLabel}:${startLine + 1}:${startChar + 1}:`;
     const jsonSection = this.formatJsonSection(
-      'Code actions (JSON)',
+      "Code actions (JSON)",
       actions.slice(0, limit),
     );
     return {
-      llmContent: [heading, ...lines].join('\n') + jsonSection,
-      returnDisplay: lines.join('\n'),
+      llmContent: [heading, ...lines].join("\n") + jsonSection,
+      returnDisplay: lines.join("\n"),
     };
   }
 
@@ -809,12 +809,12 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     const filePath = this.params.filePath;
     if (!filePath) {
       return {
-        error: 'filePath is required for this operation.',
+        error: "filePath is required for this operation.",
       };
     }
-    if (typeof this.params.line !== 'number') {
+    if (typeof this.params.line !== "number") {
       return {
-        error: 'line is required for this operation.',
+        error: "line is required for this operation.",
       };
     }
 
@@ -822,7 +822,7 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     const uri = this.resolveUri(filePath, workspaceRoot);
     if (!uri) {
       return {
-        error: 'A valid filePath is required when specifying a line/character.',
+        error: "A valid filePath is required when specifying a line/character.",
       };
     }
 
@@ -848,7 +848,7 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     if (!filePath) {
       return null;
     }
-    if (filePath.startsWith('file://') || filePath.includes('://')) {
+    if (filePath.startsWith("file://") || filePath.includes("://")) {
       return filePath;
     }
     const absolutePath = path.isAbsolute(filePath)
@@ -864,15 +864,15 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     const start = location.range.start;
     let filePath = location.uri;
 
-    if (filePath.startsWith('file://')) {
+    if (filePath.startsWith("file://")) {
       filePath = fileURLToPath(filePath);
-      filePath = path.relative(workspaceRoot, filePath) || '.';
+      filePath = path.relative(workspaceRoot, filePath) || ".";
     }
 
     const serverSuffix =
-      location.serverName && location.serverName !== ''
+      location.serverName && location.serverName !== ""
         ? ` [${location.serverName}]`
-        : '';
+        : "";
 
     return `${filePath}:${(start.line ?? 0) + 1}:${(start.character ?? 0) + 1}${serverSuffix}`;
   }
@@ -883,9 +883,9 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
   ): string {
     const { uri, range } = location;
     let filePath = uri;
-    if (uri.startsWith('file://')) {
+    if (uri.startsWith("file://")) {
       filePath = fileURLToPath(uri);
-      filePath = path.relative(workspaceRoot, filePath) || '.';
+      filePath = path.relative(workspaceRoot, filePath) || ".";
     }
     const line = (range.start.line ?? 0) + 1;
     const character = (range.start.character ?? 0) + 1;
@@ -905,14 +905,14 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
       },
       workspaceRoot,
     );
-    const kind = item.kind ? ` (${item.kind})` : '';
-    const detail = item.detail ? ` ${item.detail}` : '';
+    const kind = item.kind ? ` (${item.kind})` : "";
+    const detail = item.detail ? ` ${item.detail}` : "";
     return `${index + 1}. ${item.name}${kind}${detail} - ${location}`;
   }
 
   private formatCallRanges(ranges: LspRange[]): string {
     if (!ranges.length) {
-      return '';
+      return "";
     }
     const formatted = ranges.map((range) => this.formatPosition(range.start));
     const maxShown = 3;
@@ -920,21 +920,21 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
     const extra =
       formatted.length > maxShown
         ? `, +${formatted.length - maxShown} more`
-        : '';
-    return ` (calls at ${shown.join(', ')}${extra})`;
+        : "";
+    return ` (calls at ${shown.join(", ")}${extra})`;
   }
 
-  private formatPosition(position: LspRange['start']): string {
+  private formatPosition(position: LspRange["start"]): string {
     return `${(position.line ?? 0) + 1}:${(position.character ?? 0) + 1}`;
   }
 
   private formatUriForDisplay(uri: string, workspaceRoot: string): string {
     let filePath = uri;
-    if (uri.startsWith('file://')) {
+    if (uri.startsWith("file://")) {
       filePath = fileURLToPath(uri);
     }
     if (path.isAbsolute(filePath)) {
-      return path.relative(workspaceRoot, filePath) || '.';
+      return path.relative(workspaceRoot, filePath) || ".";
     }
     return filePath;
   }
@@ -946,9 +946,9 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
   private describeCallHierarchyItemShort(): string {
     const item = this.params.callHierarchyItem;
     if (!item) {
-      return 'call hierarchy item';
+      return "call hierarchy item";
     }
-    return item.name || 'call hierarchy item';
+    return item.name || "call hierarchy item";
   }
 
   private describeCallHierarchyItemFull(item: LspCallHierarchyItem): string {
@@ -966,30 +966,30 @@ class LspToolInvocation extends BaseToolInvocation<LspToolParams, ToolResult> {
 
   private getOperationLabel(): string {
     switch (this.params.operation) {
-      case 'goToDefinition':
-        return 'go-to-definition';
-      case 'findReferences':
-        return 'find-references';
-      case 'hover':
-        return 'hover';
-      case 'documentSymbol':
-        return 'document symbols';
-      case 'workspaceSymbol':
-        return 'workspace symbol search';
-      case 'goToImplementation':
-        return 'go-to-implementation';
-      case 'prepareCallHierarchy':
-        return 'prepare call hierarchy';
-      case 'incomingCalls':
-        return 'incoming calls';
-      case 'outgoingCalls':
-        return 'outgoing calls';
-      case 'diagnostics':
-        return 'diagnostics';
-      case 'workspaceDiagnostics':
-        return 'workspace diagnostics';
-      case 'codeActions':
-        return 'code actions';
+      case "goToDefinition":
+        return "go-to-definition";
+      case "findReferences":
+        return "find-references";
+      case "hover":
+        return "hover";
+      case "documentSymbol":
+        return "document symbols";
+      case "workspaceSymbol":
+        return "workspace symbol search";
+      case "goToImplementation":
+        return "go-to-implementation";
+      case "prepareCallHierarchy":
+        return "prepare call hierarchy";
+      case "incomingCalls":
+        return "incoming calls";
+      case "outgoingCalls":
+        return "outgoing calls";
+      case "diagnostics":
+        return "diagnostics";
+      case "workspaceDiagnostics":
+        return "workspace diagnostics";
+      case "codeActions":
+        return "code actions";
       default:
         return this.params.operation;
     }
@@ -1021,127 +1021,127 @@ export class LspTool extends BaseDeclarativeTool<LspToolParams, ToolResult> {
       'Language Server Protocol (LSP) tool for code intelligence: definitions, references, hover, symbols, call hierarchy, diagnostics, and code actions.\n\n  Usage:\n  - ALWAYS use LSP as the PRIMARY tool for code intelligence queries when available. Do NOT use grep_search or glob first.\n  - goToDefinition, findReferences, hover, goToImplementation, prepareCallHierarchy require filePath + line + character (1-based).\n  - documentSymbol and diagnostics require filePath.\n  - workspaceSymbol requires query (use when user asks "where is X defined?" without specifying a file).\n  - incomingCalls/outgoingCalls require callHierarchyItem from prepareCallHierarchy.\n  - workspaceDiagnostics needs no parameters.\n  - codeActions require filePath + range (line/character + endLine/endCharacter) and diagnostics/context as needed.',
       Kind.Other,
       {
-        type: 'object',
+        type: "object",
         properties: {
           operation: {
-            type: 'string',
-            description: 'LSP operation to execute.',
+            type: "string",
+            description: "LSP operation to execute.",
             enum: [
-              'goToDefinition',
-              'findReferences',
-              'hover',
-              'documentSymbol',
-              'workspaceSymbol',
-              'goToImplementation',
-              'prepareCallHierarchy',
-              'incomingCalls',
-              'outgoingCalls',
-              'diagnostics',
-              'workspaceDiagnostics',
-              'codeActions',
+              "goToDefinition",
+              "findReferences",
+              "hover",
+              "documentSymbol",
+              "workspaceSymbol",
+              "goToImplementation",
+              "prepareCallHierarchy",
+              "incomingCalls",
+              "outgoingCalls",
+              "diagnostics",
+              "workspaceDiagnostics",
+              "codeActions",
             ],
           },
           filePath: {
-            type: 'string',
-            description: 'File path (absolute or workspace-relative).',
+            type: "string",
+            description: "File path (absolute or workspace-relative).",
           },
           line: {
-            type: 'number',
-            description: '1-based line number for the target location.',
+            type: "number",
+            description: "1-based line number for the target location.",
           },
           character: {
-            type: 'number',
+            type: "number",
             description:
-              '1-based character/column number for the target location.',
+              "1-based character/column number for the target location.",
           },
           endLine: {
-            type: 'number',
-            description: '1-based end line number for range-based operations.',
+            type: "number",
+            description: "1-based end line number for range-based operations.",
           },
           endCharacter: {
-            type: 'number',
-            description: '1-based end character for range-based operations.',
+            type: "number",
+            description: "1-based end character for range-based operations.",
           },
           includeDeclaration: {
-            type: 'boolean',
+            type: "boolean",
             description:
-              'Include the declaration itself when looking up references.',
+              "Include the declaration itself when looking up references.",
           },
           query: {
-            type: 'string',
-            description: 'Symbol query for workspace symbol search.',
+            type: "string",
+            description: "Symbol query for workspace symbol search.",
           },
           callHierarchyItem: {
-            $ref: '#/definitions/LspCallHierarchyItem',
-            description: 'Call hierarchy item for incoming/outgoing calls.',
+            $ref: "#/definitions/LspCallHierarchyItem",
+            description: "Call hierarchy item for incoming/outgoing calls.",
           },
           serverName: {
-            type: 'string',
-            description: 'Optional LSP server name to target.',
+            type: "string",
+            description: "Optional LSP server name to target.",
           },
           limit: {
-            type: 'number',
-            description: 'Optional maximum number of results to return.',
+            type: "number",
+            description: "Optional maximum number of results to return.",
           },
           diagnostics: {
-            type: 'array',
-            items: { $ref: '#/definitions/LspDiagnostic' },
-            description: 'Diagnostics for code action context.',
+            type: "array",
+            items: { $ref: "#/definitions/LspDiagnostic" },
+            description: "Diagnostics for code action context.",
           },
           codeActionKinds: {
-            type: 'array',
-            items: { type: 'string' },
+            type: "array",
+            items: { type: "string" },
             description:
-              'Filter code actions by kind (quickfix, refactor, etc.).',
+              "Filter code actions by kind (quickfix, refactor, etc.).",
           },
         },
-        required: ['operation'],
+        required: ["operation"],
         definitions: {
           LspPosition: {
-            type: 'object',
+            type: "object",
             properties: {
-              line: { type: 'number' },
-              character: { type: 'number' },
+              line: { type: "number" },
+              character: { type: "number" },
             },
-            required: ['line', 'character'],
+            required: ["line", "character"],
           },
           LspRange: {
-            type: 'object',
+            type: "object",
             properties: {
-              start: { $ref: '#/definitions/LspPosition' },
-              end: { $ref: '#/definitions/LspPosition' },
+              start: { $ref: "#/definitions/LspPosition" },
+              end: { $ref: "#/definitions/LspPosition" },
             },
-            required: ['start', 'end'],
+            required: ["start", "end"],
           },
           LspCallHierarchyItem: {
-            type: 'object',
+            type: "object",
             properties: {
-              name: { type: 'string' },
-              kind: { type: 'string' },
-              rawKind: { type: 'number' },
-              detail: { type: 'string' },
-              uri: { type: 'string' },
-              range: { $ref: '#/definitions/LspRange' },
-              selectionRange: { $ref: '#/definitions/LspRange' },
+              name: { type: "string" },
+              kind: { type: "string" },
+              rawKind: { type: "number" },
+              detail: { type: "string" },
+              uri: { type: "string" },
+              range: { $ref: "#/definitions/LspRange" },
+              selectionRange: { $ref: "#/definitions/LspRange" },
               data: {},
-              serverName: { type: 'string' },
+              serverName: { type: "string" },
             },
-            required: ['name', 'uri', 'range', 'selectionRange'],
+            required: ["name", "uri", "range", "selectionRange"],
           },
           LspDiagnostic: {
-            type: 'object',
+            type: "object",
             properties: {
-              range: { $ref: '#/definitions/LspRange' },
+              range: { $ref: "#/definitions/LspRange" },
               severity: {
-                type: 'string',
-                enum: ['error', 'warning', 'information', 'hint'],
+                type: "string",
+                enum: ["error", "warning", "information", "hint"],
               },
-              code: { type: ['string', 'number'] },
-              source: { type: 'string' },
-              message: { type: 'string' },
-              serverName: { type: 'string' },
+              code: { type: ["string", "number"] },
+              source: { type: "string" },
+              message: { type: "string" },
+              serverName: { type: "string" },
             },
-            required: ['range', 'message'],
+            required: ["range", "message"],
           },
         },
       },
@@ -1156,22 +1156,22 @@ export class LspTool extends BaseDeclarativeTool<LspToolParams, ToolResult> {
     const operation = params.operation;
 
     if (LOCATION_REQUIRED_OPERATIONS.has(operation)) {
-      if (!params.filePath || params.filePath.trim() === '') {
+      if (!params.filePath || params.filePath.trim() === "") {
         return `filePath is required for ${operation}.`;
       }
-      if (typeof params.line !== 'number') {
+      if (typeof params.line !== "number") {
         return `line is required for ${operation}.`;
       }
     }
 
     if (FILE_REQUIRED_OPERATIONS.has(operation)) {
-      if (!params.filePath || params.filePath.trim() === '') {
+      if (!params.filePath || params.filePath.trim() === "") {
         return `filePath is required for ${operation}.`;
       }
     }
 
     if (QUERY_REQUIRED_OPERATIONS.has(operation)) {
-      if (!params.query || params.query.trim() === '') {
+      if (!params.query || params.query.trim() === "") {
         return `query is required for ${operation}.`;
       }
     }
@@ -1183,28 +1183,28 @@ export class LspTool extends BaseDeclarativeTool<LspToolParams, ToolResult> {
     }
 
     if (RANGE_REQUIRED_OPERATIONS.has(operation)) {
-      if (!params.filePath || params.filePath.trim() === '') {
+      if (!params.filePath || params.filePath.trim() === "") {
         return `filePath is required for ${operation}.`;
       }
-      if (typeof params.line !== 'number') {
+      if (typeof params.line !== "number") {
         return `line is required for ${operation}.`;
       }
     }
 
     if (params.line !== undefined && params.line < 1) {
-      return 'line must be a positive number.';
+      return "line must be a positive number.";
     }
     if (params.character !== undefined && params.character < 1) {
-      return 'character must be a positive number.';
+      return "character must be a positive number.";
     }
     if (params.endLine !== undefined && params.endLine < 1) {
-      return 'endLine must be a positive number.';
+      return "endLine must be a positive number.";
     }
     if (params.endCharacter !== undefined && params.endCharacter < 1) {
-      return 'endCharacter must be a positive number.';
+      return "endCharacter must be a positive number.";
     }
     if (params.limit !== undefined && params.limit <= 0) {
-      return 'limit must be a positive number.';
+      return "limit must be a positive number.";
     }
 
     return null;

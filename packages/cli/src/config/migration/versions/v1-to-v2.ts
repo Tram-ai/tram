@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { SettingsMigration } from '../types.js';
+import type { SettingsMigration } from "../types.js";
 import {
   CONSOLIDATED_DISABLE_KEYS,
   V1_INDICATOR_KEYS,
   V1_TO_V2_MIGRATION_MAP,
   V1_TO_V2_PRESERVE_DISABLE_MAP,
   V2_CONTAINER_KEYS,
-} from './v1-to-v2-shared.js';
-import { setNestedPropertySafe } from '../../../utils/settingsUtils.js';
+} from "./v1-to-v2-shared.js";
+import { setNestedPropertySafe } from "../../../utils/settingsUtils.js";
 
 /**
  * Heuristic indicators for deciding whether an object is "V1-like".
@@ -64,15 +64,15 @@ export class V1ToV2Migration implements SettingsMigration {
    *   are ignored while legacy-shaped indicators can still trigger migration.
    */
   shouldMigrate(settings: unknown): boolean {
-    if (typeof settings !== 'object' || settings === null) {
+    if (typeof settings !== "object" || settings === null) {
       return false;
     }
 
     const s = settings as Record<string, unknown>;
 
     // If $version exists and is a number >= 2, it's not V1
-    const version = s['$version'];
-    if (typeof version === 'number' && version >= 2) {
+    const version = s["$version"];
+    if (typeof version === "number" && version >= 2) {
       return false;
     }
 
@@ -88,7 +88,7 @@ export class V1ToV2Migration implements SettingsMigration {
       // Skip keys with object values - they may already be in V2 nested format
       // But don't let them block migration of other keys
       if (
-        typeof value === 'object' &&
+        typeof value === "object" &&
         value !== null &&
         !Array.isArray(value)
       ) {
@@ -125,8 +125,8 @@ export class V1ToV2Migration implements SettingsMigration {
     settings: unknown,
     _scope: string,
   ): { settings: unknown; warnings: string[] } {
-    if (typeof settings !== 'object' || settings === null) {
-      throw new Error('Settings must be an object');
+    if (typeof settings !== "object" || settings === null) {
+      throw new Error("Settings must be an object");
     }
 
     const source = settings as Record<string, unknown>;
@@ -144,7 +144,7 @@ export class V1ToV2Migration implements SettingsMigration {
         // to prevent double-nesting (e.g., model.name.name).
         if (
           V2_CONTAINER_KEYS.has(v1Key) &&
-          typeof value === 'object' &&
+          typeof value === "object" &&
           value !== null &&
           !Array.isArray(value)
         ) {
@@ -157,10 +157,10 @@ export class V1ToV2Migration implements SettingsMigration {
         // If value is already an object and the path matches the key,
         // it might be a partial V2 structure. Merge its contents.
         if (
-          typeof value === 'object' &&
+          typeof value === "object" &&
           value !== null &&
           !Array.isArray(value) &&
-          v2Path.startsWith(v1Key + '.')
+          v2Path.startsWith(v1Key + ".")
         ) {
           // Merge nested properties from this partial V2 structure
           for (const [nestedKey, nestedValue] of Object.entries(value)) {
@@ -187,7 +187,7 @@ export class V1ToV2Migration implements SettingsMigration {
           // Preserve stable behavior: consolidated keys use presence semantics.
           // Only literal true remains true; all other present values become false.
           setNestedPropertySafe(result, v2Path, value === true);
-        } else if (typeof value === 'boolean') {
+        } else if (typeof value === "boolean") {
           // Non-consolidated disable* keys only migrate when explicitly boolean.
           setNestedPropertySafe(result, v2Path, value);
         }
@@ -196,9 +196,9 @@ export class V1ToV2Migration implements SettingsMigration {
     }
 
     // Step 3: Preserve mcpServers at the top level
-    if ('mcpServers' in source) {
-      result['mcpServers'] = source['mcpServers'];
-      processedKeys.add('mcpServers');
+    if ("mcpServers" in source) {
+      result["mcpServers"] = source["mcpServers"];
+      processedKeys.add("mcpServers");
     }
 
     // Step 4: Carry over any unrecognized keys (including unknown nested objects)
@@ -215,7 +215,7 @@ export class V1ToV2Migration implements SettingsMigration {
               V1_TO_V2_PRESERVE_DISABLE_MAP[processedKey];
             if (!v2Path) return false;
             // Check if the v2 path starts with this key + '.'
-            return v2Path.startsWith(key + '.');
+            return v2Path.startsWith(key + ".");
           },
         );
 
@@ -224,7 +224,7 @@ export class V1ToV2Migration implements SettingsMigration {
           // Merge its unprocessed children instead of overwriting
           const existingValue = source[key];
           if (
-            typeof existingValue === 'object' &&
+            typeof existingValue === "object" &&
             existingValue !== null &&
             !Array.isArray(existingValue)
           ) {
@@ -257,7 +257,7 @@ export class V1ToV2Migration implements SettingsMigration {
     }
 
     // Step 5: Set version to 2
-    result['$version'] = 2;
+    result["$version"] = 2;
 
     return { settings: result, warnings };
   }

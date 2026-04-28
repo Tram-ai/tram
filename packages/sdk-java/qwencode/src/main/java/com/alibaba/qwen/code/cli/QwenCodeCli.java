@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Main entry point for interacting with the Qwen Code CLI. Provides static methods for simple queries and session management.
+ * Main entry point for interacting with the TRAM CLI. Provides static methods for simple queries and session management.
  *
  * @author skyfire
  * @version $Id: 0.0.1
@@ -34,7 +34,7 @@ public class QwenCodeCli {
     private static final Logger log = LoggerFactory.getLogger(QwenCodeCli.class);
 
     /**
-     * Sends a simple query to the Qwen Code CLI and returns a list of responses.
+     * Sends a simple query to the TRAM CLI and returns a list of responses.
      *
      * @param prompt The input prompt to send to the CLI
      * @return A list of strings representing the CLI's responses

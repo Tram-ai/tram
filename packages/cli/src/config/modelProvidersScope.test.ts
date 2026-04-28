@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, it } from 'vitest';
-import { SettingScope } from './settings.js';
-import { getPersistScopeForModelSelection } from './modelProvidersScope.js';
+import { describe, expect, it } from "vitest";
+import { SettingScope } from "./settings.js";
+import { getPersistScopeForModelSelection } from "./modelProvidersScope.js";
 
 function makeSettings({
   isTrusted,
@@ -23,21 +23,21 @@ function makeSettings({
   // When undefined, treat as "not present in this scope" (the key is omitted),
   // matching how LoadedSettings is shaped when a settings file doesn't define it.
   if (userModelProviders !== undefined) {
-    userSettings['modelProviders'] = userModelProviders;
+    userSettings["modelProviders"] = userModelProviders;
   }
   if (workspaceModelProviders !== undefined) {
-    workspaceSettings['modelProviders'] = workspaceModelProviders;
+    workspaceSettings["modelProviders"] = workspaceModelProviders;
   }
 
   return {
     isTrusted,
     user: { settings: userSettings },
     workspace: { settings: workspaceSettings },
-  } as unknown as import('./settings.js').LoadedSettings;
+  } as unknown as import("./settings.js").LoadedSettings;
 }
 
-describe('getPersistScopeForModelSelection', () => {
-  it('prefers workspace when trusted and workspace defines modelProviders', () => {
+describe("getPersistScopeForModelSelection", () => {
+  it("prefers workspace when trusted and workspace defines modelProviders", () => {
     const settings = makeSettings({
       isTrusted: true,
       workspaceModelProviders: {},
@@ -49,7 +49,7 @@ describe('getPersistScopeForModelSelection', () => {
     );
   });
 
-  it('falls back to user when workspace does not define modelProviders', () => {
+  it("falls back to user when workspace does not define modelProviders", () => {
     const settings = makeSettings({
       isTrusted: true,
       workspaceModelProviders: undefined,
@@ -59,7 +59,7 @@ describe('getPersistScopeForModelSelection', () => {
     expect(getPersistScopeForModelSelection(settings)).toBe(SettingScope.User);
   });
 
-  it('ignores workspace modelProviders when workspace is untrusted', () => {
+  it("ignores workspace modelProviders when workspace is untrusted", () => {
     const settings = makeSettings({
       isTrusted: false,
       workspaceModelProviders: {},
@@ -69,7 +69,7 @@ describe('getPersistScopeForModelSelection', () => {
     expect(getPersistScopeForModelSelection(settings)).toBe(SettingScope.User);
   });
 
-  it('falls back to legacy trust heuristic when neither scope defines modelProviders', () => {
+  it("falls back to legacy trust heuristic when neither scope defines modelProviders", () => {
     const trusted = makeSettings({
       isTrusted: true,
       userModelProviders: undefined,

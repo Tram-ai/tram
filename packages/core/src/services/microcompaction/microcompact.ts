@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Content, Part } from '@google/genai';
+import type { Content, Part } from "@google/genai";
 
-import type { ClearContextOnIdleSettings } from '../../config/config.js';
-import { ToolNames } from '../../tools/tool-names.js';
+import type { ClearContextOnIdleSettings } from "../../config/config.js";
+import { ToolNames } from "../../tools/tool-names.js";
 
-export const MICROCOMPACT_CLEARED_MESSAGE = '[Old tool result content cleared]';
+export const MICROCOMPACT_CLEARED_MESSAGE = "[Old tool result content cleared]";
 
 const COMPACTABLE_TOOLS = new Set<string>([
   ToolNames.READ_FILE,
@@ -67,7 +67,7 @@ function collectCompactablePartRefs(history: Content[]): PartRef[] {
   const refs: PartRef[] = [];
   for (let ci = 0; ci < history.length; ci++) {
     const content = history[ci]!;
-    if (content.role !== 'user' || !content.parts) continue;
+    if (content.role !== "user" || !content.parts) continue;
     for (let pi = 0; pi < content.parts.length; pi++) {
       const part = content.parts[pi]!;
       if (
@@ -85,19 +85,19 @@ function collectCompactablePartRefs(history: Content[]): PartRef[] {
 
 /** True when the functionResponse carries an error (not a success output). */
 function isErrorResponse(part: Part): boolean {
-  return part.functionResponse?.response?.['error'] !== undefined;
+  return part.functionResponse?.response?.["error"] !== undefined;
 }
 
 function estimatePartTokens(part: Part): number {
   if (!part.functionResponse?.response) return 0;
-  const output = part.functionResponse.response['output'];
-  if (typeof output !== 'string') return 0;
+  const output = part.functionResponse.response["output"];
+  if (typeof output !== "string") return 0;
   return Math.ceil(output.length / 4);
 }
 
 function isAlreadyCleared(part: Part): boolean {
   return (
-    part.functionResponse?.response?.['output'] === MICROCOMPACT_CLEARED_MESSAGE
+    part.functionResponse?.response?.["output"] === MICROCOMPACT_CLEARED_MESSAGE
   );
 }
 
@@ -133,7 +133,7 @@ export function microcompactHistory(
   }
   const { gapMs } = trigger;
 
-  const envKeep = process.env['QWEN_MC_KEEP_RECENT'];
+  const envKeep = process.env["QWEN_MC_KEEP_RECENT"];
   const rawKeepRecent =
     envKeep !== undefined && Number.isFinite(Number(envKeep))
       ? Number(envKeep)

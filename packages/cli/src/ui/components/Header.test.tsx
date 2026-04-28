@@ -4,81 +4,81 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Header, AuthDisplayType } from './Header.js';
-import * as useTerminalSize from '../hooks/useTerminalSize.js';
+import { render } from "ink-testing-library";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { Header, AuthDisplayType } from "./Header.js";
+import * as useTerminalSize from "../hooks/useTerminalSize.js";
 
-vi.mock('../hooks/useTerminalSize.js');
+vi.mock("../hooks/useTerminalSize.js");
 const useTerminalSizeMock = vi.mocked(useTerminalSize.useTerminalSize);
 
 const defaultProps = {
-  version: '1.0.0',
+  version: "1.0.0",
   authDisplayType: AuthDisplayType.TRAM_OAUTH,
-  model: 'tramr-plus',
-  workingDirectory: '/home/user/projects/test',
+  model: "tramr-plus",
+  workingDirectory: "/home/user/projects/test",
 };
 
-describe('<Header />', () => {
+describe("<Header />", () => {
   beforeEach(() => {
     useTerminalSizeMock.mockReturnValue({ columns: 120, rows: 24 });
   });
 
-  it('renders the ASCII logo on wide terminal', () => {
+  it("renders the ASCII logo on wide terminal", () => {
     const { lastFrame } = render(<Header {...defaultProps} />);
-    expect(lastFrame()).toContain('██╔═══██╗');
+    expect(lastFrame()).toContain("██╔═══██╗");
   });
 
-  it('hides the ASCII logo on narrow terminal', () => {
+  it("hides the ASCII logo on narrow terminal", () => {
     useTerminalSizeMock.mockReturnValue({ columns: 60, rows: 24 });
     const { lastFrame } = render(<Header {...defaultProps} />);
-    expect(lastFrame()).not.toContain('██╔═══██╗');
-    expect(lastFrame()).toContain('>_ TRAM');
+    expect(lastFrame()).not.toContain("██╔═══██╗");
+    expect(lastFrame()).toContain(">_ TRAM");
   });
 
-  it('displays the version number', () => {
+  it("displays the version number", () => {
     const { lastFrame } = render(<Header {...defaultProps} />);
-    expect(lastFrame()).toContain('v1.0.0');
+    expect(lastFrame()).toContain("v1.0.0");
   });
 
-  it('displays auth type and model', () => {
+  it("displays auth type and model", () => {
     const { lastFrame } = render(<Header {...defaultProps} />);
-    expect(lastFrame()).toContain('TRAM OAuth');
-    expect(lastFrame()).toContain('tramr-plus');
+    expect(lastFrame()).toContain("TRAM OAuth");
+    expect(lastFrame()).toContain("tramr-plus");
   });
 
-  it('displays Coding Plan auth type', () => {
+  it("displays Coding Plan auth type", () => {
     const { lastFrame } = render(
       <Header
         {...defaultProps}
         authDisplayType={AuthDisplayType.CODING_PLAN}
       />,
     );
-    expect(lastFrame()).toContain('Coding Plan');
+    expect(lastFrame()).toContain("Coding Plan");
   });
 
-  it('displays API Key auth type', () => {
+  it("displays API Key auth type", () => {
     const { lastFrame } = render(
       <Header {...defaultProps} authDisplayType={AuthDisplayType.API_KEY} />,
     );
-    expect(lastFrame()).toContain('API Key');
+    expect(lastFrame()).toContain("API Key");
   });
 
-  it('displays Unknown when auth type is not set', () => {
+  it("displays Unknown when auth type is not set", () => {
     const { lastFrame } = render(
       <Header {...defaultProps} authDisplayType={undefined} />,
     );
-    expect(lastFrame()).toContain('Unknown');
+    expect(lastFrame()).toContain("Unknown");
   });
 
-  it('displays working directory', () => {
+  it("displays working directory", () => {
     const { lastFrame } = render(<Header {...defaultProps} />);
-    expect(lastFrame()).toContain('/home/user/projects/test');
+    expect(lastFrame()).toContain("/home/user/projects/test");
   });
 
-  it('renders with border around info panel', () => {
+  it("renders with border around info panel", () => {
     const { lastFrame } = render(<Header {...defaultProps} />);
-    expect(lastFrame()).toContain('┌');
-    expect(lastFrame()).toContain('┐');
+    expect(lastFrame()).toContain("┌");
+    expect(lastFrame()).toContain("┐");
   });
 });

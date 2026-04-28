@@ -15,7 +15,7 @@
  * initialized.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 import {
   ArenaEventType,
   ArenaSessionStatus,
@@ -25,9 +25,9 @@ import {
   type ArenaSessionCompleteEvent,
   type Config,
   type InProcessBackend,
-} from '@qwen-code/qwen-code-core';
-import type { AgentViewActions } from '../contexts/AgentViewContext.js';
-import { theme } from '../semantic-colors.js';
+} from "@tram-ai/tram-core";
+import type { AgentViewActions } from "../contexts/AgentViewContext.js";
+import { theme } from "../semantic-colors.js";
 
 const AGENT_COLORS = [
   theme.text.accent,

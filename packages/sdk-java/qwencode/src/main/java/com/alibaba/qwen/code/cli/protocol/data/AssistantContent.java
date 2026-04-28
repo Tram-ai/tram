@@ -3,7 +3,7 @@ package com.alibaba.qwen.code.cli.protocol.data;
 import java.util.Map;
 
 /**
- * Represents content from the assistant in a Qwen Code session.
+ * Represents content from the assistant in a TRAM session.
  *
  * @param <C> The type of content
  * @author skyfire

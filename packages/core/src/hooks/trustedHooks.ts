@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { Storage } from '../config/storage.js';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { Storage } from "../config/storage.js";
 import {
   getHookKey,
   type HookDefinition,
   type HookEventName,
-} from './types.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "./types.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('TRUSTED_HOOKS');
+const debugLogger = createDebugLogger("TRUSTED_HOOKS");
 
 interface TrustedHooksConfig {
   [projectPath: string]: string[]; // Array of trusted hook keys (name:command)
@@ -27,7 +27,7 @@ export class TrustedHooksManager {
   constructor() {
     this.configPath = path.join(
       Storage.getGlobalTramDir(),
-      'trusted_hooks.json',
+      "trusted_hooks.json",
     );
     this.load();
   }
@@ -35,11 +35,11 @@ export class TrustedHooksManager {
   private load(): void {
     try {
       if (fs.existsSync(this.configPath)) {
-        const content = fs.readFileSync(this.configPath, 'utf-8');
+        const content = fs.readFileSync(this.configPath, "utf-8");
         this.trustedHooks = JSON.parse(content);
       }
     } catch (error) {
-      debugLogger.warn('Failed to load trusted hooks config', error);
+      debugLogger.warn("Failed to load trusted hooks config", error);
       this.trustedHooks = {};
     }
   }
@@ -55,7 +55,7 @@ export class TrustedHooksManager {
         JSON.stringify(this.trustedHooks, null, 2),
       );
     } catch (error) {
-      debugLogger.warn('Failed to save trusted hooks config', error);
+      debugLogger.warn("Failed to save trusted hooks config", error);
     }
   }
 
@@ -82,7 +82,7 @@ export class TrustedHooksManager {
           const key = getHookKey(hook);
           if (!trustedKeys.has(key)) {
             // Return friendly name or command
-            untrusted.push(hook.name || hook.command || 'unknown-hook');
+            untrusted.push(hook.name || hook.command || "unknown-hook");
           }
         }
       }

@@ -2,26 +2,26 @@
  * Unit tests for query() option mapping
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import type { QueryOptions } from '../../src/query/createQuery.js';
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import type { QueryOptions } from "../../src/query/createQuery.js";
 
 const mockProcessTransport = vi.fn();
 const mockQuery = vi.fn();
 const mockPrepareSpawnInfo = vi.fn();
 
-vi.mock('../../src/transport/ProcessTransport.js', () => ({
+vi.mock("../../src/transport/ProcessTransport.js", () => ({
   ProcessTransport: mockProcessTransport,
 }));
 
-vi.mock('../../src/query/Query.js', () => ({
+vi.mock("../../src/query/Query.js", () => ({
   Query: mockQuery,
 }));
 
-vi.mock('../../src/utils/cliPath.js', () => ({
+vi.mock("../../src/utils/cliPath.js", () => ({
   prepareSpawnInfo: mockPrepareSpawnInfo,
 }));
 
-describe('query()', () => {
+describe("query()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -36,59 +36,59 @@ describe('query()', () => {
     }));
     mockQuery.mockImplementation(() => ({
       initialized: Promise.resolve(),
-      getSessionId: () => 'test-session-id',
+      getSessionId: () => "test-session-id",
       streamInput: vi.fn(),
     }));
   });
 
-  it('maps string systemPrompt to TransportOptions.systemPrompt', async () => {
-    const { query } = await import('../../src/query/createQuery.js');
+  it("maps string systemPrompt to TransportOptions.systemPrompt", async () => {
+    const { query } = await import("../../src/query/createQuery.js");
 
     query({
-      prompt: 'hello',
+      prompt: "hello",
       options: {
-        systemPrompt: 'You are a strict reviewer.',
+        systemPrompt: "You are a strict reviewer.",
       } satisfies QueryOptions,
     });
 
     expect(mockProcessTransport).toHaveBeenCalledWith(
       expect.objectContaining({
-        systemPrompt: 'You are a strict reviewer.',
+        systemPrompt: "You are a strict reviewer.",
       }),
     );
   });
 
-  it('maps preset systemPrompt append to TransportOptions.appendSystemPrompt', async () => {
-    const { query } = await import('../../src/query/createQuery.js');
+  it("maps preset systemPrompt append to TransportOptions.appendSystemPrompt", async () => {
+    const { query } = await import("../../src/query/createQuery.js");
 
     query({
-      prompt: 'hello',
+      prompt: "hello",
       options: {
         systemPrompt: {
-          type: 'preset',
-          preset: 'qwen_code',
-          append: 'Be terse.',
+          type: "preset",
+          preset: "qwen_code",
+          append: "Be terse.",
         },
       } satisfies QueryOptions,
     });
 
     const transportOptions = mockProcessTransport.mock.calls[0]?.[0];
 
-    expect(transportOptions.appendSystemPrompt).toBe('Be terse.');
+    expect(transportOptions.appendSystemPrompt).toBe("Be terse.");
     expect(transportOptions.systemPrompt).toBeUndefined();
   });
 
-  it('rejects non-qwen preset names at runtime validation', async () => {
-    const { query } = await import('../../src/query/createQuery.js');
+  it("rejects non-qwen preset names at runtime validation", async () => {
+    const { query } = await import("../../src/query/createQuery.js");
 
     expect(() =>
       query({
-        prompt: 'hello',
+        prompt: "hello",
         options: {
           systemPrompt: {
-            type: 'preset',
-            preset: 'claude_code',
-            append: 'Be terse.',
+            type: "preset",
+            preset: "claude_code",
+            append: "Be terse.",
           } as never,
         } satisfies QueryOptions,
       }),

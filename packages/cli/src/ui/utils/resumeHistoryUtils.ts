@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as path from 'node:path';
-import type { Part, FunctionCall } from '@google/genai';
+import * as path from "node:path";
+import type { Part, FunctionCall } from "@google/genai";
 import type {
   ResumedSessionData,
   ConversationRecord,
@@ -14,30 +14,30 @@ import type {
   ToolResultDisplay,
   SlashCommandRecordPayload,
   AtCommandRecordPayload,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import type {
   HistoryItem,
   HistoryItemWithoutId,
   IndividualToolCallDisplay,
-} from '../types.js';
-import { ToolCallStatus } from '../types.js';
+} from "../types.js";
+import { ToolCallStatus } from "../types.js";
 
 /**
  * Extracts text content from a Content object's parts (excluding thought parts).
  */
 function extractTextFromParts(parts: Part[] | undefined): string {
-  if (!parts) return '';
+  if (!parts) return "";
 
   const textParts: string[] = [];
   for (const part of parts) {
-    if ('text' in part && part.text) {
+    if ("text" in part && part.text) {
       // Skip thought parts - they have a 'thought' property
-      if (!('thought' in part && part.thought)) {
+      if (!("thought" in part && part.thought)) {
         textParts.push(part.text);
       }
     }
   }
-  return textParts.join('\n');
+  return textParts.join("\n");
 }
 
 /**
@@ -45,15 +45,15 @@ function extractTextFromParts(parts: Part[] | undefined): string {
  * Thought parts are identified by having `thought: true`.
  */
 function extractThoughtTextFromParts(parts: Part[] | undefined): string {
-  if (!parts) return '';
+  if (!parts) return "";
 
   const thoughtParts: string[] = [];
   for (const part of parts) {
-    if ('text' in part && part.text && 'thought' in part && part.thought) {
+    if ("text" in part && part.text && "thought" in part && part.thought) {
       thoughtParts.push(part.text);
     }
   }
-  return thoughtParts.join('\n');
+  return thoughtParts.join("\n");
 }
 
 /**
@@ -70,11 +70,11 @@ function extractFunctionCalls(
     args: Record<string, unknown>;
   }> = [];
   for (const part of parts) {
-    if ('functionCall' in part && part.functionCall) {
+    if ("functionCall" in part && part.functionCall) {
       const fc = part.functionCall as FunctionCall;
       calls.push({
         id: fc.id || `call-${calls.length}`,
-        name: fc.name || 'unknown',
+        name: fc.name || "unknown",
         args: (fc.args as Record<string, unknown>) || {},
       });
     }
@@ -101,10 +101,10 @@ function formatToolDescription(
     return invocation.getDescription();
   } catch {
     // Fallback: use the description arg directly if available
-    if (typeof args['description'] === 'string') {
-      return args['description'];
+    if (typeof args["description"] === "string") {
+      return args["description"];
     }
-    return '';
+    return "";
   }
 }
 
@@ -113,19 +113,19 @@ function formatToolDescription(
  * SlashCommandRecordPayload.outputHistoryItems.
  */
 function restoreHistoryItem(raw: unknown): HistoryItemWithoutId | undefined {
-  if (!raw || typeof raw !== 'object') {
+  if (!raw || typeof raw !== "object") {
     return;
   }
 
   const clone = { ...(raw as Record<string, unknown>) };
-  if ('timestamp' in clone) {
-    const ts = clone['timestamp'];
-    if (typeof ts === 'string' || typeof ts === 'number') {
-      clone['timestamp'] = new Date(ts);
+  if ("timestamp" in clone) {
+    const ts = clone["timestamp"];
+    if (typeof ts === "string" || typeof ts === "number") {
+      clone["timestamp"] = new Date(ts);
     }
   }
 
-  if (typeof clone['type'] !== 'string') {
+  if (typeof clone["type"] !== "string") {
     return;
   }
 
@@ -168,16 +168,16 @@ function convertToHistoryItems(
     payload: AtCommandRecordPayload,
   ): IndividualToolCallDisplay[] => {
     // Error case: single "Read File(s)" with error message
-    if (payload.status === 'error') {
+    if (payload.status === "error") {
       atCommandCounter += 1;
       const filesLabel = payload.filesRead?.length
-        ? payload.filesRead.join(', ')
-        : 'files';
+        ? payload.filesRead.join(", ")
+        : "files";
       return [
         {
           callId: `at-command-${atCommandCounter}`,
-          name: 'Read File(s)',
-          description: 'Error attempting to read files',
+          name: "Read File(s)",
+          description: "Error attempting to read files",
           status: ToolCallStatus.Error,
           resultDisplay:
             payload.message || `Error reading files (${filesLabel})`,
@@ -192,8 +192,8 @@ function convertToHistoryItems(
       return [
         {
           callId: `at-command-${atCommandCounter}`,
-          name: 'Read File',
-          description: 'Read File(s)',
+          name: "Read File",
+          description: "Read File(s)",
           status: ToolCallStatus.Success,
           resultDisplay: undefined,
           confirmationDetails: undefined,
@@ -203,10 +203,10 @@ function convertToHistoryItems(
 
     return payload.filesRead.map((filePath) => {
       atCommandCounter += 1;
-      const isDir = filePath.endsWith('/');
+      const isDir = filePath.endsWith("/");
       return {
         callId: `at-command-${atCommandCounter}`,
-        name: isDir ? 'Read Directory' : 'Read File',
+        name: isDir ? "Read Directory" : "Read File",
         description: isDir
           ? `Read directory ${path.basename(filePath)}`
           : `Read file ${path.basename(filePath)}`,
@@ -218,12 +218,12 @@ function convertToHistoryItems(
   };
 
   for (const record of conversation.messages) {
-    if (record.type === 'system') {
-      if (record.subtype === 'slash_command') {
+    if (record.type === "system") {
+      if (record.subtype === "slash_command") {
         // Flush any pending tool group to avoid mixing contexts.
         if (currentToolGroup.length > 0) {
           items.push({
-            type: 'tool_group',
+            type: "tool_group",
             tools: [...currentToolGroup],
           });
           currentToolGroup = [];
@@ -232,10 +232,10 @@ function convertToHistoryItems(
           | SlashCommandRecordPayload
           | undefined;
         if (!payload) continue;
-        if (payload.phase === 'invocation' && payload.rawCommand) {
-          items.push({ type: 'user', text: payload.rawCommand });
+        if (payload.phase === "invocation" && payload.rawCommand) {
+          items.push({ type: "user", text: payload.rawCommand });
         }
-        if (payload.phase === 'result') {
+        if (payload.phase === "result") {
           const outputs = payload.outputHistoryItems ?? [];
           for (const raw of outputs) {
             const restored = restoreHistoryItem(raw);
@@ -245,7 +245,7 @@ function convertToHistoryItems(
           }
         }
       }
-      if (record.subtype === 'at_command') {
+      if (record.subtype === "at_command") {
         const payload = record.systemPayload as
           | AtCommandRecordPayload
           | undefined;
@@ -255,12 +255,12 @@ function convertToHistoryItems(
       continue;
     }
     switch (record.type) {
-      case 'user': {
+      case "user": {
         if (pendingAtCommands.length > 0) {
           // Flush any pending tool group before user message
           if (currentToolGroup.length > 0) {
             items.push({
-              type: 'tool_group',
+              type: "tool_group",
               tools: [...currentToolGroup],
             });
             currentToolGroup = [];
@@ -271,13 +271,13 @@ function convertToHistoryItems(
             payload.userText ||
             extractTextFromParts(record.message?.parts as Part[]);
           if (text) {
-            items.push({ type: 'user', text });
+            items.push({ type: "user", text });
           }
 
           const toolDisplays = buildAtCommandDisplays(payload);
           if (toolDisplays.length > 0) {
             items.push({
-              type: 'tool_group',
+              type: "tool_group",
               tools: toolDisplays,
             });
           }
@@ -286,7 +286,7 @@ function convertToHistoryItems(
         // Flush any pending tool group before user message
         if (currentToolGroup.length > 0) {
           items.push({
-            type: 'tool_group',
+            type: "tool_group",
             tools: [...currentToolGroup],
           });
           currentToolGroup = [];
@@ -294,12 +294,12 @@ function convertToHistoryItems(
 
         const text = extractTextFromParts(record.message?.parts as Part[]);
         if (text) {
-          items.push({ type: 'user', text });
+          items.push({ type: "user", text });
         }
         break;
       }
 
-      case 'assistant': {
+      case "assistant": {
         const parts = record.message?.parts as Part[] | undefined;
 
         // Extract thought content
@@ -307,7 +307,7 @@ function convertToHistoryItems(
           .getContentGenerator()
           .useSummarizedThinking()
           ? extractThoughtTextFromParts(parts)
-          : '';
+          : "";
 
         // Extract text content (non-function-call, non-thought)
         const text = extractTextFromParts(parts);
@@ -320,12 +320,12 @@ function convertToHistoryItems(
           // Flush any pending tool group before thought
           if (currentToolGroup.length > 0) {
             items.push({
-              type: 'tool_group',
+              type: "tool_group",
               tools: [...currentToolGroup],
             });
             currentToolGroup = [];
           }
-          items.push({ type: 'gemini_thought', text: thoughtText });
+          items.push({ type: "gemini_thought", text: thoughtText });
         }
 
         // If there's text content, add it as a gemini message
@@ -333,12 +333,12 @@ function convertToHistoryItems(
           // Flush any pending tool group before text
           if (currentToolGroup.length > 0) {
             items.push({
-              type: 'tool_group',
+              type: "tool_group",
               tools: [...currentToolGroup],
             });
             currentToolGroup = [];
           }
-          items.push({ type: 'gemini', text });
+          items.push({ type: "gemini", text });
         }
 
         // Track function calls for pairing with results
@@ -351,7 +351,7 @@ function convertToHistoryItems(
           currentToolGroup.push({
             callId: fc.id,
             name: tool?.displayName || fc.name,
-            description: tool ? formatToolDescription(tool, fc.args) : '',
+            description: tool ? formatToolDescription(tool, fc.args) : "",
             resultDisplay: undefined,
             status: ToolCallStatus.Success, // Will be updated by tool_result
             confirmationDetails: undefined,
@@ -360,7 +360,7 @@ function convertToHistoryItems(
         break;
       }
 
-      case 'tool_result': {
+      case "tool_result": {
         // Update the corresponding tool call in the current group
         if (record.toolCallResult) {
           const callId = record.toolCallResult.callId;
@@ -372,13 +372,13 @@ function convertToHistoryItems(
             // Check if status exists and use it
             const rawStatus = (
               record.toolCallResult as Record<string, unknown>
-            )['status'] as string | undefined;
+            )["status"] as string | undefined;
             toolCall.status =
-              rawStatus === 'error'
+              rawStatus === "error"
                 ? ToolCallStatus.Error
                 : ToolCallStatus.Success;
           }
-          pendingToolCalls.delete(callId || '');
+          pendingToolCalls.delete(callId || "");
         }
         break;
       }
@@ -394,7 +394,7 @@ function convertToHistoryItems(
       // Flush any pending tool group before standalone @-command
       if (currentToolGroup.length > 0) {
         items.push({
-          type: 'tool_group',
+          type: "tool_group",
           tools: [...currentToolGroup],
         });
         currentToolGroup = [];
@@ -402,12 +402,12 @@ function convertToHistoryItems(
 
       const text = payload.userText;
       if (text) {
-        items.push({ type: 'user', text });
+        items.push({ type: "user", text });
       }
       const toolDisplays = buildAtCommandDisplays(payload);
       if (toolDisplays.length > 0) {
         items.push({
-          type: 'tool_group',
+          type: "tool_group",
           tools: toolDisplays,
         });
       }
@@ -417,7 +417,7 @@ function convertToHistoryItems(
   // Flush any remaining tool group
   if (currentToolGroup.length > 0) {
     items.push({
-      type: 'tool_group',
+      type: "tool_group",
       tools: currentToolGroup,
     });
   }

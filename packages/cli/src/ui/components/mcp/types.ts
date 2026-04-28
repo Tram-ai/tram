@@ -4,21 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type {
-  MCPServerConfig,
-  MCPServerStatus,
-} from '@tram-ai/tram-core';
+import type { MCPServerConfig, MCPServerStatus } from "@tram-ai/tram-core";
 
 /**
  * MCP管理步骤定义
  */
 export const MCP_MANAGEMENT_STEPS = {
-  SERVER_LIST: 'server-list',
-  SERVER_DETAIL: 'server-detail',
-  DISABLE_SCOPE_SELECT: 'disable-scope-select',
-  TOOL_LIST: 'tool-list',
-  TOOL_DETAIL: 'tool-detail',
-  AUTHENTICATE: 'authenticate', // OAuth 认证步骤
+  SERVER_LIST: "server-list",
+  SERVER_DETAIL: "server-detail",
+  DISABLE_SCOPE_SELECT: "disable-scope-select",
+  TOOL_LIST: "tool-list",
+  TOOL_DETAIL: "tool-detail",
+  AUTHENTICATE: "authenticate", // OAuth 认证步骤
 } as const;
 
 export type MCPManagementStep =
@@ -33,7 +30,7 @@ export interface MCPServerDisplayInfo {
   /** 连接状态 */
   status: MCPServerStatus;
   /** 来源类型 */
-  source: 'user' | 'project' | 'extension';
+  source: "user" | "project" | "extension";
   /** 配置文件路径 */
   configPath?: string;
   /** 服务器配置 */
@@ -147,7 +144,7 @@ export interface DisableScopeSelectStepProps {
   /** 选中的服务器 */
   server: MCPServerDisplayInfo | null;
   /** 选择 scope 回调 */
-  onSelectScope: (scope: 'user' | 'workspace') => void;
+  onSelectScope: (scope: "user" | "workspace") => void;
   /** 返回回调 */
   onBack: () => void;
 }

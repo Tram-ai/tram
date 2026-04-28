@@ -30,7 +30,7 @@ export type ExportMetadata = {
 };
 
 export type PlatformContextValue = {
-  platform: 'web';
+  platform: "web";
   postMessage: (message: unknown) => void;
   onMessage: (handler: (event: MessageEvent) => void) => () => void;
   openFile: (path: string) => void;

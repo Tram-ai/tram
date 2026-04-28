@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import { execSync } from 'node:child_process';
-import { simpleGit, CheckRepoActions } from 'simple-git';
-import type { SimpleGit } from 'simple-git';
-import { Storage } from '../config/storage.js';
-import { isCommandAvailable } from '../utils/shell-utils.js';
-import { isNodeError } from '../utils/errors.js';
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import { execSync } from "node:child_process";
+import { simpleGit, CheckRepoActions } from "simple-git";
+import type { SimpleGit } from "simple-git";
+import { Storage } from "../config/storage.js";
+import { isCommandAvailable } from "../utils/shell-utils.js";
+import { isNodeError } from "../utils/errors.js";
 
 /**
  * Commit message used for the baseline snapshot in worktrees.
@@ -19,14 +19,14 @@ import { isNodeError } from '../utils/errors.js';
  * a commit with this message is created so that later diffs only capture the
  * agent's changes — not the pre-existing local edits.
  */
-export const BASELINE_COMMIT_MESSAGE = 'baseline (dirty state overlay)';
+export const BASELINE_COMMIT_MESSAGE = "baseline (dirty state overlay)";
 
 /**
  * Default directory and branch-prefix name used for worktrees.
- * Changing this value affects the on-disk layout (`~/.qwen/<WORKTREES_DIR>/`)
+ * Changing this value affects the on-disk layout (`~/.tram/<WORKTREES_DIR>/`)
  * **and** the default git branch prefix (`<WORKTREES_DIR>/<sessionId>/…`).
  */
-export const WORKTREES_DIR = 'worktrees';
+export const WORKTREES_DIR = "worktrees";
 
 export interface WorktreeInfo {
   /** Unique identifier for this worktree */
@@ -141,11 +141,11 @@ export class GitWorktreeService {
    * Checks if git is available on the system.
    */
   async checkGitAvailable(): Promise<{ available: boolean; error?: string }> {
-    const { available } = isCommandAvailable('git');
+    const { available } = isCommandAvailable("git");
     if (!available) {
       return {
         available: false,
-        error: 'Git is not installed. Please install Git.',
+        error: "Git is not installed. Please install Git.",
       };
     }
     return { available: true };
@@ -185,19 +185,19 @@ export class GitWorktreeService {
     }
 
     try {
-      await this.git.init(false, { '--initial-branch': 'main' });
+      await this.git.init(false, { "--initial-branch": "main" });
 
       // Create initial commit so we can create worktrees
-      await this.git.add('.');
-      await this.git.commit('Initial commit', {
-        '--allow-empty': null,
+      await this.git.add(".");
+      await this.git.commit("Initial commit", {
+        "--allow-empty": null,
       });
 
       return { initialized: true };
     } catch (error) {
       return {
         initialized: false,
-        error: `Failed to initialize git repository: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: `Failed to initialize git repository: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   }
@@ -206,7 +206,7 @@ export class GitWorktreeService {
    * Gets the current branch name.
    */
   async getCurrentBranch(): Promise<string> {
-    const branch = await this.git.revparse(['--abbrev-ref', 'HEAD']);
+    const branch = await this.git.revparse(["--abbrev-ref", "HEAD"]);
     return branch.trim();
   }
 
@@ -214,7 +214,7 @@ export class GitWorktreeService {
    * Gets the current commit hash.
    */
   async getCurrentCommitHash(): Promise<string> {
-    const hash = await this.git.revparse(['HEAD']);
+    const hash = await this.git.revparse(["HEAD"]);
     return hash.trim();
   }
 
@@ -253,9 +253,9 @@ export class GitWorktreeService {
 
       // Create the worktree with a new branch
       await this.git.raw([
-        'worktree',
-        'add',
-        '-b',
+        "worktree",
+        "add",
+        "-b",
         branchName,
         worktreePath,
         base,
@@ -274,7 +274,7 @@ export class GitWorktreeService {
     } catch (error) {
       return {
         success: false,
-        error: `Failed to create worktree for "${name}": ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: `Failed to create worktree for "${name}": ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   }
@@ -301,7 +301,7 @@ export class GitWorktreeService {
       if (!sanitized) {
         result.errors.push({
           name,
-          error: 'Worktree name becomes empty after sanitization',
+          error: "Worktree name becomes empty after sanitization",
         });
         continue;
       }
@@ -322,7 +322,7 @@ export class GitWorktreeService {
     // Check git availability
     const gitCheck = await this.checkGitAvailable();
     if (!gitCheck.available) {
-      result.errors.push({ name: 'system', error: gitCheck.error! });
+      result.errors.push({ name: "system", error: gitCheck.error! });
       return result;
     }
 
@@ -330,8 +330,8 @@ export class GitWorktreeService {
     const isRepo = await this.isGitRepository();
     if (!isRepo) {
       result.errors.push({
-        name: 'repository',
-        error: 'Source path is not a git repository.',
+        name: "repository",
+        error: "Source path is not a git repository.",
       });
       return result;
     }
@@ -344,7 +344,7 @@ export class GitWorktreeService {
     await fs.mkdir(sessionDir, { recursive: true });
 
     // Save session config for later reference
-    const configPath = path.join(sessionDir, 'config.json');
+    const configPath = path.join(sessionDir, "config.json");
     const configFile: SessionConfigFile = {
       sessionId: config.sessionId,
       sourceRepoPath: config.sourceRepoPath,
@@ -359,9 +359,9 @@ export class GitWorktreeService {
     // without modifying the source working tree or index.
     // NOTE: `git stash create` does NOT support --include-untracked;
     // untracked files are handled separately below via file copy.
-    let dirtyStateSnapshot = '';
+    let dirtyStateSnapshot = "";
     try {
-      dirtyStateSnapshot = (await this.git.stash(['create'])).trim();
+      dirtyStateSnapshot = (await this.git.stash(["create"])).trim();
     } catch {
       // Ignore — proceed without dirty state if stash create fails
     }
@@ -371,11 +371,11 @@ export class GitWorktreeService {
     let untrackedFiles: string[] = [];
     try {
       const raw = await this.git.raw([
-        'ls-files',
-        '--others',
-        '--exclude-standard',
+        "ls-files",
+        "--others",
+        "--exclude-standard",
       ]);
-      untrackedFiles = raw.trim().split('\n').filter(Boolean);
+      untrackedFiles = raw.trim().split("\n").filter(Boolean);
     } catch {
       // Non-fatal: proceed without untracked files
     }
@@ -394,7 +394,7 @@ export class GitWorktreeService {
       } else {
         result.errors.push({
           name,
-          error: createResult.error || 'Unknown error',
+          error: createResult.error || "Unknown error",
         });
       }
     }
@@ -405,8 +405,8 @@ export class GitWorktreeService {
         await this.cleanupSession(config.sessionId);
       } catch (error) {
         result.errors.push({
-          name: 'cleanup',
-          error: `Failed to cleanup after partial worktree creation: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          name: "cleanup",
+          error: `Failed to cleanup after partial worktree creation: ${error instanceof Error ? error.message : "Unknown error"}`,
         });
       }
       result.success = false;
@@ -425,7 +425,7 @@ export class GitWorktreeService {
         // 1. Apply tracked dirty changes (staged + unstaged)
         if (dirtyStateSnapshot) {
           try {
-            await wtGit.raw(['stash', 'apply', dirtyStateSnapshot]);
+            await wtGit.raw(["stash", "apply", dirtyStateSnapshot]);
           } catch {
             // Non-fatal: worktree still usable with committed state only
           }
@@ -447,10 +447,10 @@ export class GitWorktreeService {
         //    (committed + dirty + untracked). This allows us to later diff
         //    only the agent's changes, excluding the pre-existing dirty state.
         try {
-          await wtGit.add(['--all']);
+          await wtGit.add(["--all"]);
           await wtGit.commit(BASELINE_COMMIT_MESSAGE, {
-            '--allow-empty': null,
-            '--no-verify': null,
+            "--allow-empty": null,
+            "--no-verify": null,
           });
         } catch {
           // Non-fatal: diff will fall back to merge-base if baseline is missing
@@ -479,12 +479,12 @@ export class GitWorktreeService {
           const worktreePath = path.join(worktreesDir, entry.name);
 
           // Read the actual branch from the worktree
-          let branchName = '';
+          let branchName = "";
           try {
-            branchName = execSync('git rev-parse --abbrev-ref HEAD', {
+            branchName = execSync("git rev-parse --abbrev-ref HEAD", {
               cwd: worktreePath,
-              encoding: 'utf8',
-              stdio: ['pipe', 'pipe', 'pipe'],
+              encoding: "utf8",
+              stdio: ["pipe", "pipe", "pipe"],
             }).trim();
           } catch {
             // Fallback if git command fails
@@ -512,7 +512,7 @@ export class GitWorktreeService {
 
       return worktrees;
     } catch (error) {
-      if (isNodeError(error) && error.code === 'ENOENT') {
+      if (isNodeError(error) && error.code === "ENOENT") {
         return [];
       }
       throw error;
@@ -527,19 +527,19 @@ export class GitWorktreeService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       // Remove the worktree from git
-      await this.git.raw(['worktree', 'remove', worktreePath, '--force']);
+      await this.git.raw(["worktree", "remove", worktreePath, "--force"]);
       return { success: true };
     } catch (error) {
       // Try to remove the directory manually if git worktree remove fails
       try {
         await fs.rm(worktreePath, { recursive: true, force: true });
         // Prune worktree references
-        await this.git.raw(['worktree', 'prune']);
+        await this.git.raw(["worktree", "prune"]);
         return { success: true };
       } catch (_rmError) {
         return {
           success: false,
-          error: `Failed to remove worktree: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          error: `Failed to remove worktree: ${error instanceof Error ? error.message : "Unknown error"}`,
         };
       }
     }
@@ -589,7 +589,7 @@ export class GitWorktreeService {
       await fs.rm(sessionDir, { recursive: true, force: true });
     } catch (error) {
       result.errors.push(
-        `Failed to remove session directory: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to remove session directory: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
 
@@ -597,7 +597,7 @@ export class GitWorktreeService {
     try {
       for (const branchName of worktreeBranches) {
         try {
-          await this.git.branch(['-D', branchName]);
+          await this.git.branch(["-D", branchName]);
           result.removedBranches.push(branchName);
         } catch {
           // Branch might already be deleted, ignore
@@ -609,7 +609,7 @@ export class GitWorktreeService {
 
     // Prune worktree references
     try {
-      await this.git.raw(['worktree', 'prune']);
+      await this.git.raw(["worktree", "prune"]);
     } catch {
       // Ignore prune errors
     }
@@ -636,10 +636,10 @@ export class GitWorktreeService {
 
     try {
       return await this.withStagedChanges(worktreeGit, () =>
-        worktreeGit.diff(['--binary', '--cached', base]),
+        worktreeGit.diff(["--binary", "--cached", base]),
       );
     } catch (error) {
-      return `Error getting diff: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      return `Error getting diff: ${error instanceof Error ? error.message : "Unknown error"}`;
     }
   }
 
@@ -666,14 +666,14 @@ export class GitWorktreeService {
 
       if (!base) {
         // Fallback: diff from merge-base
-        const targetHead = (await targetGit.revparse(['HEAD'])).trim();
+        const targetHead = (await targetGit.revparse(["HEAD"])).trim();
         base = (
-          await worktreeGit.raw(['merge-base', 'HEAD', targetHead])
+          await worktreeGit.raw(["merge-base", "HEAD", targetHead])
         ).trim();
       }
 
       const patch = await this.withStagedChanges(worktreeGit, () =>
-        worktreeGit.diff(['--binary', '--cached', base]),
+        worktreeGit.diff(["--binary", "--cached", base]),
       );
 
       if (!patch.trim()) {
@@ -685,7 +685,7 @@ export class GitWorktreeService {
         `.worktree-apply-${Date.now()}-${Math.random().toString(16).slice(2)}.patch`,
       );
       await fs.mkdir(path.dirname(patchFile), { recursive: true });
-      await fs.writeFile(patchFile, patch, 'utf-8');
+      await fs.writeFile(patchFile, patch, "utf-8");
 
       try {
         // When using the baseline, the target working tree already matches the
@@ -694,8 +694,8 @@ export class GitWorktreeService {
         // pre-image may not match the working tree; it falls back to index
         // blob lookup which would fail on baseline-relative patches.
         const applyArgs = hasBaseline
-          ? ['apply', '--whitespace=nowarn', patchFile]
-          : ['apply', '--3way', '--whitespace=nowarn', patchFile];
+          ? ["apply", "--whitespace=nowarn", patchFile]
+          : ["apply", "--3way", "--whitespace=nowarn", patchFile];
         await targetGit.raw(applyArgs);
       } finally {
         await fs.rm(patchFile, { force: true });
@@ -705,7 +705,7 @@ export class GitWorktreeService {
     } catch (error) {
       return {
         success: false,
-        error: `Failed to apply worktree changes: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: `Failed to apply worktree changes: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   }
@@ -734,9 +734,9 @@ export class GitWorktreeService {
 
       for (const entry of entries) {
         if (entry.isDirectory()) {
-          const configPath = path.join(baseDir, entry.name, 'config.json');
+          const configPath = path.join(baseDir, entry.name, "config.json");
           try {
-            const configContent = await fs.readFile(configPath, 'utf-8');
+            const configContent = await fs.readFile(configPath, "utf-8");
             const config = JSON.parse(configContent) as SessionConfigFile;
 
             const worktreesDir = path.join(baseDir, entry.name, WORKTREES_DIR);
@@ -751,7 +751,7 @@ export class GitWorktreeService {
             sessions.push({
               sessionId: entry.name,
               createdAt: config.createdAt || Date.now(),
-              sourceRepoPath: config.sourceRepoPath || '',
+              sourceRepoPath: config.sourceRepoPath || "",
               worktreeCount,
             });
           } catch {
@@ -776,11 +776,11 @@ export class GitWorktreeService {
     try {
       const sha = (
         await worktreeGit.raw([
-          'log',
-          '--grep',
+          "log",
+          "--grep",
           BASELINE_COMMIT_MESSAGE,
-          '--format=%H',
-          '-1',
+          "--format=%H",
+          "-1",
         ])
       ).trim();
       return sha || null;
@@ -794,12 +794,12 @@ export class GitWorktreeService {
     git: SimpleGit,
     fn: () => Promise<T>,
   ): Promise<T> {
-    await git.add(['--all']);
+    await git.add(["--all"]);
     try {
       return await fn();
     } finally {
       try {
-        await git.raw(['reset']);
+        await git.raw(["reset"]);
       } catch {
         // Best-effort: ignore reset failures
       }
@@ -810,9 +810,9 @@ export class GitWorktreeService {
     // Replace invalid characters with hyphens
     return name
       .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
+      .replace(/[^a-z0-9-]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
   }
 
   private async pathExists(p: string): Promise<boolean> {

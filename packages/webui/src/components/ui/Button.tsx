@@ -4,23 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ReactNode } from 'react';
-import { forwardRef } from 'react';
+import type { ReactNode } from "react";
+import { forwardRef } from "react";
 
 /**
  * Button variant types
  */
 export type ButtonVariant =
-  | 'primary'
-  | 'secondary'
-  | 'danger'
-  | 'ghost'
-  | 'outline';
+  | "primary"
+  | "secondary"
+  | "danger"
+  | "ghost"
+  | "outline";
 
 /**
  * Button size types
  */
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonSize = "sm" | "md" | "lg";
 
 /**
  * Button component props interface
@@ -57,15 +57,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
-      variant = 'primary',
-      size = 'md',
+      variant = "primary",
+      size = "md",
       disabled = false,
       loading = false,
       leftIcon,
       rightIcon,
       fullWidth = false,
-      className = '',
-      type = 'button',
+      className = "",
+      type = "button",
       ...props
     },
     ref,
@@ -73,29 +73,29 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const isDisabled = disabled || loading;
 
     const baseClasses =
-      'inline-flex items-center justify-center rounded font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+      "inline-flex items-center justify-center rounded font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
 
     const variantClasses: Record<ButtonVariant, string> = {
-      primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+      primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
       secondary:
-        'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500',
-      danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+        "bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500",
+      danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
       ghost:
-        'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-400',
+        "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-400",
       outline:
-        'bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-400',
+        "bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-400",
     };
 
     const sizeClasses: Record<ButtonSize, string> = {
-      sm: 'px-2 py-1 text-sm gap-1',
-      md: 'px-4 py-2 gap-2',
-      lg: 'px-6 py-3 text-lg gap-2',
+      sm: "px-2 py-1 text-sm gap-1",
+      md: "px-4 py-2 gap-2",
+      lg: "px-6 py-3 text-lg gap-2",
     };
 
     const disabledClass = isDisabled
-      ? 'opacity-50 cursor-not-allowed pointer-events-none'
-      : '';
-    const widthClass = fullWidth ? 'w-full' : '';
+      ? "opacity-50 cursor-not-allowed pointer-events-none"
+      : "";
+    const widthClass = fullWidth ? "w-full" : "";
 
     return (
       <button
@@ -138,6 +138,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 
-Button.displayName = 'Button';
+Button.displayName = "Button";
 
 export default Button;

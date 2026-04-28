@@ -2,25 +2,25 @@
  * npm registry support for extension installation and updates.
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import * as os from 'node:os';
-import * as https from 'node:https';
-import * as http from 'node:http';
-import * as tar from 'tar';
-import type { ExtensionInstallMetadata } from '../config/config.js';
-import { ExtensionUpdateState } from './extensionManager.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as os from "node:os";
+import * as https from "node:https";
+import * as http from "node:http";
+import * as tar from "tar";
+import type { ExtensionInstallMetadata } from "../config/config.js";
+import { ExtensionUpdateState } from "./extensionManager.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('EXT_NPM');
+const debugLogger = createDebugLogger("EXT_NPM");
 
 export interface NpmDownloadResult {
   version: string;
-  type: 'npm';
+  type: "npm";
 }
 
 interface NpmPackageMetadata {
-  'dist-tags': Record<string, string>;
+  "dist-tags": Record<string, string>;
   versions: Record<
     string,
     {
@@ -76,12 +76,12 @@ export function resolveNpmRegistry(
   registryOverride?: string,
 ): string {
   if (registryOverride) {
-    return registryOverride.replace(/\/$/, '');
+    return registryOverride.replace(/\/$/, "");
   }
 
   const npmrcPaths = [
-    path.join(process.cwd(), '.npmrc'),
-    path.join(os.homedir(), '.npmrc'),
+    path.join(process.cwd(), ".npmrc"),
+    path.join(os.homedir(), ".npmrc"),
   ];
 
   let scopedRegistry: string | undefined;
@@ -89,23 +89,23 @@ export function resolveNpmRegistry(
 
   for (const npmrcPath of npmrcPaths) {
     try {
-      const content = fs.readFileSync(npmrcPath, 'utf-8');
-      const lines = content.split('\n');
+      const content = fs.readFileSync(npmrcPath, "utf-8");
+      const lines = content.split("\n");
       for (const line of lines) {
         const trimmed = line.trim();
         // Scoped registry: @scope:registry=https://...
         const scopeMatch = trimmed.match(
           new RegExp(
-            `^${scope.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:registry\\s*=\\s*(.+)`,
+            `^${scope.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}:registry\\s*=\\s*(.+)`,
           ),
         );
         if (scopeMatch && !scopedRegistry) {
-          scopedRegistry = scopeMatch[1].trim().replace(/\/$/, '');
+          scopedRegistry = scopeMatch[1].trim().replace(/\/$/, "");
         }
         // Default registry: registry=https://...
         const defaultMatch = trimmed.match(/^registry\s*=\s*(.+)/);
         if (defaultMatch && !defaultRegistry) {
-          defaultRegistry = defaultMatch[1].trim().replace(/\/$/, '');
+          defaultRegistry = defaultMatch[1].trim().replace(/\/$/, "");
         }
       }
     } catch {
@@ -113,7 +113,7 @@ export function resolveNpmRegistry(
     }
   }
 
-  return scopedRegistry || defaultRegistry || 'https://registry.npmjs.org';
+  return scopedRegistry || defaultRegistry || "https://registry.npmjs.org";
 }
 
 /**
@@ -124,14 +124,14 @@ export function resolveNpmRegistry(
  * 2. Registry-specific _authToken from .npmrc
  */
 function getNpmAuthToken(registryUrl: string): string | undefined {
-  const envToken = process.env['NPM_TOKEN'];
+  const envToken = process.env["NPM_TOKEN"];
   if (envToken) {
     return envToken;
   }
 
   const npmrcPaths = [
-    path.join(process.cwd(), '.npmrc'),
-    path.join(os.homedir(), '.npmrc'),
+    path.join(process.cwd(), ".npmrc"),
+    path.join(os.homedir(), ".npmrc"),
   ];
 
   // Build candidate prefixes from the registry URL to match against .npmrc
@@ -145,24 +145,24 @@ function getNpmAuthToken(registryUrl: string): string | undefined {
   const parsed = new URL(registryUrl);
   const registryPrefixes: string[] = [];
   const pathSegments = parsed.pathname
-    .replace(/\/$/, '')
-    .split('/')
+    .replace(/\/$/, "")
+    .split("/")
     .filter(Boolean);
   for (let i = pathSegments.length; i >= 0; i--) {
-    const prefix = pathSegments.slice(0, i).join('/');
-    registryPrefixes.push(`${parsed.host}${prefix ? `/${prefix}` : ''}`);
+    const prefix = pathSegments.slice(0, i).join("/");
+    registryPrefixes.push(`${parsed.host}${prefix ? `/${prefix}` : ""}`);
   }
 
   for (const npmrcPath of npmrcPaths) {
     try {
-      const content = fs.readFileSync(npmrcPath, 'utf-8');
-      const lines = content.split('\n');
+      const content = fs.readFileSync(npmrcPath, "utf-8");
+      const lines = content.split("\n");
       for (const line of lines) {
         const trimmed = line.trim();
         // Format: //host[/path]/:_authToken=TOKEN
         const match = trimmed.match(/^\/\/(.+?)\/:_authToken\s*=\s*(.+)/);
         if (match) {
-          const entryPrefix = match[1].replace(/\/$/, '');
+          const entryPrefix = match[1].replace(/\/$/, "");
           if (registryPrefixes.includes(entryPrefix)) {
             return match[2].trim();
           }
@@ -181,13 +181,13 @@ function getNpmAuthToken(registryUrl: string): string | undefined {
  */
 function fetchNpmJson<T>(url: string, authToken?: string): Promise<T> {
   const headers: Record<string, string> = {
-    Accept: 'application/json',
+    Accept: "application/json",
   };
   if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`;
+    headers["Authorization"] = `Bearer ${authToken}`;
   }
 
-  const client = url.startsWith('https://') ? https : http;
+  const client = url.startsWith("https://") ? https : http;
 
   return new Promise((resolve, reject) => {
     client
@@ -213,8 +213,8 @@ function fetchNpmJson<T>(url: string, authToken?: string): Promise<T> {
           );
         }
         const chunks: Buffer[] = [];
-        res.on('data', (chunk) => chunks.push(chunk));
-        res.on('end', () => {
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => {
           try {
             resolve(JSON.parse(Buffer.concat(chunks).toString()) as T);
           } catch (e) {
@@ -222,7 +222,7 @@ function fetchNpmJson<T>(url: string, authToken?: string): Promise<T> {
           }
         });
       })
-      .on('error', reject);
+      .on("error", reject);
   });
 }
 
@@ -236,10 +236,10 @@ function downloadNpmFile(
 ): Promise<void> {
   const headers: Record<string, string> = {};
   if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`;
+    headers["Authorization"] = `Bearer ${authToken}`;
   }
 
-  const client = url.startsWith('https://') ? https : http;
+  const client = url.startsWith("https://") ? https : http;
 
   return new Promise((resolve, reject) => {
     client
@@ -266,9 +266,9 @@ function downloadNpmFile(
         }
         const file = fs.createWriteStream(dest);
         res.pipe(file);
-        file.on('finish', () => file.close(resolve as () => void));
+        file.on("finish", () => file.close(resolve as () => void));
       })
-      .on('error', reject);
+      .on("error", reject);
   });
 }
 
@@ -282,7 +282,7 @@ export async function downloadFromNpmRegistry(
   const { name, version: requestedVersion } = parseNpmPackageSource(
     installMetadata.source,
   );
-  const scope = name.split('/')[0];
+  const scope = name.split("/")[0];
   const registryUrl =
     installMetadata.registryUrl || resolveNpmRegistry(scope, undefined);
 
@@ -292,7 +292,7 @@ export async function downloadFromNpmRegistry(
   const authToken = getNpmAuthToken(registryUrl);
 
   // Fetch package metadata
-  const encodedName = name.replaceAll('/', '%2f');
+  const encodedName = name.replaceAll("/", "%2f");
   const metadataUrl = `${registryUrl}/${encodedName}`;
   debugLogger.debug(`Fetching npm package metadata from ${metadataUrl}`);
 
@@ -303,18 +303,18 @@ export async function downloadFromNpmRegistry(
 
   // Resolve version
   let resolvedVersion: string;
-  if (requestedVersion && requestedVersion !== 'latest') {
+  if (requestedVersion && requestedVersion !== "latest") {
     if (metadata.versions[requestedVersion]) {
       resolvedVersion = requestedVersion;
-    } else if (metadata['dist-tags'][requestedVersion]) {
-      resolvedVersion = metadata['dist-tags'][requestedVersion];
+    } else if (metadata["dist-tags"][requestedVersion]) {
+      resolvedVersion = metadata["dist-tags"][requestedVersion];
     } else {
       throw new Error(
         `Version "${requestedVersion}" not found for package ${name}`,
       );
     }
   } else {
-    resolvedVersion = metadata['dist-tags']['latest'];
+    resolvedVersion = metadata["dist-tags"]["latest"];
     if (!resolvedVersion) {
       throw new Error(`No "latest" dist-tag found for package ${name}`);
     }
@@ -340,7 +340,7 @@ export async function downloadFromNpmRegistry(
   const tarballAuthToken = tarballHost === registryHost ? authToken : undefined;
 
   // Download tarball
-  const tarballPath = path.join(destination, 'package.tgz');
+  const tarballPath = path.join(destination, "package.tgz");
   await downloadNpmFile(tarballUrl, tarballPath, tarballAuthToken);
 
   // Extract tarball
@@ -350,7 +350,7 @@ export async function downloadFromNpmRegistry(
   });
 
   // npm tarballs contain a `package/` wrapper directory — flatten it
-  const packageDir = path.join(destination, 'package');
+  const packageDir = path.join(destination, "package");
   if (fs.existsSync(packageDir)) {
     const entries = await fs.promises.readdir(packageDir);
     for (const entry of entries) {
@@ -371,7 +371,7 @@ export async function downloadFromNpmRegistry(
 
   return {
     version: resolvedVersion,
-    type: 'npm',
+    type: "npm",
   };
 }
 
@@ -383,12 +383,12 @@ export async function checkNpmUpdate(
 ): Promise<ExtensionUpdateState> {
   try {
     const { name } = parseNpmPackageSource(installMetadata.source);
-    const scope = name.split('/')[0];
+    const scope = name.split("/")[0];
     const registryUrl =
       installMetadata.registryUrl || resolveNpmRegistry(scope, undefined);
     const authToken = getNpmAuthToken(registryUrl);
 
-    const encodedName = name.replaceAll('/', '%2f');
+    const encodedName = name.replaceAll("/", "%2f");
     const metadataUrl = `${registryUrl}/${encodedName}`;
     const metadata = await fetchNpmJson<NpmPackageMetadata>(
       metadataUrl,
@@ -402,18 +402,18 @@ export async function checkNpmUpdate(
     // If pinned to an exact version, it's always up-to-date
     if (
       requestedVersion &&
-      requestedVersion !== 'latest' &&
-      !metadata['dist-tags'][requestedVersion]
+      requestedVersion !== "latest" &&
+      !metadata["dist-tags"][requestedVersion]
     ) {
       return ExtensionUpdateState.UP_TO_DATE;
     }
 
     // Resolve the target dist-tag (default: "latest")
     const targetTag =
-      requestedVersion && metadata['dist-tags'][requestedVersion]
+      requestedVersion && metadata["dist-tags"][requestedVersion]
         ? requestedVersion
-        : 'latest';
-    const targetVersion = metadata['dist-tags'][targetTag];
+        : "latest";
+    const targetVersion = metadata["dist-tags"][targetTag];
     if (!targetVersion) {
       debugLogger.error(`No "${targetTag}" dist-tag found for package ${name}`);
       return ExtensionUpdateState.ERROR;

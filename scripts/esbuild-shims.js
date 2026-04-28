@@ -9,15 +9,15 @@
  * This file is injected into the bundle via esbuild's inject option
  */
 
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
 
 // Create require function for the current module and make it global
 const _require = createRequire(import.meta.url);
 
 // Make require available globally for dynamic requires
-if (typeof globalThis.require === 'undefined') {
+if (typeof globalThis.require === "undefined") {
   globalThis.require = _require;
 }
 

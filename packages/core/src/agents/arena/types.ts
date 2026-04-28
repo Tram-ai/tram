@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Content } from '@google/genai';
-import type { WorktreeInfo } from '../../services/gitWorktreeService.js';
-import type { DisplayMode } from '../backends/types.js';
-import type { AgentStatus } from '../runtime/agent-types.js';
+import type { Content } from "@google/genai";
+import type { WorktreeInfo } from "../../services/gitWorktreeService.js";
+import type { DisplayMode } from "../backends/types.js";
+import type { AgentStatus } from "../runtime/agent-types.js";
 
 /**
  * Maximum number of concurrent agents allowed in an Arena session.
@@ -19,24 +19,24 @@ export const ARENA_MAX_AGENTS = 5;
  */
 export enum ArenaSessionStatus {
   /** Session is being set up */
-  INITIALIZING = 'initializing',
+  INITIALIZING = "initializing",
   /** Session is running */
-  RUNNING = 'running',
+  RUNNING = "running",
   /** All agents finished their current task and are idle (can accept follow-ups) */
-  IDLE = 'idle',
+  IDLE = "idle",
   /** Session completed for good (winner selected or explicit end) */
-  COMPLETED = 'completed',
+  COMPLETED = "completed",
   /** Session was cancelled */
-  CANCELLED = 'cancelled',
+  CANCELLED = "cancelled",
   /** Session failed during initialization */
-  FAILED = 'failed',
+  FAILED = "failed",
 }
 
 /**
  * Configuration for a model participating in the Arena.
  */
 export interface ArenaModelConfig {
-  /** Model identifier (e.g., 'qwen-coder-plus', 'gpt-4') */
+  /** Model identifier (e.g., 'tramr-plus', 'gpt-4') */
   modelId: string;
   /** Authentication type for this model */
   authType: string;
@@ -236,17 +236,17 @@ export interface ArenaConfigFile {
  * Written by ArenaManager, consumed (read + deleted) by ArenaAgentClient.
  */
 export interface ArenaControlSignal {
-  type: 'shutdown' | 'cancel';
+  type: "shutdown" | "cancel";
   reason: string;
   timestamp: number;
 }
 
 /**
- * Convert an agentId (e.g. "arena-xxx/qwen-coder-plus") to a filename-safe
+ * Convert an agentId (e.g. "arena-xxx/tramr-plus") to a filename-safe
  * string by replacing path-unsafe characters with "--".
  */
 export function safeAgentId(agentId: string): string {
-  return agentId.replace(/[/\\:*?"<>|]/g, '--');
+  return agentId.replace(/[/\\:*?"<>|]/g, "--");
 }
 
 /**

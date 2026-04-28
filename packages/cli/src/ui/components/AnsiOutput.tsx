@@ -4,13 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Text } from 'ink';
-import type {
-  AnsiLine,
-  AnsiOutput,
-  AnsiToken,
-} from '@tram-ai/tram-core';
+import type React from "react";
+import { Text } from "ink";
+import type { AnsiLine, AnsiOutput, AnsiToken } from "@tram-ai/tram-core";
 
 const DEFAULT_HEIGHT = 24;
 

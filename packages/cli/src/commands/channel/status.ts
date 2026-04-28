@@ -1,10 +1,10 @@
-import { existsSync, readFileSync } from 'node:fs';
-import * as path from 'node:path';
-import * as os from 'node:os';
-import type { CommandModule } from 'yargs';
-import { writeStdoutLine } from '../../utils/stdioHelpers.js';
-import { readServiceInfo } from './pidfile.js';
-import type { SessionTarget } from '@qwen-code/channel-base';
+import { existsSync, readFileSync } from "node:fs";
+import * as path from "node:path";
+import * as os from "node:os";
+import type { CommandModule } from "yargs";
+import { writeStdoutLine } from "../../utils/stdioHelpers.js";
+import { readServiceInfo } from "./pidfile.js";
+import type { SessionTarget } from "@tram-ai/channel-base";
 
 interface PersistedEntry {
   sessionId: string;
@@ -26,33 +26,33 @@ function formatUptime(startedAt: string): string {
 }
 
 export const statusCommand: CommandModule = {
-  command: 'status',
-  describe: 'Show channel service status',
+  command: "status",
+  describe: "Show channel service status",
   handler: async () => {
     const info = readServiceInfo();
 
     if (!info) {
-      writeStdoutLine('No channel service is running.');
+      writeStdoutLine("No channel service is running.");
       process.exit(0);
     }
 
     writeStdoutLine(`Channel service: running (PID ${info.pid})`);
     writeStdoutLine(`Uptime:          ${formatUptime(info.startedAt)}`);
-    writeStdoutLine('');
+    writeStdoutLine("");
 
     // Read session data for per-channel counts
     const sessionsPath = path.join(
       os.homedir(),
-      '.qwen',
-      'channels',
-      'sessions.json',
+      ".tram",
+      "channels",
+      "sessions.json",
     );
 
     const sessionCounts = new Map<string, number>();
     if (existsSync(sessionsPath)) {
       try {
         const entries: Record<string, PersistedEntry> = JSON.parse(
-          readFileSync(sessionsPath, 'utf-8'),
+          readFileSync(sessionsPath, "utf-8"),
         );
         for (const entry of Object.values(entries)) {
           const name = entry.target.channelName;
@@ -65,8 +65,8 @@ export const statusCommand: CommandModule = {
 
     // Table header
     const nameWidth = Math.max(15, ...info.channels.map((c) => c.length + 2));
-    writeStdoutLine(`${'Channel'.padEnd(nameWidth)}Sessions`);
-    writeStdoutLine(`${'-'.repeat(nameWidth)}--------`);
+    writeStdoutLine(`${"Channel".padEnd(nameWidth)}Sessions`);
+    writeStdoutLine(`${"-".repeat(nameWidth)}--------`);
 
     for (const name of info.channels) {
       const count = sessionCounts.get(name) || 0;

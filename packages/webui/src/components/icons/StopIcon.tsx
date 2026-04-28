@@ -6,8 +6,8 @@
  * Stop icon for canceling operations
  */
 
-import type { FC } from 'react';
-import type { IconProps } from './types.js';
+import type { FC } from "react";
+import type { IconProps } from "./types.js";
 
 /**
  * Stop/square icon (16x16)

@@ -4,18 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { clearCommand } from './clearCommand.js';
-import { type CommandContext } from './types.js';
-import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
-import {
-  SessionEndReason,
-  SessionStartSource,
-} from '@qwen-code/qwen-code-core';
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import { clearCommand } from "./clearCommand.js";
+import { type CommandContext } from "./types.js";
+import { createMockCommandContext } from "../../test-utils/mockCommandContext.js";
+import { SessionEndReason, SessionStartSource } from "@tram-ai/tram-core";
 
 // Mock the telemetry service
-vi.mock('@tram-ai/tram-core', async () => {
-  const actual = await vi.importActual('@tram-ai/tram-core');
+vi.mock("@tram-ai/tram-core", async () => {
+  const actual = await vi.importActual("@tram-ai/tram-core");
   return {
     ...actual,
     uiTelemetryService: {
@@ -24,9 +21,9 @@ vi.mock('@tram-ai/tram-core', async () => {
   };
 });
 
-import type { GeminiClient } from '@tram-ai/tram-core';
+import type { GeminiClient } from "@tram-ai/tram-core";
 
-describe('clearCommand', () => {
+describe("clearCommand", () => {
   let mockContext: CommandContext;
   let mockResetChat: ReturnType<typeof vi.fn>;
   let mockStartNewSession: ReturnType<typeof vi.fn>;
@@ -36,7 +33,7 @@ describe('clearCommand', () => {
 
   beforeEach(() => {
     mockResetChat = vi.fn().mockResolvedValue(undefined);
-    mockStartNewSession = vi.fn().mockReturnValue('new-session-id');
+    mockStartNewSession = vi.fn().mockReturnValue("new-session-id");
     mockFireSessionEndEvent = vi.fn().mockResolvedValue(undefined);
     mockFireSessionStartEvent = vi.fn().mockResolvedValue(undefined);
     mockGetHookSystem = vi.fn().mockReturnValue({
@@ -57,9 +54,9 @@ describe('clearCommand', () => {
           getDebugLogger: () => ({
             warn: vi.fn(),
           }),
-          getModel: () => 'test-model',
+          getModel: () => "test-model",
           getToolRegistry: () => undefined,
-          getApprovalMode: () => 'default',
+          getApprovalMode: () => "default",
         },
       },
       session: {
@@ -68,21 +65,21 @@ describe('clearCommand', () => {
     });
   });
 
-  it('should set debug message, start a new session, reset chat, and clear UI when config is available', async () => {
+  it("should set debug message, start a new session, reset chat, and clear UI when config is available", async () => {
     if (!clearCommand.action) {
-      throw new Error('clearCommand must have an action.');
+      throw new Error("clearCommand must have an action.");
     }
 
-    await clearCommand.action(mockContext, '');
+    await clearCommand.action(mockContext, "");
 
     expect(mockContext.ui.setDebugMessage).toHaveBeenCalledWith(
-      'Starting a new session, resetting chat, and clearing terminal.',
+      "Starting a new session, resetting chat, and clearing terminal.",
     );
     expect(mockContext.ui.setDebugMessage).toHaveBeenCalledTimes(1);
 
     expect(mockStartNewSession).toHaveBeenCalledTimes(1);
     expect(mockContext.session.startNewSession).toHaveBeenCalledWith(
-      'new-session-id',
+      "new-session-id",
     );
     expect(mockResetChat).toHaveBeenCalledTimes(1);
     expect(mockContext.ui.clear).toHaveBeenCalledTimes(1);
@@ -95,12 +92,12 @@ describe('clearCommand', () => {
     expect(mockContext.ui.clear).toHaveBeenCalled();
   });
 
-  it('should fire SessionEnd event before clearing and SessionStart event after clearing', async () => {
+  it("should fire SessionEnd event before clearing and SessionStart event after clearing", async () => {
     if (!clearCommand.action) {
-      throw new Error('clearCommand must have an action.');
+      throw new Error("clearCommand must have an action.");
     }
 
-    await clearCommand.action(mockContext, '');
+    await clearCommand.action(mockContext, "");
 
     expect(mockGetHookSystem).toHaveBeenCalled();
     expect(mockFireSessionEndEvent).toHaveBeenCalledWith(
@@ -108,7 +105,7 @@ describe('clearCommand', () => {
     );
     expect(mockFireSessionStartEvent).toHaveBeenCalledWith(
       SessionStartSource.Clear,
-      'test-model',
+      "test-model",
       expect.any(String), // permissionMode
     );
 
@@ -120,19 +117,19 @@ describe('clearCommand', () => {
     expect(sessionEndCallOrder).toBeLessThan(sessionStartCallOrder);
   });
 
-  it('should handle hook errors gracefully and continue execution', async () => {
+  it("should handle hook errors gracefully and continue execution", async () => {
     if (!clearCommand.action) {
-      throw new Error('clearCommand must have an action.');
+      throw new Error("clearCommand must have an action.");
     }
 
     mockFireSessionEndEvent.mockRejectedValue(
-      new Error('SessionEnd hook failed'),
+      new Error("SessionEnd hook failed"),
     );
     mockFireSessionStartEvent.mockRejectedValue(
-      new Error('SessionStart hook failed'),
+      new Error("SessionStart hook failed"),
     );
 
-    await clearCommand.action(mockContext, '');
+    await clearCommand.action(mockContext, "");
 
     // Should still complete the clear operation despite hook errors
     expect(mockStartNewSession).toHaveBeenCalledTimes(1);
@@ -140,34 +137,34 @@ describe('clearCommand', () => {
     expect(mockContext.ui.clear).toHaveBeenCalledTimes(1);
   });
 
-  it('should clear UI before resetChat for immediate responsiveness', async () => {
+  it("should clear UI before resetChat for immediate responsiveness", async () => {
     if (!clearCommand.action) {
-      throw new Error('clearCommand must have an action.');
+      throw new Error("clearCommand must have an action.");
     }
 
     const callOrder: string[] = [];
     (mockContext.ui.clear as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
-        callOrder.push('ui.clear');
+        callOrder.push("ui.clear");
       },
     );
     mockResetChat.mockImplementation(async () => {
-      callOrder.push('resetChat');
+      callOrder.push("resetChat");
     });
 
-    await clearCommand.action(mockContext, '');
+    await clearCommand.action(mockContext, "");
 
     // ui.clear should be called before resetChat for immediate UI feedback
-    const clearIndex = callOrder.indexOf('ui.clear');
-    const resetIndex = callOrder.indexOf('resetChat');
+    const clearIndex = callOrder.indexOf("ui.clear");
+    const resetIndex = callOrder.indexOf("resetChat");
     expect(clearIndex).toBeGreaterThanOrEqual(0);
     expect(resetIndex).toBeGreaterThanOrEqual(0);
     expect(clearIndex).toBeLessThan(resetIndex);
   });
 
-  it('should not await hook events (fire-and-forget)', async () => {
+  it("should not await hook events (fire-and-forget)", async () => {
     if (!clearCommand.action) {
-      throw new Error('clearCommand must have an action.');
+      throw new Error("clearCommand must have an action.");
     }
 
     // Make hooks take a long time - they should not block
@@ -192,7 +189,7 @@ describe('clearCommand', () => {
         }),
     );
 
-    await clearCommand.action(mockContext, '');
+    await clearCommand.action(mockContext, "");
 
     // The action should complete immediately without waiting for hooks
     expect(mockContext.ui.clear).toHaveBeenCalledTimes(1);
@@ -205,9 +202,9 @@ describe('clearCommand', () => {
     expect(sessionStartResolved).toBe(false);
   });
 
-  it('should not attempt to reset chat if config service is not available', async () => {
+  it("should not attempt to reset chat if config service is not available", async () => {
     if (!clearCommand.action) {
-      throw new Error('clearCommand must have an action.');
+      throw new Error("clearCommand must have an action.");
     }
 
     const nullConfigContext = createMockCommandContext({
@@ -219,10 +216,10 @@ describe('clearCommand', () => {
       },
     });
 
-    await clearCommand.action(nullConfigContext, '');
+    await clearCommand.action(nullConfigContext, "");
 
     expect(nullConfigContext.ui.setDebugMessage).toHaveBeenCalledWith(
-      'Starting a new session and clearing.',
+      "Starting a new session and clearing.",
     );
     expect(mockResetChat).not.toHaveBeenCalled();
     expect(nullConfigContext.ui.clear).toHaveBeenCalledTimes(1);

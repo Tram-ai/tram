@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'node:fs/promises';
-import * as os from 'node:os';
-import path from 'node:path';
-import { canUseRipgrep } from '@tram-ai/tram-core';
+import fs from "node:fs/promises";
+import * as os from "node:os";
+import path from "node:path";
+import { canUseRipgrep } from "@tram-ai/tram-core";
 
 type WarningCheckOptions = {
   workspaceRoot: string;
@@ -22,7 +22,7 @@ type WarningCheck = {
 
 // Individual warning checks
 const homeDirectoryCheck: WarningCheck = {
-  id: 'home-directory',
+  id: "home-directory",
   check: async (options: WarningCheckOptions) => {
     try {
       const [workspaceRealPath, homeRealPath] = await Promise.all([
@@ -31,22 +31,22 @@ const homeDirectoryCheck: WarningCheck = {
       ]);
 
       if (workspaceRealPath === homeRealPath) {
-        return 'You are running TRAM in your home directory. It is recommended to run in a project-specific directory.';
+        return "You are running TRAM in your home directory. It is recommended to run in a project-specific directory.";
       }
       return null;
     } catch (_err: unknown) {
-      return 'Could not verify the current directory due to a file system error.';
+      return "Could not verify the current directory due to a file system error.";
     }
   },
 };
 
 const rootDirectoryCheck: WarningCheck = {
-  id: 'root-directory',
+  id: "root-directory",
   check: async (options: WarningCheckOptions) => {
     try {
       const workspaceRealPath = await fs.realpath(options.workspaceRoot);
       const errorMessage =
-        'Warning: You are running TRAM in the root directory. Your entire folder structure will be used for context. It is strongly recommended to run in a project-specific directory.';
+        "Warning: You are running TRAM in the root directory. Your entire folder structure will be used for context. It is strongly recommended to run in a project-specific directory.";
 
       // Check for Unix root directory
       if (path.dirname(workspaceRealPath) === workspaceRealPath) {
@@ -55,13 +55,13 @@ const rootDirectoryCheck: WarningCheck = {
 
       return null;
     } catch (_err: unknown) {
-      return 'Could not verify the current directory due to a file system error.';
+      return "Could not verify the current directory due to a file system error.";
     }
   },
 };
 
 const ripgrepAvailabilityCheck: WarningCheck = {
-  id: 'ripgrep-availability',
+  id: "ripgrep-availability",
   check: async (options: WarningCheckOptions) => {
     if (!options.useRipgrep) {
       return null;
@@ -70,11 +70,11 @@ const ripgrepAvailabilityCheck: WarningCheck = {
     try {
       const isAvailable = await canUseRipgrep(options.useBuiltinRipgrep);
       if (!isAvailable) {
-        return 'Ripgrep not available: Please install ripgrep globally to enable faster file content search. Falling back to built-in grep.';
+        return "Ripgrep not available: Please install ripgrep globally to enable faster file content search. Falling back to built-in grep.";
       }
       return null;
     } catch (error) {
-      return `Ripgrep not available: ${error instanceof Error ? error.message : 'Unknown error'}. Falling back to built-in grep.`;
+      return `Ripgrep not available: ${error instanceof Error ? error.message : "Unknown error"}. Falling back to built-in grep.`;
     }
   },
 };

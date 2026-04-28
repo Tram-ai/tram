@@ -20,16 +20,16 @@ export class Override {
   ) {}
 
   static fromInput(inputRule: string, includeSubdirs: boolean): Override {
-    const isDisable = inputRule.startsWith('!');
+    const isDisable = inputRule.startsWith("!");
     let baseRule = isDisable ? inputRule.substring(1) : inputRule;
     baseRule = ensureLeadingAndTrailingSlash(baseRule);
     return new Override(baseRule, isDisable, includeSubdirs);
   }
 
   static fromFileRule(fileRule: string): Override {
-    const isDisable = fileRule.startsWith('!');
+    const isDisable = fileRule.startsWith("!");
     let baseRule = isDisable ? fileRule.substring(1) : fileRule;
-    const includeSubdirs = baseRule.endsWith('*');
+    const includeSubdirs = baseRule.endsWith("*");
     baseRule = includeSubdirs
       ? baseRule.substring(0, baseRule.length - 1)
       : baseRule;
@@ -55,7 +55,7 @@ export class Override {
   }
 
   asRegex(): RegExp {
-    return globToRegex(`${this.baseRule}${this.includeSubdirs ? '*' : ''}`);
+    return globToRegex(`${this.baseRule}${this.includeSubdirs ? "*" : ""}`);
   }
 
   isChildOf(parent: Override) {
@@ -66,7 +66,7 @@ export class Override {
   }
 
   output(): string {
-    return `${this.isDisable ? '!' : ''}${this.baseRule}${this.includeSubdirs ? '*' : ''}`;
+    return `${this.isDisable ? "!" : ""}${this.baseRule}${this.includeSubdirs ? "*" : ""}`;
   }
 
   matchesPath(path: string) {
@@ -76,12 +76,12 @@ export class Override {
 
 const ensureLeadingAndTrailingSlash = function (dirPath: string): string {
   // Normalize separators to forward slashes for consistent matching across platforms.
-  let result = dirPath.replace(/\\/g, '/');
-  if (result.charAt(0) !== '/') {
-    result = '/' + result;
+  let result = dirPath.replace(/\\/g, "/");
+  if (result.charAt(0) !== "/") {
+    result = "/" + result;
   }
-  if (result.charAt(result.length - 1) !== '/') {
-    result = result + '/';
+  if (result.charAt(result.length - 1) !== "/") {
+    result = result + "/";
   }
   return result;
 };
@@ -95,8 +95,8 @@ const ensureLeadingAndTrailingSlash = function (dirPath: string): string {
  */
 function globToRegex(glob: string): RegExp {
   const regexString = glob
-    .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // Escape special regex characters
-    .replace(/(\/?)\*/g, '($1.*)?'); // Convert * to optional group
+    .replace(/[.+?^${}()|[\]\\]/g, "\\$&") // Escape special regex characters
+    .replace(/(\/?)\*/g, "($1.*)?"); // Convert * to optional group
 
   return new RegExp(`^${regexString}$`);
 }

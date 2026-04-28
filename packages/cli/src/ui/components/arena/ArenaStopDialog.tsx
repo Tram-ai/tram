@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useCallback, useMemo, useState } from 'react';
-import { Box, Text } from 'ink';
+import type React from "react";
+import { useCallback, useMemo, useState } from "react";
+import { Box, Text } from "ink";
 import {
   ArenaSessionStatus,
   createDebugLogger,
   type Config,
-} from '@qwen-code/qwen-code-core';
-import { theme } from '../../semantic-colors.js';
-import { useKeypress } from '../../hooks/useKeypress.js';
-import { MessageType, type HistoryItemWithoutId } from '../../types.js';
-import type { UseHistoryManagerReturn } from '../../hooks/useHistoryManager.js';
-import { DescriptiveRadioButtonSelect } from '../shared/DescriptiveRadioButtonSelect.js';
-import type { DescriptiveRadioSelectItem } from '../shared/DescriptiveRadioButtonSelect.js';
+} from "@tram-ai/tram-core";
+import { theme } from "../../semantic-colors.js";
+import { useKeypress } from "../../hooks/useKeypress.js";
+import { MessageType, type HistoryItemWithoutId } from "../../types.js";
+import type { UseHistoryManagerReturn } from "../../hooks/useHistoryManager.js";
+import { DescriptiveRadioButtonSelect } from "../shared/DescriptiveRadioButtonSelect.js";
+import type { DescriptiveRadioSelectItem } from "../shared/DescriptiveRadioButtonSelect.js";
 
-const debugLogger = createDebugLogger('ARENA_STOP_DIALOG');
+const debugLogger = createDebugLogger("ARENA_STOP_DIALOG");
 
-type StopAction = 'cleanup' | 'preserve';
+type StopAction = "cleanup" | "preserve";
 
 interface ArenaStopDialogProps {
   config: Config;
-  addItem: UseHistoryManagerReturn['addItem'];
+  addItem: UseHistoryManagerReturn["addItem"];
   closeArenaDialog: () => void;
 }
 
@@ -37,10 +37,10 @@ export function ArenaStopDialog({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const pushMessage = useCallback(
-    (result: { messageType: 'info' | 'error'; content: string }) => {
+    (result: { messageType: "info" | "error"; content: string }) => {
       const item: HistoryItemWithoutId = {
         type:
-          result.messageType === 'info' ? MessageType.INFO : MessageType.ERROR,
+          result.messageType === "info" ? MessageType.INFO : MessageType.ERROR,
         text: result.content,
       };
       addItem(item, Date.now());
@@ -48,8 +48,8 @@ export function ArenaStopDialog({
       try {
         const chatRecorder = config.getChatRecordingService();
         chatRecorder?.recordSlashCommand({
-          phase: 'result',
-          rawCommand: '/arena stop',
+          phase: "result",
+          rawCommand: "/arena stop",
           outputHistoryItems: [{ ...item } as Record<string, unknown>],
         });
       } catch {
@@ -68,8 +68,8 @@ export function ArenaStopDialog({
       const mgr = config.getArenaManager();
       if (!mgr) {
         pushMessage({
-          messageType: 'error',
-          content: 'No running Arena session found.',
+          messageType: "error",
+          content: "No running Arena session found.",
         });
         return;
       }
@@ -81,43 +81,43 @@ export function ArenaStopDialog({
           sessionStatus === ArenaSessionStatus.INITIALIZING
         ) {
           pushMessage({
-            messageType: 'info',
-            content: 'Stopping Arena agents…',
+            messageType: "info",
+            content: "Stopping Arena agents…",
           });
           await mgr.cancel();
         }
         await mgr.waitForSettled();
         pushMessage({
-          messageType: 'info',
-          content: 'Cleaning up Arena resources…',
+          messageType: "info",
+          content: "Cleaning up Arena resources…",
         });
 
-        if (action === 'preserve') {
+        if (action === "preserve") {
           await mgr.cleanupRuntime();
         } else {
           await mgr.cleanup();
         }
         config.setArenaManager(null);
 
-        if (action === 'preserve') {
+        if (action === "preserve") {
           pushMessage({
-            messageType: 'info',
+            messageType: "info",
             content:
-              'Arena session stopped. Worktrees and session files were preserved. ' +
-              'Use /arena select --discard to manually clean up later.',
+              "Arena session stopped. Worktrees and session files were preserved. " +
+              "Use /arena select --discard to manually clean up later.",
           });
         } else {
           pushMessage({
-            messageType: 'info',
+            messageType: "info",
             content:
-              'Arena session stopped. All Arena resources (including Git worktrees) were cleaned up.',
+              "Arena session stopped. All Arena resources (including Git worktrees) were cleaned up.",
           });
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        debugLogger.error('Failed to stop Arena session:', error);
+        debugLogger.error("Failed to stop Arena session:", error);
         pushMessage({
-          messageType: 'error',
+          messageType: "error",
           content: `Failed to stop Arena session: ${message}`,
         });
       }
@@ -131,8 +131,8 @@ export function ArenaStopDialog({
   const items: Array<DescriptiveRadioSelectItem<StopAction>> = useMemo(
     () => [
       {
-        key: 'cleanup',
-        value: 'cleanup' as StopAction,
+        key: "cleanup",
+        value: "cleanup" as StopAction,
         title: <Text>Stop and clean up</Text>,
         description: (
           <Text color={theme.text.secondary}>
@@ -141,8 +141,8 @@ export function ArenaStopDialog({
         ),
       },
       {
-        key: 'preserve',
-        value: 'preserve' as StopAction,
+        key: "preserve",
+        value: "preserve" as StopAction,
         title: <Text>Stop and preserve artifacts</Text>,
         description: (
           <Text color={theme.text.secondary}>
@@ -158,7 +158,7 @@ export function ArenaStopDialog({
 
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         closeArenaDialog();
       }
     },

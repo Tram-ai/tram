@@ -4,29 +4,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { HistoryItemCompression } from '../types.js';
-import { MessageType } from '../types.js';
-import type { SlashCommand } from './types.js';
-import { CommandKind } from './types.js';
-import { t } from '../../i18n/index.js';
+import type { HistoryItemCompression } from "../types.js";
+import { MessageType } from "../types.js";
+import type { SlashCommand } from "./types.js";
+import { CommandKind } from "./types.js";
+import { t } from "../../i18n/index.js";
 
 export const compressCommand: SlashCommand = {
-  name: 'compress',
-  altNames: ['summarize'],
+  name: "compress",
+  altNames: ["summarize"],
   get description() {
-    return t('Compresses the context by replacing it with a summary.');
+    return t("Compresses the context by replacing it with a summary.");
   },
   kind: CommandKind.BUILT_IN,
   action: async (context) => {
     const { ui } = context;
-    const executionMode = context.executionMode ?? 'interactive';
+    const executionMode = context.executionMode ?? "interactive";
     const abortSignal = context.abortSignal;
 
-    if (executionMode === 'interactive' && ui.pendingItem) {
+    if (executionMode === "interactive" && ui.pendingItem) {
       ui.addItem(
         {
           type: MessageType.ERROR,
-          text: t('Already compressing, wait for previous request to complete'),
+          text: t("Already compressing, wait for previous request to complete"),
         },
         Date.now(),
       );
@@ -47,9 +47,9 @@ export const compressCommand: SlashCommand = {
     const geminiClient = config?.getGeminiClient();
     if (!config || !geminiClient) {
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('Config not loaded.'),
+        type: "message",
+        messageType: "error",
+        content: t("Config not loaded."),
       };
     }
 
@@ -58,40 +58,40 @@ export const compressCommand: SlashCommand = {
       return await geminiClient.tryCompressChat(promptId, true);
     };
 
-    if (executionMode === 'acp') {
+    if (executionMode === "acp") {
       const messages = async function* () {
         try {
           yield {
-            messageType: 'info' as const,
-            content: 'Compressing context...',
+            messageType: "info" as const,
+            content: "Compressing context...",
           };
           const compressed = await doCompress();
           if (!compressed) {
             yield {
-              messageType: 'error' as const,
-              content: t('Failed to compress chat history.'),
+              messageType: "error" as const,
+              content: t("Failed to compress chat history."),
             };
             return;
           }
           yield {
-            messageType: 'info' as const,
+            messageType: "info" as const,
             content: `Context compressed (${compressed.originalTokenCount} -> ${compressed.newTokenCount}).`,
           };
         } catch (e) {
           yield {
-            messageType: 'error' as const,
-            content: t('Failed to compress chat history: {{error}}', {
+            messageType: "error" as const,
+            content: t("Failed to compress chat history: {{error}}", {
               error: e instanceof Error ? e.message : String(e),
             }),
           };
         }
       };
 
-      return { type: 'stream_messages', messages: messages() };
+      return { type: "stream_messages", messages: messages() };
     }
 
     try {
-      if (executionMode === 'interactive') {
+      if (executionMode === "interactive") {
         ui.setPendingItem(pendingMessage);
       }
 
@@ -102,11 +102,11 @@ export const compressCommand: SlashCommand = {
       }
 
       if (!compressed) {
-        if (executionMode === 'interactive') {
+        if (executionMode === "interactive") {
           ui.addItem(
             {
               type: MessageType.ERROR,
-              text: t('Failed to compress chat history.'),
+              text: t("Failed to compress chat history."),
             },
             Date.now(),
           );
@@ -114,13 +114,13 @@ export const compressCommand: SlashCommand = {
         }
 
         return {
-          type: 'message',
-          messageType: 'error',
-          content: t('Failed to compress chat history.'),
+          type: "message",
+          messageType: "error",
+          content: t("Failed to compress chat history."),
         };
       }
 
-      if (executionMode === 'interactive') {
+      if (executionMode === "interactive") {
         ui.addItem(
           {
             type: MessageType.COMPRESSION,
@@ -137,8 +137,8 @@ export const compressCommand: SlashCommand = {
       }
 
       return {
-        type: 'message',
-        messageType: 'info',
+        type: "message",
+        messageType: "info",
         content: `Context compressed (${compressed.originalTokenCount} -> ${compressed.newTokenCount}).`,
       };
     } catch (e) {
@@ -146,11 +146,11 @@ export const compressCommand: SlashCommand = {
       if (abortSignal?.aborted) {
         return;
       }
-      if (executionMode === 'interactive') {
+      if (executionMode === "interactive") {
         ui.addItem(
           {
             type: MessageType.ERROR,
-            text: t('Failed to compress chat history: {{error}}', {
+            text: t("Failed to compress chat history: {{error}}", {
               error: e instanceof Error ? e.message : String(e),
             }),
           },
@@ -160,14 +160,14 @@ export const compressCommand: SlashCommand = {
       }
 
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('Failed to compress chat history: {{error}}', {
+        type: "message",
+        messageType: "error",
+        content: t("Failed to compress chat history: {{error}}", {
           error: e instanceof Error ? e.message : String(e),
         }),
       };
     } finally {
-      if (executionMode === 'interactive') {
+      if (executionMode === "interactive") {
         ui.setPendingItem(null);
       }
     }

@@ -4,30 +4,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EventEmitter } from 'node:events';
+import { EventEmitter } from "node:events";
 import {
   EVENT_API_ERROR,
   EVENT_API_RESPONSE,
   EVENT_TOOL_CALL,
-} from './constants.js';
+} from "./constants.js";
 
-import { ToolCallDecision } from './tool-call-decision.js';
+import { ToolCallDecision } from "./tool-call-decision.js";
 import type {
   ApiErrorEvent,
   ApiResponseEvent,
   ToolCallEvent,
-} from './types.js';
+} from "./types.js";
 
 export type UiEvent =
-  | (ApiResponseEvent & { 'event.name': typeof EVENT_API_RESPONSE })
-  | (ApiErrorEvent & { 'event.name': typeof EVENT_API_ERROR })
-  | (ToolCallEvent & { 'event.name': typeof EVENT_TOOL_CALL });
+  | (ApiResponseEvent & { "event.name": typeof EVENT_API_RESPONSE })
+  | (ApiErrorEvent & { "event.name": typeof EVENT_API_ERROR })
+  | (ToolCallEvent & { "event.name": typeof EVENT_TOOL_CALL });
 
 export {
   EVENT_API_ERROR,
   EVENT_API_RESPONSE,
   EVENT_TOOL_CALL,
-} from './constants.js';
+} from "./constants.js";
 
 export interface ToolCallStats {
   count: number;
@@ -116,11 +116,14 @@ const createInitialMetrics = (): SessionMetrics => ({
   },
 });
 
-const SUBLM_PROMPT_ID_SUFFIX = ':sublm';
-const SUBLM_MODEL_SUFFIX = ' (SubLM)';
+const SUBLM_PROMPT_ID_SUFFIX = ":sublm";
+const SUBLM_MODEL_SUFFIX = " (SubLM)";
 
 function getMetricsModelName(model: string, promptId?: string): string {
-  if (typeof promptId === 'string' && promptId.endsWith(SUBLM_PROMPT_ID_SUFFIX)) {
+  if (
+    typeof promptId === "string" &&
+    promptId.endsWith(SUBLM_PROMPT_ID_SUFFIX)
+  ) {
     return `${model}${SUBLM_MODEL_SUFFIX}`;
   }
   return model;
@@ -132,7 +135,7 @@ export class UiTelemetryService extends EventEmitter {
   #lastCachedContentTokenCount = 0;
 
   addEvent(event: UiEvent) {
-    switch (event['event.name']) {
+    switch (event["event.name"]) {
       case EVENT_API_RESPONSE:
         this.processApiResponse(event);
         break;
@@ -147,7 +150,7 @@ export class UiTelemetryService extends EventEmitter {
         return;
     }
 
-    this.emit('update', {
+    this.emit("update", {
       metrics: this.#metrics,
       lastPromptTokenCount: this.#lastPromptTokenCount,
     });
@@ -174,7 +177,7 @@ export class UiTelemetryService extends EventEmitter {
 
   setLastPromptTokenCount(lastPromptTokenCount: number): void {
     this.#lastPromptTokenCount = lastPromptTokenCount;
-    this.emit('update', {
+    this.emit("update", {
       metrics: this.#metrics,
       lastPromptTokenCount: this.#lastPromptTokenCount,
     });
@@ -195,7 +198,7 @@ export class UiTelemetryService extends EventEmitter {
     this.#metrics = createInitialMetrics();
     this.#lastPromptTokenCount = 0;
     this.#lastCachedContentTokenCount = 0;
-    this.emit('update', {
+    this.emit("update", {
       metrics: this.#metrics,
       lastPromptTokenCount: this.#lastPromptTokenCount,
     });
@@ -273,11 +276,11 @@ export class UiTelemetryService extends EventEmitter {
 
     // Aggregate line count data from metadata
     if (event.metadata) {
-      if (event.metadata['model_added_lines'] !== undefined) {
-        files.totalLinesAdded += event.metadata['model_added_lines'];
+      if (event.metadata["model_added_lines"] !== undefined) {
+        files.totalLinesAdded += event.metadata["model_added_lines"];
       }
-      if (event.metadata['model_removed_lines'] !== undefined) {
-        files.totalLinesRemoved += event.metadata['model_removed_lines'];
+      if (event.metadata["model_removed_lines"] !== undefined) {
+        files.totalLinesRemoved += event.metadata["model_removed_lines"];
       }
     }
   }

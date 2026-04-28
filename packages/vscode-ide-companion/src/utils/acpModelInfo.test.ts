@@ -4,29 +4,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest";
 import {
   extractModelInfoFromNewSessionResult,
   extractSessionModelState,
-} from './acpModelInfo.js';
+} from "./acpModelInfo.js";
 
-describe('extractSessionModelState', () => {
-  it('extracts full model state from NewSessionResponse.models', () => {
+describe("extractSessionModelState", () => {
+  it("extracts full model state from NewSessionResponse.models", () => {
     const result = extractSessionModelState({
-      sessionId: 's',
+      sessionId: "s",
       models: {
-        currentModelId: 'qwen3-coder-plus',
+        currentModelId: "qwen3-coder-plus",
         availableModels: [
           {
-            modelId: 'qwen3-coder-plus',
-            name: 'Qwen3 Coder Plus',
+            modelId: "qwen3-coder-plus",
+            name: "Qwen3 Coder Plus",
             description: null,
             _meta: { contextLimit: 123 },
           },
           {
-            modelId: 'qwen3-coder',
-            name: 'Qwen3 Coder',
-            description: 'Standard model',
+            modelId: "qwen3-coder",
+            name: "Qwen3 Coder",
+            description: "Standard model",
             _meta: { contextLimit: 64 },
           },
         ],
@@ -34,101 +34,101 @@ describe('extractSessionModelState', () => {
     });
 
     expect(result).toEqual({
-      currentModelId: 'qwen3-coder-plus',
+      currentModelId: "qwen3-coder-plus",
       availableModels: [
         {
-          modelId: 'qwen3-coder-plus',
-          name: 'Qwen3 Coder Plus',
+          modelId: "qwen3-coder-plus",
+          name: "Qwen3 Coder Plus",
           description: null,
           _meta: { contextLimit: 123 },
         },
         {
-          modelId: 'qwen3-coder',
-          name: 'Qwen3 Coder',
-          description: 'Standard model',
+          modelId: "qwen3-coder",
+          name: "Qwen3 Coder",
+          description: "Standard model",
           _meta: { contextLimit: 64 },
         },
       ],
     });
   });
 
-  it('returns all available models', () => {
+  it("returns all available models", () => {
     const result = extractSessionModelState({
       models: {
-        currentModelId: 'model-a',
+        currentModelId: "model-a",
         availableModels: [
-          { modelId: 'model-a', name: 'Model A' },
-          { modelId: 'model-b', name: 'Model B' },
-          { modelId: 'model-c', name: 'Model C' },
+          { modelId: "model-a", name: "Model A" },
+          { modelId: "model-b", name: "Model B" },
+          { modelId: "model-c", name: "Model C" },
         ],
       },
     });
 
     expect(result?.availableModels).toHaveLength(3);
     expect(result?.availableModels.map((m) => m.modelId)).toEqual([
-      'model-a',
-      'model-b',
-      'model-c',
+      "model-a",
+      "model-b",
+      "model-c",
     ]);
   });
 
-  it('defaults to first model if currentModelId is missing', () => {
+  it("defaults to first model if currentModelId is missing", () => {
     const result = extractSessionModelState({
       models: {
         availableModels: [
-          { modelId: 'first', name: 'First Model' },
-          { modelId: 'second', name: 'Second Model' },
+          { modelId: "first", name: "First Model" },
+          { modelId: "second", name: "Second Model" },
         ],
       },
     });
 
-    expect(result?.currentModelId).toBe('first');
+    expect(result?.currentModelId).toBe("first");
   });
 
-  it('handles legacy array format', () => {
+  it("handles legacy array format", () => {
     const result = extractSessionModelState({
       models: [
-        { modelId: 'legacy-1', name: 'Legacy 1' },
-        { modelId: 'legacy-2', name: 'Legacy 2' },
+        { modelId: "legacy-1", name: "Legacy 1" },
+        { modelId: "legacy-2", name: "Legacy 2" },
       ],
     });
 
     expect(result).toEqual({
-      currentModelId: 'legacy-1',
+      currentModelId: "legacy-1",
       availableModels: [
-        { modelId: 'legacy-1', name: 'Legacy 1' },
-        { modelId: 'legacy-2', name: 'Legacy 2' },
+        { modelId: "legacy-1", name: "Legacy 1" },
+        { modelId: "legacy-2", name: "Legacy 2" },
       ],
     });
   });
 
-  it('filters out invalid model entries', () => {
+  it("filters out invalid model entries", () => {
     const result = extractSessionModelState({
       models: {
-        currentModelId: 'valid',
+        currentModelId: "valid",
         availableModels: [
-          { name: '', modelId: '' }, // invalid
-          { modelId: 'valid', name: 'Valid Model' },
+          { name: "", modelId: "" }, // invalid
+          { modelId: "valid", name: "Valid Model" },
           {}, // invalid
         ],
       },
     });
 
     expect(result?.availableModels).toHaveLength(1);
-    expect(result?.availableModels[0].modelId).toBe('valid');
+    expect(result?.availableModels[0].modelId).toBe("valid");
   });
 
-  it('returns null when models field is missing', () => {
+  it("returns null when models field is missing", () => {
     expect(extractSessionModelState({})).toBeNull();
     expect(extractSessionModelState(null)).toBeNull();
-    expect(extractSessionModelState({ sessionId: 's' })).toBeNull();
+    expect(extractSessionModelState({ sessionId: "s" })).toBeNull();
   });
 
-  it('returns null when availableModels is empty after filtering', () => {
+  it("returns null when availableModels is empty after filtering", () => {
     const result = extractSessionModelState({
       models: {
-        currentModelId: 'none',
-        availableModels: [{ name: '', modelId: '' }, { name: '' }],
+        currentModelId: "none",
+        availableModels: [{ name: "", modelId: "" }, { name: "" }],
       },
     });
 
@@ -137,20 +137,20 @@ describe('extractSessionModelState', () => {
     expect(result?.availableModels).toHaveLength(0);
   });
 
-  it('derives contextLimit for known models when the ACP payload omits it', () => {
+  it("derives contextLimit for known models when the ACP payload omits it", () => {
     const result = extractSessionModelState({
       models: {
-        currentModelId: 'qwen3-max',
-        availableModels: [{ modelId: 'qwen3-max', name: 'Qwen3 Max' }],
+        currentModelId: "qwen3-max",
+        availableModels: [{ modelId: "qwen3-max", name: "Qwen3 Max" }],
       },
     });
 
     expect(result).toEqual({
-      currentModelId: 'qwen3-max',
+      currentModelId: "qwen3-max",
       availableModels: [
         {
-          modelId: 'qwen3-max',
-          name: 'Qwen3 Max',
+          modelId: "qwen3-max",
+          name: "Qwen3 Max",
           _meta: { contextLimit: 262144 },
         },
       ],
@@ -158,17 +158,17 @@ describe('extractSessionModelState', () => {
   });
 });
 
-describe('extractModelInfoFromNewSessionResult', () => {
-  it('extracts from NewSessionResponse.models (SessionModelState)', () => {
+describe("extractModelInfoFromNewSessionResult", () => {
+  it("extracts from NewSessionResponse.models (SessionModelState)", () => {
     expect(
       extractModelInfoFromNewSessionResult({
-        sessionId: 's',
+        sessionId: "s",
         models: {
-          currentModelId: 'qwen3-coder-plus',
+          currentModelId: "qwen3-coder-plus",
           availableModels: [
             {
-              modelId: 'qwen3-coder-plus',
-              name: 'Qwen3 Coder Plus',
+              modelId: "qwen3-coder-plus",
+              name: "Qwen3 Coder Plus",
               description: null,
               _meta: { contextLimit: 123 },
             },
@@ -176,84 +176,84 @@ describe('extractModelInfoFromNewSessionResult', () => {
         },
       }),
     ).toEqual({
-      modelId: 'qwen3-coder-plus',
-      name: 'Qwen3 Coder Plus',
+      modelId: "qwen3-coder-plus",
+      name: "Qwen3 Coder Plus",
       description: null,
       _meta: { contextLimit: 123 },
     });
   });
 
-  it('skips invalid model entries and returns first valid one', () => {
+  it("skips invalid model entries and returns first valid one", () => {
     expect(
       extractModelInfoFromNewSessionResult({
         models: {
-          currentModelId: 'ok',
+          currentModelId: "ok",
           availableModels: [
-            { name: '', modelId: '' },
-            { name: 'Ok', modelId: 'ok', _meta: { contextLimit: null } },
+            { name: "", modelId: "" },
+            { name: "Ok", modelId: "ok", _meta: { contextLimit: null } },
           ],
         },
       }),
-    ).toEqual({ name: 'Ok', modelId: 'ok', _meta: { contextLimit: null } });
+    ).toEqual({ name: "Ok", modelId: "ok", _meta: { contextLimit: null } });
   });
 
-  it('falls back to single `model` object', () => {
+  it("falls back to single `model` object", () => {
     expect(
       extractModelInfoFromNewSessionResult({
         model: {
-          name: 'Single',
-          modelId: 'single',
+          name: "Single",
+          modelId: "single",
           _meta: { contextLimit: 999 },
         },
       }),
     ).toEqual({
-      name: 'Single',
-      modelId: 'single',
+      name: "Single",
+      modelId: "single",
       _meta: { contextLimit: 999 },
     });
   });
 
-  it('falls back to legacy `modelInfo`', () => {
+  it("falls back to legacy `modelInfo`", () => {
     expect(
       extractModelInfoFromNewSessionResult({
-        modelInfo: { name: 'legacy' },
+        modelInfo: { name: "legacy" },
       }),
-    ).toEqual({ name: 'legacy', modelId: 'legacy' });
+    ).toEqual({ name: "legacy", modelId: "legacy" });
   });
 
-  it('returns null when missing', () => {
+  it("returns null when missing", () => {
     expect(extractModelInfoFromNewSessionResult({})).toBeNull();
     expect(extractModelInfoFromNewSessionResult(null)).toBeNull();
   });
 
-  it('derives contextLimit for known models when the payload has null metadata', () => {
+  it("derives contextLimit for known models when the payload has null metadata", () => {
     expect(
       extractModelInfoFromNewSessionResult({
         model: {
-          name: 'Qwen3 Max',
-          modelId: 'qwen3-max',
+          name: "Qwen3 Max",
+          modelId: "qwen3-max",
           _meta: null,
         },
       }),
     ).toEqual({
-      name: 'Qwen3 Max',
-      modelId: 'qwen3-max',
+      name: "Qwen3 Max",
+      modelId: "qwen3-max",
       _meta: { contextLimit: 262144 },
     });
   });
 
-  it('preserves null contextLimit for unknown models', () => {
+  it("preserves null contextLimit for unknown models", () => {
     expect(
       extractModelInfoFromNewSessionResult({
         model: {
-          name: 'Unknown',
-          modelId: 'unknown-model-v1.0',
+          name: "Unknown",
+          modelId: "unknown-model-v1.0",
           _meta: { contextLimit: null },
         },
       }),
     ).toEqual({
-      name: 'Unknown',
-      modelId: 'unknown-model-v1.0',
+      name: "Unknown",
+      modelId: "unknown-model-v1.0",
       _meta: { contextLimit: null },
     });
   });

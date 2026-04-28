@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback, useMemo } from 'react';
-import type { VSCodeAPI } from '../../hooks/useVSCode.js';
+import { useState, useCallback, useMemo } from "react";
+import type { VSCodeAPI } from "../../hooks/useVSCode.js";
 
 /**
  * Session management Hook
@@ -17,9 +17,9 @@ export const useSessionManagement = (vscode: VSCodeAPI) => {
   >([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [currentSessionTitle, setCurrentSessionTitle] =
-    useState<string>('Past Conversations');
+    useState<string>("Past Conversations");
   const [showSessionSelector, setShowSessionSelector] = useState(false);
-  const [sessionSearchQuery, setSessionSearchQuery] = useState('');
+  const [sessionSearchQuery, setSessionSearchQuery] = useState("");
   const [nextCursor, setNextCursor] = useState<number | undefined>(undefined);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -38,7 +38,7 @@ export const useSessionManagement = (vscode: VSCodeAPI) => {
       const title = (
         (session.title as string) ||
         (session.name as string) ||
-        ''
+        ""
       ).toLowerCase();
       return title.includes(query);
     });
@@ -53,7 +53,7 @@ export const useSessionManagement = (vscode: VSCodeAPI) => {
     setNextCursor(undefined);
     setHasMore(true);
     setIsLoading(true);
-    vscode.postMessage({ type: 'getTramSessions', data: { size: PAGE_SIZE } });
+    vscode.postMessage({ type: "getTramSessions", data: { size: PAGE_SIZE } });
     setShowSessionSelector(true);
   }, [vscode]);
 
@@ -63,7 +63,7 @@ export const useSessionManagement = (vscode: VSCodeAPI) => {
     }
     setIsLoading(true);
     vscode.postMessage({
-      type: 'getTramSessions',
+      type: "getTramSessions",
       data: { cursor: nextCursor, size: PAGE_SIZE },
     });
   }, [hasMore, isLoading, nextCursor, vscode]);
@@ -71,14 +71,14 @@ export const useSessionManagement = (vscode: VSCodeAPI) => {
   /**
    * Create new session
    */
-  const handleNewQwenSession = useCallback(
+  const handleNewTramSession = useCallback(
     (modelId?: string | null) => {
       const trimmedModelId =
-        typeof modelId === 'string' && modelId.trim().length > 0
+        typeof modelId === "string" && modelId.trim().length > 0
           ? modelId.trim()
           : undefined;
       vscode.postMessage({
-        type: 'openNewChatTab',
+        type: "openNewChatTab",
         data: trimmedModelId ? { modelId: trimmedModelId } : {},
       });
       setShowSessionSelector(false);
@@ -92,14 +92,14 @@ export const useSessionManagement = (vscode: VSCodeAPI) => {
   const handleSwitchSession = useCallback(
     (sessionId: string) => {
       if (sessionId === currentSessionId) {
-        console.log('[useSessionManagement] Already on this session, ignoring');
+        console.log("[useSessionManagement] Already on this session, ignoring");
         setShowSessionSelector(false);
         return;
       }
 
-      console.log('[useSessionManagement] Switching to session:', sessionId);
+      console.log("[useSessionManagement] Switching to session:", sessionId);
       vscode.postMessage({
-        type: 'switchTramSession',
+        type: "switchTramSession",
         data: { sessionId },
       });
     },

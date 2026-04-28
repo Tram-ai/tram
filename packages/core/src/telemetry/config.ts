@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { TelemetrySettings } from '../config/config.js';
-import { FatalConfigError } from '../utils/errors.js';
-import { TelemetryTarget } from './index.js';
+import type { TelemetrySettings } from "../config/config.js";
+import { FatalConfigError } from "../utils/errors.js";
+import { TelemetryTarget } from "./index.js";
 
 /**
  * Parse a boolean environment flag. Accepts 'true'/'1' as true.
@@ -15,7 +15,7 @@ export function parseBooleanEnvFlag(
   value: string | undefined,
 ): boolean | undefined {
   if (value === undefined) return undefined;
-  return value === 'true' || value === '1';
+  return value === "true" || value === "1";
 }
 
 /**
@@ -25,10 +25,10 @@ export function parseTelemetryTargetValue(
   value: string | TelemetryTarget | undefined,
 ): TelemetryTarget | undefined {
   if (value === undefined) return undefined;
-  if (value === TelemetryTarget.LOCAL || value === 'local') {
+  if (value === TelemetryTarget.LOCAL || value === "local") {
     return TelemetryTarget.LOCAL;
   }
-  if (value === TelemetryTarget.GCP || value === 'gcp') {
+  if (value === TelemetryTarget.GCP || value === "gcp") {
     return TelemetryTarget.GCP;
   }
   return undefined;
@@ -57,12 +57,12 @@ export async function resolveTelemetrySettings(options: {
 
   const enabled =
     argv.telemetry ??
-    parseBooleanEnvFlag(env['TRAM_TELEMETRY_ENABLED']) ??
+    parseBooleanEnvFlag(env["TRAM_TELEMETRY_ENABLED"]) ??
     settings.enabled;
 
   const rawTarget =
     (argv.telemetryTarget as string | TelemetryTarget | undefined) ??
-    env['TRAM_TELEMETRY_TARGET'] ??
+    env["TRAM_TELEMETRY_TARGET"] ??
     (settings.target as string | TelemetryTarget | undefined);
   const target = parseTelemetryTargetValue(rawTarget);
   if (rawTarget !== undefined && target === undefined) {
@@ -75,15 +75,15 @@ export async function resolveTelemetrySettings(options: {
 
   const otlpEndpoint =
     argv.telemetryOtlpEndpoint ??
-    env['TRAM_TELEMETRY_OTLP_ENDPOINT'] ??
-    env['OTEL_EXPORTER_OTLP_ENDPOINT'] ??
+    env["TRAM_TELEMETRY_OTLP_ENDPOINT"] ??
+    env["OTEL_EXPORTER_OTLP_ENDPOINT"] ??
     settings.otlpEndpoint;
 
   const rawProtocol =
     (argv.telemetryOtlpProtocol as string | undefined) ??
-    env['TRAM_TELEMETRY_OTLP_PROTOCOL'] ??
+    env["TRAM_TELEMETRY_OTLP_PROTOCOL"] ??
     settings.otlpProtocol;
-  const otlpProtocol = (['grpc', 'http'] as const).find(
+  const otlpProtocol = (["grpc", "http"] as const).find(
     (p) => p === rawProtocol,
   );
   if (rawProtocol !== undefined && otlpProtocol === undefined) {
@@ -96,14 +96,14 @@ export async function resolveTelemetrySettings(options: {
 
   const logPrompts =
     argv.telemetryLogPrompts ??
-    parseBooleanEnvFlag(env['TRAM_TELEMETRY_LOG_PROMPTS']) ??
+    parseBooleanEnvFlag(env["TRAM_TELEMETRY_LOG_PROMPTS"]) ??
     settings.logPrompts;
 
   const outfile =
-    argv.telemetryOutfile ?? env['TRAM_TELEMETRY_OUTFILE'] ?? settings.outfile;
+    argv.telemetryOutfile ?? env["TRAM_TELEMETRY_OUTFILE"] ?? settings.outfile;
 
   const useCollector =
-    parseBooleanEnvFlag(env['TRAM_TELEMETRY_USE_COLLECTOR']) ??
+    parseBooleanEnvFlag(env["TRAM_TELEMETRY_USE_COLLECTOR"]) ??
     settings.useCollector;
 
   return {

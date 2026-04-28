@@ -6,8 +6,8 @@
  * Special UI icons
  */
 
-import type { FC } from 'react';
-import type { IconProps } from './types.js';
+import type { FC } from "react";
+import type { IconProps } from "./types.js";
 
 interface ThinkingIconProps extends IconProps {
   /**
@@ -38,11 +38,11 @@ export const ThinkingIcon: FC<ThinkingIconProps> = ({
       strokeWidth="0.27"
       style={{
         stroke: enabled
-          ? 'var(--app-tram-ivory)'
-          : 'var(--app-secondary-foreground)',
+          ? "var(--app-tram-ivory)"
+          : "var(--app-secondary-foreground)",
         fill: enabled
-          ? 'var(--app-tram-ivory)'
-          : 'var(--app-secondary-foreground)',
+          ? "var(--app-tram-ivory)"
+          : "var(--app-secondary-foreground)",
         ...style,
       }}
     />

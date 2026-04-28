@@ -48,15 +48,15 @@ export const groupSessionsByDate = (
   } = {
     Today: [],
     Yesterday: [],
-    'This Week': [],
+    "This Week": [],
     Older: [],
   };
 
   sessions.forEach((session) => {
     const timestamp =
-      (session.lastUpdated as string) || (session.startTime as string) || '';
+      (session.lastUpdated as string) || (session.startTime as string) || "";
     if (!timestamp) {
-      groups['Older'].push(session);
+      groups["Older"].push(session);
       return;
     }
 
@@ -68,13 +68,13 @@ export const groupSessionsByDate = (
     );
 
     if (sessionDay.getTime() === today.getTime()) {
-      groups['Today'].push(session);
+      groups["Today"].push(session);
     } else if (sessionDay.getTime() === yesterday.getTime()) {
-      groups['Yesterday'].push(session);
+      groups["Yesterday"].push(session);
     } else if (sessionDay.getTime() > today.getTime() - 7 * 86400000) {
-      groups['This Week'].push(session);
+      groups["This Week"].push(session);
     } else {
-      groups['Older'].push(session);
+      groups["Older"].push(session);
     }
   });
 
@@ -98,7 +98,7 @@ export const groupSessionsByDate = (
  */
 export const getTimeAgo = (timestamp: string): string => {
   if (!timestamp) {
-    return '';
+    return "";
   }
   const now = new Date().getTime();
   const then = new Date(timestamp).getTime();
@@ -108,7 +108,7 @@ export const getTimeAgo = (timestamp: string): string => {
   const diffDays = Math.floor(diffMs / 86400000);
 
   if (diffMins < 1) {
-    return 'now';
+    return "now";
   }
   if (diffMins < 60) {
     return `${diffMins}m`;
@@ -117,7 +117,7 @@ export const getTimeAgo = (timestamp: string): string => {
     return `${diffHours}h`;
   }
   if (diffDays === 1) {
-    return 'Yesterday';
+    return "Yesterday";
   }
   if (diffDays < 7) {
     return `${diffDays}d`;

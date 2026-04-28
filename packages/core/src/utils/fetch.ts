@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getErrorMessage, isNodeError } from './errors.js';
-import { URL } from 'node:url';
+import { getErrorMessage, isNodeError } from "./errors.js";
+import { URL } from "node:url";
 
 const PRIVATE_IP_RANGES = [
   /^10\./,
@@ -18,23 +18,23 @@ const PRIVATE_IP_RANGES = [
 ];
 
 const TLS_ERROR_CODES = new Set([
-  'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
-  'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
-  'SELF_SIGNED_CERT_IN_CHAIN',
-  'DEPTH_ZERO_SELF_SIGNED_CERT',
-  'CERT_HAS_EXPIRED',
-  'ERR_TLS_CERT_ALTNAME_INVALID',
+  "UNABLE_TO_GET_ISSUER_CERT_LOCALLY",
+  "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+  "SELF_SIGNED_CERT_IN_CHAIN",
+  "DEPTH_ZERO_SELF_SIGNED_CERT",
+  "CERT_HAS_EXPIRED",
+  "ERR_TLS_CERT_ALTNAME_INVALID",
 ]);
 
 const FETCH_TROUBLESHOOTING_ERROR_CODES = new Set([
   ...TLS_ERROR_CODES,
-  'ECONNRESET',
-  'ETIMEDOUT',
-  'ECONNREFUSED',
-  'ENOTFOUND',
-  'EAI_AGAIN',
-  'EHOSTUNREACH',
-  'ENETUNREACH',
+  "ECONNRESET",
+  "ETIMEDOUT",
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
 ]);
 
 export class FetchError extends Error {
@@ -43,7 +43,7 @@ export class FetchError extends Error {
     public code?: string,
   ) {
     super(message);
-    this.name = 'FetchError';
+    this.name = "FetchError";
   }
 }
 
@@ -67,8 +67,8 @@ export async function fetchWithTimeout(
     const response = await fetch(url, { signal: controller.signal });
     return response;
   } catch (error) {
-    if (isNodeError(error) && error.code === 'ABORT_ERR') {
-      throw new FetchError(`Request timed out after ${timeout}ms`, 'ETIMEDOUT');
+    if (isNodeError(error) && error.code === "ABORT_ERR") {
+      throw new FetchError(`Request timed out after ${timeout}ms`, "ETIMEDOUT");
     }
     throw new FetchError(getErrorMessage(error));
   } finally {
@@ -77,29 +77,29 @@ export async function fetchWithTimeout(
 }
 
 function getErrorCode(error: unknown): string | undefined {
-  if (!error || typeof error !== 'object') {
+  if (!error || typeof error !== "object") {
     return undefined;
   }
 
   if (
-    'code' in error &&
-    typeof (error as Record<string, unknown>)['code'] === 'string'
+    "code" in error &&
+    typeof (error as Record<string, unknown>)["code"] === "string"
   ) {
-    return (error as Record<string, string>)['code'];
+    return (error as Record<string, string>)["code"];
   }
 
   return undefined;
 }
 
 function formatUnknownErrorMessage(error: unknown): string | undefined {
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error;
   }
 
   if (
-    typeof error === 'number' ||
-    typeof error === 'boolean' ||
-    typeof error === 'bigint'
+    typeof error === "number" ||
+    typeof error === "boolean" ||
+    typeof error === "bigint"
   ) {
     return String(error);
   }
@@ -108,12 +108,12 @@ function formatUnknownErrorMessage(error: unknown): string | undefined {
     return error.message;
   }
 
-  if (!error || typeof error !== 'object') {
+  if (!error || typeof error !== "object") {
     return undefined;
   }
 
-  const message = (error as Record<string, unknown>)['message'];
-  if (typeof message === 'string') {
+  const message = (error as Record<string, unknown>)["message"];
+  if (typeof message === "string") {
     return message;
   }
 
@@ -162,10 +162,10 @@ export function formatFetchErrorForUser(
     cause ? `(cause: ${cause})` : undefined,
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   const shouldShowFetchHints =
-    errorMessage.toLowerCase().includes('fetch failed') ||
+    errorMessage.toLowerCase().includes("fetch failed") ||
     (code != null && FETCH_TROUBLESHOOTING_ERROR_CODES.has(code));
 
   const shouldShowTlsHint = code != null && TLS_ERROR_CODES.has(code);
@@ -175,18 +175,18 @@ export function formatFetchErrorForUser(
   }
 
   const hintLines = [
-    '',
-    'Troubleshooting:',
+    "",
+    "Troubleshooting:",
     ...(options.url
       ? [`- Confirm you can reach ${options.url} from this machine.`]
       : []),
-    '- If you are behind a proxy, pass `--proxy <url>` (or set `proxy` in settings).',
+    "- If you are behind a proxy, pass `--proxy <url>` (or set `proxy` in settings).",
     ...(shouldShowTlsHint
       ? [
-          '- If your network uses a corporate TLS inspection CA, set `NODE_EXTRA_CA_CERTS` to your CA bundle.',
+          "- If your network uses a corporate TLS inspection CA, set `NODE_EXTRA_CA_CERTS` to your CA bundle.",
         ]
       : []),
   ];
 
-  return `${fullErrorMessage}${hintLines.join('\n')}`;
+  return `${fullErrorMessage}${hintLines.join("\n")}`;
 }

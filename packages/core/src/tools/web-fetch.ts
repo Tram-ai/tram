@@ -4,23 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { convert } from 'html-to-text';
-import type { Config } from '../config/config.js';
-import { fetchWithTimeout, isPrivateIp } from '../utils/fetch.js';
-import { getResponseText } from '../utils/partUtils.js';
-import { ToolErrorType } from './tool-error.js';
+import { convert } from "html-to-text";
+import type { Config } from "../config/config.js";
+import { fetchWithTimeout, isPrivateIp } from "../utils/fetch.js";
+import { ToolErrorType } from "./tool-error.js";
 import type {
   ToolCallConfirmationDetails,
   ToolInvocation,
   ToolResult,
   ToolConfirmationPayload,
   ToolConfirmationOutcome,
-} from './tools.js';
-import type { PermissionDecision } from '../permissions/types.js';
-import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
-import { DEFAULT_QWEN_MODEL } from '../config/models.js';
-import { ToolNames, ToolDisplayNames } from './tool-names.js';
-import { createDebugLogger, type DebugLogger } from '../utils/debugLogger.js';
+} from "./tools.js";
+import type { PermissionDecision } from "../permissions/types.js";
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from "./tools.js";
+import { ToolNames, ToolDisplayNames } from "./tool-names.js";
+import { createDebugLogger, type DebugLogger } from "../utils/debugLogger.js";
 
 const URL_FETCH_TIMEOUT_MS = 10000;
 const MAX_CONTENT_LENGTH = 100000;
@@ -48,22 +46,19 @@ class WebFetchToolInvocation extends BaseToolInvocation<
 > {
   private readonly debugLogger: DebugLogger;
 
-  constructor(
-    private readonly config: Config,
-    params: WebFetchToolParams,
-  ) {
+  constructor(_config: Config, params: WebFetchToolParams) {
     super(params);
-    this.debugLogger = createDebugLogger('WEB_FETCH');
+    this.debugLogger = createDebugLogger("WEB_FETCH");
   }
 
   private async executeDirectFetch(signal: AbortSignal): Promise<ToolResult> {
     let url = this.params.url;
 
     // Convert GitHub blob URL to raw URL
-    if (url.includes('github.com') && url.includes('/blob/')) {
+    if (url.includes("github.com") && url.includes("/blob/")) {
       url = url
-        .replace('github.com', 'raw.githubusercontent.com')
-        .replace('/blob/', '/');
+        .replace("github.com", "raw.githubusercontent.com")
+        .replace("/blob/", "/");
       this.debugLogger.debug(
         `[WebFetchTool] Converted GitHub blob URL to raw URL: ${url}`,
       );
@@ -76,8 +71,8 @@ class WebFetchToolInvocation extends BaseToolInvocation<
       // Collect response metadata for the model
       const responseStatus = response.status;
       const responseStatusText = response.statusText;
-      const contentType = response.headers.get('content-type') || 'unknown';
-      const contentLength = response.headers.get('content-length') || 'unknown';
+      const contentType = response.headers.get("content-type") || "unknown";
+      const contentLength = response.headers.get("content-length") || "unknown";
       const finalUrl = response.url || url;
       const wasRedirected = response.redirected || finalUrl !== url;
 
@@ -86,7 +81,9 @@ class WebFetchToolInvocation extends BaseToolInvocation<
         `Content-Type: ${contentType}`,
         `Content-Length: ${contentLength}`,
         wasRedirected ? `Redirected: ${url} → ${finalUrl}` : null,
-      ].filter(Boolean).join('\n');
+      ]
+        .filter(Boolean)
+        .join("\n");
 
       if (!response.ok) {
         const errorMessage = `Request failed with status code ${responseStatus} ${responseStatusText}`;
@@ -100,55 +97,39 @@ class WebFetchToolInvocation extends BaseToolInvocation<
       this.debugLogger.debug(
         `[WebFetchTool] Successfully fetched content from ${finalUrl}`,
       );
-      const html = await response.text();
-      const textContent = convert(html, {
-        wordwrap: false,
-        selectors: [
-          { selector: 'a', options: { ignoreHref: true } },
-          { selector: 'img', format: 'skip' },
-        ],
-      }).substring(0, MAX_CONTENT_LENGTH);
+      const rawContent = await response.text();
+      const isHtmlContent = /html|xml/i.test(contentType);
+      const extractedText = isHtmlContent
+        ? convert(rawContent, {
+            wordwrap: false,
+            selectors: [
+              { selector: "a", options: { ignoreHref: true } },
+              { selector: "img", format: "skip" },
+            ],
+          })
+        : rawContent;
+      const textContent = extractedText.substring(0, MAX_CONTENT_LENGTH);
+      const wasTruncated = extractedText.length > MAX_CONTENT_LENGTH;
 
       this.debugLogger.debug(
-        `[WebFetchTool] Converted HTML to text (${textContent.length} characters)`,
-      );
-
-      const geminiClient = this.config.getGeminiClient();
-      const fallbackPrompt = `The user requested the following: "${this.params.prompt}".
-
-I have fetched the content from ${this.params.url}.
-${wasRedirected ? `(Redirected to: ${finalUrl})` : ''}
-Response: ${headerInfo}
-
-Please use the following content to answer the user's request.
-
----
-${textContent}
----`;
-
-      this.debugLogger.debug(
-        `[WebFetchTool] Processing content with prompt: "${this.params.prompt}"`,
-      );
-
-      const result = await geminiClient.generateContent(
-        [{ role: 'user', parts: [{ text: fallbackPrompt }] }],
-        {
-          systemInstruction:
-            'Extract and summarize the requested information from the provided web content. ' +
-            'Be concise and accurate. Respond only with the requested information.',
-        },
-        signal,
-        this.config.getModel() || DEFAULT_TRAM_MODEL,
-      );
-      const resultText = getResponseText(result) || '';
-
-      this.debugLogger.debug(
-        `[WebFetchTool] Successfully processed content from ${this.params.url}`,
+        `[WebFetchTool] Extracted response text (${textContent.length} characters)` +
+          (wasTruncated ? " [truncated]" : ""),
       );
 
       return {
-        llmContent: `${headerInfo}\n\n${resultText}`,
-        returnDisplay: `Content from ${finalUrl} processed successfully.\n${headerInfo}`,
+        llmContent: [
+          `Fetched content from ${finalUrl}.`,
+          `Requested extraction goal: ${this.params.prompt}`,
+          `Response metadata:\n${headerInfo}`,
+          "Fetched text:",
+          textContent,
+          wasTruncated
+            ? `Note: content was truncated to ${MAX_CONTENT_LENGTH} characters.`
+            : null,
+        ]
+          .filter(Boolean)
+          .join("\n\n"),
+        returnDisplay: `Content from ${finalUrl} fetched successfully.\n${headerInfo}`,
       };
     } catch (e) {
       const error = e as Error;
@@ -168,7 +149,7 @@ ${textContent}
   override getDescription(): string {
     const displayPrompt =
       this.params.prompt.length > 100
-        ? this.params.prompt.substring(0, 97) + '...'
+        ? this.params.prompt.substring(0, 97) + "..."
         : this.params.prompt;
     return `Fetching content from ${this.params.url} and processing with prompt: "${displayPrompt}"`;
   }
@@ -178,7 +159,7 @@ ${textContent}
    * because it makes external network requests.
    */
   override async getDefaultPermission(): Promise<PermissionDecision> {
-    return 'ask';
+    return "ask";
   }
 
   /**
@@ -197,7 +178,7 @@ ${textContent}
     const permissionRules = [`WebFetch(${domain})`];
 
     const confirmationDetails: ToolCallConfirmationDetails = {
-      type: 'info',
+      type: "info",
       title: `Confirm Web Fetch`,
       prompt: `Fetch content from ${this.params.url} and process with: ${this.params.prompt}`,
       urls: [this.params.url],
@@ -248,16 +229,16 @@ export class WebFetchTool extends BaseDeclarativeTool<
       {
         properties: {
           url: {
-            description: 'The URL to fetch content from',
-            type: 'string',
+            description: "The URL to fetch content from",
+            type: "string",
           },
           prompt: {
-            description: 'The prompt to run on the fetched content',
-            type: 'string',
+            description: "The prompt to run on the fetched content",
+            type: "string",
           },
         },
-        required: ['url', 'prompt'],
-        type: 'object',
+        required: ["url", "prompt"],
+        type: "object",
       },
     );
   }
@@ -265,16 +246,16 @@ export class WebFetchTool extends BaseDeclarativeTool<
   protected override validateToolParamValues(
     params: WebFetchToolParams,
   ): string | null {
-    if (!params.url || params.url.trim() === '') {
+    if (!params.url || params.url.trim() === "") {
       return "The 'url' parameter cannot be empty.";
     }
     if (
-      !params.url.startsWith('http://') &&
-      !params.url.startsWith('https://')
+      !params.url.startsWith("http://") &&
+      !params.url.startsWith("https://")
     ) {
       return "The 'url' must be a valid URL starting with http:// or https://.";
     }
-    if (!params.prompt || params.prompt.trim() === '') {
+    if (!params.prompt || params.prompt.trim() === "") {
       return "The 'prompt' parameter cannot be empty.";
     }
     return null;

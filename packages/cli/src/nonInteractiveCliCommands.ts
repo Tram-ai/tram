@@ -4,30 +4,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { PartListUnion } from '@google/genai';
-import { parseSlashCommand } from './utils/commands.js';
+import type { PartListUnion } from "@google/genai";
+import { parseSlashCommand } from "./utils/commands.js";
 import {
   Logger,
   uiTelemetryService,
   type Config,
   createDebugLogger,
-} from '@tram-ai/tram-core';
-import { CommandService } from './services/CommandService.js';
-import { BuiltinCommandLoader } from './services/BuiltinCommandLoader.js';
-import { BundledSkillLoader } from './services/BundledSkillLoader.js';
-import { FileCommandLoader } from './services/FileCommandLoader.js';
+} from "@tram-ai/tram-core";
+import { CommandService } from "./services/CommandService.js";
+import { BuiltinCommandLoader } from "./services/BuiltinCommandLoader.js";
+import { BundledSkillLoader } from "./services/BundledSkillLoader.js";
+import { FileCommandLoader } from "./services/FileCommandLoader.js";
 import {
   CommandKind,
   type CommandContext,
   type SlashCommand,
   type SlashCommandActionReturn,
-} from './ui/commands/types.js';
-import { createNonInteractiveUI } from './ui/noninteractive/nonInteractiveUi.js';
-import type { LoadedSettings } from './config/settings.js';
-import type { SessionStatsState } from './ui/contexts/SessionContext.js';
-import { t } from './i18n/index.js';
+} from "./ui/commands/types.js";
+import { createNonInteractiveUI } from "./ui/noninteractive/nonInteractiveUi.js";
+import type { LoadedSettings } from "./config/settings.js";
+import type { SessionStatsState } from "./ui/contexts/SessionContext.js";
+import { t } from "./i18n/index.js";
 
-const debugLogger = createDebugLogger('NON_INTERACTIVE_COMMANDS');
+const debugLogger = createDebugLogger("NON_INTERACTIVE_COMMANDS");
 
 /**
  * Built-in commands that are allowed in non-interactive modes (CLI and ACP).
@@ -40,12 +40,12 @@ const debugLogger = createDebugLogger('NON_INTERACTIVE_COMMANDS');
  * - context: Show context window usage (read-only diagnostic)
  */
 export const ALLOWED_BUILTIN_COMMANDS_NON_INTERACTIVE = [
-  'init',
-  'summary',
-  'compress',
-  'btw',
-  'bug',
-  'context',
+  "init",
+  "summary",
+  "compress",
+  "btw",
+  "bug",
+  "context",
 ] as const;
 
 /**
@@ -60,29 +60,29 @@ export const ALLOWED_BUILTIN_COMMANDS_NON_INTERACTIVE = [
  */
 export type NonInteractiveSlashCommandResult =
   | {
-      type: 'submit_prompt';
+      type: "submit_prompt";
       content: PartListUnion;
     }
   | {
-      type: 'message';
-      messageType: 'info' | 'error';
+      type: "message";
+      messageType: "info" | "error";
       content: string;
     }
   | {
-      type: 'stream_messages';
+      type: "stream_messages";
       messages: AsyncGenerator<
-        { messageType: 'info' | 'error'; content: string },
+        { messageType: "info" | "error"; content: string },
         void,
         unknown
       >;
     }
   | {
-      type: 'unsupported';
+      type: "unsupported";
       reason: string;
       originalType: string;
     }
   | {
-      type: 'no_command';
+      type: "no_command";
     };
 
 /**
@@ -102,22 +102,22 @@ function handleCommandResult(
   result: SlashCommandActionReturn,
 ): NonInteractiveSlashCommandResult {
   switch (result.type) {
-    case 'submit_prompt':
+    case "submit_prompt":
       return {
-        type: 'submit_prompt',
+        type: "submit_prompt",
         content: result.content,
       };
 
-    case 'message':
+    case "message":
       return {
-        type: 'message',
+        type: "message",
         messageType: result.messageType,
         content: result.content,
       };
 
-    case 'stream_messages':
+    case "stream_messages":
       return {
-        type: 'stream_messages',
+        type: "stream_messages",
         messages: result.messages,
       };
 
@@ -126,60 +126,60 @@ function handleCommandResult(
      * whitelist of allowed slash commands in ACP and non-interactive mode.
      * We'll try to add more supported return types in the future.
      */
-    case 'tool':
+    case "tool":
       return {
-        type: 'unsupported',
+        type: "unsupported",
         reason:
-          'Tool execution from slash commands is not supported in non-interactive mode.',
-        originalType: 'tool',
+          "Tool execution from slash commands is not supported in non-interactive mode.",
+        originalType: "tool",
       };
 
-    case 'quit':
+    case "quit":
       return {
-        type: 'unsupported',
+        type: "unsupported",
         reason:
-          'Quit command is not supported in non-interactive mode. The process will exit naturally after completion.',
-        originalType: 'quit',
+          "Quit command is not supported in non-interactive mode. The process will exit naturally after completion.",
+        originalType: "quit",
       };
 
-    case 'dialog':
+    case "dialog":
       return {
-        type: 'unsupported',
+        type: "unsupported",
         reason: `Dialog '${result.dialog}' cannot be opened in non-interactive mode.`,
-        originalType: 'dialog',
+        originalType: "dialog",
       };
 
-    case 'load_history':
+    case "load_history":
       return {
-        type: 'unsupported',
+        type: "unsupported",
         reason:
-          'Loading history is not supported in non-interactive mode. Each invocation starts with a fresh context.',
-        originalType: 'load_history',
+          "Loading history is not supported in non-interactive mode. Each invocation starts with a fresh context.",
+        originalType: "load_history",
       };
 
-    case 'confirm_shell_commands':
+    case "confirm_shell_commands":
       return {
-        type: 'unsupported',
+        type: "unsupported",
         reason:
-          'Shell command confirmation is not supported in non-interactive mode. Use YOLO mode or pre-approve commands.',
-        originalType: 'confirm_shell_commands',
+          "Shell command confirmation is not supported in non-interactive mode. Use YOLO mode or pre-approve commands.",
+        originalType: "confirm_shell_commands",
       };
 
-    case 'confirm_action':
+    case "confirm_action":
       return {
-        type: 'unsupported',
+        type: "unsupported",
         reason:
-          'Action confirmation is not supported in non-interactive mode. Commands requiring confirmation cannot be executed.',
-        originalType: 'confirm_action',
+          "Action confirmation is not supported in non-interactive mode. Commands requiring confirmation cannot be executed.",
+        originalType: "confirm_action",
       };
 
     default: {
       // Exhaustiveness check
       const _exhaustive: never = result;
       return {
-        type: 'unsupported',
+        type: "unsupported",
         reason: `Unknown command result type: ${(_exhaustive as SlashCommandActionReturn).type}`,
-        originalType: 'unknown',
+        originalType: "unknown",
       };
     }
   }
@@ -238,18 +238,18 @@ export const handleSlashCommand = async (
   ],
 ): Promise<NonInteractiveSlashCommandResult> => {
   const trimmed = rawQuery.trim();
-  if (!trimmed.startsWith('/')) {
-    return { type: 'no_command' };
+  if (!trimmed.startsWith("/")) {
+    return { type: "no_command" };
   }
 
   const isAcpMode = config.getExperimentalZedIntegration();
   const isInteractive = config.isInteractive();
 
   const executionMode = isAcpMode
-    ? 'acp'
+    ? "acp"
     : isInteractive
-      ? 'interactive'
-      : 'non_interactive';
+      ? "interactive"
+      : "non_interactive";
 
   const allowedBuiltinSet = new Set(allowedBuiltinCommandNames ?? []);
 
@@ -286,20 +286,20 @@ export const handleSlashCommand = async (
     if (knownCommand) {
       // Command exists but is not allowed in non-interactive mode
       return {
-        type: 'unsupported',
+        type: "unsupported",
         reason: t(
           'The command "/{{command}}" is not supported in non-interactive mode.',
           { command: knownCommand.name },
         ),
-        originalType: 'filtered_command',
+        originalType: "filtered_command",
       };
     }
 
-    return { type: 'no_command' };
+    return { type: "no_command" };
   }
 
   if (!commandToExecute.action) {
-    return { type: 'no_command' };
+    return { type: "no_command" };
   }
 
   // Not used by custom commands but may be in the future.
@@ -311,7 +311,7 @@ export const handleSlashCommand = async (
     promptCount: 1,
   };
 
-  const logger = new Logger(config?.getSessionId() || '', config?.storage);
+  const logger = new Logger(config?.getSessionId() || "", config?.storage);
 
   const context: CommandContext = {
     executionMode,
@@ -338,9 +338,9 @@ export const handleSlashCommand = async (
   if (!result) {
     // Command executed but returned no result (e.g., void return)
     return {
-      type: 'message',
-      messageType: 'info',
-      content: 'Command executed successfully.',
+      type: "message",
+      messageType: "info",
+      content: "Command executed successfully.",
     };
   }
 
@@ -389,7 +389,7 @@ export const getAvailableCommands = async (
     return filteredCommands.filter((cmd) => !cmd.hidden);
   } catch (error) {
     // Handle errors gracefully - log and return empty array
-    debugLogger.error('Error loading available commands:', error);
+    debugLogger.error("Error loading available commands:", error);
     return [];
   }
 };

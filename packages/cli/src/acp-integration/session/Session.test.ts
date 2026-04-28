@@ -4,27 +4,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as fs from 'node:fs/promises';
-import * as os from 'node:os';
-import * as path from 'node:path';
-import { Session } from './Session.js';
-import type { Config, GeminiChat } from '@tram-ai/tram-core';
-import { ApprovalMode, AuthType } from '@tram-ai/tram-core';
-import * as core from '@tram-ai/tram-core';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
+import { Session } from "./Session.js";
+import type { Config, GeminiChat } from "@tram-ai/tram-core";
+import { ApprovalMode, AuthType } from "@tram-ai/tram-core";
+import * as core from "@tram-ai/tram-core";
 import type {
   AgentSideConnection,
   PromptRequest,
-} from '@agentclientprotocol/sdk';
-import type { LoadedSettings } from '../../config/settings.js';
-import * as nonInteractiveCliCommands from '../../nonInteractiveCliCommands.js';
+} from "@agentclientprotocol/sdk";
+import type { LoadedSettings } from "../../config/settings.js";
+import * as nonInteractiveCliCommands from "../../nonInteractiveCliCommands.js";
 
-vi.mock('../../nonInteractiveCliCommands.js', () => ({
+vi.mock("../../nonInteractiveCliCommands.js", () => ({
   getAvailableCommands: vi.fn(),
   handleSlashCommand: vi.fn(),
 }));
 
-describe('Session', () => {
+describe("Session", () => {
   let mockChat: GeminiChat;
   let mockConfig: Config;
   let mockClient: AgentSideConnection;
@@ -37,7 +37,7 @@ describe('Session', () => {
   let mockToolRegistry: { getTool: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    currentModel = 'qwen3-code-plus';
+    currentModel = "qwen3-code-plus";
     currentAuthType = AuthType.USE_OPENAI;
     switchModelSpy = vi
       .fn()
@@ -58,7 +58,7 @@ describe('Session', () => {
       setApprovalMode: vi.fn(),
       switchModel: switchModelSpy,
       getModel: vi.fn().mockImplementation(() => currentModel),
-      getSessionId: vi.fn().mockReturnValue('test-session-id'),
+      getSessionId: vi.fn().mockReturnValue("test-session-id"),
       getWorkingDir: vi.fn().mockReturnValue(process.cwd()),
       getTelemetryLogPromptsEnabled: vi.fn().mockReturnValue(false),
       getUsageStatisticsEnabled: vi.fn().mockReturnValue(false),
@@ -81,7 +81,7 @@ describe('Session', () => {
     mockClient = {
       sessionUpdate: vi.fn().mockResolvedValue(undefined),
       requestPermission: vi.fn().mockResolvedValue({
-        outcome: { outcome: 'selected', optionId: 'proceed_once' },
+        outcome: { outcome: "selected", optionId: "proceed_once" },
       }),
       extNotification: vi.fn().mockResolvedValue(undefined),
     } as unknown as AgentSideConnection;
@@ -95,7 +95,7 @@ describe('Session', () => {
     getAvailableCommandsSpy.mockResolvedValue([]);
 
     session = new Session(
-      'test-session-id',
+      "test-session-id",
       mockChat,
       mockConfig,
       mockClient,
@@ -103,15 +103,15 @@ describe('Session', () => {
     );
   });
 
-  describe('setMode', () => {
+  describe("setMode", () => {
     it.each([
-      ['plan', ApprovalMode.PLAN],
-      ['default', ApprovalMode.DEFAULT],
-      ['auto-edit', ApprovalMode.AUTO_EDIT],
-      ['yolo', ApprovalMode.YOLO],
-    ] as const)('maps %s mode', async (modeId, expected) => {
+      ["plan", ApprovalMode.PLAN],
+      ["default", ApprovalMode.DEFAULT],
+      ["auto-edit", ApprovalMode.AUTO_EDIT],
+      ["yolo", ApprovalMode.YOLO],
+    ] as const)("maps %s mode", async (modeId, expected) => {
       await session.setMode({
-        sessionId: 'test-session-id',
+        sessionId: "test-session-id",
         modeId,
       });
 
@@ -119,51 +119,51 @@ describe('Session', () => {
     });
   });
 
-  describe('setModel', () => {
-    it('sets model via config and returns current model', async () => {
+  describe("setModel", () => {
+    it("sets model via config and returns current model", async () => {
       const requested = `qwen3-coder-plus(${AuthType.USE_OPENAI})`;
       await session.setModel({
-        sessionId: 'test-session-id',
+        sessionId: "test-session-id",
         modelId: `  ${requested}  `,
       });
 
       expect(mockConfig.switchModel).toHaveBeenCalledWith(
         AuthType.USE_OPENAI,
-        'qwen3-coder-plus',
+        "qwen3-coder-plus",
         undefined,
       );
     });
 
-    it('rejects empty/whitespace model IDs', async () => {
+    it("rejects empty/whitespace model IDs", async () => {
       await expect(
         session.setModel({
-          sessionId: 'test-session-id',
-          modelId: '   ',
+          sessionId: "test-session-id",
+          modelId: "   ",
         }),
-      ).rejects.toThrow('Invalid params');
+      ).rejects.toThrow("Invalid params");
 
       expect(mockConfig.switchModel).not.toHaveBeenCalled();
     });
 
-    it('propagates errors from config.switchModel', async () => {
-      const configError = new Error('Invalid model');
+    it("propagates errors from config.switchModel", async () => {
+      const configError = new Error("Invalid model");
       switchModelSpy.mockRejectedValueOnce(configError);
 
       await expect(
         session.setModel({
-          sessionId: 'test-session-id',
+          sessionId: "test-session-id",
           modelId: `invalid-model(${AuthType.USE_OPENAI})`,
         }),
-      ).rejects.toThrow('Invalid model');
+      ).rejects.toThrow("Invalid model");
     });
   });
 
-  describe('sendAvailableCommandsUpdate', () => {
-    it('sends available_commands_update from getAvailableCommands()', async () => {
+  describe("sendAvailableCommandsUpdate", () => {
+    it("sends available_commands_update from getAvailableCommands()", async () => {
       getAvailableCommandsSpy.mockResolvedValueOnce([
         {
-          name: 'init',
-          description: 'Initialize project context',
+          name: "init",
+          description: "Initialize project context",
         },
       ]);
 
@@ -174,13 +174,13 @@ describe('Session', () => {
         expect.any(AbortSignal),
       );
       expect(mockClient.sessionUpdate).toHaveBeenCalledWith({
-        sessionId: 'test-session-id',
+        sessionId: "test-session-id",
         update: {
-          sessionUpdate: 'available_commands_update',
+          sessionUpdate: "available_commands_update",
           availableCommands: [
             {
-              name: 'init',
-              description: 'Initialize project context',
+              name: "init",
+              description: "Initialize project context",
               input: null,
             },
           ],
@@ -188,9 +188,9 @@ describe('Session', () => {
       });
     });
 
-    it('swallows errors and does not throw', async () => {
+    it("swallows errors and does not throw", async () => {
       getAvailableCommandsSpy.mockRejectedValueOnce(
-        new Error('Command discovery failed'),
+        new Error("Command discovery failed"),
       );
 
       await expect(
@@ -200,21 +200,21 @@ describe('Session', () => {
     });
   });
 
-  describe('prompt', () => {
-    it('passes resolved paths to read_many_files tool', async () => {
+  describe("prompt", () => {
+    it("passes resolved paths to read_many_files tool", async () => {
       const tempDir = await fs.mkdtemp(
-        path.join(os.tmpdir(), 'tram-acp-session-'),
+        path.join(os.tmpdir(), "tram-acp-session-"),
       );
-      const fileName = 'README.md';
+      const fileName = "README.md";
       const filePath = path.join(tempDir, fileName);
 
       try {
-        await fs.writeFile(filePath, '# Test\n', 'utf8');
+        await fs.writeFile(filePath, "# Test\n", "utf8");
 
         const readManyFilesSpy = vi
-          .spyOn(core, 'readManyFiles')
+          .spyOn(core, "readManyFiles")
           .mockResolvedValue({
-            contentParts: 'file content',
+            contentParts: "file content",
             files: [],
           });
 
@@ -224,11 +224,11 @@ describe('Session', () => {
           .mockResolvedValue((async function* () {})());
 
         const promptRequest: PromptRequest = {
-          sessionId: 'test-session-id',
+          sessionId: "test-session-id",
           prompt: [
-            { type: 'text', text: 'Check this file' },
+            { type: "text", text: "Check this file" },
             {
-              type: 'resource_link',
+              type: "resource_link",
               name: fileName,
               uri: `file://${fileName}`,
             },
@@ -246,11 +246,11 @@ describe('Session', () => {
       }
     });
 
-    it('runs prompt inside runtime output dir context', async () => {
-      const runtimeDir = path.resolve('runtime', 'from-settings');
+    it("runs prompt inside runtime output dir context", async () => {
+      const runtimeDir = path.resolve("runtime", "from-settings");
       core.Storage.setRuntimeBaseDir(runtimeDir);
       session = new Session(
-        'test-session-id',
+        "test-session-id",
         mockChat,
         mockConfig,
         mockClient,
@@ -258,7 +258,7 @@ describe('Session', () => {
       );
       const runWithRuntimeBaseDirSpy = vi.spyOn(
         core.Storage,
-        'runWithRuntimeBaseDir',
+        "runWithRuntimeBaseDir",
       );
 
       mockChat.sendMessageStream = vi
@@ -266,8 +266,8 @@ describe('Session', () => {
         .mockResolvedValue((async function* () {})());
 
       const promptRequest: PromptRequest = {
-        sessionId: 'test-session-id',
-        prompt: [{ type: 'text', text: 'hello' }],
+        sessionId: "test-session-id",
+        prompt: [{ type: "text", text: "hello" }],
       };
 
       await session.prompt(promptRequest);
@@ -279,28 +279,28 @@ describe('Session', () => {
       );
     });
 
-    it('hides allow-always options when confirmation already forbids them', async () => {
+    it("hides allow-always options when confirmation already forbids them", async () => {
       const executeSpy = vi.fn().mockResolvedValue({
-        llmContent: 'ok',
-        returnDisplay: 'ok',
+        llmContent: "ok",
+        returnDisplay: "ok",
       });
       const onConfirmSpy = vi.fn().mockResolvedValue(undefined);
       const invocation = {
-        params: { path: '/tmp/file.txt' },
-        getDefaultPermission: vi.fn().mockResolvedValue('ask'),
+        params: { path: "/tmp/file.txt" },
+        getDefaultPermission: vi.fn().mockResolvedValue("ask"),
         getConfirmationDetails: vi.fn().mockResolvedValue({
-          type: 'info',
-          title: 'Need permission',
-          prompt: 'Allow?',
+          type: "info",
+          title: "Need permission",
+          prompt: "Allow?",
           hideAlwaysAllow: true,
           onConfirm: onConfirmSpy,
         }),
-        getDescription: vi.fn().mockReturnValue('Inspect file'),
+        getDescription: vi.fn().mockReturnValue("Inspect file"),
         toolLocations: vi.fn().mockReturnValue([]),
         execute: executeSpy,
       };
       const tool = {
-        name: 'read_file',
+        name: "read_file",
         kind: core.Kind.Read,
         build: vi.fn().mockReturnValue(invocation),
       };
@@ -317,9 +317,9 @@ describe('Session', () => {
             value: {
               functionCalls: [
                 {
-                  id: 'call-1',
-                  name: 'read_file',
-                  args: { path: '/tmp/file.txt' },
+                  id: "call-1",
+                  name: "read_file",
+                  args: { path: "/tmp/file.txt" },
                 },
               ],
             },
@@ -328,50 +328,50 @@ describe('Session', () => {
       );
 
       await session.prompt({
-        sessionId: 'test-session-id',
-        prompt: [{ type: 'text', text: 'run tool' }],
+        sessionId: "test-session-id",
+        prompt: [{ type: "text", text: "run tool" }],
       });
 
       expect(mockClient.requestPermission).toHaveBeenCalledWith(
         expect.objectContaining({
           options: [
-            expect.objectContaining({ kind: 'allow_once' }),
-            expect.objectContaining({ kind: 'reject_once' }),
+            expect.objectContaining({ kind: "allow_once" }),
+            expect.objectContaining({ kind: "reject_once" }),
           ],
         }),
       );
       const options = (mockClient.requestPermission as ReturnType<typeof vi.fn>)
         .mock.calls[0][0].options as Array<{ kind: string }>;
-      expect(options.some((option) => option.kind === 'allow_always')).toBe(
+      expect(options.some((option) => option.kind === "allow_always")).toBe(
         false,
       );
     });
 
-    it('allows info confirmation tools in plan mode', async () => {
+    it("allows info confirmation tools in plan mode", async () => {
       const executeSpy = vi.fn().mockResolvedValue({
-        llmContent: 'ok',
-        returnDisplay: 'ok',
+        llmContent: "ok",
+        returnDisplay: "ok",
       });
       const onConfirmSpy = vi.fn().mockResolvedValue(undefined);
       const invocation = {
         params: {
-          url: 'https://example.com/docs',
-          prompt: 'Summarize the docs',
+          url: "https://example.com/docs",
+          prompt: "Summarize the docs",
         },
-        getDefaultPermission: vi.fn().mockResolvedValue('ask'),
+        getDefaultPermission: vi.fn().mockResolvedValue("ask"),
         getConfirmationDetails: vi.fn().mockResolvedValue({
-          type: 'info',
-          title: 'Confirm Web Fetch',
-          prompt: 'Allow fetching docs?',
-          urls: ['https://example.com/docs'],
+          type: "info",
+          title: "Confirm Web Fetch",
+          prompt: "Allow fetching docs?",
+          urls: ["https://example.com/docs"],
           onConfirm: onConfirmSpy,
         }),
-        getDescription: vi.fn().mockReturnValue('Fetch docs'),
+        getDescription: vi.fn().mockReturnValue("Fetch docs"),
         toolLocations: vi.fn().mockReturnValue([]),
         execute: executeSpy,
       };
       const tool = {
-        name: 'web_fetch',
+        name: "web_fetch",
         kind: core.Kind.Fetch,
         build: vi.fn().mockReturnValue(invocation),
       };
@@ -386,11 +386,11 @@ describe('Session', () => {
             value: {
               functionCalls: [
                 {
-                  id: 'call-info-plan',
-                  name: 'web_fetch',
+                  id: "call-info-plan",
+                  name: "web_fetch",
                   args: {
-                    url: 'https://example.com/docs',
-                    prompt: 'Summarize the docs',
+                    url: "https://example.com/docs",
+                    prompt: "Summarize the docs",
                   },
                 },
               ],
@@ -400,8 +400,8 @@ describe('Session', () => {
       );
 
       await session.prompt({
-        sessionId: 'test-session-id',
-        prompt: [{ type: 'text', text: 'research the docs first' }],
+        sessionId: "test-session-id",
+        prompt: [{ type: "text", text: "research the docs first" }],
       });
 
       expect(mockClient.requestPermission).toHaveBeenCalled();
@@ -412,23 +412,23 @@ describe('Session', () => {
       expect(executeSpy).toHaveBeenCalled();
     });
 
-    it('returns permission error for disabled tools (L1 isToolEnabled check)', async () => {
+    it("returns permission error for disabled tools (L1 isToolEnabled check)", async () => {
       const executeSpy = vi.fn();
       const invocation = {
-        params: { path: '/tmp/file.txt' },
-        getDefaultPermission: vi.fn().mockResolvedValue('ask'),
+        params: { path: "/tmp/file.txt" },
+        getDefaultPermission: vi.fn().mockResolvedValue("ask"),
         getConfirmationDetails: vi.fn().mockResolvedValue({
-          type: 'info',
-          title: 'Need permission',
-          prompt: 'Allow?',
+          type: "info",
+          title: "Need permission",
+          prompt: "Allow?",
           onConfirm: vi.fn(),
         }),
-        getDescription: vi.fn().mockReturnValue('Write file'),
+        getDescription: vi.fn().mockReturnValue("Write file"),
         toolLocations: vi.fn().mockReturnValue([]),
         execute: executeSpy,
       };
       const tool = {
-        name: 'write_file',
+        name: "write_file",
         kind: core.Kind.Edit,
         build: vi.fn().mockReturnValue(invocation),
       };
@@ -448,9 +448,9 @@ describe('Session', () => {
             value: {
               functionCalls: [
                 {
-                  id: 'call-denied',
-                  name: 'write_file',
-                  args: { path: '/tmp/file.txt' },
+                  id: "call-denied",
+                  name: "write_file",
+                  args: { path: "/tmp/file.txt" },
                 },
               ],
             },
@@ -459,8 +459,8 @@ describe('Session', () => {
       );
 
       await session.prompt({
-        sessionId: 'test-session-id',
-        prompt: [{ type: 'text', text: 'write something' }],
+        sessionId: "test-session-id",
+        prompt: [{ type: "text", text: "write something" }],
       });
 
       // Tool should NOT have been executed
@@ -469,35 +469,35 @@ describe('Session', () => {
       expect(mockClient.requestPermission).not.toHaveBeenCalled();
     });
 
-    it('respects permission-request hook allow decisions without opening ACP permission dialog', async () => {
+    it("respects permission-request hook allow decisions without opening ACP permission dialog", async () => {
       const hookSpy = vi
-        .spyOn(core, 'firePermissionRequestHook')
+        .spyOn(core, "firePermissionRequestHook")
         .mockResolvedValue({
           hasDecision: true,
           shouldAllow: true,
-          updatedInput: { path: '/tmp/updated.txt' },
+          updatedInput: { path: "/tmp/updated.txt" },
           denyMessage: undefined,
         });
       const executeSpy = vi.fn().mockResolvedValue({
-        llmContent: 'ok',
-        returnDisplay: 'ok',
+        llmContent: "ok",
+        returnDisplay: "ok",
       });
       const onConfirmSpy = vi.fn().mockResolvedValue(undefined);
       const invocation = {
-        params: { path: '/tmp/original.txt' },
-        getDefaultPermission: vi.fn().mockResolvedValue('ask'),
+        params: { path: "/tmp/original.txt" },
+        getDefaultPermission: vi.fn().mockResolvedValue("ask"),
         getConfirmationDetails: vi.fn().mockResolvedValue({
-          type: 'info',
-          title: 'Need permission',
-          prompt: 'Allow?',
+          type: "info",
+          title: "Need permission",
+          prompt: "Allow?",
           onConfirm: onConfirmSpy,
         }),
-        getDescription: vi.fn().mockReturnValue('Inspect file'),
+        getDescription: vi.fn().mockReturnValue("Inspect file"),
         toolLocations: vi.fn().mockReturnValue([]),
         execute: executeSpy,
       };
       const tool = {
-        name: 'read_file',
+        name: "read_file",
         kind: core.Kind.Read,
         build: vi.fn().mockReturnValue(invocation),
       };
@@ -516,9 +516,9 @@ describe('Session', () => {
             value: {
               functionCalls: [
                 {
-                  id: 'call-2',
-                  name: 'read_file',
-                  args: { path: '/tmp/original.txt' },
+                  id: "call-2",
+                  name: "read_file",
+                  args: { path: "/tmp/original.txt" },
                 },
               ],
             },
@@ -528,8 +528,8 @@ describe('Session', () => {
 
       try {
         await session.prompt({
-          sessionId: 'test-session-id',
-          prompt: [{ type: 'text', text: 'run tool' }],
+          sessionId: "test-session-id",
+          prompt: [{ type: "text", text: "run tool" }],
         });
       } finally {
         hookSpy.mockRestore();
@@ -539,7 +539,7 @@ describe('Session', () => {
       expect(onConfirmSpy).toHaveBeenCalledWith(
         core.ToolConfirmationOutcome.ProceedOnce,
       );
-      expect(invocation.params).toEqual({ path: '/tmp/updated.txt' });
+      expect(invocation.params).toEqual({ path: "/tmp/updated.txt" });
       expect(executeSpy).toHaveBeenCalled();
     });
   });

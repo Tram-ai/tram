@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import { BaseMessageHandler } from './BaseMessageHandler.js';
-import { getFileName } from '../utils/webviewUtils.js';
-import { showDiffCommand } from '../../commands/index.js';
+import * as vscode from "vscode";
+import { BaseMessageHandler } from "./BaseMessageHandler.js";
+import { getFileName } from "../utils/webviewUtils.js";
+import { showDiffCommand } from "../../commands/index.js";
 import {
   findLeftGroupOfChatWebview,
   ensureLeftGroupOfChatWebview,
-} from '../../utils/editorGroupUtils.js';
-import { ReadonlyFileSystemProvider } from '../../services/readonlyFileSystemProvider.js';
-import { FileDiscoveryService } from '@tram-ai/tram-core/src/services/fileDiscoveryService.js';
+} from "../../utils/editorGroupUtils.js";
+import { ReadonlyFileSystemProvider } from "../../services/readonlyFileSystemProvider.js";
+import { FileDiscoveryService } from "@tram-ai/tram-core/src/services/fileDiscoveryService.js";
 import {
   FileSearchFactory,
   type FileSearch,
-} from '@tram-ai/tram-core/src/utils/filesearch/fileSearch.js';
-import * as crawlCache from '@tram-ai/tram-core/src/utils/filesearch/crawlCache.js';
-import { getErrorMessage } from '../../utils/errorMessage.js';
+} from "@tram-ai/tram-core/src/utils/filesearch/fileSearch.js";
+import * as crawlCache from "@tram-ai/tram-core/src/utils/filesearch/crawlCache.js";
+import { getErrorMessage } from "../../utils/errorMessage.js";
 
 /**
  * File message handler
@@ -34,28 +34,28 @@ export class FileMessageHandler extends BaseMessageHandler {
   private readonly fileSearchInitializing = new Map<string, Promise<void>>();
   private readonly fileWatchers = new Map<string, vscode.FileSystemWatcher>();
   private readonly globSpecialChars = new Set([
-    '\\',
-    '*',
-    '?',
-    '[',
-    ']',
-    '{',
-    '}',
-    '(',
-    ')',
-    '!',
-    '+',
-    '@',
+    "\\",
+    "*",
+    "?",
+    "[",
+    "]",
+    "{",
+    "}",
+    "(",
+    ")",
+    "!",
+    "+",
+    "@",
   ]);
 
   canHandle(messageType: string): boolean {
     return [
-      'attachFile',
-      'showContextPicker',
-      'getWorkspaceFiles',
-      'openFile',
-      'openDiff',
-      'createAndOpenTempFile',
+      "attachFile",
+      "showContextPicker",
+      "getWorkspaceFiles",
+      "openFile",
+      "openDiff",
+      "createAndOpenTempFile",
     ].includes(messageType);
   }
 
@@ -76,9 +76,9 @@ export class FileMessageHandler extends BaseMessageHandler {
     const initPromise = (async () => {
       const search = FileSearchFactory.create({
         projectRoot: rootPath,
-        ignoreDirs: ['.git', 'node_modules'],
+        ignoreDirs: [".git", "node_modules"],
         useGitignore: true,
-        useQwenignore: false,
+        useTramignore: false,
         cache: true,
         cacheTtl: 30000,
         enableRecursiveFileSearch: true,
@@ -96,7 +96,7 @@ export class FileMessageHandler extends BaseMessageHandler {
     } catch (error) {
       this.fileSearchInitializing.delete(rootPath);
       console.error(
-        '[FileMessageHandler] Failed to initialize file search:',
+        "[FileMessageHandler] Failed to initialize file search:",
         error,
       );
       return null;
@@ -108,7 +108,7 @@ export class FileMessageHandler extends BaseMessageHandler {
     this.fileSearchInitializing.delete(rootPath);
     crawlCache.clear();
     console.log(
-      '[FileMessageHandler] Cleared file search cache, trigger:',
+      "[FileMessageHandler] Cleared file search cache, trigger:",
       rootPath,
     );
   }
@@ -122,7 +122,7 @@ export class FileMessageHandler extends BaseMessageHandler {
     }
 
     const watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(folder, '**/*'),
+      new vscode.RelativePattern(folder, "**/*"),
     );
 
     const onFileAddOrDelete = () => this.clearFileSearchCache(rootPath);
@@ -179,36 +179,36 @@ export class FileMessageHandler extends BaseMessageHandler {
     const data = message.data as Record<string, unknown> | undefined;
 
     switch (message.type) {
-      case 'attachFile':
+      case "attachFile":
         await this.handleAttachFile();
         break;
 
-      case 'showContextPicker':
+      case "showContextPicker":
         await this.handleShowContextPicker();
         break;
 
-      case 'getWorkspaceFiles':
+      case "getWorkspaceFiles":
         await this.handleGetWorkspaceFiles(
           data?.query as string | undefined,
           data?.requestId as number | undefined,
         );
         break;
 
-      case 'openFile':
+      case "openFile":
         await this.handleOpenFile(data?.path as string | undefined);
         break;
 
-      case 'openDiff':
+      case "openDiff":
         await this.handleOpenDiff(data);
         break;
 
-      case 'createAndOpenTempFile':
+      case "createAndOpenTempFile":
         await this.handleCreateAndOpenTempFile(data);
         break;
 
       default:
         console.warn(
-          '[FileMessageHandler] Unknown message type:',
+          "[FileMessageHandler] Unknown message type:",
           message.type,
         );
         break;
@@ -224,7 +224,7 @@ export class FileMessageHandler extends BaseMessageHandler {
         canSelectMany: false,
         canSelectFiles: true,
         canSelectFolders: false,
-        openLabel: 'Attach',
+        openLabel: "Attach",
       });
 
       if (uris && uris.length > 0) {
@@ -232,20 +232,20 @@ export class FileMessageHandler extends BaseMessageHandler {
         const fileName = getFileName(uri.fsPath);
 
         this.sendToWebView({
-          type: 'fileAttached',
+          type: "fileAttached",
           data: {
             id: `file-${Date.now()}`,
-            type: 'file',
+            type: "file",
             name: fileName,
             value: uri.fsPath,
           },
         });
       }
     } catch (error) {
-      console.error('[FileMessageHandler] Failed to attach file:', error);
+      console.error("[FileMessageHandler] Failed to attach file:", error);
       const errorMsg = getErrorMessage(error);
       this.sendToWebView({
-        type: 'error',
+        type: "error",
         data: { message: `Failed to attach file: ${errorMsg}` },
       });
     }
@@ -264,59 +264,59 @@ export class FileMessageHandler extends BaseMessageHandler {
         const fileName = getFileName(activeEditor.document.uri.fsPath);
         items.push({
           label: `$(file) ${fileName}`,
-          description: 'Current file',
+          description: "Current file",
           detail: activeEditor.document.uri.fsPath,
         });
       }
 
       // Add file picker option
       items.push({
-        label: '$(file) File...',
-        description: 'Choose a file to attach',
+        label: "$(file) File...",
+        description: "Choose a file to attach",
       });
 
       // Add workspace files option
       items.push({
-        label: '$(search) Search files...',
-        description: 'Search workspace files',
+        label: "$(search) Search files...",
+        description: "Search workspace files",
       });
 
       const selected = await vscode.window.showQuickPick(items, {
-        placeHolder: 'Attach context',
+        placeHolder: "Attach context",
         matchOnDescription: true,
         matchOnDetail: true,
       });
 
       if (selected) {
-        if (selected.label.includes('Current file') && activeEditor) {
+        if (selected.label.includes("Current file") && activeEditor) {
           const fileName = getFileName(activeEditor.document.uri.fsPath);
           this.sendToWebView({
-            type: 'fileAttached',
+            type: "fileAttached",
             data: {
               id: `file-${Date.now()}`,
-              type: 'file',
+              type: "file",
               name: fileName,
               value: activeEditor.document.uri.fsPath,
             },
           });
-        } else if (selected.label.includes('File...')) {
+        } else if (selected.label.includes("File...")) {
           await this.handleAttachFile();
-        } else if (selected.label.includes('Search files')) {
+        } else if (selected.label.includes("Search files")) {
           const uri = await vscode.window.showOpenDialog({
             defaultUri: vscode.workspace.workspaceFolders?.[0]?.uri,
             canSelectMany: false,
             canSelectFiles: true,
             canSelectFolders: false,
-            openLabel: 'Attach',
+            openLabel: "Attach",
           });
 
           if (uri && uri.length > 0) {
             const fileName = getFileName(uri[0].fsPath);
             this.sendToWebView({
-              type: 'fileAttached',
+              type: "fileAttached",
               data: {
                 id: `file-${Date.now()}`,
-                type: 'file',
+                type: "file",
                 name: fileName,
                 value: uri[0].fsPath,
               },
@@ -326,12 +326,12 @@ export class FileMessageHandler extends BaseMessageHandler {
       }
     } catch (error) {
       console.error(
-        '[FileMessageHandler] Failed to show context picker:',
+        "[FileMessageHandler] Failed to show context picker:",
         error,
       );
       const errorMsg = getErrorMessage(error);
       this.sendToWebView({
-        type: 'error',
+        type: "error",
         data: { message: `Failed to show context picker: ${errorMsg}` },
       });
     }
@@ -345,7 +345,7 @@ export class FileMessageHandler extends BaseMessageHandler {
     requestId?: number,
   ): Promise<void> {
     try {
-      console.log('[FileMessageHandler] handleGetWorkspaceFiles start', {
+      console.log("[FileMessageHandler] handleGetWorkspaceFiles start", {
         query,
         requestId,
       });
@@ -396,7 +396,7 @@ export class FileMessageHandler extends BaseMessageHandler {
         }
 
         files.push({
-          id: isCurrentFile ? 'current-file' : uri.fsPath,
+          id: isCurrentFile ? "current-file" : uri.fsPath,
           label: fileName,
           description: relativePath,
           path: uri.fsPath,
@@ -407,7 +407,7 @@ export class FileMessageHandler extends BaseMessageHandler {
       // Search or show recent files
       if (query) {
         console.log(
-          '[FileMessageHandler] Searching workspace files with fuzzy search for query',
+          "[FileMessageHandler] Searching workspace files with fuzzy search for query",
           query,
         );
 
@@ -425,7 +425,7 @@ export class FileMessageHandler extends BaseMessageHandler {
             });
 
             for (let relativePath of relativePaths) {
-              const isDirectory = relativePath.endsWith('/');
+              const isDirectory = relativePath.endsWith("/");
               if (isDirectory) {
                 relativePath = relativePath.slice(0, -1);
               }
@@ -466,16 +466,16 @@ export class FileMessageHandler extends BaseMessageHandler {
         // Send an initial quick response so UI can render immediately
         try {
           this.sendToWebView({
-            type: 'workspaceFiles',
+            type: "workspaceFiles",
             data: { files, query, requestId },
           });
           console.log(
-            '[FileMessageHandler] Sent initial workspaceFiles (open tabs/active)',
+            "[FileMessageHandler] Sent initial workspaceFiles (open tabs/active)",
             files.length,
           );
         } catch (e) {
           console.warn(
-            '[FileMessageHandler] Failed sending initial response',
+            "[FileMessageHandler] Failed sending initial response",
             e,
           );
         }
@@ -483,8 +483,8 @@ export class FileMessageHandler extends BaseMessageHandler {
         // If not enough files, add some workspace files (bounded)
         if (files.length < 10) {
           const recentUris = await vscode.workspace.findFiles(
-            '**/*',
-            '**/{.git,node_modules}/**',
+            "**/*",
+            "**/{.git,node_modules}/**",
             20,
           );
 
@@ -498,21 +498,21 @@ export class FileMessageHandler extends BaseMessageHandler {
       }
 
       this.sendToWebView({
-        type: 'workspaceFiles',
+        type: "workspaceFiles",
         data: { files, query, requestId },
       });
       console.log(
-        '[FileMessageHandler] Sent final workspaceFiles',
+        "[FileMessageHandler] Sent final workspaceFiles",
         files.length,
       );
     } catch (error) {
       console.error(
-        '[FileMessageHandler] Failed to get workspace files:',
+        "[FileMessageHandler] Failed to get workspace files:",
         error,
       );
       const errorMsg = getErrorMessage(error);
       this.sendToWebView({
-        type: 'error',
+        type: "error",
         data: { message: `Failed to get workspace files: ${errorMsg}` },
       });
     }
@@ -523,18 +523,18 @@ export class FileMessageHandler extends BaseMessageHandler {
    */
   private async handleOpenFile(filePath?: string): Promise<void> {
     if (!filePath) {
-      console.warn('[FileMessageHandler] No path provided for openFile');
+      console.warn("[FileMessageHandler] No path provided for openFile");
       return;
     }
 
     try {
-      console.log('[FileOperations] Opening file:', filePath);
+      console.log("[FileOperations] Opening file:", filePath);
 
       // Parse file path, line number, and column number
       // Formats: path/to/file.ts, path/to/file.ts:123, path/to/file.ts:123:45
       const match = filePath.match(/^(.+?)(?::(\d+))?(?::(\d+))?$/);
       if (!match) {
-        console.warn('[FileOperations] Invalid file path format:', filePath);
+        console.warn("[FileOperations] Invalid file path format:", filePath);
         return;
       }
 
@@ -544,7 +544,7 @@ export class FileMessageHandler extends BaseMessageHandler {
 
       // Convert to absolute path if relative
       let absolutePath = path;
-      if (!path.startsWith('/') && !path.match(/^[a-zA-Z]:/)) {
+      if (!path.startsWith("/") && !path.match(/^[a-zA-Z]:/)) {
         // Relative path - resolve against workspace
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
         if (workspaceFolder) {
@@ -570,9 +570,9 @@ export class FileMessageHandler extends BaseMessageHandler {
         );
       }
 
-      console.log('[FileOperations] File opened successfully:', absolutePath);
+      console.log("[FileOperations] File opened successfully:", absolutePath);
     } catch (error) {
-      console.error('[FileMessageHandler] Failed to open file:', error);
+      console.error("[FileMessageHandler] Failed to open file:", error);
       vscode.window.showErrorMessage(
         `Failed to open file: ${getErrorMessage(error)}`,
       );
@@ -586,18 +586,18 @@ export class FileMessageHandler extends BaseMessageHandler {
     data: Record<string, unknown> | undefined,
   ): Promise<void> {
     if (!data) {
-      console.warn('[FileMessageHandler] No data provided for openDiff');
+      console.warn("[FileMessageHandler] No data provided for openDiff");
       return;
     }
 
     try {
       await vscode.commands.executeCommand(showDiffCommand, {
-        path: (data.path as string) || '',
-        oldText: (data.oldText as string) || '',
-        newText: (data.newText as string) || '',
+        path: (data.path as string) || "",
+        oldText: (data.oldText as string) || "",
+        newText: (data.newText as string) || "",
       });
     } catch (error) {
-      console.error('[FileMessageHandler] Failed to open diff:', error);
+      console.error("[FileMessageHandler] Failed to open diff:", error);
       vscode.window.showErrorMessage(
         `Failed to open diff: ${getErrorMessage(error)}`,
       );
@@ -612,22 +612,22 @@ export class FileMessageHandler extends BaseMessageHandler {
   ): Promise<void> {
     if (!data) {
       console.warn(
-        '[FileMessageHandler] No data provided for createAndOpenTempFile',
+        "[FileMessageHandler] No data provided for createAndOpenTempFile",
       );
       return;
     }
 
     try {
-      const content = (data.content as string) || '';
-      const fileName = (data.fileName as string) || 'temp';
+      const content = (data.content as string) || "";
+      const fileName = (data.fileName as string) || "temp";
 
       // Get readonly file system provider from global singleton
       const readonlyProvider = ReadonlyFileSystemProvider.getInstance();
       if (!readonlyProvider) {
-        const errorMessage = 'Readonly file system provider not initialized';
-        console.error('[FileMessageHandler]', errorMessage);
+        const errorMessage = "Readonly file system provider not initialized";
+        console.error("[FileMessageHandler]", errorMessage);
         this.sendToWebView({
-          type: 'error',
+          type: "error",
           data: { message: errorMessage },
         });
         return;
@@ -665,9 +665,9 @@ export class FileMessageHandler extends BaseMessageHandler {
         }
         await vscode.window.showTextDocument(document, showOptions);
         console.log(
-          '[FileMessageHandler] Focused on existing readonly file:',
+          "[FileMessageHandler] Focused on existing readonly file:",
           uri.toString(),
-          'in viewColumn:',
+          "in viewColumn:",
           existingViewColumn,
         );
         return;
@@ -688,14 +688,14 @@ export class FileMessageHandler extends BaseMessageHandler {
       });
 
       console.log(
-        '[FileMessageHandler] Created and opened readonly file:',
+        "[FileMessageHandler] Created and opened readonly file:",
         uri.toString(),
-        'in viewColumn:',
-        targetViewColumn ?? 'Beside',
+        "in viewColumn:",
+        targetViewColumn ?? "Beside",
       );
     } catch (error) {
       console.error(
-        '[FileMessageHandler] Failed to create and open temporary file:',
+        "[FileMessageHandler] Failed to create and open temporary file:",
         error,
       );
       vscode.window.showErrorMessage(
@@ -705,7 +705,7 @@ export class FileMessageHandler extends BaseMessageHandler {
   }
 
   private buildCaseInsensitiveGlob(query: string): string {
-    let pattern = '';
+    let pattern = "";
     for (const char of query) {
       if (/[a-zA-Z]/.test(char)) {
         pattern += `[${char.toLowerCase()}${char.toUpperCase()}]`;

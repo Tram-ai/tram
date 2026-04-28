@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { SettingsMigration } from '../types.js';
+import type { SettingsMigration } from "../types.js";
 import {
   deleteNestedPropertySafe,
   getNestedProperty,
   setNestedPropertySafe,
-} from '../../../utils/settingsUtils.js';
+} from "../../../utils/settingsUtils.js";
 
 /**
  * Path mapping for boolean polarity migration (V2 disable* -> V3 enable*).
@@ -24,14 +24,14 @@ import {
  * - Invalid values do not create enable* keys and produce warnings.
  */
 const V2_TO_V3_BOOLEAN_MAP: Record<string, string> = {
-  'general.disableAutoUpdate': 'general.enableAutoUpdate',
-  'general.disableUpdateNag': 'general.enableAutoUpdate',
-  'ui.accessibility.disableLoadingPhrases':
-    'ui.accessibility.enableLoadingPhrases',
-  'context.fileFiltering.disableFuzzySearch':
-    'context.fileFiltering.enableFuzzySearch',
-  'model.generationConfig.disableCacheControl':
-    'model.generationConfig.enableCacheControl',
+  "general.disableAutoUpdate": "general.enableAutoUpdate",
+  "general.disableUpdateNag": "general.enableAutoUpdate",
+  "ui.accessibility.disableLoadingPhrases":
+    "ui.accessibility.enableLoadingPhrases",
+  "context.fileFiltering.disableFuzzySearch":
+    "context.fileFiltering.enableFuzzySearch",
+  "model.generationConfig.disableCacheControl":
+    "model.generationConfig.enableCacheControl",
 };
 
 /**
@@ -45,9 +45,9 @@ const V2_TO_V3_BOOLEAN_MAP: Record<string, string> = {
  * - Invalid present values are removed and warned, and do not contribute to target calculation.
  */
 const CONSOLIDATED_V2_PATHS: Record<string, string[]> = {
-  'general.enableAutoUpdate': [
-    'general.disableAutoUpdate',
-    'general.disableUpdateNag',
+  "general.enableAutoUpdate": [
+    "general.disableAutoUpdate",
+    "general.disableUpdateNag",
   ],
 };
 
@@ -67,15 +67,15 @@ function normalizeDisableValue(value: unknown): {
   if (value === undefined) {
     return { isPresent: false, isValid: false };
   }
-  if (typeof value === 'boolean') {
+  if (typeof value === "boolean") {
     return { isPresent: true, isValid: true, booleanValue: value };
   }
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
-    if (normalized === 'true') {
+    if (normalized === "true") {
       return { isPresent: true, isValid: true, booleanValue: true };
     }
-    if (normalized === 'false') {
+    if (normalized === "false") {
       return { isPresent: true, isValid: true, booleanValue: false };
     }
   }
@@ -108,14 +108,14 @@ export class V2ToV3Migration implements SettingsMigration {
    * metadata still advances to 3.
    */
   shouldMigrate(settings: unknown): boolean {
-    if (typeof settings !== 'object' || settings === null) {
+    if (typeof settings !== "object" || settings === null) {
       return false;
     }
 
     const s = settings as Record<string, unknown>;
 
     // Migrate if $version is 2
-    return s['$version'] === 2;
+    return s["$version"] === 2;
   }
 
   /**
@@ -145,8 +145,8 @@ export class V2ToV3Migration implements SettingsMigration {
     settings: unknown,
     scope: string,
   ): { settings: unknown; warnings: string[] } {
-    if (typeof settings !== 'object' || settings === null) {
-      throw new Error('Settings must be an object');
+    if (typeof settings !== "object" || settings === null) {
+      throw new Error("Settings must be an object");
     }
 
     // Deep clone to avoid mutating input
@@ -212,7 +212,7 @@ export class V2ToV3Migration implements SettingsMigration {
     }
 
     // Step 3: Always update version to 3
-    result['$version'] = 3;
+    result["$version"] = 3;
 
     return { settings: result, warnings };
   }

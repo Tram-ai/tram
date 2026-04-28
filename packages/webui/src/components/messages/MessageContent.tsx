@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
-import { memo } from 'react';
-import { MarkdownRenderer } from './MarkdownRenderer/MarkdownRenderer.js';
+import type { FC } from "react";
+import { memo } from "react";
+import { MarkdownRenderer } from "./MarkdownRenderer/MarkdownRenderer.js";
 
 export interface MessageContentProps {
   content: string;
@@ -26,6 +26,6 @@ const MessageContentBase: FC<MessageContentProps> = ({
   />
 );
 
-MessageContentBase.displayName = 'MessageContent';
+MessageContentBase.displayName = "MessageContent";
 
 export const MessageContent = memo(MessageContentBase);

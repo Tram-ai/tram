@@ -8,8 +8,8 @@
  * Tip selection algorithm — picks the most relevant tip to show.
  */
 
-import type { TipHistory } from './tipHistory.js';
-import type { ContextualTip, TipContext, TipTrigger } from './tipRegistry.js';
+import type { TipHistory } from "./tipHistory.js";
+import type { ContextualTip, TipContext, TipTrigger } from "./tipRegistry.js";
 
 /**
  * Select the best tip to show for a given trigger event.

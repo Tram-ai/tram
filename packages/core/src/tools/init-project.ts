@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
-import { ToolNames, ToolDisplayNames } from './tool-names.js';
-import type { ToolResult, ToolResultDisplay } from './tools.js';
-import type { Config } from '../config/config.js';
-import { getCurrentGeminiMdFilename, TRAM_CONFIG_DIR } from './memoryTool.js';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from "./tools.js";
+import { ToolNames, ToolDisplayNames } from "./tool-names.js";
+import type { ToolResult, ToolResultDisplay } from "./tools.js";
+import type { Config } from "../config/config.js";
+import { getCurrentGeminiMdFilename, TRAM_CONFIG_DIR } from "./memoryTool.js";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('INIT_PROJECT');
+const debugLogger = createDebugLogger("INIT_PROJECT");
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InitProjectParams {}
@@ -33,13 +33,13 @@ export class InitProjectTool extends BaseDeclarativeTool<
     super(
       InitProjectTool.Name,
       ToolDisplayNames.INIT_PROJECT,
-      'Initialize a project by analyzing the repository and generating a TRAM.md context file. Use this when no project memory is loaded or when the user wants to (re)generate TRAM.md.',
+      "Initialize a project by analyzing the repository and generating a TRAM.md context file. Use this when no project memory is loaded or when the user wants to (re)generate TRAM.md.",
       Kind.Edit,
       {
-        type: 'object',
+        type: "object",
         properties: {},
         additionalProperties: false,
-        $schema: 'http://json-schema.org/draft-07/schema#',
+        $schema: "http://json-schema.org/draft-07/schema#",
       },
       false,
       false,
@@ -63,10 +63,10 @@ class InitProjectInvocation extends BaseToolInvocation<
   }
 
   getDescription(): string {
-    return 'Initialize project context (TRAM.md)';
+    return "Initialize project context (TRAM.md)";
   }
 
-  override async shouldConfirmExecute(): Promise<false> {
+  async shouldConfirmExecute(): Promise<false> {
     return false;
   }
 
@@ -87,7 +87,7 @@ class InitProjectInvocation extends BaseToolInvocation<
       let alreadyExists = false;
       if (fs.existsSync(contextFilePath)) {
         try {
-          const existing = fs.readFileSync(contextFilePath, 'utf8');
+          const existing = fs.readFileSync(contextFilePath, "utf8");
           if (existing && existing.trim().length > 0) {
             alreadyExists = true;
           }
@@ -97,10 +97,10 @@ class InitProjectInvocation extends BaseToolInvocation<
       }
 
       // Create or overwrite with empty file
-      fs.writeFileSync(contextFilePath, '', 'utf8');
+      fs.writeFileSync(contextFilePath, "", "utf8");
 
       debugLogger.info(
-        `${alreadyExists ? 'Reset' : 'Created'} ${contextFileName} at ${contextFilePath}`,
+        `${alreadyExists ? "Reset" : "Created"} ${contextFileName} at ${contextFilePath}`,
       );
 
       const instructions = `Project initialization started. ${alreadyExists ? `Existing ${contextFileName} has been reset.` : `Empty ${contextFileName} created at ${contextFilePath}.`}
@@ -146,7 +146,7 @@ Final step:
 
       return {
         llmContent: instructions,
-        returnDisplay: `${alreadyExists ? 'Reset' : 'Created'} ${contextFileName}. Now analyzing project...`,
+        returnDisplay: `${alreadyExists ? "Reset" : "Created"} ${contextFileName}. Now analyzing project...`,
       };
     } catch (error) {
       const errorMessage =

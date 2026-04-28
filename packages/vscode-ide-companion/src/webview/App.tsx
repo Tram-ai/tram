@@ -11,25 +11,25 @@ import React, {
   useCallback,
   useMemo,
   useLayoutEffect,
-} from 'react';
-import { useVSCode } from './hooks/useVSCode.js';
-import { useSessionManagement } from './hooks/session/useSessionManagement.js';
-import { useFileContext } from './hooks/file/useFileContext.js';
-import { useMessageHandling } from './hooks/message/useMessageHandling.js';
-import { useToolCalls } from './hooks/useToolCalls.js';
-import { useWebViewMessages } from './hooks/useWebViewMessages.js';
+} from "react";
+import { useVSCode } from "./hooks/useVSCode.js";
+import { useSessionManagement } from "./hooks/session/useSessionManagement.js";
+import { useFileContext } from "./hooks/file/useFileContext.js";
+import { useMessageHandling } from "./hooks/message/useMessageHandling.js";
+import { useToolCalls } from "./hooks/useToolCalls.js";
+import { useWebViewMessages } from "./hooks/useWebViewMessages.js";
 import {
   shouldSendMessage,
   useMessageSubmit,
-} from './hooks/useMessageSubmit.js';
-import type { PermissionOption, PermissionToolCall } from '@tram-ai/webui';
-import type { TextMessage } from './hooks/message/useMessageHandling.js';
-import type { ToolCallData } from './components/messages/toolcalls/ToolCall.js';
-import { ToolCall } from './components/messages/toolcalls/ToolCall.js';
-import { hasToolCallOutput } from './utils/utils.js';
-import { Onboarding } from './components/layout/Onboarding.js';
-import { type CompletionItem } from '../types/completionItemTypes.js';
-import { useCompletionTrigger } from './hooks/useCompletionTrigger.js';
+} from "./hooks/useMessageSubmit.js";
+import type { PermissionOption, PermissionToolCall } from "@tram-ai/webui";
+import type { TextMessage } from "./hooks/message/useMessageHandling.js";
+import type { ToolCallData } from "./components/messages/toolcalls/ToolCall.js";
+import { ToolCall } from "./components/messages/toolcalls/ToolCall.js";
+import { hasToolCallOutput } from "./utils/utils.js";
+import { Onboarding } from "./components/layout/Onboarding.js";
+import { type CompletionItem } from "../types/completionItemTypes.js";
+import { useCompletionTrigger } from "./hooks/useCompletionTrigger.js";
 import {
   AssistantMessage,
   UserMessage,
@@ -45,19 +45,19 @@ import {
   EmptyState,
   ChatHeader,
   SessionSelector,
-} from '@tram-ai/webui';
-import { InputForm } from './components/layout/InputForm.js';
+} from "@tram-ai/webui";
+import { InputForm } from "./components/layout/InputForm.js";
 import {
   AccountInfoDialog,
   type AccountInfo,
-} from './components/AccountInfoDialog.js';
-import { ApprovalMode, NEXT_APPROVAL_MODE } from '../types/acpTypes.js';
-import type { ApprovalModeValue } from '../types/approvalModeValueTypes.js';
-import type { PlanEntry, UsageStatsPayload } from '../types/chatTypes.js';
-import type { ModelInfo, AvailableCommand } from '@agentclientprotocol/sdk';
-import type { Question } from '../types/acpTypes.js';
-import { useImagePaste, type WebViewImageMessage } from './hooks/useImage.js';
-import { computeContextUsage } from './utils/contextUsage.js';
+} from "./components/AccountInfoDialog.js";
+import { ApprovalMode, NEXT_APPROVAL_MODE } from "../types/acpTypes.js";
+import type { ApprovalModeValue } from "../types/approvalModeValueTypes.js";
+import type { PlanEntry, UsageStatsPayload } from "../types/chatTypes.js";
+import type { ModelInfo, AvailableCommand } from "@agentclientprotocol/sdk";
+import type { Question } from "../types/acpTypes.js";
+import { useImagePaste, type WebViewImageMessage } from "./hooks/useImage.js";
+import { computeContextUsage } from "./utils/contextUsage.js";
 
 export const App: React.FC = () => {
   const vscode = useVSCode();
@@ -74,7 +74,7 @@ export const App: React.FC = () => {
   } = useToolCalls();
 
   // UI state
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [permissionRequest, setPermissionRequest] = useState<{
     options: PermissionOption[];
     toolCall: PermissionToolCall;
@@ -112,9 +112,9 @@ export const App: React.FC = () => {
 
   // Completion system
   const getCompletionItems = React.useCallback(
-    async (trigger: '@' | '/', query: string): Promise<CompletionItem[]> => {
-      if (trigger === '@') {
-        console.log('[App] getCompletionItems @ called', {
+    async (trigger: "@" | "/", query: string): Promise<CompletionItem[]> => {
+      if (trigger === "@") {
+        console.log("[App] getCompletionItems @ called", {
           query,
           requested: fileContext.hasRequestedFiles,
           workspaceFiles: fileContext.workspaceFiles.length,
@@ -128,7 +128,7 @@ export const App: React.FC = () => {
             id: file.id,
             label: file.label,
             description: file.description,
-            type: 'file' as const,
+            type: "file" as const,
             icon: fileIcon,
             // Insert filename after @, keep path for mapping
             value: file.label,
@@ -143,10 +143,10 @@ export const App: React.FC = () => {
         if (allItems.length === 0 && query && query.length >= 1) {
           return [
             {
-              id: 'loading-files',
-              label: 'Searching files…',
-              description: 'Type to filter, or wait a moment…',
-              type: 'info' as const,
+              id: "loading-files",
+              label: "Searching files…",
+              description: "Type to filter, or wait a moment…",
+              type: "info" as const,
             },
           ];
         }
@@ -157,29 +157,29 @@ export const App: React.FC = () => {
         // Model group - special items without / prefix
         const modelGroupItems: CompletionItem[] = [
           {
-            id: 'model',
-            label: 'Switch model...',
-            description: modelInfo?.name || 'Default',
-            type: 'command',
-            group: 'Model',
+            id: "model",
+            label: "Switch model...",
+            description: modelInfo?.name || "Default",
+            type: "command",
+            group: "Model",
           },
         ];
 
         // Account group
         const accountGroupItems: CompletionItem[] = [
           {
-            id: 'login',
-            label: 'Login',
-            description: 'Login to TRAM',
-            type: 'command',
-            group: 'Account',
+            id: "login",
+            label: "Login",
+            description: "Login to TRAM",
+            type: "command",
+            group: "Account",
           },
           {
-            id: 'account',
-            label: 'Account',
-            description: 'Show current account and authentication info',
-            type: 'command',
-            group: 'Account',
+            id: "account",
+            label: "Account",
+            description: "Show current account and authentication info",
+            type: "command",
+            group: "Account",
           },
         ];
 
@@ -189,8 +189,8 @@ export const App: React.FC = () => {
             id: cmd.name,
             label: `/${cmd.name}`,
             description: cmd.description,
-            type: 'command' as const,
-            group: 'Slash Commands',
+            type: "command" as const,
+            group: "Slash Commands",
             value: cmd.name,
           }),
         );
@@ -228,9 +228,9 @@ export const App: React.FC = () => {
       fileContext.workspaceFiles
         .map(
           (file) =>
-            `${file.id}|${file.label}|${file.description ?? ''}|${file.path}`,
+            `${file.id}|${file.label}|${file.description ?? ""}|${file.path}`,
         )
-        .join('||'),
+        .join("||"),
     [fileContext.workspaceFiles],
   );
 
@@ -238,7 +238,7 @@ export const App: React.FC = () => {
   // Note: Avoid depending on the entire `completion` object here, since its identity
   // changes on every render which would retrigger this effect and can cause a refresh loop.
   useEffect(() => {
-    if (completion.isOpen && completion.triggerChar === '@') {
+    if (completion.isOpen && completion.triggerChar === "@") {
       // Only refresh items; do not change other completion state to avoid re-renders loops
       completion.refreshCompletion();
     }
@@ -254,7 +254,7 @@ export const App: React.FC = () => {
   const { attachedImages, handleRemoveImage, clearImages, handlePaste } =
     useImagePaste({
       onError: (error) => {
-        console.error('Paste error:', error);
+        console.error("Paste error:", error);
       },
     });
 
@@ -296,15 +296,15 @@ export const App: React.FC = () => {
           /* no-op */
         }
         messageHandling.addMessage({
-          role: 'assistant',
-          content: 'Interrupted',
+          role: "assistant",
+          content: "Interrupted",
           timestamp: Date.now(),
         });
       }
     }
     // Notify extension/agent to cancel server-side work
     vscode.postMessage({
-      type: 'cancelStreaming',
+      type: "cancelStreaming",
       data: {},
     });
   }, [messageHandling, vscode]);
@@ -362,8 +362,8 @@ export const App: React.FC = () => {
 
     // Initialize once mounted so first render is correct
     onScroll();
-    container.addEventListener('scroll', onScroll, { passive: true });
-    return () => container.removeEventListener('scroll', onScroll);
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => container.removeEventListener("scroll", onScroll);
   }, []);
 
   // When content changes, if the user is pinned to bottom, keep it anchored there.
@@ -396,7 +396,7 @@ export const App: React.FC = () => {
     const raf = requestAnimationFrame(() => {
       const top = container.scrollHeight - container.clientHeight;
       // Use scrollTo to avoid cross-context issues with scrollIntoView.
-      container.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
+      container.scrollTo({ top, behavior: smooth ? "smooth" : "auto" });
     });
     return () => cancelAnimationFrame(raf);
   }, [
@@ -471,7 +471,7 @@ export const App: React.FC = () => {
       // Forward the selected optionId directly to extension as ACP permission response
       // Expected values include: 'proceed_once', 'proceed_always', 'cancel', 'proceed_always_server', etc.
       vscode.postMessage({
-        type: 'permissionResponse',
+        type: "permissionResponse",
         data: { optionId },
       });
 
@@ -485,7 +485,7 @@ export const App: React.FC = () => {
     (answers: Record<string, string>) => {
       // Forward answers to extension as ACP permission response
       vscode.postMessage({
-        type: 'askUserQuestionResponse',
+        type: "askUserQuestionResponse",
         data: { answers },
       });
 
@@ -498,7 +498,7 @@ export const App: React.FC = () => {
   const handleAskUserQuestionCancel = useCallback(() => {
     // Forward cancel to extension as ACP permission response with cancel option
     vscode.postMessage({
-      type: 'askUserQuestionResponse',
+      type: "askUserQuestionResponse",
       data: { answers: {}, cancelled: true },
     });
 
@@ -517,23 +517,23 @@ export const App: React.FC = () => {
       }
 
       // Ignore info items (placeholders like "Searching files…")
-      if (item.type === 'info') {
+      if (item.type === "info") {
         completion.closeCompletion();
         return;
       }
 
       // Commands can execute immediately
-      if (item.type === 'command') {
+      if (item.type === "command") {
         const itemId = item.id;
 
         // Helper to clear trigger text from input
         const clearTriggerText = () => {
-          const text = inputElement.textContent || '';
+          const text = inputElement.textContent || "";
           const selection = window.getSelection();
           if (!selection || selection.rangeCount === 0) {
             // Fallback: just clear everything
-            inputElement.textContent = '';
-            setInputText('');
+            inputElement.textContent = "";
+            setInputText("");
             return;
           }
 
@@ -573,7 +573,7 @@ export const App: React.FC = () => {
           }
 
           const textBeforeCursor = text.substring(0, cursorPos);
-          const slashPos = textBeforeCursor.lastIndexOf('/');
+          const slashPos = textBeforeCursor.lastIndexOf("/");
           if (slashPos >= 0) {
             const newText =
               text.substring(0, slashPos) + text.substring(cursorPos);
@@ -582,21 +582,21 @@ export const App: React.FC = () => {
           }
         };
 
-        if (itemId === 'login') {
+        if (itemId === "login") {
           clearTriggerText();
-          vscode.postMessage({ type: 'login', data: {} });
+          vscode.postMessage({ type: "login", data: {} });
           completion.closeCompletion();
           return;
         }
 
-        if (itemId === 'account') {
+        if (itemId === "account") {
           clearTriggerText();
-          vscode.postMessage({ type: 'getAccountInfo', data: {} });
+          vscode.postMessage({ type: "getAccountInfo", data: {} });
           completion.closeCompletion();
           return;
         }
 
-        if (itemId === 'model') {
+        if (itemId === "model") {
           clearTriggerText();
           setShowModelSelector(true);
           completion.closeCompletion();
@@ -612,7 +612,7 @@ export const App: React.FC = () => {
           clearTriggerText();
           // Send the slash command as a user message
           vscode.postMessage({
-            type: 'sendMessage',
+            type: "sendMessage",
             data: { text: `/${serverCmd.name}` },
           });
           completion.closeCompletion();
@@ -621,11 +621,11 @@ export const App: React.FC = () => {
       }
 
       // If selecting a file, add @filename -> fullpath mapping
-      if (item.type === 'file' && item.value && item.path) {
+      if (item.type === "file" && item.value && item.path) {
         try {
           fileContext.addFileReference(item.value, item.path);
         } catch (err) {
-          console.warn('[App] addFileReference failed:', err);
+          console.warn("[App] addFileReference failed:", err);
         }
       }
 
@@ -635,7 +635,7 @@ export const App: React.FC = () => {
       }
 
       // Current text and cursor
-      const text = inputElement.textContent || '';
+      const text = inputElement.textContent || "";
       const range = selection.getRangeAt(0);
 
       // Compute total text offset for contentEditable
@@ -674,19 +674,19 @@ export const App: React.FC = () => {
 
       // Replace from trigger to cursor with selected value
       const textBeforeCursor = text.substring(0, cursorPos);
-      const atPos = textBeforeCursor.lastIndexOf('@');
+      const atPos = textBeforeCursor.lastIndexOf("@");
       // Only consider slash as trigger if we're in slash command mode
       const slashPos =
-        completion.triggerChar === '/' ? textBeforeCursor.lastIndexOf('/') : -1;
+        completion.triggerChar === "/" ? textBeforeCursor.lastIndexOf("/") : -1;
       const triggerPos = Math.max(atPos, slashPos);
 
       if (triggerPos >= 0) {
         const insertValue =
-          typeof item.value === 'string' ? item.value : String(item.label);
+          typeof item.value === "string" ? item.value : String(item.label);
         const newText =
           text.substring(0, triggerPos + 1) + // keep the trigger symbol
           insertValue +
-          ' ' +
+          " " +
           text.substring(cursorPos);
 
         // Update DOM and state, and move caret to end
@@ -718,7 +718,7 @@ export const App: React.FC = () => {
   const handleModelSelect = useCallback(
     (modelId: string) => {
       vscode.postMessage({
-        type: 'setModel',
+        type: "setModel",
         data: { modelId },
       });
     },
@@ -729,7 +729,7 @@ export const App: React.FC = () => {
   const handleAttachContextClick = useCallback(() => {
     // Open native file picker (different from '@' completion which searches workspace files)
     vscode.postMessage({
-      type: 'attachFile',
+      type: "attachFile",
       data: {},
     });
   }, [vscode]);
@@ -742,7 +742,7 @@ export const App: React.FC = () => {
       // Notify extension to set approval mode via ACP
       try {
         vscode.postMessage({
-          type: 'setApprovalMode',
+          type: "setApprovalMode",
           data: { modeId: next },
         });
       } catch {
@@ -776,21 +776,21 @@ export const App: React.FC = () => {
   // Create unified message array containing all types of messages and tool calls
   const allMessages = useMemo<
     Array<{
-      type: 'message' | 'in-progress-tool-call' | 'completed-tool-call';
+      type: "message" | "in-progress-tool-call" | "completed-tool-call";
       data: TextMessage | ToolCallData;
       timestamp: number;
     }>
   >(() => {
     // Regular messages
     const regularMessages = messageHandling.messages.map((msg) => ({
-      type: 'message' as const,
+      type: "message" as const,
       data: msg,
       timestamp: msg.timestamp,
     }));
 
     // In-progress tool calls
     const inProgressTools = inProgressToolCalls.map((toolCall) => ({
-      type: 'in-progress-tool-call' as const,
+      type: "in-progress-tool-call" as const,
       data: toolCall,
       timestamp: toolCall.timestamp ?? 0,
     }));
@@ -799,7 +799,7 @@ export const App: React.FC = () => {
     const completedTools = completedToolCalls
       .filter(hasToolCallOutput)
       .map((toolCall) => ({
-        type: 'completed-tool-call' as const,
+        type: "completed-tool-call" as const,
         data: toolCall,
         timestamp: toolCall.timestamp ?? 0,
       }));
@@ -810,23 +810,23 @@ export const App: React.FC = () => {
     );
   }, [messageHandling.messages, inProgressToolCalls, completedToolCalls]);
 
-  console.log('[App] Rendering messages:', allMessages);
+  console.log("[App] Rendering messages:", allMessages);
 
   // Render all messages and tool calls
   const renderMessages = useCallback<() => React.ReactNode>(() => {
     let imageIndex = 0;
     return allMessages.map((item, index) => {
       switch (item.type) {
-        case 'message': {
+        case "message": {
           const msg = item.data as TextMessage;
           const handleFileClick = (path: string): void => {
             vscode.postMessage({
-              type: 'openFile',
+              type: "openFile",
               data: { path },
             });
           };
 
-          if (msg.kind === 'image' && msg.imagePath) {
+          if (msg.kind === "image" && msg.imagePath) {
             imageIndex += 1;
             return (
               <ImageMessageRenderer
@@ -837,22 +837,22 @@ export const App: React.FC = () => {
             );
           }
 
-          if (msg.role === 'thinking') {
+          if (msg.role === "thinking") {
             return (
               <ThinkingMessage
                 key={`message-${index}`}
-                content={msg.content || ''}
+                content={msg.content || ""}
                 timestamp={msg.timestamp || 0}
                 onFileClick={handleFileClick}
               />
             );
           }
 
-          if (msg.role === 'user') {
+          if (msg.role === "user") {
             return (
               <UserMessage
                 key={`message-${index}`}
-                content={msg.content || ''}
+                content={msg.content || ""}
                 timestamp={msg.timestamp || 0}
                 onFileClick={handleFileClick}
                 fileContext={msg.fileContext}
@@ -861,8 +861,8 @@ export const App: React.FC = () => {
           }
 
           {
-            const content = (msg.content || '').trim();
-            if (content === 'Interrupted' || content === 'Tool interrupted') {
+            const content = (msg.content || "").trim();
+            if (content === "Interrupted" || content === "Tool interrupted") {
               return (
                 <InterruptedMessage key={`message-${index}`} text={content} />
               );
@@ -878,8 +878,8 @@ export const App: React.FC = () => {
           }
         }
 
-        case 'in-progress-tool-call':
-        case 'completed-tool-call': {
+        case "in-progress-tool-call":
+        case "completed-tool-call": {
           return (
             <ToolCall
               key={`toolcall-${(item.data as ToolCallData).toolCallId}-${item.type}`}
@@ -909,9 +909,7 @@ export const App: React.FC = () => {
         <div className="bg-background/80 absolute inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
           <div className="text-center">
             <div className="border-primary mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2"></div>
-            <p className="text-muted-foreground text-sm">
-              Preparing TRAM...
-            </p>
+            <p className="text-muted-foreground text-sm">Preparing TRAM...</p>
           </div>
         </div>
       )}
@@ -924,7 +922,7 @@ export const App: React.FC = () => {
         onSearchChange={sessionManagement.setSessionSearchQuery}
         onSelectSession={(sessionId: string) => {
           sessionManagement.handleSwitchSession(sessionId);
-          sessionManagement.setSessionSearchQuery('');
+          sessionManagement.setSessionSearchQuery("");
         }}
         onClose={() => sessionManagement.setShowSessionSelector(false)}
         hasMore={sessionManagement.hasMore}
@@ -934,9 +932,9 @@ export const App: React.FC = () => {
 
       <ChatHeader
         currentSessionTitle={sessionManagement.currentSessionTitle}
-        onLoadSessions={sessionManagement.handleLoadQwenSessions}
+        onLoadSessions={sessionManagement.handleLoadTramSessions}
         onNewSession={() =>
-          sessionManagement.handleNewQwenSession(modelInfo?.modelId ?? null)
+          sessionManagement.handleNewTramSession(modelInfo?.modelId ?? null)
         }
       />
 
@@ -948,10 +946,8 @@ export const App: React.FC = () => {
           isAuthenticated === false ? (
             <Onboarding
               onLogin={() => {
-                vscode.postMessage({ type: 'login', data: {} });
-                messageHandling.setWaitingForResponse(
-                  'Logging in to TRAM...',
-                );
+                vscode.postMessage({ type: "login", data: {} });
+                messageHandling.setWaitingForResponse("Logging in to TRAM...");
               }}
             />
           ) : isAuthenticated === null ? (
@@ -1025,7 +1021,7 @@ export const App: React.FC = () => {
                     position = { top: inputRect.top, left: inputRect.left };
                   }
                 } catch (error) {
-                  console.error('[App] Error getting cursor position:', error);
+                  console.error("[App] Error getting cursor position:", error);
                   const inputRect =
                     inputFieldRef.current.getBoundingClientRect();
                   position = { top: inputRect.top, left: inputRect.left };
@@ -1035,7 +1031,7 @@ export const App: React.FC = () => {
                 position = { top: inputRect.top, left: inputRect.left };
               }
 
-              await completion.openCompletion('/', '', position);
+              await completion.openCompletion("/", "", position);
             }
           }}
           onAttachContext={handleAttachContextClick}

@@ -1,7 +1,7 @@
 package com.alibaba.qwen.code.cli.protocol.message;
 
 /**
- * Represents a message in the Qwen Code protocol.
+ * Represents a message in the TRAM protocol.
  *
  * @author skyfire
  * @version $Id: 0.0.1

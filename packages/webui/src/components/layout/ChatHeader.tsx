@@ -7,9 +7,9 @@
  * Displays current session title with navigation controls
  */
 
-import type { FC } from 'react';
-import { ChevronDownIcon } from '../icons/NavigationIcons.js';
-import { PlusIcon } from '../icons/NavigationIcons.js';
+import type { FC } from "react";
+import { ChevronDownIcon } from "../icons/NavigationIcons.js";
+import { PlusIcon } from "../icons/NavigationIcons.js";
 
 /**
  * Props for ChatHeader component
@@ -47,7 +47,7 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
 }) => (
   <div
     className="chat-header flex items-center select-none w-full border-b border-[var(--app-primary-border-color)] bg-[var(--app-header-background)] py-1.5 px-2.5"
-    style={{ borderBottom: '1px solid var(--app-primary-border-color)' }}
+    style={{ borderBottom: "1px solid var(--app-primary-border-color)" }}
   >
     <button
       type="button"
@@ -69,7 +69,7 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
       onClick={onNewSession}
       title="New Session"
       aria-label="New session"
-      style={{ padding: '4px' }}
+      style={{ padding: "4px" }}
     >
       <PlusIcon className="w-4 h-4 text-[var(--app-primary-foreground)]" />
     </button>

@@ -4,29 +4,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import type React from 'react';
-import { TrustLevel } from '../../config/trustedFolders.js';
-import { useKeypress } from '../hooks/useKeypress.js';
-import { useTrustModify } from '../hooks/useTrustModify.js';
-import { theme } from '../semantic-colors.js';
-import { RadioButtonSelect } from './shared/RadioButtonSelect.js';
-import { relaunchApp } from '../../utils/processUtils.js';
-import { type UseHistoryManagerReturn } from '../hooks/useHistoryManager.js';
+import { Box, Text } from "ink";
+import type React from "react";
+import { TrustLevel } from "../../config/trustedFolders.js";
+import { useKeypress } from "../hooks/useKeypress.js";
+import { useTrustModify } from "../hooks/useTrustModify.js";
+import { theme } from "../semantic-colors.js";
+import { RadioButtonSelect } from "./shared/RadioButtonSelect.js";
+import { relaunchApp } from "../../utils/processUtils.js";
+import { type UseHistoryManagerReturn } from "../hooks/useHistoryManager.js";
 
 interface TrustDialogProps {
   onExit: () => void;
-  addItem: UseHistoryManagerReturn['addItem'];
+  addItem: UseHistoryManagerReturn["addItem"];
 }
 
 const TRUST_LEVEL_ITEMS = [
   {
-    label: 'Trust this folder',
+    label: "Trust this folder",
     value: TrustLevel.TRUST_FOLDER,
     key: TrustLevel.TRUST_FOLDER,
   },
   {
-    label: 'Trust parent folder',
+    label: "Trust parent folder",
     value: TrustLevel.TRUST_PARENT,
     key: TrustLevel.TRUST_PARENT,
   },
@@ -53,10 +53,10 @@ export function TrustDialog({
 
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         onExit();
       }
-      if (needsRestart && key.name === 'r') {
+      if (needsRestart && key.name === "r") {
         commitTrustLevelChange();
         relaunchApp();
         onExit();
@@ -79,11 +79,11 @@ export function TrustDialog({
         padding={1}
       >
         <Box flexDirection="column" paddingBottom={1}>
-          <Text bold>{'> '}Modify Trust Level</Text>
+          <Text bold>{"> "}Modify Trust Level</Text>
           <Box marginTop={1} />
           <Text>Folder: {cwd}</Text>
           <Text>
-            Current Level: <Text bold>{currentTrustLevel || 'Not Set'}</Text>
+            Current Level: <Text bold>{currentTrustLevel || "Not Set"}</Text>
           </Text>
           {isInheritedTrustFromParent && (
             <Text color={theme.text.secondary}>

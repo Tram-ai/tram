@@ -99,10 +99,10 @@ export interface LspCallHierarchyOutgoingCall {
  * Diagnostic severity levels from LSP specification.
  */
 export type LspDiagnosticSeverity =
-  | 'error'
-  | 'warning'
-  | 'information'
-  | 'hint';
+  | "error"
+  | "warning"
+  | "information"
+  | "hint";
 
 /**
  * A diagnostic message from a language server.
@@ -129,7 +129,7 @@ export interface LspDiagnostic {
 /**
  * Diagnostic tags from LSP specification.
  */
-export type LspDiagnosticTag = 'unnecessary' | 'deprecated';
+export type LspDiagnosticTag = "unnecessary" | "deprecated";
 
 /**
  * Related diagnostic information.
@@ -179,14 +179,14 @@ export interface LspCodeAction {
  * Code action kinds from LSP specification.
  */
 export type LspCodeActionKind =
-  | 'quickfix'
-  | 'refactor'
-  | 'refactor.extract'
-  | 'refactor.inline'
-  | 'refactor.rewrite'
-  | 'source'
-  | 'source.organizeImports'
-  | 'source.fixAll'
+  | "quickfix"
+  | "refactor"
+  | "refactor.extract"
+  | "refactor.inline"
+  | "refactor.rewrite"
+  | "source"
+  | "source.organizeImports"
+  | "source.fixAll"
   | string;
 
 /**
@@ -243,7 +243,7 @@ export interface LspCodeActionContext {
   /** Requested kinds of code actions to return. */
   only?: LspCodeActionKind[];
   /** The reason why code actions were requested. */
-  triggerKind?: 'invoked' | 'automatic';
+  triggerKind?: "invoked" | "automatic";
 }
 
 export interface LspClient {
@@ -364,7 +364,7 @@ export interface LspClient {
 // LSP Service Types (migrated from cli)
 // ============================================================================
 
-import type { ChildProcess } from 'node:child_process';
+import type { ChildProcess } from "node:child_process";
 
 /**
  * LSP server initialization options passed during the initialize request.
@@ -398,7 +398,7 @@ export interface LspServerConfig {
   /** Command line arguments */
   args?: string[];
   /** Transport type: stdio, tcp, or socket */
-  transport: 'stdio' | 'tcp' | 'socket';
+  transport: "stdio" | "tcp" | "socket";
   /** Environment variables for the server process */
   env?: Record<string, string>;
   /** LSP initialization options */
@@ -467,10 +467,10 @@ export interface LspConnectionInterface {
  * Status of an LSP server instance.
  */
 export type LspServerStatus =
-  | 'NOT_STARTED'
-  | 'IN_PROGRESS'
-  | 'READY'
-  | 'FAILED';
+  | "NOT_STARTED"
+  | "IN_PROGRESS"
+  | "READY"
+  | "FAILED";
 
 /**
  * Handle for managing an LSP server instance.

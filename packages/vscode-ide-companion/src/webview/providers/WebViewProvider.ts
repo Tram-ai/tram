@@ -4,27 +4,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import { TramAgentManager } from '../../services/tramAgentManager.js';
-import { ConversationStore } from '../../services/conversationStore.js';
+import * as vscode from "vscode";
+import { TramAgentManager } from "../../services/tramAgentManager.js";
+import { ConversationStore } from "../../services/conversationStore.js";
 import type {
   RequestPermissionRequest,
   ModelInfo,
-} from '@agentclientprotocol/sdk';
-import type { AskUserQuestionRequest } from '../../types/acpTypes.js';
+} from "@agentclientprotocol/sdk";
+import type { AskUserQuestionRequest } from "../../types/acpTypes.js";
 import type {
   PermissionResponseMessage,
   AskUserQuestionResponseMessage,
-} from '../../types/webviewMessageTypes.js';
-import { PanelManager, getLocalResourceRoots } from './PanelManager.js';
-import { MessageHandler } from './MessageHandler.js';
-import { WebViewContent } from './WebViewContent.js';
-import { getFileName } from '../utils/webviewUtils.js';
-import { truncatePanelTitle } from '../utils/panelTitleUtils.js';
-import { createImagePathResolver } from '../utils/imageHandler.js';
-import { type ApprovalModeValue } from '../../types/approvalModeValueTypes.js';
-import { isAuthenticationRequiredError } from '../../utils/authErrors.js';
-import { getErrorMessage } from '../../utils/errorMessage.js';
+} from "../../types/webviewMessageTypes.js";
+import { PanelManager, getLocalResourceRoots } from "./PanelManager.js";
+import { MessageHandler } from "./MessageHandler.js";
+import { WebViewContent } from "./WebViewContent.js";
+import { getFileName } from "../utils/webviewUtils.js";
+import { truncatePanelTitle } from "../utils/panelTitleUtils.js";
+import { createImagePathResolver } from "../utils/imageHandler.js";
+import { type ApprovalModeValue } from "../../types/approvalModeValueTypes.js";
+import { isAuthenticationRequiredError } from "../../utils/authErrors.js";
+import { getErrorMessage } from "../../utils/errorMessage.js";
 
 export class WebViewProvider {
   private panelManager: PanelManager;
@@ -71,12 +71,12 @@ export class WebViewProvider {
     this.panelManager = new PanelManager(extensionUri, () => {
       // Panel dispose callback — unblock any pending ACP Promises
       if (this.pendingPermissionResolve) {
-        this.pendingPermissionResolve('cancel');
+        this.pendingPermissionResolve("cancel");
         this.pendingPermissionResolve = null;
         this.pendingPermissionRequest = null;
       }
       if (this.pendingAskUserQuestionResolve) {
-        this.pendingAskUserQuestionResolve({ optionId: 'cancel' });
+        this.pendingAskUserQuestionResolve({ optionId: "cancel" });
         this.pendingAskUserQuestionResolve = null;
         this.pendingAskUserQuestionRequest = null;
       }
@@ -109,7 +109,7 @@ export class WebViewProvider {
       // assistant replies when a new prompt starts while an async save is
       // still finishing.
       this.sendMessageToWebView({
-        type: 'message',
+        type: "message",
         data: message,
       });
     });
@@ -119,7 +119,7 @@ export class WebViewProvider {
       // See note in onMessage() above.
       this.messageHandler.appendStreamContent(chunk);
       this.sendMessageToWebView({
-        type: 'streamChunk',
+        type: "streamChunk",
         data: { chunk },
       });
     });
@@ -129,7 +129,7 @@ export class WebViewProvider {
       // Always forward thought chunks; do not gate on checkpoint saves.
       this.messageHandler.appendStreamContent(chunk);
       this.sendMessageToWebView({
-        type: 'thoughtChunk',
+        type: "thoughtChunk",
         data: { chunk },
       });
     });
@@ -138,17 +138,17 @@ export class WebViewProvider {
     this.agentManager.onModeInfo((info) => {
       try {
         const current = (info?.currentModeId || null) as
-          | 'plan'
-          | 'default'
-          | 'auto-edit'
-          | 'yolo'
+          | "plan"
+          | "default"
+          | "auto-edit"
+          | "yolo"
           | null;
         this.currentModeId = current;
       } catch (_error) {
         // Ignore error when parsing mode info
       }
       this.sendMessageToWebView({
-        type: 'modeInfo',
+        type: "modeInfo",
         data: info || {},
       });
     });
@@ -161,21 +161,21 @@ export class WebViewProvider {
         // Ignore error when setting mode id
       }
       this.sendMessageToWebView({
-        type: 'modeChanged',
+        type: "modeChanged",
         data: { modeId },
       });
     });
 
     this.agentManager.onUsageUpdate((stats) => {
       this.sendMessageToWebView({
-        type: 'usageStats',
+        type: "usageStats",
         data: stats,
       });
     });
 
     this.agentManager.onModelInfo((info) => {
       this.sendMessageToWebView({
-        type: 'modelInfo',
+        type: "modelInfo",
         data: info,
       });
     });
@@ -183,7 +183,7 @@ export class WebViewProvider {
     // Surface model changes (primarily from set_model response path)
     this.agentManager.onModelChanged((model) => {
       this.sendMessageToWebView({
-        type: 'modelChanged',
+        type: "modelChanged",
         data: { model },
       });
     });
@@ -191,7 +191,7 @@ export class WebViewProvider {
     // Surface available commands (from ACP available_commands_update)
     this.agentManager.onAvailableCommands((commands) => {
       this.sendMessageToWebView({
-        type: 'availableCommands',
+        type: "availableCommands",
         data: { commands },
       });
     });
@@ -199,13 +199,13 @@ export class WebViewProvider {
     // Surface available models (from session/new response)
     this.agentManager.onAvailableModels((models) => {
       console.log(
-        '[WebViewProvider] onAvailableModels received, sending to webview:',
+        "[WebViewProvider] onAvailableModels received, sending to webview:",
         models,
       );
       // Cache models for re-sending when webview becomes ready
       this.cachedAvailableModels = models;
       this.sendMessageToWebView({
-        type: 'availableModels',
+        type: "availableModels",
         data: { models },
       });
     });
@@ -214,10 +214,10 @@ export class WebViewProvider {
     this.agentManager.onEndTurn((reason) => {
       // Ensure WebView exits streaming state even if no explicit streamEnd was emitted elsewhere
       this.sendMessageToWebView({
-        type: 'streamEnd',
+        type: "streamEnd",
         data: {
           timestamp: Date.now(),
-          reason: reason || 'end_turn',
+          reason: reason || "end_turn",
         },
       });
     });
@@ -237,14 +237,14 @@ export class WebViewProvider {
       if (!messageType) {
         // Infer type: if has kind or title, assume initial call; otherwise update
         if (updateData.kind || updateData.title || updateData.rawInput) {
-          messageType = 'tool_call';
+          messageType = "tool_call";
         } else {
-          messageType = 'tool_call_update';
+          messageType = "tool_call_update";
         }
       }
 
       this.sendMessageToWebView({
-        type: 'toolCall',
+        type: "toolCall",
         data: {
           type: messageType,
           ...updateData,
@@ -255,7 +255,7 @@ export class WebViewProvider {
     // Setup plan handler
     this.agentManager.onPlan((entries) => {
       this.sendMessageToWebView({
-        type: 'plan',
+        type: "plan",
         data: { entries },
       });
     });
@@ -264,14 +264,14 @@ export class WebViewProvider {
       async (request: RequestPermissionRequest) => {
         // Send permission request to WebView
         this.sendMessageToWebView({
-          type: 'permissionRequest',
+          type: "permissionRequest",
           data: request,
         });
 
         // If a previous permission request is still pending, cancel it so its
         // promise settles instead of leaking (issue: handler overwrite leak).
         if (this.pendingPermissionResolve) {
-          this.pendingPermissionResolve('cancel');
+          this.pendingPermissionResolve("cancel");
         }
 
         // Wait for user response
@@ -287,7 +287,7 @@ export class WebViewProvider {
             resolve(optionId);
             // Instruct the webview UI to close its drawer
             this.sendMessageToWebView({
-              type: 'permissionResolved',
+              type: "permissionResolved",
               data: { optionId },
             });
             // NOTE: Diff management (closeAll, suppressBriefly) is handled
@@ -295,21 +295,21 @@ export class WebViewProvider {
           };
 
           const handler = (message: PermissionResponseMessage) => {
-            if (message.type !== 'permissionResponse') {
+            if (message.type !== "permissionResponse") {
               return;
             }
 
-            const optionId = message.data.optionId || '';
+            const optionId = message.data.optionId || "";
 
             // Resolve the optionId back to ACP so the agent isn't blocked
             this.pendingPermissionResolve?.(optionId);
 
             const isCancel =
-              optionId === 'cancel' ||
-              optionId.toLowerCase().includes('reject');
+              optionId === "cancel" ||
+              optionId.toLowerCase().includes("reject");
 
             // Always close open tram-diff editors after any permission decision
-            void vscode.commands.executeCommand('tram.diff.closeAll');
+            void vscode.commands.executeCommand("tram.diff.closeAll");
 
             if (isCancel) {
               // Fire and forget — cancel generation and update UI
@@ -318,46 +318,46 @@ export class WebViewProvider {
                   await this.agentManager.cancelCurrentPrompt();
                 } catch (err) {
                   console.warn(
-                    '[WebViewProvider] cancelCurrentPrompt error:',
+                    "[WebViewProvider] cancelCurrentPrompt error:",
                     err,
                   );
                 }
 
                 this.sendMessageToWebView({
-                  type: 'streamEnd',
-                  data: { timestamp: Date.now(), reason: 'user_cancelled' },
+                  type: "streamEnd",
+                  data: { timestamp: Date.now(), reason: "user_cancelled" },
                 });
 
                 // Synthesize a failed tool_call_update to match CLI UX
                 try {
                   const toolCallId =
                     (request.toolCall as { toolCallId?: string } | undefined)
-                      ?.toolCallId || '';
+                      ?.toolCallId || "";
                   const title =
                     (request.toolCall as { title?: string } | undefined)
-                      ?.title || '';
+                      ?.title || "";
                   let kind = ((
                     request.toolCall as { kind?: string } | undefined
-                  )?.kind || 'execute') as string;
+                  )?.kind || "execute") as string;
                   if (!kind && title) {
                     const t = title.toLowerCase();
-                    if (t.includes('read') || t.includes('cat')) {
-                      kind = 'read';
-                    } else if (t.includes('write') || t.includes('edit')) {
-                      kind = 'edit';
+                    if (t.includes("read") || t.includes("cat")) {
+                      kind = "read";
+                    } else if (t.includes("write") || t.includes("edit")) {
+                      kind = "edit";
                     } else {
-                      kind = 'execute';
+                      kind = "execute";
                     }
                   }
 
                   this.sendMessageToWebView({
-                    type: 'toolCall',
+                    type: "toolCall",
                     data: {
-                      type: 'tool_call_update',
+                      type: "tool_call_update",
                       toolCallId,
                       title,
                       kind,
-                      status: 'failed',
+                      status: "failed",
                       rawInput: (request.toolCall as { rawInput?: unknown })
                         ?.rawInput,
                       locations: (
@@ -372,14 +372,14 @@ export class WebViewProvider {
                   });
                 } catch (err) {
                   console.warn(
-                    '[WebViewProvider] failed to synthesize failed tool_call_update:',
+                    "[WebViewProvider] failed to synthesize failed tool_call_update:",
                     err,
                   );
                 }
               })();
             } else {
               // Allowed/proceeded — suppress diff re-open briefly
-              void vscode.commands.executeCommand('tram.diff.suppressBriefly');
+              void vscode.commands.executeCommand("tram.diff.suppressBriefly");
             }
           };
           // Store handler in message handler
@@ -392,7 +392,7 @@ export class WebViewProvider {
       async (request: AskUserQuestionRequest) => {
         // Send ask user question request to WebView
         this.sendMessageToWebView({
-          type: 'askUserQuestion',
+          type: "askUserQuestion",
           data: request,
         });
 
@@ -412,13 +412,13 @@ export class WebViewProvider {
               this.pendingAskUserQuestionResolve = null;
               // Instruct the webview UI to close the dialog
               this.sendMessageToWebView({
-                type: 'askUserQuestionResolved',
+                type: "askUserQuestionResolved",
                 data: { optionId: result.optionId },
               });
             }
           };
           const handler = (message: AskUserQuestionResponseMessage) => {
-            if (message.type !== 'askUserQuestionResponse') {
+            if (message.type !== "askUserQuestionResponse") {
               return;
             }
 
@@ -427,11 +427,11 @@ export class WebViewProvider {
             // Resolve with the result
             if (cancelled) {
               this.pendingAskUserQuestionResolve?.({
-                optionId: 'cancel',
+                optionId: "cancel",
               });
             } else {
               this.pendingAskUserQuestionResolve?.({
-                optionId: optionId || 'proceed_once',
+                optionId: optionId || "proceed_once",
                 answers,
               });
             }
@@ -491,14 +491,14 @@ export class WebViewProvider {
     // Handle messages from WebView
     webview.onDidReceiveMessage(
       async (message: { type: string; data?: unknown }) => {
-        if (message.type === 'openDiff' && this.isAutoMode()) {
+        if (message.type === "openDiff" && this.isAutoMode()) {
           return;
         }
-        if (message.type === 'webviewReady') {
+        if (message.type === "webviewReady") {
           this.handleWebviewReady();
           return;
         }
-        if (message.type === 'resolveImagePaths') {
+        if (message.type === "resolveImagePaths") {
           this.handleResolveImagePaths(message.data, webview);
           return;
         }
@@ -530,7 +530,7 @@ export class WebViewProvider {
         }
 
         this.sendMessageToWebView({
-          type: 'activeEditorChanged',
+          type: "activeEditorChanged",
           data: { fileName, filePath, selection: selectionInfo },
         });
       },
@@ -555,7 +555,7 @@ export class WebViewProvider {
           }
 
           this.sendMessageToWebView({
-            type: 'activeEditorChanged',
+            type: "activeEditorChanged",
             data: { fileName, filePath, selection: selectionInfo },
           });
         }
@@ -578,7 +578,7 @@ export class WebViewProvider {
       }
 
       this.sendMessageToWebView({
-        type: 'activeEditorChanged',
+        type: "activeEditorChanged",
         data: { fileName, filePath, selection: selectionInfo },
       });
     }
@@ -601,9 +601,16 @@ export class WebViewProvider {
 
     // Attempt to restore auth state and initialize connection
     console.log(
-      '[WebViewProvider] Attempting to restore auth state and connection for view...',
+      "[WebViewProvider] Attempting to restore auth state and connection for view...",
     );
     await this.attemptAuthStateRestoration();
+  }
+
+  async submitMessage(text: string): Promise<void> {
+    this.sendMessageToWebView({
+      type: "sendMessage",
+      data: { text },
+    });
   }
 
   async show(): Promise<void> {
@@ -631,7 +638,7 @@ export class WebViewProvider {
     // Set up state serialization
     newPanel.onDidChangeViewState(() => {
       console.log(
-        '[WebViewProvider] Panel view state changed, triggering serialization check',
+        "[WebViewProvider] Panel view state changed, triggering serialization check",
       );
     });
 
@@ -650,25 +657,25 @@ export class WebViewProvider {
     newPanel.webview.onDidReceiveMessage(
       async (message: { type: string; data?: unknown }) => {
         // Suppress UI-originated diff opens in auto/yolo mode
-        if (message.type === 'openDiff' && this.isAutoMode()) {
+        if (message.type === "openDiff" && this.isAutoMode()) {
           return;
         }
-        if (message.type === 'webviewReady') {
+        if (message.type === "webviewReady") {
           this.handleWebviewReady();
           return;
         }
-        if (message.type === 'resolveImagePaths') {
+        if (message.type === "resolveImagePaths") {
           this.handleResolveImagePaths(message.data, newPanel.webview);
           return;
         }
         // Allow webview to request updating the VS Code tab title
-        if (message.type === 'updatePanelTitle') {
+        if (message.type === "updatePanelTitle") {
           const title = String(
-            (message.data as { title?: unknown } | undefined)?.title ?? '',
+            (message.data as { title?: unknown } | undefined)?.title ?? "",
           ).trim();
           const panelRef = this.panelManager.getPanel();
           if (panelRef) {
-            panelRef.title = title ? truncatePanelTitle(title) : 'TRAM';
+            panelRef.title = title ? truncatePanelTitle(title) : "TRAM";
           }
           return;
         }
@@ -712,7 +719,7 @@ export class WebViewProvider {
         // Update last known state
 
         this.sendMessageToWebView({
-          type: 'activeEditorChanged',
+          type: "activeEditorChanged",
           data: { fileName, filePath, selection: selectionInfo },
         });
       },
@@ -740,7 +747,7 @@ export class WebViewProvider {
           // Update last known state
 
           this.sendMessageToWebView({
-            type: 'activeEditorChanged',
+            type: "activeEditorChanged",
             data: { fileName, filePath, selection: selectionInfo },
           });
 
@@ -765,21 +772,21 @@ export class WebViewProvider {
       }
 
       this.sendMessageToWebView({
-        type: 'activeEditorChanged',
+        type: "activeEditorChanged",
         data: { fileName, filePath, selection: selectionInfo },
       });
     }
 
     // Attempt to restore authentication state and initialize connection
     console.log(
-      '[WebViewProvider] Attempting to restore auth state and connection...',
+      "[WebViewProvider] Attempting to restore auth state and connection...",
     );
     await this.attemptAuthStateRestoration();
   }
 
   setInitialModelId(modelId: string | null | undefined): void {
     this.initialModelId =
-      typeof modelId === 'string' && modelId.trim().length > 0
+      typeof modelId === "string" && modelId.trim().length > 0
         ? modelId.trim()
         : null;
   }
@@ -796,12 +803,12 @@ export class WebViewProvider {
 
     this.initializationPromise = (async () => {
       try {
-        console.log('[WebViewProvider] Attempting connection...');
+        console.log("[WebViewProvider] Attempting connection...");
         // Attempt a connection to detect prior auth without forcing login
         await this.initializeAgentConnection({ autoAuthenticate: false });
       } catch (error) {
         console.error(
-          '[WebViewProvider] Error in attemptAuthStateRestoration:',
+          "[WebViewProvider] Error in attemptAuthStateRestoration:",
           error,
         );
         await this.initializeEmptyConversation();
@@ -835,7 +842,7 @@ export class WebViewProvider {
       const workingDir = workspaceFolder?.uri.fsPath || process.cwd();
 
       console.log(
-        '[WebViewProvider] Starting initialization, workingDir:',
+        "[WebViewProvider] Starting initialization, workingDir:",
         workingDir,
       );
       console.log(
@@ -844,13 +851,13 @@ export class WebViewProvider {
 
       const bundledCliEntry = vscode.Uri.joinPath(
         this.extensionUri,
-        'dist',
-        'tram-cli',
-        'cli.js',
+        "dist",
+        "tram-cli",
+        "cli.js",
       ).fsPath;
 
       try {
-        console.log('[WebViewProvider] Connecting to agent...');
+        console.log("[WebViewProvider] Connecting to agent...");
 
         // Pass the detected CLI path to ensure we use the correct installation
         const connectResult = await this.agentManager.connect(
@@ -858,17 +865,17 @@ export class WebViewProvider {
           bundledCliEntry,
           options,
         );
-        console.log('[WebViewProvider] Agent connected successfully');
+        console.log("[WebViewProvider] Agent connected successfully");
         this.agentInitialized = true;
 
         // If authentication is required and autoAuthenticate is false,
         // send authState message and return without creating session
         if (connectResult.requiresAuth && !autoAuthenticate) {
           console.log(
-            '[WebViewProvider] Authentication required but auto-auth disabled, sending authState and returning',
+            "[WebViewProvider] Authentication required but auto-auth disabled, sending authState and returning",
           );
           this.sendMessageToWebView({
-            type: 'authState',
+            type: "authState",
             data: { authenticated: false },
           });
           // Initialize empty conversation to allow browsing history
@@ -878,7 +885,7 @@ export class WebViewProvider {
 
         if (connectResult.requiresAuth) {
           this.sendMessageToWebView({
-            type: 'authState',
+            type: "authState",
             data: { authenticated: false },
           });
         }
@@ -889,17 +896,17 @@ export class WebViewProvider {
         if (sessionReady) {
           // Notify webview that agent is connected
           this.sendMessageToWebView({
-            type: 'agentConnected',
+            type: "agentConnected",
             data: {},
           });
         } else {
           console.log(
-            '[WebViewProvider] Session creation deferred until user logs in.',
+            "[WebViewProvider] Session creation deferred until user logs in.",
           );
         }
       } catch (_error) {
         const errorMsg = getErrorMessage(_error);
-        console.error('[WebViewProvider] Agent connection error:', _error);
+        console.error("[WebViewProvider] Agent connection error:", _error);
         vscode.window.showWarningMessage(
           `Failed to connect to TRAM CLI: ${errorMsg}\nYou can still use the chat UI, but messages won't be sent to AI.`,
         );
@@ -908,7 +915,7 @@ export class WebViewProvider {
 
         // Notify webview that agent connection failed
         this.sendMessageToWebView({
-          type: 'agentConnectionError',
+          type: "agentConnectionError",
           data: {
             message: errorMsg,
           },
@@ -924,7 +931,7 @@ export class WebViewProvider {
    * Called when user explicitly uses /login command
    */
   async forceReLogin(): Promise<void> {
-    console.log('[WebViewProvider] Force re-login requested');
+    console.log("[WebViewProvider] Force re-login requested");
 
     return vscode.window.withProgress(
       {
@@ -933,15 +940,15 @@ export class WebViewProvider {
       },
       async (progress) => {
         try {
-          progress.report({ message: 'Preparing sign-in...' });
+          progress.report({ message: "Preparing sign-in..." });
 
           // Disconnect existing connection if any
           if (this.agentInitialized) {
             try {
               this.agentManager.disconnect();
-              console.log('[WebViewProvider] Existing connection disconnected');
+              console.log("[WebViewProvider] Existing connection disconnected");
             } catch (_error) {
-              console.log('[WebViewProvider] Error disconnecting:', _error);
+              console.log("[WebViewProvider] Error disconnecting:", _error);
             }
             this.agentInitialized = false;
           }
@@ -950,31 +957,31 @@ export class WebViewProvider {
           await new Promise((resolve) => setTimeout(resolve, 300));
 
           progress.report({
-            message: 'Connecting to CLI and starting sign-in...',
+            message: "Connecting to CLI and starting sign-in...",
           });
 
           // Reinitialize connection (will trigger fresh authentication)
           await this.doInitializeAgentConnection({ autoAuthenticate: true });
           console.log(
-            '[WebViewProvider] Force re-login completed successfully',
+            "[WebViewProvider] Force re-login completed successfully",
           );
 
           // Send success notification to WebView
           this.sendMessageToWebView({
-            type: 'loginSuccess',
-            data: { message: 'Successfully logged in!' },
+            type: "loginSuccess",
+            data: { message: "Successfully logged in!" },
           });
         } catch (_error) {
           const errorMsg = getErrorMessage(_error);
-          console.error('[WebViewProvider] Force re-login failed:', _error);
+          console.error("[WebViewProvider] Force re-login failed:", _error);
           console.error(
-            '[WebViewProvider] Error stack:',
-            _error instanceof Error ? _error.stack : 'N/A',
+            "[WebViewProvider] Error stack:",
+            _error instanceof Error ? _error.stack : "N/A",
           );
 
           // Send error notification to WebView
           this.sendMessageToWebView({
-            type: 'loginError',
+            type: "loginError",
             data: {
               message: `Login failed: ${errorMsg}`,
             },
@@ -1009,7 +1016,7 @@ export class WebViewProvider {
 
       try {
         await this.doInitializeAgentConnection();
-        console.log('[WebViewProvider] Auto-reconnect succeeded');
+        console.log("[WebViewProvider] Auto-reconnect succeeded");
         this.isReconnecting = false;
         return;
       } catch (error) {
@@ -1022,13 +1029,13 @@ export class WebViewProvider {
 
     // All attempts exhausted
     this.isReconnecting = false;
-    console.error('[WebViewProvider] Auto-reconnect failed after all attempts');
+    console.error("[WebViewProvider] Auto-reconnect failed after all attempts");
 
     this.sendMessageToWebView({
-      type: 'agentConnectionError',
+      type: "agentConnectionError",
       data: {
         message:
-          'Lost connection to Qwen agent and auto-reconnect failed. Please use the refresh button to try again.',
+          "Lost connection to Qwen agent and auto-reconnect failed. Please use the refresh button to try again.",
       },
     });
   }
@@ -1038,15 +1045,15 @@ export class WebViewProvider {
    * Called when restoring WebView after VSCode restart
    */
   async refreshConnection(): Promise<void> {
-    console.log('[WebViewProvider] Refresh connection requested');
+    console.log("[WebViewProvider] Refresh connection requested");
 
     // Disconnect existing connection if any
     if (this.agentInitialized) {
       try {
         this.agentManager.disconnect();
-        console.log('[WebViewProvider] Existing connection disconnected');
+        console.log("[WebViewProvider] Existing connection disconnected");
       } catch (_error) {
-        console.log('[WebViewProvider] Error disconnecting:', _error);
+        console.log("[WebViewProvider] Error disconnecting:", _error);
       }
       this.agentInitialized = false;
     }
@@ -1058,21 +1065,21 @@ export class WebViewProvider {
     try {
       await this.initializeAgentConnection();
       console.log(
-        '[WebViewProvider] Connection refresh completed successfully',
+        "[WebViewProvider] Connection refresh completed successfully",
       );
 
       // Notify webview that agent is connected after refresh
       this.sendMessageToWebView({
-        type: 'agentConnected',
+        type: "agentConnected",
         data: {},
       });
     } catch (_error) {
       const errorMsg = getErrorMessage(_error);
-      console.error('[WebViewProvider] Connection refresh failed:', _error);
+      console.error("[WebViewProvider] Connection refresh failed:", _error);
 
       // Notify webview that agent connection failed after refresh
       this.sendMessageToWebView({
-        type: 'agentConnectionError',
+        type: "agentConnectionError",
         data: {
           message: errorMsg,
         },
@@ -1093,7 +1100,7 @@ export class WebViewProvider {
     let sessionReady = false;
     try {
       console.log(
-        '[WebViewProvider] Initializing with new session (skipping restoration)',
+        "[WebViewProvider] Initializing with new session (skipping restoration)",
       );
 
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
@@ -1103,10 +1110,10 @@ export class WebViewProvider {
       if (!this.agentManager.currentSessionId) {
         if (!autoAuthenticate) {
           console.log(
-            '[WebViewProvider] Skipping ACP session creation until user logs in.',
+            "[WebViewProvider] Skipping ACP session creation until user logs in.",
           );
           this.sendMessageToWebView({
-            type: 'authState',
+            type: "authState",
             data: { authenticated: false },
           });
         } else {
@@ -1114,22 +1121,22 @@ export class WebViewProvider {
             await this.agentManager.createNewSession(workingDir, {
               autoAuthenticate,
             });
-            console.log('[WebViewProvider] ACP session created successfully');
+            console.log("[WebViewProvider] ACP session created successfully");
             sessionReady = true;
           } catch (sessionError) {
             const requiresAuth = isAuthenticationRequiredError(sessionError);
             if (requiresAuth && !autoAuthenticate) {
               console.log(
-                '[WebViewProvider] ACP session requires authentication; waiting for explicit login.',
+                "[WebViewProvider] ACP session requires authentication; waiting for explicit login.",
               );
               this.sendMessageToWebView({
-                type: 'authState',
+                type: "authState",
                 data: { authenticated: false },
               });
             } else {
               const errorMsg = getErrorMessage(sessionError);
               console.error(
-                '[WebViewProvider] Failed to create ACP session:',
+                "[WebViewProvider] Failed to create ACP session:",
                 sessionError,
               );
               vscode.window.showWarningMessage(
@@ -1140,7 +1147,7 @@ export class WebViewProvider {
         }
       } else {
         console.log(
-          '[WebViewProvider] Existing ACP session detected, skipping new session creation',
+          "[WebViewProvider] Existing ACP session detected, skipping new session creation",
         );
         sessionReady = true;
       }
@@ -1153,7 +1160,7 @@ export class WebViewProvider {
     } catch (_error) {
       const errorMsg = getErrorMessage(_error);
       console.error(
-        '[WebViewProvider] Failed to load session messages:',
+        "[WebViewProvider] Failed to load session messages:",
         _error,
       );
       vscode.window.showErrorMessage(
@@ -1178,7 +1185,7 @@ export class WebViewProvider {
       await this.agentManager.setModelFromUi(modelId);
     } catch (error) {
       console.warn(
-        '[WebViewProvider] Failed to apply initial model selection:',
+        "[WebViewProvider] Failed to apply initial model selection:",
         error,
       );
     }
@@ -1190,26 +1197,26 @@ export class WebViewProvider {
    */
   private async initializeEmptyConversation(): Promise<void> {
     try {
-      console.log('[WebViewProvider] Initializing empty conversation');
+      console.log("[WebViewProvider] Initializing empty conversation");
       const newConv = await this.conversationStore.createConversation();
       this.messageHandler.setCurrentConversationId(newConv.id);
       this.sendMessageToWebView({
-        type: 'conversationLoaded',
+        type: "conversationLoaded",
         data: newConv,
       });
       console.log(
-        '[WebViewProvider] Empty conversation initialized:',
+        "[WebViewProvider] Empty conversation initialized:",
         this.messageHandler.getCurrentConversationId(),
       );
     } catch (_error) {
       console.error(
-        '[WebViewProvider] Failed to initialize conversation:',
+        "[WebViewProvider] Failed to initialize conversation:",
         _error,
       );
       // Send empty state to WebView as fallback
       this.sendMessageToWebView({
-        type: 'conversationLoaded',
-        data: { id: 'temp', messages: [] },
+        type: "conversationLoaded",
+        data: { id: "temp", messages: [] },
       });
     }
   }
@@ -1218,7 +1225,7 @@ export class WebViewProvider {
    * Track authentication state based on outbound messages to the webview.
    */
   private updateAuthStateFromMessage(message: unknown): void {
-    if (!message || typeof message !== 'object') {
+    if (!message || typeof message !== "object") {
       return;
     }
     const msg = message as {
@@ -1227,19 +1234,19 @@ export class WebViewProvider {
     };
 
     switch (msg.type) {
-      case 'authState':
-        if (typeof msg.data?.authenticated === 'boolean') {
+      case "authState":
+        if (typeof msg.data?.authenticated === "boolean") {
           this.authState = msg.data.authenticated;
         } else {
           this.authState = null;
         }
         break;
-      case 'agentConnected':
-      case 'loginSuccess':
+      case "agentConnected":
+      case "loginSuccess":
         this.authState = true;
         break;
-      case 'agentConnectionError':
-      case 'loginError':
+      case "agentConnectionError":
+      case "loginError":
         this.authState = false;
         break;
       default:
@@ -1253,7 +1260,7 @@ export class WebViewProvider {
   private handleWebviewReady(): void {
     if (this.currentModeId) {
       this.sendMessageToWebView({
-        type: 'modeChanged',
+        type: "modeChanged",
         data: { modeId: this.currentModeId },
       });
     }
@@ -1261,18 +1268,18 @@ export class WebViewProvider {
     // Send cached available models to webview
     if (this.cachedAvailableModels && this.cachedAvailableModels.length > 0) {
       console.log(
-        '[WebViewProvider] Sending cached availableModels on webviewReady:',
+        "[WebViewProvider] Sending cached availableModels on webviewReady:",
         this.cachedAvailableModels.map((m) => m.modelId),
       );
       this.sendMessageToWebView({
-        type: 'availableModels',
+        type: "availableModels",
         data: { models: this.cachedAvailableModels },
       });
     }
 
-    if (typeof this.authState === 'boolean') {
+    if (typeof this.authState === "boolean") {
       this.sendMessageToWebView({
-        type: 'authState',
+        type: "authState",
         data: { authenticated: this.authState },
       });
       return;
@@ -1281,7 +1288,7 @@ export class WebViewProvider {
     if (this.agentInitialized) {
       const authenticated = Boolean(this.agentManager.currentSessionId);
       this.sendMessageToWebView({
-        type: 'authState',
+        type: "authState",
         data: { authenticated },
       });
     }
@@ -1301,10 +1308,10 @@ export class WebViewProvider {
     type: string;
     data?: unknown;
   }): boolean {
-    if (message.type !== 'openNewChatTab' || !this.isViewHost) {
+    if (message.type !== "openNewChatTab" || !this.isViewHost) {
       return false;
     }
-    void this.messageHandler.route({ type: 'newTramSession', data: {} });
+    void this.messageHandler.route({ type: "newTramSession", data: {} });
     return true;
   }
 
@@ -1342,7 +1349,7 @@ export class WebViewProvider {
     const resolved = resolveImagePaths(paths);
 
     webview.postMessage({
-      type: 'imagePathsResolved',
+      type: "imagePathsResolved",
       data: { resolved, requestId: payload?.requestId },
     });
   }
@@ -1365,7 +1372,7 @@ export class WebViewProvider {
 
   /** True if diffs/permissions should be auto-handled without prompting. */
   isAutoMode(): boolean {
-    return this.currentModeId === 'auto-edit' || this.currentModeId === 'yolo';
+    return this.currentModeId === "auto-edit" || this.currentModeId === "yolo";
   }
 
   /** Used by extension to decide if diffs should be suppressed. */
@@ -1378,7 +1385,7 @@ export class WebViewProvider {
    * The choice can be a concrete optionId or a shorthand intent.
    */
   respondToPendingPermission(
-    choice: { optionId: string } | 'accept' | 'allow' | 'reject' | 'cancel',
+    choice: { optionId: string } | "accept" | "allow" | "reject" | "cancel",
   ): void {
     if (!this.pendingPermissionResolve || !this.pendingPermissionRequest) {
       return; // nothing to do
@@ -1389,11 +1396,11 @@ export class WebViewProvider {
     const pickByKind = (substr: string, preferOnce = false) => {
       const lc = substr.toLowerCase();
       const filtered = options.filter((o) =>
-        (o.kind || '').toLowerCase().includes(lc),
+        (o.kind || "").toLowerCase().includes(lc),
       );
       if (preferOnce) {
         const once = filtered.find((o) =>
-          (o.optionId || '').toLowerCase().includes('once'),
+          (o.optionId || "").toLowerCase().includes("once"),
         );
         if (once) {
           return once.optionId;
@@ -1403,31 +1410,31 @@ export class WebViewProvider {
     };
 
     const pickByOptionId = (substr: string) =>
-      options.find((o) => (o.optionId || '').toLowerCase().includes(substr))
+      options.find((o) => (o.optionId || "").toLowerCase().includes(substr))
         ?.optionId;
 
     let optionId: string | undefined;
 
-    if (typeof choice === 'object') {
+    if (typeof choice === "object") {
       optionId = choice.optionId;
     } else {
       const c = choice.toLowerCase();
-      if (c === 'accept' || c === 'allow') {
+      if (c === "accept" || c === "allow") {
         // Prefer an allow_once/proceed_once style option, then any allow/proceed
         optionId =
-          pickByKind('allow', true) ||
-          pickByOptionId('proceed_once') ||
-          pickByKind('allow') ||
-          pickByOptionId('proceed') ||
+          pickByKind("allow", true) ||
+          pickByOptionId("proceed_once") ||
+          pickByKind("allow") ||
+          pickByOptionId("proceed") ||
           options[0]?.optionId; // last resort: first option
-      } else if (c === 'cancel' || c === 'reject') {
+      } else if (c === "cancel" || c === "reject") {
         // Prefer explicit cancel, then a reject option
         optionId =
-          options.find((o) => o.optionId === 'cancel')?.optionId ||
-          pickByKind('reject') ||
-          pickByOptionId('cancel') ||
-          pickByOptionId('reject') ||
-          'cancel';
+          options.find((o) => o.optionId === "cancel")?.optionId ||
+          pickByKind("reject") ||
+          pickByOptionId("cancel") ||
+          pickByOptionId("reject") ||
+          "cancel";
       }
     }
 
@@ -1439,7 +1446,7 @@ export class WebViewProvider {
       this.pendingPermissionResolve(optionId);
     } catch (_error) {
       console.warn(
-        '[WebViewProvider] respondToPendingPermission failed:',
+        "[WebViewProvider] respondToPendingPermission failed:",
         _error,
       );
     }
@@ -1450,7 +1457,7 @@ export class WebViewProvider {
    * Call this when auth cache is cleared to force re-authentication
    */
   resetAgentState(): void {
-    console.log('[WebViewProvider] Resetting agent state');
+    console.log("[WebViewProvider] Resetting agent state");
     this.agentInitialized = false;
     this.authState = null;
     // Disconnect existing connection
@@ -1462,18 +1469,18 @@ export class WebViewProvider {
    * This sets up the panel with all event listeners
    */
   async restorePanel(panel: vscode.WebviewPanel): Promise<void> {
-    console.log('[WebViewProvider] Restoring WebView panel');
+    console.log("[WebViewProvider] Restoring WebView panel");
     console.log(
-      '[WebViewProvider] Using CLI-managed authentication in restore',
+      "[WebViewProvider] Using CLI-managed authentication in restore",
     );
     this.panelManager.setPanel(panel);
 
     // Ensure restored tab title starts from default label
     try {
-      panel.title = 'TRAM';
+      panel.title = "TRAM";
     } catch (e) {
       console.warn(
-        '[WebViewProvider] Failed to reset restored panel title:',
+        "[WebViewProvider] Failed to reset restored panel title:",
         e,
       );
     }
@@ -1487,29 +1494,29 @@ export class WebViewProvider {
     panel.webview.onDidReceiveMessage(
       async (message: { type: string; data?: unknown }) => {
         // Suppress UI-originated diff opens in auto/yolo mode
-        if (message.type === 'openDiff' && this.isAutoMode()) {
+        if (message.type === "openDiff" && this.isAutoMode()) {
           return;
         }
-        if (message.type === 'webviewReady') {
+        if (message.type === "webviewReady") {
           this.handleWebviewReady();
           return;
         }
-        if (message.type === 'resolveImagePaths') {
+        if (message.type === "resolveImagePaths") {
           this.handleResolveImagePaths(message.data, panel.webview);
           return;
         }
-        if (message.type === 'updatePanelTitle') {
+        if (message.type === "updatePanelTitle") {
           const title = String(
-            (message.data as { title?: unknown } | undefined)?.title ?? '',
+            (message.data as { title?: unknown } | undefined)?.title ?? "",
           ).trim();
           const panelRef = this.panelManager.getPanel();
           if (panelRef) {
-            panelRef.title = title ? truncatePanelTitle(title) : 'TRAM';
+            panelRef.title = title ? truncatePanelTitle(title) : "TRAM";
           }
           return;
         }
         // Handle ask user question response
-        if (message.type === 'askUserQuestionResponse') {
+        if (message.type === "askUserQuestionResponse") {
           const askUserQuestionMsg = message as AskUserQuestionResponseMessage;
           const answers = askUserQuestionMsg.data.answers || {};
           const cancelled = askUserQuestionMsg.data.cancelled || false;
@@ -1517,11 +1524,11 @@ export class WebViewProvider {
           // Resolve the pending ask user question promise
           if (cancelled) {
             this.pendingAskUserQuestionResolve?.({
-              optionId: 'cancel',
+              optionId: "cancel",
             });
           } else {
             this.pendingAskUserQuestionResolve?.({
-              optionId: 'proceed_once',
+              optionId: "proceed_once",
               answers,
             });
           }
@@ -1567,7 +1574,7 @@ export class WebViewProvider {
         // Update last known state
 
         this.sendMessageToWebView({
-          type: 'activeEditorChanged',
+          type: "activeEditorChanged",
           data: { fileName, filePath, selection: selectionInfo },
         });
       },
@@ -1590,7 +1597,7 @@ export class WebViewProvider {
       }
 
       this.sendMessageToWebView({
-        type: 'activeEditorChanged',
+        type: "activeEditorChanged",
         data: { fileName, filePath, selection: selectionInfo },
       });
     }
@@ -1616,7 +1623,7 @@ export class WebViewProvider {
           // Update last known state
 
           this.sendMessageToWebView({
-            type: 'activeEditorChanged',
+            type: "activeEditorChanged",
             data: { fileName, filePath, selection: selectionInfo },
           });
         }
@@ -1626,11 +1633,11 @@ export class WebViewProvider {
     // Capture the tab reference on restore
     this.panelManager.captureTab();
 
-    console.log('[WebViewProvider] Panel restored successfully');
+    console.log("[WebViewProvider] Panel restored successfully");
 
     // Attempt to restore authentication state and initialize connection
     console.log(
-      '[WebViewProvider] Attempting to restore auth state and connection after restore...',
+      "[WebViewProvider] Attempting to restore auth state and connection after restore...",
     );
     await this.attemptAuthStateRestoration();
   }
@@ -1643,20 +1650,20 @@ export class WebViewProvider {
     conversationId: string | null;
     agentInitialized: boolean;
   } {
-    console.log('[WebViewProvider] Getting state for serialization');
+    console.log("[WebViewProvider] Getting state for serialization");
     console.log(
-      '[WebViewProvider] Current conversationId:',
+      "[WebViewProvider] Current conversationId:",
       this.messageHandler.getCurrentConversationId(),
     );
     console.log(
-      '[WebViewProvider] Current agentInitialized:',
+      "[WebViewProvider] Current agentInitialized:",
       this.agentInitialized,
     );
     const state = {
       conversationId: this.messageHandler.getCurrentConversationId(),
       agentInitialized: this.agentInitialized,
     };
-    console.log('[WebViewProvider] Returning state:', state);
+    console.log("[WebViewProvider] Returning state:", state);
     return state;
   }
 
@@ -1674,12 +1681,12 @@ export class WebViewProvider {
     conversationId: string | null;
     agentInitialized: boolean;
   }): void {
-    console.log('[WebViewProvider] Restoring state:', state);
+    console.log("[WebViewProvider] Restoring state:", state);
     this.messageHandler.setCurrentConversationId(state.conversationId);
     this.agentInitialized = state.agentInitialized;
     this.authState = null;
     console.log(
-      '[WebViewProvider] State restored. agentInitialized:',
+      "[WebViewProvider] State restored. agentInitialized:",
       this.agentInitialized,
     );
 
@@ -1709,11 +1716,11 @@ export class WebViewProvider {
 
       // Clear current conversation UI
       this.sendMessageToWebView({
-        type: 'conversationCleared',
+        type: "conversationCleared",
         data: {},
       });
     } catch (_error) {
-      console.error('[WebViewProvider] Failed to create new session:', _error);
+      console.error("[WebViewProvider] Failed to create new session:", _error);
       vscode.window.showErrorMessage(
         `Failed to create new session: ${getErrorMessage(_error)}`,
       );
@@ -1726,12 +1733,12 @@ export class WebViewProvider {
   dispose(): void {
     // Unblock any pending ACP Promises before tearing down
     if (this.pendingPermissionResolve) {
-      this.pendingPermissionResolve('cancel');
+      this.pendingPermissionResolve("cancel");
       this.pendingPermissionResolve = null;
       this.pendingPermissionRequest = null;
     }
     if (this.pendingAskUserQuestionResolve) {
-      this.pendingAskUserQuestionResolve({ optionId: 'cancel' });
+      this.pendingAskUserQuestionResolve({ optionId: "cancel" });
       this.pendingAskUserQuestionResolve = null;
       this.pendingAskUserQuestionRequest = null;
     }

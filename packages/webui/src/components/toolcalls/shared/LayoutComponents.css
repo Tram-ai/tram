@@ -28,7 +28,7 @@
 
 /* Default timeline connector line - full height */
 .toolcall-container::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 12px;
   top: 0;
@@ -61,7 +61,7 @@
 .toolcall-container.toolcall-status-error::before,
 .toolcall-container.toolcall-status-warning::before,
 .toolcall-container.toolcall-status-loading::before {
-  content: '\25cf';
+  content: "\25cf";
   position: absolute;
   left: 8px;
   top: 8px;
@@ -160,7 +160,7 @@
 }
 
 .toolcall-header::before {
-  content: '\25cf';
+  content: "\25cf";
   position: absolute;
   left: -22px;
   top: 50%;

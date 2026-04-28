@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import { describe, it, expect, vi } from 'vitest';
-import { Footer } from './Footer.js';
-import * as useTerminalSize from '../hooks/useTerminalSize.js';
-import { type UIState, UIStateContext } from '../contexts/UIStateContext.js';
-import { ConfigContext } from '../contexts/ConfigContext.js';
-import { VimModeProvider } from '../contexts/VimModeContext.js';
-import { SettingsContext } from '../contexts/SettingsContext.js';
-import type { LoadedSettings } from '../../config/settings.js';
+import { render } from "ink-testing-library";
+import { describe, it, expect, vi } from "vitest";
+import { Footer } from "./Footer.js";
+import * as useTerminalSize from "../hooks/useTerminalSize.js";
+import { type UIState, UIStateContext } from "../contexts/UIStateContext.js";
+import { ConfigContext } from "../contexts/ConfigContext.js";
+import { VimModeProvider } from "../contexts/VimModeContext.js";
+import { SettingsContext } from "../contexts/SettingsContext.js";
+import type { LoadedSettings } from "../../config/settings.js";
 
-vi.mock('../hooks/useTerminalSize.js');
+vi.mock("../hooks/useTerminalSize.js");
 const useTerminalSizeMock = vi.mocked(useTerminalSize.useTerminalSize);
 
 const defaultProps = {
-  model: 'gemini-pro',
+  model: "gemini-pro",
 };
 
 const createMockConfig = (overrides = {}) => ({
@@ -34,7 +34,7 @@ const createMockUIState = (overrides: Partial<UIState> = {}): UIState =>
   ({
     sessionStats: {
       lastPromptTokenCount: 100,
-      sessionId: 'test-session',
+      sessionId: "test-session",
       metrics: {
         models: {},
         tools: {
@@ -48,7 +48,7 @@ const createMockUIState = (overrides: Partial<UIState> = {}): UIState =>
         files: { totalLinesAdded: 0, totalLinesRemoved: 0 },
       },
     },
-    currentModel: 'gemini-pro',
+    currentModel: "gemini-pro",
     branchName: undefined,
     geminiMdFileCount: 0,
     contextFileNames: [],
@@ -82,36 +82,36 @@ const renderWithWidth = (width: number, uiState: UIState) => {
   );
 };
 
-describe('<Footer />', () => {
-  it('renders the component', () => {
+describe("<Footer />", () => {
+  it("renders the component", () => {
     const { lastFrame } = renderWithWidth(120, createMockUIState());
     expect(lastFrame()).toBeDefined();
   });
 
-  it('does not display the working directory or branch name', () => {
+  it("does not display the working directory or branch name", () => {
     const { lastFrame } = renderWithWidth(120, createMockUIState());
     expect(lastFrame()).not.toMatch(/\(.*\*\)/);
   });
 
-  it('displays the context percentage', () => {
+  it("displays the context percentage", () => {
     const { lastFrame } = renderWithWidth(120, createMockUIState());
     expect(lastFrame()).toMatch(/\d+(\.\d+)?% context used/);
   });
 
-  it('displays the abbreviated context percentage on narrow terminal', () => {
+  it("displays the abbreviated context percentage on narrow terminal", () => {
     const { lastFrame } = renderWithWidth(99, createMockUIState());
     expect(lastFrame()).toMatch(/\d+%/);
   });
 
-  describe('footer rendering (golden snapshots)', () => {
-    it('renders complete footer on wide terminal', () => {
+  describe("footer rendering (golden snapshots)", () => {
+    it("renders complete footer on wide terminal", () => {
       const { lastFrame } = renderWithWidth(120, createMockUIState());
-      expect(lastFrame()).toMatchSnapshot('complete-footer-wide');
+      expect(lastFrame()).toMatchSnapshot("complete-footer-wide");
     });
 
-    it('renders complete footer on narrow terminal', () => {
+    it("renders complete footer on narrow terminal", () => {
       const { lastFrame } = renderWithWidth(79, createMockUIState());
-      expect(lastFrame()).toMatchSnapshot('complete-footer-narrow');
+      expect(lastFrame()).toMatchSnapshot("complete-footer-narrow");
     });
   });
 });

@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Config } from '@tram-ai/tram-core';
-import { OutputFormat } from '@tram-ai/tram-core';
-import { validateAuthMethod } from './config/auth.js';
-import { type LoadedSettings } from './config/settings.js';
-import { JsonOutputAdapter } from './nonInteractive/io/JsonOutputAdapter.js';
-import { StreamJsonOutputAdapter } from './nonInteractive/io/StreamJsonOutputAdapter.js';
-import { runExitCleanup } from './utils/cleanup.js';
-import { writeStderrLine } from './utils/stdioHelpers.js';
+import type { Config } from "@tram-ai/tram-core";
+import { OutputFormat } from "@tram-ai/tram-core";
+import { validateAuthMethod } from "./config/auth.js";
+import { type LoadedSettings } from "./config/settings.js";
+import { JsonOutputAdapter } from "./nonInteractive/io/JsonOutputAdapter.js";
+import { StreamJsonOutputAdapter } from "./nonInteractive/io/StreamJsonOutputAdapter.js";
+import { runExitCleanup } from "./utils/cleanup.js";
+import { writeStderrLine } from "./utils/stdioHelpers.js";
 
 export async function validateNonInteractiveAuth(
   useExternalAuth: boolean | undefined,
@@ -25,7 +25,7 @@ export async function validateNonInteractiveAuth(
       .getCurrentAuthType();
     if (!authType) {
       throw new Error(
-        'No auth type is selected. Please configure an auth type (e.g. via settings or `--auth-type`) before running in non-interactive mode.',
+        "No auth type is selected. Please configure an auth type (e.g. via settings or `--auth-type`) before running in non-interactive mode.",
       );
     }
     const resolvedAuthType: NonNullable<typeof authType> = authType;

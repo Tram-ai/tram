@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ExtensionStorage } from './storage.js';
-import * as os from 'node:os';
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { ExtensionStorage } from "./storage.js";
+import * as os from "node:os";
+import * as path from "node:path";
+import * as fs from "node:fs";
 import {
   EXTENSION_SETTINGS_FILENAME,
   EXTENSIONS_CONFIG_FILENAME,
-} from './variables.js';
-import { Storage } from '../config/storage.js';
+} from "./variables.js";
+import { Storage } from "../config/storage.js";
 
-vi.mock('node:os');
-vi.mock('node:fs', async (importOriginal) => {
+vi.mock("node:os");
+vi.mock("node:fs", async (importOriginal) => {
   const actual = await importOriginal<typeof fs>();
   return {
     ...actual,
@@ -26,11 +26,11 @@ vi.mock('node:fs', async (importOriginal) => {
     },
   };
 });
-vi.mock('../config/storage.js');
+vi.mock("../config/storage.js");
 
-describe('ExtensionStorage', () => {
-  const mockHomeDir = '/mock/home';
-  const extensionName = 'test-extension';
+describe("ExtensionStorage", () => {
+  const mockHomeDir = "/mock/home";
+  const extensionName = "test-extension";
   let storage: ExtensionStorage;
 
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('ExtensionStorage', () => {
     vi.mocked(Storage).mockImplementation(
       () =>
         ({
-          getExtensionsDir: () => path.join(mockHomeDir, '.tram', 'extensions'),
+          getExtensionsDir: () => path.join(mockHomeDir, ".tram", "extensions"),
         }) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     );
     storage = new ExtensionStorage(extensionName);
@@ -48,52 +48,52 @@ describe('ExtensionStorage', () => {
     vi.restoreAllMocks();
   });
 
-  it('should return the correct extension directory', () => {
+  it("should return the correct extension directory", () => {
     const expectedDir = path.join(
       mockHomeDir,
-      '.tram',
-      'extensions',
+      ".tram",
+      "extensions",
       extensionName,
     );
     expect(storage.getExtensionDir()).toBe(expectedDir);
   });
 
-  it('should return the correct config path', () => {
+  it("should return the correct config path", () => {
     const expectedPath = path.join(
       mockHomeDir,
-      '.tram',
-      'extensions',
+      ".tram",
+      "extensions",
       extensionName,
       EXTENSIONS_CONFIG_FILENAME, // EXTENSIONS_CONFIG_FILENAME
     );
     expect(storage.getConfigPath()).toBe(expectedPath);
   });
 
-  it('should return the correct env file path', () => {
+  it("should return the correct env file path", () => {
     const expectedPath = path.join(
       mockHomeDir,
-      '.tram',
-      'extensions',
+      ".tram",
+      "extensions",
       extensionName,
       EXTENSION_SETTINGS_FILENAME, // EXTENSION_SETTINGS_FILENAME
     );
     expect(storage.getEnvFilePath()).toBe(expectedPath);
   });
 
-  it('should return the correct user extensions directory', () => {
-    const expectedDir = path.join(mockHomeDir, '.tram', 'extensions');
+  it("should return the correct user extensions directory", () => {
+    const expectedDir = path.join(mockHomeDir, ".tram", "extensions");
     expect(ExtensionStorage.getUserExtensionsDir()).toBe(expectedDir);
   });
 
-  it('should create a temporary directory', async () => {
-    const mockTmpDir = '/tmp/tram-extension-123';
+  it("should create a temporary directory", async () => {
+    const mockTmpDir = "/tmp/tram-extension-123";
     vi.mocked(fs.promises.mkdtemp).mockResolvedValue(mockTmpDir);
-    vi.mocked(os.tmpdir).mockReturnValue('/tmp');
+    vi.mocked(os.tmpdir).mockReturnValue("/tmp");
 
     const result = await ExtensionStorage.createTmpDir();
 
     expect(fs.promises.mkdtemp).toHaveBeenCalledWith(
-      path.join('/tmp', 'tram-extension'),
+      path.join("/tmp", "tram-extension"),
     );
     expect(result).toBe(mockTmpDir);
   });

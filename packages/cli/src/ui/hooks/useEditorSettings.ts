@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
-import type { LoadedSettings, SettingScope } from '../../config/settings.js';
-import { type HistoryItem, MessageType } from '../types.js';
-import type { EditorType } from '@tram-ai/tram-core';
+import { useState, useCallback } from "react";
+import type { LoadedSettings, SettingScope } from "../../config/settings.js";
+import { type HistoryItem, MessageType } from "../types.js";
+import type { EditorType } from "@tram-ai/tram-core";
 import {
   allowEditorTypeInSandbox,
   checkHasEditorType,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 
 interface UseEditorSettingsReturn {
   isEditorDialogOpen: boolean;
@@ -26,7 +26,7 @@ interface UseEditorSettingsReturn {
 export const useEditorSettings = (
   loadedSettings: LoadedSettings,
   setEditorError: (error: string | null) => void,
-  addItem: (item: Omit<HistoryItem, 'id'>, timestamp: number) => void,
+  addItem: (item: Omit<HistoryItem, "id">, timestamp: number) => void,
 ): UseEditorSettingsReturn => {
   const [isEditorDialogOpen, setIsEditorDialogOpen] = useState(false);
 
@@ -45,11 +45,11 @@ export const useEditorSettings = (
       }
 
       try {
-        loadedSettings.setValue(scope, 'general.preferredEditor', editorType);
+        loadedSettings.setValue(scope, "general.preferredEditor", editorType);
         addItem(
           {
             type: MessageType.INFO,
-            text: `Editor preference ${editorType ? `set to "${editorType}"` : 'cleared'} in ${scope} settings.`,
+            text: `Editor preference ${editorType ? `set to "${editorType}"` : "cleared"} in ${scope} settings.`,
           },
           Date.now(),
         );

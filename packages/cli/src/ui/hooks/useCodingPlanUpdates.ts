@@ -4,18 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import type { Config, ModelProvidersConfig } from '@tram-ai/tram-core';
-import { AuthType } from '@tram-ai/tram-core';
-import type { LoadedSettings } from '../../config/settings.js';
-import { getPersistScopeForModelSelection } from '../../config/modelProvidersScope.js';
+import { useCallback, useEffect, useState } from "react";
+import type {
+  Config,
+  ModelProvidersConfig,
+  ProviderModelConfig,
+} from "@tram-ai/tram-core";
+import { AuthType } from "@tram-ai/tram-core";
+import type { LoadedSettings } from "../../config/settings.js";
+import { getPersistScopeForModelSelection } from "../../config/modelProvidersScope.js";
 import {
   isCodingPlanConfig,
   getCodingPlanConfig,
   CodingPlanRegion,
   CODING_PLAN_ENV_KEY,
-} from '../../constants/codingPlan.js';
-import { t } from '../../i18n/index.js';
+} from "../../constants/codingPlan.js";
+import { t } from "../../i18n/index.js";
+import { normalizeModelsForAuthType } from "../../utils/modelProviderIds.js";
 
 export interface CodingPlanUpdateRequest {
   prompt: string;
@@ -31,7 +36,7 @@ export function useCodingPlanUpdates(
   settings: LoadedSettings,
   config: Config,
   addItem: (
-    item: { type: 'info' | 'error' | 'warning'; text: string },
+    item: { type: "info" | "error" | "warning"; text: string },
     timestamp: number,
   ) => void,
 ) {
@@ -54,17 +59,17 @@ export function useCodingPlanUpdates(
         const currentConfigs =
           (
             settings.merged.modelProviders as
-              | Record<string, Array<Record<string, unknown>>>
+              | ModelProvidersConfig
               | undefined
           )?.[AuthType.USE_OPENAI] || [];
 
         // Filter out all Coding Plan configs (since they are mutually exclusive)
         // Keep only non-Coding-Plan user custom configs
-        const nonCodingPlanConfigs = currentConfigs.filter(
+        const nonCodingPlanConfigs = (currentConfigs as ProviderModelConfig[]).filter(
           (cfg) =>
             !isCodingPlanConfig(
-              cfg['baseUrl'] as string | undefined,
-              cfg['envKey'] as string | undefined,
+              cfg.baseUrl,
+              cfg.envKey,
             ),
         );
 
@@ -78,10 +83,10 @@ export function useCodingPlanUpdates(
         }));
 
         // Combine: new Coding Plan configs at the front, user configs preserved
-        const updatedConfigs = [
-          ...newConfigs,
-          ...(nonCodingPlanConfigs as Array<Record<string, unknown>>),
-        ] as Array<Record<string, unknown>>;
+        const updatedConfigs = normalizeModelsForAuthType(
+          AuthType.USE_OPENAI,
+          [...newConfigs, ...nonCodingPlanConfigs],
+        );
 
         // Record the user's current model before the update
         const previousModel = config.getModel();
@@ -112,19 +117,19 @@ export function useCodingPlanUpdates(
         );
 
         // Update the version (single version field for backward compatibility)
-        settings.setValue(persistScope, 'codingPlan.version', version);
+        settings.setValue(persistScope, "codingPlan.version", version);
 
         // Update the region
-        settings.setValue(persistScope, 'codingPlan.region', region);
+        settings.setValue(persistScope, "codingPlan.region", region);
 
-        const activeModel = config.getModel();
+        const activeModel = config.getModelName();
 
-        if (previousModelStillAvailable && activeModel === previousModel) {
+        if (previousModelStillAvailable && config.getModel() === previousModel) {
           addItem(
             {
-              type: 'info',
-              text: t('{{region}} configuration updated successfully.', {
-                region: t('Alibaba Cloud Coding Plan'),
+              type: "info",
+              text: t("{{region}} configuration updated successfully.", {
+                region: t("Alibaba Cloud Coding Plan"),
               }),
             },
             Date.now(),
@@ -132,10 +137,10 @@ export function useCodingPlanUpdates(
         } else {
           addItem(
             {
-              type: 'info',
+              type: "info",
               text: t(
                 '{{region}} configuration updated successfully. Model switched to "{{model}}".',
-                { region: t('Alibaba Cloud Coding Plan'), model: activeModel },
+                { region: t("Alibaba Cloud Coding Plan"), model: activeModel },
               ),
             },
             Date.now(),
@@ -144,9 +149,9 @@ export function useCodingPlanUpdates(
 
         addItem(
           {
-            type: 'info',
+            type: "info",
             text: t(
-              'Tip: Use /model to switch between available Coding Plan models.',
+              "Tip: Use /model to switch between available Coding Plan models.",
             ),
           },
           Date.now(),
@@ -158,8 +163,8 @@ export function useCodingPlanUpdates(
           error instanceof Error ? error.message : String(error);
         addItem(
           {
-            type: 'error',
-            text: t('Failed to update Coding Plan configuration: {{message}}', {
+            type: "error",
+            text: t("Failed to update Coding Plan configuration: {{message}}", {
               message: errorMessage,
             }),
           },
@@ -201,8 +206,8 @@ export function useCodingPlanUpdates(
     if (savedVersion !== currentVersion) {
       setUpdateRequest({
         prompt: t(
-          'New model configurations are available for {{region}}. Update now?',
-          { region: t('Alibaba Cloud Coding Plan') },
+          "New model configurations are available for {{region}}. Update now?",
+          { region: t("Alibaba Cloud Coding Plan") },
         ),
         onConfirm: async (confirmed: boolean) => {
           setUpdateRequest(undefined);

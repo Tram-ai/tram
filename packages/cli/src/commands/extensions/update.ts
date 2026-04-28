@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { CommandModule } from 'yargs';
-import { getErrorMessage } from '../../utils/errors.js';
-import { writeStdoutLine, writeStderrLine } from '../../utils/stdioHelpers.js';
-import { ExtensionUpdateState } from '../../ui/state/extensions.js';
+import type { CommandModule } from "yargs";
+import { getErrorMessage } from "../../utils/errors.js";
+import { writeStdoutLine, writeStderrLine } from "../../utils/stdioHelpers.js";
+import { ExtensionUpdateState } from "../../ui/state/extensions.js";
 import {
   checkForExtensionUpdate,
   type ExtensionUpdateInfo,
-} from '@tram-ai/tram-core';
-import { getExtensionManager } from './utils.js';
-import { t } from '../../i18n/index.js';
+} from "@tram-ai/tram-core";
+import { getExtensionManager } from "./utils.js";
+import { t } from "../../i18n/index.js";
 
 interface UpdateArgs {
   name?: string;
@@ -112,10 +112,10 @@ export async function handleUpdate(args: UpdateArgs) {
         (info) => info.originalVersion !== info.updatedVersion,
       );
       if (updateInfos.length === 0) {
-        writeStdoutLine(t('No extensions to update.'));
+        writeStdoutLine(t("No extensions to update."));
         return;
       }
-      writeStdoutLine(updateInfos.map((info) => updateOutput(info)).join('\n'));
+      writeStdoutLine(updateInfos.map((info) => updateOutput(info)).join("\n"));
     } catch (error) {
       writeStderrLine(getErrorMessage(error));
     }
@@ -123,33 +123,33 @@ export async function handleUpdate(args: UpdateArgs) {
 }
 
 export const updateCommand: CommandModule = {
-  command: 'update [<name>] [--all]',
+  command: "update [<name>] [--all]",
   describe: t(
-    'Updates all extensions or a named extension to the latest version.',
+    "Updates all extensions or a named extension to the latest version.",
   ),
   builder: (yargs) =>
     yargs
-      .positional('name', {
-        describe: t('The name of the extension to update.'),
-        type: 'string',
+      .positional("name", {
+        describe: t("The name of the extension to update."),
+        type: "string",
       })
-      .option('all', {
-        describe: t('Update all extensions.'),
-        type: 'boolean',
+      .option("all", {
+        describe: t("Update all extensions."),
+        type: "boolean",
       })
-      .conflicts('name', 'all')
+      .conflicts("name", "all")
       .check((argv) => {
         if (!argv.all && !argv.name) {
           throw new Error(
-            t('Either an extension name or --all must be provided'),
+            t("Either an extension name or --all must be provided"),
           );
         }
         return true;
       }),
   handler: async (argv) => {
     await handleUpdate({
-      name: argv['name'] as string | undefined,
-      all: argv['all'] as boolean | undefined,
+      name: argv["name"] as string | undefined,
+      all: argv["all"] as boolean | undefined,
     });
   },
 };

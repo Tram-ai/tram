@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../../semantic-colors.js';
-import { formatDuration } from '../../utils/formatters.js';
-import { getArenaStatusLabel } from '../../utils/displayUtils.js';
-import type { ArenaAgentCardData } from '../../types.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { theme } from "../../semantic-colors.js";
+import { formatDuration } from "../../utils/formatters.js";
+import { getArenaStatusLabel } from "../../utils/displayUtils.js";
+import type { ArenaAgentCardData } from "../../types.js";
 
 // ─── Helpers ────────────────────────────────────────────────
 
@@ -52,7 +52,7 @@ export const ArenaAgentCard: React.FC<ArenaAgentCardProps> = ({
           Tool Calls: {agent.toolCalls}
           {agent.failedToolCalls > 0 && (
             <>
-              {' '}
+              {" "}
               (
               <Text color={theme.status.success}>
                 ✓ {agent.successfulToolCalls}
@@ -90,11 +90,11 @@ interface ArenaSessionCardProps {
 function pad(
   str: string,
   len: number,
-  align: 'left' | 'right' = 'left',
+  align: "left" | "right" = "left",
 ): string {
   if (str.length >= len) return str.slice(0, len);
-  const padding = ' '.repeat(len - str.length);
-  return align === 'right' ? padding + str : str + padding;
+  const padding = " ".repeat(len - str.length);
+  return align === "right" ? padding + str : str + padding;
 }
 
 /**
@@ -102,7 +102,7 @@ function pad(
  */
 function truncate(str: string, maxLen: number): string {
   if (str.length <= maxLen) return str;
-  return str.slice(0, maxLen - 1) + '…';
+  return str.slice(0, maxLen - 1) + "…";
 }
 
 /**
@@ -114,14 +114,14 @@ function getDiffStats(diff: string | undefined): {
   additions: number;
   deletions: number;
 } {
-  if (!diff) return { text: '', additions: 0, deletions: 0 };
-  const lines = diff.split('\n');
+  if (!diff) return { text: "", additions: 0, deletions: 0 };
+  const lines = diff.split("\n");
   let additions = 0;
   let deletions = 0;
   for (const line of lines) {
-    if (line.startsWith('+') && !line.startsWith('+++')) {
+    if (line.startsWith("+") && !line.startsWith("+++")) {
       additions++;
-    } else if (line.startsWith('-') && !line.startsWith('---')) {
+    } else if (line.startsWith("-") && !line.startsWith("---")) {
       deletions++;
     }
   }
@@ -139,7 +139,7 @@ export const ArenaSessionCard: React.FC<ArenaSessionCardProps> = ({
   // Truncate task for display
   const maxTaskLen = 60;
   const displayTask =
-    task.length > maxTaskLen ? task.slice(0, maxTaskLen - 1) + '…' : task;
+    task.length > maxTaskLen ? task.slice(0, maxTaskLen - 1) + "…" : task;
 
   // Column widths for the agent table (unified with Arena Results)
   const colStatus = 14;
@@ -148,13 +148,13 @@ export const ArenaSessionCard: React.FC<ArenaSessionCardProps> = ({
   const colChanges = 10;
 
   const titleLabel =
-    sessionStatus === 'idle'
-      ? 'Agents Status · Idle'
-      : sessionStatus === 'completed'
-        ? 'Arena Complete'
-        : sessionStatus === 'cancelled'
-          ? 'Arena Cancelled'
-          : 'Arena Failed';
+    sessionStatus === "idle"
+      ? "Agents Status · Idle"
+      : sessionStatus === "completed"
+        ? "Arena Complete"
+        : sessionStatus === "cancelled"
+          ? "Arena Cancelled"
+          : "Arena Failed";
 
   return (
     <Box
@@ -216,7 +216,7 @@ export const ArenaSessionCard: React.FC<ArenaSessionCardProps> = ({
       {/* Table separator */}
       <Box>
         <Text color={theme.border.default}>
-          {'─'.repeat((width ?? 60) - 8)}
+          {"─".repeat((width ?? 60) - 8)}
         </Text>
       </Box>
 
@@ -236,7 +236,7 @@ export const ArenaSessionCard: React.FC<ArenaSessionCardProps> = ({
             </Box>
             <Box width={colTime} justifyContent="flex-end">
               <Text color={theme.text.primary}>
-                {pad(formatDuration(agent.durationMs), colTime - 1, 'right')}
+                {pad(formatDuration(agent.durationMs), colTime - 1, "right")}
               </Text>
             </Box>
             <Box width={colTokens} justifyContent="flex-end">
@@ -244,7 +244,7 @@ export const ArenaSessionCard: React.FC<ArenaSessionCardProps> = ({
                 {pad(
                   agent.totalTokens.toLocaleString(),
                   colTokens - 1,
-                  'right',
+                  "right",
                 )}
               </Text>
             </Box>
@@ -268,16 +268,16 @@ export const ArenaSessionCard: React.FC<ArenaSessionCardProps> = ({
       <Box height={1} />
 
       {/* Hint */}
-      {sessionStatus === 'idle' && (
+      {sessionStatus === "idle" && (
         <Box flexDirection="column">
           <Text color={theme.text.secondary}>
-            Switch to an agent tab to continue, or{' '}
+            Switch to an agent tab to continue, or{" "}
             <Text color={theme.text.accent}>/arena select</Text> to pick a
             winner.
           </Text>
         </Box>
       )}
-      {sessionStatus === 'completed' && (
+      {sessionStatus === "completed" && (
         <Box>
           <Text color={theme.text.secondary}>
             Run <Text color={theme.text.accent}>/arena select</Text> to pick a

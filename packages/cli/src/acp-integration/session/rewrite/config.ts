@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { LoadedSettings } from '../../../config/settings.js';
-import type { MessageRewriteConfig } from './types.js';
+import type { LoadedSettings } from "../../../config/settings.js";
+import type { MessageRewriteConfig } from "./types.js";
 
 /**
  * Reads messageRewrite configuration from user/workspace originalSettings.
@@ -23,6 +23,6 @@ export function loadRewriteConfig(
         | Record<string, unknown>
         | undefined)
     : undefined;
-  return (workspaceOriginal?.['messageRewrite'] ??
-    userOriginal?.['messageRewrite']) as MessageRewriteConfig | undefined;
+  return (workspaceOriginal?.["messageRewrite"] ??
+    userOriginal?.["messageRewrite"]) as MessageRewriteConfig | undefined;
 }

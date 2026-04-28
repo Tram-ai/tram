@@ -4,64 +4,64 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fsPromises from 'fs/promises';
-import path from 'path';
+import * as fsPromises from "fs/promises";
+import path from "path";
 import {
   type SlashCommand,
   CommandKind,
   type SlashCommandActionReturn,
-} from './types.js';
-import { getProjectSummaryPrompt } from '@tram-ai/tram-core';
-import type { HistoryItemSummary } from '../types.js';
-import { t } from '../../i18n/index.js';
+} from "./types.js";
+import { getProjectSummaryPrompt } from "@tram-ai/tram-core";
+import type { HistoryItemSummary } from "../types.js";
+import { t } from "../../i18n/index.js";
 
 export const summaryCommand: SlashCommand = {
-  name: 'summary',
+  name: "summary",
   get description() {
     return t(
-      'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md',
+      "Generate a project summary and save it to .tram/PROJECT_SUMMARY.md",
     );
   },
   kind: CommandKind.BUILT_IN,
   action: async (context): Promise<SlashCommandActionReturn> => {
     const { config } = context.services;
     const { ui } = context;
-    const executionMode = context.executionMode ?? 'interactive';
+    const executionMode = context.executionMode ?? "interactive";
     const abortSignal = context.abortSignal;
 
     if (!config) {
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('Config not loaded.'),
+        type: "message",
+        messageType: "error",
+        content: t("Config not loaded."),
       };
     }
 
     const geminiClient = config.getGeminiClient();
     if (!geminiClient) {
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('No chat client available to generate summary.'),
+        type: "message",
+        messageType: "error",
+        content: t("No chat client available to generate summary."),
       };
     }
 
     // Check if already generating summary (interactive UI only)
-    if (executionMode === 'interactive' && ui.pendingItem) {
+    if (executionMode === "interactive" && ui.pendingItem) {
       ui.addItem(
         {
-          type: 'error' as const,
+          type: "error" as const,
           text: t(
-            'Already generating summary, wait for previous request to complete',
+            "Already generating summary, wait for previous request to complete",
           ),
         },
         Date.now(),
       );
       return {
-        type: 'message',
-        messageType: 'error',
+        type: "message",
+        messageType: "error",
         content: t(
-          'Already generating summary, wait for previous request to complete',
+          "Already generating summary, wait for previous request to complete",
         ),
       };
     }
@@ -75,7 +75,7 @@ export const summaryCommand: SlashCommand = {
       history: ReturnType<typeof getChatHistory>,
     ) => {
       if (history.length <= 2) {
-        throw new Error(t('No conversation found to summarize.'));
+        throw new Error(t("No conversation found to summarize."));
       }
     };
 
@@ -93,7 +93,7 @@ export const summaryCommand: SlashCommand = {
         [
           ...conversationContext,
           {
-            role: 'user',
+            role: "user",
             parts: [
               {
                 text: getProjectSummaryPrompt(),
@@ -112,13 +112,13 @@ export const summaryCommand: SlashCommand = {
       const markdownSummary =
         parts
           ?.map((part) => part.text)
-          .filter((text): text is string => typeof text === 'string')
-          .join('') || '';
+          .filter((text): text is string => typeof text === "string")
+          .join("") || "";
 
       if (!markdownSummary) {
         throw new Error(
           t(
-            'Failed to generate summary - no text content received from LLM response',
+            "Failed to generate summary - no text content received from LLM response",
           ),
         );
       }
@@ -134,7 +134,7 @@ export const summaryCommand: SlashCommand = {
     }> => {
       // Ensure .tram directory exists
       const projectRoot = config.getProjectRoot();
-      const tramDir = path.join(projectRoot, '.tram');
+      const tramDir = path.join(projectRoot, ".tram");
       try {
         await fsPromises.mkdir(tramDir, { recursive: true });
       } catch (_err) {
@@ -142,7 +142,7 @@ export const summaryCommand: SlashCommand = {
       }
 
       // Save the summary to PROJECT_SUMMARY.md
-      const summaryPath = path.join(tramDir, 'PROJECT_SUMMARY.md');
+      const summaryPath = path.join(tramDir, "PROJECT_SUMMARY.md");
       const summaryContent = `${markdownSummary}
 
 ---
@@ -151,20 +151,20 @@ export const summaryCommand: SlashCommand = {
 **Update time**: ${new Date().toISOString()} 
 `;
 
-      await fsPromises.writeFile(summaryPath, summaryContent, 'utf8');
+      await fsPromises.writeFile(summaryPath, summaryContent, "utf8");
 
       return {
-        filePathForDisplay: '.tram/PROJECT_SUMMARY.md',
+        filePathForDisplay: ".tram/PROJECT_SUMMARY.md",
         fullPath: summaryPath,
       };
     };
 
-    const emitInteractivePending = (stage: 'generating' | 'saving') => {
-      if (executionMode !== 'interactive') {
+    const emitInteractivePending = (stage: "generating" | "saving") => {
+      if (executionMode !== "interactive") {
         return;
       }
       const pendingMessage: HistoryItemSummary = {
-        type: 'summary',
+        type: "summary",
         summary: {
           isPending: true,
           stage,
@@ -174,15 +174,15 @@ export const summaryCommand: SlashCommand = {
     };
 
     const completeInteractive = (filePathForDisplay: string) => {
-      if (executionMode !== 'interactive') {
+      if (executionMode !== "interactive") {
         return;
       }
       ui.setPendingItem(null);
       const completedSummaryItem: HistoryItemSummary = {
-        type: 'summary',
+        type: "summary",
         summary: {
           isPending: false,
-          stage: 'completed',
+          stage: "completed",
           filePath: filePathForDisplay,
         },
       };
@@ -190,12 +190,12 @@ export const summaryCommand: SlashCommand = {
     };
 
     const formatErrorMessage = (error: unknown): string =>
-      t('Failed to generate project context summary: {{error}}', {
+      t("Failed to generate project context summary: {{error}}", {
         error: error instanceof Error ? error.message : String(error),
       });
 
     const failInteractive = (error: unknown) => {
-      if (executionMode !== 'interactive') {
+      if (executionMode !== "interactive") {
         return;
       }
       // If cancelled via ESC, don't show error — cancelSlashCommand already handled UI
@@ -205,7 +205,7 @@ export const summaryCommand: SlashCommand = {
       ui.setPendingItem(null);
       ui.addItem(
         {
-          type: 'error' as const,
+          type: "error" as const,
           text: `❌ ${formatErrorMessage(error)}`,
         },
         Date.now(),
@@ -213,27 +213,27 @@ export const summaryCommand: SlashCommand = {
     };
 
     const formatSuccessMessage = (filePathForDisplay: string): string =>
-      t('Saved project summary to {{filePathForDisplay}}.', {
+      t("Saved project summary to {{filePathForDisplay}}.", {
         filePathForDisplay,
       });
 
     const returnNoConversationMessage = (): SlashCommandActionReturn => {
-      const msg = t('No conversation found to summarize.');
-      if (executionMode === 'acp') {
+      const msg = t("No conversation found to summarize.");
+      if (executionMode === "acp") {
         const messages = async function* () {
           yield {
-            messageType: 'info' as const,
+            messageType: "info" as const,
             content: msg,
           };
         };
         return {
-          type: 'stream_messages',
+          type: "stream_messages",
           messages: messages(),
         };
       }
       return {
-        type: 'message',
-        messageType: 'info',
+        type: "message",
+        messageType: "info",
         content: msg,
       };
     };
@@ -244,12 +244,12 @@ export const summaryCommand: SlashCommand = {
       markdownSummary: string;
       filePathForDisplay: string;
     }> => {
-      emitInteractivePending('generating');
+      emitInteractivePending("generating");
       const markdownSummary = await generateSummaryMarkdown(history);
       if (abortSignal?.aborted) {
-        throw new DOMException('Summary generation cancelled.', 'AbortError');
+        throw new DOMException("Summary generation cancelled.", "AbortError");
       }
-      emitInteractivePending('saving');
+      emitInteractivePending("saving");
       const { filePathForDisplay } = await saveSummaryToDisk(markdownSummary);
       completeInteractive(filePathForDisplay);
       return { markdownSummary, filePathForDisplay };
@@ -263,32 +263,32 @@ export const summaryCommand: SlashCommand = {
       return returnNoConversationMessage();
     }
 
-    if (executionMode === 'acp') {
+    if (executionMode === "acp") {
       const messages = async function* () {
         try {
           yield {
-            messageType: 'info' as const,
-            content: t('Generating project summary...'),
+            messageType: "info" as const,
+            content: t("Generating project summary..."),
           };
 
           const { filePathForDisplay } =
             await executeSummaryGeneration(history);
 
           yield {
-            messageType: 'info' as const,
+            messageType: "info" as const,
             content: formatSuccessMessage(filePathForDisplay),
           };
         } catch (error) {
           failInteractive(error);
           yield {
-            messageType: 'error' as const,
+            messageType: "error" as const,
             content: formatErrorMessage(error),
           };
         }
       };
 
       return {
-        type: 'stream_messages',
+        type: "stream_messages",
         messages: messages(),
       };
     }
@@ -296,26 +296,26 @@ export const summaryCommand: SlashCommand = {
     try {
       const { filePathForDisplay } = await executeSummaryGeneration(history);
 
-      if (executionMode === 'non_interactive') {
+      if (executionMode === "non_interactive") {
         return {
-          type: 'message',
-          messageType: 'info',
+          type: "message",
+          messageType: "info",
           content: formatSuccessMessage(filePathForDisplay),
         };
       }
 
       // Interactive mode: UI components already display progress and completion.
       return {
-        type: 'message',
-        messageType: 'info',
-        content: '',
+        type: "message",
+        messageType: "info",
+        content: "",
       };
     } catch (error) {
       failInteractive(error);
 
       return {
-        type: 'message',
-        messageType: 'error',
+        type: "message",
+        messageType: "error",
         content: formatErrorMessage(error),
       };
     }

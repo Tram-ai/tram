@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'node:fs';
-import fsPromises from 'node:fs/promises';
-import path from 'node:path';
-import type { PartUnion } from '@google/genai';
-import mime from 'mime/lite';
+import fs from "node:fs";
+import fsPromises from "node:fs/promises";
+import path from "node:path";
+import type { PartUnion } from "@google/genai";
+import mime from "mime/lite";
 import {
   iconvDecode,
   iconvEncodingExists,
   isUtf8CompatibleEncoding,
-} from './iconvHelper.js';
-import { ToolErrorType } from '../tools/tool-error.js';
-import { BINARY_EXTENSIONS } from './ignorePatterns.js';
-import type { Config } from '../config/config.js';
-import { createDebugLogger } from './debugLogger.js';
-import type { InputModalities } from '../core/contentGenerator.js';
-import { detectEncodingFromBuffer } from './systemEncoding.js';
+} from "./iconvHelper.js";
+import { ToolErrorType } from "../tools/tool-error.js";
+import { BINARY_EXTENSIONS } from "./ignorePatterns.js";
+import type { Config } from "../config/config.js";
+import { createDebugLogger } from "./debugLogger.js";
+import type { InputModalities } from "../core/contentGenerator.js";
+import { detectEncodingFromBuffer } from "./systemEncoding.js";
 import {
   extractImageText,
   transcribeAudio,
-} from '../services/siliconFlowFallback.js';
+} from "../services/siliconFlowFallback.js";
 
-const debugLogger = createDebugLogger('FILE_UTILS');
+const debugLogger = createDebugLogger("FILE_UTILS");
 
 /**
  * Extract basic metadata from an image buffer (dimensions, format).
@@ -35,26 +35,27 @@ function extractImageMetadata(buffer: Buffer, filePath: string): string {
   const ext = path.extname(filePath).toLowerCase();
   const fileSizeKB = (buffer.length / 1024).toFixed(1);
   const fileSizeMB = (buffer.length / (1024 * 1024)).toFixed(2);
-  const sizeStr = buffer.length > 1024 * 1024 ? `${fileSizeMB}MB` : `${fileSizeKB}KB`;
+  const sizeStr =
+    buffer.length > 1024 * 1024 ? `${fileSizeMB}MB` : `${fileSizeKB}KB`;
   let width = 0;
   let height = 0;
-  let format = ext.replace('.', '').toUpperCase();
+  let format = ext.replace(".", "").toUpperCase();
 
   try {
     // PNG: width at offset 16 (4 bytes BE), height at offset 20 (4 bytes BE)
     if (buffer.length >= 24 && buffer[0] === 0x89 && buffer[1] === 0x50) {
       width = buffer.readUInt32BE(16);
       height = buffer.readUInt32BE(20);
-      format = 'PNG';
+      format = "PNG";
     }
     // JPEG: scan for SOF0/SOF2 markers (0xFF 0xC0 or 0xFF 0xC2)
-    else if (buffer.length >= 4 && buffer[0] === 0xFF && buffer[1] === 0xD8) {
-      format = 'JPEG';
+    else if (buffer.length >= 4 && buffer[0] === 0xff && buffer[1] === 0xd8) {
+      format = "JPEG";
       let offset = 2;
       while (offset < buffer.length - 8) {
-        if (buffer[offset] !== 0xFF) break;
+        if (buffer[offset] !== 0xff) break;
         const marker = buffer[offset + 1]!;
-        if (marker === 0xC0 || marker === 0xC2) {
+        if (marker === 0xc0 || marker === 0xc2) {
           height = buffer.readUInt16BE(offset + 5);
           width = buffer.readUInt16BE(offset + 7);
           break;
@@ -67,24 +68,31 @@ function extractImageMetadata(buffer: Buffer, filePath: string): string {
     else if (buffer.length >= 10 && buffer[0] === 0x47 && buffer[1] === 0x49) {
       width = buffer.readUInt16LE(6);
       height = buffer.readUInt16LE(8);
-      format = 'GIF';
+      format = "GIF";
     }
     // BMP: width at offset 18 (4 bytes LE), height at offset 22
-    else if (buffer.length >= 26 && buffer[0] === 0x42 && buffer[1] === 0x4D) {
+    else if (buffer.length >= 26 && buffer[0] === 0x42 && buffer[1] === 0x4d) {
       width = buffer.readInt32LE(18);
       height = Math.abs(buffer.readInt32LE(22));
-      format = 'BMP';
+      format = "BMP";
     }
     // WebP: RIFF header, check for VP8 chunk
-    else if (buffer.length >= 30 && buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP') {
-      format = 'WebP';
-      if (buffer.toString('ascii', 12, 16) === 'VP8 ' && buffer.length >= 30) {
-        width = buffer.readUInt16LE(26) & 0x3FFF;
-        height = buffer.readUInt16LE(28) & 0x3FFF;
-      } else if (buffer.toString('ascii', 12, 16) === 'VP8L' && buffer.length >= 25) {
+    else if (
+      buffer.length >= 30 &&
+      buffer.toString("ascii", 0, 4) === "RIFF" &&
+      buffer.toString("ascii", 8, 12) === "WEBP"
+    ) {
+      format = "WebP";
+      if (buffer.toString("ascii", 12, 16) === "VP8 " && buffer.length >= 30) {
+        width = buffer.readUInt16LE(26) & 0x3fff;
+        height = buffer.readUInt16LE(28) & 0x3fff;
+      } else if (
+        buffer.toString("ascii", 12, 16) === "VP8L" &&
+        buffer.length >= 25
+      ) {
         const bits = buffer.readUInt32LE(21);
-        width = (bits & 0x3FFF) + 1;
-        height = ((bits >> 14) & 0x3FFF) + 1;
+        width = (bits & 0x3fff) + 1;
+        height = ((bits >> 14) & 0x3fff) + 1;
       }
     }
   } catch {
@@ -95,15 +103,15 @@ function extractImageMetadata(buffer: Buffer, filePath: string): string {
   if (width > 0 && height > 0) {
     parts.push(`Dimensions: ${width}×${height}px`);
   }
-  return parts.join(', ');
+  return parts.join(", ");
 }
 
 // Default values for encoding and separator format
-export const DEFAULT_ENCODING: BufferEncoding = 'utf-8';
+export const DEFAULT_ENCODING: BufferEncoding = "utf-8";
 
 // --- Unicode BOM detection & decoding helpers --------------------------------
 
-type UnicodeEncoding = 'utf8' | 'utf16le' | 'utf16be' | 'utf32le' | 'utf32be';
+type UnicodeEncoding = "utf8" | "utf16le" | "utf16be" | "utf32le" | "utf32be";
 
 interface BOMInfo {
   encoding: UnicodeEncoding;
@@ -123,7 +131,7 @@ export function detectBOM(buf: Buffer): BOMInfo | null {
       buf[2] === 0x00 &&
       buf[3] === 0x00
     ) {
-      return { encoding: 'utf32le', bomLength: 4 };
+      return { encoding: "utf32le", bomLength: 4 };
     }
     // UTF-32 BE: 00 00 FE FF
     if (
@@ -132,13 +140,13 @@ export function detectBOM(buf: Buffer): BOMInfo | null {
       buf[2] === 0xfe &&
       buf[3] === 0xff
     ) {
-      return { encoding: 'utf32be', bomLength: 4 };
+      return { encoding: "utf32be", bomLength: 4 };
     }
   }
   if (buf.length >= 3) {
     // UTF-8: EF BB BF
     if (buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf) {
-      return { encoding: 'utf8', bomLength: 3 };
+      return { encoding: "utf8", bomLength: 3 };
     }
   }
   if (buf.length >= 2) {
@@ -148,11 +156,11 @@ export function detectBOM(buf: Buffer): BOMInfo | null {
       buf[1] === 0xfe &&
       (buf.length < 4 || buf[2] !== 0x00 || buf[3] !== 0x00)
     ) {
-      return { encoding: 'utf16le', bomLength: 2 };
+      return { encoding: "utf16le", bomLength: 2 };
     }
     // UTF-16 BE: FE FF
     if (buf[0] === 0xfe && buf[1] === 0xff) {
-      return { encoding: 'utf16be', bomLength: 2 };
+      return { encoding: "utf16be", bomLength: 2 };
     }
   }
   return null;
@@ -163,10 +171,10 @@ export function detectBOM(buf: Buffer): BOMInfo | null {
  * (Node has 'utf16le' but not 'utf16be'.)
  */
 function decodeUTF16BE(buf: Buffer): string {
-  if (buf.length === 0) return '';
+  if (buf.length === 0) return "";
   const swapped = Buffer.from(buf); // swap16 mutates in place, so copy
   swapped.swap16();
-  return swapped.toString('utf16le');
+  return swapped.toString("utf16le");
 }
 
 /**
@@ -174,9 +182,9 @@ function decodeUTF16BE(buf: Buffer): string {
  * Invalid code points are replaced with U+FFFD, partial trailing bytes are ignored.
  */
 function decodeUTF32(buf: Buffer, littleEndian: boolean): string {
-  if (buf.length < 4) return '';
+  if (buf.length < 4) return "";
   const usable = buf.length - (buf.length % 4);
-  let out = '';
+  let out = "";
   for (let i = 0; i < usable; i += 4) {
     const cp = littleEndian
       ? (buf[i] |
@@ -193,7 +201,7 @@ function decodeUTF32(buf: Buffer, littleEndian: boolean): string {
     if (cp <= 0x10ffff && !(cp >= 0xd800 && cp <= 0xdfff)) {
       out += String.fromCodePoint(cp);
     } else {
-      out += '\uFFFD';
+      out += "\uFFFD";
     }
   }
   return out;
@@ -205,7 +213,7 @@ function decodeUTF32(buf: Buffer, littleEndian: boolean): string {
  */
 function isValidUtf8(buffer: Buffer): boolean {
   try {
-    new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+    new TextDecoder("utf-8", { fatal: true }).decode(buffer);
     return true;
   } catch {
     return false;
@@ -235,19 +243,19 @@ export interface FileReadResult {
 function decodeBOMBuffer(buf: Buffer, bomInfo: BOMInfo): string {
   const content = buf.subarray(bomInfo.bomLength);
   switch (bomInfo.encoding) {
-    case 'utf8':
-      return content.toString('utf8');
-    case 'utf16le':
-      return content.toString('utf16le');
-    case 'utf16be':
+    case "utf8":
+      return content.toString("utf8");
+    case "utf16le":
+      return content.toString("utf16le");
+    case "utf16be":
       return decodeUTF16BE(content);
-    case 'utf32le':
+    case "utf32le":
       return decodeUTF32(content, true);
-    case 'utf32be':
+    case "utf32be":
       return decodeUTF32(content, false);
     default:
       // Defensive fallback; should be unreachable
-      return content.toString('utf8');
+      return content.toString("utf8");
   }
 }
 
@@ -256,18 +264,18 @@ function decodeBOMBuffer(buf: Buffer, bomInfo: BOMInfo): string {
  */
 function bomEncodingToName(bomEncoding: UnicodeEncoding): string {
   switch (bomEncoding) {
-    case 'utf8':
-      return 'utf-8';
-    case 'utf16le':
-      return 'utf-16le';
-    case 'utf16be':
-      return 'utf-16be';
-    case 'utf32le':
-      return 'utf-32le';
-    case 'utf32be':
-      return 'utf-32be';
+    case "utf8":
+      return "utf-8";
+    case "utf16le":
+      return "utf-16le";
+    case "utf16be":
+      return "utf-16be";
+    case "utf32le":
+      return "utf-32le";
+    case "utf32be":
+      return "utf-32be";
     default:
-      return 'utf-8';
+      return "utf-8";
   }
 }
 
@@ -285,7 +293,7 @@ export async function readFileWithEncodingInfo(
 ): Promise<FileReadResult> {
   // Read the file once; detect BOM and decode from the single buffer.
   const full = await fs.promises.readFile(filePath);
-  if (full.length === 0) return { content: '', encoding: 'utf-8', bom: false };
+  if (full.length === 0) return { content: "", encoding: "utf-8", bom: false };
 
   const bomInfo = detectBOM(full);
   if (bomInfo) {
@@ -300,7 +308,7 @@ export async function readFileWithEncodingInfo(
 
   // No BOM — check if it's valid UTF-8 first (fast path for the common case)
   if (isValidUtf8(full)) {
-    return { content: full.toString('utf8'), encoding: 'utf-8', bom: false };
+    return { content: full.toString("utf8"), encoding: "utf-8", bom: false };
   }
 
   // Not valid UTF-8 — try chardet statistical detection
@@ -322,7 +330,7 @@ export async function readFileWithEncodingInfo(
   }
 
   // Final fallback: UTF-8 with replacement characters
-  return { content: full.toString('utf8'), encoding: 'utf-8', bom: false };
+  return { content: full.toString("utf8"), encoding: "utf-8", bom: false };
 }
 
 /**
@@ -338,7 +346,7 @@ export async function readFileWithEncoding(filePath: string): Promise<string> {
 
 export async function countFileLines(filePath: string): Promise<number> {
   const result = await readFileWithEncodingInfo(filePath);
-  return result.content.split('\n').length;
+  return result.content.split("\n").length;
 }
 
 export async function readFileWithLineAndLimit(params: {
@@ -353,7 +361,7 @@ export async function readFileWithLineAndLimit(params: {
 }> {
   const { path: filePath, limit, line } = params;
   const { content, encoding, bom } = await readFileWithEncodingInfo(filePath);
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const originalLineCount = lines.length;
   const startLine = line || 0;
   // Ensure endLine does not exceed originalLineCount
@@ -363,7 +371,7 @@ export async function readFileWithLineAndLimit(params: {
   const selectedLines = lines.slice(actualStartLine, endLine);
 
   return {
-    content: selectedLines.join('\n'),
+    content: selectedLines.join("\n"),
     bom,
     encoding,
     originalLineCount,
@@ -378,38 +386,38 @@ export async function readFileWithLineAndLimit(params: {
 export async function detectFileEncoding(filePath: string): Promise<string> {
   let fh: fs.promises.FileHandle | null = null;
   try {
-    fh = await fs.promises.open(filePath, 'r');
+    fh = await fs.promises.open(filePath, "r");
     const stats = await fh.stat();
-    if (stats.size === 0) return 'utf-8';
+    if (stats.size === 0) return "utf-8";
 
     // Read a sample (up to 8KB) for detection
     const sampleSize = Math.min(8192, stats.size);
     const buf = Buffer.alloc(sampleSize);
     const { bytesRead } = await fh.read(buf, 0, sampleSize, 0);
-    if (bytesRead === 0) return 'utf-8';
+    if (bytesRead === 0) return "utf-8";
     const sample = buf.subarray(0, bytesRead);
 
     // 1. Check for BOM
     const bom = detectBOM(sample);
     if (bom) {
       switch (bom.encoding) {
-        case 'utf8':
-          return 'utf-8';
-        case 'utf16le':
-          return 'utf-16le';
-        case 'utf16be':
-          return 'utf-16be';
-        case 'utf32le':
-          return 'utf-32le';
-        case 'utf32be':
-          return 'utf-32be';
+        case "utf8":
+          return "utf-8";
+        case "utf16le":
+          return "utf-16le";
+        case "utf16be":
+          return "utf-16be";
+        case "utf32le":
+          return "utf-32le";
+        case "utf32be":
+          return "utf-32be";
         default:
-          return 'utf-8';
+          return "utf-8";
       }
     }
 
     // 2. Validate UTF-8
-    if (isValidUtf8(sample)) return 'utf-8';
+    if (isValidUtf8(sample)) return "utf-8";
 
     // 3. Use chardet for detection
     const detected = detectEncodingFromBuffer(sample);
@@ -417,10 +425,10 @@ export async function detectFileEncoding(filePath: string): Promise<string> {
       return detected;
     }
 
-    return 'utf-8';
+    return "utf-8";
   } catch {
     // If file can't be read, default to UTF-8
-    return 'utf-8';
+    return "utf-8";
   } finally {
     if (fh) {
       try {
@@ -439,7 +447,7 @@ export async function detectFileEncoding(filePath: string): Promise<string> {
  */
 export function getSpecificMimeType(filePath: string): string | undefined {
   const lookedUpMime = mime.getType(filePath);
-  return typeof lookedUpMime === 'string' ? lookedUpMime : undefined;
+  return typeof lookedUpMime === "string" ? lookedUpMime : undefined;
 }
 
 /**
@@ -477,7 +485,7 @@ export function isWithinRoot(
 export async function isBinaryFile(filePath: string): Promise<boolean> {
   let fh: fs.promises.FileHandle | null = null;
   try {
-    fh = await fs.promises.open(filePath, 'r');
+    fh = await fs.promises.open(filePath, "r");
     const stats = await fh.stat();
     const fileSize = stats.size;
     if (fileSize === 0) return false; // empty is not binary
@@ -528,49 +536,49 @@ export async function isBinaryFile(filePath: string): Promise<boolean> {
  */
 export async function detectFileType(
   filePath: string,
-): Promise<'text' | 'image' | 'pdf' | 'audio' | 'video' | 'binary' | 'svg'> {
+): Promise<"text" | "image" | "pdf" | "audio" | "video" | "binary" | "svg"> {
   const ext = path.extname(filePath).toLowerCase();
 
   // The mimetype for various TypeScript extensions (ts, mts, cts, tsx) can be
   // MPEG transport stream (a video format), but we want to assume these are
   // TypeScript files instead.
-  if (['.ts', '.mts', '.cts'].includes(ext)) {
-    return 'text';
+  if ([".ts", ".mts", ".cts"].includes(ext)) {
+    return "text";
   }
 
-  if (ext === '.svg') {
-    return 'svg';
+  if (ext === ".svg") {
+    return "svg";
   }
 
   const lookedUpMimeType = mime.getType(filePath); // Returns null if not found, or the mime type string
   if (lookedUpMimeType) {
-    if (lookedUpMimeType.startsWith('image/')) {
-      return 'image';
+    if (lookedUpMimeType.startsWith("image/")) {
+      return "image";
     }
-    if (lookedUpMimeType.startsWith('audio/')) {
-      return 'audio';
+    if (lookedUpMimeType.startsWith("audio/")) {
+      return "audio";
     }
-    if (lookedUpMimeType.startsWith('video/')) {
-      return 'video';
+    if (lookedUpMimeType.startsWith("video/")) {
+      return "video";
     }
-    if (lookedUpMimeType === 'application/pdf') {
-      return 'pdf';
+    if (lookedUpMimeType === "application/pdf") {
+      return "pdf";
     }
   }
 
   // Stricter binary check for common non-text extensions before content check
   // These are often not well-covered by mime-types or might be misidentified.
   if (BINARY_EXTENSIONS.includes(ext)) {
-    return 'binary';
+    return "binary";
   }
 
   // Fall back to content-based check if mime type wasn't conclusive for image/pdf
   // and it's not a known binary extension.
   if (await isBinaryFile(filePath)) {
-    return 'binary';
+    return "binary";
   }
 
-  return 'text';
+  return "text";
 }
 
 export interface ProcessedFileReadResult {
@@ -588,13 +596,13 @@ export interface ProcessedFileReadResult {
  * Returns undefined for non-media types (text, binary, svg) which are always supported.
  */
 function mediaModalityKey(
-  fileType: 'image' | 'pdf' | 'audio' | 'video' | 'text' | 'binary' | 'svg',
+  fileType: "image" | "pdf" | "audio" | "video" | "text" | "binary" | "svg",
 ): keyof InputModalities | undefined {
   if (
-    fileType === 'image' ||
-    fileType === 'pdf' ||
-    fileType === 'audio' ||
-    fileType === 'video'
+    fileType === "image" ||
+    fileType === "pdf" ||
+    fileType === "audio" ||
+    fileType === "video"
   ) {
     return fileType;
   }
@@ -610,12 +618,12 @@ function unsupportedModalityMessage(
   displayName: string,
 ): string {
   let hint: string;
-  if (modality === 'pdf') {
+  if (modality === "pdf") {
     hint =
-      'This model does not support PDF input directly. The read_file tool cannot extract PDF content either. To extract text from the PDF file, try using skills if applicable, or guide user to install pdf skill by running this slash command:\n/extensions install https://github.com/anthropics/skills:document-skills';
-  } else if (modality === 'video') {
+      "This model does not support PDF input directly. The read_file tool cannot extract PDF content either. To extract text from the PDF file, try using skills if applicable, or guide user to install pdf skill by running this slash command:\n/extensions install https://github.com/anthropics/skills:document-skills";
+  } else if (modality === "video") {
     hint =
-      'This model does not support video input. Use the video_to_audio tool to extract audio from the video file first, then use read_file on the resulting audio file.';
+      "This model does not support video input. Use the video_to_audio tool to extract audio from the video file first, then use read_file on the resulting audio file.";
   } else {
     hint = `This model does not support ${modality} input. The read_file tool cannot process this type of file either. To handle this file, try using skills if applicable, or any tools installed at system wide, or let the user know you cannot process this type of file.`;
   }
@@ -642,8 +650,8 @@ export async function processSingleFileContent(
       // Sync check is acceptable before async read
       return {
         llmContent:
-          'Could not read file because no file was found at the specified path.',
-        returnDisplay: 'File not found.',
+          "Could not read file because no file was found at the specified path.",
+        returnDisplay: "File not found.",
         error: `File not found: ${filePath}`,
         errorType: ToolErrorType.FILE_NOT_FOUND,
       };
@@ -652,8 +660,8 @@ export async function processSingleFileContent(
     if (stats.isDirectory()) {
       return {
         llmContent:
-          'Could not read file because the provided path is a directory, not a file.',
-        returnDisplay: 'Path is a directory.',
+          "Could not read file because the provided path is a directory, not a file.",
+        returnDisplay: "Path is a directory.",
         error: `Path is a directory, not a file: ${filePath}`,
         errorType: ToolErrorType.TARGET_IS_DIRECTORY,
       };
@@ -663,8 +671,8 @@ export async function processSingleFileContent(
     // Use 9.9MB instead of 10MB to leave margin for encoding overhead (#1880)
     if (fileSizeInMB > 9.9) {
       return {
-        llmContent: 'File size exceeds the 10MB limit.',
-        returnDisplay: 'File size exceeds the 10MB limit.',
+        llmContent: "File size exceeds the 10MB limit.",
+        returnDisplay: "File size exceeds the 10MB limit.",
         error: `File size exceeds the 10MB limit: ${filePath} (${fileSizeInMB.toFixed(2)}MB)`,
         errorType: ToolErrorType.FILE_TOO_LARGE,
       };
@@ -673,7 +681,7 @@ export async function processSingleFileContent(
     const fileType = await detectFileType(filePath);
     const relativePathForDisplay = path
       .relative(rootDirectory, filePath)
-      .replace(/\\/g, '/');
+      .replace(/\\/g, "/");
 
     const displayName = path.basename(filePath);
 
@@ -686,17 +694,17 @@ export async function processSingleFileContent(
       if (!modalities[modality]) {
         // Try SiliconFlow fallback for image/audio when API key is configured
         const sfApiKey = config.getSiliconFlowApiKey();
-        if (sfApiKey && (modality === 'image' || modality === 'audio')) {
+        if (sfApiKey && (modality === "image" || modality === "audio")) {
           debugLogger.info(
             `Model '${config.getModel()}' does not support ${modality} input. ` +
               `Using SiliconFlow fallback for: ${relativePathForDisplay}`,
           );
           try {
             const contentBuffer = await fs.promises.readFile(filePath);
-            if (modality === 'image') {
-              const base64Data = contentBuffer.toString('base64');
+            if (modality === "image") {
+              const base64Data = contentBuffer.toString("base64");
               const mimeType =
-                mime.getType(filePath) || 'application/octet-stream';
+                mime.getType(filePath) || "application/octet-stream";
               const metadata = extractImageMetadata(contentBuffer, filePath);
               const ocrResult = await extractImageText(
                 sfApiKey,
@@ -743,13 +751,13 @@ export async function processSingleFileContent(
     }
 
     switch (fileType) {
-      case 'binary': {
+      case "binary": {
         return {
           llmContent: `Cannot display content of binary file: ${relativePathForDisplay}`,
           returnDisplay: `Skipped binary file: ${relativePathForDisplay}`,
         };
       }
-      case 'svg': {
+      case "svg": {
         const SVG_MAX_SIZE_BYTES = 1 * 1024 * 1024;
         if (stats.size > SVG_MAX_SIZE_BYTES) {
           return {
@@ -763,7 +771,7 @@ export async function processSingleFileContent(
           returnDisplay: `Read SVG as text: ${relativePathForDisplay}`,
         };
       }
-      case 'text': {
+      case "text": {
         // Use BOM-aware reader to avoid leaving a BOM character in content and to support UTF-16/32 transparently
         const { content, _meta } = await config
           .getFileSystemService()
@@ -774,12 +782,12 @@ export async function processSingleFileContent(
           });
         const originalLineCount =
           _meta?.originalLineCount ?? (await countFileLines(filePath));
-        const selectedLines = content.split('\n').map((line) => line.trimEnd());
+        const selectedLines = content.split("\n").map((line) => line.trimEnd());
         const startLine = offset || 0;
         const configCharLimit = config.getTruncateToolOutputThreshold();
 
         // Apply character limit truncation
-        let llmContent = '';
+        let llmContent = "";
         let contentLengthTruncated = false;
         let linesIncluded = 0;
 
@@ -802,17 +810,17 @@ export async function processSingleFileContent(
                 10,
               );
               formattedLines.push(
-                line.substring(0, remaining) + '... [truncated]',
+                line.substring(0, remaining) + "... [truncated]",
               );
               contentLengthTruncated = true;
               break;
             }
           }
 
-          llmContent = formattedLines.join('\n');
+          llmContent = formattedLines.join("\n");
         } else {
           // No character limit, use all selected lines
-          llmContent = selectedLines.join('\n');
+          llmContent = selectedLines.join("\n");
           linesIncluded = selectedLines.length;
         }
 
@@ -822,13 +830,13 @@ export async function processSingleFileContent(
         const isTruncated = contentRangeTruncated || contentLengthTruncated;
 
         // By default, return nothing to streamline the common case of a successful read_file.
-        let returnDisplay = '';
+        let returnDisplay = "";
         if (isTruncated) {
           returnDisplay = `Read lines ${
             startLine + 1
           }-${actualEndLine} of ${originalLineCount} from ${relativePathForDisplay}`;
           if (contentLengthTruncated) {
-            returnDisplay += ' (truncated)';
+            returnDisplay += " (truncated)";
           }
         }
 
@@ -840,12 +848,12 @@ export async function processSingleFileContent(
           linesShown: [startLine + 1, actualEndLine],
         };
       }
-      case 'image':
-      case 'audio':
-      case 'video':
-      case 'pdf': {
+      case "image":
+      case "audio":
+      case "video":
+      case "pdf": {
         const contentBuffer = await fs.promises.readFile(filePath);
-        const base64Data = contentBuffer.toString('base64');
+        const base64Data = contentBuffer.toString("base64");
         const base64SizeInMB = base64Data.length / (1024 * 1024);
         // Use 9.9MB instead of 10MB to leave margin for small overhead (#1880)
         if (base64SizeInMB > 9.9) {
@@ -858,8 +866,8 @@ export async function processSingleFileContent(
         }
 
         // For images, include metadata in the display
-        let metadataStr = '';
-        if (fileType === 'image') {
+        let metadataStr = "";
+        if (fileType === "image") {
           metadataStr = extractImageMetadata(contentBuffer, filePath);
         }
 
@@ -867,7 +875,7 @@ export async function processSingleFileContent(
           llmContent: {
             inlineData: {
               data: base64Data,
-              mimeType: mime.getType(filePath) || 'application/octet-stream',
+              mimeType: mime.getType(filePath) || "application/octet-stream",
               displayName,
             },
           },
@@ -890,7 +898,7 @@ export async function processSingleFileContent(
     const errorMessage = error instanceof Error ? error.message : String(error);
     const displayPath = path
       .relative(rootDirectory, filePath)
-      .replace(/\\/g, '/');
+      .replace(/\\/g, "/");
     return {
       llmContent: `Error reading file ${displayPath}: ${errorMessage}`,
       returnDisplay: `Error reading file ${displayPath}: ${errorMessage}`,

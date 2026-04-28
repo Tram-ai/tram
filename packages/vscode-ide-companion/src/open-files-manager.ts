@@ -4,11 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import type {
-  File,
-  IdeContext,
-} from '@tram-ai/tram-core/src/ide/types.js';
+import * as vscode from "vscode";
+import type { File, IdeContext } from "@tram-ai/tram-core/src/ide/types.js";
 import {
   isFileUri,
   isNotebookFileUri,
@@ -16,16 +13,16 @@ import {
   removeFile,
   renameFile,
   getNotebookUriFromCellUri,
-} from './services/open-files-manager/utils.js';
+} from "./services/open-files-manager/utils.js";
 import {
   addOrMoveToFront,
   updateActiveContext,
-} from './services/open-files-manager/text-handler.js';
+} from "./services/open-files-manager/text-handler.js";
 import {
   addOrMoveToFrontNotebook,
   updateNotebookActiveContext,
   updateNotebookCellSelection,
-} from './services/open-files-manager/notebook-handler.js';
+} from "./services/open-files-manager/notebook-handler.js";
 
 /**
  * Keeps track of the workspace state, including open files, cursor position, and selected text.

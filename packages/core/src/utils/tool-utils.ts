@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { AnyDeclarativeTool, AnyToolInvocation } from '../index.js';
-import { isTool } from '../index.js';
+import type { AnyDeclarativeTool, AnyToolInvocation } from "../index.js";
+import { isTool } from "../index.js";
 import {
   ToolNames,
   ToolDisplayNames,
   ToolNamesMigration,
   ToolDisplayNamesMigration,
-} from '../tools/tool-names.js';
+} from "../tools/tool-names.js";
 
 export type ToolName = (typeof ToolNames)[keyof typeof ToolNames];
 
 const normalizeIdentifier = (identifier: string): string =>
-  identifier.trim().replace(/^_+/, '');
+  identifier.trim().replace(/^_+/, "");
 
 const toolNameKeys = Object.keys(ToolNames) as Array<keyof typeof ToolNames>;
 
@@ -71,7 +71,7 @@ const sanitizeExactIdentifier = (value: string): string =>
   normalizeIdentifier(value);
 
 const sanitizePatternIdentifier = (value: string): string => {
-  const openParenIndex = value.indexOf('(');
+  const openParenIndex = value.indexOf("(");
   if (openParenIndex === -1) {
     return normalizeIdentifier(value);
   }
@@ -112,7 +112,7 @@ export function isToolEnabled(
   return !filteredExclude.some((entry) => matchesIdentifier(entry));
 }
 
-const SHELL_TOOL_NAMES = ['run_shell_command', 'ShellTool'];
+const SHELL_TOOL_NAMES = ["run_shell_command", "ShellTool"];
 
 /**
  * Checks if a tool invocation matches any of a list of patterns.
@@ -143,7 +143,7 @@ export function doesToolInvocationMatch(
   }
 
   for (const pattern of patterns) {
-    const openParen = pattern.indexOf('(');
+    const openParen = pattern.indexOf("(");
 
     if (openParen === -1) {
       // No arguments, just a tool name
@@ -158,20 +158,20 @@ export function doesToolInvocationMatch(
       continue;
     }
 
-    if (!pattern.endsWith(')')) {
+    if (!pattern.endsWith(")")) {
       continue;
     }
 
     const argPattern = pattern.substring(openParen + 1, pattern.length - 1);
 
     if (
-      'command' in invocation.params &&
-      toolNames.includes('run_shell_command')
+      "command" in invocation.params &&
+      toolNames.includes("run_shell_command")
     ) {
       const argValue = String(
         (invocation.params as { command: string }).command,
       );
-      if (argValue === argPattern || argValue.startsWith(argPattern + ' ')) {
+      if (argValue === argPattern || argValue.startsWith(argPattern + " ")) {
         return true;
       }
     }

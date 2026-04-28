@@ -4,33 +4,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { CommandContext, SlashCommand } from './types.js';
-import { CommandKind } from './types.js';
-import { MessageType } from '../types.js';
-import type { HistoryItemInsightProgress } from '../types.js';
-import { t } from '../../i18n/index.js';
-import { join } from 'path';
-import { StaticInsightGenerator } from '../../services/insight/generators/StaticInsightGenerator.js';
-import { createDebugLogger, Storage } from '@tram-ai/tram-core';
-import open from 'open';
+import type { CommandContext, SlashCommand } from "./types.js";
+import { CommandKind } from "./types.js";
+import { MessageType } from "../types.js";
+import type { HistoryItemInsightProgress } from "../types.js";
+import { t } from "../../i18n/index.js";
+import { join } from "path";
+import { StaticInsightGenerator } from "../../services/insight/generators/StaticInsightGenerator.js";
+import { createDebugLogger, Storage } from "@tram-ai/tram-core";
+import open from "open";
 
-const logger = createDebugLogger('DataProcessor');
+const logger = createDebugLogger("DataProcessor");
 
 export const insightCommand: SlashCommand = {
-  name: 'insight',
+  name: "insight",
   get description() {
     return t(
-      'generate personalized programming insights from your chat history',
+      "generate personalized programming insights from your chat history",
     );
   },
   kind: CommandKind.BUILT_IN,
   action: async (context: CommandContext) => {
     try {
-      context.ui.setDebugMessage(t('Generating insights...'));
+      context.ui.setDebugMessage(t("Generating insights..."));
 
-      const projectsDir = join(Storage.getRuntimeBaseDir(), 'projects');
+      const projectsDir = join(Storage.getRuntimeBaseDir(), "projects");
       if (!context.services.config) {
-        throw new Error('Config service is not available');
+        throw new Error("Config service is not available");
       }
       const insightGenerator = new StaticInsightGenerator(
         context.services.config,
@@ -55,13 +55,13 @@ export const insightCommand: SlashCommand = {
       context.ui.addItem(
         {
           type: MessageType.INFO,
-          text: t('This may take a couple minutes. Sit tight!'),
+          text: t("This may take a couple minutes. Sit tight!"),
         },
         Date.now(),
       );
 
       // Initial progress
-      updateProgress(t('Starting insight generation...'), 0);
+      updateProgress(t("Starting insight generation..."), 0);
 
       // Generate the static insight HTML file
       const outputPath = await insightGenerator.generateStaticInsight(
@@ -75,7 +75,7 @@ export const insightCommand: SlashCommand = {
       context.ui.addItem(
         {
           type: MessageType.INFO,
-          text: t('Insight report generated successfully!'),
+          text: t("Insight report generated successfully!"),
         },
         Date.now(),
       );
@@ -87,20 +87,20 @@ export const insightCommand: SlashCommand = {
         context.ui.addItem(
           {
             type: MessageType.INFO,
-            text: t('Opening insights in your browser: {{path}}', {
+            text: t("Opening insights in your browser: {{path}}", {
               path: outputPath,
             }),
           },
           Date.now(),
         );
       } catch (browserError) {
-        logger.error('Failed to open browser automatically:', browserError);
+        logger.error("Failed to open browser automatically:", browserError);
 
         context.ui.addItem(
           {
             type: MessageType.INFO,
             text: t(
-              'Insights generated at: {{path}}. Please open this file in your browser.',
+              "Insights generated at: {{path}}. Please open this file in your browser.",
               {
                 path: outputPath,
               },
@@ -110,7 +110,7 @@ export const insightCommand: SlashCommand = {
         );
       }
 
-      context.ui.setDebugMessage(t('Insights ready.'));
+      context.ui.setDebugMessage(t("Insights ready."));
     } catch (error) {
       // Clear pending item on error
       context.ui.setPendingItem(null);
@@ -118,14 +118,14 @@ export const insightCommand: SlashCommand = {
       context.ui.addItem(
         {
           type: MessageType.ERROR,
-          text: t('Failed to generate insights: {{error}}', {
+          text: t("Failed to generate insights: {{error}}", {
             error: (error as Error).message,
           }),
         },
         Date.now(),
       );
 
-      logger.error('Insight generation error:', error);
+      logger.error("Insight generation error:", error);
     }
   },
 };

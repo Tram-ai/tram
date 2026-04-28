@@ -5,12 +5,11 @@
  * detecting local IPs, and parsing JSON request bodies.
  */
 
-import http from 'node:http';
-import os from 'node:os';
-import {
-  ApprovalMode,
-} from '@tram-ai/tram-core';
-import { SettingScope, type LoadedSettings } from '../config/settings.js';
+import http from "node:http";
+import os from "node:os";
+import { ApprovalMode, type ModelProvidersConfig } from "@tram-ai/tram-core";
+import { SettingScope, type LoadedSettings } from "../config/settings.js";
+import { normalizeModelProvidersConfig } from "../utils/modelProviderIds.js";
 
 // ============================================================
 // Types
@@ -29,7 +28,7 @@ export interface WebSettingsPayload {
 export const APPROVAL_MAP: Record<string, ApprovalMode> = {
   plan: ApprovalMode.PLAN,
   default: ApprovalMode.DEFAULT,
-  'auto-edit': ApprovalMode.AUTO_EDIT,
+  "auto-edit": ApprovalMode.AUTO_EDIT,
   yolo: ApprovalMode.YOLO,
 };
 
@@ -38,13 +37,13 @@ export const APPROVAL_MAP: Record<string, ApprovalMode> = {
 // ============================================================
 
 export function getLocalIPs(): string[] {
-  const ips: string[] = ['localhost'];
+  const ips: string[] = ["localhost"];
   const interfaces = os.networkInterfaces();
 
   for (const iface of Object.values(interfaces)) {
     if (!iface) continue;
     for (const info of iface) {
-      if (info.family === 'IPv4' && !info.internal) {
+      if (info.family === "IPv4" && !info.internal) {
         ips.push(info.address);
       }
     }
@@ -73,74 +72,81 @@ export function applyWebSettings(
   } else if (payload.settings) {
     obj = payload.settings;
   } else {
-    throw new Error('Missing settings or rawSettings');
+    throw new Error("Missing settings or rawSettings");
   }
 
   const scope = SettingScope.User;
 
   // modelProviders
-  if (obj['modelProviders']) {
-    store.setValue(scope, 'modelProviders', obj['modelProviders']);
+  if (obj["modelProviders"] && typeof obj["modelProviders"] === "object") {
+    const normalizedModelProviders = normalizeModelProvidersConfig(
+      obj["modelProviders"] as ModelProvidersConfig,
+    );
+    store.setValue(scope, "modelProviders", normalizedModelProviders);
   }
 
   // env (merge with existing)
-  if (obj['env'] && typeof obj['env'] === 'object') {
+  if (obj["env"] && typeof obj["env"] === "object") {
     const merged: Record<string, string> = {
       ...((store.merged.env as Record<string, string>) || {}),
-      ...(obj['env'] as Record<string, string>),
+      ...(obj["env"] as Record<string, string>),
     };
-    store.setValue(scope, 'env', merged);
+    store.setValue(scope, "env", merged);
   }
 
   // security.auth
-  const sec = obj['security'];
-  if (sec && typeof sec === 'object') {
+  const sec = obj["security"];
+  if (sec && typeof sec === "object") {
     const secObj = sec as Record<string, unknown>;
-    const auth = secObj['auth'];
-    if (auth && typeof auth === 'object') {
+    const auth = secObj["auth"];
+    if (auth && typeof auth === "object") {
       const authObj = auth as Record<string, unknown>;
-      if (authObj['selectedType']) {
-        store.setValue(scope, 'security.auth.selectedType', authObj['selectedType']);
+      if (authObj["selectedType"]) {
+        store.setValue(
+          scope,
+          "security.auth.selectedType",
+          authObj["selectedType"],
+        );
       }
     }
   }
 
   // model.name
-  const mdl = obj['model'];
-  if (mdl && typeof mdl === 'object') {
+  const mdl = obj["model"];
+  if (mdl && typeof mdl === "object") {
     const mdlObj = mdl as Record<string, unknown>;
-    if (mdlObj['name']) {
-      store.setValue(scope, 'model.name', mdlObj['name']);
+    if (mdlObj["name"]) {
+      store.setValue(scope, "model.name", mdlObj["name"]);
     }
   }
 
   // approval mode
-  const tools = obj['tools'];
-  if (tools && typeof tools === 'object') {
+  const tools = obj["tools"];
+  if (tools && typeof tools === "object") {
     const toolsObj = tools as Record<string, unknown>;
-    if (toolsObj['approvalMode']) {
-      const mode = toolsObj['approvalMode'] as string;
-      store.setValue(scope, 'tools.approvalMode', APPROVAL_MAP[mode] || mode);
+    if (toolsObj["approvalMode"]) {
+      const mode = toolsObj["approvalMode"] as string;
+      store.setValue(scope, "tools.approvalMode", APPROVAL_MAP[mode] || mode);
     }
   }
 
   // proxy
-  if (typeof obj['proxy'] === 'string' && obj['proxy']) {
-    store.setValue(scope, 'proxy', obj['proxy']);
+  if (typeof obj["proxy"] === "string" && obj["proxy"]) {
+    store.setValue(scope, "proxy", obj["proxy"]);
   }
 
   // theme
-  const ui = obj['ui'];
-  if (ui && typeof ui === 'object') {
+  const ui = obj["ui"];
+  if (ui && typeof ui === "object") {
     const uiObj = ui as Record<string, unknown>;
-    if (uiObj['theme']) {
-      store.setValue(scope, 'ui.theme', uiObj['theme']);
+    if (uiObj["theme"]) {
+      store.setValue(scope, "ui.theme", uiObj["theme"]);
     }
   }
 
   // Clear deprecated fields
-  store.setValue(scope, 'security.auth.baseUrl', undefined);
-  store.setValue(scope, 'security.auth.apiKey', undefined);
+  store.setValue(scope, "security.auth.baseUrl", undefined);
+  store.setValue(scope, "security.auth.apiKey", undefined);
 }
 
 // ============================================================
@@ -153,26 +159,25 @@ export function parseJsonBody(req: http.IncomingMessage): Promise<unknown> {
     let size = 0;
     const MAX_BODY = 1024 * 64; // 64KB limit
 
-    req.on('data', (chunk: Buffer) => {
+    req.on("data", (chunk: Buffer) => {
       size += chunk.length;
       if (size > MAX_BODY) {
         req.destroy();
-        reject(new Error('Body too large'));
+        reject(new Error("Body too large"));
         return;
       }
       chunks.push(chunk);
     });
 
-    req.on('end', () => {
+    req.on("end", () => {
       try {
-        const body = Buffer.concat(chunks).toString('utf-8');
+        const body = Buffer.concat(chunks).toString("utf-8");
         resolve(JSON.parse(body));
       } catch (e) {
         reject(e);
       }
     });
 
-    req.on('error', reject);
+    req.on("error", reject);
   });
 }
-

@@ -4,18 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, it, vi } from 'vitest';
-<<<<<<< HEAD:packages/vscode-ide-companion/src/services/tramAgentManager.test.ts
-import { extractSessionListItems } from './tramAgentManager.js';
-=======
+import { describe, expect, it, vi } from "vitest";
 import {
   extractSessionListItems,
-  QwenAgentManager,
-} from './qwenAgentManager.js';
-import type { ModelInfo } from '@agentclientprotocol/sdk';
->>>>>>> v0.14.5:packages/vscode-ide-companion/src/services/qwenAgentManager.test.ts
+  TramAgentManager,
+} from "./tramAgentManager.js";
+import type { ModelInfo } from "@agentclientprotocol/sdk";
 
-vi.mock('vscode', () => ({
+vi.mock("vscode", () => ({
   window: {
     showInformationMessage: vi.fn(),
     showWarningMessage: vi.fn(),
@@ -23,55 +19,55 @@ vi.mock('vscode', () => ({
   },
 }));
 
-describe('extractSessionListItems', () => {
+describe("extractSessionListItems", () => {
   it('returns sessions array from the "sessions" field', () => {
     const items = extractSessionListItems({
-      sessions: [{ sessionId: 'session-1' }],
+      sessions: [{ sessionId: "session-1" }],
     });
-    expect(items).toEqual([{ sessionId: 'session-1' }]);
+    expect(items).toEqual([{ sessionId: "session-1" }]);
   });
 
   it('returns items array from the legacy "items" field', () => {
     const items = extractSessionListItems({
-      items: [{ sessionId: 'session-2' }],
+      items: [{ sessionId: "session-2" }],
     });
-    expect(items).toEqual([{ sessionId: 'session-2' }]);
+    expect(items).toEqual([{ sessionId: "session-2" }]);
   });
 
   it('prefers "sessions" over "items" when both are present', () => {
     const items = extractSessionListItems({
-      sessions: [{ sessionId: 'from-sessions' }],
-      items: [{ sessionId: 'from-items' }],
+      sessions: [{ sessionId: "from-sessions" }],
+      items: [{ sessionId: "from-items" }],
     });
-    expect(items).toEqual([{ sessionId: 'from-sessions' }]);
+    expect(items).toEqual([{ sessionId: "from-sessions" }]);
   });
 
-  it('returns empty array for null/undefined input', () => {
+  it("returns empty array for null/undefined input", () => {
     expect(extractSessionListItems(null)).toEqual([]);
     expect(extractSessionListItems(undefined)).toEqual([]);
   });
 
-  it('returns empty array for non-object input', () => {
-    expect(extractSessionListItems('string')).toEqual([]);
+  it("returns empty array for non-object input", () => {
+    expect(extractSessionListItems("string")).toEqual([]);
     expect(extractSessionListItems(42)).toEqual([]);
   });
 
-  it('returns empty array when neither field is an array', () => {
-    expect(extractSessionListItems({ sessions: 'not-array' })).toEqual([]);
+  it("returns empty array when neither field is an array", () => {
+    expect(extractSessionListItems({ sessions: "not-array" })).toEqual([]);
     expect(extractSessionListItems({ items: 123 })).toEqual([]);
     expect(extractSessionListItems({})).toEqual([]);
   });
 });
 
-describe('QwenAgentManager.setModelFromUi', () => {
-  it('emits the selected model metadata from the available models list', async () => {
-    const manager = new QwenAgentManager();
+describe("TramAgentManager.setModelFromUi", () => {
+  it("emits the selected model metadata from the available models list", async () => {
+    const manager = new TramAgentManager();
     const onModelChanged = vi.fn();
     manager.onModelChanged(onModelChanged);
 
     const selectedModel: ModelInfo = {
-      modelId: 'qwen3-coder-plus',
-      name: 'Qwen3 Coder Plus',
+      modelId: "qwen3-coder-plus",
+      name: "Qwen3 Coder Plus",
       _meta: {
         contextLimit: 262144,
       },
@@ -83,8 +79,8 @@ describe('QwenAgentManager.setModelFromUi', () => {
       }
     ).baselineAvailableModels = [
       {
-        modelId: 'qwen3-coder-base',
-        name: 'Qwen3 Coder Base',
+        modelId: "qwen3-coder-base",
+        name: "Qwen3 Coder Base",
         _meta: {
           contextLimit: 131072,
         },
@@ -108,14 +104,14 @@ describe('QwenAgentManager.setModelFromUi', () => {
   });
 });
 
-describe('QwenAgentManager.createNewSession', () => {
-  it('creates a fresh ACP session when explicitly requested even if one is already active', async () => {
-    const manager = new QwenAgentManager();
+describe("TramAgentManager.createNewSession", () => {
+  it("creates a fresh ACP session when explicitly requested even if one is already active", async () => {
+    const manager = new TramAgentManager();
     const connection = {
-      currentSessionId: 'session-1',
+      currentSessionId: "session-1",
       newSession: vi.fn().mockImplementation(async () => {
-        connection.currentSessionId = 'session-2';
-        return { sessionId: 'session-2' };
+        connection.currentSessionId = "session-2";
+        return { sessionId: "session-2" };
       }),
       authenticate: vi.fn(),
     };
@@ -126,21 +122,21 @@ describe('QwenAgentManager.createNewSession', () => {
       }
     ).connection = connection;
 
-    const newSessionId = await manager.createNewSession('/workspace', {
+    const newSessionId = await manager.createNewSession("/workspace", {
       forceNew: true,
     } as never);
 
-    expect(connection.newSession).toHaveBeenCalledWith('/workspace');
-    expect(newSessionId).toBe('session-2');
+    expect(connection.newSession).toHaveBeenCalledWith("/workspace");
+    expect(newSessionId).toBe("session-2");
   });
 
-  it('creates a distinct fresh session after an in-flight bootstrap when forceNew is requested', async () => {
-    const manager = new QwenAgentManager();
+  it("creates a distinct fresh session after an in-flight bootstrap when forceNew is requested", async () => {
+    const manager = new TramAgentManager();
     const connection = {
       currentSessionId: null as string | null,
       newSession: vi.fn().mockImplementation(async () => {
-        connection.currentSessionId = 'session-2';
-        return { sessionId: 'session-2' };
+        connection.currentSessionId = "session-2";
+        return { sessionId: "session-2" };
       }),
       authenticate: vi.fn(),
     };
@@ -165,16 +161,16 @@ describe('QwenAgentManager.createNewSession', () => {
       }
     ).sessionCreateInFlight = bootstrapSession;
 
-    const newSessionPromise = manager.createNewSession('/workspace', {
+    const newSessionPromise = manager.createNewSession("/workspace", {
       forceNew: true,
     } as never);
 
     expect(connection.newSession).not.toHaveBeenCalled();
 
-    resolveBootstrap?.('session-1');
+    resolveBootstrap?.("session-1");
 
-    await expect(newSessionPromise).resolves.toBe('session-2');
+    await expect(newSessionPromise).resolves.toBe("session-2");
     expect(connection.newSession).toHaveBeenCalledTimes(1);
-    expect(connection.newSession).toHaveBeenCalledWith('/workspace');
+    expect(connection.newSession).toHaveBeenCalledWith("/workspace");
   });
 });

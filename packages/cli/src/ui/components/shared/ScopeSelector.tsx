@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import type { SettingScope } from '../../../config/settings.js';
-import { getScopeItems } from '../../../utils/dialogScopeUtils.js';
-import { RadioButtonSelect } from './RadioButtonSelect.js';
-import { t } from '../../../i18n/index.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import type { SettingScope } from "../../../config/settings.js";
+import { getScopeItems } from "../../../utils/dialogScopeUtils.js";
+import { RadioButtonSelect } from "./RadioButtonSelect.js";
+import { t } from "../../../i18n/index.js";
 
 interface ScopeSelectorProps {
   /** Callback function when a scope is selected */
@@ -42,8 +42,8 @@ export function ScopeSelector({
   return (
     <Box flexDirection="column">
       <Text bold={isFocused} wrap="truncate">
-        {isFocused ? '> ' : '  '}
-        {t('Apply To')}
+        {isFocused ? "> " : "  "}
+        {t("Apply To")}
       </Text>
       <Box height={1} />
       <RadioButtonSelect

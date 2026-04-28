@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
 
 import {
   useExtensionUpdates,
   useSettingInputRequests,
   useConfirmUpdateRequests,
   usePluginChoiceRequests,
-} from './useExtensionUpdates.js';
+} from "./useExtensionUpdates.js";
 import {
   TRAM_DIR,
   type ExtensionManager,
   type Extension,
   type ExtensionUpdateInfo,
   ExtensionUpdateState,
-} from '@tram-ai/tram-core';
-import { renderHook, waitFor, act } from '@testing-library/react';
-import { MessageType } from '../types.js';
+} from "@tram-ai/tram-core";
+import { renderHook, waitFor, act } from "@testing-library/react";
+import { MessageType } from "../types.js";
 
-vi.mock('os', async (importOriginal) => {
+vi.mock("os", async (importOriginal) => {
   const mockedOs = await importOriginal<typeof os>();
   return {
     ...mockedOs,
@@ -35,19 +35,19 @@ vi.mock('os', async (importOriginal) => {
 
 function createMockExtension(overrides: Partial<Extension> = {}): Extension {
   return {
-    id: 'test-extension-id',
-    name: 'test-extension',
-    version: '1.0.0',
-    path: '/some/path',
+    id: "test-extension-id",
+    name: "test-extension",
+    version: "1.0.0",
+    path: "/some/path",
     isActive: true,
     config: {
-      name: 'test-extension',
-      version: '1.0.0',
+      name: "test-extension",
+      version: "1.0.0",
     },
     contextFiles: [],
     installMetadata: {
-      type: 'git',
-      source: 'https://some/repo',
+      type: "git",
+      source: "https://some/repo",
       autoUpdate: false,
     },
     ...overrides,
@@ -76,31 +76,31 @@ function createMockExtensionManager(
   } as unknown as ExtensionManager;
 }
 
-describe('useConfirmUpdateRequests', () => {
-  it('should add a confirmation request', () => {
+describe("useConfirmUpdateRequests", () => {
+  it("should add a confirmation request", () => {
     const { result } = renderHook(() => useConfirmUpdateRequests());
 
     const onConfirm = vi.fn();
     act(() => {
       result.current.addConfirmUpdateExtensionRequest({
-        prompt: 'Test prompt',
+        prompt: "Test prompt",
         onConfirm,
       });
     });
 
     expect(result.current.confirmUpdateExtensionRequests).toHaveLength(1);
     expect(result.current.confirmUpdateExtensionRequests[0].prompt).toBe(
-      'Test prompt',
+      "Test prompt",
     );
   });
 
-  it('should remove a confirmation request when confirmed', () => {
+  it("should remove a confirmation request when confirmed", () => {
     const { result } = renderHook(() => useConfirmUpdateRequests());
 
     const onConfirm = vi.fn();
     act(() => {
       result.current.addConfirmUpdateExtensionRequest({
-        prompt: 'Test prompt',
+        prompt: "Test prompt",
         onConfirm,
       });
     });
@@ -116,7 +116,7 @@ describe('useConfirmUpdateRequests', () => {
     expect(onConfirm).toHaveBeenCalledWith(true);
   });
 
-  it('should handle multiple confirmation requests', () => {
+  it("should handle multiple confirmation requests", () => {
     const { result } = renderHook(() => useConfirmUpdateRequests());
 
     const onConfirm1 = vi.fn();
@@ -124,11 +124,11 @@ describe('useConfirmUpdateRequests', () => {
 
     act(() => {
       result.current.addConfirmUpdateExtensionRequest({
-        prompt: 'Prompt 1',
+        prompt: "Prompt 1",
         onConfirm: onConfirm1,
       });
       result.current.addConfirmUpdateExtensionRequest({
-        prompt: 'Prompt 2',
+        prompt: "Prompt 2",
         onConfirm: onConfirm2,
       });
     });
@@ -142,22 +142,22 @@ describe('useConfirmUpdateRequests', () => {
 
     expect(result.current.confirmUpdateExtensionRequests).toHaveLength(1);
     expect(result.current.confirmUpdateExtensionRequests[0].prompt).toBe(
-      'Prompt 2',
+      "Prompt 2",
     );
     expect(onConfirm1).toHaveBeenCalledWith(false);
   });
 });
 
-describe('useSettingInputRequests', () => {
-  it('should add a setting input request', () => {
+describe("useSettingInputRequests", () => {
+  it("should add a setting input request", () => {
     const { result } = renderHook(() => useSettingInputRequests());
 
     const onSubmit = vi.fn();
     const onCancel = vi.fn();
     act(() => {
       result.current.addSettingInputRequest({
-        settingName: 'API_KEY',
-        settingDescription: 'Enter your API key',
+        settingName: "API_KEY",
+        settingDescription: "Enter your API key",
         sensitive: true,
         onSubmit,
         onCancel,
@@ -165,22 +165,22 @@ describe('useSettingInputRequests', () => {
     });
 
     expect(result.current.settingInputRequests).toHaveLength(1);
-    expect(result.current.settingInputRequests[0].settingName).toBe('API_KEY');
+    expect(result.current.settingInputRequests[0].settingName).toBe("API_KEY");
     expect(result.current.settingInputRequests[0].settingDescription).toBe(
-      'Enter your API key',
+      "Enter your API key",
     );
     expect(result.current.settingInputRequests[0].sensitive).toBe(true);
   });
 
-  it('should remove a setting input request when submitted', () => {
+  it("should remove a setting input request when submitted", () => {
     const { result } = renderHook(() => useSettingInputRequests());
 
     const onSubmit = vi.fn();
     const onCancel = vi.fn();
     act(() => {
       result.current.addSettingInputRequest({
-        settingName: 'API_KEY',
-        settingDescription: 'Enter your API key',
+        settingName: "API_KEY",
+        settingDescription: "Enter your API key",
         sensitive: true,
         onSubmit,
         onCancel,
@@ -191,23 +191,23 @@ describe('useSettingInputRequests', () => {
 
     // Submit the value
     act(() => {
-      result.current.settingInputRequests[0].onSubmit('my-secret-key');
+      result.current.settingInputRequests[0].onSubmit("my-secret-key");
     });
 
     expect(result.current.settingInputRequests).toHaveLength(0);
-    expect(onSubmit).toHaveBeenCalledWith('my-secret-key');
+    expect(onSubmit).toHaveBeenCalledWith("my-secret-key");
     expect(onCancel).not.toHaveBeenCalled();
   });
 
-  it('should remove a setting input request when cancelled', () => {
+  it("should remove a setting input request when cancelled", () => {
     const { result } = renderHook(() => useSettingInputRequests());
 
     const onSubmit = vi.fn();
     const onCancel = vi.fn();
     act(() => {
       result.current.addSettingInputRequest({
-        settingName: 'API_KEY',
-        settingDescription: 'Enter your API key',
+        settingName: "API_KEY",
+        settingDescription: "Enter your API key",
         sensitive: true,
         onSubmit,
         onCancel,
@@ -226,7 +226,7 @@ describe('useSettingInputRequests', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('should handle multiple setting input requests in sequence', () => {
+  it("should handle multiple setting input requests in sequence", () => {
     const { result } = renderHook(() => useSettingInputRequests());
 
     const onSubmit1 = vi.fn();
@@ -236,15 +236,15 @@ describe('useSettingInputRequests', () => {
 
     act(() => {
       result.current.addSettingInputRequest({
-        settingName: 'USERNAME',
-        settingDescription: 'Enter username',
+        settingName: "USERNAME",
+        settingDescription: "Enter username",
         sensitive: false,
         onSubmit: onSubmit1,
         onCancel: onCancel1,
       });
       result.current.addSettingInputRequest({
-        settingName: 'PASSWORD',
-        settingDescription: 'Enter password',
+        settingName: "PASSWORD",
+        settingDescription: "Enter password",
         sensitive: true,
         onSubmit: onSubmit2,
         onCancel: onCancel2,
@@ -255,31 +255,31 @@ describe('useSettingInputRequests', () => {
 
     // Submit first request
     act(() => {
-      result.current.settingInputRequests[0].onSubmit('john_doe');
+      result.current.settingInputRequests[0].onSubmit("john_doe");
     });
 
     expect(result.current.settingInputRequests).toHaveLength(1);
-    expect(result.current.settingInputRequests[0].settingName).toBe('PASSWORD');
-    expect(onSubmit1).toHaveBeenCalledWith('john_doe');
+    expect(result.current.settingInputRequests[0].settingName).toBe("PASSWORD");
+    expect(onSubmit1).toHaveBeenCalledWith("john_doe");
 
     // Submit second request
     act(() => {
-      result.current.settingInputRequests[0].onSubmit('secret123');
+      result.current.settingInputRequests[0].onSubmit("secret123");
     });
 
     expect(result.current.settingInputRequests).toHaveLength(0);
-    expect(onSubmit2).toHaveBeenCalledWith('secret123');
+    expect(onSubmit2).toHaveBeenCalledWith("secret123");
   });
 });
 
-describe('useExtensionUpdates', () => {
+describe("useExtensionUpdates", () => {
   let tempHomeDir: string;
   let userExtensionsDir: string;
 
   beforeEach(() => {
-    tempHomeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tram-cli-test-home-'));
+    tempHomeDir = fs.mkdtempSync(path.join(os.tmpdir(), "tram-cli-test-home-"));
     vi.mocked(os.homedir).mockReturnValue(tempHomeDir);
-    userExtensionsDir = path.join(tempHomeDir, TRAM_DIR, 'extensions');
+    userExtensionsDir = path.join(tempHomeDir, TRAM_DIR, "extensions");
     fs.mkdirSync(userExtensionsDir, { recursive: true });
   });
 
@@ -288,22 +288,22 @@ describe('useExtensionUpdates', () => {
     vi.clearAllMocks();
   });
 
-  it('should check for updates and log a message if an update is available', async () => {
+  it("should check for updates and log a message if an update is available", async () => {
     const extension = createMockExtension({
-      name: 'test-extension',
+      name: "test-extension",
       installMetadata: {
-        type: 'git',
-        source: 'https://some/repo',
+        type: "git",
+        source: "https://some/repo",
         autoUpdate: false,
       },
     });
     const addItem = vi.fn();
-    const cwd = '/test/cwd';
+    const cwd = "/test/cwd";
 
     const extensionManager = createMockExtensionManager(
       [extension],
       async (callback) => {
-        callback('test-extension', ExtensionUpdateState.UPDATE_AVAILABLE);
+        callback("test-extension", ExtensionUpdateState.UPDATE_AVAILABLE);
       },
     );
 
@@ -320,12 +320,12 @@ describe('useExtensionUpdates', () => {
     });
   });
 
-  it('should check for updates and automatically update if autoUpdate is true', async () => {
+  it("should check for updates and automatically update if autoUpdate is true", async () => {
     const extension = createMockExtension({
-      name: 'test-extension',
+      name: "test-extension",
       installMetadata: {
-        type: 'git',
-        source: 'https://some.git/repo',
+        type: "git",
+        source: "https://some.git/repo",
         autoUpdate: true,
       },
     });
@@ -335,12 +335,12 @@ describe('useExtensionUpdates', () => {
     const extensionManager = createMockExtensionManager(
       [extension],
       async (callback) => {
-        callback('test-extension', ExtensionUpdateState.UPDATE_AVAILABLE);
+        callback("test-extension", ExtensionUpdateState.UPDATE_AVAILABLE);
       },
       {
-        originalVersion: '1.0.0',
-        updatedVersion: '1.1.0',
-        name: 'test-extension',
+        originalVersion: "1.0.0",
+        updatedVersion: "1.1.0",
+        name: "test-extension",
       },
     );
 
@@ -362,24 +362,24 @@ describe('useExtensionUpdates', () => {
     );
   });
 
-  it('should batch update notifications for multiple extensions', async () => {
+  it("should batch update notifications for multiple extensions", async () => {
     const extension1 = createMockExtension({
-      id: 'test-extension-1-id',
-      name: 'test-extension-1',
-      version: '1.0.0',
+      id: "test-extension-1-id",
+      name: "test-extension-1",
+      version: "1.0.0",
       installMetadata: {
-        type: 'git',
-        source: 'https://some.git/repo1',
+        type: "git",
+        source: "https://some.git/repo1",
         autoUpdate: true,
       },
     });
     const extension2 = createMockExtension({
-      id: 'test-extension-2-id',
-      name: 'test-extension-2',
-      version: '2.0.0',
+      id: "test-extension-2-id",
+      name: "test-extension-2",
+      version: "2.0.0",
       installMetadata: {
-        type: 'git',
-        source: 'https://some.git/repo2',
+        type: "git",
+        source: "https://some.git/repo2",
         autoUpdate: true,
       },
     });
@@ -396,23 +396,23 @@ describe('useExtensionUpdates', () => {
             state: ExtensionUpdateState,
           ) => void,
         ) => {
-          callback('test-extension-1', ExtensionUpdateState.UPDATE_AVAILABLE);
-          callback('test-extension-2', ExtensionUpdateState.UPDATE_AVAILABLE);
+          callback("test-extension-1", ExtensionUpdateState.UPDATE_AVAILABLE);
+          callback("test-extension-2", ExtensionUpdateState.UPDATE_AVAILABLE);
         },
       ),
       updateExtension: vi.fn(async () => {
         updateCallCount++;
         if (updateCallCount === 1) {
           return {
-            originalVersion: '1.0.0',
-            updatedVersion: '1.1.0',
-            name: 'test-extension-1',
+            originalVersion: "1.0.0",
+            updatedVersion: "1.1.0",
+            name: "test-extension-1",
           };
         }
         return {
-          originalVersion: '2.0.0',
-          updatedVersion: '2.1.0',
-          name: 'test-extension-2',
+          originalVersion: "2.0.0",
+          updatedVersion: "2.1.0",
+          name: "test-extension-2",
         };
       }),
     } as unknown as ExtensionManager;
@@ -443,37 +443,37 @@ describe('useExtensionUpdates', () => {
     );
   });
 
-  it('should batch update notifications for multiple extensions with autoUpdate: false', async () => {
+  it("should batch update notifications for multiple extensions with autoUpdate: false", async () => {
     const extension1 = createMockExtension({
-      id: 'test-extension-1-id',
-      name: 'test-extension-1',
-      version: '1.0.0',
+      id: "test-extension-1-id",
+      name: "test-extension-1",
+      version: "1.0.0",
       installMetadata: {
-        type: 'git',
-        source: 'https://some/repo1',
+        type: "git",
+        source: "https://some/repo1",
         autoUpdate: false,
       },
     });
     const extension2 = createMockExtension({
-      id: 'test-extension-2-id',
-      name: 'test-extension-2',
-      version: '2.0.0',
+      id: "test-extension-2-id",
+      name: "test-extension-2",
+      version: "2.0.0",
       installMetadata: {
-        type: 'git',
-        source: 'https://some/repo2',
+        type: "git",
+        source: "https://some/repo2",
         autoUpdate: false,
       },
     });
 
     const addItem = vi.fn();
-    const cwd = '/test/cwd';
+    const cwd = "/test/cwd";
 
     const extensionManager = createMockExtensionManager(
       [extension1, extension2],
       async (callback) => {
-        callback('test-extension-1', ExtensionUpdateState.UPDATE_AVAILABLE);
+        callback("test-extension-1", ExtensionUpdateState.UPDATE_AVAILABLE);
         await new Promise((r) => setTimeout(r, 50));
-        callback('test-extension-2', ExtensionUpdateState.UPDATE_AVAILABLE);
+        callback("test-extension-2", ExtensionUpdateState.UPDATE_AVAILABLE);
       },
     );
 
@@ -492,18 +492,18 @@ describe('useExtensionUpdates', () => {
   });
 });
 
-describe('usePluginChoiceRequests', () => {
-  it('should add a plugin choice request', () => {
+describe("usePluginChoiceRequests", () => {
+  it("should add a plugin choice request", () => {
     const { result } = renderHook(() => usePluginChoiceRequests());
 
     const onSelect = vi.fn();
     const onCancel = vi.fn();
     act(() => {
       result.current.addPluginChoiceRequest({
-        marketplaceName: 'test-marketplace',
+        marketplaceName: "test-marketplace",
         plugins: [
-          { name: 'plugin1', description: 'First plugin' },
-          { name: 'plugin2', description: 'Second plugin' },
+          { name: "plugin1", description: "First plugin" },
+          { name: "plugin2", description: "Second plugin" },
         ],
         onSelect,
         onCancel,
@@ -512,20 +512,20 @@ describe('usePluginChoiceRequests', () => {
 
     expect(result.current.pluginChoiceRequests).toHaveLength(1);
     expect(result.current.pluginChoiceRequests[0].marketplaceName).toBe(
-      'test-marketplace',
+      "test-marketplace",
     );
     expect(result.current.pluginChoiceRequests[0].plugins).toHaveLength(2);
   });
 
-  it('should remove a plugin choice request when a plugin is selected', () => {
+  it("should remove a plugin choice request when a plugin is selected", () => {
     const { result } = renderHook(() => usePluginChoiceRequests());
 
     const onSelect = vi.fn();
     const onCancel = vi.fn();
     act(() => {
       result.current.addPluginChoiceRequest({
-        marketplaceName: 'test-marketplace',
-        plugins: [{ name: 'plugin1' }],
+        marketplaceName: "test-marketplace",
+        plugins: [{ name: "plugin1" }],
         onSelect,
         onCancel,
       });
@@ -535,23 +535,23 @@ describe('usePluginChoiceRequests', () => {
 
     // Select a plugin
     act(() => {
-      result.current.pluginChoiceRequests[0].onSelect('plugin1');
+      result.current.pluginChoiceRequests[0].onSelect("plugin1");
     });
 
     expect(result.current.pluginChoiceRequests).toHaveLength(0);
-    expect(onSelect).toHaveBeenCalledWith('plugin1');
+    expect(onSelect).toHaveBeenCalledWith("plugin1");
     expect(onCancel).not.toHaveBeenCalled();
   });
 
-  it('should remove a plugin choice request when cancelled', () => {
+  it("should remove a plugin choice request when cancelled", () => {
     const { result } = renderHook(() => usePluginChoiceRequests());
 
     const onSelect = vi.fn();
     const onCancel = vi.fn();
     act(() => {
       result.current.addPluginChoiceRequest({
-        marketplaceName: 'test-marketplace',
-        plugins: [{ name: 'plugin1' }],
+        marketplaceName: "test-marketplace",
+        plugins: [{ name: "plugin1" }],
         onSelect,
         onCancel,
       });
@@ -569,7 +569,7 @@ describe('usePluginChoiceRequests', () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it('should handle multiple plugin choice requests', () => {
+  it("should handle multiple plugin choice requests", () => {
     const { result } = renderHook(() => usePluginChoiceRequests());
 
     const onSelect1 = vi.fn();
@@ -579,14 +579,14 @@ describe('usePluginChoiceRequests', () => {
 
     act(() => {
       result.current.addPluginChoiceRequest({
-        marketplaceName: 'marketplace-1',
-        plugins: [{ name: 'plugin1' }],
+        marketplaceName: "marketplace-1",
+        plugins: [{ name: "plugin1" }],
         onSelect: onSelect1,
         onCancel: onCancel1,
       });
       result.current.addPluginChoiceRequest({
-        marketplaceName: 'marketplace-2',
-        plugins: [{ name: 'plugin2' }],
+        marketplaceName: "marketplace-2",
+        plugins: [{ name: "plugin2" }],
         onSelect: onSelect2,
         onCancel: onCancel2,
       });
@@ -596,13 +596,13 @@ describe('usePluginChoiceRequests', () => {
 
     // Select from first request
     act(() => {
-      result.current.pluginChoiceRequests[0].onSelect('plugin1');
+      result.current.pluginChoiceRequests[0].onSelect("plugin1");
     });
 
     expect(result.current.pluginChoiceRequests).toHaveLength(1);
     expect(result.current.pluginChoiceRequests[0].marketplaceName).toBe(
-      'marketplace-2',
+      "marketplace-2",
     );
-    expect(onSelect1).toHaveBeenCalledWith('plugin1');
+    expect(onSelect1).toHaveBeenCalledWith("plugin1");
   });
 });

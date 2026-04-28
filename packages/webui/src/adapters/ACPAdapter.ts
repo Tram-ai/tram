@@ -11,16 +11,16 @@ import type {
   ACPMessage,
   ACPMessageData,
   ToolCallData,
-} from './types.js';
+} from "./types.js";
 
 /**
  * Check if a message is a user message (breaks AI sequence)
  */
 function isUserMessage(msg: ACPMessage | undefined): boolean {
   if (!msg) return true;
-  if (msg.type !== 'message') return false;
+  if (msg.type !== "message") return false;
   const data = msg.data as ACPMessageData;
-  return data?.role === 'user';
+  return data?.role === "user";
 }
 
 /**
@@ -39,16 +39,16 @@ export function adaptACPMessages(messages: ACPMessage[]): UnifiedMessage[] {
     const isLast = isUserMessage(next);
 
     switch (item.type) {
-      case 'message': {
+      case "message": {
         const msg = item.data as ACPMessageData;
         return {
           id: `msg-${index}`,
           type:
-            msg.role === 'user'
-              ? 'user'
-              : msg.role === 'thinking'
-                ? 'thinking'
-                : 'assistant',
+            msg.role === "user"
+              ? "user"
+              : msg.role === "thinking"
+                ? "thinking"
+                : "assistant",
           timestamp: msg.timestamp || Date.now(),
           content: msg.content,
           fileContext: msg.fileContext,
@@ -57,12 +57,12 @@ export function adaptACPMessages(messages: ACPMessage[]): UnifiedMessage[] {
         };
       }
 
-      case 'in-progress-tool-call':
-      case 'completed-tool-call': {
+      case "in-progress-tool-call":
+      case "completed-tool-call": {
         const toolCall = item.data as ToolCallData;
         return {
           id: `tool-${toolCall.toolCallId}-${item.type}`,
-          type: 'tool_call',
+          type: "tool_call",
           timestamp: Date.now(),
           toolCall,
           isFirst,
@@ -74,9 +74,9 @@ export function adaptACPMessages(messages: ACPMessage[]): UnifiedMessage[] {
         // Fallback for unknown types
         return {
           id: `unknown-${index}`,
-          type: 'assistant',
+          type: "assistant",
           timestamp: Date.now(),
-          content: '',
+          content: "",
           isFirst,
           isLast,
         };
@@ -89,10 +89,10 @@ export function adaptACPMessages(messages: ACPMessage[]): UnifiedMessage[] {
  */
 export function isToolCallData(data: unknown): data is ToolCallData {
   return (
-    typeof data === 'object' &&
+    typeof data === "object" &&
     data !== null &&
-    'toolCallId' in data &&
-    'kind' in data
+    "toolCallId" in data &&
+    "kind" in data
   );
 }
 
@@ -101,9 +101,9 @@ export function isToolCallData(data: unknown): data is ToolCallData {
  */
 export function isMessageData(data: unknown): data is ACPMessageData {
   return (
-    typeof data === 'object' &&
+    typeof data === "object" &&
     data !== null &&
-    'role' in data &&
-    'content' in data
+    "role" in data &&
+    "content" in data
   );
 }

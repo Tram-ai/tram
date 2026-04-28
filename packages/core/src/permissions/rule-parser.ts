@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import path from 'node:path';
-import os from 'node:os';
-import picomatch from 'picomatch';
-import { parse } from 'shell-quote';
+import path from "node:path";
+import os from "node:os";
+import picomatch from "picomatch";
+import { parse } from "shell-quote";
 
 /**
  * Normalize a filesystem path to use POSIX-style forward slashes.
@@ -21,13 +21,13 @@ import { parse } from 'shell-quote';
  *   toPosixPath('/home/user/project') → '/home/user/project' (no-op on POSIX)
  */
 function toPosixPath(p: string): string {
-  return p.replace(/\\/g, '/');
+  return p.replace(/\\/g, "/");
 }
 import type {
   PermissionCheckContext,
   PermissionRule,
   SpecifierKind,
-} from './types.js';
+} from "./types.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tool name aliases & categories
@@ -39,100 +39,100 @@ import type {
  */
 export const TOOL_NAME_ALIASES: Readonly<Record<string, string>> = {
   // Shell tool
-  run_shell_command: 'run_shell_command',
-  Shell: 'run_shell_command',
-  ShellTool: 'run_shell_command',
-  Bash: 'run_shell_command', // Claude Code compatibility
+  run_shell_command: "run_shell_command",
+  Shell: "run_shell_command",
+  ShellTool: "run_shell_command",
+  Bash: "run_shell_command", // Claude Code compatibility
 
   // Edit tool — "Edit" is also a meta-category covering edit + write_file
-  edit: 'edit',
-  Edit: 'edit',
-  EditTool: 'edit',
+  edit: "edit",
+  Edit: "edit",
+  EditTool: "edit",
 
   // Write File tool — also matched by "Edit" meta-category rules
-  write_file: 'write_file',
-  WriteFile: 'write_file',
-  WriteFileTool: 'write_file',
-  Write: 'write_file',
+  write_file: "write_file",
+  WriteFile: "write_file",
+  WriteFileTool: "write_file",
+  Write: "write_file",
 
   // Read File tool — "Read" is also a meta-category covering read_file + grep + glob + list_directory
-  read_file: 'read_file',
-  ReadFile: 'read_file',
-  ReadFileTool: 'read_file',
-  Read: 'read_file',
+  read_file: "read_file",
+  ReadFile: "read_file",
+  ReadFileTool: "read_file",
+  Read: "read_file",
 
   // Grep tool — also matched by "Read" meta-category rules
-  grep_search: 'grep_search',
-  Grep: 'grep_search',
-  GrepTool: 'grep_search',
-  search_file_content: 'grep_search', // legacy
-  SearchFiles: 'grep_search', // legacy display name
+  grep_search: "grep_search",
+  Grep: "grep_search",
+  GrepTool: "grep_search",
+  search_file_content: "grep_search", // legacy
+  SearchFiles: "grep_search", // legacy display name
 
   // Glob tool — also matched by "Read" meta-category rules
-  glob: 'glob',
-  Glob: 'glob',
-  GlobTool: 'glob',
-  FindFiles: 'glob', // legacy display name
+  glob: "glob",
+  Glob: "glob",
+  GlobTool: "glob",
+  FindFiles: "glob", // legacy display name
 
   // List Directory tool — also matched by "Read" meta-category rules
-  list_directory: 'list_directory',
-  ListFiles: 'list_directory',
-  ListFilesTool: 'list_directory',
-  ReadFolder: 'list_directory', // legacy display name
+  list_directory: "list_directory",
+  ListFiles: "list_directory",
+  ListFilesTool: "list_directory",
+  ReadFolder: "list_directory", // legacy display name
 
   // Memory tool
-  save_memory: 'save_memory',
-  SaveMemory: 'save_memory',
-  SaveMemoryTool: 'save_memory',
+  save_memory: "save_memory",
+  SaveMemory: "save_memory",
+  SaveMemoryTool: "save_memory",
 
   // TodoWrite tool
-  todo_write: 'todo_write',
-  TodoWrite: 'todo_write',
-  TodoWriteTool: 'todo_write',
+  todo_write: "todo_write",
+  TodoWrite: "todo_write",
+  TodoWriteTool: "todo_write",
 
   // WebFetch tool
-  web_fetch: 'web_fetch',
-  WebFetch: 'web_fetch',
-  WebFetchTool: 'web_fetch',
+  web_fetch: "web_fetch",
+  WebFetch: "web_fetch",
+  WebFetchTool: "web_fetch",
 
   // WebSearch tool
-  web_search: 'web_search',
-  WebSearch: 'web_search',
-  WebSearchTool: 'web_search',
+  web_search: "web_search",
+  WebSearch: "web_search",
+  WebSearchTool: "web_search",
 
   // Agent (subagent) tool
-  agent: 'agent',
-  Agent: 'agent',
-  AgentTool: 'agent',
+  agent: "agent",
+  Agent: "agent",
+  AgentTool: "agent",
 
   // Legacy aliases for the agent tool (renamed from "task")
-  task: 'agent',
-  Task: 'agent',
-  TaskTool: 'agent',
+  task: "agent",
+  Task: "agent",
+  TaskTool: "agent",
 
   // Skill tool
-  skill: 'skill',
-  Skill: 'skill',
-  SkillTool: 'skill',
+  skill: "skill",
+  Skill: "skill",
+  SkillTool: "skill",
 
   // ExitPlanMode tool
-  exit_plan_mode: 'exit_plan_mode',
-  ExitPlanMode: 'exit_plan_mode',
-  ExitPlanModeTool: 'exit_plan_mode',
+  exit_plan_mode: "exit_plan_mode",
+  ExitPlanMode: "exit_plan_mode",
+  ExitPlanModeTool: "exit_plan_mode",
 
   // LSP tool
-  lsp: 'lsp',
-  Lsp: 'lsp',
-  LspTool: 'lsp',
+  lsp: "lsp",
+  Lsp: "lsp",
+  LspTool: "lsp",
 
   // Legacy edit tool name
-  replace: 'edit',
+  replace: "edit",
 };
 
 /**
  * Shell tool canonical names.
  */
-const SHELL_TOOL_NAMES = new Set(['run_shell_command']);
+const SHELL_TOOL_NAMES = new Set(["run_shell_command"]);
 
 /**
  * File-reading tools — "Read" rules apply to all of these (best-effort).
@@ -141,10 +141,10 @@ const SHELL_TOOL_NAMES = new Set(['run_shell_command']);
  * to all built-in tools that read files like Grep and Glob."
  */
 const READ_TOOLS = new Set([
-  'read_file',
-  'grep_search',
-  'glob',
-  'list_directory',
+  "read_file",
+  "grep_search",
+  "glob",
+  "list_directory",
 ]);
 
 /**
@@ -152,12 +152,12 @@ const READ_TOOLS = new Set([
  *
  * Per Claude Code docs: "Edit rules apply to all built-in tools that edit files."
  */
-const EDIT_TOOLS = new Set(['edit', 'write_file']);
+const EDIT_TOOLS = new Set(["edit", "write_file"]);
 
 /**
  * WebFetch tools.
  */
-const WEBFETCH_TOOLS = new Set(['web_fetch']);
+const WEBFETCH_TOOLS = new Set(["web_fetch"]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tool name resolution & categorization
@@ -178,15 +178,15 @@ export function resolveToolName(rawName: string): string {
  */
 export function getSpecifierKind(canonicalToolName: string): SpecifierKind {
   if (SHELL_TOOL_NAMES.has(canonicalToolName)) {
-    return 'command';
+    return "command";
   }
   if (READ_TOOLS.has(canonicalToolName) || EDIT_TOOLS.has(canonicalToolName)) {
-    return 'path';
+    return "path";
   }
   if (WEBFETCH_TOOLS.has(canonicalToolName)) {
-    return 'domain';
+    return "domain";
   }
-  return 'literal';
+  return "literal";
 }
 
 /**
@@ -204,11 +204,11 @@ export function toolMatchesRuleToolName(
     return true;
   }
   // "Read" → covers all READ_TOOLS
-  if (ruleToolName === 'read_file' && READ_TOOLS.has(contextToolName)) {
+  if (ruleToolName === "read_file" && READ_TOOLS.has(contextToolName)) {
     return true;
   }
   // "Edit" → covers all EDIT_TOOLS
-  if (ruleToolName === 'edit' && EDIT_TOOLS.has(contextToolName)) {
+  if (ruleToolName === "edit" && EDIT_TOOLS.has(contextToolName)) {
     return true;
   }
   return false;
@@ -238,9 +238,9 @@ export function parseRule(raw: string): PermissionRule {
 
   // Handle legacy `:*` suffix (deprecated, equivalent to ` *`)
   // e.g. "Bash(git:*)" → "Bash(git *)"
-  const normalized = trimmed.replace(/:(\*)/, ' $1');
+  const normalized = trimmed.replace(/:(\*)/, " $1");
 
-  const openParen = normalized.indexOf('(');
+  const openParen = normalized.indexOf("(");
 
   if (openParen === -1) {
     // Simple tool name rule (no specifier)
@@ -252,7 +252,7 @@ export function parseRule(raw: string): PermissionRule {
   }
 
   const toolPart = normalized.substring(0, openParen).trim();
-  const specifier = normalized.endsWith(')')
+  const specifier = normalized.endsWith(")")
     ? normalized.substring(openParen + 1, normalized.length - 1)
     : undefined;
 
@@ -290,26 +290,26 @@ export function parseRules(raws: string[]): PermissionRule[] {
  */
 const CANONICAL_TO_RULE_DISPLAY: Readonly<Record<string, string>> = {
   // Read meta-category
-  read_file: 'Read',
-  grep_search: 'Read',
-  glob: 'Read',
-  list_directory: 'Read',
+  read_file: "Read",
+  grep_search: "Read",
+  glob: "Read",
+  list_directory: "Read",
   // Edit meta-category
-  edit: 'Edit',
-  write_file: 'Edit',
+  edit: "Edit",
+  write_file: "Edit",
   // Shell
-  run_shell_command: 'Bash',
+  run_shell_command: "Bash",
   // Web
-  web_fetch: 'WebFetch',
-  web_search: 'WebSearch',
+  web_fetch: "WebFetch",
+  web_search: "WebSearch",
   // Agent / Skill
-  agent: 'Agent',
-  skill: 'Skill',
+  agent: "Agent",
+  skill: "Skill",
   // Others
-  save_memory: 'SaveMemory',
-  todo_write: 'TodoWrite',
-  lsp: 'Lsp',
-  exit_plan_mode: 'ExitPlanMode',
+  save_memory: "SaveMemory",
+  todo_write: "TodoWrite",
+  lsp: "Lsp",
+  exit_plan_mode: "ExitPlanMode",
 };
 
 /**
@@ -332,7 +332,7 @@ export function getRuleDisplayName(canonicalToolName: string): string {
  * Directory-targeted tools (list_directory, grep_search, glob) already receive
  * a directory path, so they use it as-is.
  */
-const FILE_TARGETED_TOOLS = new Set(['read_file', 'edit', 'write_file']);
+const FILE_TARGETED_TOOLS = new Set(["read_file", "edit", "write_file"]);
 
 /**
  * Build minimum-scope permission rule strings from a permission check context.
@@ -365,7 +365,7 @@ export function buildPermissionRules(ctx: PermissionCheckContext): string[] {
   const kind = getSpecifierKind(canonicalName);
 
   switch (kind) {
-    case 'command':
+    case "command":
       // Shell commands — fallback only; shell.ts provides its own rules via
       // extractCommandRules which are more granular (per-simple-command).
       if (ctx.command) {
@@ -373,7 +373,7 @@ export function buildPermissionRules(ctx: PermissionCheckContext): string[] {
       }
       return [displayName];
 
-    case 'path':
+    case "path":
       if (ctx.filePath) {
         // For file-targeted tools, scope to the containing directory;
         // for directory-targeted tools the path is already a directory.
@@ -384,20 +384,20 @@ export function buildPermissionRules(ctx: PermissionCheckContext): string[] {
         // Append `/**` so the gitignore-style glob matches all files in the
         // directory recursively (picomatch uses `**` for recursive descent).
         // resolvePathPattern("//foo/**") → "/foo/**" — round-trips correctly.
-        const specifier = dirPath.startsWith('/')
+        const specifier = dirPath.startsWith("/")
           ? `/${dirPath}/**`
           : `${dirPath}/**`;
         return [`${displayName}(${specifier})`];
       }
       return [displayName];
 
-    case 'domain':
+    case "domain":
       if (ctx.domain) {
         return [`${displayName}(${ctx.domain})`];
       }
       return [displayName];
 
-    case 'literal':
+    case "literal":
     default:
       if (ctx.specifier) {
         return [`${displayName}(${ctx.specifier})`];
@@ -411,37 +411,37 @@ export function buildPermissionRules(ctx: PermissionCheckContext): string[] {
  * Maps display name → verb phrase for use in "Always allow [verb phrase] in this project".
  */
 const DISPLAY_NAME_TO_VERB: Readonly<Record<string, string>> = {
-  Read: 'read files',
-  Edit: 'edit files',
-  Bash: 'run commands',
-  WebFetch: 'fetch from',
-  WebSearch: 'search the web',
-  Agent: 'use agent',
-  Skill: 'use skill',
-  SaveMemory: 'save memory',
-  TodoWrite: 'write todos',
-  Lsp: 'use LSP',
-  ExitPlanMode: 'exit plan mode',
+  Read: "read files",
+  Edit: "edit files",
+  Bash: "run commands",
+  WebFetch: "fetch from",
+  WebSearch: "search the web",
+  Agent: "use agent",
+  Skill: "use skill",
+  SaveMemory: "save memory",
+  TodoWrite: "write todos",
+  Lsp: "use LSP",
+  ExitPlanMode: "exit plan mode",
 };
 
 /**
  * Strip the glob suffix (e.g. `/**`) and the leading `//` from an absolute
  * path specifier so it reads cleanly in a UI label.
  *
- * `//Users/mochi/.qwen/**` → `/Users/mochi/.qwen/`
+ * `//Users/mochi/.tram/**` → `/Users/mochi/.tram/`
  * `/src/**`                → `src/`
  */
 function cleanPathSpecifier(specifier: string): string {
   let cleaned = specifier;
   // Remove trailing glob patterns like /** or /*
-  cleaned = cleaned.replace(/\/\*\*$/, '/').replace(/\/\*$/, '/');
+  cleaned = cleaned.replace(/\/\*\*$/, "/").replace(/\/\*$/, "/");
   // Convert rule grammar `//absolute` → `/absolute`
-  if (cleaned.startsWith('//')) {
+  if (cleaned.startsWith("//")) {
     cleaned = cleaned.substring(1);
   }
   // Ensure trailing slash for directories
-  if (!cleaned.endsWith('/')) {
-    cleaned += '/';
+  if (!cleaned.endsWith("/")) {
+    cleaned += "/";
   }
   return cleaned;
 }
@@ -453,7 +453,7 @@ function cleanPathSpecifier(specifier: string): string {
  * description instead of raw rule syntax.
  *
  * Examples:
- *   `["Read(//Users/mochi/.qwen/**)"]`  → `"read files in /Users/mochi/.qwen/"`
+ *   `["Read(//Users/mochi/.tram/**)"]`  → `"read files in /Users/mochi/.tram/"`
  *   `["Bash(git *)"]`                    → `"run 'git *' commands"`
  *   `["WebFetch(github.com)"]`            → `"fetch from github.com"`
  *   `["Read"]`                            → `"read files"`
@@ -462,12 +462,12 @@ function cleanPathSpecifier(specifier: string): string {
  * @returns A human-readable description string
  */
 export function buildHumanReadableRuleLabel(rules: string[]): string {
-  if (!rules.length) return '';
+  if (!rules.length) return "";
 
   const parts: string[] = [];
   for (const rule of rules) {
     // Parse "DisplayName(specifier)" or bare "DisplayName"
-    const parenIdx = rule.indexOf('(');
+    const parenIdx = rule.indexOf("(");
     if (parenIdx === -1) {
       // Bare rule like "Read" or "Bash"
       const verb = DISPLAY_NAME_TO_VERB[rule] ?? rule.toLowerCase();
@@ -482,28 +482,28 @@ export function buildHumanReadableRuleLabel(rules: string[]): string {
     const canonicalName = Object.entries(CANONICAL_TO_RULE_DISPLAY).find(
       ([, v]) => v === displayName,
     )?.[0];
-    const kind = canonicalName ? getSpecifierKind(canonicalName) : 'literal';
+    const kind = canonicalName ? getSpecifierKind(canonicalName) : "literal";
 
     switch (kind) {
-      case 'path': {
+      case "path": {
         const cleanPath = cleanPathSpecifier(specifier);
         parts.push(`${verb} in ${cleanPath}`);
         break;
       }
-      case 'command':
+      case "command":
         parts.push(`run '${specifier}' commands`);
         break;
-      case 'domain':
+      case "domain":
         parts.push(`${verb} ${specifier}`);
         break;
-      case 'literal':
+      case "literal":
       default:
         parts.push(`${verb} "${specifier}"`);
         break;
     }
   }
 
-  return parts.join(', ');
+  return parts.join(", ");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -514,7 +514,7 @@ export function buildHumanReadableRuleLabel(rules: string[]): string {
  * Shell operator tokens that act as command boundaries.
  * Ordered by length (longest first) for correct multi-char operator detection.
  */
-const SHELL_OPERATORS = ['&&', '||', ';;', '|&', '|', ';'];
+const SHELL_OPERATORS = ["&&", "||", ";;", "|&", "|", ";"];
 
 /**
  * Split a compound shell command into its individual simple commands
@@ -543,7 +543,7 @@ export function splitCompoundCommand(command: string): string[] {
       escaped = false;
       continue;
     }
-    if (ch === '\\') {
+    if (ch === "\\") {
       escaped = true;
       continue;
     }
@@ -610,17 +610,17 @@ export function matchesCommandPattern(
   const normalizedCommand = stripLeadingVariableAssignments(command);
 
   // Special case: lone `*` matches any single command
-  if (pattern === '*') {
+  if (pattern === "*") {
     return true;
   }
 
-  if (!pattern.includes('*')) {
+  if (!pattern.includes("*")) {
     // No wildcards: prefix matching (backward compat).
     // "git commit" matches "git commit" and "git commit -m test"
     // but NOT "gitcommit".
     return (
       normalizedCommand === pattern ||
-      normalizedCommand.startsWith(pattern + ' ')
+      normalizedCommand.startsWith(pattern + " ")
     );
   }
 
@@ -631,11 +631,11 @@ export function matchesCommandPattern(
   //   - If preceded by a space: the space acts as a word boundary before `.*`
   //   - If preceded by non-space (or at start): `.*` with no boundary constraint
 
-  let regex = '^';
+  let regex = "^";
   let pos = 0;
 
   while (pos < pattern.length) {
-    const starIdx = pattern.indexOf('*', pos);
+    const starIdx = pattern.indexOf("*", pos);
     if (starIdx === -1) {
       // No more wildcards; rest is literal, then allow trailing args
       regex += escapeRegex(pattern.substring(pos));
@@ -645,7 +645,7 @@ export function matchesCommandPattern(
     // Add literal part before the `*`
     const literalBefore = pattern.substring(pos, starIdx);
 
-    if (starIdx > 0 && pattern[starIdx - 1] === ' ') {
+    if (starIdx > 0 && pattern[starIdx - 1] === " ") {
       // Word-boundary wildcard: "ls *"
       // The literal includes the trailing space. The `*` matches
       // anything after that space (including empty = just "ls").
@@ -655,11 +655,11 @@ export function matchesCommandPattern(
       // Rewrite: literal without trailing space + (space + anything | end)
       const literalWithoutTrailingSpace = literalBefore.slice(0, -1);
       regex += escapeRegex(literalWithoutTrailingSpace);
-      regex += '( .*)?';
+      regex += "( .*)?";
     } else {
       // No word boundary: "ls*" → `ls` followed by anything
       regex += escapeRegex(literalBefore);
-      regex += '.*';
+      regex += ".*";
     }
 
     pos = starIdx + 1;
@@ -667,10 +667,10 @@ export function matchesCommandPattern(
 
   // If the pattern does NOT end with `*`, the regex already matches exactly.
   // If it does end with `*`, the trailing `.*` handles it.
-  regex += '$';
+  regex += "$";
 
   try {
-    return new RegExp(regex, 's').test(normalizedCommand);
+    return new RegExp(regex, "s").test(normalizedCommand);
   } catch {
     return normalizedCommand === pattern;
   }
@@ -680,7 +680,7 @@ export function matchesCommandPattern(
  * Escape special regex characters.
  */
 function escapeRegex(s: string): string {
-  return s.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+  return s.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
 }
 
 const ENV_ASSIGNMENT_REGEX = /^[A-Za-z_][A-Za-z0-9_]*=/;
@@ -695,13 +695,13 @@ function stripLeadingVariableAssignments(command: string): string {
     const tokens: string[] = [];
 
     for (const token of parse(trimmed)) {
-      if (typeof token === 'string') {
+      if (typeof token === "string") {
         tokens.push(token);
       } else if (
         token &&
-        typeof token === 'object' &&
-        'op' in token &&
-        typeof token.op === 'string'
+        typeof token === "object" &&
+        "op" in token &&
+        typeof token.op === "string"
       ) {
         tokens.push(token.op);
       }
@@ -715,7 +715,7 @@ function stripLeadingVariableAssignments(command: string): string {
       firstCommandToken++;
     }
 
-    return tokens.slice(firstCommandToken).join(' ');
+    return tokens.slice(firstCommandToken).join(" ");
   } catch {
     return trimmed;
   }
@@ -747,23 +747,23 @@ export function resolvePathPattern(
   projectRoot: string,
   cwd: string,
 ): string {
-  if (specifier.startsWith('//')) {
+  if (specifier.startsWith("//")) {
     // Absolute path from filesystem root: `//path` → `/path`
     return specifier.substring(1);
   }
 
-  if (specifier.startsWith('~/')) {
+  if (specifier.startsWith("~/")) {
     // Relative to home directory
     // Normalize homedir to forward slashes for cross-platform picomatch compatibility
     return toPosixPath(path.join(os.homedir(), specifier.substring(2)));
   }
 
-  if (specifier.startsWith('/')) {
+  if (specifier.startsWith("/")) {
     // Relative to project root (NOT absolute!)
     return toPosixPath(path.join(projectRoot, specifier.substring(1)));
   }
 
-  if (specifier.startsWith('./')) {
+  if (specifier.startsWith("./")) {
     // Relative to current working directory
     return toPosixPath(path.join(cwd, specifier.substring(2)));
   }
@@ -828,7 +828,7 @@ export function matchesDomainPattern(
   domain: string,
 ): boolean {
   // Strip the "domain:" prefix if present
-  const pattern = specifier.startsWith('domain:')
+  const pattern = specifier.startsWith("domain:")
     ? specifier.substring(7).trim()
     : specifier.trim();
 
@@ -845,7 +845,7 @@ export function matchesDomainPattern(
   }
 
   // Subdomain match: "sub.example.com" matches "example.com"
-  if (normalizedDomain.endsWith('.' + normalizedPattern)) {
+  if (normalizedDomain.endsWith("." + normalizedPattern)) {
     return true;
   }
 
@@ -872,15 +872,15 @@ export function matchesMcpPattern(pattern: string, toolName: string): boolean {
   // Wildcard: patterns ending with "*" match by prefix.
   // e.g. "mcp__server__*" matches all tools from that server,
   //      "mcp__chrome__use_*" matches all "use_*" tools from chrome.
-  if (pattern.endsWith('*')) {
+  if (pattern.endsWith("*")) {
     const prefix = pattern.slice(0, -1); // strip trailing "*"
     return toolName.startsWith(prefix);
   }
 
   // Server-level match: "mcp__puppeteer" matches "mcp__puppeteer__anything"
   // Only when the pattern has exactly 2 parts (mcp + server) and the tool has 3+
-  const patternParts = pattern.split('__');
-  const toolParts = toolName.split('__');
+  const patternParts = pattern.split("__");
+  const toolParts = toolName.split("__");
   if (
     patternParts.length === 2 &&
     toolParts.length >= 3 &&
@@ -946,8 +946,8 @@ export function matchesRule(
 
   // ── MCP tool matching ────────────────────────────────────────────────
   if (
-    rule.toolName.startsWith('mcp__') ||
-    canonicalCtxToolName.startsWith('mcp__')
+    rule.toolName.startsWith("mcp__") ||
+    canonicalCtxToolName.startsWith("mcp__")
   ) {
     return matchesMcpPattern(rule.toolName, canonicalCtxToolName);
   }
@@ -966,14 +966,14 @@ export function matchesRule(
   const kind = rule.specifierKind ?? getSpecifierKind(rule.toolName);
 
   switch (kind) {
-    case 'command': {
+    case "command": {
       if (command === undefined) {
         return false;
       }
       return matchesCommandPattern(rule.specifier, command);
     }
 
-    case 'path': {
+    case "path": {
       if (filePath === undefined) {
         return false;
       }
@@ -989,14 +989,14 @@ export function matchesRule(
       );
     }
 
-    case 'domain': {
+    case "domain": {
       if (domain === undefined) {
         return false;
       }
       return matchesDomainPattern(rule.specifier, domain);
     }
 
-    case 'literal':
+    case "literal":
     default: {
       // Literal/exact matching (for Skill names, Agent subagent types, etc.)
       const value = command ?? specifier;

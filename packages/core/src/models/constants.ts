@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DEFAULT_TRAM_MODEL, MAINLINE_CODER_MODEL } from '../config/models.js';
+import { DEFAULT_TRAM_MODEL, MAINLINE_CODER_MODEL } from "../config/models.js";
 
-import type { ModelConfig } from './types.js';
+import type { ModelConfig } from "./types.js";
 
-type AuthType = import('../core/contentGenerator.js').AuthType;
+type AuthType = import("../core/contentGenerator.js").AuthType;
 type ContentGeneratorConfig =
-  import('../core/contentGenerator.js').ContentGeneratorConfig;
+  import("../core/contentGenerator.js").ContentGeneratorConfig;
 
 /**
  * Field keys for model-scoped generation config.
@@ -19,17 +19,17 @@ type ContentGeneratorConfig =
  * usage is type-only and does not emit runtime imports.
  */
 export const MODEL_GENERATION_CONFIG_FIELDS = [
-  'samplingParams',
-  'timeout',
-  'maxRetries',
-  'retryErrorCodes',
-  'enableCacheControl',
-  'schemaCompliance',
-  'reasoning',
-  'contextWindowSize',
-  'customHeaders',
-  'extra_body',
-  'modalities',
+  "samplingParams",
+  "timeout",
+  "maxRetries",
+  "retryErrorCodes",
+  "enableCacheControl",
+  "schemaCompliance",
+  "reasoning",
+  "contextWindowSize",
+  "customHeaders",
+  "extra_body",
+  "modalities",
 ] as const satisfies ReadonlyArray<keyof ContentGeneratorConfig>;
 
 /**
@@ -37,11 +37,11 @@ export const MODEL_GENERATION_CONFIG_FIELDS = [
  * but not ModelGenerationConfig.
  */
 export const CREDENTIAL_FIELDS = [
-  'model',
-  'requestModel',
-  'apiKey',
-  'apiKeyEnvKey',
-  'baseUrl',
+  "model",
+  "requestModel",
+  "apiKey",
+  "apiKeyEnvKey",
+  "baseUrl",
 ] as const satisfies ReadonlyArray<keyof ContentGeneratorConfig>;
 
 /**
@@ -64,26 +64,26 @@ export interface AuthEnvMapping {
 
 export const AUTH_ENV_MAPPINGS = {
   openai: {
-    apiKey: ['OPENAI_API_KEY'],
-    baseUrl: ['OPENAI_BASE_URL'],
-    model: ['OPENAI_MODEL', 'TRAM_MODEL'],
+    apiKey: ["OPENAI_API_KEY"],
+    baseUrl: ["OPENAI_BASE_URL"],
+    model: ["OPENAI_MODEL", "TRAM_MODEL"],
   },
   anthropic: {
-    apiKey: ['ANTHROPIC_API_KEY'],
-    baseUrl: ['ANTHROPIC_BASE_URL'],
-    model: ['ANTHROPIC_MODEL'],
+    apiKey: ["ANTHROPIC_API_KEY"],
+    baseUrl: ["ANTHROPIC_BASE_URL"],
+    model: ["ANTHROPIC_MODEL"],
   },
   gemini: {
-    apiKey: ['GEMINI_API_KEY'],
+    apiKey: ["GEMINI_API_KEY"],
     baseUrl: [],
-    model: ['GEMINI_MODEL'],
+    model: ["GEMINI_MODEL"],
   },
-  'vertex-ai': {
-    apiKey: ['GOOGLE_API_KEY'],
+  "vertex-ai": {
+    apiKey: ["GOOGLE_API_KEY"],
     baseUrl: [],
-    model: ['GOOGLE_MODEL'],
+    model: ["GOOGLE_MODEL"],
   },
-  'tram-oauth': {
+  "tram-oauth": {
     apiKey: [],
     baseUrl: [],
     model: [],
@@ -92,7 +92,7 @@ export const AUTH_ENV_MAPPINGS = {
 
 export const DEFAULT_MODELS = {
   openai: MAINLINE_CODER_MODEL,
-  'tram-oauth': DEFAULT_TRAM_MODEL,
+  "tram-oauth": DEFAULT_TRAM_MODEL,
 } as Partial<Record<AuthType, string>>;
 
 /**
@@ -101,10 +101,10 @@ export const DEFAULT_MODELS = {
  */
 export const TRAM_OAUTH_MODELS: ModelConfig[] = [
   {
-    id: 'coder-model',
-    name: 'coder-model',
+    id: "coder-model",
+    name: "coder-model",
     description:
-      'Qwen 3.6 Plus — efficient hybrid model with leading coding performance',
+      "Qwen 3.6 Plus — efficient hybrid model with leading coding performance",
     capabilities: { vision: true },
   },
 ];

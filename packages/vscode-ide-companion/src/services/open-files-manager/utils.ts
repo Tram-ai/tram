@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import type { File } from '@tram-ai/tram-core/src/ide/types.js';
+import * as vscode from "vscode";
+import type { File } from "@tram-ai/tram-core/src/ide/types.js";
 
 export function isFileUri(uri: vscode.Uri): boolean {
-  return uri.scheme === 'file';
+  return uri.scheme === "file";
 }
 
 export function isNotebookFileUri(uri: vscode.Uri): boolean {
-  return uri.scheme === 'file' && uri.path.toLowerCase().endsWith('.ipynb');
+  return uri.scheme === "file" && uri.path.toLowerCase().endsWith(".ipynb");
 }
 
 export function isNotebookCellUri(uri: vscode.Uri): boolean {
   // Notebook cell URIs have the scheme 'vscode-notebook-cell'
-  return uri.scheme === 'vscode-notebook-cell';
+  return uri.scheme === "vscode-notebook-cell";
 }
 
 export function removeFile(openFiles: File[], uri: vscode.Uri): void {
@@ -61,7 +61,7 @@ export function truncateSelectedText(
     return undefined;
   }
   if (selectedText.length > maxLength) {
-    return selectedText.substring(0, maxLength) + '... [TRUNCATED]';
+    return selectedText.substring(0, maxLength) + "... [TRUNCATED]";
   }
   return selectedText;
 }

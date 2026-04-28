@@ -1,16 +1,16 @@
-import { ChannelBase } from '@qwen-code/channel-base';
+import { ChannelBase } from "@tram-ai/channel-base";
 import type {
   ChannelConfig,
   ChannelBaseOptions,
   Envelope,
   AcpBridge,
-} from '@qwen-code/channel-base';
-import WebSocket from 'ws';
+} from "@tram-ai/channel-base";
+import WebSocket from "ws";
 import type {
   InboundMessage,
   OutboundMessage,
   ChunkMessage,
-} from './protocol.js';
+} from "./protocol.js";
 
 export interface MockPluginConfig extends ChannelConfig {
   serverWsUrl: string;
@@ -35,14 +35,14 @@ export class MockPluginChannel extends ChannelBase {
     return new Promise<void>((resolve, reject) => {
       this.ws = new WebSocket(this.serverWsUrl);
 
-      this.ws.on('open', () => {
+      this.ws.on("open", () => {
         resolve();
       });
 
-      this.ws.on('message', (data: Buffer) => {
+      this.ws.on("message", (data: Buffer) => {
         try {
           const msg = JSON.parse(data.toString()) as InboundMessage;
-          if (msg.type === 'inbound') {
+          if (msg.type === "inbound") {
             this.onInboundMessage(msg);
           }
         } catch {
@@ -50,11 +50,11 @@ export class MockPluginChannel extends ChannelBase {
         }
       });
 
-      this.ws.on('close', () => {
+      this.ws.on("close", () => {
         this.ws = null;
       });
 
-      this.ws.on('error', (err: Error) => {
+      this.ws.on("error", (err: Error) => {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
           reject(err);
         }
@@ -88,8 +88,8 @@ export class MockPluginChannel extends ChannelBase {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
 
     const msg: ChunkMessage = {
-      type: 'chunk',
-      messageId: this.pendingMessageId || 'unknown',
+      type: "chunk",
+      messageId: this.pendingMessageId || "unknown",
       chatId,
       text: chunk,
     };
@@ -110,8 +110,8 @@ export class MockPluginChannel extends ChannelBase {
     }
 
     const outbound: OutboundMessage = {
-      type: 'outbound',
-      messageId: this.pendingMessageId || 'unknown',
+      type: "outbound",
+      messageId: this.pendingMessageId || "unknown",
       chatId,
       text,
     };

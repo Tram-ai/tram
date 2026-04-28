@@ -1,12 +1,12 @@
 /**
  * @license
- * Copyright 2025 Qwen Code
+ * Copyright 2025 TRAM
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MessageBus } from './message-bus.js';
-import { MessageBusType } from './types.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MessageBus } from "./message-bus.js";
+import { MessageBusType } from "./types.js";
 import type {
   HookExecutionRequest,
   HookExecutionResponse,
@@ -14,9 +14,9 @@ import type {
   ToolConfirmationRequest,
   ToolConfirmationResponse,
   ToolExecutionSuccess,
-} from './types.js';
+} from "./types.js";
 
-vi.mock('../utils/debugLogger.js', () => ({
+vi.mock("../utils/debugLogger.js", () => ({
   createDebugLogger: () => ({
     debug: vi.fn(),
     warn: vi.fn(),
@@ -24,11 +24,11 @@ vi.mock('../utils/debugLogger.js', () => ({
   }),
 }));
 
-vi.mock('../utils/safeJsonStringify.js', () => ({
+vi.mock("../utils/safeJsonStringify.js", () => ({
   safeJsonStringify: (obj: unknown) => JSON.stringify(obj),
 }));
 
-describe('MessageBus', () => {
+describe("MessageBus", () => {
   let bus: MessageBus;
 
   beforeEach(() => {
@@ -39,8 +39,8 @@ describe('MessageBus', () => {
     bus.removeAllListeners();
   });
 
-  describe('publish', () => {
-    it('should auto-confirm tool confirmation requests', async () => {
+  describe("publish", () => {
+    it("should auto-confirm tool confirmation requests", async () => {
       const responses: ToolConfirmationResponse[] = [];
       bus.subscribe<ToolConfirmationResponse>(
         MessageBusType.TOOL_CONFIRMATION_RESPONSE,
@@ -49,18 +49,18 @@ describe('MessageBus', () => {
 
       const request: ToolConfirmationRequest = {
         type: MessageBusType.TOOL_CONFIRMATION_REQUEST,
-        toolCall: { name: 'test_tool', args: {} },
-        correlationId: 'test-123',
+        toolCall: { name: "test_tool", args: {} },
+        correlationId: "test-123",
       };
 
       await bus.publish(request);
 
       expect(responses).toHaveLength(1);
       expect(responses[0].confirmed).toBe(true);
-      expect(responses[0].correlationId).toBe('test-123');
+      expect(responses[0].correlationId).toBe("test-123");
     });
 
-    it('should emit hook execution requests directly', async () => {
+    it("should emit hook execution requests directly", async () => {
       const received: HookExecutionRequest[] = [];
       bus.subscribe<HookExecutionRequest>(
         MessageBusType.HOOK_EXECUTION_REQUEST,
@@ -69,19 +69,19 @@ describe('MessageBus', () => {
 
       const request: HookExecutionRequest = {
         type: MessageBusType.HOOK_EXECUTION_REQUEST,
-        eventName: 'UserPromptSubmit',
-        input: { prompt: 'test' },
-        correlationId: 'hook-123',
+        eventName: "UserPromptSubmit",
+        input: { prompt: "test" },
+        correlationId: "hook-123",
       };
 
       await bus.publish(request);
 
       expect(received).toHaveLength(1);
-      expect(received[0].eventName).toBe('UserPromptSubmit');
-      expect(received[0].correlationId).toBe('hook-123');
+      expect(received[0].eventName).toBe("UserPromptSubmit");
+      expect(received[0].correlationId).toBe("hook-123");
     });
 
-    it('should emit other message types directly', async () => {
+    it("should emit other message types directly", async () => {
       const received: ToolExecutionSuccess[] = [];
       bus.subscribe<ToolExecutionSuccess>(
         MessageBusType.TOOL_EXECUTION_SUCCESS,
@@ -90,42 +90,42 @@ describe('MessageBus', () => {
 
       const message: ToolExecutionSuccess = {
         type: MessageBusType.TOOL_EXECUTION_SUCCESS,
-        toolCall: { name: 'test_tool', args: {} },
-        result: { data: 'test' },
+        toolCall: { name: "test_tool", args: {} },
+        result: { data: "test" },
       };
 
       await bus.publish(message);
 
       expect(received).toHaveLength(1);
-      expect(received[0].result).toEqual({ data: 'test' });
+      expect(received[0].result).toEqual({ data: "test" });
     });
 
-    it('should emit error for invalid messages', async () => {
+    it("should emit error for invalid messages", async () => {
       const errors: Error[] = [];
-      bus.on('error', (err) => errors.push(err));
+      bus.on("error", (err) => errors.push(err));
 
       await bus.publish(null as unknown as Message);
 
       expect(errors).toHaveLength(1);
-      expect(errors[0].message).toContain('Invalid message structure');
+      expect(errors[0].message).toContain("Invalid message structure");
     });
 
-    it('should emit error for tool confirmation request without correlationId', async () => {
+    it("should emit error for tool confirmation request without correlationId", async () => {
       const errors: Error[] = [];
-      bus.on('error', (err) => errors.push(err));
+      bus.on("error", (err) => errors.push(err));
 
       await bus.publish({
         type: MessageBusType.TOOL_CONFIRMATION_REQUEST,
-        toolCall: { name: 'test', args: {} },
+        toolCall: { name: "test", args: {} },
       } as unknown as Message);
 
       expect(errors).toHaveLength(1);
-      expect(errors[0].message).toContain('Invalid message structure');
+      expect(errors[0].message).toContain("Invalid message structure");
     });
 
-    it('should emit error for message without type', async () => {
+    it("should emit error for message without type", async () => {
       const errors: Error[] = [];
-      bus.on('error', (err) => errors.push(err));
+      bus.on("error", (err) => errors.push(err));
 
       await bus.publish({} as unknown as Message);
 
@@ -133,8 +133,8 @@ describe('MessageBus', () => {
     });
   });
 
-  describe('subscribe / unsubscribe', () => {
-    it('should subscribe and receive messages', async () => {
+  describe("subscribe / unsubscribe", () => {
+    it("should subscribe and receive messages", async () => {
       const received: HookExecutionResponse[] = [];
       const listener = (msg: HookExecutionResponse) => received.push(msg);
       bus.subscribe<HookExecutionResponse>(
@@ -144,7 +144,7 @@ describe('MessageBus', () => {
 
       const response: HookExecutionResponse = {
         type: MessageBusType.HOOK_EXECUTION_RESPONSE,
-        correlationId: 'resp-123',
+        correlationId: "resp-123",
         success: true,
       };
 
@@ -152,7 +152,7 @@ describe('MessageBus', () => {
       expect(received).toHaveLength(1);
     });
 
-    it('should unsubscribe and stop receiving messages', async () => {
+    it("should unsubscribe and stop receiving messages", async () => {
       const received: HookExecutionResponse[] = [];
       const listener = (msg: HookExecutionResponse) => received.push(msg);
       bus.subscribe<HookExecutionResponse>(
@@ -166,7 +166,7 @@ describe('MessageBus', () => {
 
       const response: HookExecutionResponse = {
         type: MessageBusType.HOOK_EXECUTION_RESPONSE,
-        correlationId: 'resp-123',
+        correlationId: "resp-123",
         success: true,
       };
 
@@ -175,8 +175,8 @@ describe('MessageBus', () => {
     });
   });
 
-  describe('request', () => {
-    it('should correlate request and response', async () => {
+  describe("request", () => {
+    it("should correlate request and response", async () => {
       // Set up a handler that responds to hook execution requests
       bus.subscribe<HookExecutionRequest>(
         MessageBusType.HOOK_EXECUTION_REQUEST,
@@ -185,7 +185,7 @@ describe('MessageBus', () => {
             type: MessageBusType.HOOK_EXECUTION_RESPONSE,
             correlationId: msg.correlationId,
             success: true,
-            output: { result: 'done' },
+            output: { result: "done" },
           });
         },
       );
@@ -196,17 +196,17 @@ describe('MessageBus', () => {
       >(
         {
           type: MessageBusType.HOOK_EXECUTION_REQUEST,
-          eventName: 'TestEvent',
+          eventName: "TestEvent",
           input: {},
         },
         MessageBusType.HOOK_EXECUTION_RESPONSE,
       );
 
       expect(response.success).toBe(true);
-      expect(response.output).toEqual({ result: 'done' });
+      expect(response.output).toEqual({ result: "done" });
     });
 
-    it('should ignore responses with non-matching correlationId', async () => {
+    it("should ignore responses with non-matching correlationId", async () => {
       // Emit a response with wrong correlation ID, then the correct one
       bus.subscribe<HookExecutionRequest>(
         MessageBusType.HOOK_EXECUTION_REQUEST,
@@ -214,7 +214,7 @@ describe('MessageBus', () => {
           // First emit a wrong correlation ID
           void bus.publish({
             type: MessageBusType.HOOK_EXECUTION_RESPONSE,
-            correlationId: 'wrong-id',
+            correlationId: "wrong-id",
             success: false,
           });
           // Then emit the correct one
@@ -232,7 +232,7 @@ describe('MessageBus', () => {
       >(
         {
           type: MessageBusType.HOOK_EXECUTION_REQUEST,
-          eventName: 'TestEvent',
+          eventName: "TestEvent",
           input: {},
         },
         MessageBusType.HOOK_EXECUTION_RESPONSE,
@@ -241,21 +241,21 @@ describe('MessageBus', () => {
       expect(response.success).toBe(true);
     });
 
-    it('should timeout if no response is received', async () => {
+    it("should timeout if no response is received", async () => {
       await expect(
         bus.request<HookExecutionRequest, HookExecutionResponse>(
           {
             type: MessageBusType.HOOK_EXECUTION_REQUEST,
-            eventName: 'TestEvent',
+            eventName: "TestEvent",
             input: {},
           },
           MessageBusType.HOOK_EXECUTION_RESPONSE,
           50, // 50ms timeout
         ),
-      ).rejects.toThrow('Request timed out');
+      ).rejects.toThrow("Request timed out");
     });
 
-    it('should reject immediately when signal is already aborted', async () => {
+    it("should reject immediately when signal is already aborted", async () => {
       const controller = new AbortController();
       controller.abort();
 
@@ -263,23 +263,23 @@ describe('MessageBus', () => {
         bus.request<HookExecutionRequest, HookExecutionResponse>(
           {
             type: MessageBusType.HOOK_EXECUTION_REQUEST,
-            eventName: 'TestEvent',
+            eventName: "TestEvent",
             input: {},
           },
           MessageBusType.HOOK_EXECUTION_RESPONSE,
           5000,
           controller.signal,
         ),
-      ).rejects.toThrow('Request aborted');
+      ).rejects.toThrow("Request aborted");
     });
 
-    it('should reject when signal is aborted during wait', async () => {
+    it("should reject when signal is aborted during wait", async () => {
       const controller = new AbortController();
 
       const promise = bus.request<HookExecutionRequest, HookExecutionResponse>(
         {
           type: MessageBusType.HOOK_EXECUTION_REQUEST,
-          eventName: 'TestEvent',
+          eventName: "TestEvent",
           input: {},
         },
         MessageBusType.HOOK_EXECUTION_RESPONSE,
@@ -290,17 +290,17 @@ describe('MessageBus', () => {
       // Abort after a tick
       setTimeout(() => controller.abort(), 10);
 
-      await expect(promise).rejects.toThrow('Request aborted');
+      await expect(promise).rejects.toThrow("Request aborted");
     });
 
-    it('should auto-confirm tool confirmation via request pattern', async () => {
+    it("should auto-confirm tool confirmation via request pattern", async () => {
       const response = await bus.request<
         ToolConfirmationRequest,
         ToolConfirmationResponse
       >(
         {
           type: MessageBusType.TOOL_CONFIRMATION_REQUEST,
-          toolCall: { name: 'test_tool', args: {} },
+          toolCall: { name: "test_tool", args: {} },
         },
         MessageBusType.TOOL_CONFIRMATION_RESPONSE,
       );
@@ -309,8 +309,8 @@ describe('MessageBus', () => {
     });
   });
 
-  describe('debug mode', () => {
-    it('should create MessageBus with debug enabled', () => {
+  describe("debug mode", () => {
+    it("should create MessageBus with debug enabled", () => {
       const debugBus = new MessageBus(true);
       expect(debugBus).toBeInstanceOf(MessageBus);
       debugBus.removeAllListeners();

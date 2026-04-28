@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { Text, Box } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { colorizeCode } from './CodeColorizer.js';
-import { TableRenderer, type ColumnAlign } from './TableRenderer.js';
-import { RenderInline } from './InlineMarkdownRenderer.js';
-import { useSettings } from '../contexts/SettingsContext.js';
+import React from "react";
+import { Text, Box } from "ink";
+import { theme } from "../semantic-colors.js";
+import { colorizeCode } from "./CodeColorizer.js";
+import { TableRenderer, type ColumnAlign } from "./TableRenderer.js";
+import { RenderInline } from "./InlineMarkdownRenderer.js";
+import { useSettings } from "../contexts/SettingsContext.js";
 
 interface MarkdownDisplayProps {
   text: string;
@@ -53,11 +53,11 @@ const MarkdownDisplayInternal: React.FC<MarkdownDisplayProps> = ({
       .map((cell) => cell.trim())
       .filter((cell) => cell.length > 0)
       .map((cell) => {
-        const startsWithColon = cell.startsWith(':');
-        const endsWithColon = cell.endsWith(':');
-        if (startsWithColon && endsWithColon) return 'center';
-        if (endsWithColon) return 'right';
-        return 'left';
+        const startsWithColon = cell.startsWith(":");
+        const endsWithColon = cell.endsWith(":");
+        if (startsWithColon && endsWithColon) return "center";
+        if (endsWithColon) return "right";
+        return "left";
       });
 
   const contentBlocks: React.ReactNode[] = [];
@@ -65,7 +65,7 @@ const MarkdownDisplayInternal: React.FC<MarkdownDisplayProps> = ({
   let lastLineEmpty = true;
   let codeBlockContent: string[] = [];
   let codeBlockLang: string | null = null;
-  let codeBlockFence = '';
+  let codeBlockFence = "";
   let inTable = false;
   let tableRows: string[][] = [];
   let tableHeaders: string[] = [];
@@ -101,7 +101,7 @@ const MarkdownDisplayInternal: React.FC<MarkdownDisplayProps> = ({
         inCodeBlock = false;
         codeBlockContent = [];
         codeBlockLang = null;
-        codeBlockFence = '';
+        codeBlockFence = "";
       } else {
         codeBlockContent.push(line);
       }
@@ -124,8 +124,8 @@ const MarkdownDisplayInternal: React.FC<MarkdownDisplayProps> = ({
       // Potential table start - check if next line is separator with matching column count
       const potentialHeaders = tableRowMatch[1]
         .split(/(?<!\\)\|/)
-        .map((cell) => cell.trim().replaceAll('\\|', '|'));
-      const nextLine = index + 1 < lines.length ? lines[index + 1]! : '';
+        .map((cell) => cell.trim().replaceAll("\\|", "|"));
+      const nextLine = index + 1 < lines.length ? lines[index + 1]! : "";
       const sepMatch = nextLine.match(tableSeparatorRegex);
       const sepColCount = sepMatch
         ? nextLine
@@ -155,10 +155,10 @@ const MarkdownDisplayInternal: React.FC<MarkdownDisplayProps> = ({
       // Add table row
       const cells = tableRowMatch[1]
         .split(/(?<!\\)\|/)
-        .map((cell) => cell.trim().replaceAll('\\|', '|'));
+        .map((cell) => cell.trim().replaceAll("\\|", "|"));
       // Ensure row has same column count as headers
       while (cells.length < tableHeaders.length) {
-        cells.push('');
+        cells.push("");
       }
       if (cells.length > tableHeaders.length) {
         cells.length = tableHeaders.length;
@@ -357,7 +357,7 @@ const RenderCodeBlockInternal: React.FC<RenderCodeBlockProps> = ({
       }
       const truncatedContent = content.slice(0, MAX_CODE_LINES_WHEN_PENDING);
       const colorizedTruncatedCode = colorizeCode(
-        truncatedContent.join('\n'),
+        truncatedContent.join("\n"),
         lang,
         availableTerminalHeight,
         contentWidth - CODE_BLOCK_PREFIX_PADDING,
@@ -373,7 +373,7 @@ const RenderCodeBlockInternal: React.FC<RenderCodeBlockProps> = ({
     }
   }
 
-  const fullContent = content.join('\n');
+  const fullContent = content.join("\n");
   const colorizedCode = colorizeCode(
     fullContent,
     lang,
@@ -399,7 +399,7 @@ const RenderCodeBlock = React.memo(RenderCodeBlockInternal);
 
 interface RenderListItemProps {
   itemText: string;
-  type: 'ul' | 'ol';
+  type: "ul" | "ol";
   marker: string;
   leadingWhitespace?: string;
   textColor?: string;
@@ -409,10 +409,10 @@ const RenderListItemInternal: React.FC<RenderListItemProps> = ({
   itemText,
   type,
   marker,
-  leadingWhitespace = '',
+  leadingWhitespace = "",
   textColor = theme.text.primary,
 }) => {
-  const prefix = type === 'ol' ? `${marker}. ` : `${marker} `;
+  const prefix = type === "ol" ? `${marker}. ` : `${marker} `;
   const prefixWidth = prefix.length;
   const indentation = leadingWhitespace.length;
 

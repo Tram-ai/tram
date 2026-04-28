@@ -4,23 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import type { PartListUnion } from '@google/genai';
-import type { Config } from '@tram-ai/tram-core';
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import type { PartListUnion } from "@google/genai";
+import type { Config } from "@tram-ai/tram-core";
 import {
   getErrorMessage,
   isNodeError,
   Storage,
   unescapePath,
   readManyFiles,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import type {
   HistoryItemToolGroup,
   HistoryItemWithoutId,
   IndividualToolCallDisplay,
-} from '../types.js';
-import { ToolCallStatus } from '../types.js';
+} from "../types.js";
+import { ToolCallStatus } from "../types.js";
 
 interface HandleAtCommandParams {
   query: string;
@@ -39,7 +39,7 @@ interface HandleAtCommandResult {
 }
 
 interface AtCommandPart {
-  type: 'text' | 'atPath';
+  type: "text" | "atPath";
   content: string;
 }
 
@@ -57,8 +57,8 @@ function parseAllAtCommands(query: string): AtCommandPart[] {
     // Find next unescaped '@'
     while (nextSearchIndex < query.length) {
       if (
-        query[nextSearchIndex] === '@' &&
-        (nextSearchIndex === 0 || query[nextSearchIndex - 1] !== '\\')
+        query[nextSearchIndex] === "@" &&
+        (nextSearchIndex === 0 || query[nextSearchIndex - 1] !== "\\")
       ) {
         atIndex = nextSearchIndex;
         break;
@@ -69,7 +69,7 @@ function parseAllAtCommands(query: string): AtCommandPart[] {
     if (atIndex === -1) {
       // No more @
       if (currentIndex < query.length) {
-        parts.push({ type: 'text', content: query.substring(currentIndex) });
+        parts.push({ type: "text", content: query.substring(currentIndex) });
       }
       break;
     }
@@ -77,7 +77,7 @@ function parseAllAtCommands(query: string): AtCommandPart[] {
     // Add text before @
     if (atIndex > currentIndex) {
       parts.push({
-        type: 'text',
+        type: "text",
         content: query.substring(currentIndex, atIndex),
       });
     }
@@ -89,17 +89,17 @@ function parseAllAtCommands(query: string): AtCommandPart[] {
       const char = query[pathEndIndex];
       if (inEscape) {
         inEscape = false;
-      } else if (char === '\\') {
+      } else if (char === "\\") {
         inEscape = true;
       } else if (/[,\s;!?()[\]{}]/.test(char)) {
         // Path ends at first whitespace or punctuation not escaped
         break;
-      } else if (char === '.') {
+      } else if (char === ".") {
         // For . we need to be more careful - only terminate if followed by whitespace or end of string
         // This allows file extensions like .txt, .js but terminates at sentence endings like "file.txt. Next sentence"
         const nextChar =
-          pathEndIndex + 1 < query.length ? query[pathEndIndex + 1] : '';
-        if (nextChar === '' || /\s/.test(nextChar)) {
+          pathEndIndex + 1 < query.length ? query[pathEndIndex + 1] : "";
+        if (nextChar === "" || /\s/.test(nextChar)) {
           break;
         }
       }
@@ -108,12 +108,12 @@ function parseAllAtCommands(query: string): AtCommandPart[] {
     const rawAtPath = query.substring(atIndex, pathEndIndex);
     // unescapePath expects the @ symbol to be present, and will handle it.
     const atPath = unescapePath(rawAtPath);
-    parts.push({ type: 'atPath', content: atPath });
+    parts.push({ type: "atPath", content: atPath });
     currentIndex = pathEndIndex;
   }
   // Filter out empty text parts that might result from consecutive @paths or leading/trailing spaces
   return parts.filter(
-    (part) => !(part.type === 'text' && part.content.trim() === ''),
+    (part) => !(part.type === "text" && part.content.trim() === ""),
   );
 }
 
@@ -136,14 +136,14 @@ export async function handleAtCommand({
 }: HandleAtCommandParams): Promise<HandleAtCommandResult> {
   const commandParts = parseAllAtCommands(query);
   const atPathCommandParts = commandParts.filter(
-    (part) => part.type === 'atPath',
+    (part) => part.type === "atPath",
   );
 
   const addToolGroup = (result: HandleAtCommandResult): void => {
     if (!addItem) return;
     if (result.toolDisplays && result.toolDisplays.length > 0) {
       const toolGroupItem: HistoryItemToolGroup = {
-        type: 'tool_group',
+        type: "tool_group",
         tools: result.toolDisplays,
       };
       addItem(toolGroupItem, userMessageTimestamp);
@@ -171,9 +171,9 @@ export async function handleAtCommand({
   for (const atPathPart of atPathCommandParts) {
     const originalAtPath = atPathPart.content; // e.g., "@file.txt" or "@"
 
-    if (originalAtPath === '@') {
+    if (originalAtPath === "@") {
       onDebugMessage(
-        'Lone @ detected, will be treated as text in the modified query.',
+        "Lone @ detected, will be treated as text in the modified query.",
       );
       continue;
     }
@@ -187,7 +187,7 @@ export async function handleAtCommand({
     const projectTempDir = Storage.getGlobalTempDir();
     const absolutePathName = path.isAbsolute(pathName)
       ? pathName
-      : path.resolve(workspaceContext.getDirectories()[0] || '', pathName);
+      : path.resolve(workspaceContext.getDirectories()[0] || "", pathName);
 
     if (
       !absolutePathName.startsWith(projectTempDir) &&
@@ -214,14 +214,14 @@ export async function handleAtCommand({
 
     if (gitIgnored || tramIgnored) {
       const reason =
-        gitIgnored && tramIgnored ? 'both' : gitIgnored ? 'git' : 'tram';
+        gitIgnored && tramIgnored ? "both" : gitIgnored ? "git" : "tram";
       ignoredByReason[reason].push(pathName);
       const reasonText =
-        reason === 'both'
-          ? 'ignored by both git and tram'
-          : reason === 'git'
-            ? 'git-ignored'
-            : 'tram-ignored';
+        reason === "both"
+          ? "ignored by both git and tram"
+          : reason === "git"
+            ? "git-ignored"
+            : "tram-ignored";
       onDebugMessage(`Path ${pathName} is ${reasonText} and will be skipped.`);
       continue;
     }
@@ -241,7 +241,7 @@ export async function handleAtCommand({
         }
         resolvedSuccessfully = true;
       } catch (error) {
-        if (isNodeError(error) && error.code === 'ENOENT') {
+        if (isNodeError(error) && error.code === "ENOENT") {
           sawNotFound = true;
           continue;
         } else {
@@ -265,10 +265,10 @@ export async function handleAtCommand({
   }
 
   // Construct the initial part of the query for the LLM
-  let initialQueryText = '';
+  let initialQueryText = "";
   for (let i = 0; i < commandParts.length; i++) {
     const part = commandParts[i];
-    if (part.type === 'text') {
+    if (part.type === "text") {
       initialQueryText += part.content;
     } else {
       // type === 'atPath'
@@ -276,16 +276,16 @@ export async function handleAtCommand({
       if (
         i > 0 &&
         initialQueryText.length > 0 &&
-        !initialQueryText.endsWith(' ')
+        !initialQueryText.endsWith(" ")
       ) {
         // Add space if previous part was text and didn't end with space, or if previous was @path
         const prevPart = commandParts[i - 1];
         if (
-          prevPart.type === 'text' ||
-          (prevPart.type === 'atPath' &&
+          prevPart.type === "text" ||
+          (prevPart.type === "atPath" &&
             atPathToResolvedSpecMap.has(prevPart.content))
         ) {
-          initialQueryText += ' ';
+          initialQueryText += " ";
         }
       }
       if (resolvedSpec) {
@@ -296,10 +296,10 @@ export async function handleAtCommand({
         if (
           i > 0 &&
           initialQueryText.length > 0 &&
-          !initialQueryText.endsWith(' ') &&
-          !part.content.startsWith(' ')
+          !initialQueryText.endsWith(" ") &&
+          !part.content.startsWith(" ")
         ) {
-          initialQueryText += ' ';
+          initialQueryText += " ";
         }
         initialQueryText += part.content;
       }
@@ -309,30 +309,30 @@ export async function handleAtCommand({
 
   // Inform user about ignored paths
   const totalIgnored =
-    ignoredByReason['git'].length +
-    ignoredByReason['tram'].length +
-    ignoredByReason['both'].length;
+    ignoredByReason["git"].length +
+    ignoredByReason["tram"].length +
+    ignoredByReason["both"].length;
 
   if (totalIgnored > 0) {
     const messages = [];
-    if (ignoredByReason['git'].length) {
-      messages.push(`Git-ignored: ${ignoredByReason['git'].join(', ')}`);
+    if (ignoredByReason["git"].length) {
+      messages.push(`Git-ignored: ${ignoredByReason["git"].join(", ")}`);
     }
-    if (ignoredByReason['tram'].length) {
-      messages.push(`TRAM-ignored: ${ignoredByReason['tram'].join(', ')}`);
+    if (ignoredByReason["tram"].length) {
+      messages.push(`TRAM-ignored: ${ignoredByReason["tram"].join(", ")}`);
     }
-    if (ignoredByReason['both'].length) {
-      messages.push(`Ignored by both: ${ignoredByReason['both'].join(', ')}`);
+    if (ignoredByReason["both"].length) {
+      messages.push(`Ignored by both: ${ignoredByReason["both"].join(", ")}`);
     }
 
-    const message = `Ignored ${totalIgnored} files:\n${messages.join('\n')}`;
+    const message = `Ignored ${totalIgnored} files:\n${messages.join("\n")}`;
     onDebugMessage(message);
   }
 
   // Fallback for lone "@" or completely invalid @-commands resulting in empty initialQueryText
   if (pathSpecsToRead.length === 0) {
-    onDebugMessage('No valid file paths found in @ commands to read.');
-    if (initialQueryText === '@' && query.trim() === '@') {
+    onDebugMessage("No valid file paths found in @ commands to read.");
+    if (initialQueryText === "@" && query.trim() === "@") {
       // If the only thing was a lone @, pass original query (which might have spaces)
       return { processedQuery: [{ text: query }], shouldProceed: true };
     } else if (!initialQueryText && query) {
@@ -360,7 +360,7 @@ export async function handleAtCommand({
     const toolCallDisplays: IndividualToolCallDisplay[] = result.files.map(
       (file, index) => ({
         callId: `client-read-${userMessageTimestamp}-${index}`,
-        name: file.isDirectory ? 'Read Directory' : 'Read File',
+        name: file.isDirectory ? "Read Directory" : "Read File",
         description: file.isDirectory
           ? `Read directory ${path.basename(file.filePath)}`
           : `Read file ${path.basename(file.filePath)}`,
@@ -375,7 +375,7 @@ export async function handleAtCommand({
     if (parts.length > 0 && !result.error) {
       // readManyFiles now returns properly formatted parts with headers and prefixes
       for (const part of parts) {
-        if (typeof part === 'string') {
+        if (typeof part === "string") {
           processedQueryParts.push({ text: part });
         } else {
           // part is a Part object (text, inlineData, or fileData)
@@ -383,7 +383,7 @@ export async function handleAtCommand({
         }
       }
     } else {
-      onDebugMessage('readManyFiles returned no content or empty content.');
+      onDebugMessage("readManyFiles returned no content or empty content.");
     }
 
     const processedResult: HandleAtCommandResult = {
@@ -396,7 +396,7 @@ export async function handleAtCommand({
     const chatRecorder = config.getChatRecordingService?.();
     chatRecorder?.recordAtCommand({
       filesRead: contentLabelsForDisplay,
-      status: 'success',
+      status: "success",
       userText: query,
     });
 
@@ -405,20 +405,20 @@ export async function handleAtCommand({
   } catch (error: unknown) {
     const errorToolCallDisplay: IndividualToolCallDisplay = {
       callId: `client-read-${userMessageTimestamp}`,
-      name: 'Read File(s)',
-      description: 'Error attempting to read files',
+      name: "Read File(s)",
+      description: "Error attempting to read files",
       status: ToolCallStatus.Error,
-      resultDisplay: `Error reading files (${contentLabelsForDisplay.join(', ')}): ${getErrorMessage(error)}`,
+      resultDisplay: `Error reading files (${contentLabelsForDisplay.join(", ")}): ${getErrorMessage(error)}`,
       confirmationDetails: undefined,
     };
     const chatRecorder = config.getChatRecordingService?.();
     const errorMessage =
-      typeof errorToolCallDisplay.resultDisplay === 'string'
+      typeof errorToolCallDisplay.resultDisplay === "string"
         ? errorToolCallDisplay.resultDisplay
         : undefined;
     chatRecorder?.recordAtCommand({
       filesRead: contentLabelsForDisplay,
-      status: 'error',
+      status: "error",
       message: errorMessage,
       userText: query,
     });

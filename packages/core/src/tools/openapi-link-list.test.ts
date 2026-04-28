@@ -4,32 +4,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
-import { OpenApiLinkListTool } from './openapi-link-list.js';
+import { describe, it, expect } from "vitest";
+import { OpenApiLinkListTool } from "./openapi-link-list.js";
 
-describe('OpenApiLinkListTool', () => {
-  it('returns all entries by default', async () => {
+describe("OpenApiLinkListTool", () => {
+  it("returns all entries by default", async () => {
     const tool = new OpenApiLinkListTool();
     const invocation = tool.build({});
     const result = await invocation.execute(new AbortController().signal);
 
-    expect(result.returnDisplay).toContain('Modrinth API');
-    expect(result.returnDisplay).toContain('CurseForge API');
-    expect(result.returnDisplay).toContain('SpiGet API');
-    expect(result.returnDisplay).toContain('Hangar API');
-    expect(String(result.llmContent)).toContain('Modrinth API');
+    expect(result.returnDisplay).toContain("Modrinth API");
+    expect(result.returnDisplay).toContain("CurseForge API");
+    expect(result.returnDisplay).toContain("SpiGet API");
+    expect(result.returnDisplay).toContain("Hangar API");
+    expect(String(result.llmContent)).toContain("Modrinth API");
   });
 
-  it('filters entries by keyword', async () => {
+  it("filters entries by keyword", async () => {
     const tool = new OpenApiLinkListTool();
-    const invocation = tool.build({ keyword: 'spigot' });
+    const invocation = tool.build({ keyword: "spigot" });
     const result = await invocation.execute(new AbortController().signal);
 
-    expect(result.returnDisplay).toContain('SpiGet API');
-    expect(result.returnDisplay).not.toContain('MCJars API');
+    expect(result.returnDisplay).toContain("SpiGet API");
+    expect(result.returnDisplay).not.toContain("MCJars API");
   });
 
-  it('validates maxResults as positive integer', () => {
+  it("validates maxResults as positive integer", () => {
     const tool = new OpenApiLinkListTool();
 
     expect(() => tool.build({ maxResults: 0 })).toThrow(

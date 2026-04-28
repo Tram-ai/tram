@@ -13,43 +13,43 @@ const CHUNK_LIMIT = 3800;
 
 function isTableSeparator(line: string): boolean {
   const trimmed = line.trim();
-  if (!trimmed.includes('-')) return false;
+  if (!trimmed.includes("-")) return false;
   const cells = trimmed
-    .replace(/^\|/, '')
-    .replace(/\|$/, '')
-    .split('|')
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
     .map((c) => c.trim());
   return cells.length > 0 && cells.every((c) => /^:?-{3,}:?$/.test(c));
 }
 
 function isTableRow(line: string): boolean {
   const trimmed = line.trim();
-  return trimmed.includes('|') && !trimmed.startsWith('```');
+  return trimmed.includes("|") && !trimmed.startsWith("```");
 }
 
 function parseTableRow(line: string): string[] {
   return line
     .trim()
-    .replace(/^\|/, '')
-    .replace(/\|$/, '')
-    .split('|')
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
     .map((c) => c.trim());
 }
 
 function renderTable(lines: string[]): string {
   const rows = lines.map(parseTableRow).filter((cells) => cells.length > 0);
-  return rows.map((cells) => cells.join(' | ')).join('  \n');
+  return rows.map((cells) => cells.join(" | ")).join("  \n");
 }
 
 export function convertTables(text: string): string {
-  const lines = text.split('\n');
+  const lines = text.split("\n");
   const output: string[] = [];
   let i = 0;
   let inCode = false;
 
   while (i < lines.length) {
-    const line = lines[i] || '';
-    if (line.trim().startsWith('```')) {
+    const line = lines[i] || "";
+    if (line.trim().startsWith("```")) {
       inCode = !inCode;
       output.push(line);
       i++;
@@ -60,12 +60,12 @@ export function convertTables(text: string): string {
       !inCode &&
       i + 1 < lines.length &&
       isTableRow(line) &&
-      isTableSeparator(lines[i + 1] || '')
+      isTableSeparator(lines[i + 1] || "")
     ) {
       const tableLines = [line];
       i += 2; // skip header + separator
-      while (i < lines.length && isTableRow(lines[i] || '')) {
-        tableLines.push(lines[i] || '');
+      while (i < lines.length && isTableRow(lines[i] || "")) {
+        tableLines.push(lines[i] || "");
         i++;
       }
       output.push(renderTable(tableLines));
@@ -76,7 +76,7 @@ export function convertTables(text: string): string {
     i++;
   }
 
-  return output.join('\n');
+  return output.join("\n");
 }
 
 // --- Chunk splitting ---
@@ -87,8 +87,8 @@ export function splitChunks(text: string): string[] {
   }
 
   const chunks: string[] = [];
-  let buf = '';
-  const lines = text.split('\n');
+  let buf = "";
+  const lines = text.split("\n");
   let inCode = false;
 
   for (const line of lines) {
@@ -96,13 +96,13 @@ export function splitChunks(text: string): string[] {
 
     if (buf.length + line.length + 1 > CHUNK_LIMIT && buf.length > 0) {
       if (inCode) {
-        buf += '\n```';
+        buf += "\n```";
       }
       chunks.push(buf);
-      buf = inCode ? '```\n' : '';
+      buf = inCode ? "```\n" : "";
     }
 
-    buf += (buf ? '\n' : '') + line;
+    buf += (buf ? "\n" : "") + line;
 
     if (fenceCount % 2 === 1) {
       inCode = !inCode;
@@ -118,9 +118,9 @@ export function splitChunks(text: string): string[] {
 
 /** Extract a short title from the first line of markdown for the webhook payload. */
 export function extractTitle(text: string): string {
-  const firstLine = text.split('\n')[0] || '';
-  const cleaned = firstLine.replace(/^[#*\s\->]+/, '').slice(0, 20);
-  return cleaned || 'Reply';
+  const firstLine = text.split("\n")[0] || "";
+  const cleaned = firstLine.replace(/^[#*\s\->]+/, "").slice(0, 20);
+  return cleaned || "Reply";
 }
 
 /** Full normalization pipeline: tables → chunks. */

@@ -21,9 +21,9 @@ import type {
   AgentMessage,
   ToolCallConfirmationDetails,
   ToolResultDisplay,
-} from '@qwen-code/qwen-code-core';
-import type { HistoryItem, IndividualToolCallDisplay } from '../../types.js';
-import { ToolCallStatus } from '../../types.js';
+} from "@tram-ai/tram-core";
+import type { HistoryItem, IndividualToolCallDisplay } from "../../types.js";
+import { ToolCallStatus } from "../../types.js";
 
 /**
  * Convert AgentMessage[] + pendingApprovals into HistoryItem[].
@@ -50,33 +50,33 @@ export function agentMessagesToHistoryItems(
     const msg = messages[i]!;
 
     // ── user ──────────────────────────────────────────────────
-    if (msg.role === 'user') {
-      items.push({ type: 'user', text: msg.content, id: nextId++ });
+    if (msg.role === "user") {
+      items.push({ type: "user", text: msg.content, id: nextId++ });
       i++;
 
       // ── assistant ─────────────────────────────────────────────
-    } else if (msg.role === 'assistant') {
-      if (msg.metadata?.['error']) {
-        items.push({ type: 'error', text: msg.content, id: nextId++ });
+    } else if (msg.role === "assistant") {
+      if (msg.metadata?.["error"]) {
+        items.push({ type: "error", text: msg.content, id: nextId++ });
       } else if (msg.thought) {
-        items.push({ type: 'gemini_thought', text: msg.content, id: nextId++ });
+        items.push({ type: "gemini_thought", text: msg.content, id: nextId++ });
       } else {
-        items.push({ type: 'gemini', text: msg.content, id: nextId++ });
+        items.push({ type: "gemini", text: msg.content, id: nextId++ });
       }
       i++;
 
       // ── info / warning / success / error ──────────────────────
-    } else if (msg.role === 'info') {
-      const level = msg.metadata?.['level'] as string | undefined;
+    } else if (msg.role === "info") {
+      const level = msg.metadata?.["level"] as string | undefined;
       const type =
-        level === 'warning' || level === 'success' || level === 'error'
+        level === "warning" || level === "success" || level === "error"
           ? level
-          : 'info';
+          : "info";
       items.push({ type, text: msg.content, id: nextId++ });
       i++;
 
       // ── tool_call / tool_result → tool_group ──────────────────
-    } else if (msg.role === 'tool_call' || msg.role === 'tool_result') {
+    } else if (msg.role === "tool_call" || msg.role === "tool_result") {
       const groupId = nextId++;
 
       const callMap = new Map<
@@ -95,21 +95,21 @@ export function agentMessagesToHistoryItems(
 
       while (
         i < messages.length &&
-        (messages[i]!.role === 'tool_call' ||
-          messages[i]!.role === 'tool_result')
+        (messages[i]!.role === "tool_call" ||
+          messages[i]!.role === "tool_result")
       ) {
         const m = messages[i]!;
-        const callId = (m.metadata?.['callId'] as string) ?? `unknown-${i}`;
+        const callId = (m.metadata?.["callId"] as string) ?? `unknown-${i}`;
 
-        if (m.role === 'tool_call') {
+        if (m.role === "tool_call") {
           if (!callMap.has(callId)) callOrder.push(callId);
           callMap.set(callId, {
             callId,
-            name: (m.metadata?.['toolName'] as string) ?? 'unknown',
-            description: (m.metadata?.['description'] as string) ?? '',
+            name: (m.metadata?.["toolName"] as string) ?? "unknown",
+            description: (m.metadata?.["description"] as string) ?? "",
             resultDisplay: undefined,
             outputFile: undefined,
-            renderOutputAsMarkdown: m.metadata?.['renderOutputAsMarkdown'] as
+            renderOutputAsMarkdown: m.metadata?.["renderOutputAsMarkdown"] as
               | boolean
               | undefined,
             success: undefined,
@@ -117,12 +117,12 @@ export function agentMessagesToHistoryItems(
         } else {
           // tool_result — attach to existing call entry
           const entry = callMap.get(callId);
-          const resultDisplay = m.metadata?.['resultDisplay'] as
+          const resultDisplay = m.metadata?.["resultDisplay"] as
             | ToolResultDisplay
             | string
             | undefined;
-          const outputFile = m.metadata?.['outputFile'] as string | undefined;
-          const success = m.metadata?.['success'] as boolean;
+          const outputFile = m.metadata?.["outputFile"] as string | undefined;
+          const success = m.metadata?.["success"] as boolean;
 
           if (entry) {
             entry.success = success;
@@ -134,8 +134,8 @@ export function agentMessagesToHistoryItems(
             callOrder.push(callId);
             callMap.set(callId, {
               callId,
-              name: (m.metadata?.['toolName'] as string) ?? 'unknown',
-              description: '',
+              name: (m.metadata?.["toolName"] as string) ?? "unknown",
+              description: "",
               resultDisplay,
               outputFile,
               renderOutputAsMarkdown: undefined,
@@ -183,7 +183,7 @@ export function agentMessagesToHistoryItems(
         };
       });
 
-      items.push({ type: 'tool_group', tools, id: groupId });
+      items.push({ type: "tool_group", tools, id: groupId });
     } else {
       // Skip unknown roles
       i++;

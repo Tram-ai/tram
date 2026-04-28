@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
-import * as crypto from 'crypto';
-import { getProjectHash } from '@tram-ai/tram-core/src/utils/paths.js';
-import type { TramSession } from './tramSessionReader.js';
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
+import * as crypto from "crypto";
+import { getProjectHash } from "@tram-ai/tram-core/src/utils/paths.js";
+import type { TramSession } from "./tramSessionReader.js";
 
 /**
  * Tram Session Manager
@@ -24,7 +24,7 @@ export class TramSessionManager {
   private tramDir: string;
 
   constructor() {
-    this.tramDir = path.join(os.homedir(), '.tram');
+    this.tramDir = path.join(os.homedir(), ".tram");
   }
 
   /**
@@ -32,7 +32,7 @@ export class TramSessionManager {
    */
   private getSessionDir(workingDir: string): string {
     const projectHash = getProjectHash(workingDir);
-    const sessionDir = path.join(this.tramDir, 'tmp', projectHash, 'chats');
+    const sessionDir = path.join(this.tramDir, "tmp", projectHash, "chats");
     return sessionDir;
   }
 
@@ -64,13 +64,13 @@ export class TramSessionManager {
         return null;
       }
 
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = fs.readFileSync(filePath, "utf-8");
       const session = JSON.parse(content) as TramSession;
 
       console.log(`[TramSessionManager] Session loaded: ${filePath}`);
       return session;
     } catch (error) {
-      console.error('[TramSessionManager] Failed to load session:', error);
+      console.error("[TramSessionManager] Failed to load session:", error);
       return null;
     }
   }
@@ -92,14 +92,14 @@ export class TramSessionManager {
       const files = fs
         .readdirSync(sessionDir)
         .filter(
-          (file) => file.startsWith('session-') && file.endsWith('.json'),
+          (file) => file.startsWith("session-") && file.endsWith(".json"),
         );
 
       const sessions: TramSession[] = [];
       for (const file of files) {
         try {
           const filePath = path.join(sessionDir, file);
-          const content = fs.readFileSync(filePath, 'utf-8');
+          const content = fs.readFileSync(filePath, "utf-8");
           const session = JSON.parse(content) as TramSession;
           sessions.push(session);
         } catch (error) {
@@ -118,7 +118,7 @@ export class TramSessionManager {
 
       return sessions;
     } catch (error) {
-      console.error('[TramSessionManager] Failed to list sessions:', error);
+      console.error("[TramSessionManager] Failed to list sessions:", error);
       return [];
     }
   }
@@ -144,7 +144,7 @@ export class TramSessionManager {
 
       return false;
     } catch (error) {
-      console.error('[TramSessionManager] Failed to delete session:', error);
+      console.error("[TramSessionManager] Failed to delete session:", error);
       return false;
     }
   }

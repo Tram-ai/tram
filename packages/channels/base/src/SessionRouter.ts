@@ -1,6 +1,6 @@
-import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs';
-import type { SessionScope, SessionTarget } from './types.js';
-import type { AcpBridge } from './AcpBridge.js';
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from "node:fs";
+import type { SessionScope, SessionTarget } from "./types.js";
+import type { AcpBridge } from "./AcpBridge.js";
 
 interface PersistedEntry {
   sessionId: string;
@@ -22,7 +22,7 @@ export class SessionRouter {
   constructor(
     bridge: AcpBridge,
     defaultCwd: string,
-    scope: SessionScope = 'user',
+    scope: SessionScope = "user",
     persistPath?: string,
   ) {
     this.bridge = bridge;
@@ -49,11 +49,11 @@ export class SessionRouter {
   ): string {
     const scope = this.channelScopes.get(channelName) || this.defaultScope;
     switch (scope) {
-      case 'thread':
+      case "thread":
         return `${channelName}:${threadId || chatId}`;
-      case 'single':
+      case "single":
         return `${channelName}:__single__`;
-      case 'user':
+      case "user":
       default:
         return `${channelName}:${senderId}:${chatId}`;
     }
@@ -164,7 +164,7 @@ export class SessionRouter {
 
     let entries: Record<string, PersistedEntry>;
     try {
-      entries = JSON.parse(readFileSync(this.persistPath, 'utf-8'));
+      entries = JSON.parse(readFileSync(this.persistPath, "utf-8"));
     } catch {
       return { restored: 0, failed: 0 };
     }
@@ -226,7 +226,7 @@ export class SessionRouter {
     }
 
     try {
-      writeFileSync(this.persistPath, JSON.stringify(data, null, 2), 'utf-8');
+      writeFileSync(this.persistPath, JSON.stringify(data, null, 2), "utf-8");
     } catch {
       // best-effort — don't break message flow for persistence failure
     }

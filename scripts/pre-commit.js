@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { execSync } from 'node:child_process';
-import lintStaged from 'lint-staged';
+import { execSync } from "node:child_process";
+import lintStaged from "lint-staged";
 
 try {
   // Get repository root
-  const root = execSync('git rev-parse --show-toplevel').toString().trim();
+  const root = execSync("git rev-parse --show-toplevel").toString().trim();
 
   // Run lint-staged with API directly
   const passed = await lintStaged({ cwd: root });

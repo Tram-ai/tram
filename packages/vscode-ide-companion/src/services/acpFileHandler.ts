@@ -10,9 +10,9 @@
  * Responsible for handling file read and write operations in the ACP protocol
  */
 
-import * as path from 'path';
-import * as vscode from 'vscode';
-import { getErrorMessage } from '../utils/errorMessage.js';
+import * as path from "path";
+import * as vscode from "vscode";
+import { getErrorMessage } from "../utils/errorMessage.js";
 
 /**
  * ACP File Operation Handler Class
@@ -57,11 +57,11 @@ export class AcpFileHandler {
       // Handle line offset and limit.
       // ACP spec: `line` is 1-based (first line = 1).
       if (params.line !== null || params.limit !== null) {
-        const lines = content.split('\n');
+        const lines = content.split("\n");
         const startLine = Math.max(0, (params.line ?? 1) - 1);
         const endLine = params.limit ? startLine + params.limit : lines.length;
         const selectedLines = lines.slice(startLine, endLine);
-        const result = { content: selectedLines.join('\n') };
+        const result = { content: selectedLines.join("\n") };
         console.log(`[ACP] Returning ${selectedLines.length} lines`);
         return result;
       }
@@ -76,17 +76,17 @@ export class AcpFileHandler {
       // Detect "file not found" from both Node.js (code === 'ENOENT') and
       // VS Code's FileSystemError.FileNotFound (code === 'FileNotFound').
       const errorCode =
-        typeof error === 'object' && error !== null && 'code' in error
+        typeof error === "object" && error !== null && "code" in error
           ? (error as { code?: unknown }).code
           : undefined;
 
-      if (errorCode === 'ENOENT' || errorCode === 'FileNotFound') {
+      if (errorCode === "ENOENT" || errorCode === "FileNotFound") {
         // Normalise to a Node-style ENOENT so downstream ACP layers
         // (mapReadTextFileError → AcpFileSystemService) can recognise it.
         const enoent = new Error(
           `ENOENT: no such file or directory, open '${params.path}'`,
         ) as NodeJS.ErrnoException;
-        enoent.code = 'ENOENT';
+        enoent.code = "ENOENT";
         enoent.path = params.path;
         throw enoent;
       }
@@ -147,7 +147,7 @@ export class AcpFileHandler {
         edit.replace(uri, fullRange, params.content);
         const applied = await vscode.workspace.applyEdit(edit);
         if (!applied) {
-          throw new Error('WorkspaceEdit was not applied');
+          throw new Error("WorkspaceEdit was not applied");
         }
         const updatedDoc = await vscode.workspace.openTextDocument(uri);
         if (updatedDoc.isDirty) {
@@ -158,7 +158,7 @@ export class AcpFileHandler {
         }
       } else {
         // New file – write UTF-8 bytes directly.
-        const bytes = Buffer.from(params.content, 'utf-8');
+        const bytes = Buffer.from(params.content, "utf-8");
         await vscode.workspace.fs.writeFile(uri, bytes);
       }
 

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import Anthropic from "@anthropic-ai/sdk";
 import type {
   CountTokensParameters,
   CountTokensResponse,
@@ -13,31 +13,31 @@ import type {
   GenerateContentParameters,
   GenerateContentResponseUsageMetadata,
   Part,
-} from '@google/genai';
-import { GenerateContentResponse } from '@google/genai';
-import type { Config } from '../../config/config.js';
+} from "@google/genai";
+import { GenerateContentResponse } from "@google/genai";
+import type { Config } from "../../config/config.js";
 import type {
   ContentGenerator,
   ContentGeneratorConfig,
-} from '../contentGenerator.js';
+} from "../contentGenerator.js";
 type Message = Anthropic.Message;
 type MessageCreateParamsNonStreaming =
   Anthropic.MessageCreateParamsNonStreaming;
 type MessageCreateParamsStreaming = Anthropic.MessageCreateParamsStreaming;
 type RawMessageStreamEvent = Anthropic.RawMessageStreamEvent;
-import { RequestTokenEstimator } from '../../utils/request-tokenizer/index.js';
-import { safeJsonParse } from '../../utils/safeJsonParse.js';
-import { AnthropicContentConverter } from './converter.js';
-import { buildRuntimeFetchOptions } from '../../utils/runtimeFetchOptions.js';
-import { DEFAULT_TIMEOUT } from '../openaiContentGenerator/constants.js';
-import { createDebugLogger } from '../../utils/debugLogger.js';
+import { RequestTokenEstimator } from "../../utils/request-tokenizer/index.js";
+import { safeJsonParse } from "../../utils/safeJsonParse.js";
+import { AnthropicContentConverter } from "./converter.js";
+import { buildRuntimeFetchOptions } from "../../utils/runtimeFetchOptions.js";
+import { DEFAULT_TIMEOUT } from "../openaiContentGenerator/constants.js";
+import { createDebugLogger } from "../../utils/debugLogger.js";
 import {
   tokenLimit,
   CAPPED_DEFAULT_MAX_TOKENS,
   hasExplicitOutputLimit,
-} from '../tokenLimits.js';
+} from "../tokenLimits.js";
 
-const debugLogger = createDebugLogger('ANTHROPIC');
+const debugLogger = createDebugLogger("ANTHROPIC");
 
 type StreamingBlockState = {
   type: string;
@@ -48,10 +48,10 @@ type StreamingBlockState = {
 };
 
 type MessageCreateParamsWithThinking = MessageCreateParamsNonStreaming & {
-  thinking?: { type: 'enabled'; budget_tokens: number };
+  thinking?: { type: "enabled"; budget_tokens: number };
   // Anthropic beta feature: output_config.effort (requires beta header effort-2025-11-24)
   // This is not yet represented in the official SDK types we depend on.
-  output_config?: { effort: 'low' | 'medium' | 'high' };
+  output_config?: { effort: "low" | "medium" | "high" };
 };
 
 export class AnthropicContentGenerator implements ContentGenerator {
@@ -67,7 +67,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
     // Configure runtime options to ensure user-configured timeout works as expected
     // bodyTimeout is always disabled (0) to let Anthropic SDK timeout control the request
     const runtimeOptions = buildRuntimeFetchOptions(
-      'anthropic',
+      "anthropic",
       this.cliConfig.getProxy(),
     );
 
@@ -103,7 +103,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
   ): Promise<AsyncGenerator<GenerateContentResponse>> {
     const anthropicRequest = await this.buildRequest(request);
     const streamingRequest: MessageCreateParamsStreaming & {
-      thinking?: { type: 'enabled'; budget_tokens: number };
+      thinking?: { type: "enabled"; budget_tokens: number };
     } = {
       ...anthropicRequest,
       stream: true,
@@ -116,7 +116,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
       },
     )) as AsyncIterable<RawMessageStreamEvent>;
 
-    return this.processStream(stream);
+    return this.processStream(stream, request);
   }
 
   async countTokens(
@@ -131,8 +131,8 @@ export class AnthropicContentGenerator implements ContentGenerator {
       };
     } catch (error) {
       debugLogger.warn(
-        'Failed to calculate tokens with tokenizer, ' +
-          'falling back to simple method:',
+        "Failed to calculate tokens with tokenizer, " +
+          "falling back to simple method:",
         error,
       );
 
@@ -147,7 +147,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
   async embedContent(
     _request: EmbedContentParameters,
   ): Promise<EmbedContentResponse> {
-    throw new Error('Anthropic does not support embeddings.');
+    throw new Error("Anthropic does not support embeddings.");
   }
 
   useSummarizedThinking(): boolean {
@@ -155,7 +155,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
   }
 
   private buildHeaders(): Record<string, string> {
-    const version = this.cliConfig.getCliVersion() || 'unknown';
+    const version = this.cliConfig.getCliVersion() || "unknown";
     const userAgent = `TramCode/${version} (${process.platform}; ${process.arch})`;
     const { customHeaders } = this.contentGeneratorConfig;
 
@@ -164,20 +164,20 @@ export class AnthropicContentGenerator implements ContentGenerator {
 
     // Interleaved thinking is used when we send the `thinking` field.
     if (reasoning !== false) {
-      betas.push('interleaved-thinking-2025-05-14');
+      betas.push("interleaved-thinking-2025-05-14");
     }
 
     // Effort (beta) is enabled when reasoning.effort is set.
     if (reasoning !== false && reasoning?.effort !== undefined) {
-      betas.push('effort-2025-11-24');
+      betas.push("effort-2025-11-24");
     }
 
     const headers: Record<string, string> = {
-      'User-Agent': userAgent,
+      "User-Agent": userAgent,
     };
 
     if (betas.length) {
-      headers['anthropic-beta'] = betas.join(',');
+      headers["anthropic-beta"] = betas.join(",");
     }
 
     return customHeaders ? { ...headers, ...customHeaders } : headers;
@@ -197,8 +197,19 @@ export class AnthropicContentGenerator implements ContentGenerator {
     const thinking = this.buildThinkingConfig(request);
     const outputConfig = this.buildOutputConfig();
 
+    let effectiveModel =
+      request.model ||
+      this.contentGeneratorConfig.requestModel ||
+      this.contentGeneratorConfig.model;
+    if (request.model) {
+      effectiveModel = this.cliConfig.resolveUpstreamModelId(
+        request.model,
+        this.contentGeneratorConfig.authType,
+      );
+    }
+
     return {
-      model: this.contentGeneratorConfig.model,
+      model: effectiveModel,
       system,
       messages,
       tools,
@@ -229,9 +240,12 @@ export class AnthropicContentGenerator implements ContentGenerator {
     };
 
     // Apply output token limit logic consistent with OpenAI providers
-    const userMaxTokens = getParam<number>('max_tokens', 'maxOutputTokens');
-    const modelId = this.contentGeneratorConfig.model;
-    const modelLimit = tokenLimit(modelId, 'output');
+    const userMaxTokens = getParam<number>("max_tokens", "maxOutputTokens");
+    const modelId =
+      request.model ||
+      this.contentGeneratorConfig.requestModel ||
+      this.contentGeneratorConfig.model;
+    const modelLimit = tokenLimit(modelId, "output");
     const isKnownModel = hasExplicitOutputLimit(modelId);
 
     let maxTokens: number;
@@ -241,7 +255,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
         : userMaxTokens;
     } else {
       // No explicit user config — check env var, then use capped default.
-      const envVal = process.env['QWEN_CODE_MAX_OUTPUT_TOKENS'];
+      const envVal = process.env["QWEN_CODE_MAX_OUTPUT_TOKENS"];
       const envMaxTokens = envVal ? parseInt(envVal, 10) : NaN;
       if (!isNaN(envMaxTokens) && envMaxTokens > 0) {
         maxTokens = isKnownModel
@@ -254,15 +268,15 @@ export class AnthropicContentGenerator implements ContentGenerator {
 
     return {
       max_tokens: maxTokens,
-      temperature: getParam<number>('temperature', 'temperature') ?? 1,
-      top_p: getParam<number>('top_p', 'topP'),
-      top_k: getParam<number>('top_k', 'topK'),
+      temperature: getParam<number>("temperature", "temperature") ?? 1,
+      top_p: getParam<number>("top_p", "topP"),
+      top_k: getParam<number>("top_k", "topK"),
     };
   }
 
   private buildThinkingConfig(
     request: GenerateContentParameters,
-  ): { type: 'enabled'; budget_tokens: number } | undefined {
+  ): { type: "enabled"; budget_tokens: number } | undefined {
     if (request.config?.thinkingConfig?.includeThoughts === false) {
       return undefined;
     }
@@ -275,7 +289,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
 
     if (reasoning?.budget_tokens !== undefined) {
       return {
-        type: 'enabled',
+        type: "enabled",
         budget_tokens: reasoning.budget_tokens,
       };
     }
@@ -283,16 +297,16 @@ export class AnthropicContentGenerator implements ContentGenerator {
     const effort = reasoning?.effort;
     // When using interleaved thinking with tools, this budget token limit is the entire context window(200k tokens).
     const budgetTokens =
-      effort === 'low' ? 16_000 : effort === 'high' ? 64_000 : 32_000;
+      effort === "low" ? 16_000 : effort === "high" ? 64_000 : 32_000;
 
     return {
-      type: 'enabled',
+      type: "enabled",
       budget_tokens: budgetTokens,
     };
   }
 
   private buildOutputConfig():
-    | { effort: 'low' | 'medium' | 'high' }
+    | { effort: "low" | "medium" | "high" }
     | undefined {
     const reasoning = this.contentGeneratorConfig.reasoning;
     if (reasoning === false || reasoning === undefined) {
@@ -308,9 +322,16 @@ export class AnthropicContentGenerator implements ContentGenerator {
 
   private async *processStream(
     stream: AsyncIterable<RawMessageStreamEvent>,
+    request: GenerateContentParameters,
   ): AsyncGenerator<GenerateContentResponse> {
     let messageId: string | undefined;
-    let model = this.contentGeneratorConfig.model;
+    let model = request.model || this.contentGeneratorConfig.model;
+    if (request.model) {
+      model = this.cliConfig.resolveUpstreamModelId(
+        request.model,
+        this.contentGeneratorConfig.authType,
+      );
+    }
     let cachedTokens = 0;
     let promptTokens = 0;
     let completionTokens = 0;
@@ -321,7 +342,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
 
     for await (const event of stream) {
       switch (event.type) {
-        case 'message_start': {
+        case "message_start": {
           messageId = event.message.id ?? messageId;
           model = event.message.model ?? model;
           cachedTokens =
@@ -329,46 +350,46 @@ export class AnthropicContentGenerator implements ContentGenerator {
           promptTokens = event.message.usage?.input_tokens ?? promptTokens;
           break;
         }
-        case 'content_block_start': {
+        case "content_block_start": {
           const index = event.index ?? 0;
-          const type = String(event.content_block.type || 'text');
+          const type = String(event.content_block.type || "text");
           const initialInput =
-            type === 'tool_use' && 'input' in event.content_block
+            type === "tool_use" && "input" in event.content_block
               ? JSON.stringify(event.content_block.input)
-              : '';
+              : "";
           blocks.set(index, {
             type,
             id:
-              'id' in event.content_block ? event.content_block.id : undefined,
+              "id" in event.content_block ? event.content_block.id : undefined,
             name:
-              'name' in event.content_block
+              "name" in event.content_block
                 ? event.content_block.name
                 : undefined,
-            inputJson: initialInput !== '{}' ? initialInput : '',
+            inputJson: initialInput !== "{}" ? initialInput : "",
             signature:
-              type === 'thinking' &&
-              'signature' in event.content_block &&
-              typeof event.content_block.signature === 'string'
+              type === "thinking" &&
+              "signature" in event.content_block &&
+              typeof event.content_block.signature === "string"
                 ? event.content_block.signature
-                : '',
+                : "",
           });
           break;
         }
-        case 'content_block_delta': {
+        case "content_block_delta": {
           const index = event.index ?? 0;
-          const deltaType = (event.delta as { type?: string }).type || '';
+          const deltaType = (event.delta as { type?: string }).type || "";
           const blockState = blocks.get(index);
 
-          if (deltaType === 'text_delta') {
-            const text = 'text' in event.delta ? event.delta.text : '';
+          if (deltaType === "text_delta") {
+            const text = "text" in event.delta ? event.delta.text : "";
             if (text) {
               const chunk = this.buildGeminiChunk({ text }, messageId, model);
               collectedResponses.push(chunk);
               yield chunk;
             }
-          } else if (deltaType === 'thinking_delta') {
+          } else if (deltaType === "thinking_delta") {
             const thinking =
-              (event.delta as { thinking?: string }).thinking || '';
+              (event.delta as { thinking?: string }).thinking || "";
             if (thinking) {
               const chunk = this.buildGeminiChunk(
                 { text: thinking, thought: true },
@@ -378,9 +399,9 @@ export class AnthropicContentGenerator implements ContentGenerator {
               collectedResponses.push(chunk);
               yield chunk;
             }
-          } else if (deltaType === 'signature_delta' && blockState) {
+          } else if (deltaType === "signature_delta" && blockState) {
             const signature =
-              (event.delta as { signature?: string }).signature || '';
+              (event.delta as { signature?: string }).signature || "";
             if (signature) {
               blockState.signature += signature;
               const chunk = this.buildGeminiChunk(
@@ -391,20 +412,20 @@ export class AnthropicContentGenerator implements ContentGenerator {
               collectedResponses.push(chunk);
               yield chunk;
             }
-          } else if (deltaType === 'input_json_delta' && blockState) {
+          } else if (deltaType === "input_json_delta" && blockState) {
             const jsonDelta =
-              (event.delta as { partial_json?: string }).partial_json || '';
+              (event.delta as { partial_json?: string }).partial_json || "";
             if (jsonDelta) {
               blockState.inputJson += jsonDelta;
             }
           }
           break;
         }
-        case 'content_block_stop': {
+        case "content_block_stop": {
           const index = event.index ?? 0;
           const blockState = blocks.get(index);
-          if (blockState?.type === 'tool_use') {
-            const args = safeJsonParse(blockState.inputJson || '{}', {});
+          if (blockState?.type === "tool_use") {
+            const args = safeJsonParse(blockState.inputJson || "{}", {});
             const chunk = this.buildGeminiChunk(
               {
                 functionCall: {
@@ -422,7 +443,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
           blocks.delete(index);
           break;
         }
-        case 'message_delta': {
+        case "message_delta": {
           const stopReasonValue = event.delta.stop_reason;
           if (stopReasonValue) {
             finishReason = stopReasonValue;
@@ -433,22 +454,22 @@ export class AnthropicContentGenerator implements ContentGenerator {
           // Anthropic SDK types only expose `output_tokens` here.
           const usageUnknown = event.usage as unknown;
           const usageRecord =
-            usageUnknown && typeof usageUnknown === 'object'
+            usageUnknown && typeof usageUnknown === "object"
               ? (usageUnknown as Record<string, unknown>)
               : undefined;
 
           if (event.usage?.output_tokens !== undefined) {
             completionTokens = event.usage.output_tokens;
           }
-          if (usageRecord?.['input_tokens'] !== undefined) {
-            const inputTokens = usageRecord['input_tokens'];
-            if (typeof inputTokens === 'number') {
+          if (usageRecord?.["input_tokens"] !== undefined) {
+            const inputTokens = usageRecord["input_tokens"];
+            if (typeof inputTokens === "number") {
               promptTokens = inputTokens;
             }
           }
-          if (usageRecord?.['cache_read_input_tokens'] !== undefined) {
-            const cacheRead = usageRecord['cache_read_input_tokens'];
-            if (typeof cacheRead === 'number') {
+          if (usageRecord?.["cache_read_input_tokens"] !== undefined) {
+            const cacheRead = usageRecord["cache_read_input_tokens"];
+            if (typeof cacheRead === "number") {
               cachedTokens = cacheRead;
             }
           }
@@ -471,7 +492,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
           }
           break;
         }
-        case 'message_stop': {
+        case "message_stop": {
           if (promptTokens || completionTokens) {
             const chunk = this.buildGeminiChunk(
               undefined,
@@ -523,7 +544,7 @@ export class AnthropicContentGenerator implements ContentGenerator {
       {
         content: {
           parts: candidateParts,
-          role: 'model' as const,
+          role: "model" as const,
         },
         index: 0,
         safetyRatings: [],

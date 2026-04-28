@@ -1,7 +1,7 @@
-import type { InsightData } from './types';
+import type { InsightData } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React from 'react';
+import React from "react";
 
 // -----------------------------------------------------------------------------
 // Existing Components
@@ -9,9 +9,9 @@ import React from 'react';
 
 // Dashboard Cards Component
 export function DashboardCards({ insights }: { insights: InsightData }) {
-  const cardClass = 'glass-card p-6';
+  const cardClass = "glass-card p-6";
   const sectionTitleClass =
-    'text-lg font-semibold tracking-tight text-slate-900';
+    "text-lg font-semibold tracking-tight text-slate-900";
 
   return (
     <div className="grid gap-4 md:grid-cols-2 md:gap-6">
@@ -36,28 +36,28 @@ export function ActiveHoursChart({
 }) {
   const phases = [
     {
-      label: 'Morning',
-      time: '06:00 - 12:00',
+      label: "Morning",
+      time: "06:00 - 12:00",
       hours: [6, 7, 8, 9, 10, 11],
-      color: '#fbbf24', // amber-400
+      color: "#fbbf24", // amber-400
     },
     {
-      label: 'Afternoon',
-      time: '12:00 - 18:00',
+      label: "Afternoon",
+      time: "12:00 - 18:00",
       hours: [12, 13, 14, 15, 16, 17],
-      color: '#0ea5e9', // sky-500
+      color: "#0ea5e9", // sky-500
     },
     {
-      label: 'Evening',
-      time: '18:00 - 22:00',
+      label: "Evening",
+      time: "18:00 - 22:00",
       hours: [18, 19, 20, 21],
-      color: '#6366f1', // indigo-500
+      color: "#6366f1", // indigo-500
     },
     {
-      label: 'Night',
-      time: '22:00 - 06:00',
+      label: "Night",
+      time: "22:00 - 06:00",
       hours: [22, 23, 0, 1, 2, 3, 4, 5],
-      color: '#475569', // slate-600
+      color: "#475569", // slate-600
     },
   ];
 
@@ -84,8 +84,8 @@ export function ActiveHoursChart({
                 <span
                   className="rounded-full"
                   style={{
-                    width: '12px',
-                    height: '12px',
+                    width: "12px",
+                    height: "12px",
                     backgroundColor: item.color,
                   }}
                 ></span>
@@ -98,7 +98,7 @@ export function ActiveHoursChart({
             </div>
             <div
               className="w-full rounded-full overflow-hidden"
-              style={{ height: '12px', backgroundColor: '#e2e8f0' }}
+              style={{ height: "12px", backgroundColor: "#e2e8f0" }}
             >
               <div
                 className="h-full rounded-full"
@@ -121,9 +121,9 @@ export function HeatmapSection({
 }: {
   heatmap: Record<string, number>;
 }) {
-  const cardClass = 'glass-card p-6';
+  const cardClass = "glass-card p-6";
   const sectionTitleClass =
-    'text-lg font-semibold tracking-tight text-slate-900';
+    "text-lg font-semibold tracking-tight text-slate-900";
 
   return (
     <div className={`${cardClass} mt-4 md:mt-6`}>
@@ -166,7 +166,7 @@ function ActivityHeatmap({
 
   const colorLevels = [0, 2, 4, 10, 20];
   // GitHub contribution graph color palette (green)
-  const colors = ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
+  const colors = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"];
 
   function getColor(value: number) {
     if (value === 0) return colors[0];
@@ -180,18 +180,18 @@ function ActivityHeatmap({
   const startY = 20;
 
   const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
 
   // Calculate start day of week (0 = Sunday, 1 = Monday, etc.)
@@ -242,7 +242,7 @@ function ActivityHeatmap({
         const x = startX + week * (cellSize + cellPadding);
         const y = startY + day * (cellSize + cellPadding);
 
-        const dateKey = date.toISOString().split('T')[0];
+        const dateKey = date.toISOString().split("T")[0];
         const value = heatmapData[dateKey] || 0;
         const color = getColor(value);
 
@@ -278,7 +278,7 @@ function ActivityHeatmap({
 
 // Heatmap Legend Component (outside SVG)
 function HeatmapLegend() {
-  const colors = ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
+  const colors = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"];
 
   return (
     <div className="flex items-center gap-2 mt-4">
@@ -288,8 +288,8 @@ function HeatmapLegend() {
           key={index}
           className="inline-block rounded"
           style={{
-            width: '10px',
-            height: '10px',
+            width: "10px",
+            height: "10px",
             backgroundColor: color,
           }}
         />

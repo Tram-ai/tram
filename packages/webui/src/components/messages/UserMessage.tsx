@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
-import { CollapsibleFileContent } from './CollapsibleFileContent.js';
+import type { FC } from "react";
+import { CollapsibleFileContent } from "./CollapsibleFileContent.js";
 
 export interface FileContext {
   fileName: string;
@@ -47,16 +47,16 @@ export const UserMessage: FC<UserMessageProps> = ({
   return (
     <div
       className="tram-message user-message-container flex gap-0 my-1 items-start text-left flex-col relative"
-      style={{ position: 'relative' }}
+      style={{ position: "relative" }}
     >
       <div
         className="inline-block relative whitespace-pre-wrap rounded-md max-w-full overflow-x-auto overflow-y-hidden select-text leading-[1.5]"
         style={{
-          border: '1px solid var(--app-input-border)',
-          borderRadius: 'var(--corner-radius-medium)',
-          backgroundColor: 'var(--app-input-background)',
-          padding: '4px 6px',
-          color: 'var(--app-primary-foreground)',
+          border: "1px solid var(--app-input-border)",
+          borderRadius: "var(--corner-radius-medium)",
+          backgroundColor: "var(--app-input-background)",
+          padding: "4px 6px",
+          color: "var(--app-primary-foreground)",
         }}
       >
         <CollapsibleFileContent
@@ -77,8 +77,8 @@ export const UserMessage: FC<UserMessageProps> = ({
             <span
               title={fileContextDisplay}
               style={{
-                fontSize: '12px',
-                color: 'var(--app-secondary-foreground)',
+                fontSize: "12px",
+                color: "var(--app-secondary-foreground)",
               }}
             >
               {fileContextDisplay}

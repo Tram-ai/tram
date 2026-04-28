@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ControlDispatcher } from './ControlDispatcher.js';
-import type { IControlContext } from './ControlContext.js';
-import type { SystemController } from './controllers/systemController.js';
-import type { StreamJsonOutputAdapter } from '../io/StreamJsonOutputAdapter.js';
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { ControlDispatcher } from "./ControlDispatcher.js";
+import type { IControlContext } from "./ControlContext.js";
+import type { SystemController } from "./controllers/systemController.js";
+import type { StreamJsonOutputAdapter } from "../io/StreamJsonOutputAdapter.js";
 import type {
   CLIControlRequest,
   CLIControlResponse,
@@ -19,7 +19,7 @@ import type {
   CLIControlSetModelRequest,
   CLIControlSupportedCommandsRequest,
   CLIControlGetContextUsageRequest,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * Creates a mock control context for testing
@@ -35,12 +35,12 @@ function createMockContext(debugMode: boolean = false): IControlContext {
   };
 
   return {
-    config: mockConfig as unknown as IControlContext['config'],
+    config: mockConfig as unknown as IControlContext["config"],
     streamJson: mockStreamJson,
-    sessionId: 'test-session-id',
+    sessionId: "test-session-id",
     abortSignal: abortController.signal,
     debugMode,
-    permissionMode: 'default',
+    permissionMode: "default",
     sdkMcpServers: new Set<string>(),
     mcpClients: new Map(),
     inputClosed: false,
@@ -58,7 +58,7 @@ function createMockSystemController() {
   } as unknown as SystemController;
 }
 
-describe('ControlDispatcher', () => {
+describe("ControlDispatcher", () => {
   let dispatcher: ControlDispatcher;
   let mockContext: IControlContext;
   let mockSystemController: SystemController;
@@ -68,7 +68,7 @@ describe('ControlDispatcher', () => {
     mockSystemController = createMockSystemController();
 
     // Mock SystemController constructor
-    vi.doMock('./controllers/systemController.js', () => ({
+    vi.doMock("./controllers/systemController.js", () => ({
       SystemController: vi.fn().mockImplementation(() => mockSystemController),
     }));
 
@@ -79,13 +79,13 @@ describe('ControlDispatcher', () => {
     ).systemController = mockSystemController;
   });
 
-  describe('constructor', () => {
-    it('should initialize with context and create controllers', () => {
+  describe("constructor", () => {
+    it("should initialize with context and create controllers", () => {
       expect(dispatcher).toBeDefined();
       expect(dispatcher.systemController).toBeDefined();
     });
 
-    it('should listen to abort signal and shutdown when aborted', () => {
+    it("should listen to abort signal and shutdown when aborted", () => {
       const abortController = new AbortController();
 
       const context = {
@@ -94,7 +94,7 @@ describe('ControlDispatcher', () => {
       };
 
       const newDispatcher = new ControlDispatcher(context);
-      vi.spyOn(newDispatcher, 'shutdown');
+      vi.spyOn(newDispatcher, "shutdown");
 
       abortController.abort();
 
@@ -108,18 +108,18 @@ describe('ControlDispatcher', () => {
     });
   });
 
-  describe('dispatch', () => {
-    it('should route initialize request to system controller', async () => {
+  describe("dispatch", () => {
+    it("should route initialize request to system controller", async () => {
       const request: CLIControlRequest = {
-        type: 'control_request',
-        request_id: 'req-1',
+        type: "control_request",
+        request_id: "req-1",
         request: {
-          subtype: 'initialize',
+          subtype: "initialize",
         } as CLIControlInitializeRequest,
       };
 
       const mockResponse = {
-        subtype: 'initialize',
+        subtype: "initialize",
         capabilities: { test: true },
       };
 
@@ -131,28 +131,28 @@ describe('ControlDispatcher', () => {
 
       expect(mockSystemController.handleRequest).toHaveBeenCalledWith(
         request.request,
-        'req-1',
+        "req-1",
       );
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'success',
-          request_id: 'req-1',
+          subtype: "success",
+          request_id: "req-1",
           response: mockResponse,
         },
       });
     });
 
-    it('should route interrupt request to system controller', async () => {
+    it("should route interrupt request to system controller", async () => {
       const request: CLIControlRequest = {
-        type: 'control_request',
-        request_id: 'req-2',
+        type: "control_request",
+        request_id: "req-2",
         request: {
-          subtype: 'interrupt',
+          subtype: "interrupt",
         } as CLIControlInterruptRequest,
       };
 
-      const mockResponse = { subtype: 'interrupt' };
+      const mockResponse = { subtype: "interrupt" };
 
       vi.mocked(mockSystemController.handleRequest).mockResolvedValue(
         mockResponse,
@@ -162,31 +162,31 @@ describe('ControlDispatcher', () => {
 
       expect(mockSystemController.handleRequest).toHaveBeenCalledWith(
         request.request,
-        'req-2',
+        "req-2",
       );
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'success',
-          request_id: 'req-2',
+          subtype: "success",
+          request_id: "req-2",
           response: mockResponse,
         },
       });
     });
 
-    it('should route set_model request to system controller', async () => {
+    it("should route set_model request to system controller", async () => {
       const request: CLIControlRequest = {
-        type: 'control_request',
-        request_id: 'req-3',
+        type: "control_request",
+        request_id: "req-3",
         request: {
-          subtype: 'set_model',
-          model: 'test-model',
+          subtype: "set_model",
+          model: "test-model",
         } as CLIControlSetModelRequest,
       };
 
       const mockResponse = {
-        subtype: 'set_model',
-        model: 'test-model',
+        subtype: "set_model",
+        model: "test-model",
       };
 
       vi.mocked(mockSystemController.handleRequest).mockResolvedValue(
@@ -197,30 +197,30 @@ describe('ControlDispatcher', () => {
 
       expect(mockSystemController.handleRequest).toHaveBeenCalledWith(
         request.request,
-        'req-3',
+        "req-3",
       );
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'success',
-          request_id: 'req-3',
+          subtype: "success",
+          request_id: "req-3",
           response: mockResponse,
         },
       });
     });
 
-    it('should route supported_commands request to system controller', async () => {
+    it("should route supported_commands request to system controller", async () => {
       const request: CLIControlRequest = {
-        type: 'control_request',
-        request_id: 'req-4',
+        type: "control_request",
+        request_id: "req-4",
         request: {
-          subtype: 'supported_commands',
+          subtype: "supported_commands",
         } as CLIControlSupportedCommandsRequest,
       };
 
       const mockResponse = {
-        subtype: 'supported_commands',
-        commands: ['initialize', 'interrupt'],
+        subtype: "supported_commands",
+        commands: ["initialize", "interrupt"],
       };
 
       vi.mocked(mockSystemController.handleRequest).mockResolvedValue(
@@ -231,30 +231,30 @@ describe('ControlDispatcher', () => {
 
       expect(mockSystemController.handleRequest).toHaveBeenCalledWith(
         request.request,
-        'req-4',
+        "req-4",
       );
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'success',
-          request_id: 'req-4',
+          subtype: "success",
+          request_id: "req-4",
           response: mockResponse,
         },
       });
     });
 
-    it('should route get_context_usage request to system controller', async () => {
+    it("should route get_context_usage request to system controller", async () => {
       const request: CLIControlRequest = {
-        type: 'control_request',
-        request_id: 'req-ctx',
+        type: "control_request",
+        request_id: "req-ctx",
         request: {
-          subtype: 'get_context_usage',
+          subtype: "get_context_usage",
           show_details: false,
         } as CLIControlGetContextUsageRequest,
       };
 
       const mockResponse = {
-        subtype: 'get_context_usage',
+        subtype: "get_context_usage",
         totalTokens: 1000,
       };
 
@@ -266,73 +266,73 @@ describe('ControlDispatcher', () => {
 
       expect(mockSystemController.handleRequest).toHaveBeenCalledWith(
         request.request,
-        'req-ctx',
+        "req-ctx",
       );
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'success',
-          request_id: 'req-ctx',
+          subtype: "success",
+          request_id: "req-ctx",
           response: mockResponse,
         },
       });
     });
 
-    it('should send error response when controller throws error', async () => {
+    it("should send error response when controller throws error", async () => {
       const request: CLIControlRequest = {
-        type: 'control_request',
-        request_id: 'req-5',
+        type: "control_request",
+        request_id: "req-5",
         request: {
-          subtype: 'initialize',
+          subtype: "initialize",
         } as CLIControlInitializeRequest,
       };
 
-      const error = new Error('Test error');
+      const error = new Error("Test error");
       vi.mocked(mockSystemController.handleRequest).mockRejectedValue(error);
 
       await dispatcher.dispatch(request);
 
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'error',
-          request_id: 'req-5',
-          error: 'Test error',
+          subtype: "error",
+          request_id: "req-5",
+          error: "Test error",
         },
       });
     });
 
-    it('should handle non-Error thrown values', async () => {
+    it("should handle non-Error thrown values", async () => {
       const request: CLIControlRequest = {
-        type: 'control_request',
-        request_id: 'req-6',
+        type: "control_request",
+        request_id: "req-6",
         request: {
-          subtype: 'initialize',
+          subtype: "initialize",
         } as CLIControlInitializeRequest,
       };
 
       vi.mocked(mockSystemController.handleRequest).mockRejectedValue(
-        'String error',
+        "String error",
       );
 
       await dispatcher.dispatch(request);
 
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'error',
-          request_id: 'req-6',
-          error: 'String error',
+          subtype: "error",
+          request_id: "req-6",
+          error: "String error",
         },
       });
     });
 
-    it('should send error response for unknown request subtype', async () => {
+    it("should send error response for unknown request subtype", async () => {
       const request = {
-        type: 'control_request' as const,
-        request_id: 'req-7',
+        type: "control_request" as const,
+        request_id: "req-7",
         request: {
-          subtype: 'unknown_subtype',
+          subtype: "unknown_subtype",
         } as unknown as ControlRequestPayload,
       };
 
@@ -340,25 +340,25 @@ describe('ControlDispatcher', () => {
 
       // Dispatch catches errors and sends error response instead of throwing
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'error',
-          request_id: 'req-7',
-          error: 'Unknown control request subtype: unknown_subtype',
+          subtype: "error",
+          request_id: "req-7",
+          error: "Unknown control request subtype: unknown_subtype",
         },
       });
     });
   });
 
-  describe('handleControlResponse', () => {
-    it('should resolve pending outgoing request on success response', () => {
-      const requestId = 'outgoing-req-1';
+  describe("handleControlResponse", () => {
+    it("should resolve pending outgoing request on success response", () => {
+      const requestId = "outgoing-req-1";
       const response: CLIControlResponse = {
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'success',
+          subtype: "success",
           request_id: requestId,
-          response: { result: 'success' },
+          response: { result: "success" },
         },
       };
 
@@ -380,7 +380,7 @@ describe('ControlDispatcher', () => {
         }
       ).registerOutgoingRequest(
         requestId,
-        'SystemController',
+        "SystemController",
         resolve,
         reject,
         timeoutId,
@@ -392,14 +392,14 @@ describe('ControlDispatcher', () => {
       expect(reject).not.toHaveBeenCalled();
     });
 
-    it('should reject pending outgoing request on error response', () => {
-      const requestId = 'outgoing-req-2';
+    it("should reject pending outgoing request on error response", () => {
+      const requestId = "outgoing-req-2";
       const response: CLIControlResponse = {
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'error',
+          subtype: "error",
           request_id: requestId,
-          error: 'Request failed',
+          error: "Request failed",
         },
       };
 
@@ -419,7 +419,7 @@ describe('ControlDispatcher', () => {
         }
       ).registerOutgoingRequest(
         requestId,
-        'SystemController',
+        "SystemController",
         resolve,
         reject,
         timeoutId,
@@ -429,20 +429,20 @@ describe('ControlDispatcher', () => {
 
       expect(reject).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Request failed',
+          message: "Request failed",
         }),
       );
       expect(resolve).not.toHaveBeenCalled();
     });
 
-    it('should handle error object in error response', () => {
-      const requestId = 'outgoing-req-3';
+    it("should handle error object in error response", () => {
+      const requestId = "outgoing-req-3";
       const response: CLIControlResponse = {
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'error',
+          subtype: "error",
           request_id: requestId,
-          error: { message: 'Detailed error', code: 500 },
+          error: { message: "Detailed error", code: 500 },
         },
       };
 
@@ -462,7 +462,7 @@ describe('ControlDispatcher', () => {
         }
       ).registerOutgoingRequest(
         requestId,
-        'SystemController',
+        "SystemController",
         resolve,
         reject,
         timeoutId,
@@ -472,17 +472,17 @@ describe('ControlDispatcher', () => {
 
       expect(reject).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Detailed error',
+          message: "Detailed error",
         }),
       );
     });
 
-    it('should handle response for non-existent pending request gracefully', () => {
+    it("should handle response for non-existent pending request gracefully", () => {
       const response: CLIControlResponse = {
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'success',
-          request_id: 'non-existent',
+          subtype: "success",
+          request_id: "non-existent",
           response: {},
         },
       };
@@ -491,15 +491,15 @@ describe('ControlDispatcher', () => {
       expect(() => dispatcher.handleControlResponse(response)).not.toThrow();
     });
 
-    it('should handle response for non-existent request in debug mode', () => {
+    it("should handle response for non-existent request in debug mode", () => {
       const context = createMockContext(true);
 
       const dispatcherWithDebug = new ControlDispatcher(context);
       const response: CLIControlResponse = {
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'success',
-          request_id: 'non-existent',
+          subtype: "success",
+          request_id: "non-existent",
           response: {},
         },
       };
@@ -511,15 +511,15 @@ describe('ControlDispatcher', () => {
     });
   });
 
-  describe('sendControlRequest', () => {
-    it('should delegate to system controller sendControlRequest', async () => {
+  describe("sendControlRequest", () => {
+    it("should delegate to system controller sendControlRequest", async () => {
       const payload: ControlRequestPayload = {
-        subtype: 'initialize',
+        subtype: "initialize",
       } as CLIControlInitializeRequest;
 
       const expectedResponse: ControlResponse = {
-        subtype: 'success',
-        request_id: 'test-id',
+        subtype: "success",
+        request_id: "test-id",
         response: {},
       };
 
@@ -537,13 +537,13 @@ describe('ControlDispatcher', () => {
     });
   });
 
-  describe('handleCancel', () => {
-    it('should cancel specific incoming request', () => {
-      const requestId = 'cancel-req-1';
+  describe("handleCancel", () => {
+    it("should cancel specific incoming request", () => {
+      const requestId = "cancel-req-1";
       const abortController = new AbortController();
       const timeoutId = setTimeout(() => {}, 1000);
 
-      const abortSpy = vi.spyOn(abortController, 'abort');
+      const abortSpy = vi.spyOn(abortController, "abort");
 
       (
         dispatcher as unknown as {
@@ -556,7 +556,7 @@ describe('ControlDispatcher', () => {
         }
       ).registerIncomingRequest(
         requestId,
-        'SystemController',
+        "SystemController",
         abortController,
         timeoutId,
       );
@@ -565,26 +565,26 @@ describe('ControlDispatcher', () => {
 
       expect(abortSpy).toHaveBeenCalled();
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'error',
+          subtype: "error",
           request_id: requestId,
-          error: 'Request cancelled',
+          error: "Request cancelled",
         },
       });
     });
 
-    it('should cancel all incoming requests when no requestId provided', () => {
-      const requestId1 = 'cancel-req-2';
-      const requestId2 = 'cancel-req-3';
+    it("should cancel all incoming requests when no requestId provided", () => {
+      const requestId1 = "cancel-req-2";
+      const requestId2 = "cancel-req-3";
 
       const abortController1 = new AbortController();
       const abortController2 = new AbortController();
       const timeoutId1 = setTimeout(() => {}, 1000);
       const timeoutId2 = setTimeout(() => {}, 1000);
 
-      const abortSpy1 = vi.spyOn(abortController1, 'abort');
-      const abortSpy2 = vi.spyOn(abortController2, 'abort');
+      const abortSpy1 = vi.spyOn(abortController1, "abort");
+      const abortSpy2 = vi.spyOn(abortController2, "abort");
 
       const register = (
         dispatcher as unknown as {
@@ -597,8 +597,8 @@ describe('ControlDispatcher', () => {
         }
       ).registerIncomingRequest.bind(dispatcher);
 
-      register(requestId1, 'SystemController', abortController1, timeoutId1);
-      register(requestId2, 'SystemController', abortController2, timeoutId2);
+      register(requestId1, "SystemController", abortController1, timeoutId1);
+      register(requestId2, "SystemController", abortController2, timeoutId2);
 
       dispatcher.handleCancel();
 
@@ -606,32 +606,32 @@ describe('ControlDispatcher', () => {
       expect(abortSpy2).toHaveBeenCalled();
       expect(mockContext.streamJson.send).toHaveBeenCalledTimes(2);
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'error',
+          subtype: "error",
           request_id: requestId1,
-          error: 'All requests cancelled',
+          error: "All requests cancelled",
         },
       });
       expect(mockContext.streamJson.send).toHaveBeenCalledWith({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'error',
+          subtype: "error",
           request_id: requestId2,
-          error: 'All requests cancelled',
+          error: "All requests cancelled",
         },
       });
     });
 
-    it('should handle cancel of non-existent request gracefully', () => {
-      expect(() => dispatcher.handleCancel('non-existent')).not.toThrow();
+    it("should handle cancel of non-existent request gracefully", () => {
+      expect(() => dispatcher.handleCancel("non-existent")).not.toThrow();
     });
 
-    it('should cancel request in debug mode without throwing', () => {
+    it("should cancel request in debug mode without throwing", () => {
       const context = createMockContext(true);
 
       const dispatcherWithDebug = new ControlDispatcher(context);
-      const requestId = 'cancel-req-debug';
+      const requestId = "cancel-req-debug";
       const abortController = new AbortController();
       const timeoutId = setTimeout(() => {}, 1000);
 
@@ -646,7 +646,7 @@ describe('ControlDispatcher', () => {
         }
       ).registerIncomingRequest(
         requestId,
-        'SystemController',
+        "SystemController",
         abortController,
         timeoutId,
       );
@@ -655,17 +655,17 @@ describe('ControlDispatcher', () => {
     });
   });
 
-  describe('markInputClosed', () => {
-    it('should reject all pending outgoing requests when input closes', () => {
-      const requestId1 = 'reject-req-1';
-      const requestId2 = 'reject-req-2';
+  describe("markInputClosed", () => {
+    it("should reject all pending outgoing requests when input closes", () => {
+      const requestId1 = "reject-req-1";
+      const requestId2 = "reject-req-2";
       const resolve1 = vi.fn();
       const resolve2 = vi.fn();
       const reject1 = vi.fn();
       const reject2 = vi.fn();
       const timeoutId1 = setTimeout(() => {}, 1000);
       const timeoutId2 = setTimeout(() => {}, 1000);
-      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
 
       const register = (
         dispatcher as unknown as {
@@ -679,32 +679,32 @@ describe('ControlDispatcher', () => {
         }
       ).registerOutgoingRequest.bind(dispatcher);
 
-      register(requestId1, 'SystemController', resolve1, reject1, timeoutId1);
-      register(requestId2, 'SystemController', resolve2, reject2, timeoutId2);
+      register(requestId1, "SystemController", resolve1, reject1, timeoutId1);
+      register(requestId2, "SystemController", resolve2, reject2, timeoutId2);
 
       dispatcher.markInputClosed();
 
       expect(reject1).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'Input closed' }),
+        expect.objectContaining({ message: "Input closed" }),
       );
       expect(reject2).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'Input closed' }),
+        expect.objectContaining({ message: "Input closed" }),
       );
       expect(clearTimeoutSpy).toHaveBeenCalledWith(timeoutId1);
       expect(clearTimeoutSpy).toHaveBeenCalledWith(timeoutId2);
     });
 
-    it('should mark input as closed on context', () => {
+    it("should mark input as closed on context", () => {
       dispatcher.markInputClosed();
       expect(mockContext.inputClosed).toBe(true);
     });
 
-    it('should handle empty pending requests gracefully', () => {
+    it("should handle empty pending requests gracefully", () => {
       expect(() => dispatcher.markInputClosed()).not.toThrow();
     });
 
-    it('should be idempotent when called multiple times', () => {
-      const requestId = 'idempotent-req';
+    it("should be idempotent when called multiple times", () => {
+      const requestId = "idempotent-req";
       const resolve = vi.fn();
       const reject = vi.fn();
       const timeoutId = setTimeout(() => {}, 1000);
@@ -721,7 +721,7 @@ describe('ControlDispatcher', () => {
         }
       ).registerOutgoingRequest(
         requestId,
-        'SystemController',
+        "SystemController",
         resolve,
         reject,
         timeoutId,
@@ -737,11 +737,11 @@ describe('ControlDispatcher', () => {
       expect(secondRejectCount).toBe(firstRejectCount);
     });
 
-    it('should mark input closed in debug mode without throwing', () => {
+    it("should mark input closed in debug mode without throwing", () => {
       const context = createMockContext(true);
 
       const dispatcherWithDebug = new ControlDispatcher(context);
-      const requestId = 'reject-req-debug';
+      const requestId = "reject-req-debug";
       const resolve = vi.fn();
       const reject = vi.fn();
       const timeoutId = setTimeout(() => {}, 1000);
@@ -758,7 +758,7 @@ describe('ControlDispatcher', () => {
         }
       ).registerOutgoingRequest(
         requestId,
-        'SystemController',
+        "SystemController",
         resolve,
         reject,
         timeoutId,
@@ -768,19 +768,19 @@ describe('ControlDispatcher', () => {
     });
   });
 
-  describe('shutdown', () => {
-    it('should cancel all pending incoming requests', () => {
-      const requestId1 = 'shutdown-req-1';
-      const requestId2 = 'shutdown-req-2';
+  describe("shutdown", () => {
+    it("should cancel all pending incoming requests", () => {
+      const requestId1 = "shutdown-req-1";
+      const requestId2 = "shutdown-req-2";
 
       const abortController1 = new AbortController();
       const abortController2 = new AbortController();
       const timeoutId1 = setTimeout(() => {}, 1000);
       const timeoutId2 = setTimeout(() => {}, 1000);
 
-      const abortSpy1 = vi.spyOn(abortController1, 'abort');
-      const abortSpy2 = vi.spyOn(abortController2, 'abort');
-      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
+      const abortSpy1 = vi.spyOn(abortController1, "abort");
+      const abortSpy2 = vi.spyOn(abortController2, "abort");
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
 
       const register = (
         dispatcher as unknown as {
@@ -793,8 +793,8 @@ describe('ControlDispatcher', () => {
         }
       ).registerIncomingRequest.bind(dispatcher);
 
-      register(requestId1, 'SystemController', abortController1, timeoutId1);
-      register(requestId2, 'SystemController', abortController2, timeoutId2);
+      register(requestId1, "SystemController", abortController1, timeoutId1);
+      register(requestId2, "SystemController", abortController2, timeoutId2);
 
       dispatcher.shutdown();
 
@@ -804,16 +804,16 @@ describe('ControlDispatcher', () => {
       expect(clearTimeoutSpy).toHaveBeenCalledWith(timeoutId2);
     });
 
-    it('should reject all pending outgoing requests', () => {
-      const requestId1 = 'outgoing-shutdown-1';
-      const requestId2 = 'outgoing-shutdown-2';
+    it("should reject all pending outgoing requests", () => {
+      const requestId1 = "outgoing-shutdown-1";
+      const requestId2 = "outgoing-shutdown-2";
 
       const reject1 = vi.fn();
       const reject2 = vi.fn();
       const timeoutId1 = setTimeout(() => {}, 1000);
       const timeoutId2 = setTimeout(() => {}, 1000);
 
-      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
 
       const register = (
         dispatcher as unknown as {
@@ -827,26 +827,26 @@ describe('ControlDispatcher', () => {
         }
       ).registerOutgoingRequest.bind(dispatcher);
 
-      register(requestId1, 'SystemController', vi.fn(), reject1, timeoutId1);
-      register(requestId2, 'SystemController', vi.fn(), reject2, timeoutId2);
+      register(requestId1, "SystemController", vi.fn(), reject1, timeoutId1);
+      register(requestId2, "SystemController", vi.fn(), reject2, timeoutId2);
 
       dispatcher.shutdown();
 
       expect(reject1).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Dispatcher shutdown',
+          message: "Dispatcher shutdown",
         }),
       );
       expect(reject2).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Dispatcher shutdown',
+          message: "Dispatcher shutdown",
         }),
       );
       expect(clearTimeoutSpy).toHaveBeenCalledWith(timeoutId1);
       expect(clearTimeoutSpy).toHaveBeenCalledWith(timeoutId2);
     });
 
-    it('should cleanup all controllers', () => {
+    it("should cleanup all controllers", () => {
       vi.mocked(mockSystemController.cleanup).mockImplementation(() => {});
 
       dispatcher.shutdown();
@@ -854,7 +854,7 @@ describe('ControlDispatcher', () => {
       expect(mockSystemController.cleanup).toHaveBeenCalled();
     });
 
-    it('should shutdown in debug mode without throwing', () => {
+    it("should shutdown in debug mode without throwing", () => {
       const context = createMockContext(true);
 
       const dispatcherWithDebug = new ControlDispatcher(context);
@@ -863,10 +863,10 @@ describe('ControlDispatcher', () => {
     });
   });
 
-  describe('pending request registry', () => {
-    describe('registerIncomingRequest', () => {
-      it('should register incoming request', () => {
-        const requestId = 'reg-incoming-1';
+  describe("pending request registry", () => {
+    describe("registerIncomingRequest", () => {
+      it("should register incoming request", () => {
+        const requestId = "reg-incoming-1";
         const abortController = new AbortController();
         const timeoutId = setTimeout(() => {}, 1000);
 
@@ -881,7 +881,7 @@ describe('ControlDispatcher', () => {
           }
         ).registerIncomingRequest(
           requestId,
-          'SystemController',
+          "SystemController",
           abortController,
           timeoutId,
         );
@@ -892,13 +892,13 @@ describe('ControlDispatcher', () => {
       });
     });
 
-    describe('deregisterIncomingRequest', () => {
-      it('should deregister incoming request', () => {
-        const requestId = 'dereg-incoming-1';
+    describe("deregisterIncomingRequest", () => {
+      it("should deregister incoming request", () => {
+        const requestId = "dereg-incoming-1";
         const abortController = new AbortController();
         const timeoutId = setTimeout(() => {}, 1000);
 
-        const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
+        const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
 
         (
           dispatcher as unknown as {
@@ -912,7 +912,7 @@ describe('ControlDispatcher', () => {
           }
         ).registerIncomingRequest(
           requestId,
-          'SystemController',
+          "SystemController",
           abortController,
           timeoutId,
         );
@@ -932,20 +932,20 @@ describe('ControlDispatcher', () => {
         expect(clearTimeoutSpy).toHaveBeenCalledWith(timeoutId);
       });
 
-      it('should handle deregister of non-existent request gracefully', () => {
+      it("should handle deregister of non-existent request gracefully", () => {
         expect(() => {
           (
             dispatcher as unknown as {
               deregisterIncomingRequest: (id: string) => void;
             }
-          ).deregisterIncomingRequest('non-existent');
+          ).deregisterIncomingRequest("non-existent");
         }).not.toThrow();
       });
     });
 
-    describe('registerOutgoingRequest', () => {
-      it('should register outgoing request', () => {
-        const requestId = 'reg-outgoing-1';
+    describe("registerOutgoingRequest", () => {
+      it("should register outgoing request", () => {
+        const requestId = "reg-outgoing-1";
         const resolve = vi.fn();
         const reject = vi.fn();
         const timeoutId = setTimeout(() => {}, 1000);
@@ -962,7 +962,7 @@ describe('ControlDispatcher', () => {
           }
         ).registerOutgoingRequest(
           requestId,
-          'SystemController',
+          "SystemController",
           resolve,
           reject,
           timeoutId,
@@ -970,9 +970,9 @@ describe('ControlDispatcher', () => {
 
         // Verify it was registered by handling a response
         const response: CLIControlResponse = {
-          type: 'control_response',
+          type: "control_response",
           response: {
-            subtype: 'success',
+            subtype: "success",
             request_id: requestId,
             response: {},
           },
@@ -983,14 +983,14 @@ describe('ControlDispatcher', () => {
       });
     });
 
-    describe('deregisterOutgoingRequest', () => {
-      it('should deregister outgoing request', () => {
-        const requestId = 'dereg-outgoing-1';
+    describe("deregisterOutgoingRequest", () => {
+      it("should deregister outgoing request", () => {
+        const requestId = "dereg-outgoing-1";
         const resolve = vi.fn();
         const reject = vi.fn();
         const timeoutId = setTimeout(() => {}, 1000);
 
-        const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
+        const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
 
         (
           dispatcher as unknown as {
@@ -1005,7 +1005,7 @@ describe('ControlDispatcher', () => {
           }
         ).registerOutgoingRequest(
           requestId,
-          'SystemController',
+          "SystemController",
           resolve,
           reject,
           timeoutId,
@@ -1019,9 +1019,9 @@ describe('ControlDispatcher', () => {
 
         // Verify it was deregistered - response should not find it
         const response: CLIControlResponse = {
-          type: 'control_response',
+          type: "control_response",
           response: {
-            subtype: 'success',
+            subtype: "success",
             request_id: requestId,
             response: {},
           },
@@ -1032,13 +1032,13 @@ describe('ControlDispatcher', () => {
         expect(clearTimeoutSpy).toHaveBeenCalledWith(timeoutId);
       });
 
-      it('should handle deregister of non-existent request gracefully', () => {
+      it("should handle deregister of non-existent request gracefully", () => {
         expect(() => {
           (
             dispatcher as unknown as {
               deregisterOutgoingRequest: (id: string) => void;
             }
-          ).deregisterOutgoingRequest('non-existent');
+          ).deregisterOutgoingRequest("non-existent");
         }).not.toThrow();
       });
     });

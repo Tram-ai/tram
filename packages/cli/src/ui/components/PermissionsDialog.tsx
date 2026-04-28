@@ -4,33 +4,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Text } from 'ink';
-import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as nodePath from 'node:path';
-import { theme } from '../semantic-colors.js';
-import { useKeypress } from '../hooks/useKeypress.js';
-import { RadioButtonSelect } from './shared/RadioButtonSelect.js';
-import { useConfig } from '../contexts/ConfigContext.js';
-import { useSettings } from '../contexts/SettingsContext.js';
-import { SettingScope } from '../../config/settings.js';
-import { TextInput } from './shared/TextInput.js';
-import { Colors } from '../colors.js';
-import { t } from '../../i18n/index.js';
+import type React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Box, Text } from "ink";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as nodePath from "node:path";
+import { theme } from "../semantic-colors.js";
+import { useKeypress } from "../hooks/useKeypress.js";
+import { RadioButtonSelect } from "./shared/RadioButtonSelect.js";
+import { useConfig } from "../contexts/ConfigContext.js";
+import { useSettings } from "../contexts/SettingsContext.js";
+import { SettingScope } from "../../config/settings.js";
+import { TextInput } from "./shared/TextInput.js";
+import { Colors } from "../colors.js";
+import { t } from "../../i18n/index.js";
 import type {
   PermissionManager,
   RuleWithSource,
   RuleType,
-} from '@qwen-code/qwen-code-core';
-import { isPathWithinRoot } from '@qwen-code/qwen-code-core';
+} from "@tram-ai/tram-core";
+import { isPathWithinRoot } from "@tram-ai/tram-core";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-type TabId = 'allow' | 'ask' | 'deny' | 'workspace';
+type TabId = "allow" | "ask" | "deny" | "workspace";
 
 interface Tab {
   id: TabId;
@@ -40,13 +40,13 @@ interface Tab {
 
 /** Internal views for the dialog state machine. */
 type DialogView =
-  | 'rule-list' // main rule list view
-  | 'add-rule-input' // text input for new rule
-  | 'add-rule-scope' // scope selector after entering a rule
-  | 'delete-confirm' // confirm rule deletion
-  | 'ws-dir-list' // workspace directory list
-  | 'ws-add-dir-input' // text input for adding a directory
-  | 'ws-remove-confirm'; // confirm directory removal
+  | "rule-list" // main rule list view
+  | "add-rule-input" // text input for new rule
+  | "add-rule-scope" // scope selector after entering a rule
+  | "delete-confirm" // confirm rule deletion
+  | "ws-dir-list" // workspace directory list
+  | "ws-add-dir-input" // text input for adding a directory
+  | "ws-remove-confirm"; // confirm directory removal
 
 // ---------------------------------------------------------------------------
 // Scope items (matches Claude Code screenshot layout)
@@ -62,16 +62,16 @@ interface PermScopeItem {
 function getPermScopeItems(): PermScopeItem[] {
   return [
     {
-      label: t('Project settings'),
-      description: t('Checked in at .qwen/settings.json'),
+      label: t("Project settings"),
+      description: t("Checked in at .tram/settings.json"),
       value: SettingScope.Workspace,
-      key: 'project',
+      key: "project",
     },
     {
-      label: t('User settings'),
-      description: t('Saved in at ~/.qwen/settings.json'),
+      label: t("User settings"),
+      description: t("Saved in at ~/.tram/settings.json"),
       value: SettingScope.User,
-      key: 'user',
+      key: "user",
     },
   ];
 }
@@ -83,24 +83,24 @@ function getPermScopeItems(): PermScopeItem[] {
 function getTabs(): Tab[] {
   return [
     {
-      id: 'allow',
-      label: t('Allow'),
-      description: t("Qwen Code won't ask before using allowed tools."),
+      id: "allow",
+      label: t("Allow"),
+      description: t("TRAM won't ask before using allowed tools."),
     },
     {
-      id: 'ask',
-      label: t('Ask'),
-      description: t('Qwen Code will ask before using these tools.'),
+      id: "ask",
+      label: t("Ask"),
+      description: t("TRAM will ask before using these tools."),
     },
     {
-      id: 'deny',
-      label: t('Deny'),
-      description: t('Qwen Code is not allowed to use denied tools.'),
+      id: "deny",
+      label: t("Deny"),
+      description: t("TRAM is not allowed to use denied tools."),
     },
     {
-      id: 'workspace',
-      label: t('Workspace'),
-      description: t('Manage trusted directories for this workspace.'),
+      id: "workspace",
+      label: t("Workspace"),
+      description: t("Manage trusted directories for this workspace."),
     },
   ];
 }
@@ -111,7 +111,7 @@ function describeRule(raw: string): string {
   const toolName = match[1]!.trim();
   const specifier = match[2]?.trim();
   if (!specifier) {
-    return t('Any use of the {{tool}} tool', { tool: toolName });
+    return t("Any use of the {{tool}} tool", { tool: toolName });
   }
   return t("{{tool}} commands matching '{{pattern}}'", {
     tool: toolName,
@@ -121,12 +121,12 @@ function describeRule(raw: string): string {
 
 function scopeLabel(scope: string): string {
   switch (scope) {
-    case 'user':
-      return t('From user settings');
-    case 'workspace':
-      return t('From project settings');
-    case 'session':
-      return t('From session');
+    case "user":
+      return t("From user settings");
+    case "workspace":
+      return t("From project settings");
+    case "session":
+      return t("From session");
     default:
       return scope;
   }
@@ -158,19 +158,19 @@ export function PermissionsDialog({
 
   // --- Rule list state ---
   const [allRules, setAllRules] = useState<RuleWithSource[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
 
   // --- Dialog view state machine ---
-  const [view, setView] = useState<DialogView>('rule-list');
-  const [newRuleInput, setNewRuleInput] = useState('');
-  const [pendingRuleText, setPendingRuleText] = useState('');
+  const [view, setView] = useState<DialogView>("rule-list");
+  const [newRuleInput, setNewRuleInput] = useState("");
+  const [pendingRuleText, setPendingRuleText] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<RuleWithSource | null>(null);
 
   // --- Workspace directory state ---
   const workspaceContext = config.getWorkspaceContext();
-  const [newDirInput, setNewDirInput] = useState('');
-  const [dirInputError, setDirInputError] = useState('');
+  const [newDirInput, setNewDirInput] = useState("");
+  const [dirInputError, setDirInputError] = useState("");
   const [dirInputRemountKey, setDirInputRemountKey] = useState(0);
   const [completionIndex, setCompletionIndex] = useState(0);
   const [removeDirTarget, setRemoveDirTarget] = useState<string | null>(null);
@@ -203,13 +203,13 @@ export function PermissionsDialog({
   const dirCompletions = useMemo(() => {
     const trimmed = newDirInput.trim();
     if (!trimmed) return [];
-    const expanded = trimmed.startsWith('~')
+    const expanded = trimmed.startsWith("~")
       ? trimmed.replace(/^~/, os.homedir())
       : trimmed;
     const endsWithSep =
-      expanded.endsWith('/') || expanded.endsWith(nodePath.sep);
+      expanded.endsWith("/") || expanded.endsWith(nodePath.sep);
     const searchDir = endsWithSep ? expanded : nodePath.dirname(expanded);
-    const prefix = endsWithSep ? '' : nodePath.basename(expanded);
+    const prefix = endsWithSep ? "" : nodePath.basename(expanded);
     try {
       return fs
         .readdirSync(searchDir, { withFileTypes: true })
@@ -217,7 +217,7 @@ export function PermissionsDialog({
           (e) =>
             e.isDirectory() &&
             e.name.startsWith(prefix) &&
-            !e.name.startsWith('.'),
+            !e.name.startsWith("."),
         )
         .map((e) => nodePath.join(searchDir, e.name))
         .slice(0, 6);
@@ -229,7 +229,7 @@ export function PermissionsDialog({
   const handleDirInputChange = useCallback(
     (text: string) => {
       setNewDirInput(text);
-      if (dirInputError) setDirInputError('');
+      if (dirInputError) setDirInputError("");
     },
     [dirInputError],
   );
@@ -242,7 +242,7 @@ export function PermissionsDialog({
   const handleDirTabComplete = useCallback(() => {
     const selected = dirCompletions[completionIndex] ?? dirCompletions[0];
     if (selected) {
-      setNewDirInput(selected + '/');
+      setNewDirInput(selected + "/");
       setDirInputRemountKey((k) => k + 1);
     }
   }, [dirCompletions, completionIndex]);
@@ -267,9 +267,9 @@ export function PermissionsDialog({
     }> = [];
     // 'Add directory…' always FIRST
     items.push({
-      label: t('Add directory…'),
-      value: '__add_dir__',
-      key: '__add_dir__',
+      label: t("Add directory…"),
+      value: "__add_dir__",
+      key: "__add_dir__",
     });
     // Only show non-initial (runtime-added) directories in the selectable list
     for (const dir of directories) {
@@ -286,15 +286,15 @@ export function PermissionsDialog({
 
   const handleDirListSelect = useCallback(
     (value: string) => {
-      if (value === '__add_dir__') {
-        setNewDirInput('');
-        setView('ws-add-dir-input');
+      if (value === "__add_dir__") {
+        setNewDirInput("");
+        setView("ws-add-dir-input");
         return;
       }
       // Selecting a directory → offer to remove if not initial
       if (!initialDirs.has(value)) {
         setRemoveDirTarget(value);
-        setView('ws-remove-confirm');
+        setView("ws-remove-confirm");
       }
     },
     [initialDirs],
@@ -304,7 +304,7 @@ export function PermissionsDialog({
     const trimmed = newDirInput.trim();
     if (!trimmed) return;
 
-    const expanded = trimmed.startsWith('~')
+    const expanded = trimmed.startsWith("~")
       ? trimmed.replace(/^~/, os.homedir())
       : trimmed;
     const absoluteExpanded = nodePath.isAbsolute(expanded)
@@ -313,11 +313,11 @@ export function PermissionsDialog({
 
     // Existence & type checks
     if (!fs.existsSync(absoluteExpanded)) {
-      setDirInputError(t('Directory does not exist.'));
+      setDirInputError(t("Directory does not exist."));
       return;
     }
     if (!fs.statSync(absoluteExpanded).isDirectory()) {
-      setDirInputError(t('Path is not a directory.'));
+      setDirInputError(t("Path is not a directory."));
       return;
     }
 
@@ -331,7 +331,7 @@ export function PermissionsDialog({
 
     // Validate: exact duplicate
     if ((directories as string[]).includes(resolved)) {
-      setDirInputError(t('This directory is already in the workspace.'));
+      setDirInputError(t("This directory is already in the workspace."));
       return;
     }
 
@@ -339,7 +339,7 @@ export function PermissionsDialog({
     for (const existingDir of directories) {
       if (isPathWithinRoot(resolved, existingDir)) {
         setDirInputError(
-          t('Already covered by existing directory: {{dir}}', {
+          t("Already covered by existing directory: {{dir}}", {
             dir: existingDir,
           }),
         );
@@ -347,17 +347,17 @@ export function PermissionsDialog({
       }
     }
 
-    setDirInputError('');
+    setDirInputError("");
 
     // Add to workspace context (already validated)
     workspaceContext.addDirectory(resolved);
 
     // Persist directly to project (Workspace) settings
-    const key = 'context.includeDirectories';
+    const key = "context.includeDirectories";
     const currentDirs = (settings.merged as Record<string, unknown>)[
-      'context'
+      "context"
     ] as Record<string, string[]> | undefined;
-    const existingDirs = currentDirs?.['includeDirectories'] ?? [];
+    const existingDirs = currentDirs?.["includeDirectories"] ?? [];
     if (!existingDirs.includes(resolved)) {
       settings.setValue(SettingScope.Workspace, key, [
         ...existingDirs,
@@ -366,8 +366,8 @@ export function PermissionsDialog({
     }
 
     setDirRefreshKey((k) => k + 1);
-    setView('ws-dir-list');
-    setNewDirInput('');
+    setView("ws-dir-list");
+    setNewDirInput("");
   }, [newDirInput, directories, workspaceContext, settings]);
 
   const handleRemoveDirConfirm = useCallback(() => {
@@ -380,24 +380,24 @@ export function PermissionsDialog({
     for (const scope of [SettingScope.User, SettingScope.Workspace]) {
       const scopeSettings = settings.forScope(scope).settings;
       const contextSection = (scopeSettings as Record<string, unknown>)[
-        'context'
+        "context"
       ] as Record<string, string[]> | undefined;
-      const scopeDirs = contextSection?.['includeDirectories'];
+      const scopeDirs = contextSection?.["includeDirectories"];
       if (scopeDirs?.includes(removeDirTarget)) {
         const updated = scopeDirs.filter((d: string) => d !== removeDirTarget);
-        settings.setValue(scope, 'context.includeDirectories', updated);
+        settings.setValue(scope, "context.includeDirectories", updated);
         break;
       }
     }
 
     setDirRefreshKey((k) => k + 1);
     setRemoveDirTarget(null);
-    setView('ws-dir-list');
+    setView("ws-dir-list");
   }, [removeDirTarget, workspaceContext, settings]);
 
   // Filter rules for current tab
   const currentTabRules = useMemo(() => {
-    if (activeTab.id === 'workspace') return [];
+    if (activeTab.id === "workspace") return [];
     return allRules.filter((r) => r.type === activeTab.id);
   }, [allRules, activeTab.id]);
 
@@ -420,9 +420,9 @@ export function PermissionsDialog({
       key: string;
     }> = [
       {
-        label: t('Add a new rule…'),
-        value: '__add__',
-        key: '__add__',
+        label: t("Add a new rule…"),
+        value: "__add__",
+        key: "__add__",
       },
     ];
     for (const r of filteredRules) {
@@ -441,28 +441,28 @@ export function PermissionsDialog({
     (direction: 1 | -1) => {
       const newIndex = (activeTabIndex + direction + tabs.length) % tabs.length;
       setActiveTabIndex(newIndex);
-      setSearchQuery('');
+      setSearchQuery("");
       setIsSearchActive(false);
-      setDirInputError('');
+      setDirInputError("");
       // Set the appropriate default view for each tab
       const newTab = tabs[newIndex]!;
-      setView(newTab.id === 'workspace' ? 'ws-dir-list' : 'rule-list');
+      setView(newTab.id === "workspace" ? "ws-dir-list" : "rule-list");
     },
     [activeTabIndex, tabs],
   );
 
   const handleListSelect = useCallback(
     (value: string) => {
-      if (value === '__add__') {
-        setNewRuleInput('');
-        setView('add-rule-input');
+      if (value === "__add__") {
+        setNewRuleInput("");
+        setView("add-rule-input");
         return;
       }
       // Selecting an existing rule → offer to delete
       const found = filteredRules.find((r) => r.rule.raw === value);
       if (found) {
         setDeleteTarget(found);
-        setView('delete-confirm');
+        setView("delete-confirm");
       }
     },
     [filteredRules],
@@ -472,12 +472,12 @@ export function PermissionsDialog({
     const trimmed = newRuleInput.trim();
     if (!trimmed) return;
     setPendingRuleText(trimmed);
-    setView('add-rule-scope');
+    setView("add-rule-scope");
   }, [newRuleInput]);
 
   const handleScopeSelect = useCallback(
     (scope: SettingScope) => {
-      if (!pm || activeTab.id === 'workspace') return;
+      if (!pm || activeTab.id === "workspace") return;
       const ruleType = activeTab.id as RuleType;
 
       // Add to PermissionManager in-memory
@@ -486,7 +486,7 @@ export function PermissionsDialog({
       // Persist to settings file (with dedup)
       const key = `permissions.${ruleType}`;
       const perms = (settings.merged as Record<string, unknown>)[
-        'permissions'
+        "permissions"
       ] as Record<string, string[]> | undefined;
       const currentRules = perms?.[ruleType] ?? [];
       if (!currentRules.includes(pendingRuleText)) {
@@ -495,8 +495,8 @@ export function PermissionsDialog({
 
       // Refresh and go back
       refreshRules();
-      setView('rule-list');
-      setPendingRuleText('');
+      setView("rule-list");
+      setPendingRuleText("");
     },
     [pm, activeTab.id, pendingRuleText, settings, refreshRules],
   );
@@ -513,7 +513,7 @@ export function PermissionsDialog({
     for (const scope of [SettingScope.User, SettingScope.Workspace]) {
       const scopeSettings = settings.forScope(scope).settings;
       const perms = (scopeSettings as Record<string, unknown>)[
-        'permissions'
+        "permissions"
       ] as Record<string, string[]> | undefined;
       const scopeRules = perms?.[ruleType];
       if (scopeRules?.includes(deleteTarget.rule.raw)) {
@@ -527,33 +527,33 @@ export function PermissionsDialog({
 
     refreshRules();
     setDeleteTarget(null);
-    setView('rule-list');
+    setView("rule-list");
   }, [pm, deleteTarget, settings, refreshRules]);
 
   // --- Keypress handling ---
 
   useKeypress(
     (key) => {
-      if (view === 'rule-list') {
-        if (key.name === 'escape') {
+      if (view === "rule-list") {
+        if (key.name === "escape") {
           if (isSearchActive && searchQuery) {
-            setSearchQuery('');
+            setSearchQuery("");
             setIsSearchActive(false);
           } else {
             onExit();
           }
           return;
         }
-        if (key.name === 'tab') {
+        if (key.name === "tab") {
           handleTabCycle(1);
           return;
         }
-        if (key.name === 'right' || key.name === 'left') {
-          handleTabCycle(key.name === 'right' ? 1 : -1);
+        if (key.name === "right" || key.name === "left") {
+          handleTabCycle(key.name === "right" ? 1 : -1);
           return;
         }
         // Search input: backspace
-        if (key.name === 'backspace' || key.name === 'delete') {
+        if (key.name === "backspace" || key.name === "delete") {
           if (searchQuery.length > 0) {
             setSearchQuery((prev) => prev.slice(0, -1));
           }
@@ -565,65 +565,65 @@ export function PermissionsDialog({
           !key.ctrl &&
           !key.meta &&
           key.sequence.length === 1 &&
-          key.sequence >= ' '
+          key.sequence >= " "
         ) {
           setSearchQuery((prev) => prev + key.sequence);
           setIsSearchActive(true);
           return;
         }
       }
-      if (view === 'add-rule-input') {
-        if (key.name === 'escape') {
-          setView('rule-list');
+      if (view === "add-rule-input") {
+        if (key.name === "escape") {
+          setView("rule-list");
           return;
         }
       }
-      if (view === 'add-rule-scope') {
-        if (key.name === 'escape') {
-          setView('add-rule-input');
+      if (view === "add-rule-scope") {
+        if (key.name === "escape") {
+          setView("add-rule-input");
           return;
         }
       }
-      if (view === 'delete-confirm') {
-        if (key.name === 'escape') {
+      if (view === "delete-confirm") {
+        if (key.name === "escape") {
           setDeleteTarget(null);
-          setView('rule-list');
+          setView("rule-list");
           return;
         }
-        if (key.name === 'return') {
+        if (key.name === "return") {
           handleDeleteConfirm();
           return;
         }
       }
       // Workspace tab views
-      if (view === 'ws-dir-list') {
-        if (key.name === 'escape') {
+      if (view === "ws-dir-list") {
+        if (key.name === "escape") {
           onExit();
           return;
         }
-        if (key.name === 'tab') {
+        if (key.name === "tab") {
           handleTabCycle(1);
           return;
         }
-        if (key.name === 'right' || key.name === 'left') {
-          handleTabCycle(key.name === 'right' ? 1 : -1);
+        if (key.name === "right" || key.name === "left") {
+          handleTabCycle(key.name === "right" ? 1 : -1);
           return;
         }
       }
-      if (view === 'ws-add-dir-input') {
-        if (key.name === 'escape') {
-          setDirInputError('');
-          setView('ws-dir-list');
+      if (view === "ws-add-dir-input") {
+        if (key.name === "escape") {
+          setDirInputError("");
+          setView("ws-dir-list");
           return;
         }
       }
-      if (view === 'ws-remove-confirm') {
-        if (key.name === 'escape') {
+      if (view === "ws-remove-confirm") {
+        if (key.name === "escape") {
           setRemoveDirTarget(null);
-          setView('ws-dir-list');
+          setView("ws-dir-list");
           return;
         }
-        if (key.name === 'return') {
+        if (key.name === "return") {
           handleRemoveDirConfirm();
           return;
         }
@@ -633,20 +633,20 @@ export function PermissionsDialog({
   );
 
   // --- Workspace tab: add directory input ---
-  if (activeTab.id === 'workspace' && view === 'ws-add-dir-input') {
+  if (activeTab.id === "workspace" && view === "ws-add-dir-input") {
     return (
       <Box flexDirection="column">
         <Text bold color={theme.text.accent}>
-          {t('Add directory to workspace')}
+          {t("Add directory to workspace")}
         </Text>
         <Box height={1} />
         <Text color={theme.text.secondary} wrap="wrap">
           {t(
-            'Qwen Code will be able to read files in this directory and make edits when auto-accept edits is on.',
+            "TRAM will be able to read files in this directory and make edits when auto-accept edits is on.",
           )}
         </Text>
         <Box height={1} />
-        <Text>{t('Enter the path to the directory:')}</Text>
+        <Text>{t("Enter the path to the directory:")}</Text>
         <Box
           borderStyle="round"
           borderColor={theme.border.default}
@@ -664,7 +664,7 @@ export function PermissionsDialog({
             onDown={
               dirCompletions.length > 0 ? handleDirCompletionDown : undefined
             }
-            placeholder={t('Enter directory path…')}
+            placeholder={t("Enter directory path…")}
             isActive={true}
             validationErrors={dirInputError ? [dirInputError] : []}
           />
@@ -693,7 +693,7 @@ export function PermissionsDialog({
         )}
         <Box marginTop={1}>
           <Text color={theme.text.secondary}>
-            {t('Tab to complete · Enter to add · Esc to cancel')}
+            {t("Tab to complete · Enter to add · Esc to cancel")}
           </Text>
         </Box>
       </Box>
@@ -702,8 +702,8 @@ export function PermissionsDialog({
 
   // --- Workspace tab: remove directory confirmation ---
   if (
-    activeTab.id === 'workspace' &&
-    view === 'ws-remove-confirm' &&
+    activeTab.id === "workspace" &&
+    view === "ws-remove-confirm" &&
     removeDirTarget
   ) {
     return (
@@ -714,7 +714,7 @@ export function PermissionsDialog({
           flexDirection="column"
           padding={1}
         >
-          <Text bold>{t('Remove directory?')}</Text>
+          <Text bold>{t("Remove directory?")}</Text>
           <Box height={1} />
           <Box marginLeft={2} flexDirection="column">
             <Text bold>{removeDirTarget}</Text>
@@ -722,13 +722,13 @@ export function PermissionsDialog({
           <Box height={1} />
           <Text>
             {t(
-              'Are you sure you want to remove this directory from the workspace?',
+              "Are you sure you want to remove this directory from the workspace?",
             )}
           </Text>
         </Box>
         <Box marginTop={1} marginLeft={1}>
           <Text color={theme.text.secondary}>
-            {t('Enter to confirm · Esc to cancel')}
+            {t("Enter to confirm · Esc to cancel")}
           </Text>
         </Box>
       </Box>
@@ -736,26 +736,26 @@ export function PermissionsDialog({
   }
 
   // --- Workspace tab: directory list (default) ---
-  if (activeTab.id === 'workspace') {
+  if (activeTab.id === "workspace") {
     const initialDirArray = Array.from(initialDirs);
     return (
       <Box flexDirection="column">
         <TabBar tabs={tabs} activeIndex={activeTabIndex} />
         <Text color={theme.text.secondary} wrap="wrap">
           {t(
-            'Qwen Code can read files in the workspace, and make edits when auto-accept edits is on.',
+            "TRAM can read files in the workspace, and make edits when auto-accept edits is on.",
           )}
         </Text>
         <Box height={1} />
         {/* Initial (non-removable) dirs: shown inline with dash, same visual level as list */}
         {initialDirArray.map((dir, idx) => (
           <Box key={dir} marginLeft={2}>
-            <Text color={theme.text.secondary}>{'- '}</Text>
+            <Text color={theme.text.secondary}>{"- "}</Text>
             <Text>{dir}</Text>
             <Text color={theme.text.secondary}>
               {idx === 0
-                ? t('  (Original working directory)')
-                : t('  (from settings)')}
+                ? t("  (Original working directory)")
+                : t("  (from settings)")}
             </Text>
           </Box>
         ))}
@@ -763,7 +763,7 @@ export function PermissionsDialog({
         <RadioButtonSelect
           items={dirListItems}
           onSelect={handleDirListSelect}
-          isFocused={view === 'ws-dir-list'}
+          isFocused={view === "ws-dir-list"}
           showNumbers={true}
           showScrollArrows={false}
           maxItemsToShow={15}
@@ -775,7 +775,7 @@ export function PermissionsDialog({
 
   // --- Render views ---
 
-  if (view === 'add-rule-input') {
+  if (view === "add-rule-input") {
     return (
       <Box flexDirection="column">
         <Box
@@ -785,16 +785,16 @@ export function PermissionsDialog({
           padding={1}
         >
           <Text bold>
-            {t('Add {{type}} permission rule', { type: activeTab.id })}
+            {t("Add {{type}} permission rule", { type: activeTab.id })}
           </Text>
           <Box height={1} />
           <Text wrap="wrap">
             {t(
-              'Permission rules are a tool name, optionally followed by a specifier in parentheses.',
+              "Permission rules are a tool name, optionally followed by a specifier in parentheses.",
             )}
           </Text>
           <Text>
-            {t('e.g.,')} <Text bold>WebFetch</Text> {t('or')}{' '}
+            {t("e.g.,")} <Text bold>WebFetch</Text> {t("or")}{" "}
             <Text bold>Bash(ls:*)</Text>
           </Text>
           <Box height={1} />
@@ -808,21 +808,21 @@ export function PermissionsDialog({
               value={newRuleInput}
               onChange={setNewRuleInput}
               onSubmit={handleAddRuleSubmit}
-              placeholder={t('Enter permission rule…')}
+              placeholder={t("Enter permission rule…")}
               isActive={true}
             />
           </Box>
         </Box>
         <Box marginTop={1} marginLeft={1}>
           <Text color={theme.text.secondary}>
-            {t('Enter to submit · Esc to cancel')}
+            {t("Enter to submit · Esc to cancel")}
           </Text>
         </Box>
       </Box>
     );
   }
 
-  if (view === 'add-rule-scope') {
+  if (view === "add-rule-scope") {
     const scopeItems = getPermScopeItems();
     return (
       <Box flexDirection="column">
@@ -833,7 +833,7 @@ export function PermissionsDialog({
           padding={1}
         >
           <Text bold>
-            {t('Add {{type}} permission rule', { type: activeTab.id })}
+            {t("Add {{type}} permission rule", { type: activeTab.id })}
           </Text>
           <Box height={1} />
           <Box marginLeft={2} flexDirection="column">
@@ -843,7 +843,7 @@ export function PermissionsDialog({
             </Text>
           </Box>
           <Box height={1} />
-          <Text>{t('Where should this rule be saved?')}</Text>
+          <Text>{t("Where should this rule be saved?")}</Text>
           <RadioButtonSelect
             items={scopeItems.map((s) => ({
               label: `${s.label}    ${s.description}`,
@@ -857,14 +857,14 @@ export function PermissionsDialog({
         </Box>
         <Box marginTop={1} marginLeft={1}>
           <Text color={theme.text.secondary}>
-            {t('Enter to confirm · Esc to cancel')}
+            {t("Enter to confirm · Esc to cancel")}
           </Text>
         </Box>
       </Box>
     );
   }
 
-  if (view === 'delete-confirm' && deleteTarget) {
+  if (view === "delete-confirm" && deleteTarget) {
     return (
       <Box flexDirection="column">
         <Box
@@ -874,7 +874,7 @@ export function PermissionsDialog({
           padding={1}
         >
           <Text bold>
-            {t('Delete {{type}} rule?', { type: deleteTarget.type })}
+            {t("Delete {{type}} rule?", { type: deleteTarget.type })}
           </Text>
           <Box height={1} />
           <Box marginLeft={2} flexDirection="column">
@@ -888,12 +888,12 @@ export function PermissionsDialog({
           </Box>
           <Box height={1} />
           <Text>
-            {t('Are you sure you want to delete this permission rule?')}
+            {t("Are you sure you want to delete this permission rule?")}
           </Text>
         </Box>
         <Box marginTop={1} marginLeft={1}>
           <Text color={theme.text.secondary}>
-            {t('Enter to confirm · Esc to cancel')}
+            {t("Enter to confirm · Esc to cancel")}
           </Text>
         </Box>
       </Box>
@@ -914,11 +914,11 @@ export function PermissionsDialog({
         paddingRight={1}
         width={60}
       >
-        <Text color={theme.text.accent}>{'> '}</Text>
+        <Text color={theme.text.accent}>{"> "}</Text>
         {searchQuery ? (
           <Text>{searchQuery}</Text>
         ) : (
-          <Text color={Colors.Gray}>{t('Search…')}</Text>
+          <Text color={Colors.Gray}>{t("Search…")}</Text>
         )}
       </Box>
       <Box height={1} />
@@ -926,7 +926,7 @@ export function PermissionsDialog({
       <RadioButtonSelect
         items={listItems}
         onSelect={handleListSelect}
-        isFocused={view === 'rule-list'}
+        isFocused={view === "rule-list"}
         showNumbers={true}
         showScrollArrows={false}
         maxItemsToShow={15}
@@ -950,7 +950,7 @@ function TabBar({
   return (
     <Box marginBottom={1}>
       <Text color={theme.text.accent} bold>
-        {t('Permissions:')}{' '}
+        {t("Permissions:")}{" "}
       </Text>
       {tabs.map((tab, i) => (
         <Box key={tab.id} marginRight={2}>
@@ -967,18 +967,18 @@ function TabBar({
           )}
         </Box>
       ))}
-      <Text color={theme.text.secondary}>{t('(←/→ or tab to cycle)')}</Text>
+      <Text color={theme.text.secondary}>{t("(←/→ or tab to cycle)")}</Text>
     </Box>
   );
 }
 
 function FooterHint({ view }: { view: DialogView }): React.JSX.Element {
-  if (view !== 'rule-list' && view !== 'ws-dir-list') return <></>;
+  if (view !== "rule-list" && view !== "ws-dir-list") return <></>;
   return (
     <Box marginTop={1}>
       <Text color={theme.text.secondary}>
         {t(
-          'Press ↑↓ to navigate · Enter to select · Type to search · Esc to cancel',
+          "Press ↑↓ to navigate · Enter to select · Type to search · Esc to cancel",
         )}
       </Text>
     </Box>

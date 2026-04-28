@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useMessageQueue } from './useMessageQueue.js';
-import { StreamingState } from '../types.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import { useMessageQueue } from "./useMessageQueue.js";
+import { StreamingState } from "../types.js";
 
-describe('useMessageQueue', () => {
+describe("useMessageQueue", () => {
   let mockSubmitQuery: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe('useMessageQueue', () => {
     vi.clearAllMocks();
   });
 
-  it('should initialize with empty queue', () => {
+  it("should initialize with empty queue", () => {
     const { result } = renderHook(() =>
       useMessageQueue({
         isConfigInitialized: true,
@@ -32,10 +32,10 @@ describe('useMessageQueue', () => {
     );
 
     expect(result.current.messageQueue).toEqual([]);
-    expect(result.current.getQueuedMessagesText()).toBe('');
+    expect(result.current.getQueuedMessagesText()).toBe("");
   });
 
-  it('should add messages to queue', () => {
+  it("should add messages to queue", () => {
     const { result } = renderHook(() =>
       useMessageQueue({
         isConfigInitialized: true,
@@ -45,17 +45,17 @@ describe('useMessageQueue', () => {
     );
 
     act(() => {
-      result.current.addMessage('Test message 1');
-      result.current.addMessage('Test message 2');
+      result.current.addMessage("Test message 1");
+      result.current.addMessage("Test message 2");
     });
 
     expect(result.current.messageQueue).toEqual([
-      'Test message 1',
-      'Test message 2',
+      "Test message 1",
+      "Test message 2",
     ]);
   });
 
-  it('should filter out empty messages', () => {
+  it("should filter out empty messages", () => {
     const { result } = renderHook(() =>
       useMessageQueue({
         isConfigInitialized: true,
@@ -65,19 +65,19 @@ describe('useMessageQueue', () => {
     );
 
     act(() => {
-      result.current.addMessage('Valid message');
-      result.current.addMessage('   '); // Only whitespace
-      result.current.addMessage(''); // Empty
-      result.current.addMessage('Another valid message');
+      result.current.addMessage("Valid message");
+      result.current.addMessage("   "); // Only whitespace
+      result.current.addMessage(""); // Empty
+      result.current.addMessage("Another valid message");
     });
 
     expect(result.current.messageQueue).toEqual([
-      'Valid message',
-      'Another valid message',
+      "Valid message",
+      "Another valid message",
     ]);
   });
 
-  it('should clear queue', () => {
+  it("should clear queue", () => {
     const { result } = renderHook(() =>
       useMessageQueue({
         isConfigInitialized: true,
@@ -87,10 +87,10 @@ describe('useMessageQueue', () => {
     );
 
     act(() => {
-      result.current.addMessage('Test message');
+      result.current.addMessage("Test message");
     });
 
-    expect(result.current.messageQueue).toEqual(['Test message']);
+    expect(result.current.messageQueue).toEqual(["Test message"]);
 
     act(() => {
       result.current.clearQueue();
@@ -99,7 +99,7 @@ describe('useMessageQueue', () => {
     expect(result.current.messageQueue).toEqual([]);
   });
 
-  it('should return queued messages as text with double newlines', () => {
+  it("should return queued messages as text with double newlines", () => {
     const { result } = renderHook(() =>
       useMessageQueue({
         isConfigInitialized: true,
@@ -109,17 +109,17 @@ describe('useMessageQueue', () => {
     );
 
     act(() => {
-      result.current.addMessage('Message 1');
-      result.current.addMessage('Message 2');
-      result.current.addMessage('Message 3');
+      result.current.addMessage("Message 1");
+      result.current.addMessage("Message 2");
+      result.current.addMessage("Message 3");
     });
 
     expect(result.current.getQueuedMessagesText()).toBe(
-      'Message 1\n\nMessage 2\n\nMessage 3',
+      "Message 1\n\nMessage 2\n\nMessage 3",
     );
   });
 
-  it('should auto-submit queued messages when transitioning to Idle', () => {
+  it("should auto-submit queued messages when transitioning to Idle", () => {
     const { result, rerender } = renderHook(
       ({ streamingState }) =>
         useMessageQueue({
@@ -134,20 +134,20 @@ describe('useMessageQueue', () => {
 
     // Add some messages
     act(() => {
-      result.current.addMessage('Message 1');
-      result.current.addMessage('Message 2');
+      result.current.addMessage("Message 1");
+      result.current.addMessage("Message 2");
     });
 
-    expect(result.current.messageQueue).toEqual(['Message 1', 'Message 2']);
+    expect(result.current.messageQueue).toEqual(["Message 1", "Message 2"]);
 
     // Transition to Idle
     rerender({ streamingState: StreamingState.Idle });
 
-    expect(mockSubmitQuery).toHaveBeenCalledWith('Message 1\n\nMessage 2');
+    expect(mockSubmitQuery).toHaveBeenCalledWith("Message 1\n\nMessage 2");
     expect(result.current.messageQueue).toEqual([]);
   });
 
-  it('should not auto-submit when queue is empty', () => {
+  it("should not auto-submit when queue is empty", () => {
     const { rerender } = renderHook(
       ({ streamingState }) =>
         useMessageQueue({
@@ -166,7 +166,7 @@ describe('useMessageQueue', () => {
     expect(mockSubmitQuery).not.toHaveBeenCalled();
   });
 
-  it('should not auto-submit when not transitioning to Idle', () => {
+  it("should not auto-submit when not transitioning to Idle", () => {
     const { result, rerender } = renderHook(
       ({ streamingState }) =>
         useMessageQueue({
@@ -181,17 +181,17 @@ describe('useMessageQueue', () => {
 
     // Add messages
     act(() => {
-      result.current.addMessage('Message 1');
+      result.current.addMessage("Message 1");
     });
 
     // Transition to WaitingForConfirmation (not Idle)
     rerender({ streamingState: StreamingState.WaitingForConfirmation });
 
     expect(mockSubmitQuery).not.toHaveBeenCalled();
-    expect(result.current.messageQueue).toEqual(['Message 1']);
+    expect(result.current.messageQueue).toEqual(["Message 1"]);
   });
 
-  it('should handle multiple state transitions correctly', () => {
+  it("should handle multiple state transitions correctly", () => {
     const { result, rerender } = renderHook(
       ({ streamingState }) =>
         useMessageQueue({
@@ -209,13 +209,13 @@ describe('useMessageQueue', () => {
 
     // Add messages while responding
     act(() => {
-      result.current.addMessage('First batch');
+      result.current.addMessage("First batch");
     });
 
     // Go back to idle - should submit
     rerender({ streamingState: StreamingState.Idle });
 
-    expect(mockSubmitQuery).toHaveBeenCalledWith('First batch');
+    expect(mockSubmitQuery).toHaveBeenCalledWith("First batch");
     expect(result.current.messageQueue).toEqual([]);
 
     // Start responding again
@@ -223,17 +223,17 @@ describe('useMessageQueue', () => {
 
     // Add more messages
     act(() => {
-      result.current.addMessage('Second batch');
+      result.current.addMessage("Second batch");
     });
 
     // Go back to idle - should submit again
     rerender({ streamingState: StreamingState.Idle });
 
-    expect(mockSubmitQuery).toHaveBeenCalledWith('Second batch');
+    expect(mockSubmitQuery).toHaveBeenCalledWith("Second batch");
     expect(mockSubmitQuery).toHaveBeenCalledTimes(2);
   });
 
-  it('should pop all messages from queue', () => {
+  it("should pop all messages from queue", () => {
     const { result } = renderHook(() =>
       useMessageQueue({
         isConfigInitialized: true,
@@ -243,9 +243,9 @@ describe('useMessageQueue', () => {
     );
 
     act(() => {
-      result.current.addMessage('Message 1');
-      result.current.addMessage('Message 2');
-      result.current.addMessage('Message 3');
+      result.current.addMessage("Message 1");
+      result.current.addMessage("Message 2");
+      result.current.addMessage("Message 3");
     });
 
     let popped: string | null = null;
@@ -253,11 +253,11 @@ describe('useMessageQueue', () => {
       popped = result.current.popAllMessages();
     });
 
-    expect(popped).toBe('Message 1\n\nMessage 2\n\nMessage 3');
+    expect(popped).toBe("Message 1\n\nMessage 2\n\nMessage 3");
     expect(result.current.messageQueue).toEqual([]);
   });
 
-  it('should pop single message without separator', () => {
+  it("should pop single message without separator", () => {
     const { result } = renderHook(() =>
       useMessageQueue({
         isConfigInitialized: true,
@@ -267,7 +267,7 @@ describe('useMessageQueue', () => {
     );
 
     act(() => {
-      result.current.addMessage('Only message');
+      result.current.addMessage("Only message");
     });
 
     let popped: string | null = null;
@@ -275,11 +275,11 @@ describe('useMessageQueue', () => {
       popped = result.current.popAllMessages();
     });
 
-    expect(popped).toBe('Only message');
+    expect(popped).toBe("Only message");
     expect(result.current.messageQueue).toEqual([]);
   });
 
-  it('should return null when popping from empty queue', () => {
+  it("should return null when popping from empty queue", () => {
     const { result } = renderHook(() =>
       useMessageQueue({
         isConfigInitialized: true,

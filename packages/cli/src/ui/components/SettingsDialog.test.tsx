@@ -21,33 +21,33 @@
  *
  */
 
-import { render } from 'ink-testing-library';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { SettingsDialog } from './SettingsDialog.js';
-import { LoadedSettings, SettingScope } from '../../config/settings.js';
-import { VimModeProvider } from '../contexts/VimModeContext.js';
-import { KeypressProvider } from '../contexts/KeypressContext.js';
-import { act } from 'react';
+import { render } from "ink-testing-library";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { SettingsDialog } from "./SettingsDialog.js";
+import { LoadedSettings, SettingScope } from "../../config/settings.js";
+import { VimModeProvider } from "../contexts/VimModeContext.js";
+import { KeypressProvider } from "../contexts/KeypressContext.js";
+import { act } from "react";
 import {
   getDialogSettingKeys,
   getSettingDefinition,
   saveModifiedSettings,
   TEST_ONLY,
-} from '../../utils/settingsUtils.js';
-import { OUTPUT_LANGUAGE_AUTO } from '../../utils/languageUtils.js';
+} from "../../utils/settingsUtils.js";
+import { OUTPUT_LANGUAGE_AUTO } from "../../utils/languageUtils.js";
 
 // Mock the VimModeContext
 const mockToggleVimEnabled = vi.fn();
 const mockSetVimMode = vi.fn();
 
 enum TerminalKeys {
-  ENTER = '\u000D',
-  TAB = '\t',
-  UP_ARROW = '\u001B[A',
-  DOWN_ARROW = '\u001B[B',
-  LEFT_ARROW = '\u001B[D',
-  RIGHT_ARROW = '\u001B[C',
-  ESCAPE = '\u001B',
+  ENTER = "\u000D",
+  TAB = "\t",
+  UP_ARROW = "\u001B[A",
+  DOWN_ARROW = "\u001B[B",
+  LEFT_ARROW = "\u001B[D",
+  RIGHT_ARROW = "\u001B[C",
+  ESCAPE = "\u001B",
 }
 
 const createMockSettings = (
@@ -63,12 +63,12 @@ const createMockSettings = (
         mcpServers: {},
         ...systemSettings,
       },
-      path: '/system/settings.json',
+      path: "/system/settings.json",
     },
     {
       settings: {},
       originalSettings: {},
-      path: '/system/system-defaults.json',
+      path: "/system/system-defaults.json",
     },
     {
       settings: {
@@ -81,7 +81,7 @@ const createMockSettings = (
         mcpServers: {},
         ...userSettings,
       },
-      path: '/user/settings.json',
+      path: "/user/settings.json",
     },
     {
       settings: {
@@ -94,44 +94,44 @@ const createMockSettings = (
         mcpServers: {},
         ...workspaceSettings,
       },
-      path: '/workspace/settings.json',
+      path: "/workspace/settings.json",
     },
     true,
     new Set(),
   );
 
-vi.mock('../../config/settingsSchema.js', async (importOriginal) => {
+vi.mock("../../config/settingsSchema.js", async (importOriginal) => {
   const original =
-    await importOriginal<typeof import('../../config/settingsSchema.js')>();
+    await importOriginal<typeof import("../../config/settingsSchema.js")>();
   return {
     ...original,
     getSettingsSchema: vi.fn(original.getSettingsSchema),
   };
 });
 
-vi.mock('../contexts/VimModeContext.js', async () => {
-  const actual = await vi.importActual('../contexts/VimModeContext.js');
+vi.mock("../contexts/VimModeContext.js", async () => {
+  const actual = await vi.importActual("../contexts/VimModeContext.js");
   return {
     ...actual,
     useVimMode: () => ({
       vimEnabled: false,
-      vimMode: 'INSERT' as const,
+      vimMode: "INSERT" as const,
       toggleVimEnabled: mockToggleVimEnabled,
       setVimMode: mockSetVimMode,
     }),
   };
 });
 
-vi.mock('../../utils/settingsUtils.js', async () => {
-  const actual = await vi.importActual('../../utils/settingsUtils.js');
+vi.mock("../../utils/settingsUtils.js", async () => {
+  const actual = await vi.importActual("../../utils/settingsUtils.js");
   return {
     ...actual,
     saveModifiedSettings: vi.fn(),
   };
 });
 
-vi.mock('../../utils/languageUtils.js', async () => {
-  const actual = await vi.importActual('../../utils/languageUtils.js');
+vi.mock("../../utils/languageUtils.js", async () => {
+  const actual = await vi.importActual("../../utils/languageUtils.js");
   return {
     ...actual,
     updateOutputLanguageFile: vi.fn(),
@@ -159,7 +159,7 @@ vi.mock('../../utils/languageUtils.js', async () => {
 // const originalConsoleLog = console.log;
 // const originalConsoleError = console.error;
 
-describe('SettingsDialog', () => {
+describe("SettingsDialog", () => {
   // Simple delay function for remaining tests that need gradual migration
   const wait = (ms = 50) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -183,7 +183,7 @@ describe('SettingsDialog', () => {
     if (lastError) {
       throw lastError;
     }
-    throw new Error('waitFor timed out');
+    throw new Error("waitFor timed out");
   };
 
   beforeEach(() => {
@@ -206,8 +206,8 @@ describe('SettingsDialog', () => {
     // console.error = originalConsoleError;
   });
 
-  describe('Initial Rendering', () => {
-    it('should render the settings dialog with default state', () => {
+  describe("Initial Rendering", () => {
+    it("should render the settings dialog with default state", () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -218,13 +218,13 @@ describe('SettingsDialog', () => {
       );
 
       const output = lastFrame();
-      expect(output).toContain('Settings');
+      expect(output).toContain("Settings");
       // Scope selector is now in a separate view (Tab to switch)
-      expect(output).not.toContain('Apply To');
-      expect(output).toContain('(Use Enter to select, Tab to configure scope)');
+      expect(output).not.toContain("Apply To");
+      expect(output).toContain("(Use Enter to select, Tab to configure scope)");
     });
 
-    it('should accept availableTerminalHeight prop without errors', () => {
+    it("should accept availableTerminalHeight prop without errors", () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -240,11 +240,11 @@ describe('SettingsDialog', () => {
 
       const output = lastFrame();
       // Should still render properly with the height prop
-      expect(output).toContain('Settings');
-      expect(output).toContain('Enter to select');
+      expect(output).toContain("Settings");
+      expect(output).toContain("Enter to select");
     });
 
-    it('should show settings list with default values', () => {
+    it("should show settings list with default values", () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -256,10 +256,10 @@ describe('SettingsDialog', () => {
 
       const output = lastFrame();
       // Should show some default settings
-      expect(output).toContain('●'); // Active indicator
+      expect(output).toContain("●"); // Active indicator
     });
 
-    it('should highlight first setting by default', () => {
+    it("should highlight first setting by default", () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -271,12 +271,12 @@ describe('SettingsDialog', () => {
 
       const output = lastFrame();
       // First item should be highlighted with green color and active indicator
-      expect(output).toContain('●');
+      expect(output).toContain("●");
     });
   });
 
-  describe('Settings Navigation', () => {
-    it('should navigate down with arrow key', async () => {
+  describe("Settings Navigation", () => {
+    it("should navigate down with arrow key", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -295,14 +295,14 @@ describe('SettingsDialog', () => {
       expect(secondKey).toBeDefined();
       const secondLabel = secondKey
         ? (getSettingDefinition(secondKey)?.label ?? secondKey)
-        : '';
+        : "";
       expect(lastFrame()).toContain(`● ${secondLabel}`);
 
       // The active index should have changed (tested indirectly through behavior)
       unmount();
     });
 
-    it('should navigate up with arrow key', async () => {
+    it("should navigate up with arrow key", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -321,7 +321,7 @@ describe('SettingsDialog', () => {
       unmount();
     });
 
-    it('should navigate with vim keys (j/k)', async () => {
+    it("should navigate with vim keys (j/k)", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -332,15 +332,15 @@ describe('SettingsDialog', () => {
       );
 
       // Navigate with vim keys
-      stdin.write('j'); // Down
+      stdin.write("j"); // Down
       await wait();
-      stdin.write('k'); // Up
+      stdin.write("k"); // Up
       await wait();
 
       unmount();
     });
 
-    it('wraps around when at the top of the list', async () => {
+    it("wraps around when at the top of the list", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -362,7 +362,7 @@ describe('SettingsDialog', () => {
 
       const lastLabel = lastKey
         ? (getSettingDefinition(lastKey)?.label ?? lastKey)
-        : '';
+        : "";
 
       expect(lastFrame()).toContain(`● ${lastLabel}`);
 
@@ -370,8 +370,8 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('Settings Toggling', () => {
-    it('should toggle setting with Enter key', async () => {
+  describe("Settings Toggling", () => {
+    it("should toggle setting with Enter key", async () => {
       vi.mocked(saveModifiedSettings).mockClear();
 
       const settings = createMockSettings();
@@ -386,11 +386,11 @@ describe('SettingsDialog', () => {
 
       // Wait for initial render and verify we're on Tool Approval Mode (first setting)
       await waitFor(() => {
-        expect(lastFrame()).toContain('● Tool Approval Mode');
+        expect(lastFrame()).toContain("● Tool Approval Mode");
       });
 
       const dialogKeys = getDialogSettingKeys();
-      const targetIndex = dialogKeys.indexOf('general.vimMode');
+      const targetIndex = dialogKeys.indexOf("general.vimMode");
       expect(targetIndex).toBeGreaterThan(0);
 
       // Navigate to Vim Mode setting and verify we're there
@@ -401,7 +401,7 @@ describe('SettingsDialog', () => {
         await wait();
       }
       await waitFor(() => {
-        expect(lastFrame()).toContain('● Vim Mode');
+        expect(lastFrame()).toContain("● Vim Mode");
       });
 
       // Toggle the setting
@@ -421,7 +421,7 @@ describe('SettingsDialog', () => {
       });
 
       expect(vi.mocked(saveModifiedSettings)).toHaveBeenCalledWith(
-        new Set<string>(['general.vimMode']),
+        new Set<string>(["general.vimMode"]),
         {
           general: {
             vimMode: true,
@@ -434,8 +434,8 @@ describe('SettingsDialog', () => {
       unmount();
     });
 
-    describe('enum values', () => {
-      it('toggles enum values with the enter key', async () => {
+    describe("enum values", () => {
+      it("toggles enum values with the enter key", async () => {
         vi.mocked(saveModifiedSettings).mockClear();
 
         // Use real schema - first setting "Tool Approval Mode" is an enum
@@ -451,7 +451,7 @@ describe('SettingsDialog', () => {
 
         // Verify we're on Tool Approval Mode (first setting, an enum)
         await waitFor(() => {
-          expect(lastFrame()).toContain('● Tool Approval Mode');
+          expect(lastFrame()).toContain("● Tool Approval Mode");
         });
 
         // Press Enter to cycle the enum value
@@ -465,7 +465,7 @@ describe('SettingsDialog', () => {
 
         // Tool Approval Mode cycles through enum values
         expect(vi.mocked(saveModifiedSettings)).toHaveBeenCalledWith(
-          new Set<string>(['tools.approvalMode']),
+          new Set<string>(["tools.approvalMode"]),
           expect.objectContaining({
             tools: expect.objectContaining({
               approvalMode: expect.any(String),
@@ -478,12 +478,12 @@ describe('SettingsDialog', () => {
         unmount();
       });
 
-      it('loops back when reaching the end of an enum', async () => {
+      it("loops back when reaching the end of an enum", async () => {
         vi.mocked(saveModifiedSettings).mockClear();
         // Use Tool Approval Mode set to YOLO (last value) to test looping back to first
         const settings = createMockSettings({
           tools: {
-            approvalMode: 'yolo', // Last enum value
+            approvalMode: "yolo", // Last enum value
           },
         });
         const onSelect = vi.fn();
@@ -497,7 +497,7 @@ describe('SettingsDialog', () => {
 
         // Verify we're on Tool Approval Mode (first setting)
         await waitFor(() => {
-          expect(lastFrame()).toContain('● Tool Approval Mode');
+          expect(lastFrame()).toContain("● Tool Approval Mode");
         });
 
         // Press Enter to cycle - should loop back to first value (Plan)
@@ -511,10 +511,10 @@ describe('SettingsDialog', () => {
 
         // Should loop back to first enum value (Plan)
         expect(vi.mocked(saveModifiedSettings)).toHaveBeenCalledWith(
-          new Set<string>(['tools.approvalMode']),
+          new Set<string>(["tools.approvalMode"]),
           expect.objectContaining({
             tools: expect.objectContaining({
-              approvalMode: 'plan', // First enum value after YOLO
+              approvalMode: "plan", // First enum value after YOLO
             }),
           }),
           expect.any(LoadedSettings),
@@ -525,7 +525,7 @@ describe('SettingsDialog', () => {
       });
     });
 
-    it('should toggle setting with Space key', async () => {
+    it("should toggle setting with Space key", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -536,13 +536,13 @@ describe('SettingsDialog', () => {
       );
 
       // Press Space to toggle current setting
-      stdin.write(' '); // Space key
+      stdin.write(" "); // Space key
       await wait();
 
       unmount();
     });
 
-    it('should handle vim mode setting specially', async () => {
+    it("should handle vim mode setting specially", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -562,8 +562,8 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('Scope Selection', () => {
-    it('should switch between scopes', async () => {
+  describe("Scope Selection", () => {
+    it("should switch between scopes", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -578,13 +578,13 @@ describe('SettingsDialog', () => {
       await wait();
 
       // Select different scope (numbers 1-3 typically available)
-      stdin.write('2'); // Select second scope option
+      stdin.write("2"); // Select second scope option
       await wait();
 
       unmount();
     });
 
-    it('should reset to settings focus when scope is selected', async () => {
+    it("should reset to settings focus when scope is selected", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -596,12 +596,12 @@ describe('SettingsDialog', () => {
 
       // Wait for initial render
       await waitFor(() => {
-        expect(lastFrame()).toContain('Tool Approval Mode');
+        expect(lastFrame()).toContain("Tool Approval Mode");
       });
 
       // The UI should show settings mode is active (scope is in separate view)
-      expect(lastFrame()).toContain('● Tool Approval Mode'); // Settings section active
-      expect(lastFrame()).not.toContain('Apply To'); // Scope is in a separate view
+      expect(lastFrame()).toContain("● Tool Approval Mode"); // Settings section active
+      expect(lastFrame()).not.toContain("Apply To"); // Scope is in a separate view
 
       // This test validates the initial state - scope selection is now
       // accessed via Tab key, not shown alongside settings
@@ -610,8 +610,8 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('Restart Prompt', () => {
-    it('should show restart prompt for restart-required settings', async () => {
+  describe("Restart Prompt", () => {
+    it("should show restart prompt for restart-required settings", async () => {
       const settings = createMockSettings();
       const onRestartRequest = vi.fn();
 
@@ -632,7 +632,7 @@ describe('SettingsDialog', () => {
       unmount();
     });
 
-    it('should handle restart request when r is pressed', async () => {
+    it("should handle restart request when r is pressed", async () => {
       const settings = createMockSettings();
       const onRestartRequest = vi.fn();
 
@@ -647,7 +647,7 @@ describe('SettingsDialog', () => {
       );
 
       // Press 'r' key (this would only work if restart prompt is showing)
-      stdin.write('r');
+      stdin.write("r");
       await wait();
 
       // If restart prompt was showing, onRestartRequest should be called
@@ -655,8 +655,8 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('Escape Key Behavior', () => {
-    it('should call onSelect with undefined when Escape is pressed', async () => {
+  describe("Escape Key Behavior", () => {
+    it("should call onSelect with undefined when Escape is pressed", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -668,12 +668,12 @@ describe('SettingsDialog', () => {
 
       // Wait for initial render
       await waitFor(() => {
-        expect(lastFrame()).toContain('Tool Approval Mode');
+        expect(lastFrame()).toContain("Tool Approval Mode");
       });
 
       // Verify the dialog is rendered properly (scope is in separate view)
-      expect(lastFrame()).toContain('Settings');
-      expect(lastFrame()).not.toContain('Apply To'); // Scope is in a separate view
+      expect(lastFrame()).toContain("Settings");
+      expect(lastFrame()).not.toContain("Apply To"); // Scope is in a separate view
 
       // This test validates rendering - escape key behavior depends on complex
       // keypress handling that's difficult to test reliably in this environment
@@ -682,8 +682,8 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('Settings Persistence', () => {
-    it('should persist settings across scope changes', async () => {
+  describe("Settings Persistence", () => {
+    it("should persist settings across scope changes", async () => {
       const settings = createMockSettings({ vimMode: true });
       const onSelect = vi.fn();
 
@@ -698,14 +698,14 @@ describe('SettingsDialog', () => {
       await wait();
 
       // Change scope
-      stdin.write('2'); // Select workspace scope
+      stdin.write("2"); // Select workspace scope
       await wait();
 
       // Settings should be reloaded for new scope
       unmount();
     });
 
-    it('should show different values for different scopes', () => {
+    it("should show different values for different scopes", () => {
       const settings = createMockSettings(
         { vimMode: true }, // User settings
         { vimMode: false }, // System settings
@@ -721,13 +721,13 @@ describe('SettingsDialog', () => {
 
       // Should show user scope values initially
       const output = lastFrame();
-      expect(output).toContain('Settings');
+      expect(output).toContain("Settings");
     });
   });
 
-  describe('Error Handling', () => {
-    it('should handle vim mode toggle errors gracefully', async () => {
-      mockToggleVimEnabled.mockRejectedValue(new Error('Toggle failed'));
+  describe("Error Handling", () => {
+    it("should handle vim mode toggle errors gracefully", async () => {
+      mockToggleVimEnabled.mockRejectedValue(new Error("Toggle failed"));
 
       const settings = createMockSettings();
       const onSelect = vi.fn();
@@ -747,8 +747,8 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('Complex State Management', () => {
-    it('should track modified settings correctly', async () => {
+  describe("Complex State Management", () => {
+    it("should track modified settings correctly", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -772,7 +772,7 @@ describe('SettingsDialog', () => {
       unmount();
     });
 
-    it('should handle scrolling when there are many settings', async () => {
+    it("should handle scrolling when there are many settings", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -792,8 +792,8 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('VimMode Integration', () => {
-    it('should sync with VimModeContext when vim mode is toggled', async () => {
+  describe("VimMode Integration", () => {
+    it("should sync with VimModeContext when vim mode is toggled", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -814,8 +814,8 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('Specific Settings Behavior', () => {
-    it('should show correct display values for settings with different states', () => {
+  describe("Specific Settings Behavior", () => {
+    it("should show correct display values for settings with different states", () => {
       const settings = createMockSettings(
         { vimMode: true, hideTips: false }, // User settings
         { hideWindowTitle: true }, // System settings
@@ -831,10 +831,10 @@ describe('SettingsDialog', () => {
 
       const output = lastFrame();
       // Should contain settings labels
-      expect(output).toContain('Settings');
+      expect(output).toContain("Settings");
     });
 
-    it('should handle immediate settings save for non-restart-required settings', async () => {
+    it("should handle immediate settings save for non-restart-required settings", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -852,7 +852,7 @@ describe('SettingsDialog', () => {
       unmount();
     });
 
-    it('should show restart prompt for restart-required settings', async () => {
+    it("should show restart prompt for restart-required settings", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -868,13 +868,13 @@ describe('SettingsDialog', () => {
 
       // Should not show restart prompt initially
       expect(lastFrame()).not.toContain(
-        'To see changes, TRAM must be restarted',
+        "To see changes, TRAM must be restarted",
       );
 
       unmount();
     });
 
-    it('should keep restart prompt when switching scopes', async () => {
+    it("should keep restart prompt when switching scopes", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -891,29 +891,25 @@ describe('SettingsDialog', () => {
       await wait();
 
       await waitFor(() => {
-        expect(lastFrame()).toContain(
-          'To see changes, TRAM must be restarted',
-        );
+        expect(lastFrame()).toContain("To see changes, TRAM must be restarted");
       });
 
       // Switch scopes; restart prompt should remain visible.
       stdin.write(TerminalKeys.TAB as string);
       await wait();
-      stdin.write('2');
+      stdin.write("2");
       await wait();
 
       await waitFor(() => {
-        expect(lastFrame()).toContain(
-          'To see changes, TRAM must be restarted',
-        );
+        expect(lastFrame()).toContain("To see changes, TRAM must be restarted");
       });
 
       unmount();
     });
   });
 
-  describe('Settings Display Values', () => {
-    it('should show correct values for inherited settings', () => {
+  describe("Settings Display Values", () => {
+    it("should show correct values for inherited settings", () => {
       const settings = createMockSettings(
         {},
         { vimMode: true, hideWindowTitle: false }, // System settings
@@ -929,10 +925,10 @@ describe('SettingsDialog', () => {
 
       const output = lastFrame();
       // Settings should show inherited values
-      expect(output).toContain('Settings');
+      expect(output).toContain("Settings");
     });
 
-    it('should show override indicator for overridden settings', () => {
+    it("should show override indicator for overridden settings", () => {
       const settings = createMockSettings(
         { vimMode: false }, // User overrides
         { vimMode: true }, // System default
@@ -948,14 +944,14 @@ describe('SettingsDialog', () => {
 
       const output = lastFrame();
       // Should show settings with override indicators
-      expect(output).toContain('Settings');
+      expect(output).toContain("Settings");
     });
   });
 
-  describe('Output Language', () => {
-    it('treats empty output language as auto', async () => {
+  describe("Output Language", () => {
+    it("treats empty output language as auto", async () => {
       const settings = createMockSettings({
-        general: { outputLanguage: 'en' },
+        general: { outputLanguage: "en" },
       });
 
       const { stdin, unmount, lastFrame } = render(
@@ -965,13 +961,13 @@ describe('SettingsDialog', () => {
       );
 
       await waitFor(() => {
-        expect(lastFrame()).toContain('Settings');
+        expect(lastFrame()).toContain("Settings");
       });
 
       // Navigate to the output language setting, start editing, then commit empty.
       // Avoid hard-coding the item index because schema-driven ordering can differ by platform.
       const outputLanguageIndex = getDialogSettingKeys().indexOf(
-        'general.outputLanguage',
+        "general.outputLanguage",
       );
       expect(outputLanguageIndex).toBeGreaterThanOrEqual(0);
 
@@ -993,7 +989,7 @@ describe('SettingsDialog', () => {
         const outputLanguageCall = vi
           .mocked(saveModifiedSettings)
           .mock.calls.find((call) =>
-            (call[0] as Set<string>).has('general.outputLanguage'),
+            (call[0] as Set<string>).has("general.outputLanguage"),
           );
         expect(outputLanguageCall).toBeTruthy();
       });
@@ -1001,7 +997,7 @@ describe('SettingsDialog', () => {
       const outputLanguageCall = vi
         .mocked(saveModifiedSettings)
         .mock.calls.find((call) =>
-          (call[0] as Set<string>).has('general.outputLanguage'),
+          (call[0] as Set<string>).has("general.outputLanguage"),
         );
       // Should save 'auto' to settings
       expect(outputLanguageCall?.[1]).toMatchObject({
@@ -1012,8 +1008,8 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('Keyboard Shortcuts Edge Cases', () => {
-    it('should handle rapid key presses gracefully', async () => {
+  describe("Keyboard Shortcuts Edge Cases", () => {
+    it("should handle rapid key presses gracefully", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -1034,7 +1030,7 @@ describe('SettingsDialog', () => {
       unmount();
     });
 
-    it('should handle Ctrl+C to reset current setting to default', async () => {
+    it("should handle Ctrl+C to reset current setting to default", async () => {
       const settings = createMockSettings({ vimMode: true }); // Start with vimMode enabled
       const onSelect = vi.fn();
 
@@ -1045,14 +1041,14 @@ describe('SettingsDialog', () => {
       );
 
       // Press Ctrl+C to reset current setting to default
-      stdin.write('\u0003'); // Ctrl+C
+      stdin.write("\u0003"); // Ctrl+C
       await wait();
 
       // Should reset the current setting to its default value
       unmount();
     });
 
-    it('should handle Ctrl+L to reset current setting to default', async () => {
+    it("should handle Ctrl+L to reset current setting to default", async () => {
       const settings = createMockSettings({ vimMode: true }); // Start with vimMode enabled
       const onSelect = vi.fn();
 
@@ -1063,14 +1059,14 @@ describe('SettingsDialog', () => {
       );
 
       // Press Ctrl+L to reset current setting to default
-      stdin.write('\u000C'); // Ctrl+L
+      stdin.write("\u000C"); // Ctrl+L
       await wait();
 
       // Should reset the current setting to its default value
       unmount();
     });
 
-    it('should handle navigation when only one setting exists', async () => {
+    it("should handle navigation when only one setting exists", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -1089,7 +1085,7 @@ describe('SettingsDialog', () => {
       unmount();
     });
 
-    it('should properly handle Tab navigation between sections', async () => {
+    it("should properly handle Tab navigation between sections", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -1101,12 +1097,12 @@ describe('SettingsDialog', () => {
 
       // Wait for initial render
       await waitFor(() => {
-        expect(lastFrame()).toContain('Tool Approval Mode');
+        expect(lastFrame()).toContain("Tool Approval Mode");
       });
 
       // Verify initial state: settings mode active (scope is in separate view)
-      expect(lastFrame()).toContain('● Tool Approval Mode'); // Settings mode active
-      expect(lastFrame()).not.toContain('Apply To'); // Scope is in a separate view
+      expect(lastFrame()).toContain("● Tool Approval Mode"); // Settings mode active
+      expect(lastFrame()).not.toContain("Apply To"); // Scope is in a separate view
 
       // This test validates the rendered UI structure for tab navigation
       // Tab now switches between settings view and scope view
@@ -1115,8 +1111,8 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('Error Recovery', () => {
-    it('should handle malformed settings gracefully', () => {
+  describe("Error Recovery", () => {
+    it("should handle malformed settings gracefully", () => {
       // Create settings with potentially problematic values
       const settings = createMockSettings(
         { vimMode: null as unknown as boolean }, // Invalid value
@@ -1132,10 +1128,10 @@ describe('SettingsDialog', () => {
       );
 
       // Should still render without crashing
-      expect(lastFrame()).toContain('Settings');
+      expect(lastFrame()).toContain("Settings");
     });
 
-    it('should handle missing setting definitions gracefully', () => {
+    it("should handle missing setting definitions gracefully", () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -1146,12 +1142,12 @@ describe('SettingsDialog', () => {
         </KeypressProvider>,
       );
 
-      expect(lastFrame()).toContain('Settings');
+      expect(lastFrame()).toContain("Settings");
     });
   });
 
-  describe('Complex User Interactions', () => {
-    it('should handle complete user workflow: navigate, toggle, change scope, exit', async () => {
+  describe("Complex User Interactions", () => {
+    it("should handle complete user workflow: navigate, toggle, change scope, exit", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -1163,15 +1159,15 @@ describe('SettingsDialog', () => {
 
       // Wait for initial render
       await waitFor(() => {
-        expect(lastFrame()).toContain('Tool Approval Mode');
+        expect(lastFrame()).toContain("Tool Approval Mode");
       });
 
       // Verify the complete UI is rendered (scope is in separate view)
-      expect(lastFrame()).toContain('Settings'); // Title
-      expect(lastFrame()).toContain('● Tool Approval Mode'); // Active setting
-      expect(lastFrame()).not.toContain('Apply To'); // Scope is in a separate view (Tab to access)
+      expect(lastFrame()).toContain("Settings"); // Title
+      expect(lastFrame()).toContain("● Tool Approval Mode"); // Active setting
+      expect(lastFrame()).not.toContain("Apply To"); // Scope is in a separate view (Tab to access)
       expect(lastFrame()).toContain(
-        '(Use Enter to select, Tab to configure scope)',
+        "(Use Enter to select, Tab to configure scope)",
       ); // Help text
 
       // This test validates the complete UI structure is available for user workflow
@@ -1180,7 +1176,7 @@ describe('SettingsDialog', () => {
       unmount();
     });
 
-    it('should allow changing multiple settings without losing pending changes', async () => {
+    it("should allow changing multiple settings without losing pending changes", async () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -1211,7 +1207,7 @@ describe('SettingsDialog', () => {
       unmount();
     });
 
-    it('should maintain state consistency during complex interactions', async () => {
+    it("should maintain state consistency during complex interactions", async () => {
       const settings = createMockSettings({ vimMode: true });
       const onSelect = vi.fn();
 
@@ -1224,20 +1220,20 @@ describe('SettingsDialog', () => {
       // Multiple scope changes
       stdin.write(TerminalKeys.TAB as string); // Tab to scope
       await wait();
-      stdin.write('2'); // Workspace
+      stdin.write("2"); // Workspace
       await wait();
       stdin.write(TerminalKeys.TAB as string); // Tab to settings
       await wait();
       stdin.write(TerminalKeys.TAB as string); // Tab to scope
       await wait();
-      stdin.write('1'); // User
+      stdin.write("1"); // User
       await wait();
 
       // Should maintain consistent state
       unmount();
     });
 
-    it('should handle restart workflow correctly', async () => {
+    it("should handle restart workflow correctly", async () => {
       const settings = createMockSettings();
       const onRestartRequest = vi.fn();
 
@@ -1252,7 +1248,7 @@ describe('SettingsDialog', () => {
       );
 
       // This would test the restart workflow if we could trigger it
-      stdin.write('r'); // Try restart key
+      stdin.write("r"); // Try restart key
       await wait();
 
       // Without restart prompt showing, this should have no effect
@@ -1262,9 +1258,9 @@ describe('SettingsDialog', () => {
     });
   });
 
-  describe('String Settings Editing', () => {
-    it('should allow editing and committing a string setting', async () => {
-      let settings = createMockSettings({ 'a.string.setting': 'initial' });
+  describe("String Settings Editing", () => {
+    it("should allow editing and committing a string setting", async () => {
+      let settings = createMockSettings({ "a.string.setting": "initial" });
       const onSelect = vi.fn();
 
       const { stdin, unmount, rerender } = render(
@@ -1278,24 +1274,24 @@ describe('SettingsDialog', () => {
 
       // Navigate to the last setting
       for (let i = 0; i < 20; i++) {
-        stdin.write('j'); // Down
+        stdin.write("j"); // Down
         await wait(10);
       }
 
       // Press Enter to start editing
-      stdin.write('\r');
+      stdin.write("\r");
       await wait();
 
       // Type a new value
-      stdin.write('new value');
+      stdin.write("new value");
       await wait();
 
       // Press Enter to commit
-      stdin.write('\r');
+      stdin.write("\r");
       await wait();
 
       settings = createMockSettings(
-        { 'a.string.setting': 'new value' },
+        { "a.string.setting": "new value" },
         {},
         {},
       );
@@ -1307,16 +1303,16 @@ describe('SettingsDialog', () => {
       await wait();
 
       // Press Escape to exit
-      stdin.write('\u001B');
+      stdin.write("\u001B");
       await wait();
 
-      expect(onSelect).toHaveBeenCalledWith(undefined, 'User');
+      expect(onSelect).toHaveBeenCalledWith(undefined, "User");
 
       unmount();
     });
   });
 
-  describe('Snapshot Tests', () => {
+  describe("Snapshot Tests", () => {
     /**
      * Snapshot tests for SettingsDialog component using ink-testing-library.
      * These tests capture the visual output of the component in various states:
@@ -1334,7 +1330,7 @@ describe('SettingsDialog', () => {
      * The snapshots help ensure UI consistency and catch unintended visual changes.
      */
 
-    it('should render default state correctly', () => {
+    it("should render default state correctly", () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -1347,7 +1343,7 @@ describe('SettingsDialog', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('should render with various boolean settings enabled', () => {
+    it("should render with various boolean settings enabled", () => {
       const settings = createMockSettings({
         general: {
           vimMode: true,
@@ -1398,7 +1394,7 @@ describe('SettingsDialog', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('should render with mixed boolean and number settings', () => {
+    it("should render with mixed boolean and number settings", () => {
       const settings = createMockSettings({
         general: {
           vimMode: false,
@@ -1428,7 +1424,7 @@ describe('SettingsDialog', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('should render focused on scope selector', () => {
+    it("should render focused on scope selector", () => {
       const settings = createMockSettings();
       const onSelect = vi.fn();
 
@@ -1439,12 +1435,12 @@ describe('SettingsDialog', () => {
       );
 
       // Switch focus to scope selector with Tab
-      stdin.write('\t');
+      stdin.write("\t");
 
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('should render with different scope selected (System)', () => {
+    it("should render with different scope selected (System)", () => {
       const settings = createMockSettings(
         {}, // userSettings
         {
@@ -1465,15 +1461,15 @@ describe('SettingsDialog', () => {
       );
 
       // Switch to scope selector
-      stdin.write('\t');
+      stdin.write("\t");
       // Navigate to System scope
-      stdin.write('ArrowDown');
-      stdin.write('\r'); // Enter to select
+      stdin.write("ArrowDown");
+      stdin.write("\r"); // Enter to select
 
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('should render with different scope selected (Workspace)', () => {
+    it("should render with different scope selected (Workspace)", () => {
       const settings = createMockSettings(
         {}, // userSettings
         {}, // systemSettings
@@ -1498,16 +1494,16 @@ describe('SettingsDialog', () => {
       );
 
       // Switch to scope selector
-      stdin.write('\t');
+      stdin.write("\t");
       // Navigate to Workspace scope (down twice)
-      stdin.write('ArrowDown');
-      stdin.write('ArrowDown');
-      stdin.write('\r'); // Enter to select
+      stdin.write("ArrowDown");
+      stdin.write("ArrowDown");
+      stdin.write("\r"); // Enter to select
 
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('should render with accessibility settings enabled', () => {
+    it("should render with accessibility settings enabled", () => {
       const settings = createMockSettings({
         ui: {
           accessibility: {
@@ -1531,7 +1527,7 @@ describe('SettingsDialog', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('should render with file filtering settings configured', () => {
+    it("should render with file filtering settings configured", () => {
       const settings = createMockSettings({
         context: {
           fileFiltering: {
@@ -1554,7 +1550,7 @@ describe('SettingsDialog', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('should render with tools and security settings', () => {
+    it("should render with tools and security settings", () => {
       const settings = createMockSettings({
         tools: {
           enableInteractiveShell: true,
@@ -1584,7 +1580,7 @@ describe('SettingsDialog', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('should render with all boolean settings disabled', () => {
+    it("should render with all boolean settings disabled", () => {
       const settings = createMockSettings({
         general: {
           vimMode: false,

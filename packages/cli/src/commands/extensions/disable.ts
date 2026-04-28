@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { type CommandModule } from 'yargs';
-import { SettingScope } from '../../config/settings.js';
-import { getErrorMessage } from '../../utils/errors.js';
-import { writeStdoutLine, writeStderrLine } from '../../utils/stdioHelpers.js';
-import { getExtensionManager } from './utils.js';
-import { t } from '../../i18n/index.js';
+import { type CommandModule } from "yargs";
+import { SettingScope } from "../../config/settings.js";
+import { getErrorMessage } from "../../utils/errors.js";
+import { writeStdoutLine, writeStderrLine } from "../../utils/stdioHelpers.js";
+import { getExtensionManager } from "./utils.js";
+import { t } from "../../i18n/index.js";
 
 interface DisableArgs {
   name: string;
@@ -19,7 +19,7 @@ interface DisableArgs {
 export async function handleDisable(args: DisableArgs) {
   const extensionManager = await getExtensionManager();
   try {
-    if (args.scope?.toLowerCase() === 'workspace') {
+    if (args.scope?.toLowerCase() === "workspace") {
       extensionManager.disableExtension(args.name, SettingScope.Workspace);
     } else {
       extensionManager.disableExtension(args.name, SettingScope.User);
@@ -37,17 +37,17 @@ export async function handleDisable(args: DisableArgs) {
 }
 
 export const disableCommand: CommandModule = {
-  command: 'disable [--scope] <name>',
-  describe: t('Disables an extension.'),
+  command: "disable [--scope] <name>",
+  describe: t("Disables an extension."),
   builder: (yargs) =>
     yargs
-      .positional('name', {
-        describe: t('The name of the extension to disable.'),
-        type: 'string',
+      .positional("name", {
+        describe: t("The name of the extension to disable."),
+        type: "string",
       })
-      .option('scope', {
-        describe: t('The scope to disable the extenison in.'),
-        type: 'string',
+      .option("scope", {
+        describe: t("The scope to disable the extenison in."),
+        type: "string",
         default: SettingScope.User,
       })
       .check((argv) => {
@@ -58,11 +58,11 @@ export const disableCommand: CommandModule = {
             .includes((argv.scope as string).toLowerCase())
         ) {
           throw new Error(
-            t('Invalid scope: {{scope}}. Please use one of {{scopes}}.', {
+            t("Invalid scope: {{scope}}. Please use one of {{scopes}}.", {
               scope: argv.scope as string,
               scopes: Object.values(SettingScope)
                 .map((s) => s.toLowerCase())
-                .join(', '),
+                .join(", "),
             }),
           );
         }
@@ -70,8 +70,8 @@ export const disableCommand: CommandModule = {
       }),
   handler: async (argv) => {
     await handleDisable({
-      name: argv['name'] as string,
-      scope: argv['scope'] as string,
+      name: argv["name"] as string,
+      scope: argv["scope"] as string,
     });
   },
 };

@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import { theme } from '../../semantic-colors.js';
-import { useTerminalSize } from '../../hooks/useTerminalSize.js';
-import type { HookConfigDisplayInfo, HookEventDisplayInfo } from './types.js';
-import { HooksConfigSource } from '@qwen-code/qwen-code-core';
-import { t } from '../../../i18n/index.js';
+import { Box, Text } from "ink";
+import { theme } from "../../semantic-colors.js";
+import { useTerminalSize } from "../../hooks/useTerminalSize.js";
+import type { HookConfigDisplayInfo, HookEventDisplayInfo } from "./types.js";
+import { HooksConfigSource } from "@tram-ai/tram-core";
+import { t } from "../../../i18n/index.js";
 
 interface HookConfigDetailStepProps {
   hookEvent: HookEventDisplayInfo;
@@ -26,13 +26,13 @@ export function HookConfigDetailStep({
   const getSourceDisplay = (): string => {
     switch (hookConfig.source) {
       case HooksConfigSource.Project:
-        return t('Local Settings');
+        return t("Local Settings");
       case HooksConfigSource.User:
-        return t('User Settings');
+        return t("User Settings");
       case HooksConfigSource.System:
-        return t('System Settings');
+        return t("System Settings");
       case HooksConfigSource.Extensions:
-        return t('Extensions');
+        return t("Extensions");
       default:
         return hookConfig.source;
     }
@@ -44,8 +44,8 @@ export function HookConfigDetailStep({
   // Get hook type display
   const getHookTypeDisplay = (): string => {
     switch (hookConfig.config.type) {
-      case 'command':
-        return 'command';
+      case "command":
+        return "command";
       default:
         return hookConfig.config.type;
     }
@@ -53,10 +53,10 @@ export function HookConfigDetailStep({
 
   // Get command to display
   const getCommand = (): string => {
-    if (hookConfig.config.type === 'command') {
+    if (hookConfig.config.type === "command") {
       return hookConfig.config.command;
     }
-    return '';
+    return "";
   };
 
   // Calculate box width for command display
@@ -70,14 +70,14 @@ export function HookConfigDetailStep({
       {/* Title */}
       <Box marginBottom={1}>
         <Text bold color={theme.text.primary}>
-          {t('Hook details')}
+          {t("Hook details")}
         </Text>
       </Box>
 
       {/* Event */}
       <Box>
         <Box width={labelWidth}>
-          <Text color={theme.text.secondary}>{t('Event:')}</Text>
+          <Text color={theme.text.secondary}>{t("Event:")}</Text>
         </Box>
         <Text color={theme.text.primary}>{hookEvent.event}</Text>
       </Box>
@@ -85,7 +85,7 @@ export function HookConfigDetailStep({
       {/* Type */}
       <Box>
         <Box width={labelWidth}>
-          <Text color={theme.text.secondary}>{t('Type:')}</Text>
+          <Text color={theme.text.secondary}>{t("Type:")}</Text>
         </Box>
         <Text color={theme.text.primary}>{getHookTypeDisplay()}</Text>
       </Box>
@@ -93,7 +93,7 @@ export function HookConfigDetailStep({
       {/* Source */}
       <Box>
         <Box width={labelWidth}>
-          <Text color={theme.text.secondary}>{t('Source:')}</Text>
+          <Text color={theme.text.secondary}>{t("Source:")}</Text>
         </Box>
         <Text color={theme.text.primary}>{getSourceDisplay()}</Text>
         {hookConfig.sourcePath && (
@@ -105,7 +105,7 @@ export function HookConfigDetailStep({
       {isFromExtension && hookConfig.sourceDisplay && (
         <Box>
           <Box width={labelWidth}>
-            <Text color={theme.text.secondary}>{t('Extension:')}</Text>
+            <Text color={theme.text.secondary}>{t("Extension:")}</Text>
           </Box>
           <Text color={theme.text.primary}>{hookConfig.sourceDisplay}</Text>
         </Box>
@@ -115,7 +115,7 @@ export function HookConfigDetailStep({
       {hookConfig.config.name && (
         <Box>
           <Box width={labelWidth}>
-            <Text color={theme.text.secondary}>{t('Name:')}</Text>
+            <Text color={theme.text.secondary}>{t("Name:")}</Text>
           </Box>
           <Text color={theme.text.primary}>{hookConfig.config.name}</Text>
         </Box>
@@ -125,7 +125,7 @@ export function HookConfigDetailStep({
       {hookConfig.config.description && (
         <Box>
           <Box width={labelWidth}>
-            <Text color={theme.text.secondary}>{t('Desc:')}</Text>
+            <Text color={theme.text.secondary}>{t("Desc:")}</Text>
           </Box>
           <Text color={theme.text.primary}>
             {hookConfig.config.description}
@@ -135,7 +135,7 @@ export function HookConfigDetailStep({
 
       {/* Command */}
       <Box marginTop={1}>
-        <Text color={theme.text.secondary}>{t('Command:')}</Text>
+        <Text color={theme.text.secondary}>{t("Command:")}</Text>
       </Box>
 
       {/* Command box */}
@@ -153,14 +153,14 @@ export function HookConfigDetailStep({
       <Box marginTop={1}>
         <Text color={theme.text.secondary}>
           {t(
-            'To modify or remove this hook, edit settings.json directly or ask Qwen to help.',
+            "To modify or remove this hook, edit settings.json directly or ask Qwen to help.",
           )}
         </Text>
       </Box>
 
       {/* Footer hint */}
       <Box marginTop={1}>
-        <Text color={theme.text.secondary}>{t('Esc to go back')}</Text>
+        <Text color={theme.text.secondary}>{t("Esc to go back")}</Text>
       </Box>
     </Box>
   );

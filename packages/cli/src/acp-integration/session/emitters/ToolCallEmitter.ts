@@ -4,26 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BaseEmitter } from './BaseEmitter.js';
-import { PlanEmitter } from './PlanEmitter.js';
+import { BaseEmitter } from "./BaseEmitter.js";
+import { PlanEmitter } from "./PlanEmitter.js";
 import type {
   SessionContext,
   ToolCallStartParams,
   ToolCallResultParams,
   ResolvedToolMetadata,
   SubagentMeta,
-} from '../types.js';
+} from "../types.js";
 import type {
   ToolCallContent,
   ToolCallLocation,
   ToolKind,
-} from '@agentclientprotocol/sdk';
-import type { Part } from '@google/genai';
-import {
-  TodoWriteTool,
-  Kind,
-  ExitPlanModeTool,
-} from '@tram-ai/tram-core';
+} from "@agentclientprotocol/sdk";
+import type { Part } from "@google/genai";
+import { TodoWriteTool, Kind, ExitPlanModeTool } from "@tram-ai/tram-core";
 
 /**
  * Unified tool call event emitter.
@@ -62,9 +58,9 @@ export class ToolCallEmitter extends BaseEmitter {
     );
 
     await this.sendUpdate({
-      sessionUpdate: 'tool_call',
+      sessionUpdate: "tool_call",
       toolCallId: params.callId,
-      status: params.status || 'pending',
+      status: params.status || "pending",
       title,
       content: [],
       locations,
@@ -99,7 +95,7 @@ export class ToolCallEmitter extends BaseEmitter {
       // This ensures the UI is updated even when all todos are removed
       if (todos && todos.length > 0) {
         await this.planEmitter.emitPlan(todos);
-      } else if (params.args && Array.isArray(params.args['todos'])) {
+      } else if (params.args && Array.isArray(params.args["todos"])) {
         // Send empty plan when args had todos but result has none
         await this.planEmitter.emitPlan([]);
       }
@@ -117,8 +113,8 @@ export class ToolCallEmitter extends BaseEmitter {
       // Error case: show error message
       contentArray = [
         {
-          type: 'content',
-          content: { type: 'text', text: params.error.message },
+          type: "content",
+          content: { type: "text", text: params.error.message },
         },
       ];
     } else {
@@ -128,9 +124,9 @@ export class ToolCallEmitter extends BaseEmitter {
 
     // Build the update
     const update: Parameters<typeof this.sendUpdate>[0] = {
-      sessionUpdate: 'tool_call_update',
+      sessionUpdate: "tool_call_update",
       toolCallId: params.callId,
-      status: params.success ? 'completed' : 'failed',
+      status: params.success ? "completed" : "failed",
       content: contentArray,
       _meta: {
         toolName: params.toolName,
@@ -143,7 +139,7 @@ export class ToolCallEmitter extends BaseEmitter {
 
     // Add rawOutput from resultDisplay
     if (params.resultDisplay !== undefined) {
-      (update as Record<string, unknown>)['rawOutput'] = params.resultDisplay;
+      (update as Record<string, unknown>)["rawOutput"] = params.resultDisplay;
     }
 
     await this.sendUpdate(update);
@@ -165,11 +161,11 @@ export class ToolCallEmitter extends BaseEmitter {
     subagentMeta?: SubagentMeta,
   ): Promise<void> {
     await this.sendUpdate({
-      sessionUpdate: 'tool_call_update',
+      sessionUpdate: "tool_call_update",
       toolCallId: callId,
-      status: 'failed',
+      status: "failed",
       content: [
-        { type: 'content', content: { type: 'text', text: error.message } },
+        { type: "content", content: { type: "text", text: error.message } },
       ],
       _meta: {
         toolName,
@@ -211,7 +207,7 @@ export class ToolCallEmitter extends BaseEmitter {
 
     let title = tool?.displayName ?? toolName;
     let locations: ToolCallLocation[] = [];
-    let kind: ToolKind = 'other';
+    let kind: ToolKind = "other";
 
     if (tool && args) {
       try {
@@ -226,8 +222,8 @@ export class ToolCallEmitter extends BaseEmitter {
         kind = this.mapToolKind(tool.kind, toolName);
       } catch {
         // Fallback: use the description arg directly if available
-        if (typeof args['description'] === 'string') {
-          title = `${title}: ${args['description']}`;
+        if (typeof args["description"] === "string") {
+          title = `${title}: ${args["description"]}`;
         }
         if (tool.kind) {
           kind = this.mapToolKind(tool.kind, toolName);
@@ -247,21 +243,21 @@ export class ToolCallEmitter extends BaseEmitter {
   mapToolKind(kind: Kind, toolName?: string): ToolKind {
     // Special case: exit_plan_mode uses 'switch_mode' kind per ACP spec
     if (toolName && this.isExitPlanModeTool(toolName)) {
-      return 'switch_mode';
+      return "switch_mode";
     }
 
     const kindMap: Record<Kind, ToolKind> = {
-      [Kind.Read]: 'read',
-      [Kind.Edit]: 'edit',
-      [Kind.Delete]: 'delete',
-      [Kind.Move]: 'move',
-      [Kind.Search]: 'search',
-      [Kind.Execute]: 'execute',
-      [Kind.Think]: 'think',
-      [Kind.Fetch]: 'fetch',
-      [Kind.Other]: 'other',
+      [Kind.Read]: "read",
+      [Kind.Edit]: "edit",
+      [Kind.Delete]: "delete",
+      [Kind.Move]: "move",
+      [Kind.Search]: "search",
+      [Kind.Execute]: "execute",
+      [Kind.Think]: "think",
+      [Kind.Fetch]: "fetch",
+      [Kind.Other]: "other",
     };
-    return kindMap[kind] ?? 'other';
+    return kindMap[kind] ?? "other";
   }
 
   // ==================== Private Helpers ====================
@@ -271,17 +267,17 @@ export class ToolCallEmitter extends BaseEmitter {
    * Returns null if not a diff.
    */
   private extractDiffContent(resultDisplay: unknown): ToolCallContent | null {
-    if (!resultDisplay || typeof resultDisplay !== 'object') return null;
+    if (!resultDisplay || typeof resultDisplay !== "object") return null;
 
     const obj = resultDisplay as Record<string, unknown>;
 
     // Check if this is a diff display (edit tool result)
-    if ('fileName' in obj && 'newContent' in obj) {
+    if ("fileName" in obj && "newContent" in obj) {
       return {
-        type: 'diff',
-        path: obj['fileName'] as string,
-        oldText: (obj['originalContent'] as string) ?? '',
-        newText: obj['newContent'] as string,
+        type: "diff",
+        path: obj["fileName"] as string,
+        oldText: (obj["originalContent"] as string) ?? "",
+        newText: obj["newContent"] as string,
       };
     }
 
@@ -297,31 +293,31 @@ export class ToolCallEmitter extends BaseEmitter {
 
     for (const part of parts) {
       // Handle text parts
-      if ('text' in part && part.text) {
+      if ("text" in part && part.text) {
         result.push({
-          type: 'content',
-          content: { type: 'text', text: part.text },
+          type: "content",
+          content: { type: "text", text: part.text },
         });
       }
 
       // Handle functionResponse parts - stringify the response
-      if ('functionResponse' in part && part.functionResponse) {
+      if ("functionResponse" in part && part.functionResponse) {
         try {
           const resp = part.functionResponse.response as Record<
             string,
             unknown
           >;
-          const outputField = resp['output'];
-          const errorField = resp['error'];
+          const outputField = resp["output"];
+          const errorField = resp["error"];
           const responseText =
-            typeof outputField === 'string'
+            typeof outputField === "string"
               ? outputField
-              : typeof errorField === 'string'
+              : typeof errorField === "string"
                 ? errorField
                 : JSON.stringify(resp);
           result.push({
-            type: 'content',
-            content: { type: 'text', text: responseText },
+            type: "content",
+            content: { type: "text", text: responseText },
           });
         } catch {
           // Ignore serialization errors

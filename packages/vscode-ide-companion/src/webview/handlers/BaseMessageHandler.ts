@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { TramAgentManager } from '../../services/tramAgentManager.js';
-import type { ConversationStore } from '../../services/conversationStore.js';
+import type { TramAgentManager } from "../../services/tramAgentManager.js";
+import type { ConversationStore } from "../../services/conversationStore.js";
 
 /**
  * Base message handler interface

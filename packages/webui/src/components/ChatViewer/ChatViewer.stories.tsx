@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useRef, useState, useCallback, useEffect } from 'react';
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useRef, useState, useCallback, useEffect } from "react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   ChatViewer,
   type ChatMessageData,
   type ChatViewerHandle,
   type ToolCallData,
-} from './ChatViewer.js';
+} from "./ChatViewer.js";
 
 /**
  * ChatViewer component displays a read-only conversation flow.
@@ -25,47 +25,47 @@ import {
  * - Empty state with customizable message
  */
 const meta: Meta<typeof ChatViewer> = {
-  title: 'Chat/ChatViewer',
+  title: "Chat/ChatViewer",
   component: ChatViewer,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     messages: {
-      control: 'object',
-      description: 'Array of chat messages in JSONL format',
+      control: "object",
+      description: "Array of chat messages in JSONL format",
     },
     className: {
-      control: 'text',
-      description: 'Additional CSS class name',
+      control: "text",
+      description: "Additional CSS class name",
     },
-    onFileClick: { action: 'fileClicked' },
+    onFileClick: { action: "fileClicked" },
     emptyMessage: {
-      control: 'text',
-      description: 'Message to show when there are no messages',
+      control: "text",
+      description: "Message to show when there are no messages",
     },
     autoScroll: {
-      control: 'boolean',
-      description: 'Whether to auto-scroll to bottom when new messages arrive',
+      control: "boolean",
+      description: "Whether to auto-scroll to bottom when new messages arrive",
     },
     theme: {
-      control: 'select',
-      options: ['dark', 'light', 'auto'],
-      description: 'Theme variant for the viewer',
+      control: "select",
+      options: ["dark", "light", "auto"],
+      description: "Theme variant for the viewer",
     },
     showEmptyIcon: {
-      control: 'boolean',
-      description: 'Whether to show the icon in empty state',
+      control: "boolean",
+      description: "Whether to show the icon in empty state",
     },
   },
   decorators: [
     (Story) => (
       <div
         style={{
-          background: 'var(--app-background, #1e1e1e)',
-          padding: '20px',
-          height: '500px',
+          background: "var(--app-background, #1e1e1e)",
+          padding: "20px",
+          height: "500px",
         }}
       >
         <Story />
@@ -80,18 +80,18 @@ type Story = StoryObj<typeof meta>;
 // Helper function to create message data
 const createMessage = (
   uuid: string,
-  type: 'user' | 'assistant',
+  type: "user" | "assistant",
   text: string,
   timestamp: string,
   model?: string,
 ): ChatMessageData => ({
   uuid,
   parentUuid: null,
-  sessionId: 'story-session',
+  sessionId: "story-session",
   timestamp,
   type,
   message: {
-    role: type === 'user' ? 'user' : 'model',
+    role: type === "user" ? "user" : "model",
     parts: [{ text }],
   },
   model,
@@ -101,17 +101,17 @@ export const Default: Story = {
   args: {
     messages: [
       createMessage(
-        '1',
-        'user',
-        'How do I create a React component?',
-        '2026-01-19T10:00:00.000Z',
+        "1",
+        "user",
+        "How do I create a React component?",
+        "2026-01-19T10:00:00.000Z",
       ),
       createMessage(
-        '2',
-        'assistant',
+        "2",
+        "assistant",
         "To create a React component, you can use either a function or a class. Here's a simple example of a functional component:\n\n```tsx\nimport React from 'react';\n\nconst MyComponent: React.FC = () => {\n  return <div>Hello, World!</div>;\n};\n\nexport default MyComponent;\n```\n\nThis creates a basic component that renders \"Hello, World!\". You can then use it in other components like `<MyComponent />`.",
-        '2026-01-19T10:00:05.000Z',
-        'coder-model',
+        "2026-01-19T10:00:05.000Z",
+        "coder-model",
       ),
     ],
   },
@@ -121,43 +121,43 @@ export const MultiTurn: Story = {
   args: {
     messages: [
       createMessage(
-        '1',
-        'user',
-        'What is TypeScript?',
-        '2026-01-19T10:00:00.000Z',
+        "1",
+        "user",
+        "What is TypeScript?",
+        "2026-01-19T10:00:00.000Z",
       ),
       createMessage(
-        '2',
-        'assistant',
-        'TypeScript is a strongly typed programming language that builds on JavaScript. It adds optional static typing and class-based object-oriented programming to the language.',
-        '2026-01-19T10:00:05.000Z',
-        'coder-model',
+        "2",
+        "assistant",
+        "TypeScript is a strongly typed programming language that builds on JavaScript. It adds optional static typing and class-based object-oriented programming to the language.",
+        "2026-01-19T10:00:05.000Z",
+        "coder-model",
       ),
       createMessage(
-        '3',
-        'user',
-        'How do I define an interface?',
-        '2026-01-19T10:00:30.000Z',
+        "3",
+        "user",
+        "How do I define an interface?",
+        "2026-01-19T10:00:30.000Z",
       ),
       createMessage(
-        '4',
-        'assistant',
+        "4",
+        "assistant",
         'You can define an interface in TypeScript like this:\n\n```typescript\ninterface User {\n  id: number;\n  name: string;\n  email?: string; // optional property\n}\n\nconst user: User = {\n  id: 1,\n  name: "John Doe"\n};\n```\n\nInterfaces help you define the shape of objects and enable better type checking.',
-        '2026-01-19T10:00:35.000Z',
-        'coder-model',
+        "2026-01-19T10:00:35.000Z",
+        "coder-model",
       ),
       createMessage(
-        '5',
-        'user',
-        'Can interfaces extend other interfaces?',
-        '2026-01-19T10:01:00.000Z',
+        "5",
+        "user",
+        "Can interfaces extend other interfaces?",
+        "2026-01-19T10:01:00.000Z",
       ),
       createMessage(
-        '6',
-        'assistant',
+        "6",
+        "assistant",
         'Yes! Interfaces can extend one or more interfaces. Here\'s an example:\n\n```typescript\ninterface Person {\n  name: string;\n  age: number;\n}\n\ninterface Employee extends Person {\n  employeeId: string;\n  department: string;\n}\n\n// Employee now has: name, age, employeeId, and department\nconst employee: Employee = {\n  name: "Jane",\n  age: 30,\n  employeeId: "E001",\n  department: "Engineering"\n};\n```\n\nYou can also extend multiple interfaces: `interface Manager extends Person, Employee { ... }`',
-        '2026-01-19T10:01:05.000Z',
-        'coder-model',
+        "2026-01-19T10:01:05.000Z",
+        "coder-model",
       ),
     ],
   },
@@ -167,14 +167,14 @@ export const WithCodeBlocks: Story = {
   args: {
     messages: [
       createMessage(
-        '1',
-        'user',
-        'Show me how to implement a debounce function',
-        '2026-01-19T10:00:00.000Z',
+        "1",
+        "user",
+        "Show me how to implement a debounce function",
+        "2026-01-19T10:00:00.000Z",
       ),
       createMessage(
-        '2',
-        'assistant',
+        "2",
+        "assistant",
         `Here's a debounce function implementation in TypeScript:
 
 \`\`\`typescript
@@ -213,8 +213,8 @@ handleSearch('hello');
 \`\`\`
 
 The debounce function delays the execution until there's a pause in calls for the specified wait time (300ms in this case).`,
-        '2026-01-19T10:00:10.000Z',
-        'coder-model',
+        "2026-01-19T10:00:10.000Z",
+        "coder-model",
       ),
     ],
   },
@@ -224,43 +224,43 @@ export const LongConversation: Story = {
   args: {
     messages: [
       createMessage(
-        '1',
-        'user',
-        'I need to build a REST API. What framework should I use?',
-        '2026-01-19T10:00:00.000Z',
+        "1",
+        "user",
+        "I need to build a REST API. What framework should I use?",
+        "2026-01-19T10:00:00.000Z",
       ),
       createMessage(
-        '2',
-        'assistant',
-        'For building a REST API, there are several excellent options depending on your needs:\n\n1. **Express.js** - Minimal and flexible, great for small to medium projects\n2. **Fastify** - High performance, excellent for high-throughput APIs\n3. **NestJS** - Full-featured framework with TypeScript, great for enterprise applications\n4. **Hono** - Ultra-fast and lightweight, perfect for edge computing\n\nWhat language/runtime are you planning to use?',
-        '2026-01-19T10:00:05.000Z',
-        'coder-model',
+        "2",
+        "assistant",
+        "For building a REST API, there are several excellent options depending on your needs:\n\n1. **Express.js** - Minimal and flexible, great for small to medium projects\n2. **Fastify** - High performance, excellent for high-throughput APIs\n3. **NestJS** - Full-featured framework with TypeScript, great for enterprise applications\n4. **Hono** - Ultra-fast and lightweight, perfect for edge computing\n\nWhat language/runtime are you planning to use?",
+        "2026-01-19T10:00:05.000Z",
+        "coder-model",
       ),
       createMessage(
-        '3',
-        'user',
-        'I want to use TypeScript with Node.js. The API will handle about 10k requests per second.',
-        '2026-01-19T10:00:30.000Z',
+        "3",
+        "user",
+        "I want to use TypeScript with Node.js. The API will handle about 10k requests per second.",
+        "2026-01-19T10:00:30.000Z",
       ),
       createMessage(
-        '4',
-        'assistant',
+        "4",
+        "assistant",
         "For high throughput (10k req/s) with TypeScript, I recommend **Fastify**. It's designed for performance and has excellent TypeScript support out of the box.\n\nHere's a quick setup:\n\n```bash\nnpm init -y\nnpm install fastify\nnpm install -D typescript @types/node\n```\n\n```typescript\nimport Fastify from 'fastify';\n\nconst app = Fastify({ logger: true });\n\napp.get('/health', async () => {\n  return { status: 'ok' };\n});\n\napp.listen({ port: 3000 }, (err) => {\n  if (err) throw err;\n});\n```\n\nFastify benchmarks show it can handle 30k+ req/s on modest hardware.",
-        '2026-01-19T10:00:35.000Z',
-        'coder-model',
+        "2026-01-19T10:00:35.000Z",
+        "coder-model",
       ),
       createMessage(
-        '5',
-        'user',
-        'How do I add request validation?',
-        '2026-01-19T10:01:00.000Z',
+        "5",
+        "user",
+        "How do I add request validation?",
+        "2026-01-19T10:01:00.000Z",
       ),
       createMessage(
-        '6',
-        'assistant',
+        "6",
+        "assistant",
         "Fastify has built-in JSON Schema validation. Here's how to add it:\n\n```typescript\nconst createUserSchema = {\n  body: {\n    type: 'object',\n    required: ['email', 'name'],\n    properties: {\n      email: { type: 'string', format: 'email' },\n      name: { type: 'string', minLength: 2 },\n      age: { type: 'integer', minimum: 0 }\n    }\n  },\n  response: {\n    201: {\n      type: 'object',\n      properties: {\n        id: { type: 'string' },\n        email: { type: 'string' },\n        name: { type: 'string' }\n      }\n    }\n  }\n};\n\napp.post('/users', { schema: createUserSchema }, async (req, reply) => {\n  const { email, name, age } = req.body;\n  // Create user...\n  reply.code(201).send({ id: '123', email, name });\n});\n```\n\nInvalid requests automatically return 400 with detailed error messages.",
-        '2026-01-19T10:01:10.000Z',
-        'coder-model',
+        "2026-01-19T10:01:10.000Z",
+        "coder-model",
       ),
     ],
   },
@@ -269,14 +269,14 @@ export const LongConversation: Story = {
 export const Empty: Story = {
   args: {
     messages: [],
-    emptyMessage: 'Start a conversation to see messages here',
+    emptyMessage: "Start a conversation to see messages here",
   },
 };
 
 export const CustomEmptyMessage: Story = {
   args: {
     messages: [],
-    emptyMessage: 'No chat history available',
+    emptyMessage: "No chat history available",
   },
 };
 
@@ -284,10 +284,10 @@ export const SingleUserMessage: Story = {
   args: {
     messages: [
       createMessage(
-        '1',
-        'user',
-        'This is a single user message without any response yet.',
-        '2026-01-19T10:00:00.000Z',
+        "1",
+        "user",
+        "This is a single user message without any response yet.",
+        "2026-01-19T10:00:00.000Z",
       ),
     ],
   },
@@ -297,11 +297,11 @@ export const SingleAssistantMessage: Story = {
   args: {
     messages: [
       createMessage(
-        '1',
-        'assistant',
-        'This is a standalone assistant message, perhaps from a system prompt or welcome message.',
-        '2026-01-19T10:00:00.000Z',
-        'coder-model',
+        "1",
+        "assistant",
+        "This is a standalone assistant message, perhaps from a system prompt or welcome message.",
+        "2026-01-19T10:00:00.000Z",
+        "coder-model",
       ),
     ],
   },
@@ -312,13 +312,13 @@ export const RealConversation: Story = {
   args: {
     messages: [
       {
-        uuid: '20fb9426-40ca-4e85-92a1-7add59082167',
+        uuid: "20fb9426-40ca-4e85-92a1-7add59082167",
         parentUuid: null,
-        sessionId: 'f05dd1fc-2947-44e0-9f31-cbddce461844',
-        timestamp: '2026-01-09T02:58:32.415Z',
-        type: 'user',
+        sessionId: "f05dd1fc-2947-44e0-9f31-cbddce461844",
+        timestamp: "2026-01-09T02:58:32.415Z",
+        type: "user",
         message: {
-          role: 'user',
+          role: "user",
           content: `Message received: Object from: Object
 service-worker.js:137 Attempting to connect to Native Host: com.tram.cli.bridge
 service-worker.js:202 Sending handshake...
@@ -336,28 +336,28 @@ service-worker.js:231 Handshake successful: Object`,
         },
       },
       {
-        uuid: '86f72c75-4626-4292-a26f-13db6f80d4be',
-        parentUuid: '20fb9426-40ca-4e85-92a1-7add59082167',
-        sessionId: 'f05dd1fc-2947-44e0-9f31-cbddce461844',
-        timestamp: '2026-01-09T02:58:45.239Z',
-        type: 'assistant',
-        model: 'claude-opus-4-5-20251101',
+        uuid: "86f72c75-4626-4292-a26f-13db6f80d4be",
+        parentUuid: "20fb9426-40ca-4e85-92a1-7add59082167",
+        sessionId: "f05dd1fc-2947-44e0-9f31-cbddce461844",
+        timestamp: "2026-01-09T02:58:45.239Z",
+        type: "assistant",
+        model: "claude-opus-4-5-20251101",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content: `I can see you're experiencing an issue with the Chrome extension's native host connection. The error shows that the native host is disconnecting with "Native host has exited" and there's a handshake timeout. However, the logs also show that sometimes the handshake is successful when the host_info is received properly.
 
 Let me help you troubleshoot this issue. First, I'll explore the codebase to understand how the native host communication works.`,
         },
       },
       {
-        uuid: '6ffff579-8020-4ccb-9b79-7c1da76bbf82',
-        parentUuid: '86f72c75-4626-4292-a26f-13db6f80d4be',
-        sessionId: 'f05dd1fc-2947-44e0-9f31-cbddce461844',
-        timestamp: '2026-01-09T02:58:52.409Z',
-        type: 'assistant',
-        model: 'claude-opus-4-5-20251101',
+        uuid: "6ffff579-8020-4ccb-9b79-7c1da76bbf82",
+        parentUuid: "86f72c75-4626-4292-a26f-13db6f80d4be",
+        sessionId: "f05dd1fc-2947-44e0-9f31-cbddce461844",
+        timestamp: "2026-01-09T02:58:52.409Z",
+        type: "assistant",
+        model: "claude-opus-4-5-20251101",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content: `Let me create a todo list to track the troubleshooting steps:
 
 1. **Explore the codebase** to understand the native host implementation
@@ -368,14 +368,14 @@ Let me help you troubleshoot this issue. First, I'll explore the codebase to und
         },
       },
       {
-        uuid: '8fd3dc96-1d34-4dae-845a-4827f435b890',
-        parentUuid: '6ffff579-8020-4ccb-9b79-7c1da76bbf82',
-        sessionId: 'f05dd1fc-2947-44e0-9f31-cbddce461844',
-        timestamp: '2026-01-09T02:58:57.366Z',
-        type: 'assistant',
-        model: 'claude-opus-4-5-20251101',
+        uuid: "8fd3dc96-1d34-4dae-845a-4827f435b890",
+        parentUuid: "6ffff579-8020-4ccb-9b79-7c1da76bbf82",
+        sessionId: "f05dd1fc-2947-44e0-9f31-cbddce461844",
+        timestamp: "2026-01-09T02:58:57.366Z",
+        type: "assistant",
+        model: "claude-opus-4-5-20251101",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content: `Let me start by exploring the codebase to understand the native host implementation.
 
 Looking at the project structure, I found the following relevant files:
@@ -397,25 +397,25 @@ The issue appears to be in the handshake timing. The native host is exiting befo
         },
       },
       {
-        uuid: 'user-follow-up-1',
-        parentUuid: '8fd3dc96-1d34-4dae-845a-4827f435b890',
-        sessionId: 'f05dd1fc-2947-44e0-9f31-cbddce461844',
-        timestamp: '2026-01-09T03:00:15.000Z',
-        type: 'user',
+        uuid: "user-follow-up-1",
+        parentUuid: "8fd3dc96-1d34-4dae-845a-4827f435b890",
+        sessionId: "f05dd1fc-2947-44e0-9f31-cbddce461844",
+        timestamp: "2026-01-09T03:00:15.000Z",
+        type: "user",
         message: {
-          role: 'user',
-          content: 'How should I fix this issue?',
+          role: "user",
+          content: "How should I fix this issue?",
         },
       },
       {
-        uuid: 'assistant-fix-1',
-        parentUuid: 'user-follow-up-1',
-        sessionId: 'f05dd1fc-2947-44e0-9f31-cbddce461844',
-        timestamp: '2026-01-09T03:00:45.000Z',
-        type: 'assistant',
-        model: 'claude-opus-4-5-20251101',
+        uuid: "assistant-fix-1",
+        parentUuid: "user-follow-up-1",
+        sessionId: "f05dd1fc-2947-44e0-9f31-cbddce461844",
+        timestamp: "2026-01-09T03:00:45.000Z",
+        type: "assistant",
+        model: "claude-opus-4-5-20251101",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content: `Based on my analysis, here's how to fix the native host connection issue:
 
 ## Root Cause
@@ -476,7 +476,7 @@ Would you like me to apply these changes to your codebase?`,
     docs: {
       description: {
         story:
-          'A real debugging conversation about Chrome extension native host connection issues. Demonstrates multi-turn conversation with code blocks and mixed languages (English and Chinese).',
+          "A real debugging conversation about Chrome extension native host connection issues. Demonstrates multi-turn conversation with code blocks and mixed languages (English and Chinese).",
       },
     },
   },
@@ -487,9 +487,9 @@ const createToolCall = (
   id: string,
   kind: string,
   title: string,
-  status: 'pending' | 'in_progress' | 'completed' | 'failed',
-  content?: ToolCallData['content'],
-  locations?: ToolCallData['locations'],
+  status: "pending" | "in_progress" | "completed" | "failed",
+  content?: ToolCallData["content"],
+  locations?: ToolCallData["locations"],
 ): ToolCallData => ({
   toolCallId: id,
   kind,
@@ -504,42 +504,42 @@ export const WithToolCalls: Story = {
   args: {
     messages: [
       {
-        uuid: 'tc-1',
-        timestamp: '2026-01-15T14:00:00.000Z',
-        type: 'user',
+        uuid: "tc-1",
+        timestamp: "2026-01-15T14:00:00.000Z",
+        type: "user",
         message: {
-          role: 'user',
+          role: "user",
           parts: [
             {
-              text: 'Please check the package.json file and add a lodash dependency',
+              text: "Please check the package.json file and add a lodash dependency",
             },
           ],
         },
       },
       {
-        uuid: 'tc-2',
-        timestamp: '2026-01-15T14:00:05.000Z',
-        type: 'assistant',
+        uuid: "tc-2",
+        timestamp: "2026-01-15T14:00:05.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content:
-            'Sure, let me read the package.json file to check the current dependency configuration.',
+            "Sure, let me read the package.json file to check the current dependency configuration.",
         },
       },
       {
-        uuid: 'tc-3',
-        timestamp: '2026-01-15T14:00:06.000Z',
-        type: 'tool_call',
+        uuid: "tc-3",
+        timestamp: "2026-01-15T14:00:06.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'read-1',
-          'read',
-          'package.json',
-          'completed',
+          "read-1",
+          "read",
+          "package.json",
+          "completed",
           [
             {
-              type: 'content',
+              type: "content",
               content: {
-                type: 'text',
+                type: "text",
                 text: `{
   "name": "my-project",
   "version": "1.0.0",
@@ -555,32 +555,32 @@ export const WithToolCalls: Story = {
               },
             },
           ],
-          [{ path: 'package.json', line: 1 }],
+          [{ path: "package.json", line: 1 }],
         ),
       },
       {
-        uuid: 'tc-4',
-        timestamp: '2026-01-15T14:00:10.000Z',
-        type: 'assistant',
+        uuid: "tc-4",
+        timestamp: "2026-01-15T14:00:10.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content:
-            'I see the project uses React 18 and TypeScript. Now let me add the lodash dependency.',
+            "I see the project uses React 18 and TypeScript. Now let me add the lodash dependency.",
         },
       },
       {
-        uuid: 'tc-5',
-        timestamp: '2026-01-15T14:00:11.000Z',
-        type: 'tool_call',
+        uuid: "tc-5",
+        timestamp: "2026-01-15T14:00:11.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'edit-1',
-          'edit',
-          'package.json',
-          'completed',
+          "edit-1",
+          "edit",
+          "package.json",
+          "completed",
           [
             {
-              type: 'diff',
-              path: 'package.json',
+              type: "diff",
+              path: "package.json",
               oldText: `  "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -592,15 +592,15 @@ export const WithToolCalls: Story = {
   },`,
             },
           ],
-          [{ path: 'package.json', line: 4 }],
+          [{ path: "package.json", line: 4 }],
         ),
       },
       {
-        uuid: 'tc-6',
-        timestamp: '2026-01-15T14:00:15.000Z',
-        type: 'assistant',
+        uuid: "tc-6",
+        timestamp: "2026-01-15T14:00:15.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content: `Successfully added lodash dependency to package.json.
 
 You need to run the following command to install the new dependency:
@@ -622,7 +622,7 @@ pnpm install
     docs: {
       description: {
         story:
-          'Demonstrates a conversation with Read and Edit tool calls, showing file reading and modification.',
+          "Demonstrates a conversation with Read and Edit tool calls, showing file reading and modification.",
       },
     },
   },
@@ -633,60 +633,60 @@ export const WithShellCommands: Story = {
   args: {
     messages: [
       {
-        uuid: 'sh-1',
-        timestamp: '2026-01-15T15:00:00.000Z',
-        type: 'user',
+        uuid: "sh-1",
+        timestamp: "2026-01-15T15:00:00.000Z",
+        type: "user",
         message: {
-          role: 'user',
+          role: "user",
           parts: [
-            { text: 'Help me create a new React component folder structure' },
+            { text: "Help me create a new React component folder structure" },
           ],
         },
       },
       {
-        uuid: 'sh-2',
-        timestamp: '2026-01-15T15:00:05.000Z',
-        type: 'assistant',
+        uuid: "sh-2",
+        timestamp: "2026-01-15T15:00:05.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content:
-            'Sure, let me create a standard React component folder structure.',
+            "Sure, let me create a standard React component folder structure.",
         },
       },
       {
-        uuid: 'sh-3',
-        timestamp: '2026-01-15T15:00:06.000Z',
-        type: 'tool_call',
+        uuid: "sh-3",
+        timestamp: "2026-01-15T15:00:06.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'shell-1',
-          'bash',
-          'mkdir -p src/components/Button',
-          'completed',
+          "shell-1",
+          "bash",
+          "mkdir -p src/components/Button",
+          "completed",
           [
             {
-              type: 'content',
+              type: "content",
               content: {
-                type: 'text',
-                text: '',
+                type: "text",
+                text: "",
               },
             },
           ],
         ),
       },
       {
-        uuid: 'sh-4',
-        timestamp: '2026-01-15T15:00:08.000Z',
-        type: 'tool_call',
+        uuid: "sh-4",
+        timestamp: "2026-01-15T15:00:08.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'write-1',
-          'write',
-          'src/components/Button/Button.tsx',
-          'completed',
+          "write-1",
+          "write",
+          "src/components/Button/Button.tsx",
+          "completed",
           [
             {
-              type: 'content',
+              type: "content",
               content: {
-                type: 'text',
+                type: "text",
                 text: `import React from 'react';
 import './Button.css';
 
@@ -710,23 +710,23 @@ export const Button: React.FC<ButtonProps> = ({
               },
             },
           ],
-          [{ path: 'src/components/Button/Button.tsx' }],
+          [{ path: "src/components/Button/Button.tsx" }],
         ),
       },
       {
-        uuid: 'sh-5',
-        timestamp: '2026-01-15T15:00:10.000Z',
-        type: 'tool_call',
+        uuid: "sh-5",
+        timestamp: "2026-01-15T15:00:10.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'write-2',
-          'write',
-          'src/components/Button/Button.css',
-          'completed',
+          "write-2",
+          "write",
+          "src/components/Button/Button.css",
+          "completed",
           [
             {
-              type: 'content',
+              type: "content",
               content: {
-                type: 'text',
+                type: "text",
                 text: `.button {
   padding: 8px 16px;
   border-radius: 4px;
@@ -748,37 +748,37 @@ export const Button: React.FC<ButtonProps> = ({
               },
             },
           ],
-          [{ path: 'src/components/Button/Button.css' }],
+          [{ path: "src/components/Button/Button.css" }],
         ),
       },
       {
-        uuid: 'sh-6',
-        timestamp: '2026-01-15T15:00:12.000Z',
-        type: 'tool_call',
+        uuid: "sh-6",
+        timestamp: "2026-01-15T15:00:12.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'write-3',
-          'write',
-          'src/components/Button/index.ts',
-          'completed',
+          "write-3",
+          "write",
+          "src/components/Button/index.ts",
+          "completed",
           [
             {
-              type: 'content',
+              type: "content",
               content: {
-                type: 'text',
+                type: "text",
                 text: `export { Button } from './Button';
 export type { ButtonProps } from './Button';`,
               },
             },
           ],
-          [{ path: 'src/components/Button/index.ts' }],
+          [{ path: "src/components/Button/index.ts" }],
         ),
       },
       {
-        uuid: 'sh-7',
-        timestamp: '2026-01-15T15:00:15.000Z',
-        type: 'assistant',
+        uuid: "sh-7",
+        timestamp: "2026-01-15T15:00:15.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content: `Created complete Button component structure:
 
 \`\`\`
@@ -805,7 +805,7 @@ import { Button } from './components/Button';
     docs: {
       description: {
         story:
-          'Shows a conversation with Shell and Write tool calls, creating a complete component structure.',
+          "Shows a conversation with Shell and Write tool calls, creating a complete component structure.",
       },
     },
   },
@@ -816,40 +816,40 @@ export const WithSearchAndRead: Story = {
   args: {
     messages: [
       {
-        uuid: 'sr-1',
-        timestamp: '2026-01-15T16:00:00.000Z',
-        type: 'user',
+        uuid: "sr-1",
+        timestamp: "2026-01-15T16:00:00.000Z",
+        type: "user",
         message: {
-          role: 'user',
+          role: "user",
           parts: [
-            { text: 'Help me find all files that use useState in the project' },
+            { text: "Help me find all files that use useState in the project" },
           ],
         },
       },
       {
-        uuid: 'sr-2',
-        timestamp: '2026-01-15T16:00:05.000Z',
-        type: 'assistant',
+        uuid: "sr-2",
+        timestamp: "2026-01-15T16:00:05.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content:
-            'Sure, let me search for all files that use useState in the project.',
+            "Sure, let me search for all files that use useState in the project.",
         },
       },
       {
-        uuid: 'sr-3',
-        timestamp: '2026-01-15T16:00:06.000Z',
-        type: 'tool_call',
+        uuid: "sr-3",
+        timestamp: "2026-01-15T16:00:06.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'search-1',
-          'grep',
-          'useState',
-          'completed',
+          "search-1",
+          "grep",
+          "useState",
+          "completed",
           [
             {
-              type: 'content',
+              type: "content",
               content: {
-                type: 'text',
+                type: "text",
                 text: `src/App.tsx:3:import { useState } from 'react';
 src/components/Counter.tsx:1:import { useState } from 'react';
 src/components/Form.tsx:2:import { useState, useEffect } from 'react';
@@ -858,19 +858,19 @@ src/hooks/useLocalStorage.ts:1:import { useState, useEffect } from 'react';`,
             },
           ],
           [
-            { path: 'src/App.tsx', line: 3 },
-            { path: 'src/components/Counter.tsx', line: 1 },
-            { path: 'src/components/Form.tsx', line: 2 },
-            { path: 'src/hooks/useLocalStorage.ts', line: 1 },
+            { path: "src/App.tsx", line: 3 },
+            { path: "src/components/Counter.tsx", line: 1 },
+            { path: "src/components/Form.tsx", line: 2 },
+            { path: "src/hooks/useLocalStorage.ts", line: 1 },
           ],
         ),
       },
       {
-        uuid: 'sr-4',
-        timestamp: '2026-01-15T16:00:10.000Z',
-        type: 'assistant',
+        uuid: "sr-4",
+        timestamp: "2026-01-15T16:00:10.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content: `Found **4 files** using \`useState\`:
 
 | File | Line |
@@ -884,28 +884,28 @@ Would you like me to look at any specific file in detail?`,
         },
       },
       {
-        uuid: 'sr-5',
-        timestamp: '2026-01-15T16:00:30.000Z',
-        type: 'user',
+        uuid: "sr-5",
+        timestamp: "2026-01-15T16:00:30.000Z",
+        type: "user",
         message: {
-          role: 'user',
-          parts: [{ text: 'Show me Counter.tsx' }],
+          role: "user",
+          parts: [{ text: "Show me Counter.tsx" }],
         },
       },
       {
-        uuid: 'sr-6',
-        timestamp: '2026-01-15T16:00:31.000Z',
-        type: 'tool_call',
+        uuid: "sr-6",
+        timestamp: "2026-01-15T16:00:31.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'read-2',
-          'read',
-          'src/components/Counter.tsx',
-          'completed',
+          "read-2",
+          "read",
+          "src/components/Counter.tsx",
+          "completed",
           [
             {
-              type: 'content',
+              type: "content",
               content: {
-                type: 'text',
+                type: "text",
                 text: `import { useState } from 'react';
 
 export const Counter = () => {
@@ -922,15 +922,15 @@ export const Counter = () => {
               },
             },
           ],
-          [{ path: 'src/components/Counter.tsx' }],
+          [{ path: "src/components/Counter.tsx" }],
         ),
       },
       {
-        uuid: 'sr-7',
-        timestamp: '2026-01-15T16:00:35.000Z',
-        type: 'assistant',
+        uuid: "sr-7",
+        timestamp: "2026-01-15T16:00:35.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content: `This is a simple counter component that uses \`useState\` to manage the count state.
 
 **Code Analysis:**
@@ -951,7 +951,7 @@ Would you like me to optimize this component?`,
     docs: {
       description: {
         story:
-          'Demonstrates Search (grep) and Read tool calls in a code exploration conversation.',
+          "Demonstrates Search (grep) and Read tool calls in a code exploration conversation.",
       },
     },
   },
@@ -962,57 +962,57 @@ export const WithPlanUpdates: Story = {
   args: {
     messages: [
       {
-        uuid: 'plan-1',
-        timestamp: '2026-01-15T17:00:00.000Z',
-        type: 'user',
+        uuid: "plan-1",
+        timestamp: "2026-01-15T17:00:00.000Z",
+        type: "user",
         message: {
-          role: 'user',
+          role: "user",
           parts: [
             {
-              text: 'Help me refactor the authentication module of this project',
+              text: "Help me refactor the authentication module of this project",
             },
           ],
         },
       },
       {
-        uuid: 'plan-2',
-        timestamp: '2026-01-15T17:00:05.000Z',
-        type: 'assistant',
+        uuid: "plan-2",
+        timestamp: "2026-01-15T17:00:05.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content:
-            'Sure, this is a complex task. Let me first create a plan to track progress.',
+            "Sure, this is a complex task. Let me first create a plan to track progress.",
         },
       },
       {
-        uuid: 'plan-3',
-        timestamp: '2026-01-15T17:00:06.000Z',
-        type: 'tool_call',
+        uuid: "plan-3",
+        timestamp: "2026-01-15T17:00:06.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'todo-1',
-          'todowrite',
-          'Create refactoring plan',
-          'completed',
+          "todo-1",
+          "todowrite",
+          "Create refactoring plan",
+          "completed",
           [
             {
-              type: 'content',
+              type: "content",
               content: {
-                type: 'text',
+                type: "text",
                 text: JSON.stringify([
                   {
-                    content: 'Analyze existing auth code structure',
-                    status: 'in_progress',
+                    content: "Analyze existing auth code structure",
+                    status: "in_progress",
                   },
                   {
-                    content: 'Design new auth architecture',
-                    status: 'pending',
+                    content: "Design new auth architecture",
+                    status: "pending",
                   },
                   {
-                    content: 'Implement JWT token management',
-                    status: 'pending',
+                    content: "Implement JWT token management",
+                    status: "pending",
                   },
-                  { content: 'Add refresh token mechanism', status: 'pending' },
-                  { content: 'Update related tests', status: 'pending' },
+                  { content: "Add refresh token mechanism", status: "pending" },
+                  { content: "Update related tests", status: "pending" },
                 ]),
               },
             },
@@ -1020,48 +1020,48 @@ export const WithPlanUpdates: Story = {
         ),
       },
       {
-        uuid: 'plan-4',
-        timestamp: '2026-01-15T17:00:10.000Z',
-        type: 'assistant',
+        uuid: "plan-4",
+        timestamp: "2026-01-15T17:00:10.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content:
-            'I have created the refactoring plan. Now let me analyze the existing auth code.',
+            "I have created the refactoring plan. Now let me analyze the existing auth code.",
         },
       },
       {
-        uuid: 'plan-5',
-        timestamp: '2026-01-15T17:00:11.000Z',
-        type: 'tool_call',
+        uuid: "plan-5",
+        timestamp: "2026-01-15T17:00:11.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'search-2',
-          'glob',
-          '**/auth/**',
-          'completed',
+          "search-2",
+          "glob",
+          "**/auth/**",
+          "completed",
           undefined,
           [
-            { path: 'src/auth/index.ts' },
-            { path: 'src/auth/login.ts' },
-            { path: 'src/auth/logout.ts' },
-            { path: 'src/auth/middleware.ts' },
-            { path: 'src/auth/types.ts' },
+            { path: "src/auth/index.ts" },
+            { path: "src/auth/login.ts" },
+            { path: "src/auth/logout.ts" },
+            { path: "src/auth/middleware.ts" },
+            { path: "src/auth/types.ts" },
           ],
         ),
       },
       {
-        uuid: 'plan-6',
-        timestamp: '2026-01-15T17:00:15.000Z',
-        type: 'tool_call',
+        uuid: "plan-6",
+        timestamp: "2026-01-15T17:00:15.000Z",
+        type: "tool_call",
         toolCall: createToolCall(
-          'read-3',
-          'read',
-          'src/auth/index.ts',
-          'completed',
+          "read-3",
+          "read",
+          "src/auth/index.ts",
+          "completed",
           [
             {
-              type: 'content',
+              type: "content",
               content: {
-                type: 'text',
+                type: "text",
                 text: `// Legacy auth module
 export { login } from './login';
 export { logout } from './logout';
@@ -1070,15 +1070,15 @@ export type { AuthUser, AuthToken } from './types';`,
               },
             },
           ],
-          [{ path: 'src/auth/index.ts' }],
+          [{ path: "src/auth/index.ts" }],
         ),
       },
       {
-        uuid: 'plan-7',
-        timestamp: '2026-01-15T17:00:20.000Z',
-        type: 'assistant',
+        uuid: "plan-7",
+        timestamp: "2026-01-15T17:00:20.000Z",
+        type: "assistant",
         message: {
-          role: 'assistant',
+          role: "assistant",
           content: `Analysis complete! Existing auth module structure:
 
 \`\`\`
@@ -1109,7 +1109,7 @@ Should I continue with the implementation?`,
     docs: {
       description: {
         story:
-          'Shows a complex refactoring task with Todo/Plan updates, file search, and code analysis.',
+          "Shows a complex refactoring task with Todo/Plan updates, file search, and code analysis.",
       },
     },
   },
@@ -1119,28 +1119,28 @@ export const LightTheme: Story = {
   args: {
     messages: [
       createMessage(
-        '1',
-        'user',
-        'Show me how to use the light theme.',
-        '2026-01-19T10:00:00.000Z',
+        "1",
+        "user",
+        "Show me how to use the light theme.",
+        "2026-01-19T10:00:00.000Z",
       ),
       createMessage(
-        '2',
-        'assistant',
+        "2",
+        "assistant",
         'The ChatViewer supports light, dark, and auto themes. Set `theme="light"` for light mode styling.',
-        '2026-01-19T10:00:05.000Z',
-        'coder-model',
+        "2026-01-19T10:00:05.000Z",
+        "coder-model",
       ),
     ],
-    theme: 'light',
+    theme: "light",
   },
   decorators: [
     (Story) => (
       <div
         style={{
-          background: '#ffffff',
-          padding: '20px',
-          height: '500px',
+          background: "#ffffff",
+          padding: "20px",
+          height: "500px",
         }}
       >
         <Story />
@@ -1153,17 +1153,17 @@ export const AutoScrollDisabled: Story = {
   args: {
     messages: [
       createMessage(
-        '1',
-        'user',
-        'This story has auto-scroll disabled.',
-        '2026-01-19T10:00:00.000Z',
+        "1",
+        "user",
+        "This story has auto-scroll disabled.",
+        "2026-01-19T10:00:00.000Z",
       ),
       createMessage(
-        '2',
-        'assistant',
-        'When `autoScroll={false}`, the viewer will not automatically scroll to the bottom when new messages arrive. This is useful when you want users to manually control the scroll position.',
-        '2026-01-19T10:00:05.000Z',
-        'coder-model',
+        "2",
+        "assistant",
+        "When `autoScroll={false}`, the viewer will not automatically scroll to the bottom when new messages arrive. This is useful when you want users to manually control the scroll position.",
+        "2026-01-19T10:00:05.000Z",
+        "coder-model",
       ),
     ],
     autoScroll: false,
@@ -1173,7 +1173,7 @@ export const AutoScrollDisabled: Story = {
 export const EmptyWithoutIcon: Story = {
   args: {
     messages: [],
-    emptyMessage: 'No messages yet',
+    emptyMessage: "No messages yet",
     showEmptyIcon: false,
   },
 };
@@ -1185,34 +1185,34 @@ const WithRefControlTemplate = () => {
   const messages: ChatMessageData[] = Array.from({ length: 20 }, (_, i) =>
     createMessage(
       String(i + 1),
-      i % 2 === 0 ? 'user' : 'assistant',
+      i % 2 === 0 ? "user" : "assistant",
       i % 2 === 0
         ? `Question ${Math.floor(i / 2) + 1}: How does feature ${Math.floor(i / 2) + 1} work?`
         : `This is the answer to question ${Math.floor(i / 2) + 1}. The feature works by processing data through multiple stages and returning the result to the caller.`,
       new Date(2026, 0, 19, 10, i).toISOString(),
-      i % 2 === 1 ? 'coder-model' : undefined,
+      i % 2 === 1 ? "coder-model" : undefined,
     ),
   );
 
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '500px',
-        gap: '10px',
+        display: "flex",
+        flexDirection: "column",
+        height: "500px",
+        gap: "10px",
       }}
     >
-      <div style={{ display: 'flex', gap: '10px' }}>
+      <div style={{ display: "flex", gap: "10px" }}>
         <button
-          onClick={() => chatRef.current?.scrollToTop('smooth')}
-          style={{ padding: '8px 16px', cursor: 'pointer' }}
+          onClick={() => chatRef.current?.scrollToTop("smooth")}
+          style={{ padding: "8px 16px", cursor: "pointer" }}
         >
           Scroll to Top
         </button>
         <button
-          onClick={() => chatRef.current?.scrollToBottom('smooth')}
-          style={{ padding: '8px 16px', cursor: 'pointer' }}
+          onClick={() => chatRef.current?.scrollToBottom("smooth")}
+          style={{ padding: "8px 16px", cursor: "pointer" }}
         >
           Scroll to Bottom
         </button>
@@ -1230,7 +1230,7 @@ export const WithRefControl: Story = {
     docs: {
       description: {
         story:
-          'Demonstrates programmatic scroll control using the `ref` prop. The `ChatViewerHandle` provides `scrollToTop()`, `scrollToBottom()`, and `getScrollContainer()` methods.',
+          "Demonstrates programmatic scroll control using the `ref` prop. The `ChatViewerHandle` provides `scrollToTop()`, `scrollToBottom()`, and `getScrollContainer()` methods.",
       },
     },
   },
@@ -1418,12 +1418,12 @@ const PlaygroundTemplate = () => {
     try {
       const parsed = JSON.parse(input);
       if (!Array.isArray(parsed)) {
-        throw new Error('JSON must be an array of messages');
+        throw new Error("JSON must be an array of messages");
       }
       setMessages(parsed);
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Invalid JSON');
+      setError(e instanceof Error ? e.message : "Invalid JSON");
       setMessages([]);
     }
   }, []);
@@ -1455,49 +1455,49 @@ const PlaygroundTemplate = () => {
   return (
     <div
       style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '16px',
-        height: '700px',
-        fontFamily: 'system-ui, sans-serif',
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "16px",
+        height: "700px",
+        fontFamily: "system-ui, sans-serif",
       }}
     >
       {/* Left Panel - JSON Input */}
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
           minWidth: 0,
         }}
       >
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '8px',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "8px",
           }}
         >
-          <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>
+          <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>
             JSON Input (Messages Array)
           </h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <label
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontSize: '12px',
-                color: 'var(--app-secondary-foreground, #a1a1aa)',
-                cursor: 'pointer',
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontSize: "12px",
+                color: "var(--app-secondary-foreground, #a1a1aa)",
+                cursor: "pointer",
               }}
             >
               <input
                 type="checkbox"
                 checked={autoRender}
                 onChange={(e) => setAutoRender(e.target.checked)}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: "pointer" }}
               />
               Auto Render
             </label>
@@ -1505,13 +1505,13 @@ const PlaygroundTemplate = () => {
               <button
                 onClick={() => parseAndRender(jsonInput)}
                 style={{
-                  padding: '6px 12px',
-                  background: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '13px',
+                  padding: "6px 12px",
+                  background: "#3b82f6",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "13px",
                   fontWeight: 500,
                 }}
               >
@@ -1525,27 +1525,27 @@ const PlaygroundTemplate = () => {
           onChange={(e) => setJsonInput(e.target.value)}
           style={{
             flex: 1,
-            padding: '12px',
-            fontFamily: 'ui-monospace, monospace',
-            fontSize: '12px',
-            border: '1px solid var(--app-border, #3f3f46)',
-            borderRadius: '6px',
-            background: 'var(--app-input-background, #3c3c3c)',
-            color: 'var(--app-primary-foreground, #e4e4e7)',
-            resize: 'none',
-            outline: 'none',
+            padding: "12px",
+            fontFamily: "ui-monospace, monospace",
+            fontSize: "12px",
+            border: "1px solid var(--app-border, #3f3f46)",
+            borderRadius: "6px",
+            background: "var(--app-input-background, #3c3c3c)",
+            color: "var(--app-primary-foreground, #e4e4e7)",
+            resize: "none",
+            outline: "none",
           }}
           placeholder="Paste your JSON messages array here..."
         />
         {error && (
           <div
             style={{
-              padding: '8px 12px',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid #ef4444',
-              borderRadius: '4px',
-              color: '#ef4444',
-              fontSize: '13px',
+              padding: "8px 12px",
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid #ef4444",
+              borderRadius: "4px",
+              color: "#ef4444",
+              fontSize: "13px",
             }}
           >
             Error: {error}
@@ -1553,16 +1553,16 @@ const PlaygroundTemplate = () => {
         )}
         <div
           style={{
-            fontSize: '11px',
-            color: 'var(--app-secondary-foreground, #a1a1aa)',
+            fontSize: "11px",
+            color: "var(--app-secondary-foreground, #a1a1aa)",
             lineHeight: 1.5,
           }}
         >
           <strong>Supported message types:</strong>
-          <br />• <code>user</code> - User messages with{' '}
+          <br />• <code>user</code> - User messages with{" "}
           <code>message.parts[].text</code> or <code>message.content</code>
           <br />• <code>assistant</code> - AI responses
-          <br />• <code>tool_call</code> - Tool calls with{' '}
+          <br />• <code>tool_call</code> - Tool calls with{" "}
           <code>toolCall.kind</code> (read, write, edit, bash, grep, etc.)
         </div>
       </div>
@@ -1570,21 +1570,21 @@ const PlaygroundTemplate = () => {
       {/* Right Panel - ChatViewer Preview */}
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
           minWidth: 0,
         }}
       >
-        <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>
+        <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>
           ChatViewer Preview
         </h3>
         <div
           style={{
             flex: 1,
-            border: '1px solid var(--app-border, #3f3f46)',
-            borderRadius: '6px',
-            overflow: 'hidden',
+            border: "1px solid var(--app-border, #3f3f46)",
+            borderRadius: "6px",
+            overflow: "hidden",
           }}
         >
           <ChatViewer
@@ -1600,7 +1600,7 @@ const PlaygroundTemplate = () => {
 export const Playground: Story = {
   render: () => <PlaygroundTemplate />,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     docs: {
       description: {
         story: `
@@ -1638,9 +1638,9 @@ Paste your chat history JSON (array of messages) on the left, click "Render" to 
     (Story) => (
       <div
         style={{
-          background: 'var(--app-background, #1e1e1e)',
-          padding: '20px',
-          minHeight: '100vh',
+          background: "var(--app-background, #1e1e1e)",
+          padding: "20px",
+          minHeight: "100vh",
         }}
       >
         <Story />

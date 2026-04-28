@@ -8,6 +8,6 @@
  * Generates a filename with timestamp for export files.
  */
 export function generateExportFilename(extension: string): string {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   return `tram-export-${timestamp}.${extension}`;
 }

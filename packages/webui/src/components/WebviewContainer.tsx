@@ -1,5 +1,5 @@
-import type { PropsWithChildren } from 'react';
-import type React from 'react';
+import type { PropsWithChildren } from "react";
+import type React from "react";
 
 interface WebviewContainerProps extends PropsWithChildren {
   className?: string;
@@ -11,7 +11,7 @@ interface WebviewContainerProps extends PropsWithChildren {
  */
 const WebviewContainer: React.FC<WebviewContainerProps> = ({
   children,
-  className = '',
+  className = "",
 }) => <div className={`tram-webui-container ${className}`}>{children}</div>;
 
 export default WebviewContainer;

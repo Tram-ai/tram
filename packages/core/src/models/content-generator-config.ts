@@ -12,16 +12,16 @@
  * different model or provider than the parent process.
  */
 
-import type { Config } from '../config/config.js';
+import type { Config } from "../config/config.js";
 import {
   type AuthType,
   type ContentGeneratorConfig,
-} from '../core/contentGenerator.js';
+} from "../core/contentGenerator.js";
 import {
   AUTH_ENV_MAPPINGS,
   MODEL_GENERATION_CONFIG_FIELDS,
-} from './constants.js';
-import type { ResolvedModelConfig } from './types.js';
+} from "./constants.js";
+import type { ResolvedModelConfig } from "./types.js";
 
 export interface AuthOverrides {
   authType: string;
@@ -80,7 +80,7 @@ export function buildAgentContentGeneratorConfig(
     authOverrides.apiKey,
     sameProvider ? parentConfig.apiKey : undefined,
     authOverrides.authType,
-    'apiKey',
+    "apiKey",
   );
   nextConfig.baseUrl =
     authOverrides.baseUrl ??
@@ -88,7 +88,7 @@ export function buildAgentContentGeneratorConfig(
       undefined,
       sameProvider ? parentConfig.baseUrl : undefined,
       authOverrides.authType,
-      'baseUrl',
+      "baseUrl",
     );
   nextConfig.apiKeyEnvKey = sameProvider
     ? parentConfig.apiKeyEnvKey
@@ -104,7 +104,9 @@ function applyResolvedModelConfig(
   authOverrides: AuthOverrides,
 ): void {
   const sameProvider = authOverrides.authType === parentConfig.authType;
+  // Use upstreamModelId directly as model - this is sent to the API
   targetConfig.model = resolvedModel.id;
+  targetConfig.requestModel = resolvedModel.upstreamModelId || resolvedModel.id;
   targetConfig.authType = resolvedModel.authType;
   targetConfig.baseUrl =
     authOverrides.baseUrl ??
@@ -122,7 +124,7 @@ function applyResolvedModelConfig(
       authOverrides.apiKey,
       sameProvider ? parentConfig.apiKey : undefined,
       authOverrides.authType,
-      'apiKey',
+      "apiKey",
     );
     targetConfig.apiKeyEnvKey = sameProvider
       ? parentConfig.apiKeyEnvKey
@@ -149,7 +151,7 @@ export function resolveCredentialField(
   explicitValue: string | undefined,
   inheritedValue: string | undefined,
   authType: string,
-  field: 'apiKey' | 'baseUrl',
+  field: "apiKey" | "baseUrl",
 ): string | undefined {
   if (explicitValue) return explicitValue;
   if (inheritedValue) return inheritedValue;

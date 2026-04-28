@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Extension, Config } from '@tram-ai/tram-core';
+import type { Extension, Config } from "@tram-ai/tram-core";
 
 /**
  * Management steps for the extensions manager dialog.
  */
 export const MANAGEMENT_STEPS = {
-  EXTENSION_LIST: 'extension-list',
-  ACTION_SELECTION: 'action-selection',
-  EXTENSION_DETAIL: 'extension-detail',
-  UNINSTALL_CONFIRMATION: 'uninstall-confirmation',
-  DISABLE_SCOPE_SELECT: 'disable-scope-select',
-  ENABLE_SCOPE_SELECT: 'enable-scope-select',
-  UPDATE_PROGRESS: 'update-progress',
+  EXTENSION_LIST: "extension-list",
+  ACTION_SELECTION: "action-selection",
+  EXTENSION_DETAIL: "extension-detail",
+  UNINSTALL_CONFIRMATION: "uninstall-confirmation",
+  DISABLE_SCOPE_SELECT: "disable-scope-select",
+  ENABLE_SCOPE_SELECT: "enable-scope-select",
+  UPDATE_PROGRESS: "update-progress",
 } as const;
 
 /**
@@ -65,20 +65,20 @@ export interface UninstallConfirmStepProps extends StepNavigationProps {
  */
 export interface ScopeSelectStepProps extends StepNavigationProps {
   selectedExtension: Extension | null;
-  mode: 'disable' | 'enable';
-  onScopeSelect: (scope: 'user' | 'workspace') => void;
+  mode: "disable" | "enable";
+  onScopeSelect: (scope: "user" | "workspace") => void;
 }
 
 /**
  * Available actions for an extension.
  */
 export type ExtensionAction =
-  | 'view'
-  | 'update'
-  | 'disable'
-  | 'enable'
-  | 'uninstall'
-  | 'back';
+  | "view"
+  | "update"
+  | "disable"
+  | "enable"
+  | "uninstall"
+  | "back";
 
 /**
  * Props for the ExtensionsManagerDialog component.

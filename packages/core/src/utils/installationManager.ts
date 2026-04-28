@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import { randomUUID } from 'node:crypto';
-import * as path from 'node:path';
-import { Storage } from '../config/storage.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import * as fs from "node:fs";
+import { randomUUID } from "node:crypto";
+import * as path from "node:path";
+import { Storage } from "../config/storage.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('INSTALLATION');
+const debugLogger = createDebugLogger("INSTALLATION");
 
 export class InstallationManager {
   private getInstallationIdPath(): string {
@@ -21,7 +21,7 @@ export class InstallationManager {
     const installationIdFile = this.getInstallationIdPath();
     if (fs.existsSync(installationIdFile)) {
       const installationid = fs
-        .readFileSync(installationIdFile, 'utf-8')
+        .readFileSync(installationIdFile, "utf-8")
         .trim();
       return installationid || null;
     }
@@ -32,7 +32,7 @@ export class InstallationManager {
     const installationIdFile = this.getInstallationIdPath();
     const dir = path.dirname(installationIdFile);
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(installationIdFile, installationId, 'utf-8');
+    fs.writeFileSync(installationIdFile, installationId, "utf-8");
   }
 
   /**
@@ -52,10 +52,10 @@ export class InstallationManager {
       return installationId;
     } catch (error) {
       debugLogger.error(
-        'Error accessing installation ID file, generating ephemeral ID:',
+        "Error accessing installation ID file, generating ephemeral ID:",
         error,
       );
-      return '123456789';
+      return "123456789";
     }
   }
 }

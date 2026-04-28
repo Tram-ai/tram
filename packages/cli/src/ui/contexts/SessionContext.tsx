@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
+import type React from "react";
 import {
   createContext,
   useCallback,
@@ -12,20 +12,20 @@ import {
   useState,
   useMemo,
   useEffect,
-} from 'react';
+} from "react";
 
 import type {
   SessionMetrics,
   ModelMetrics,
   ToolCallStats,
-} from '@tram-ai/tram-core';
-import { uiTelemetryService } from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
+import { uiTelemetryService } from "@tram-ai/tram-core";
 
 export enum ToolCallDecision {
-  ACCEPT = 'accept',
-  REJECT = 'reject',
-  MODIFY = 'modify',
-  AUTO_ACCEPT = 'auto_accept',
+  ACCEPT = "accept",
+  REJECT = "reject",
+  MODIFY = "modify",
+  AUTO_ACCEPT = "auto_accept",
 }
 
 function areModelMetricsEqual(a: ModelMetrics, b: ModelMetrics): boolean {
@@ -179,7 +179,7 @@ const SessionStatsContext = createContext<SessionStatsContextValue | undefined>(
   undefined,
 );
 
-const createDefaultStats = (sessionId: string = ''): SessionStatsState => ({
+const createDefaultStats = (sessionId: string = ""): SessionStatsState => ({
   sessionId,
   sessionStartTime: new Date(),
   metrics: uiTelemetryService.getMetrics(),
@@ -194,7 +194,7 @@ export const SessionStatsProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ sessionId, children }) => {
   const [stats, setStats] = useState<SessionStatsState>(() =>
-    createDefaultStats(sessionId ?? ''),
+    createDefaultStats(sessionId ?? ""),
   );
 
   useEffect(() => {
@@ -220,7 +220,7 @@ export const SessionStatsProvider: React.FC<{
       });
     };
 
-    uiTelemetryService.on('update', handleUpdate);
+    uiTelemetryService.on("update", handleUpdate);
     // Set initial state
     handleUpdate({
       metrics: uiTelemetryService.getMetrics(),
@@ -228,7 +228,7 @@ export const SessionStatsProvider: React.FC<{
     });
 
     return () => {
-      uiTelemetryService.off('update', handleUpdate);
+      uiTelemetryService.off("update", handleUpdate);
     };
   }, []);
 
@@ -274,7 +274,7 @@ export const useSessionStats = () => {
   const context = useContext(SessionStatsContext);
   if (context === undefined) {
     throw new Error(
-      'useSessionStats must be used within a SessionStatsProvider',
+      "useSessionStats must be used within a SessionStatsProvider",
     );
   }
   return context;

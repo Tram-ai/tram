@@ -1,10 +1,10 @@
-# Connect Qwen Code to tools via MCP
+# Connect TRAM to tools via MCP
 
-Qwen Code can connect to external tools and data sources through the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction). MCP servers give Qwen Code access to your tools, databases, and APIs.
+TRAM can connect to external tools and data sources through the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction). MCP servers give TRAM access to your tools, databases, and APIs.
 
 ## What you can do with MCP
 
-With MCP servers connected, you can ask Qwen Code to:
+With MCP servers connected, you can ask TRAM to:
 
 - Work with files and repos (read/search/write, depending on the tools you enable)
 - Query databases (schema inspection, queries, reporting)
@@ -17,7 +17,7 @@ With MCP servers connected, you can ask Qwen Code to:
 
 ## Quick start
 
-Qwen Code loads MCP servers from `mcpServers` in your `settings.json`. You can configure servers either:
+TRAM loads MCP servers from `mcpServers` in your `settings.json`. You can configure servers either:
 
 - By editing `settings.json` directly
 - By using `qwen mcp` commands (see [CLI reference](#qwen-mcp-cli))
@@ -36,7 +36,7 @@ qwen mcp add --transport http my-server http://localhost:3000/mcp
 qwen mcp
 ```
 
-3. Restart Qwen Code in the same project (or start it if it wasn’t running yet), then ask the model to use tools from that server.
+3. Restart TRAM in the same project (or start it if it wasn’t running yet), then ask the model to use tools from that server.
 
 ## Where configuration is stored (scopes)
 
@@ -155,7 +155,7 @@ qwen mcp add --transport sse sseServer http://localhost:8080/sse --timeout 30000
 
 ### Tool filtering (allow/deny tools per server)
 
-Use `includeTools` / `excludeTools` to restrict tools exposed by a server (from Qwen Code’s perspective).
+Use `includeTools` / `excludeTools` to restrict tools exposed by a server (from TRAM’s perspective).
 
 Example: include only a few tools:
 
@@ -194,7 +194,7 @@ Example:
 
 - **Server shows “Disconnected” in `qwen mcp list`**: verify the URL/command is correct, then increase `timeout`.
 - **Stdio server fails to start**: use an absolute `command` path, and double-check `cwd`/`env`.
-- **Environment variables in JSON don’t resolve**: ensure they exist in the environment where Qwen Code runs (shell vs GUI app environments can differ).
+- **Environment variables in JSON don’t resolve**: ensure they exist in the environment where TRAM runs (shell vs GUI app environments can differ).
 
 ## Reference
 

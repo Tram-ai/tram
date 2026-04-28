@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { exec, type ChildProcess } from 'child_process';
-import { createDebugLogger } from '@qwen-code/qwen-code-core';
-import { useSettings } from '../contexts/SettingsContext.js';
-import { useUIState } from '../contexts/UIStateContext.js';
-import { useConfig } from '../contexts/ConfigContext.js';
-import { useVimMode } from '../contexts/VimModeContext.js';
-import type { SessionMetrics } from '../contexts/SessionContext.js';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { exec, type ChildProcess } from "child_process";
+import { createDebugLogger } from "@tram-ai/tram-core";
+import { useSettings } from "../contexts/SettingsContext.js";
+import { useUIState } from "../contexts/UIStateContext.js";
+import { useConfig } from "../contexts/ConfigContext.js";
+import { useVimMode } from "../contexts/VimModeContext.js";
+import type { SessionMetrics } from "../contexts/SessionContext.js";
 
 /**
  * Structured JSON input passed to the status line command via stdin.
@@ -67,11 +67,11 @@ export interface StatusLineCommandInput {
 }
 
 interface StatusLineConfig {
-  type: 'command';
+  type: "command";
   command: string;
 }
 
-const debugLog = createDebugLogger('STATUS_LINE');
+const debugLog = createDebugLogger("STATUS_LINE");
 
 function getStatusLineConfig(
   settings: ReturnType<typeof useSettings>,
@@ -79,15 +79,15 @@ function getStatusLineConfig(
   const raw = settings.merged.ui?.statusLine;
   if (
     raw &&
-    typeof raw === 'object' &&
-    'type' in raw &&
-    raw.type === 'command' &&
-    'command' in raw &&
-    typeof raw.command === 'string' &&
+    typeof raw === "object" &&
+    "type" in raw &&
+    raw.type === "command" &&
+    "command" in raw &&
+    typeof raw.command === "string" &&
     raw.command.trim().length > 0
   ) {
     const config: StatusLineConfig = {
-      type: 'command',
+      type: "command",
       command: raw.command,
     };
     return config;
@@ -97,8 +97,8 @@ function getStatusLineConfig(
 
 function buildMetricsPayload(
   m: SessionMetrics,
-): StatusLineCommandInput['metrics'] {
-  const models: StatusLineCommandInput['metrics']['models'] = {};
+): StatusLineCommandInput["metrics"] {
+  const models: StatusLineCommandInput["metrics"]["models"] = {};
   for (const [id, mm] of Object.entries(m.models)) {
     models[id] = {
       api: {
@@ -234,9 +234,9 @@ export function useStatusLine(): {
 
     const input: StatusLineCommandInput = {
       session_id: stats.sessionId,
-      version: cfg.getCliVersion() || 'unknown',
+      version: cfg.getCliVersion() || "unknown",
       model: {
-        display_name: ui.currentModel || cfg.getModel() || 'unknown',
+        display_name: ui.currentModel || cfg.getModelName() || "unknown",
       },
       context_window: {
         context_window_size: contextWindowSize,
@@ -277,7 +277,7 @@ export function useStatusLine(): {
         activeChildRef.current = undefined;
         if (!error && stdout) {
           // Strip only the trailing newline to preserve intentional whitespace.
-          const line = stdout.replace(/\r?\n$/, '').split(/\r?\n/, 1)[0];
+          const line = stdout.replace(/\r?\n$/, "").split(/\r?\n/, 1)[0];
           setOutput(line || null);
         } else {
           setOutput(null);
@@ -290,9 +290,9 @@ export function useStatusLine(): {
     // Pass structured JSON context via stdin.
     // Guard against EPIPE if the child exits before we finish writing.
     if (child.stdin) {
-      child.stdin.on('error', (err) => {
-        if ((err as NodeJS.ErrnoException).code !== 'EPIPE') {
-          debugLog.error('statusline stdin error:', err.message);
+      child.stdin.on("error", (err) => {
+        if ((err as NodeJS.ErrnoException).code !== "EPIPE") {
+          debugLog.error("statusline stdin error:", err.message);
         }
       });
       child.stdin.write(JSON.stringify(input));

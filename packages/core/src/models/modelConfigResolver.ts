@@ -18,9 +18,9 @@
  * 5. Defaults - Built-in default values
  */
 
-import { AuthType } from '../core/contentGenerator.js';
-import type { ContentGeneratorConfig } from '../core/contentGenerator.js';
-import { DEFAULT_TRAM_MODEL } from '../config/models.js';
+import { AuthType } from "../core/contentGenerator.js";
+import type { ContentGeneratorConfig } from "../core/contentGenerator.js";
+import { DEFAULT_TRAM_MODEL } from "../config/models.js";
 import {
   resolveField,
   resolveOptionalField,
@@ -34,18 +34,18 @@ import {
   type ConfigSource,
   type ConfigSources,
   type ConfigLayer,
-} from '../utils/configResolver.js';
+} from "../utils/configResolver.js";
 import {
   AUTH_ENV_MAPPINGS,
   DEFAULT_MODELS,
   TRAM_OAUTH_ALLOWED_MODELS,
   MODEL_GENERATION_CONFIG_FIELDS,
-} from './constants.js';
-import type { ModelConfig as ModelProviderConfig } from './types.js';
+} from "./constants.js";
+import type { ModelConfig as ModelProviderConfig } from "./types.js";
 export {
   validateModelConfig,
   type ModelConfigValidationResult,
-} from '../core/contentGenerator.js';
+} from "../core/contentGenerator.js";
 
 /**
  * CLI-provided configuration values
@@ -144,27 +144,27 @@ export function resolveModelConfig(
     modelLayers.push(
       layer(
         modelProvider.id,
-        modelProvidersSource(authType, modelProvider.id, 'model.id'),
+        modelProvidersSource(authType, modelProvider.id, "model.id"),
       ),
     );
   }
   if (cli?.model) {
-    modelLayers.push(layer(cli.model, cliSource('--model')));
+    modelLayers.push(layer(cli.model, cliSource("--model")));
   }
   for (const envKey of envMapping.model) {
     modelLayers.push(envLayer(env, envKey));
   }
   if (settings?.model) {
-    modelLayers.push(layer(settings.model, settingsSource('model.name')));
+    modelLayers.push(layer(settings.model, settingsSource("model.name")));
   }
 
-  const defaultModel = authType ? DEFAULT_MODELS[authType] : '';
+  const defaultModel = authType ? DEFAULT_MODELS[authType] : "";
   const modelResult = resolveField(
     modelLayers,
     defaultModel,
     defaultSource(defaultModel),
   );
-  sources['model'] = modelResult.source;
+  sources["model"] = modelResult.source;
 
   // ---- API Key ----
   const apiKeyLayers: Array<ConfigLayer<string>> = [];
@@ -175,28 +175,28 @@ export function resolveModelConfig(
     if (apiKeyFromEnv) {
       apiKeyLayers.push(
         layer(apiKeyFromEnv, {
-          kind: 'env',
+          kind: "env",
           envKey: modelProvider.envKey,
-          via: modelProvidersSource(authType, modelProvider.id, 'envKey'),
+          via: modelProvidersSource(authType, modelProvider.id, "envKey"),
         }),
       );
     }
   }
   if (cli?.apiKey) {
-    apiKeyLayers.push(layer(cli.apiKey, cliSource('--openaiApiKey')));
+    apiKeyLayers.push(layer(cli.apiKey, cliSource("--openaiApiKey")));
   }
   for (const envKey of envMapping.apiKey) {
     apiKeyLayers.push(envLayer(env, envKey));
   }
   if (settings?.apiKey) {
     apiKeyLayers.push(
-      layer(settings.apiKey, settingsSource('security.auth.apiKey')),
+      layer(settings.apiKey, settingsSource("security.auth.apiKey")),
     );
   }
 
   const apiKeyResult = resolveOptionalField(apiKeyLayers);
   if (apiKeyResult) {
-    sources['apiKey'] = apiKeyResult.source;
+    sources["apiKey"] = apiKeyResult.source;
   }
 
   // ---- Base URL ----
@@ -206,35 +206,35 @@ export function resolveModelConfig(
     baseUrlLayers.push(
       layer(
         modelProvider.baseUrl,
-        modelProvidersSource(authType, modelProvider.id, 'baseUrl'),
+        modelProvidersSource(authType, modelProvider.id, "baseUrl"),
       ),
     );
   }
   if (cli?.baseUrl) {
-    baseUrlLayers.push(layer(cli.baseUrl, cliSource('--openaiBaseUrl')));
+    baseUrlLayers.push(layer(cli.baseUrl, cliSource("--openaiBaseUrl")));
   }
   for (const envKey of envMapping.baseUrl) {
     baseUrlLayers.push(envLayer(env, envKey));
   }
   if (settings?.baseUrl) {
     baseUrlLayers.push(
-      layer(settings.baseUrl, settingsSource('security.auth.baseUrl')),
+      layer(settings.baseUrl, settingsSource("security.auth.baseUrl")),
     );
   }
 
   const baseUrlResult = resolveOptionalField(baseUrlLayers);
   if (baseUrlResult) {
-    sources['baseUrl'] = baseUrlResult.source;
+    sources["baseUrl"] = baseUrlResult.source;
   }
 
   // ---- API Key Env Key (for error messages) ----
   let apiKeyEnvKey: string | undefined;
   if (authType && modelProvider?.envKey) {
     apiKeyEnvKey = modelProvider.envKey;
-    sources['apiKeyEnvKey'] = modelProvidersSource(
+    sources["apiKeyEnvKey"] = modelProvidersSource(
       authType,
       modelProvider.id,
-      'envKey',
+      "envKey",
     );
   }
 
@@ -250,7 +250,7 @@ export function resolveModelConfig(
   // Build final config
   const config: ContentGeneratorConfig = {
     authType,
-    model: modelResult.value || '',
+    model: modelResult.value || "",
     apiKey: apiKeyResult?.value,
     apiKeyEnvKey,
     baseUrl: baseUrlResult?.value,
@@ -260,11 +260,11 @@ export function resolveModelConfig(
 
   // Add proxy source
   if (proxy) {
-    sources['proxy'] = computedSource('Config.getProxy()');
+    sources["proxy"] = computedSource("Config.getProxy()");
   }
 
   // Add authType source
-  sources['authType'] = computedSource('provided by caller');
+  sources["authType"] = computedSource("provided by caller");
 
   return { config, sources, warnings };
 }
@@ -291,15 +291,15 @@ function resolveTramOAuthConfig(
   if (requestedModel && allowedModels.has(requestedModel)) {
     resolvedModel = requestedModel;
     modelSource = cli?.model
-      ? cliSource('--model')
-      : settingsSource('model.name');
+      ? cliSource("--model")
+      : settingsSource("model.name");
   } else {
     if (requestedModel) {
       const isVisionModel =
-        requestedModel.includes('vl') || requestedModel.includes('vision');
+        requestedModel.includes("vl") || requestedModel.includes("vision");
       const extraMessage = isVisionModel
         ? ` Note: vision-model has been removed since coder-model now supports vision capabilities.`
-        : '';
+        : "";
       warnings.push(
         `Warning: Unsupported TRAM OAuth model '${requestedModel}', falling back to '${DEFAULT_TRAM_MODEL}'.${extraMessage}`,
       );
@@ -308,12 +308,12 @@ function resolveTramOAuthConfig(
     modelSource = defaultSource(`fallback to '${DEFAULT_TRAM_MODEL}'`);
   }
 
-  sources['model'] = modelSource;
-  sources['apiKey'] = computedSource('TRAM OAuth dynamic token');
-  sources['authType'] = computedSource('provided by caller');
+  sources["model"] = modelSource;
+  sources["apiKey"] = computedSource("TRAM OAuth dynamic token");
+  sources["authType"] = computedSource("provided by caller");
 
   if (proxy) {
-    sources['proxy'] = computedSource('Config.getProxy()');
+    sources["proxy"] = computedSource("Config.getProxy()");
   }
 
   // Resolve generation config from settings and modelProvider
@@ -328,7 +328,7 @@ function resolveTramOAuthConfig(
   const config: ContentGeneratorConfig = {
     authType: AuthType.TRAM_OAUTH,
     model: resolvedModel,
-    apiKey: 'TRAM_OAUTH_DYNAMIC_TOKEN',
+    apiKey: "TRAM_OAUTH_DYNAMIC_TOKEN",
     proxy,
     ...generationConfig,
   };
@@ -355,7 +355,7 @@ function resolveGenerationConfig(
       (result as any)[field] = modelProviderConfig[field];
       sources[field] = modelProvidersSource(
         authType,
-        modelId || '',
+        modelId || "",
         `generationConfig.${field}`,
       );
     } else if (settingsConfig && field in settingsConfig) {

@@ -4,32 +4,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { Box, Text } from 'ink';
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { Box, Text } from "ink";
 import {
   ExtensionListStep,
   ExtensionDetailStep,
   ActionSelectionStep,
   UninstallConfirmStep,
   ScopeSelectStep,
-} from './steps/index.js';
-import { MANAGEMENT_STEPS, type ExtensionAction } from './types.js';
-import { theme } from '../../semantic-colors.js';
-import { useKeypress } from '../../hooks/useKeypress.js';
-import { useUIState } from '../../contexts/UIStateContext.js';
-import { t } from '../../../i18n/index.js';
-import type { Extension, Config } from '@tram-ai/tram-core';
-import { SettingScope, createDebugLogger } from '@tram-ai/tram-core';
-import { ExtensionUpdateState } from '../../state/extensions.js';
-import { getErrorMessage } from '../../../utils/errors.js';
-import { useTerminalSize } from '../../hooks/useTerminalSize.js';
+} from "./steps/index.js";
+import { MANAGEMENT_STEPS, type ExtensionAction } from "./types.js";
+import { theme } from "../../semantic-colors.js";
+import { useKeypress } from "../../hooks/useKeypress.js";
+import { useUIState } from "../../contexts/UIStateContext.js";
+import { t } from "../../../i18n/index.js";
+import type { Extension, Config } from "@tram-ai/tram-core";
+import { SettingScope, createDebugLogger } from "@tram-ai/tram-core";
+import { ExtensionUpdateState } from "../../state/extensions.js";
+import { getErrorMessage } from "../../../utils/errors.js";
+import { useTerminalSize } from "../../hooks/useTerminalSize.js";
 
 interface ExtensionsManagerDialogProps {
   onClose: () => void;
   config: Config | null;
 }
 
-const debugLogger = createDebugLogger('EXTENSIONS_MANAGER_DIALOG');
+const debugLogger = createDebugLogger("EXTENSIONS_MANAGER_DIALOG");
 
 export function ExtensionsManagerDialog({
   onClose,
@@ -56,7 +56,7 @@ export function ExtensionsManagerDialog({
 
     const extensionManager = config.getExtensionManager();
     if (!extensionManager) {
-      debugLogger.error('ExtensionManager not available');
+      debugLogger.error("ExtensionManager not available");
       return;
     }
 
@@ -65,7 +65,7 @@ export function ExtensionsManagerDialog({
       const loadedExtensions = extensionManager.getLoadedExtensions();
       setExtensions(loadedExtensions);
     } catch (error) {
-      debugLogger.error('Failed to load extensions:', error);
+      debugLogger.error("Failed to load extensions:", error);
     }
   }, [config]);
 
@@ -127,12 +127,12 @@ export function ExtensionsManagerDialog({
     try {
       const extensionManager = config.getExtensionManager();
       if (!extensionManager) {
-        throw new Error('ExtensionManager not available');
+        throw new Error("ExtensionManager not available");
       }
 
       const state = extensionsUpdateState.get(selectedExtension.name);
       if (state !== ExtensionUpdateState.UPDATE_AVAILABLE) {
-        throw new Error('No update available');
+        throw new Error("No update available");
       }
 
       // Use the extension manager to update
@@ -162,9 +162,9 @@ export function ExtensionsManagerDialog({
       // Go back to action selection
       handleNavigateBack();
     } catch (error) {
-      debugLogger.error('Failed to update extension:', error);
+      debugLogger.error("Failed to update extension:", error);
       setUpdateError(
-        error instanceof Error ? error.message : 'Unknown error occurred',
+        error instanceof Error ? error.message : "Unknown error occurred",
       );
     } finally {
       setUpdateInProgress(false);
@@ -180,20 +180,20 @@ export function ExtensionsManagerDialog({
   const handleActionSelect = useCallback(
     (action: ExtensionAction) => {
       switch (action) {
-        case 'view':
+        case "view":
           handleNavigateToStep(MANAGEMENT_STEPS.EXTENSION_DETAIL);
           break;
-        case 'update':
+        case "update":
           handleNavigateToStep(MANAGEMENT_STEPS.UPDATE_PROGRESS);
           handleUpdateExtension();
           break;
-        case 'disable':
+        case "disable":
           handleNavigateToStep(MANAGEMENT_STEPS.DISABLE_SCOPE_SELECT);
           break;
-        case 'enable':
+        case "enable":
           handleNavigateToStep(MANAGEMENT_STEPS.ENABLE_SCOPE_SELECT);
           break;
-        case 'uninstall':
+        case "uninstall":
           handleNavigateToStep(MANAGEMENT_STEPS.UNINSTALL_CONFIRMATION);
           break;
         default:
@@ -205,17 +205,17 @@ export function ExtensionsManagerDialog({
 
   // Unified handler for toggling extension state (enable/disable)
   const handleToggleExtensionState = useCallback(
-    async (scope: 'user' | 'workspace', newState: boolean) => {
+    async (scope: "user" | "workspace", newState: boolean) => {
       if (!config || !selectedExtension) return;
 
       try {
         const extensionManager = config.getExtensionManager();
         if (!extensionManager) {
-          throw new Error('ExtensionManager not available');
+          throw new Error("ExtensionManager not available");
         }
 
         const settingScope =
-          scope === 'user' ? SettingScope.User : SettingScope.Workspace;
+          scope === "user" ? SettingScope.User : SettingScope.Workspace;
 
         if (newState) {
           await extensionManager.enableExtension(
@@ -239,7 +239,7 @@ export function ExtensionsManagerDialog({
         );
 
         // Show success message
-        const actionKey = newState ? 'enabled' : 'disabled';
+        const actionKey = newState ? "enabled" : "disabled";
         setSuccessMessage(
           t(`Extension "{{name}}" ${actionKey} successfully.`, {
             name: selectedExtension.name,
@@ -251,12 +251,12 @@ export function ExtensionsManagerDialog({
         setNavigationStack([MANAGEMENT_STEPS.EXTENSION_LIST]);
       } catch (error) {
         debugLogger.error(
-          `Failed to ${newState ? 'enable' : 'disable'} extension:`,
+          `Failed to ${newState ? "enable" : "disable"} extension:`,
           error,
         );
         setErrorMessage(
           t('Failed to {{action}} extension "{{name}}": {{error}}', {
-            action: newState ? 'enable' : 'disable',
+            action: newState ? "enable" : "disable",
             name: selectedExtension.name,
             error: getErrorMessage(error),
           }),
@@ -268,14 +268,14 @@ export function ExtensionsManagerDialog({
   );
 
   const handleDisableExtension = useCallback(
-    async (scope: 'user' | 'workspace') => {
+    async (scope: "user" | "workspace") => {
       await handleToggleExtensionState(scope, false);
     },
     [handleToggleExtensionState],
   );
 
   const handleEnableExtension = useCallback(
-    async (scope: 'user' | 'workspace') => {
+    async (scope: "user" | "workspace") => {
       await handleToggleExtensionState(scope, true);
     },
     [handleToggleExtensionState],
@@ -288,7 +288,7 @@ export function ExtensionsManagerDialog({
       try {
         const extensionManager = config.getExtensionManager();
         if (!extensionManager) {
-          throw new Error('ExtensionManager not available');
+          throw new Error("ExtensionManager not available");
         }
 
         await extensionManager.uninstallExtension(extension.name, false);
@@ -300,7 +300,7 @@ export function ExtensionsManagerDialog({
         setNavigationStack([MANAGEMENT_STEPS.EXTENSION_LIST]);
         setSelectedExtensionIndex(-1);
       } catch (error) {
-        debugLogger.error('Failed to uninstall extension:', error);
+        debugLogger.error("Failed to uninstall extension:", error);
         throw error;
       }
     },
@@ -310,7 +310,7 @@ export function ExtensionsManagerDialog({
   // Centralized ESC key handling
   useKeypress(
     (key) => {
-      if (key.name !== 'escape') {
+      if (key.name !== "escape") {
         return;
       }
 
@@ -334,21 +334,21 @@ export function ExtensionsManagerDialog({
     const getStepHeaderText = () => {
       switch (currentStep) {
         case MANAGEMENT_STEPS.EXTENSION_LIST:
-          return t('Manage Extensions');
+          return t("Manage Extensions");
         case MANAGEMENT_STEPS.ACTION_SELECTION:
-          return selectedExtension?.name || t('Choose Action');
+          return selectedExtension?.name || t("Choose Action");
         case MANAGEMENT_STEPS.EXTENSION_DETAIL:
-          return t('Extension Details');
+          return t("Extension Details");
         case MANAGEMENT_STEPS.DISABLE_SCOPE_SELECT:
-          return t('Disable Extension');
+          return t("Disable Extension");
         case MANAGEMENT_STEPS.ENABLE_SCOPE_SELECT:
-          return t('Enable Extension');
+          return t("Enable Extension");
         case MANAGEMENT_STEPS.UNINSTALL_CONFIRMATION:
-          return t('Uninstall Extension');
+          return t("Uninstall Extension");
         case MANAGEMENT_STEPS.UPDATE_PROGRESS:
-          return t('Update Extension');
+          return t("Update Extension");
         default:
-          return t('Unknown Step');
+          return t("Unknown Step");
       }
     };
 
@@ -366,24 +366,24 @@ export function ExtensionsManagerDialog({
     const getNavigationInstructions = () => {
       if (currentStep === MANAGEMENT_STEPS.EXTENSION_LIST) {
         if (extensions.length === 0 || successMessage) {
-          return t('Esc to close');
+          return t("Esc to close");
         }
-        return t('↑↓ to navigate · Enter to select · Esc to close');
+        return t("↑↓ to navigate · Enter to select · Esc to close");
       }
 
       if (currentStep === MANAGEMENT_STEPS.EXTENSION_DETAIL) {
-        return t('Esc to go back');
+        return t("Esc to go back");
       }
 
       if (currentStep === MANAGEMENT_STEPS.UNINSTALL_CONFIRMATION) {
-        return t('Y/Enter to confirm · N/Esc to cancel');
+        return t("Y/Enter to confirm · N/Esc to cancel");
       }
 
       if (currentStep === MANAGEMENT_STEPS.UPDATE_PROGRESS) {
-        return updateInProgress ? t('Updating...') : '';
+        return updateInProgress ? t("Updating...") : "";
       }
 
-      return t('↑↓ to navigate · Enter to select · Esc to go back');
+      return t("↑↓ to navigate · Enter to select · Esc to go back");
     };
 
     return (
@@ -417,7 +417,7 @@ export function ExtensionsManagerDialog({
     if (updateError && currentStep === MANAGEMENT_STEPS.UPDATE_PROGRESS) {
       return (
         <Box flexDirection="column" gap={1}>
-          <Text color={theme.status.error}>{t('Update failed:')}</Text>
+          <Text color={theme.status.error}>{t("Update failed:")}</Text>
           <Text>{updateError}</Text>
         </Box>
       );
@@ -472,10 +472,10 @@ export function ExtensionsManagerDialog({
           <Box flexDirection="column" gap={1}>
             <Text>
               {updateInProgress
-                ? t('Updating {{name}}...', {
-                    name: selectedExtension?.name || '',
+                ? t("Updating {{name}}...", {
+                    name: selectedExtension?.name || "",
                   })
-                : t('Update complete!')}
+                : t("Update complete!")}
             </Text>
           </Box>
         );
@@ -483,7 +483,7 @@ export function ExtensionsManagerDialog({
         return (
           <Box>
             <Text color={theme.status.error}>
-              {t('Invalid step: {{step}}', { step: currentStep })}
+              {t("Invalid step: {{step}}", { step: currentStep })}
             </Text>
           </Box>
         );

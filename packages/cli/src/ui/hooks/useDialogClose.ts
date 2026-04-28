@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback } from 'react';
-import { SettingScope } from '../../config/settings.js';
-import type { AuthType, ApprovalMode } from '@tram-ai/tram-core';
-import type { ArenaDialogType } from './useArenaCommand.js';
+import { useCallback } from "react";
+import { SettingScope } from "../../config/settings.js";
+import type { AuthType, ApprovalMode } from "@tram-ai/tram-core";
+import type { ArenaDialogType } from "./useArenaCommand.js";
 // OpenAICredentials type (previously imported from OpenAIKeyPrompt)
 interface OpenAICredentials {
   apiKey: string;

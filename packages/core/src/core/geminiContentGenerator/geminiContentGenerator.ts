@@ -16,12 +16,12 @@ import type {
   Content,
   Part,
   HttpOptions,
-} from '@google/genai';
-import { GoogleGenAI } from '@google/genai';
+} from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import type {
   ContentGenerator,
   ContentGeneratorConfig,
-} from '../contentGenerator.js';
+} from "../contentGenerator.js";
 
 /**
  * A wrapper for GoogleGenAI that implements the ContentGenerator interface.
@@ -84,33 +84,33 @@ export class GeminiContentGenerator implements ContentGenerator {
       ...requestConfig,
       temperature: getParameterValue<number>(
         configSamplingParams?.temperature,
-        'temperature',
+        "temperature",
         0,
       ),
       topP: getParameterValue<number>(
         configSamplingParams?.top_p,
-        'topP',
+        "topP",
         0.95,
       ),
-      topK: getParameterValue<number>(configSamplingParams?.top_k, 'topK', 64),
+      topK: getParameterValue<number>(configSamplingParams?.top_k, "topK", 64),
       maxOutputTokens: getParameterValue<number>(
         configSamplingParams?.max_tokens,
-        'maxOutputTokens',
+        "maxOutputTokens",
       ),
       presencePenalty: getParameterValue<number>(
         configSamplingParams?.presence_penalty,
-        'presencePenalty',
+        "presencePenalty",
       ),
       frequencyPenalty: getParameterValue<number>(
         configSamplingParams?.frequency_penalty,
-        'frequencyPenalty',
+        "frequencyPenalty",
       ),
       thinkingConfig: getParameterValue(
         this.buildThinkingConfig(),
-        'thinkingConfig',
+        "thinkingConfig",
         {
           includeThoughts: true,
-          thinkingLevel: 'THINKING_LEVEL_UNSPECIFIED' as ThinkingLevel,
+          thinkingLevel: "THINKING_LEVEL_UNSPECIFIED" as ThinkingLevel,
         },
       ),
     };
@@ -127,11 +127,11 @@ export class GeminiContentGenerator implements ContentGenerator {
 
     if (reasoning) {
       const thinkingLevel = (
-        reasoning.effort === 'low'
-          ? 'LOW'
-          : reasoning.effort === 'high'
-            ? 'HIGH'
-            : 'THINKING_LEVEL_UNSPECIFIED'
+        reasoning.effort === "low"
+          ? "LOW"
+          : reasoning.effort === "high"
+            ? "HIGH"
+            : "THINKING_LEVEL_UNSPECIFIED"
       ) as ThinkingLevel;
 
       return {
@@ -171,32 +171,32 @@ export class GeminiContentGenerator implements ContentGenerator {
    * Strip fields not supported by Gemini API (e.g., displayName in inlineData/fileData)
    */
   private stripUnsupportedFields(
-    contents: GenerateContentParameters['contents'],
-  ): GenerateContentParameters['contents'] {
+    contents: GenerateContentParameters["contents"],
+  ): GenerateContentParameters["contents"] {
     if (!contents) return contents;
 
-    if (typeof contents === 'string') return contents;
+    if (typeof contents === "string") return contents;
 
     if (Array.isArray(contents)) {
       return contents.map((content) =>
         this.stripContentFields(content),
-      ) as GenerateContentParameters['contents'];
+      ) as GenerateContentParameters["contents"];
     }
 
     return this.stripContentFields(
       contents,
-    ) as GenerateContentParameters['contents'];
+    ) as GenerateContentParameters["contents"];
   }
 
   private stripContentFields(
     content: Content | Part | string,
   ): Content | Part | string {
-    if (typeof content === 'string') {
+    if (typeof content === "string") {
       return content;
     }
 
     // Handle Part directly (for arrays of parts)
-    if (!('role' in content) && !('parts' in content)) {
+    if (!("role" in content) && !("parts" in content)) {
       return this.stripPartFields(content as Part);
     }
 
@@ -211,7 +211,7 @@ export class GeminiContentGenerator implements ContentGenerator {
   }
 
   private stripPartFields(part: Part): Part {
-    if (typeof part === 'string') {
+    if (typeof part === "string") {
       return part;
     }
 
@@ -221,14 +221,14 @@ export class GeminiContentGenerator implements ContentGenerator {
     if (result.inlineData) {
       const { displayName: _, ...inlineDataWithoutDisplayName } =
         result.inlineData as { displayName?: string; [key: string]: unknown };
-      result.inlineData = inlineDataWithoutDisplayName as Part['inlineData'];
+      result.inlineData = inlineDataWithoutDisplayName as Part["inlineData"];
     }
 
     // Strip displayName from fileData
     if (result.fileData) {
       const { displayName: _, ...fileDataWithoutDisplayName } =
         result.fileData as { displayName?: string; [key: string]: unknown };
-      result.fileData = fileDataWithoutDisplayName as Part['fileData'];
+      result.fileData = fileDataWithoutDisplayName as Part["fileData"];
     }
 
     // Handle functionResponse parts (which may contain nested media parts)
@@ -254,30 +254,30 @@ export class GeminiContentGenerator implements ContentGenerator {
    * Convert unsupported media types (audio, video) to explanatory text for Gemini API
    */
   private convertUnsupportedMediaToText(part: Part): Part {
-    if (typeof part === 'string') return part;
+    if (typeof part === "string") return part;
 
-    const inlineMimeType = part.inlineData?.mimeType || '';
-    const fileMimeType = part.fileData?.mimeType || '';
+    const inlineMimeType = part.inlineData?.mimeType || "";
+    const fileMimeType = part.fileData?.mimeType || "";
 
     if (
-      inlineMimeType.startsWith('audio/') ||
-      inlineMimeType.startsWith('video/')
+      inlineMimeType.startsWith("audio/") ||
+      inlineMimeType.startsWith("video/")
     ) {
       const displayName = (part.inlineData as { displayName?: string })
         ?.displayName;
-      const displayNameText = displayName ? ` (${displayName})` : '';
+      const displayNameText = displayName ? ` (${displayName})` : "";
       return {
         text: `Unsupported media type for Gemini: ${inlineMimeType}${displayNameText}.`,
       };
     }
 
     if (
-      fileMimeType.startsWith('audio/') ||
-      fileMimeType.startsWith('video/')
+      fileMimeType.startsWith("audio/") ||
+      fileMimeType.startsWith("video/")
     ) {
       const displayName = (part.fileData as { displayName?: string })
         ?.displayName;
-      const displayNameText = displayName ? ` (${displayName})` : '';
+      const displayNameText = displayName ? ` (${displayName})` : "";
       return {
         text: `Unsupported media type for Gemini: ${fileMimeType}${displayNameText}.`,
       };

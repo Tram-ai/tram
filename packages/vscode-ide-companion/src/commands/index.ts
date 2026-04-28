@@ -4,27 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import type { DiffManager } from '../diff-manager.js';
-import type { WebViewProvider } from '../webview/providers/WebViewProvider.js';
-import { getErrorMessage } from '../utils/errorMessage.js';
+import * as vscode from "vscode";
+import type { DiffManager } from "../diff-manager.js";
+import type { WebViewProvider } from "../webview/providers/WebViewProvider.js";
+import { getErrorMessage } from "../utils/errorMessage.js";
 import {
   CHAT_VIEW_ID_SIDEBAR,
   CHAT_VIEW_ID_SECONDARY,
-} from '../constants/viewIds.js';
+} from "../constants/viewIds.js";
 
 type Logger = (message: string) => void;
 
-export const runTramCommand = 'tram.runTram';
-export const showDiffCommand = 'tramCode.showDiff';
-export const openChatCommand = 'tram.openChat';
-export const openNewChatTabCommand = 'tramCode.openNewChatTab';
-export const loginCommand = 'tram.login';
-export const focusChatCommand = 'tram.focusChat';
-export const newConversationCommand = 'tram.newConversation';
-export const showLogsCommand = 'tram.showLogs';
-export const toggleChatLogsCommand = 'tram.toggleChatLogs';
-export const quickServiceAlertCommand = 'tram.quickServiceAlert';
+export const runTramCommand = "tram.runTram";
+export const showDiffCommand = "tramCode.showDiff";
+export const openChatCommand = "tram.openChat";
+export const openNewChatTabCommand = "tramCode.openNewChatTab";
+export const loginCommand = "tram.login";
+export const focusChatCommand = "tram.focusChat";
+export const newConversationCommand = "tram.newConversation";
+export const showLogsCommand = "tram.showLogs";
+export const toggleChatLogsCommand = "tram.toggleChatLogs";
+export const quickServiceAlertCommand = "tram.quickServiceAlert";
+export const toggleServiceFollowCommand = "tram.toggleServiceFollow";
 
 /**
  * Register all TRAM chat-related commands.
@@ -55,7 +56,9 @@ export function registerNewCommands(
   const sendToLatestProvider = async (text: string) => {
     const providers = getWebViewProviders();
     const provider =
-      providers.length > 0 ? providers[providers.length - 1] : createWebViewProvider();
+      providers.length > 0
+        ? providers[providers.length - 1]
+        : createWebViewProvider();
     await provider.show();
     await provider.submitMessage(text);
   };
@@ -79,7 +82,7 @@ export function registerNewCommands(
       async (args: { path: string; oldText: string; newText: string }) => {
         try {
           let absolutePath = args.path;
-          if (!args.path.startsWith('/') && !args.path.match(/^[a-zA-Z]:/)) {
+          if (!args.path.startsWith("/") && !args.path.match(/^[a-zA-Z]:/)) {
             const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
             if (workspaceFolder) {
               absolutePath = vscode.Uri.joinPath(
@@ -118,7 +121,7 @@ export function registerNewCommands(
         await providers[providers.length - 1].forceReLogin();
       } else {
         vscode.window.showInformationMessage(
-          'Please open TRAM chat first before logging in.',
+          "Please open TRAM chat first before logging in.",
         );
       }
     }),
@@ -152,7 +155,7 @@ export function registerNewCommands(
         logsVisible = true;
       } else {
         vscode.window.showWarningMessage(
-          'TRAM Companion log channel is not available.',
+          "TRAM Companion log channel is not available.",
         );
       }
     }),
@@ -175,8 +178,8 @@ export function registerNewCommands(
   disposables.push(
     vscode.commands.registerCommand(quickServiceAlertCommand, async () => {
       const serviceName = await vscode.window.showInputBox({
-        prompt: 'Enter service name for alert handling',
-        placeHolder: 'api',
+        prompt: "Enter service name for alert handling",
+        placeHolder: "api",
         ignoreFocusOut: true,
       });
 
@@ -188,6 +191,40 @@ export function registerNewCommands(
       await vscode.commands.executeCommand(focusChatCommand);
       await sendToLatestProvider(`/service alert ${normalized}`);
     }),
+  );
+
+  // Ctrl+Alt+L quick action to toggle follow/unfollow for a service
+  disposables.push(
+    vscode.commands.registerCommand(
+      toggleServiceFollowCommand,
+      async () => {
+        const serviceName = await vscode.window.showInputBox({
+          prompt:
+            "Enter service name to toggle follow (will follow if currently unfollowed, or unfollow if currently followed)",
+          placeHolder: "api",
+          ignoreFocusOut: true,
+        });
+
+        const normalized = serviceName?.trim();
+        if (!normalized) {
+          return;
+        }
+
+        const action = await vscode.window.showQuickPick(
+          ["follow", "unfollow"],
+          {
+            placeHolder: `Follow or unfollow service "${normalized}"?`,
+          },
+        );
+
+        if (!action) {
+          return;
+        }
+
+        await vscode.commands.executeCommand(focusChatCommand);
+        await sendToLatestProvider(`/service ${action} ${normalized}`);
+      },
+    ),
   );
 
   context.subscriptions.push(...disposables);

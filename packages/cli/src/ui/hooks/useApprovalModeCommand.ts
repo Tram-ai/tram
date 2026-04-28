@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
-import type { ApprovalMode, Config } from '@tram-ai/tram-core';
-import type { LoadedSettings, SettingScope } from '../../config/settings.js';
+import { useState, useCallback } from "react";
+import type { ApprovalMode, Config } from "@tram-ai/tram-core";
+import type { LoadedSettings, SettingScope } from "../../config/settings.js";
 
 interface UseApprovalModeCommandReturn {
   isApprovalModeDialogOpen: boolean;
@@ -38,7 +38,7 @@ export const useApprovalModeCommand = (
         }
 
         // Set the mode in the current session and persist to settings
-        loadedSettings.setValue(scope, 'tools.approvalMode', mode);
+        loadedSettings.setValue(scope, "tools.approvalMode", mode);
         config.setApprovalMode(
           loadedSettings.merged.tools?.approvalMode ?? mode,
         );

@@ -12,46 +12,46 @@ import type {
   ToolConfirmationOutcome,
   ToolResultDisplay,
   AgentStatus,
-} from '@tram-ai/tram-core';
-import type { PartListUnion } from '@google/genai';
-import { type ReactNode } from 'react';
+} from "@tram-ai/tram-core";
+import type { PartListUnion } from "@google/genai";
+import { type ReactNode } from "react";
 
 export type { ThoughtSummary };
 
 export enum AuthState {
   // Attemtping to authenticate or re-authenticate
-  Unauthenticated = 'unauthenticated',
+  Unauthenticated = "unauthenticated",
   // Auth dialog is open for user to select auth method
-  Updating = 'updating',
+  Updating = "updating",
   // Successfully authenticated
-  Authenticated = 'authenticated',
+  Authenticated = "authenticated",
 }
 
 // Only defining the state enum needed by the UI
 export enum StreamingState {
-  Idle = 'idle',
-  Responding = 'responding',
-  WaitingForConfirmation = 'waiting_for_confirmation',
+  Idle = "idle",
+  Responding = "responding",
+  WaitingForConfirmation = "waiting_for_confirmation",
 }
 
 // Copied from server/src/core/turn.ts for CLI usage
 export enum GeminiEventType {
-  Content = 'content',
-  ToolCallRequest = 'tool_call_request',
+  Content = "content",
+  ToolCallRequest = "tool_call_request",
   // Add other event types if the UI hook needs to handle them
 }
 
 export enum ToolCallStatus {
-  Pending = 'Pending',
-  Canceled = 'Canceled',
-  Confirming = 'Confirming',
-  Executing = 'Executing',
-  Success = 'Success',
-  Error = 'Error',
+  Pending = "Pending",
+  Canceled = "Canceled",
+  Confirming = "Confirming",
+  Executing = "Executing",
+  Success = "Success",
+  Error = "Error",
 }
 
 export interface ToolCallEvent {
-  type: 'tool_call';
+  type: "tool_call";
   status: ToolCallStatus;
   callId: string;
   name: string;
@@ -80,7 +80,7 @@ export interface CompressionProps {
 
 export interface SummaryProps {
   isPending: boolean;
-  stage: 'generating' | 'saving' | 'completed';
+  stage: "generating" | "saving" | "completed";
   filePath?: string; // Path to the saved summary file
 }
 
@@ -89,60 +89,60 @@ export interface HistoryItemBase {
 }
 
 export type HistoryItemUser = HistoryItemBase & {
-  type: 'user';
+  type: "user";
   text: string;
 };
 
 export type HistoryItemGemini = HistoryItemBase & {
-  type: 'gemini';
+  type: "gemini";
   text: string;
 };
 
 export type HistoryItemGeminiContent = HistoryItemBase & {
-  type: 'gemini_content';
+  type: "gemini_content";
   text: string;
 };
 
 export type HistoryItemGeminiThought = HistoryItemBase & {
-  type: 'gemini_thought';
+  type: "gemini_thought";
   text: string;
 };
 
 export type HistoryItemGeminiThoughtContent = HistoryItemBase & {
-  type: 'gemini_thought_content';
+  type: "gemini_thought_content";
   text: string;
 };
 
 export type HistoryItemInfo = HistoryItemBase & {
-  type: 'info';
+  type: "info";
   text: string;
   linkUrl?: string;
   linkText?: string;
 };
 
 export type HistoryItemError = HistoryItemBase & {
-  type: 'error';
+  type: "error";
   text: string;
   hint?: string; // Optional inline hint (e.g., retry countdown) displayed in secondary color
 };
 
 export type HistoryItemWarning = HistoryItemBase & {
-  type: 'warning';
+  type: "warning";
   text: string;
 };
 
 export type HistoryItemSuccess = HistoryItemBase & {
-  type: 'success';
+  type: "success";
   text: string;
 };
 
 export type HistoryItemRetryCountdown = HistoryItemBase & {
-  type: 'retry_countdown';
+  type: "retry_countdown";
   text: string;
 };
 
 export type HistoryItemAbout = HistoryItemBase & {
-  type: 'about';
+  type: "about";
   systemInfo: {
     cliVersion: string;
     osPlatform: string;
@@ -162,51 +162,51 @@ export type HistoryItemAbout = HistoryItemBase & {
 };
 
 export type HistoryItemHelp = HistoryItemBase & {
-  type: 'help';
+  type: "help";
   timestamp: Date;
 };
 
 export type HistoryItemStats = HistoryItemBase & {
-  type: 'stats';
+  type: "stats";
   duration: string;
 };
 
 export type HistoryItemModelStats = HistoryItemBase & {
-  type: 'model_stats';
+  type: "model_stats";
 };
 
 export type HistoryItemToolStats = HistoryItemBase & {
-  type: 'tool_stats';
+  type: "tool_stats";
 };
 
 export type HistoryItemQuit = HistoryItemBase & {
-  type: 'quit';
+  type: "quit";
   duration: string;
 };
 
 export type HistoryItemToolGroup = HistoryItemBase & {
-  type: 'tool_group';
+  type: "tool_group";
   tools: IndividualToolCallDisplay[];
   isUserInitiated?: boolean;
 };
 
 export type HistoryItemUserShell = HistoryItemBase & {
-  type: 'user_shell';
+  type: "user_shell";
   text: string;
 };
 
 export type HistoryItemCompression = HistoryItemBase & {
-  type: 'compression';
+  type: "compression";
   compression: CompressionProps;
 };
 
 export type HistoryItemSummary = HistoryItemBase & {
-  type: 'summary';
+  type: "summary";
   summary: SummaryProps;
 };
 
 export type HistoryItemExtensionsList = HistoryItemBase & {
-  type: 'extensions_list';
+  type: "extensions_list";
 };
 
 export interface ToolDefinition {
@@ -220,13 +220,13 @@ export interface SkillDefinition {
 }
 
 export type HistoryItemToolsList = HistoryItemBase & {
-  type: 'tools_list';
+  type: "tools_list";
   tools: ToolDefinition[];
   showDescriptions: boolean;
 };
 
 export type HistoryItemSkillsList = HistoryItemBase & {
-  type: 'skills_list';
+  type: "skills_list";
   skills: SkillDefinition[];
 };
 
@@ -249,13 +249,13 @@ export interface JsonMcpPrompt {
 }
 
 export type HistoryItemMcpStatus = HistoryItemBase & {
-  type: 'mcp_status';
+  type: "mcp_status";
   servers: Record<string, MCPServerConfig>;
   tools: JsonMcpTool[];
   prompts: JsonMcpPrompt[];
   authStatus: Record<
     string,
-    'authenticated' | 'expired' | 'unauthenticated' | 'not-configured'
+    "authenticated" | "expired" | "unauthenticated" | "not-configured"
   >;
   blockedServers: Array<{ name: string; extensionName: string }>;
   discoveryInProgress: boolean;
@@ -299,7 +299,7 @@ export interface ContextSkillDetail {
 }
 
 export type HistoryItemContextUsage = HistoryItemBase & {
-  type: 'context_usage';
+  type: "context_usage";
   modelName: string;
   totalTokens: number;
   contextWindowSize: number;
@@ -333,12 +333,12 @@ export interface ArenaAgentCardData {
 }
 
 export type HistoryItemArenaAgentComplete = HistoryItemBase & {
-  type: 'arena_agent_complete';
+  type: "arena_agent_complete";
   agent: ArenaAgentCardData;
 };
 
 export type HistoryItemArenaSessionComplete = HistoryItemBase & {
-  type: 'arena_session_complete';
+  type: "arena_session_complete";
   sessionStatus: string;
   task: string;
   totalDurationMs: number;
@@ -349,7 +349,7 @@ export type HistoryItemArenaSessionComplete = HistoryItemBase & {
  * Insight progress message.
  */
 export type HistoryItemInsightProgress = HistoryItemBase & {
-  type: 'insight_progress';
+  type: "insight_progress";
   progress: InsightProgressProps;
 };
 
@@ -360,7 +360,7 @@ export interface BtwProps {
 }
 
 export type HistoryItemBtw = HistoryItemBase & {
-  type: 'btw';
+  type: "btw";
   btw: BtwProps;
 };
 
@@ -369,7 +369,7 @@ export type HistoryItemBtw = HistoryItemBase & {
  * Displayed when a UserPromptSubmit hook blocks the user's prompt.
  */
 export type HistoryItemUserPromptSubmitBlocked = HistoryItemBase & {
-  type: 'user_prompt_submit_blocked';
+  type: "user_prompt_submit_blocked";
   reason: string;
   originalPrompt: string;
 };
@@ -379,7 +379,7 @@ export type HistoryItemUserPromptSubmitBlocked = HistoryItemBase & {
  * Displayed when Stop hooks create a loop, forcing the agent to continue.
  */
 export type HistoryItemStopHookLoop = HistoryItemBase & {
-  type: 'stop_hook_loop';
+  type: "stop_hook_loop";
   iterationCount: number;
   reasons: string[];
   stopHookCount: number;
@@ -390,7 +390,7 @@ export type HistoryItemStopHookLoop = HistoryItemBase & {
  * Displayed when Stop hooks return a systemMessage to show to the user.
  */
 export type HistoryItemStopHookSystemMessage = HistoryItemBase & {
-  type: 'stop_hook_system_message';
+  type: "stop_hook_system_message";
   message: string;
 };
 
@@ -437,29 +437,29 @@ export type HistoryItem = HistoryItemWithoutId & { id: number };
 
 // Message types used by internal command feedback (subset of HistoryItem types)
 export enum MessageType {
-  INFO = 'info',
-  SUCCESS = 'success',
-  ERROR = 'error',
-  WARNING = 'warning',
-  USER = 'user',
-  ABOUT = 'about',
-  HELP = 'help',
-  STATS = 'stats',
-  MODEL_STATS = 'model_stats',
-  TOOL_STATS = 'tool_stats',
-  QUIT = 'quit',
-  GEMINI = 'gemini',
-  COMPRESSION = 'compression',
-  SUMMARY = 'summary',
-  EXTENSIONS_LIST = 'extensions_list',
-  TOOLS_LIST = 'tools_list',
-  SKILLS_LIST = 'skills_list',
-  MCP_STATUS = 'mcp_status',
-  CONTEXT_USAGE = 'context_usage',
-  ARENA_AGENT_COMPLETE = 'arena_agent_complete',
-  ARENA_SESSION_COMPLETE = 'arena_session_complete',
-  INSIGHT_PROGRESS = 'insight_progress',
-  BTW = 'btw',
+  INFO = "info",
+  SUCCESS = "success",
+  ERROR = "error",
+  WARNING = "warning",
+  USER = "user",
+  ABOUT = "about",
+  HELP = "help",
+  STATS = "stats",
+  MODEL_STATS = "model_stats",
+  TOOL_STATS = "tool_stats",
+  QUIT = "quit",
+  GEMINI = "gemini",
+  COMPRESSION = "compression",
+  SUMMARY = "summary",
+  EXTENSIONS_LIST = "extensions_list",
+  TOOLS_LIST = "tools_list",
+  SKILLS_LIST = "skills_list",
+  MCP_STATUS = "mcp_status",
+  CONTEXT_USAGE = "context_usage",
+  ARENA_AGENT_COMPLETE = "arena_agent_complete",
+  ARENA_SESSION_COMPLETE = "arena_session_complete",
+  INSIGHT_PROGRESS = "insight_progress",
+  BTW = "btw",
 }
 
 export interface InsightProgressProps {
@@ -542,7 +542,7 @@ export type Message =
     };
 
 export interface ConsoleMessageItem {
-  type: 'log' | 'warn' | 'error' | 'debug' | 'info';
+  type: "log" | "warn" | "error" | "debug" | "info";
   content: string;
   count: number;
 }
@@ -552,7 +552,7 @@ export interface ConsoleMessageItem {
  * being submitted to the Gemini model.
  */
 export interface SubmitPromptResult {
-  type: 'submit_prompt';
+  type: "submit_prompt";
   content: PartListUnion;
 }
 
@@ -561,12 +561,12 @@ export interface SubmitPromptResult {
  */
 export type SlashCommandProcessorResult =
   | {
-      type: 'schedule_tool';
+      type: "schedule_tool";
       toolName: string;
       toolArgs: Record<string, unknown>;
     }
   | {
-      type: 'handled'; // Indicates the command was processed and no further action is needed.
+      type: "handled"; // Indicates the command was processed and no further action is needed.
       output?: string;
     }
   | SubmitPromptResult;
@@ -585,7 +585,7 @@ export interface ConfirmationRequest {
 }
 
 export interface LoopDetectionConfirmationRequest {
-  onComplete: (result: { userSelection: 'disable' | 'keep' }) => void;
+  onComplete: (result: { userSelection: "disable" | "keep" }) => void;
 }
 
 export interface SettingInputRequest {

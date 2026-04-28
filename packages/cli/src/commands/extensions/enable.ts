@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { type CommandModule } from 'yargs';
-import { FatalConfigError, getErrorMessage } from '@tram-ai/tram-core';
-import { SettingScope } from '../../config/settings.js';
-import { writeStdoutLine } from '../../utils/stdioHelpers.js';
-import { getExtensionManager } from './utils.js';
-import { t } from '../../i18n/index.js';
+import { type CommandModule } from "yargs";
+import { FatalConfigError, getErrorMessage } from "@tram-ai/tram-core";
+import { SettingScope } from "../../config/settings.js";
+import { writeStdoutLine } from "../../utils/stdioHelpers.js";
+import { getExtensionManager } from "./utils.js";
+import { t } from "../../i18n/index.js";
 
 interface EnableArgs {
   name: string;
@@ -20,7 +20,7 @@ export async function handleEnable(args: EnableArgs) {
   const extensionManager = await getExtensionManager();
 
   try {
-    if (args.scope?.toLowerCase() === 'workspace') {
+    if (args.scope?.toLowerCase() === "workspace") {
       extensionManager.enableExtension(args.name, SettingScope.Workspace);
     } else {
       extensionManager.enableExtension(args.name, SettingScope.User);
@@ -45,19 +45,19 @@ export async function handleEnable(args: EnableArgs) {
 }
 
 export const enableCommand: CommandModule = {
-  command: 'enable [--scope] <name>',
-  describe: t('Enables an extension.'),
+  command: "enable [--scope] <name>",
+  describe: t("Enables an extension."),
   builder: (yargs) =>
     yargs
-      .positional('name', {
-        describe: t('The name of the extension to enable.'),
-        type: 'string',
+      .positional("name", {
+        describe: t("The name of the extension to enable."),
+        type: "string",
       })
-      .option('scope', {
+      .option("scope", {
         describe: t(
-          'The scope to enable the extenison in. If not set, will be enabled in all scopes.',
+          "The scope to enable the extenison in. If not set, will be enabled in all scopes.",
         ),
-        type: 'string',
+        type: "string",
       })
       .check((argv) => {
         if (
@@ -67,11 +67,11 @@ export const enableCommand: CommandModule = {
             .includes((argv.scope as string).toLowerCase())
         ) {
           throw new Error(
-            t('Invalid scope: {{scope}}. Please use one of {{scopes}}.', {
+            t("Invalid scope: {{scope}}. Please use one of {{scopes}}.", {
               scope: argv.scope as string,
               scopes: Object.values(SettingScope)
                 .map((s) => s.toLowerCase())
-                .join(', '),
+                .join(", "),
             }),
           );
         }
@@ -79,8 +79,8 @@ export const enableCommand: CommandModule = {
       }),
   handler: async (argv) => {
     await handleEnable({
-      name: argv['name'] as string,
-      scope: argv['scope'] as string,
+      name: argv["name"] as string,
+      scope: argv["scope"] as string,
     });
   },
 };

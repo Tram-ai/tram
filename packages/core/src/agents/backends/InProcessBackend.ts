@@ -11,33 +11,33 @@
  * This enables Arena to work without tmux or any external terminal multiplexer.
  */
 
-import { createDebugLogger } from '../../utils/debugLogger.js';
-import type { Config } from '../../config/config.js';
+import { createDebugLogger } from "../../utils/debugLogger.js";
+import type { Config } from "../../config/config.js";
 import {
   type AuthType,
   type ContentGenerator,
   type ContentGeneratorConfig,
   createContentGenerator,
-} from '../../core/contentGenerator.js';
-import type { ToolRegistry } from '../../tools/tool-registry.js';
-import { WorkspaceContext } from '../../utils/workspaceContext.js';
-import { FileDiscoveryService } from '../../services/fileDiscoveryService.js';
-import { buildAgentContentGeneratorConfig } from '../../models/content-generator-config.js';
-import { AgentStatus, isTerminalStatus } from '../runtime/agent-types.js';
-import { AgentCore } from '../runtime/agent-core.js';
-import { AgentEventEmitter } from '../runtime/agent-events.js';
-import { ContextState } from '../runtime/agent-headless.js';
-import { AgentInteractive } from '../runtime/agent-interactive.js';
+} from "../../core/contentGenerator.js";
+import type { ToolRegistry } from "../../tools/tool-registry.js";
+import { WorkspaceContext } from "../../utils/workspaceContext.js";
+import { FileDiscoveryService } from "../../services/fileDiscoveryService.js";
+import { buildAgentContentGeneratorConfig } from "../../models/content-generator-config.js";
+import { AgentStatus, isTerminalStatus } from "../runtime/agent-types.js";
+import { AgentCore } from "../runtime/agent-core.js";
+import { AgentEventEmitter } from "../runtime/agent-events.js";
+import { ContextState } from "../runtime/agent-headless.js";
+import { AgentInteractive } from "../runtime/agent-interactive.js";
 import type {
   Backend,
   AgentSpawnConfig,
   AgentExitCallback,
   InProcessSpawnConfig,
-} from './types.js';
-import { DISPLAY_MODE } from './types.js';
-import type { AnsiOutput } from '../../utils/terminalSerializer.js';
+} from "./types.js";
+import { DISPLAY_MODE } from "./types.js";
+import type { AnsiOutput } from "../../utils/terminalSerializer.js";
 
-const debugLogger = createDebugLogger('IN_PROCESS_BACKEND');
+const debugLogger = createDebugLogger("IN_PROCESS_BACKEND");
 
 /**
  * InProcessBackend runs agents in the current Node.js process.
@@ -65,7 +65,7 @@ export class InProcessBackend implements Backend {
   // ─── Backend Interface ─────────────────────────────────────
 
   async init(): Promise<void> {
-    debugLogger.info('InProcessBackend initialized');
+    debugLogger.info("InProcessBackend initialized");
   }
 
   async spawnAgent(config: AgentSpawnConfig): Promise<void> {
@@ -170,7 +170,7 @@ export class InProcessBackend implements Backend {
     for (const agent of this.agents.values()) {
       agent.abort();
     }
-    debugLogger.info('Stopped all in-process agents');
+    debugLogger.info("Stopped all in-process agents");
   }
 
   async cleanup(): Promise<void> {
@@ -202,7 +202,7 @@ export class InProcessBackend implements Backend {
     this.agents.clear();
     this.agentOrder.length = 0;
     this.activeAgentId = null;
-    debugLogger.info('InProcessBackend cleaned up');
+    debugLogger.info("InProcessBackend cleaned up");
   }
 
   setOnAgentExit(callback: AgentExitCallback): void {
@@ -222,17 +222,17 @@ export class InProcessBackend implements Backend {
     }
 
     let timerId: ReturnType<typeof setTimeout>;
-    const timeout = new Promise<'timeout'>((resolve) => {
-      timerId = setTimeout(() => resolve('timeout'), timeoutMs);
+    const timeout = new Promise<"timeout">((resolve) => {
+      timerId = setTimeout(() => resolve("timeout"), timeoutMs);
     });
 
     const result = await Promise.race([
-      Promise.allSettled(promises).then(() => 'done' as const),
+      Promise.allSettled(promises).then(() => "done" as const),
       timeout,
     ]);
 
     clearTimeout(timerId!);
-    return result === 'done';
+    return result === "done";
   }
 
   // ─── Navigation ────────────────────────────────────────────
@@ -341,7 +341,7 @@ async function createPerAgentConfig(
   base: Config,
   cwd: string,
   modelId?: string,
-  authOverrides?: InProcessSpawnConfig['authOverrides'],
+  authOverrides?: InProcessSpawnConfig["authOverrides"],
 ): Promise<Config> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const override = Object.create(base) as any;
@@ -386,7 +386,7 @@ async function createPerAgentConfig(
       );
     } catch (error) {
       debugLogger.error(
-        'Failed to create per-agent ContentGenerator, falling back to parent:',
+        "Failed to create per-agent ContentGenerator, falling back to parent:",
         error,
       );
     }

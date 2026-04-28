@@ -8,17 +8,17 @@
  * Thin React wrapper around the framework-agnostic controller from core.
  */
 
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import {
   INITIAL_FOLLOWUP_STATE,
   createFollowupController,
   logPromptSuggestion,
   PromptSuggestionEvent,
-} from '@qwen-code/qwen-code-core';
-import type { FollowupState, Config } from '@qwen-code/qwen-code-core';
+} from "@tram-ai/tram-core";
+import type { FollowupState, Config } from "@tram-ai/tram-core";
 
 // Re-export for consumers that import from here
-export type { FollowupState } from '@qwen-code/qwen-code-core';
+export type { FollowupState } from "@tram-ai/tram-core";
 
 /**
  * Options for the hook
@@ -44,7 +44,7 @@ export interface UseFollowupSuggestionsReturn {
   setSuggestion: (text: string | null) => void;
   /** Accept the current suggestion */
   accept: (
-    method?: 'tab' | 'enter' | 'right',
+    method?: "tab" | "enter" | "right",
     options?: { skipOnAccept?: boolean },
   ) => void;
   /** Dismiss the current suggestion */
@@ -102,8 +102,8 @@ export function useFollowupSuggestionsCLI(
   // Telemetry callback from controller (accept/dismiss)
   const onOutcome = useCallback(
     (params: {
-      outcome: 'accepted' | 'ignored';
-      accept_method?: 'tab' | 'enter' | 'right';
+      outcome: "accepted" | "ignored";
+      accept_method?: "tab" | "enter" | "right";
       time_ms: number;
       suggestion_length: number;
     }) => {
@@ -114,7 +114,7 @@ export function useFollowupSuggestionsCLI(
         new PromptSuggestionEvent({
           outcome: params.outcome,
           accept_method: params.accept_method,
-          ...(params.outcome === 'accepted'
+          ...(params.outcome === "accepted"
             ? { time_to_accept_ms: params.time_ms }
             : { time_to_ignore_ms: params.time_ms }),
           ...(firstKeystrokeAtRef.current > 0 &&
@@ -123,7 +123,7 @@ export function useFollowupSuggestionsCLI(
                 firstKeystrokeAtRef.current - prevShownAtRef.current,
             }),
           suggestion_length: params.suggestion_length,
-          similarity: params.outcome === 'accepted' ? 1.0 : 0.0,
+          similarity: params.outcome === "accepted" ? 1.0 : 0.0,
           was_focused_when_shown: wasFocusedWhenShownRef.current,
         }),
       );

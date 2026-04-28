@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen Code
+ * Copyright 2025 TRAM
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -8,22 +8,22 @@ import type {
   CommandContext,
   SlashCommand,
   SlashCommandActionReturn,
-} from './types.js';
-import { CommandKind } from './types.js';
-import { MessageType } from '../types.js';
-import type { HistoryItemBtw } from '../types.js';
-import { t } from '../../i18n/index.js';
-import type { GeminiClient } from '@qwen-code/qwen-code-core';
-import type { Content } from '@google/genai';
+} from "./types.js";
+import { CommandKind } from "./types.js";
+import { MessageType } from "../types.js";
+import type { HistoryItemBtw } from "../types.js";
+import { t } from "../../i18n/index.js";
+import type { GeminiClient } from "@tram-ai/tram-core";
+import type { Content } from "@google/genai";
 
 function makeBtwPromptId(sessionId: string): string {
   return `${sessionId}########btw-${Date.now()}`;
 }
 
 function formatBtwError(error: unknown): string {
-  return t('Failed to answer btw question: {{error}}', {
+  return t("Failed to answer btw question: {{error}}", {
     error:
-      error instanceof Error ? error.message : String(error || 'Unknown error'),
+      error instanceof Error ? error.message : String(error || "Unknown error"),
   });
 }
 
@@ -39,7 +39,7 @@ function trimHistory(history: Content[]): Content[] {
   // Slice from the end, ensuring we start on a 'user' message so the
   // alternating user/model pattern is preserved.
   const sliced = history.slice(-MAX_BTW_HISTORY_MESSAGES);
-  if (sliced[0]?.role === 'model' && sliced.length > 1) {
+  if (sliced[0]?.role === "model" && sliced.length > 1) {
     return sliced.slice(1);
   }
   return sliced;
@@ -67,7 +67,7 @@ async function askBtw(
     [
       ...history,
       {
-        role: 'user',
+        role: "user",
         parts: [
           {
             text: `[This is a side question - answer directly and concisely.
@@ -101,16 +101,16 @@ ${question}`,
   return (
     parts
       ?.map((part) => part.text)
-      .filter((text): text is string => typeof text === 'string')
-      .join('') || t('No response received.')
+      .filter((text): text is string => typeof text === "string")
+      .join("") || t("No response received.")
   );
 }
 
 export const btwCommand: SlashCommand = {
-  name: 'btw',
+  name: "btw",
   get description() {
     return t(
-      'Ask a quick side question without affecting the main conversation',
+      "Ask a quick side question without affecting the main conversation",
     );
   },
   kind: CommandKind.BUILT_IN,
@@ -119,14 +119,14 @@ export const btwCommand: SlashCommand = {
     args: string,
   ): Promise<void | SlashCommandActionReturn> => {
     const question = args.trim();
-    const executionMode = context.executionMode ?? 'interactive';
+    const executionMode = context.executionMode ?? "interactive";
     const abortSignal = context.abortSignal ?? new AbortController().signal;
 
     if (!question) {
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('Please provide a question. Usage: /btw <your question>'),
+        type: "message",
+        messageType: "error",
+        content: t("Please provide a question. Usage: /btw <your question>"),
       };
     }
 
@@ -135,9 +135,9 @@ export const btwCommand: SlashCommand = {
 
     if (!config) {
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('Config not loaded.'),
+        type: "message",
+        messageType: "error",
+        content: t("Config not loaded."),
       };
     }
 
@@ -147,20 +147,20 @@ export const btwCommand: SlashCommand = {
 
     if (!model) {
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('No model configured.'),
+        type: "message",
+        messageType: "error",
+        content: t("No model configured."),
       };
     }
 
     // ACP mode: return a stream_messages async generator
-    if (executionMode === 'acp') {
+    if (executionMode === "acp") {
       const btwPromptId = makeBtwPromptId(sessionId);
       const messages = async function* () {
         try {
           yield {
-            messageType: 'info' as const,
-            content: t('Thinking...'),
+            messageType: "info" as const,
+            content: t("Thinking..."),
           };
 
           const answer = await askBtw(
@@ -172,22 +172,22 @@ export const btwCommand: SlashCommand = {
           );
 
           yield {
-            messageType: 'info' as const,
+            messageType: "info" as const,
             content: `btw> ${question}\n${answer}`,
           };
         } catch (error) {
           yield {
-            messageType: 'error' as const,
+            messageType: "error" as const,
             content: formatBtwError(error),
           };
         }
       };
 
-      return { type: 'stream_messages', messages: messages() };
+      return { type: "stream_messages", messages: messages() };
     }
 
     // Non-interactive mode: return a simple message result
-    if (executionMode === 'non_interactive') {
+    if (executionMode === "non_interactive") {
       try {
         const btwPromptId = makeBtwPromptId(sessionId);
         const answer = await askBtw(
@@ -198,14 +198,14 @@ export const btwCommand: SlashCommand = {
           btwPromptId,
         );
         return {
-          type: 'message',
-          messageType: 'info',
+          type: "message",
+          messageType: "info",
           content: `btw> ${question}\n${answer}`,
         };
       } catch (error) {
         return {
-          type: 'message',
-          messageType: 'error',
+          type: "message",
+          messageType: "error",
           content: formatBtwError(error),
         };
       }
@@ -225,7 +225,7 @@ export const btwCommand: SlashCommand = {
       type: MessageType.BTW,
       btw: {
         question,
-        answer: '',
+        answer: "",
         isPending: true,
       },
     };

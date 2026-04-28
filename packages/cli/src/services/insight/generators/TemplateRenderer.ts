@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INSIGHT_JS, INSIGHT_CSS } from '@tram-ai/web-templates';
-import type { InsightData } from '../types/StaticInsightTypes.js';
+import { INSIGHT_JS, INSIGHT_CSS } from "@tram-ai/web-templates";
+import type { InsightData } from "../types/StaticInsightTypes.js";
 
 export class TemplateRenderer {
   // Render the complete HTML file

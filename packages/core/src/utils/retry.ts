@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { GenerateContentResponse } from '@google/genai';
-import { AuthType } from '../core/contentGenerator.js';
-import { isTramQuotaExceededError } from './quotaErrorDetection.js';
-import { createDebugLogger } from './debugLogger.js';
-import { getErrorStatus } from './errors.js';
+import type { GenerateContentResponse } from "@google/genai";
+import { AuthType } from "../core/contentGenerator.js";
+import { isProQuotaExceededError } from "./quotaErrorDetection.js";
+import { createDebugLogger } from "./debugLogger.js";
+import { getErrorStatus } from "./errors.js";
 
-const debugLogger = createDebugLogger('RETRY');
+const debugLogger = createDebugLogger("RETRY");
 
 export interface HttpError extends Error {
   status?: number;
@@ -66,7 +66,7 @@ export async function retryWithBackoff<T>(
   options?: Partial<RetryOptions>,
 ): Promise<T> {
   if (options?.maxAttempts !== undefined && options.maxAttempts <= 0) {
-    throw new Error('maxAttempts must be a positive number.');
+    throw new Error("maxAttempts must be a positive number.");
   }
 
   const cleanOptions = options
@@ -109,10 +109,10 @@ export async function retryWithBackoff<T>(
       const errorStatus = getErrorStatus(error);
 
       // Check for TRAM OAuth quota exceeded error - throw immediately without retry
-      if (authType === AuthType.TRAM_OAUTH && isTramQuotaExceededError(error)) {
+      if (authType === AuthType.TRAM_OAUTH && isProQuotaExceededError(error)) {
         throw new Error(
           `Qwen OAuth free tier has been discontinued as of 2026-04-15.\n\n` +
-            `To continue using Qwen Code, try one of these alternatives:\n` +
+            `To continue using TRAM, try one of these alternatives:\n` +
             `  - OpenRouter:    https://openrouter.ai/docs/quickstart\n` +
             `  - Fireworks AI:  https://docs.fireworks.ai/api-reference/introduction\n` +
             `  - ModelStudio:   https://help.aliyun.com/zh/model-studio/coding-plan\n\n` +
@@ -131,7 +131,7 @@ export async function retryWithBackoff<T>(
       if (retryAfterMs > 0) {
         // Respect Retry-After header if present and parsed
         debugLogger.warn(
-          `Attempt ${attempt} failed with status ${errorStatus ?? 'unknown'}. Retrying after explicit delay of ${retryAfterMs}ms...`,
+          `Attempt ${attempt} failed with status ${errorStatus ?? "unknown"}. Retrying after explicit delay of ${retryAfterMs}ms...`,
           error,
         );
         await delay(retryAfterMs);
@@ -150,7 +150,7 @@ export async function retryWithBackoff<T>(
   }
   // This line should theoretically be unreachable due to the throw in the catch block.
   // Added for type safety and to satisfy the compiler that a promise is always returned.
-  throw new Error('Retry attempts exhausted');
+  throw new Error("Retry attempts exhausted");
 }
 
 /**
@@ -159,22 +159,22 @@ export async function retryWithBackoff<T>(
  * @returns The delay in milliseconds, or 0 if not found or invalid.
  */
 function getRetryAfterDelayMs(error: unknown): number {
-  if (typeof error === 'object' && error !== null) {
+  if (typeof error === "object" && error !== null) {
     // Check for error.response.headers (common in axios errors)
     if (
-      'response' in error &&
-      typeof (error as { response?: unknown }).response === 'object' &&
+      "response" in error &&
+      typeof (error as { response?: unknown }).response === "object" &&
       (error as { response?: unknown }).response !== null
     ) {
       const response = (error as { response: { headers?: unknown } }).response;
       if (
-        'headers' in response &&
-        typeof response.headers === 'object' &&
+        "headers" in response &&
+        typeof response.headers === "object" &&
         response.headers !== null
       ) {
-        const headers = response.headers as { 'retry-after'?: unknown };
-        const retryAfterHeader = headers['retry-after'];
-        if (typeof retryAfterHeader === 'string') {
+        const headers = response.headers as { "retry-after"?: unknown };
+        const retryAfterHeader = headers["retry-after"];
+        if (typeof retryAfterHeader === "string") {
           const retryAfterSeconds = parseInt(retryAfterHeader, 10);
           if (!isNaN(retryAfterSeconds)) {
             return retryAfterSeconds * 1000;

@@ -13,7 +13,7 @@ export const CopyButton = ({ text }: CopyButtonProps) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      console.error("Failed to copy:", err);
     }
   };
 
@@ -21,8 +21,8 @@ export const CopyButton = ({ text }: CopyButtonProps) => {
     <button
       onClick={handleCopy}
       className="copy-button"
-      title={copied ? 'Copied!' : 'Copy to clipboard'}
-      aria-label={copied ? 'Copied!' : 'Copy to clipboard'}
+      title={copied ? "Copied!" : "Copy to clipboard"}
+      aria-label={copied ? "Copied!" : "Copy to clipboard"}
     >
       {copied ? (
         <svg

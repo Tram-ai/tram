@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { SessionListItem } from '@tram-ai/tram-core';
+import type { SessionListItem } from "@tram-ai/tram-core";
 
 /**
  * State for managing loaded sessions in the session picker.
@@ -31,7 +31,7 @@ export function truncateText(text: string, maxWidth: number): string {
   if (maxWidth <= 3) {
     return firstLine.slice(0, maxWidth);
   }
-  return firstLine.slice(0, maxWidth - 3) + '...';
+  return firstLine.slice(0, maxWidth - 3) + "...";
 }
 
 /**
@@ -55,5 +55,5 @@ export function filterSessions(
  * Formats message count for display with proper pluralization.
  */
 export function formatMessageCount(count: number): string {
-  return count === 1 ? '1 message' : `${count} messages`;
+  return count === 1 ? "1 message" : `${count} messages`;
 }

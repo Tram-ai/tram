@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useRef, useState } from 'react';
-import type { ImageAttachment } from '../../utils/imageSupport.js';
+import { useCallback, useRef, useState } from "react";
+import type { ImageAttachment } from "../../utils/imageSupport.js";
 import {
   MAX_IMAGE_SIZE,
   MAX_TOTAL_IMAGE_SIZE,
@@ -13,14 +13,14 @@ import {
   isSupportedPastedImageMimeType,
   getImageExtensionForMimeType,
   unescapePath,
-} from '../../utils/imageSupport.js';
+} from "../../utils/imageSupport.js";
 
 export type { ImageAttachment };
 
 // ======================== Message Types ========================
 
 export interface WebViewMessageBase {
-  role: 'user' | 'assistant' | 'thinking';
+  role: "user" | "assistant" | "thinking";
   content: string;
   timestamp: number;
   fileContext?: {
@@ -32,7 +32,7 @@ export interface WebViewMessageBase {
 }
 
 export interface WebViewImageMessage extends WebViewMessageBase {
-  kind: 'image';
+  kind: "image";
   imagePath: string;
   imageSrc?: string;
   imageMissing?: boolean;
@@ -50,9 +50,9 @@ interface ParsedImageReference {
 
 function normalizeWhitespace(value: string): string {
   return value
-    .replace(/[ \t]+/g, ' ')
-    .replace(/ ?\n ?/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]+/g, " ")
+    .replace(/ ?\n ?/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
@@ -61,7 +61,7 @@ export function splitMessageContentForImages(content: string): {
   imagePaths: string[];
 } {
   if (!content) {
-    return { text: '', imagePaths: [] };
+    return { text: "", imagePaths: [] };
   }
 
   const imageReferences = parseImageReferences(content);
@@ -70,7 +70,7 @@ export function splitMessageContentForImages(content: string): {
     return { text: content, imagePaths: [] };
   }
 
-  let cleanedContent = '';
+  let cleanedContent = "";
   let lastIndex = 0;
 
   for (const reference of imageReferences) {
@@ -96,8 +96,8 @@ function parseImageReferences(content: string): ParsedImageReference[] {
 
     while (nextSearchIndex < content.length) {
       if (
-        content[nextSearchIndex] === '@' &&
-        (nextSearchIndex === 0 || content[nextSearchIndex - 1] !== '\\')
+        content[nextSearchIndex] === "@" &&
+        (nextSearchIndex === 0 || content[nextSearchIndex - 1] !== "\\")
       ) {
         atIndex = nextSearchIndex;
         break;
@@ -117,14 +117,14 @@ function parseImageReferences(content: string): ParsedImageReference[] {
 
       if (inEscape) {
         inEscape = false;
-      } else if (char === '\\') {
+      } else if (char === "\\") {
         inEscape = true;
       } else if (/[,\s;!?()[\]{}]/.test(char)) {
         break;
-      } else if (char === '.') {
+      } else if (char === ".") {
         const nextChar =
-          pathEndIndex + 1 < content.length ? content[pathEndIndex + 1] : '';
-        if (nextChar === '' || /\s/.test(nextChar)) {
+          pathEndIndex + 1 < content.length ? content[pathEndIndex + 1] : "";
+        if (nextChar === "" || /\s/.test(nextChar)) {
           break;
         }
       }
@@ -134,7 +134,7 @@ function parseImageReferences(content: string): ParsedImageReference[] {
 
     const rawReference = content.slice(atIndex, pathEndIndex);
     const unescapedReference = unescapePath(rawReference);
-    const imagePath = unescapedReference.startsWith('@')
+    const imagePath = unescapedReference.startsWith("@")
       ? unescapedReference.slice(1)
       : unescapedReference;
 
@@ -162,10 +162,10 @@ export function expandUserMessageWithImages(message: WebViewMessageBase): {
   }
 
   const expanded: WebViewMessage[] = imagePaths.map((imagePath) => ({
-    role: 'user',
-    content: '',
+    role: "user",
+    content: "",
     timestamp: message.timestamp,
-    kind: 'image',
+    kind: "image",
     imagePath,
   }));
 
@@ -189,7 +189,7 @@ export function applyImageResolution(
 
   let changed = false;
   const next = messages.map((message) => {
-    if (!('kind' in message) || message.kind !== 'image') {
+    if (!("kind" in message) || message.kind !== "image") {
       return message;
     }
 
@@ -239,12 +239,12 @@ function isWithinSizeLimit(file: File): boolean {
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) {
-    return '0 B';
+    return "0 B";
   }
   const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 async function createImageAttachment(
@@ -275,10 +275,10 @@ async function createImageAttachment(
 
 function generatePastedImageName(mimeType: string): string {
   const now = new Date();
-  const timeStr = `${now.getHours().toString().padStart(2, '0')}${now
+  const timeStr = `${now.getHours().toString().padStart(2, "0")}${now
     .getMinutes()
     .toString()
-    .padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+    .padStart(2, "0")}${now.getSeconds().toString().padStart(2, "0")}`;
   return `pasted_image_${timeStr}${getImageExtensionForMimeType(mimeType)}`;
 }
 
@@ -319,7 +319,7 @@ export function useImagePaste({
         for (let i = 0; i < clipboardData.files.length; i++) {
           const file = clipboardData.files[i];
 
-          if (!file.type.startsWith('image/')) {
+          if (!file.type.startsWith("image/")) {
             continue;
           }
 
@@ -330,14 +330,14 @@ export function useImagePaste({
 
           if (!isWithinSizeLimit(file)) {
             errors.push(
-              `Image "${file.name || 'pasted image'}" is too large (${formatFileSize(file.size)}). Maximum size is 10MB.`,
+              `Image "${file.name || "pasted image"}" is too large (${formatFileSize(file.size)}). Maximum size is 10MB.`,
             );
             continue;
           }
 
           if (runningTotal + file.size > MAX_TOTAL_IMAGE_SIZE) {
             errors.push(
-              `Skipping image "${file.name || 'pasted image'}" – total attachment size would exceed ${formatFileSize(MAX_TOTAL_IMAGE_SIZE)}.`,
+              `Skipping image "${file.name || "pasted image"}" – total attachment size would exceed ${formatFileSize(MAX_TOTAL_IMAGE_SIZE)}.`,
             );
             continue;
           }
@@ -345,7 +345,7 @@ export function useImagePaste({
           try {
             // Clipboard pastes default to "image.png"; generate a timestamped name instead.
             const imageFile =
-              file.name && file.name !== 'image.png'
+              file.name && file.name !== "image.png"
                 ? file
                 : new File([file], generatePastedImageName(file.type), {
                     type: file.type,
@@ -358,13 +358,13 @@ export function useImagePaste({
             }
           } catch {
             errors.push(
-              `Failed to process image "${file.name || 'pasted image'}"`,
+              `Failed to process image "${file.name || "pasted image"}"`,
             );
           }
         }
 
         if (errors.length > 0) {
-          onError?.(errors.join('\n'));
+          onError?.(errors.join("\n"));
         }
 
         if (imageAttachments.length > 0) {
@@ -399,7 +399,7 @@ export function useImageResolution({
       const allImagePaths: string[] = [];
 
       for (const message of messages) {
-        if (message.role === 'user') {
+        if (message.role === "user") {
           const result = expandUserMessageWithImages(message);
           expanded.push(...result.messages);
           allImagePaths.push(...result.imagePaths);
@@ -441,7 +441,7 @@ export function useImageResolution({
 
       imageRequestIdRef.current += 1;
       vscode.postMessage({
-        type: 'resolveImagePaths',
+        type: "resolveImagePaths",
         data: { paths: pending, requestId: imageRequestIdRef.current },
       });
     },
@@ -460,7 +460,7 @@ export function useImageResolution({
   const materializeMessage = useCallback(
     (message: WebViewMessageBase): WebViewMessage[] => {
       const expanded =
-        message.role === 'user'
+        message.role === "user"
           ? expandUserMessageWithImages(message)
           : { messages: [message], imagePaths: [] as string[] };
       requestImageResolutions(expanded.imagePaths);

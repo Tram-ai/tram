@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { logs } from '@opentelemetry/api-logs';
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
-import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import type { Config } from '../config/config.js';
+import { logs } from "@opentelemetry/api-logs";
+import { SemanticAttributes } from "@opentelemetry/semantic-conventions";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import type { Config } from "../config/config.js";
 import type {
   AnyToolInvocation,
   CompletedToolCall,
   ContentGeneratorConfig,
   ErroredToolCall,
-} from '../index.js';
+} from "../index.js";
 import {
   AuthType,
   EditTool,
@@ -21,8 +21,8 @@ import {
   ToolConfirmationOutcome,
   ToolErrorType,
   ToolRegistry,
-} from '../index.js';
-import { OutputFormat } from '../output/types.js';
+} from "../index.js";
+import { OutputFormat } from "../output/types.js";
 import {
   EVENT_API_REQUEST,
   EVENT_API_RESPONSE,
@@ -37,7 +37,7 @@ import {
   EVENT_EXTENSION_DISABLE,
   EVENT_EXTENSION_INSTALL,
   EVENT_EXTENSION_UNINSTALL,
-} from './constants.js';
+} from "./constants.js";
 import {
   logApiRequest,
   logApiResponse,
@@ -56,11 +56,11 @@ import {
   logExtensionUninstall,
   logHookCall,
   logApiError,
-} from './loggers.js';
-import * as metrics from './metrics.js';
-import { TramLogger } from './tram-logger/tram-logger.js';
-import * as sdk from './sdk.js';
-import { ToolCallDecision } from './tool-call-decision.js';
+} from "./loggers.js";
+import * as metrics from "./metrics.js";
+import { TramLogger } from "./tram-logger/tram-logger.js";
+import * as sdk from "./sdk.js";
+import { ToolCallDecision } from "./tool-call-decision.js";
 import {
   ApiRequestEvent,
   ApiResponseEvent,
@@ -79,17 +79,17 @@ import {
   ExtensionUninstallEvent,
   HookCallEvent,
   ApiErrorEvent,
-} from './types.js';
-import { FileOperation } from './metrics.js';
+} from "./types.js";
+import { FileOperation } from "./metrics.js";
 import type {
   CallableTool,
   GenerateContentResponseUsageMetadata,
-} from '@google/genai';
-import { DiscoveredMCPTool } from '../tools/mcp-tool.js';
-import * as uiTelemetry from './uiTelemetry.js';
-import { makeFakeConfig } from '../test-utils/config.js';
+} from "@google/genai";
+import { DiscoveredMCPTool } from "../tools/mcp-tool.js";
+import * as uiTelemetry from "./uiTelemetry.js";
+import { makeFakeConfig } from "../test-utils/config.js";
 
-describe('loggers', () => {
+describe("loggers", () => {
   const mockLogger = {
     emit: vi.fn(),
   };
@@ -99,23 +99,23 @@ describe('loggers', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(sdk, 'isTelemetrySdkInitialized').mockReturnValue(true);
-    vi.spyOn(logs, 'getLogger').mockReturnValue(mockLogger);
-    vi.spyOn(uiTelemetry.uiTelemetryService, 'addEvent').mockImplementation(
+    vi.spyOn(sdk, "isTelemetrySdkInitialized").mockReturnValue(true);
+    vi.spyOn(logs, "getLogger").mockReturnValue(mockLogger);
+    vi.spyOn(uiTelemetry.uiTelemetryService, "addEvent").mockImplementation(
       mockUiEvent.addEvent,
     );
     vi.useFakeTimers();
-    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+    vi.setSystemTime(new Date("2025-01-01T00:00:00.000Z"));
   });
 
-  describe('logChatCompression', () => {
+  describe("logChatCompression", () => {
     beforeEach(() => {
-      vi.spyOn(metrics, 'recordChatCompressionMetrics');
-      vi.spyOn(TramLogger.prototype, 'logChatCompressionEvent');
+      vi.spyOn(metrics, "recordChatCompressionMetrics");
+      vi.spyOn(TramLogger.prototype, "logChatCompressionEvent");
     });
 
-    it('logs the chat compression event to TramLogger', () => {
-      const mockConfig = makeFakeConfig({ sessionId: 'test-session-id' });
+    it("logs the chat compression event to TramLogger", () => {
+      const mockConfig = makeFakeConfig({ sessionId: "test-session-id" });
 
       const event = makeChatCompressionEvent({
         tokens_before: 9001,
@@ -129,8 +129,8 @@ describe('loggers', () => {
       );
     });
 
-    it('records the chat compression event to OTEL', () => {
-      const mockConfig = makeFakeConfig({ sessionId: 'test-session-id' });
+    it("records the chat compression event to OTEL", () => {
+      const mockConfig = makeFakeConfig({ sessionId: "test-session-id" });
 
       logChatCompression(
         mockConfig,
@@ -147,14 +147,14 @@ describe('loggers', () => {
     });
   });
 
-  describe('logCliConfiguration', () => {
-    it('should log the cli configuration', () => {
+  describe("logCliConfiguration", () => {
+    it("should log the cli configuration", () => {
       const mockConfig = {
-        getSessionId: () => 'test-session-id',
-        getModel: () => 'test-model',
+        getSessionId: () => "test-session-id",
+        getModel: () => "test-model",
         getSandbox: () => true,
-        getCoreTools: () => ['ls', 'read-file'],
-        getApprovalMode: () => 'default',
+        getCoreTools: () => ["ls", "read-file"],
+        getApprovalMode: () => "default",
         getTruncateToolOutputThreshold: () => 25000,
         getTruncateToolOutputLines: () => 1000,
         getTelemetryEnabled: () => true,
@@ -164,13 +164,13 @@ describe('loggers', () => {
         getFileFilteringAllowBuildArtifacts: () => false,
         getDebugMode: () => true,
         getMcpServers: () => ({
-          'test-server': {
-            command: 'test-command',
+          "test-server": {
+            command: "test-command",
           },
         }),
-        getQuestion: () => 'test-question',
-        getTargetDir: () => 'target-dir',
-        getProxy: () => 'http://test.proxy.com:8080',
+        getQuestion: () => "test-question",
+        getTargetDir: () => "target-dir",
+        getProxy: () => "http://test.proxy.com:8080",
         getOutputFormat: () => OutputFormat.JSON,
         getToolRegistry: () => undefined,
         getChatRecordingService: () => undefined,
@@ -183,27 +183,27 @@ describe('loggers', () => {
       logStartSession(mockConfig, startSessionEvent);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'CLI configuration loaded.',
+        body: "CLI configuration loaded.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_CLI_CONFIG,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          model: 'test-model',
+          "session.id": "test-session-id",
+          "event.name": EVENT_CLI_CONFIG,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          model: "test-model",
           sandbox_enabled: true,
-          core_tools_enabled: 'ls,read-file',
-          approval_mode: 'default',
+          core_tools_enabled: "ls,read-file",
+          approval_mode: "default",
           truncate_tool_output_threshold: 25000,
           truncate_tool_output_lines: 1000,
           file_filtering_respect_git_ignore: true,
           debug_mode: true,
-          mcp_servers: 'test-server',
+          mcp_servers: "test-server",
           mcp_servers_count: 1,
           mcp_tools: undefined,
           mcp_tools_count: undefined,
           hooks: undefined,
           ide_enabled: false,
           interactive_shell_enabled: true,
-          output_format: 'json',
+          output_format: "json",
           skills: undefined,
           subagents: undefined,
         },
@@ -211,73 +211,73 @@ describe('loggers', () => {
     });
   });
 
-  describe('logUserPrompt', () => {
+  describe("logUserPrompt", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
+      getSessionId: () => "test-session-id",
       getTelemetryEnabled: () => true,
       getTelemetryLogPromptsEnabled: () => true,
       getUsageStatisticsEnabled: () => true,
     } as unknown as Config;
 
-    it('should log a user prompt', () => {
+    it("should log a user prompt", () => {
       const event = new UserPromptEvent(
         11,
-        'prompt-id-8',
+        "prompt-id-8",
         AuthType.USE_VERTEX_AI,
-        'test-prompt',
+        "test-prompt",
       );
 
       logUserPrompt(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'User prompt. Length: 11.',
+        body: "User prompt. Length: 11.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_USER_PROMPT,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
+          "session.id": "test-session-id",
+          "event.name": EVENT_USER_PROMPT,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
           prompt_length: 11,
-          prompt: 'test-prompt',
-          prompt_id: 'prompt-id-8',
-          auth_type: 'vertex-ai',
+          prompt: "test-prompt",
+          prompt_id: "prompt-id-8",
+          auth_type: "vertex-ai",
         },
       });
     });
 
-    it('should not log prompt if disabled', () => {
+    it("should not log prompt if disabled", () => {
       const mockConfig = {
-        getSessionId: () => 'test-session-id',
+        getSessionId: () => "test-session-id",
         getTelemetryEnabled: () => true,
         getTelemetryLogPromptsEnabled: () => false,
-        getTargetDir: () => 'target-dir',
+        getTargetDir: () => "target-dir",
         getUsageStatisticsEnabled: () => true,
       } as unknown as Config;
       const event = new UserPromptEvent(
         11,
-        'prompt-id-9',
+        "prompt-id-9",
         AuthType.USE_GEMINI,
-        'test-prompt',
+        "test-prompt",
       );
 
       logUserPrompt(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'User prompt. Length: 11.',
+        body: "User prompt. Length: 11.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_USER_PROMPT,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
+          "session.id": "test-session-id",
+          "event.name": EVENT_USER_PROMPT,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
           prompt_length: 11,
-          prompt_id: 'prompt-id-9',
-          auth_type: 'gemini',
+          prompt_id: "prompt-id-9",
+          auth_type: "gemini",
         },
       });
     });
   });
 
-  describe('logApiResponse', () => {
+  describe("logApiResponse", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
-      getTargetDir: () => 'target-dir',
+      getSessionId: () => "test-session-id",
+      getTargetDir: () => "target-dir",
       getUsageStatisticsEnabled: () => true,
       getTelemetryEnabled: () => true,
       getTelemetryLogPromptsEnabled: () => true,
@@ -290,15 +290,15 @@ describe('loggers', () => {
     };
 
     beforeEach(() => {
-      vi.spyOn(metrics, 'recordApiResponseMetrics').mockImplementation(
+      vi.spyOn(metrics, "recordApiResponseMetrics").mockImplementation(
         mockMetrics.recordApiResponseMetrics,
       );
-      vi.spyOn(metrics, 'recordTokenUsageMetrics').mockImplementation(
+      vi.spyOn(metrics, "recordTokenUsageMetrics").mockImplementation(
         mockMetrics.recordTokenUsageMetrics,
       );
     });
 
-    it('should log an API response with all fields', () => {
+    it("should log an API response with all fields", () => {
       const usageData: GenerateContentResponseUsageMetadata = {
         promptTokenCount: 17,
         candidatesTokenCount: 50,
@@ -307,26 +307,26 @@ describe('loggers', () => {
         toolUsePromptTokenCount: 2,
       };
       const event = new ApiResponseEvent(
-        'test-response-id',
-        'test-model',
+        "test-response-id",
+        "test-model",
         100,
-        'prompt-id-1',
+        "prompt-id-1",
         AuthType.USE_GEMINI,
         usageData,
-        'test-response',
+        "test-response",
       );
 
       logApiResponse(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'API response from test-model. Status: 200. Duration: 100ms.',
+        body: "API response from test-model. Status: 200. Duration: 100ms.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_API_RESPONSE,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
+          "session.id": "test-session-id",
+          "event.name": EVENT_API_RESPONSE,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
           [SemanticAttributes.HTTP_STATUS_CODE]: 200,
-          response_id: 'test-response-id',
-          model: 'test-model',
+          response_id: "test-response-id",
+          model: "test-model",
           status_code: 200,
           duration_ms: 100,
           input_token_count: 17,
@@ -335,39 +335,39 @@ describe('loggers', () => {
           thoughts_token_count: 5,
           tool_token_count: 2,
           total_token_count: 0,
-          response_text: 'test-response',
-          prompt_id: 'prompt-id-1',
-          auth_type: 'gemini',
+          response_text: "test-response",
+          prompt_id: "prompt-id-1",
+          auth_type: "gemini",
         },
       });
 
       expect(mockMetrics.recordApiResponseMetrics).toHaveBeenCalledWith(
         mockConfig,
         100,
-        { model: 'test-model', status_code: 200 },
+        { model: "test-model", status_code: 200 },
       );
 
       expect(mockMetrics.recordTokenUsageMetrics).toHaveBeenCalledWith(
         mockConfig,
         50,
-        { model: 'test-model', type: 'output' },
+        { model: "test-model", type: "output" },
       );
 
       expect(mockUiEvent.addEvent).toHaveBeenCalledWith({
         ...event,
-        'event.name': EVENT_API_RESPONSE,
-        'event.timestamp': '2025-01-01T00:00:00.000Z',
+        "event.name": EVENT_API_RESPONSE,
+        "event.timestamp": "2025-01-01T00:00:00.000Z",
       });
     });
   });
 
-  describe('logApiResponse skips chatRecordingService for internal prompt IDs', () => {
-    it.each(['prompt_suggestion', 'forked_query', 'speculation'])(
-      'should not record to chatRecordingService when prompt_id is %s',
+  describe("logApiResponse skips chatRecordingService for internal prompt IDs", () => {
+    it.each(["prompt_suggestion", "forked_query", "speculation"])(
+      "should not record to chatRecordingService when prompt_id is %s",
       (promptId) => {
         const mockRecordUiTelemetryEvent = vi.fn();
         const configWithRecording = {
-          getSessionId: () => 'test-session-id',
+          getSessionId: () => "test-session-id",
           getUsageStatisticsEnabled: () => false,
           getChatRecordingService: () => ({
             recordUiTelemetryEvent: mockRecordUiTelemetryEvent,
@@ -375,8 +375,8 @@ describe('loggers', () => {
         } as unknown as Config;
 
         const event = new ApiResponseEvent(
-          'resp-id',
-          'test-model',
+          "resp-id",
+          "test-model",
           50,
           promptId,
         );
@@ -387,10 +387,10 @@ describe('loggers', () => {
       },
     );
 
-    it('should record to chatRecordingService for normal prompt IDs', () => {
+    it("should record to chatRecordingService for normal prompt IDs", () => {
       const mockRecordUiTelemetryEvent = vi.fn();
       const configWithRecording = {
-        getSessionId: () => 'test-session-id',
+        getSessionId: () => "test-session-id",
         getUsageStatisticsEnabled: () => false,
         getChatRecordingService: () => ({
           recordUiTelemetryEvent: mockRecordUiTelemetryEvent,
@@ -398,10 +398,10 @@ describe('loggers', () => {
       } as unknown as Config;
 
       const event = new ApiResponseEvent(
-        'resp-id',
-        'test-model',
+        "resp-id",
+        "test-model",
         50,
-        'user_query',
+        "user_query",
       );
       logApiResponse(configWithRecording, event);
 
@@ -409,13 +409,13 @@ describe('loggers', () => {
     });
   });
 
-  describe('logApiError skips chatRecordingService for internal prompt IDs', () => {
-    it.each(['prompt_suggestion', 'forked_query', 'speculation'])(
-      'should not record to chatRecordingService when prompt_id is %s',
+  describe("logApiError skips chatRecordingService for internal prompt IDs", () => {
+    it.each(["prompt_suggestion", "forked_query", "speculation"])(
+      "should not record to chatRecordingService when prompt_id is %s",
       (promptId) => {
         const mockRecordUiTelemetryEvent = vi.fn();
         const configWithRecording = {
-          getSessionId: () => 'test-session-id',
+          getSessionId: () => "test-session-id",
           getUsageStatisticsEnabled: () => false,
           getChatRecordingService: () => ({
             recordUiTelemetryEvent: mockRecordUiTelemetryEvent,
@@ -423,10 +423,10 @@ describe('loggers', () => {
         } as unknown as Config;
 
         const event = new ApiErrorEvent({
-          model: 'test-model',
+          model: "test-model",
           durationMs: 100,
           promptId,
-          errorMessage: 'test error',
+          errorMessage: "test error",
         });
         logApiError(configWithRecording, event);
 
@@ -434,10 +434,10 @@ describe('loggers', () => {
       },
     );
 
-    it('should record to chatRecordingService for normal prompt IDs', () => {
+    it("should record to chatRecordingService for normal prompt IDs", () => {
       const mockRecordUiTelemetryEvent = vi.fn();
       const configWithRecording = {
-        getSessionId: () => 'test-session-id',
+        getSessionId: () => "test-session-id",
         getUsageStatisticsEnabled: () => false,
         getChatRecordingService: () => ({
           recordUiTelemetryEvent: mockRecordUiTelemetryEvent,
@@ -445,10 +445,10 @@ describe('loggers', () => {
       } as unknown as Config;
 
       const event = new ApiErrorEvent({
-        model: 'test-model',
+        model: "test-model",
         durationMs: 100,
-        promptId: 'user_query',
-        errorMessage: 'test error',
+        promptId: "user_query",
+        errorMessage: "test error",
       });
       logApiError(configWithRecording, event);
 
@@ -456,93 +456,93 @@ describe('loggers', () => {
     });
   });
 
-  describe('logApiRequest', () => {
+  describe("logApiRequest", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
-      getTargetDir: () => 'target-dir',
+      getSessionId: () => "test-session-id",
+      getTargetDir: () => "target-dir",
       getUsageStatisticsEnabled: () => true,
       getTelemetryEnabled: () => true,
       getTelemetryLogPromptsEnabled: () => true,
     } as unknown as Config;
 
-    it('should log an API request with request_text', () => {
+    it("should log an API request with request_text", () => {
       const event = new ApiRequestEvent(
-        'test-model',
-        'prompt-id-7',
-        'This is a test request',
+        "test-model",
+        "prompt-id-7",
+        "This is a test request",
       );
 
       logApiRequest(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'API request to test-model.',
+        body: "API request to test-model.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_API_REQUEST,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          model: 'test-model',
-          request_text: 'This is a test request',
-          prompt_id: 'prompt-id-7',
+          "session.id": "test-session-id",
+          "event.name": EVENT_API_REQUEST,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          model: "test-model",
+          request_text: "This is a test request",
+          prompt_id: "prompt-id-7",
         },
       });
     });
 
-    it('should log an API request without request_text', () => {
-      const event = new ApiRequestEvent('test-model', 'prompt-id-6');
+    it("should log an API request without request_text", () => {
+      const event = new ApiRequestEvent("test-model", "prompt-id-6");
 
       logApiRequest(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'API request to test-model.',
+        body: "API request to test-model.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_API_REQUEST,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          model: 'test-model',
-          prompt_id: 'prompt-id-6',
+          "session.id": "test-session-id",
+          "event.name": EVENT_API_REQUEST,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          model: "test-model",
+          prompt_id: "prompt-id-6",
         },
       });
     });
   });
 
-  describe('logFlashFallback', () => {
+  describe("logFlashFallback", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
+      getSessionId: () => "test-session-id",
       getUsageStatisticsEnabled: () => true,
     } as unknown as Config;
 
-    it('should log flash fallback event', () => {
+    it("should log flash fallback event", () => {
       const event = new FlashFallbackEvent(AuthType.USE_VERTEX_AI);
 
       logFlashFallback(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Switching to flash as Fallback.',
+        body: "Switching to flash as Fallback.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_FLASH_FALLBACK,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          auth_type: 'vertex-ai',
+          "session.id": "test-session-id",
+          "event.name": EVENT_FLASH_FALLBACK,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          auth_type: "vertex-ai",
         },
       });
     });
   });
 
-  describe('logRipgrepFallback', () => {
+  describe("logRipgrepFallback", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
+      getSessionId: () => "test-session-id",
       getUsageStatisticsEnabled: () => true,
     } as unknown as Config;
 
     beforeEach(() => {
-      vi.spyOn(TramLogger.prototype, 'logRipgrepFallbackEvent');
+      vi.spyOn(TramLogger.prototype, "logRipgrepFallbackEvent");
     });
 
-    it('should log ripgrep fallback event', () => {
+    it("should log ripgrep fallback event", () => {
       const event = new RipgrepFallbackEvent(
         false,
         false,
-        'ripgrep is not available',
+        "ripgrep is not available",
       );
 
       logRipgrepFallback(mockConfig, event);
@@ -550,73 +550,73 @@ describe('loggers', () => {
       expect(TramLogger.prototype.logRipgrepFallbackEvent).toHaveBeenCalled();
 
       const emittedEvent = mockLogger.emit.mock.calls[0][0];
-      expect(emittedEvent.body).toBe('Switching to grep as fallback.');
+      expect(emittedEvent.body).toBe("Switching to grep as fallback.");
       expect(emittedEvent.attributes).toEqual(
         expect.objectContaining({
-          'session.id': 'test-session-id',
-          'event.name': EVENT_RIPGREP_FALLBACK,
-          error: 'ripgrep is not available',
+          "session.id": "test-session-id",
+          "event.name": EVENT_RIPGREP_FALLBACK,
+          error: "ripgrep is not available",
         }),
       );
     });
 
-    it('should log ripgrep fallback event with an error', () => {
-      const event = new RipgrepFallbackEvent(false, false, 'rg not found');
+    it("should log ripgrep fallback event with an error", () => {
+      const event = new RipgrepFallbackEvent(false, false, "rg not found");
 
       logRipgrepFallback(mockConfig, event);
 
       expect(TramLogger.prototype.logRipgrepFallbackEvent).toHaveBeenCalled();
 
       const emittedEvent = mockLogger.emit.mock.calls[0][0];
-      expect(emittedEvent.body).toBe('Switching to grep as fallback.');
+      expect(emittedEvent.body).toBe("Switching to grep as fallback.");
       expect(emittedEvent.attributes).toEqual(
         expect.objectContaining({
-          'session.id': 'test-session-id',
-          'event.name': EVENT_RIPGREP_FALLBACK,
-          error: 'rg not found',
+          "session.id": "test-session-id",
+          "event.name": EVENT_RIPGREP_FALLBACK,
+          error: "rg not found",
         }),
       );
     });
   });
 
-  describe('logToolCall', () => {
+  describe("logToolCall", () => {
     const cfg1 = {
-      getSessionId: () => 'test-session-id',
-      getTargetDir: () => 'target-dir',
+      getSessionId: () => "test-session-id",
+      getTargetDir: () => "target-dir",
       getGeminiClient: () => mockGeminiClient,
     } as Config;
     const cfg2 = {
-      getSessionId: () => 'test-session-id',
-      getTargetDir: () => 'target-dir',
-      getProjectRoot: () => '/test/project/root',
-      getProxy: () => 'http://test.proxy.com:8080',
+      getSessionId: () => "test-session-id",
+      getTargetDir: () => "target-dir",
+      getProjectRoot: () => "/test/project/root",
+      getProxy: () => "http://test.proxy.com:8080",
       getContentGeneratorConfig: () =>
-        ({ model: 'test-model' }) as ContentGeneratorConfig,
-      getModel: () => 'test-model',
-      getEmbeddingModel: () => 'test-embedding-model',
-      getWorkingDir: () => 'test-working-dir',
+        ({ model: "test-model" }) as ContentGeneratorConfig,
+      getModel: () => "test-model",
+      getEmbeddingModel: () => "test-embedding-model",
+      getWorkingDir: () => "test-working-dir",
       getSandbox: () => true,
-      getCoreTools: () => ['ls', 'read-file'],
-      getApprovalMode: () => 'default',
+      getCoreTools: () => ["ls", "read-file"],
+      getApprovalMode: () => "default",
       getTelemetryLogPromptsEnabled: () => true,
       getFileFilteringRespectGitIgnore: () => true,
       getFileFilteringAllowBuildArtifacts: () => false,
       getDebugMode: () => true,
       getMcpServers: () => ({
-        'test-server': {
-          command: 'test-command',
+        "test-server": {
+          command: "test-command",
         },
       }),
-      getQuestion: () => 'test-question',
+      getQuestion: () => "test-question",
       getToolRegistry: () => new ToolRegistry(cfg1),
       getFullContext: () => false,
-      getUserMemory: () => 'user-memory',
+      getUserMemory: () => "user-memory",
     } as unknown as Config;
 
     const mockGeminiClient = new GeminiClient(cfg2);
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
-      getTargetDir: () => 'target-dir',
+      getSessionId: () => "test-session-id",
+      getTargetDir: () => "target-dir",
       getGeminiClient: () => mockGeminiClient,
       getUsageStatisticsEnabled: () => true,
       getTelemetryEnabled: () => true,
@@ -629,34 +629,34 @@ describe('loggers', () => {
     };
 
     beforeEach(() => {
-      vi.spyOn(metrics, 'recordToolCallMetrics').mockImplementation(
+      vi.spyOn(metrics, "recordToolCallMetrics").mockImplementation(
         mockMetrics.recordToolCallMetrics,
       );
       mockLogger.emit.mockReset();
     });
 
-    it('should log a tool call with all fields', () => {
+    it("should log a tool call with all fields", () => {
       const tool = new EditTool(mockConfig);
       const call: CompletedToolCall = {
-        status: 'success',
+        status: "success",
         request: {
-          name: 'test-function',
+          name: "test-function",
           args: {
-            arg1: 'value1',
+            arg1: "value1",
             arg2: 2,
           },
-          callId: 'test-call-id',
+          callId: "test-call-id",
           isClientInitiated: true,
-          prompt_id: 'prompt-id-1',
+          prompt_id: "prompt-id-1",
         },
         response: {
-          callId: 'test-call-id',
-          responseParts: [{ text: 'test-response' }],
+          callId: "test-call-id",
+          responseParts: [{ text: "test-response" }],
           resultDisplay: {
-            fileDiff: 'diff',
-            fileName: 'file.txt',
-            originalContent: 'old content',
-            newContent: 'new content',
+            fileDiff: "diff",
+            fileName: "file.txt",
+            originalContent: "old content",
+            newContent: "new content",
             diffStat: {
               model_added_lines: 1,
               model_removed_lines: 2,
@@ -682,26 +682,26 @@ describe('loggers', () => {
       logToolCall(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Tool call: test-function. Decision: accept. Success: true. Duration: 100ms.',
+        body: "Tool call: test-function. Decision: accept. Success: true. Duration: 100ms.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_TOOL_CALL,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          function_name: 'test-function',
+          "session.id": "test-session-id",
+          "event.name": EVENT_TOOL_CALL,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          function_name: "test-function",
           function_args: JSON.stringify(
             {
-              arg1: 'value1',
+              arg1: "value1",
               arg2: 2,
             },
             null,
             2,
           ),
           duration_ms: 100,
-          status: 'success',
+          status: "success",
           success: true,
           decision: ToolCallDecision.ACCEPT,
-          prompt_id: 'prompt-id-1',
-          tool_type: 'native',
+          prompt_id: "prompt-id-1",
+          tool_type: "native",
           error: undefined,
           error_type: undefined,
 
@@ -723,35 +723,35 @@ describe('loggers', () => {
         mockConfig,
         100,
         {
-          function_name: 'test-function',
+          function_name: "test-function",
           success: true,
           decision: ToolCallDecision.ACCEPT,
-          tool_type: 'native',
+          tool_type: "native",
         },
       );
 
       expect(mockUiEvent.addEvent).toHaveBeenCalledWith({
         ...event,
-        'event.name': EVENT_TOOL_CALL,
-        'event.timestamp': '2025-01-01T00:00:00.000Z',
+        "event.name": EVENT_TOOL_CALL,
+        "event.timestamp": "2025-01-01T00:00:00.000Z",
       });
     });
-    it('should log a tool call with a reject decision', () => {
+    it("should log a tool call with a reject decision", () => {
       const call: ErroredToolCall = {
-        status: 'error',
+        status: "error",
         request: {
-          name: 'test-function',
+          name: "test-function",
           args: {
-            arg1: 'value1',
+            arg1: "value1",
             arg2: 2,
           },
-          callId: 'test-call-id',
+          callId: "test-call-id",
           isClientInitiated: true,
-          prompt_id: 'prompt-id-2',
+          prompt_id: "prompt-id-2",
         },
         response: {
-          callId: 'test-call-id',
-          responseParts: [{ text: 'test-response' }],
+          callId: "test-call-id",
+          responseParts: [{ text: "test-response" }],
           resultDisplay: undefined,
           error: undefined,
           errorType: undefined,
@@ -765,26 +765,26 @@ describe('loggers', () => {
       logToolCall(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Tool call: test-function. Decision: reject. Success: false. Duration: 100ms.',
+        body: "Tool call: test-function. Decision: reject. Success: false. Duration: 100ms.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_TOOL_CALL,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          function_name: 'test-function',
+          "session.id": "test-session-id",
+          "event.name": EVENT_TOOL_CALL,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          function_name: "test-function",
           function_args: JSON.stringify(
             {
-              arg1: 'value1',
+              arg1: "value1",
               arg2: 2,
             },
             null,
             2,
           ),
           duration_ms: 100,
-          status: 'error',
+          status: "error",
           success: false,
           decision: ToolCallDecision.REJECT,
-          prompt_id: 'prompt-id-2',
-          tool_type: 'native',
+          prompt_id: "prompt-id-2",
+          tool_type: "native",
           error: undefined,
           error_type: undefined,
           metadata: undefined,
@@ -796,36 +796,36 @@ describe('loggers', () => {
         mockConfig,
         100,
         {
-          function_name: 'test-function',
+          function_name: "test-function",
           success: false,
           decision: ToolCallDecision.REJECT,
-          tool_type: 'native',
+          tool_type: "native",
         },
       );
 
       expect(mockUiEvent.addEvent).toHaveBeenCalledWith({
         ...event,
-        'event.name': EVENT_TOOL_CALL,
-        'event.timestamp': '2025-01-01T00:00:00.000Z',
+        "event.name": EVENT_TOOL_CALL,
+        "event.timestamp": "2025-01-01T00:00:00.000Z",
       });
     });
 
-    it('should log a tool call with a modify decision', () => {
+    it("should log a tool call with a modify decision", () => {
       const call: CompletedToolCall = {
-        status: 'success',
+        status: "success",
         request: {
-          name: 'test-function',
+          name: "test-function",
           args: {
-            arg1: 'value1',
+            arg1: "value1",
             arg2: 2,
           },
-          callId: 'test-call-id',
+          callId: "test-call-id",
           isClientInitiated: true,
-          prompt_id: 'prompt-id-3',
+          prompt_id: "prompt-id-3",
         },
         response: {
-          callId: 'test-call-id',
-          responseParts: [{ text: 'test-response' }],
+          callId: "test-call-id",
+          responseParts: [{ text: "test-response" }],
           resultDisplay: undefined,
           error: undefined,
           errorType: undefined,
@@ -841,26 +841,26 @@ describe('loggers', () => {
       logToolCall(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Tool call: test-function. Decision: modify. Success: true. Duration: 100ms.',
+        body: "Tool call: test-function. Decision: modify. Success: true. Duration: 100ms.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_TOOL_CALL,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          function_name: 'test-function',
+          "session.id": "test-session-id",
+          "event.name": EVENT_TOOL_CALL,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          function_name: "test-function",
           function_args: JSON.stringify(
             {
-              arg1: 'value1',
+              arg1: "value1",
               arg2: 2,
             },
             null,
             2,
           ),
           duration_ms: 100,
-          status: 'success',
+          status: "success",
           success: true,
           decision: ToolCallDecision.MODIFY,
-          prompt_id: 'prompt-id-3',
-          tool_type: 'native',
+          prompt_id: "prompt-id-3",
+          tool_type: "native",
           error: undefined,
           error_type: undefined,
           metadata: undefined,
@@ -872,36 +872,36 @@ describe('loggers', () => {
         mockConfig,
         100,
         {
-          function_name: 'test-function',
+          function_name: "test-function",
           success: true,
           decision: ToolCallDecision.MODIFY,
-          tool_type: 'native',
+          tool_type: "native",
         },
       );
 
       expect(mockUiEvent.addEvent).toHaveBeenCalledWith({
         ...event,
-        'event.name': EVENT_TOOL_CALL,
-        'event.timestamp': '2025-01-01T00:00:00.000Z',
+        "event.name": EVENT_TOOL_CALL,
+        "event.timestamp": "2025-01-01T00:00:00.000Z",
       });
     });
 
-    it('should log a tool call without a decision', () => {
+    it("should log a tool call without a decision", () => {
       const call: CompletedToolCall = {
-        status: 'success',
+        status: "success",
         request: {
-          name: 'test-function',
+          name: "test-function",
           args: {
-            arg1: 'value1',
+            arg1: "value1",
             arg2: 2,
           },
-          callId: 'test-call-id',
+          callId: "test-call-id",
           isClientInitiated: true,
-          prompt_id: 'prompt-id-4',
+          prompt_id: "prompt-id-4",
         },
         response: {
-          callId: 'test-call-id',
-          responseParts: [{ text: 'test-response' }],
+          callId: "test-call-id",
+          responseParts: [{ text: "test-response" }],
           resultDisplay: undefined,
           error: undefined,
           errorType: undefined,
@@ -916,25 +916,25 @@ describe('loggers', () => {
       logToolCall(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Tool call: test-function. Success: true. Duration: 100ms.',
+        body: "Tool call: test-function. Success: true. Duration: 100ms.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_TOOL_CALL,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          function_name: 'test-function',
+          "session.id": "test-session-id",
+          "event.name": EVENT_TOOL_CALL,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          function_name: "test-function",
           function_args: JSON.stringify(
             {
-              arg1: 'value1',
+              arg1: "value1",
               arg2: 2,
             },
             null,
             2,
           ),
           duration_ms: 100,
-          status: 'success',
+          status: "success",
           success: true,
-          prompt_id: 'prompt-id-4',
-          tool_type: 'native',
+          prompt_id: "prompt-id-4",
+          tool_type: "native",
           decision: undefined,
           error: undefined,
           error_type: undefined,
@@ -947,37 +947,37 @@ describe('loggers', () => {
         mockConfig,
         100,
         {
-          function_name: 'test-function',
+          function_name: "test-function",
           success: true,
           decision: undefined,
-          tool_type: 'native',
+          tool_type: "native",
         },
       );
 
       expect(mockUiEvent.addEvent).toHaveBeenCalledWith({
         ...event,
-        'event.name': EVENT_TOOL_CALL,
-        'event.timestamp': '2025-01-01T00:00:00.000Z',
+        "event.name": EVENT_TOOL_CALL,
+        "event.timestamp": "2025-01-01T00:00:00.000Z",
       });
     });
 
-    it('should log a failed tool call with an error', () => {
-      const errorMessage = 'test-error';
+    it("should log a failed tool call with an error", () => {
+      const errorMessage = "test-error";
       const call: ErroredToolCall = {
-        status: 'error',
+        status: "error",
         request: {
-          name: 'test-function',
+          name: "test-function",
           args: {
-            arg1: 'value1',
+            arg1: "value1",
             arg2: 2,
           },
-          callId: 'test-call-id',
+          callId: "test-call-id",
           isClientInitiated: true,
-          prompt_id: 'prompt-id-5',
+          prompt_id: "prompt-id-5",
         },
         response: {
-          callId: 'test-call-id',
-          responseParts: [{ text: 'test-response' }],
+          callId: "test-call-id",
+          responseParts: [{ text: "test-response" }],
           resultDisplay: undefined,
           error: new Error(errorMessage),
           errorType: ToolErrorType.UNKNOWN,
@@ -990,29 +990,29 @@ describe('loggers', () => {
       logToolCall(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Tool call: test-function. Success: false. Duration: 100ms.',
+        body: "Tool call: test-function. Success: false. Duration: 100ms.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_TOOL_CALL,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          function_name: 'test-function',
+          "session.id": "test-session-id",
+          "event.name": EVENT_TOOL_CALL,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          function_name: "test-function",
           function_args: JSON.stringify(
             {
-              arg1: 'value1',
+              arg1: "value1",
               arg2: 2,
             },
             null,
             2,
           ),
           duration_ms: 100,
-          status: 'error',
+          status: "error",
           success: false,
-          error: 'test-error',
-          'error.message': 'test-error',
+          error: "test-error",
+          "error.message": "test-error",
           error_type: ToolErrorType.UNKNOWN,
-          'error.type': ToolErrorType.UNKNOWN,
-          prompt_id: 'prompt-id-5',
-          tool_type: 'native',
+          "error.type": ToolErrorType.UNKNOWN,
+          prompt_id: "prompt-id-5",
+          tool_type: "native",
           decision: undefined,
           metadata: undefined,
           content_length: errorMessage.length,
@@ -1023,48 +1023,48 @@ describe('loggers', () => {
         mockConfig,
         100,
         {
-          function_name: 'test-function',
+          function_name: "test-function",
           success: false,
           decision: undefined,
-          tool_type: 'native',
+          tool_type: "native",
         },
       );
 
       expect(mockUiEvent.addEvent).toHaveBeenCalledWith({
         ...event,
-        'event.name': EVENT_TOOL_CALL,
-        'event.timestamp': '2025-01-01T00:00:00.000Z',
+        "event.name": EVENT_TOOL_CALL,
+        "event.timestamp": "2025-01-01T00:00:00.000Z",
       });
     });
 
-    it('should log a tool call with mcp_server_name for MCP tools', () => {
+    it("should log a tool call with mcp_server_name for MCP tools", () => {
       const mockMcpTool = new DiscoveredMCPTool(
         {} as CallableTool,
-        'mock_mcp_server',
-        'mock_mcp_tool',
-        'tool description',
+        "mock_mcp_server",
+        "mock_mcp_tool",
+        "tool description",
         {
-          type: 'object',
+          type: "object",
           properties: {
-            arg1: { type: 'string' },
-            arg2: { type: 'number' },
+            arg1: { type: "string" },
+            arg2: { type: "number" },
           },
-          required: ['arg1', 'arg2'],
+          required: ["arg1", "arg2"],
         },
       );
 
       const call: CompletedToolCall = {
-        status: 'success',
+        status: "success",
         request: {
-          name: 'mock_mcp_tool',
-          args: { arg1: 'value1', arg2: 2 },
-          callId: 'test-call-id',
+          name: "mock_mcp_tool",
+          args: { arg1: "value1", arg2: 2 },
+          callId: "test-call-id",
           isClientInitiated: true,
-          prompt_id: 'prompt-id',
+          prompt_id: "prompt-id",
         },
         response: {
-          callId: 'test-call-id',
-          responseParts: [{ text: 'test-response' }],
+          callId: "test-call-id",
+          responseParts: [{ text: "test-response" }],
           resultDisplay: undefined,
           error: undefined,
           errorType: undefined,
@@ -1078,26 +1078,26 @@ describe('loggers', () => {
       logToolCall(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Tool call: mock_mcp_tool. Success: true. Duration: 100ms.',
+        body: "Tool call: mock_mcp_tool. Success: true. Duration: 100ms.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_TOOL_CALL,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          function_name: 'mock_mcp_tool',
+          "session.id": "test-session-id",
+          "event.name": EVENT_TOOL_CALL,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          function_name: "mock_mcp_tool",
           function_args: JSON.stringify(
             {
-              arg1: 'value1',
+              arg1: "value1",
               arg2: 2,
             },
             null,
             2,
           ),
           duration_ms: 100,
-          status: 'success',
+          status: "success",
           success: true,
-          prompt_id: 'prompt-id',
-          tool_type: 'mcp',
-          mcp_server_name: 'mock_mcp_server',
+          prompt_id: "prompt-id",
+          tool_type: "mcp",
+          mcp_server_name: "mock_mcp_server",
           decision: undefined,
           error: undefined,
           error_type: undefined,
@@ -1108,8 +1108,8 @@ describe('loggers', () => {
       });
     });
 
-    it.each(['prompt_suggestion', 'forked_query', 'speculation'])(
-      'should not record to chatRecordingService when prompt_id is %s',
+    it.each(["prompt_suggestion", "forked_query", "speculation"])(
+      "should not record to chatRecordingService when prompt_id is %s",
       (promptId) => {
         const mockRecordUiTelemetryEvent = vi.fn();
         const configWithRecording = {
@@ -1120,17 +1120,17 @@ describe('loggers', () => {
         } as unknown as Config;
 
         const call: CompletedToolCall = {
-          status: 'success',
+          status: "success",
           request: {
-            name: 'test-function',
+            name: "test-function",
             args: {},
-            callId: 'test-call-id',
+            callId: "test-call-id",
             isClientInitiated: true,
             prompt_id: promptId,
           },
           response: {
-            callId: 'test-call-id',
-            responseParts: [{ text: 'ok' }],
+            callId: "test-call-id",
+            responseParts: [{ text: "ok" }],
             resultDisplay: undefined,
             error: undefined,
             errorType: undefined,
@@ -1149,14 +1149,14 @@ describe('loggers', () => {
     );
   });
 
-  describe('logMalformedJsonResponse', () => {
+  describe("logMalformedJsonResponse", () => {
     beforeEach(() => {
-      vi.spyOn(TramLogger.prototype, 'logMalformedJsonResponseEvent');
+      vi.spyOn(TramLogger.prototype, "logMalformedJsonResponseEvent");
     });
 
-    it('logs the event to Clearcut and OTEL', () => {
-      const mockConfig = makeFakeConfig({ sessionId: 'test-session-id' });
-      const event = new MalformedJsonResponseEvent('test-model');
+    it("logs the event to Clearcut and OTEL", () => {
+      const mockConfig = makeFakeConfig({ sessionId: "test-session-id" });
+      const event = new MalformedJsonResponseEvent("test-model");
 
       logMalformedJsonResponse(mockConfig, event);
 
@@ -1165,21 +1165,21 @@ describe('loggers', () => {
       ).toHaveBeenCalledWith(event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Malformed JSON response from test-model.',
+        body: "Malformed JSON response from test-model.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_MALFORMED_JSON_RESPONSE,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          model: 'test-model',
+          "session.id": "test-session-id",
+          "event.name": EVENT_MALFORMED_JSON_RESPONSE,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          model: "test-model",
         },
       });
     });
   });
 
-  describe('logFileOperation', () => {
+  describe("logFileOperation", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
-      getTargetDir: () => 'target-dir',
+      getSessionId: () => "test-session-id",
+      getTargetDir: () => "target-dir",
       getUsageStatisticsEnabled: () => true,
       getTelemetryEnabled: () => true,
       getTelemetryLogPromptsEnabled: () => true,
@@ -1190,60 +1190,60 @@ describe('loggers', () => {
     };
 
     beforeEach(() => {
-      vi.spyOn(metrics, 'recordFileOperationMetric').mockImplementation(
+      vi.spyOn(metrics, "recordFileOperationMetric").mockImplementation(
         mockMetrics.recordFileOperationMetric,
       );
     });
 
-    it('should log a file operation event', () => {
+    it("should log a file operation event", () => {
       const event = new FileOperationEvent(
-        'test-tool',
+        "test-tool",
         FileOperation.READ,
         10,
-        'text/plain',
-        '.txt',
-        'typescript',
+        "text/plain",
+        ".txt",
+        "typescript",
       );
 
       logFileOperation(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'File operation: read. Lines: 10.',
+        body: "File operation: read. Lines: 10.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_FILE_OPERATION,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          tool_name: 'test-tool',
-          operation: 'read',
+          "session.id": "test-session-id",
+          "event.name": EVENT_FILE_OPERATION,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          tool_name: "test-tool",
+          operation: "read",
           lines: 10,
-          mimetype: 'text/plain',
-          extension: '.txt',
-          programming_language: 'typescript',
+          mimetype: "text/plain",
+          extension: ".txt",
+          programming_language: "typescript",
         },
       });
 
       expect(mockMetrics.recordFileOperationMetric).toHaveBeenCalledWith(
         mockConfig,
         {
-          operation: 'read',
+          operation: "read",
           lines: 10,
-          mimetype: 'text/plain',
-          extension: '.txt',
-          programming_language: 'typescript',
+          mimetype: "text/plain",
+          extension: ".txt",
+          programming_language: "typescript",
         },
       );
     });
   });
 
-  describe('logToolOutputTruncated', () => {
+  describe("logToolOutputTruncated", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
+      getSessionId: () => "test-session-id",
       getUsageStatisticsEnabled: () => true,
     } as unknown as Config;
 
-    it('should log a tool output truncated event', () => {
-      const event = new ToolOutputTruncatedEvent('prompt-id-1', {
-        toolName: 'test-tool',
+    it("should log a tool output truncated event", () => {
+      const event = new ToolOutputTruncatedEvent("prompt-id-1", {
+        toolName: "test-tool",
         originalContentLength: 1000,
         truncatedContentLength: 100,
         threshold: 500,
@@ -1253,14 +1253,14 @@ describe('loggers', () => {
       logToolOutputTruncated(mockConfig, event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Tool output truncated for test-tool.',
+        body: "Tool output truncated for test-tool.",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': 'tool_output_truncated',
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          eventName: 'tool_output_truncated',
-          prompt_id: 'prompt-id-1',
-          tool_name: 'test-tool',
+          "session.id": "test-session-id",
+          "event.name": "tool_output_truncated",
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          eventName: "tool_output_truncated",
+          prompt_id: "prompt-id-1",
+          tool_name: "test-tool",
           original_content_length: 1000,
           truncated_content_length: 100,
           threshold: 500,
@@ -1270,26 +1270,26 @@ describe('loggers', () => {
     });
   });
 
-  describe('logExtensionInstall', () => {
+  describe("logExtensionInstall", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
+      getSessionId: () => "test-session-id",
       getUsageStatisticsEnabled: () => true,
     } as unknown as Config;
 
     beforeEach(() => {
-      vi.spyOn(TramLogger.prototype, 'logExtensionInstallEvent');
+      vi.spyOn(TramLogger.prototype, "logExtensionInstallEvent");
     });
 
     afterEach(() => {
       vi.resetAllMocks();
     });
 
-    it('should log extension install event', () => {
+    it("should log extension install event", () => {
       const event = new ExtensionInstallEvent(
-        'vscode',
-        '0.1.0',
-        'git',
-        'success',
+        "vscode",
+        "0.1.0",
+        "git",
+        "success",
       );
 
       logExtensionInstallEvent(mockConfig, event);
@@ -1299,36 +1299,36 @@ describe('loggers', () => {
       ).toHaveBeenCalledWith(event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Installed extension vscode',
+        body: "Installed extension vscode",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_EXTENSION_INSTALL,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          extension_name: 'vscode',
-          extension_version: '0.1.0',
-          extension_source: 'git',
-          status: 'success',
+          "session.id": "test-session-id",
+          "event.name": EVENT_EXTENSION_INSTALL,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          extension_name: "vscode",
+          extension_version: "0.1.0",
+          extension_source: "git",
+          status: "success",
         },
       });
     });
   });
 
-  describe('logExtensionUninstall', () => {
+  describe("logExtensionUninstall", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
+      getSessionId: () => "test-session-id",
       getUsageStatisticsEnabled: () => true,
     } as unknown as Config;
 
     beforeEach(() => {
-      vi.spyOn(TramLogger.prototype, 'logExtensionUninstallEvent');
+      vi.spyOn(TramLogger.prototype, "logExtensionUninstallEvent");
     });
 
     afterEach(() => {
       vi.resetAllMocks();
     });
 
-    it('should log extension uninstall event', () => {
-      const event = new ExtensionUninstallEvent('vscode', 'success');
+    it("should log extension uninstall event", () => {
+      const event = new ExtensionUninstallEvent("vscode", "success");
 
       logExtensionUninstall(mockConfig, event);
 
@@ -1337,34 +1337,34 @@ describe('loggers', () => {
       ).toHaveBeenCalledWith(event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Uninstalled extension vscode',
+        body: "Uninstalled extension vscode",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_EXTENSION_UNINSTALL,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          extension_name: 'vscode',
-          status: 'success',
+          "session.id": "test-session-id",
+          "event.name": EVENT_EXTENSION_UNINSTALL,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          extension_name: "vscode",
+          status: "success",
         },
       });
     });
   });
 
-  describe('logExtensionEnable', () => {
+  describe("logExtensionEnable", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
+      getSessionId: () => "test-session-id",
       getUsageStatisticsEnabled: () => true,
     } as unknown as Config;
 
     beforeEach(() => {
-      vi.spyOn(TramLogger.prototype, 'logExtensionEnableEvent');
+      vi.spyOn(TramLogger.prototype, "logExtensionEnableEvent");
     });
 
     afterEach(() => {
       vi.resetAllMocks();
     });
 
-    it('should log extension enable event', () => {
-      const event = new ExtensionEnableEvent('vscode', 'user');
+    it("should log extension enable event", () => {
+      const event = new ExtensionEnableEvent("vscode", "user");
 
       logExtensionEnable(mockConfig, event);
 
@@ -1373,34 +1373,34 @@ describe('loggers', () => {
       );
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Enabled extension vscode',
+        body: "Enabled extension vscode",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_EXTENSION_ENABLE,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          extension_name: 'vscode',
-          setting_scope: 'user',
+          "session.id": "test-session-id",
+          "event.name": EVENT_EXTENSION_ENABLE,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          extension_name: "vscode",
+          setting_scope: "user",
         },
       });
     });
   });
 
-  describe('logExtensionDisable', () => {
+  describe("logExtensionDisable", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
+      getSessionId: () => "test-session-id",
       getUsageStatisticsEnabled: () => true,
     } as unknown as Config;
 
     beforeEach(() => {
-      vi.spyOn(TramLogger.prototype, 'logExtensionDisableEvent');
+      vi.spyOn(TramLogger.prototype, "logExtensionDisableEvent");
     });
 
     afterEach(() => {
       vi.resetAllMocks();
     });
 
-    it('should log extension disable event', () => {
-      const event = new ExtensionDisableEvent('vscode', 'user');
+    it("should log extension disable event", () => {
+      const event = new ExtensionDisableEvent("vscode", "user");
 
       logExtensionDisable(mockConfig, event);
 
@@ -1409,22 +1409,22 @@ describe('loggers', () => {
       ).toHaveBeenCalledWith(event);
 
       expect(mockLogger.emit).toHaveBeenCalledWith({
-        body: 'Disabled extension vscode',
+        body: "Disabled extension vscode",
         attributes: {
-          'session.id': 'test-session-id',
-          'event.name': EVENT_EXTENSION_DISABLE,
-          'event.timestamp': '2025-01-01T00:00:00.000Z',
-          extension_name: 'vscode',
-          setting_scope: 'user',
+          "session.id": "test-session-id",
+          "event.name": EVENT_EXTENSION_DISABLE,
+          "event.timestamp": "2025-01-01T00:00:00.000Z",
+          extension_name: "vscode",
+          setting_scope: "user",
         },
       });
     });
   });
 
-  describe('logHookCall', () => {
+  describe("logHookCall", () => {
     const mockConfig = {
-      getSessionId: () => 'test-session-id',
-      getTargetDir: () => 'target-dir',
+      getSessionId: () => "test-session-id",
+      getTargetDir: () => "target-dir",
       getUsageStatisticsEnabled: () => true,
       getTelemetryEnabled: () => true,
       getTelemetryLogPromptsEnabled: () => true,
@@ -1435,24 +1435,24 @@ describe('loggers', () => {
     };
 
     beforeEach(() => {
-      vi.spyOn(QwenLogger, 'getInstance').mockReturnValue(
-        mockQwenLogger as unknown as QwenLogger,
+      vi.spyOn(TramLogger, "getInstance").mockReturnValue(
+        mockQwenLogger as unknown as TramLogger,
       );
       mockQwenLogger.logHookCallEvent.mockClear();
     });
 
-    it('should log a successful hook call to QwenLogger', () => {
+    it("should log a successful hook call to QwenLogger", () => {
       const event = new HookCallEvent(
-        'UserPromptSubmit',
-        'command',
-        'check-secrets.sh',
-        { prompt: 'test prompt' },
+        "UserPromptSubmit",
+        "command",
+        "check-secrets.sh",
+        { prompt: "test prompt" },
         150,
         true,
-        { output: 'success' },
+        { output: "success" },
         0,
-        'stdout message',
-        'stderr message',
+        "stdout message",
+        "stderr message",
         undefined,
       );
 
@@ -1462,19 +1462,19 @@ describe('loggers', () => {
       expect(mockQwenLogger.logHookCallEvent).toHaveBeenCalledWith(event);
     });
 
-    it('should log a failed hook call with error', () => {
+    it("should log a failed hook call with error", () => {
       const event = new HookCallEvent(
-        'Stop',
-        'command',
-        'cleanup.sh',
-        { last_assistant_message: 'final message' },
+        "Stop",
+        "command",
+        "cleanup.sh",
+        { last_assistant_message: "final message" },
         200,
         false,
         undefined,
         1,
-        'stdout message',
-        'stderr message',
-        'Error occurred',
+        "stdout message",
+        "stderr message",
+        "Error occurred",
       );
 
       logHookCall(mockConfig, event);
@@ -1483,14 +1483,14 @@ describe('loggers', () => {
       expect(mockQwenLogger.logHookCallEvent).toHaveBeenCalledWith(event);
     });
 
-    it('should handle when QwenLogger is not available', () => {
-      vi.spyOn(QwenLogger, 'getInstance').mockReturnValue(undefined);
+    it("should handle when TramLogger is not available", () => {
+      vi.spyOn(TramLogger, "getInstance").mockReturnValue(undefined);
 
       const event = new HookCallEvent(
-        'UserPromptSubmit',
-        'command',
-        'test-hook.sh',
-        { prompt: 'test' },
+        "UserPromptSubmit",
+        "command",
+        "test-hook.sh",
+        { prompt: "test" },
         100,
         true,
       );
@@ -1499,18 +1499,18 @@ describe('loggers', () => {
       expect(() => logHookCall(mockConfig, event)).not.toThrow();
     });
 
-    it('should log hook call with all optional fields', () => {
+    it("should log hook call with all optional fields", () => {
       const event = new HookCallEvent(
-        'PreToolUse',
-        'command',
-        'validator.sh',
-        { tool_name: 'read_file', path: '/test/file.txt' },
+        "PreToolUse",
+        "command",
+        "validator.sh",
+        { tool_name: "read_file", path: "/test/file.txt" },
         250,
         true,
-        { decision: 'allow', reason: 'validated' },
+        { decision: "allow", reason: "validated" },
         0,
-        'validation passed',
-        '',
+        "validation passed",
+        "",
         undefined,
       );
 
@@ -1519,11 +1519,11 @@ describe('loggers', () => {
       expect(mockQwenLogger.logHookCallEvent).toHaveBeenCalledWith(event);
     });
 
-    it('should log hook call with minimal fields', () => {
+    it("should log hook call with minimal fields", () => {
       const event = new HookCallEvent(
-        'SessionStart',
-        'command',
-        'init.sh',
+        "SessionStart",
+        "command",
+        "init.sh",
         {},
         10,
         true,
@@ -1534,19 +1534,19 @@ describe('loggers', () => {
       expect(mockQwenLogger.logHookCallEvent).toHaveBeenCalledWith(event);
     });
 
-    it('should log hook call with exit code', () => {
+    it("should log hook call with exit code", () => {
       const event = new HookCallEvent(
-        'PostToolUseFailure',
-        'command',
-        'error-handler.sh',
-        { tool_name: 'shell' },
+        "PostToolUseFailure",
+        "command",
+        "error-handler.sh",
+        { tool_name: "shell" },
         50,
         false,
         undefined,
         1,
-        '',
-        'error output',
-        'Command failed with exit code 1',
+        "",
+        "error output",
+        "Command failed with exit code 1",
       );
 
       logHookCall(mockConfig, event);
@@ -1554,18 +1554,18 @@ describe('loggers', () => {
       expect(mockQwenLogger.logHookCallEvent).toHaveBeenCalledWith(event);
     });
 
-    it('should log hook call with zero exit code on success', () => {
+    it("should log hook call with zero exit code on success", () => {
       const event = new HookCallEvent(
-        'PostToolUse',
-        'command',
-        'success-handler.sh',
-        { tool_name: 'write_file' },
+        "PostToolUse",
+        "command",
+        "success-handler.sh",
+        { tool_name: "write_file" },
         100,
         true,
-        { result: 'ok' },
+        { result: "ok" },
         0,
-        'done',
-        '',
+        "done",
+        "",
         undefined,
       );
 
@@ -1574,19 +1574,19 @@ describe('loggers', () => {
       expect(mockQwenLogger.logHookCallEvent).toHaveBeenCalledWith(event);
     });
 
-    it('should log hook call with non-zero exit code on failure', () => {
+    it("should log hook call with non-zero exit code on failure", () => {
       const event = new HookCallEvent(
-        'PostToolUseFailure',
-        'command',
-        'failure-handler.sh',
-        { tool_name: 'shell' },
+        "PostToolUseFailure",
+        "command",
+        "failure-handler.sh",
+        { tool_name: "shell" },
         75,
         false,
         undefined,
         127,
-        '',
-        'command not found',
-        'Hook command not found',
+        "",
+        "command not found",
+        "Hook command not found",
       );
 
       logHookCall(mockConfig, event);
@@ -1594,20 +1594,20 @@ describe('loggers', () => {
       expect(mockQwenLogger.logHookCallEvent).toHaveBeenCalledWith(event);
     });
 
-    it('should log all hook event types', () => {
+    it("should log all hook event types", () => {
       const eventTypes = [
-        'PreToolUse',
-        'PostToolUse',
-        'PostToolUseFailure',
-        'Notification',
-        'UserPromptSubmit',
-        'SessionStart',
-        'SessionEnd',
-        'Stop',
-        'SubagentStart',
-        'SubagentStop',
-        'PreCompact',
-        'PermissionRequest',
+        "PreToolUse",
+        "PostToolUse",
+        "PostToolUseFailure",
+        "Notification",
+        "UserPromptSubmit",
+        "SessionStart",
+        "SessionEnd",
+        "Stop",
+        "SubagentStart",
+        "SubagentStop",
+        "PreCompact",
+        "PermissionRequest",
       ];
 
       for (const eventType of eventTypes) {
@@ -1615,8 +1615,8 @@ describe('loggers', () => {
 
         const event = new HookCallEvent(
           eventType,
-          'command',
-          'test-hook.sh',
+          "command",
+          "test-hook.sh",
           {},
           100,
           true,
@@ -1628,12 +1628,12 @@ describe('loggers', () => {
       }
     });
 
-    it('should pass the exact event object to QwenLogger', () => {
+    it("should pass the exact event object to QwenLogger", () => {
       const event = new HookCallEvent(
-        'PreToolUse',
-        'command',
-        'test-hook.sh',
-        { tool_name: 'read_file' },
+        "PreToolUse",
+        "command",
+        "test-hook.sh",
+        { tool_name: "read_file" },
         100,
         true,
       );

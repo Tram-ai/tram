@@ -26,21 +26,21 @@
  * enum in packages/sdk/typescript/src/types/controlRequests.ts
  */
 
-import type { IControlContext } from './ControlContext.js';
-import type { IPendingRequestRegistry } from './controllers/baseController.js';
-import { SystemController } from './controllers/systemController.js';
-import { PermissionController } from './controllers/permissionController.js';
-import { SdkMcpController } from './controllers/sdkMcpController.js';
+import type { IControlContext } from "./ControlContext.js";
+import type { IPendingRequestRegistry } from "./controllers/baseController.js";
+import { SystemController } from "./controllers/systemController.js";
+import { PermissionController } from "./controllers/permissionController.js";
+import { SdkMcpController } from "./controllers/sdkMcpController.js";
 // import { HookController } from './controllers/hookController.js';
 import type {
   CLIControlRequest,
   CLIControlResponse,
   ControlResponse,
   ControlRequestPayload,
-} from '../types.js';
-import { createDebugLogger } from '@tram-ai/tram-core';
+} from "../types.js";
+import { createDebugLogger } from "@tram-ai/tram-core";
 
-const debugLogger = createDebugLogger('CONTROL_DISPATCHER');
+const debugLogger = createDebugLogger("CONTROL_DISPATCHER");
 
 /**
  * Tracks an incoming request from SDK awaiting CLI response
@@ -89,17 +89,17 @@ export class ControlDispatcher implements IPendingRequestRegistry {
     this.systemController = new SystemController(
       context,
       this,
-      'SystemController',
+      "SystemController",
     );
     this.permissionController = new PermissionController(
       context,
       this,
-      'PermissionController',
+      "PermissionController",
     );
     this.sdkMcpController = new SdkMcpController(
       context,
       this,
-      'SdkMcpController',
+      "SdkMcpController",
     );
     // this.hookController = new HookController(context, this, 'HookController');
 
@@ -107,7 +107,7 @@ export class ControlDispatcher implements IPendingRequestRegistry {
     this.abortHandler = () => {
       this.shutdown();
     };
-    this.context.abortSignal.addEventListener('abort', this.abortHandler);
+    this.context.abortSignal.addEventListener("abort", this.abortHandler);
   }
 
   /**
@@ -151,13 +151,13 @@ export class ControlDispatcher implements IPendingRequestRegistry {
     this.deregisterOutgoingRequest(requestId);
 
     // Resolve or reject based on response type
-    if (responsePayload.subtype === 'success') {
+    if (responsePayload.subtype === "success") {
       pending.resolve(responsePayload);
     } else {
       const errorMessage =
-        typeof responsePayload.error === 'string'
+        typeof responsePayload.error === "string"
           ? responsePayload.error
-          : (responsePayload.error?.message ?? 'Unknown error');
+          : (responsePayload.error?.message ?? "Unknown error");
       pending.reject(new Error(errorMessage));
     }
   }
@@ -183,7 +183,7 @@ export class ControlDispatcher implements IPendingRequestRegistry {
       if (pending) {
         pending.abortController.abort();
         this.deregisterIncomingRequest(requestId);
-        this.sendErrorResponse(requestId, 'Request cancelled');
+        this.sendErrorResponse(requestId, "Request cancelled");
 
         debugLogger.debug(
           `[ControlDispatcher] Cancelled incoming request: ${requestId}`,
@@ -197,7 +197,7 @@ export class ControlDispatcher implements IPendingRequestRegistry {
         if (pending) {
           pending.abortController.abort();
           this.deregisterIncomingRequest(id);
-          this.sendErrorResponse(id, 'All requests cancelled');
+          this.sendErrorResponse(id, "All requests cancelled");
         }
       }
 
@@ -232,7 +232,7 @@ export class ControlDispatcher implements IPendingRequestRegistry {
       const pending = this.pendingOutgoingRequests.get(id);
       if (pending) {
         this.deregisterOutgoingRequest(id);
-        pending.reject(new Error('Input closed'));
+        pending.reject(new Error("Input closed"));
       }
     }
   }
@@ -241,11 +241,11 @@ export class ControlDispatcher implements IPendingRequestRegistry {
    * Stops all pending requests and cleans up all controllers
    */
   shutdown(): void {
-    debugLogger.debug('[ControlDispatcher] Shutting down');
+    debugLogger.debug("[ControlDispatcher] Shutting down");
 
     // Remove abort listener to prevent memory leak
     if (this.abortHandler) {
-      this.context.abortSignal.removeEventListener('abort', this.abortHandler);
+      this.context.abortSignal.removeEventListener("abort", this.abortHandler);
       this.abortHandler = null;
     }
 
@@ -265,7 +265,7 @@ export class ControlDispatcher implements IPendingRequestRegistry {
       pending,
     ] of this.pendingOutgoingRequests.entries()) {
       clearTimeout(pending.timeoutId);
-      pending.reject(new Error('Dispatcher shutdown'));
+      pending.reject(new Error("Dispatcher shutdown"));
     }
     this.pendingOutgoingRequests.clear();
 
@@ -367,7 +367,7 @@ export class ControlDispatcher implements IPendingRequestRegistry {
     }
 
     if (this.pendingIncomingRequests.size === 0) {
-      debugLogger.debug('[ControlDispatcher] All incoming requests completed');
+      debugLogger.debug("[ControlDispatcher] All incoming requests completed");
     }
   }
 
@@ -376,18 +376,18 @@ export class ControlDispatcher implements IPendingRequestRegistry {
    */
   private getControllerForRequest(subtype: string) {
     switch (subtype) {
-      case 'initialize':
-      case 'interrupt':
-      case 'set_model':
-      case 'supported_commands':
-      case 'get_context_usage':
+      case "initialize":
+      case "interrupt":
+      case "set_model":
+      case "supported_commands":
+      case "get_context_usage":
         return this.systemController;
 
-      case 'can_use_tool':
-      case 'set_permission_mode':
+      case "can_use_tool":
+      case "set_permission_mode":
         return this.permissionController;
 
-      case 'mcp_server_status':
+      case "mcp_server_status":
         return this.sdkMcpController;
 
       // case 'hook_callback':
@@ -406,9 +406,9 @@ export class ControlDispatcher implements IPendingRequestRegistry {
     response: Record<string, unknown>,
   ): void {
     const controlResponse: CLIControlResponse = {
-      type: 'control_response',
+      type: "control_response",
       response: {
-        subtype: 'success',
+        subtype: "success",
         request_id: requestId,
         response,
       },
@@ -421,9 +421,9 @@ export class ControlDispatcher implements IPendingRequestRegistry {
    */
   private sendErrorResponse(requestId: string, error: string): void {
     const controlResponse: CLIControlResponse = {
-      type: 'control_response',
+      type: "control_response",
       response: {
-        subtype: 'error',
+        subtype: "error",
         request_id: requestId,
         error,
       },

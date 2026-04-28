@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { RefObject } from 'react';
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import type { CompletionItem } from '../../types/completionItemTypes.js';
+import type { RefObject } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import type { CompletionItem } from "../../types/completionItemTypes.js";
 
 interface CompletionTriggerState {
   isOpen: boolean;
-  triggerChar: '@' | '/' | null;
+  triggerChar: "@" | "/" | null;
   query: string;
   position: { top: number; left: number };
   items: CompletionItem[];
@@ -23,25 +23,25 @@ interface CompletionTriggerState {
 export function useCompletionTrigger(
   inputRef: RefObject<HTMLDivElement | null>,
   getCompletionItems: (
-    trigger: '@' | '/',
+    trigger: "@" | "/",
     query: string,
   ) => Promise<CompletionItem[]>,
 ) {
   // Show immediate loading and provide a timeout fallback for slow sources
   const LOADING_ITEM = useMemo<CompletionItem>(
     () => ({
-      id: 'loading',
-      label: 'Loading…',
-      type: 'info',
+      id: "loading",
+      label: "Loading…",
+      type: "info",
     }),
     [],
   );
 
   const TIMEOUT_ITEM = useMemo<CompletionItem>(
     () => ({
-      id: 'timeout',
-      label: 'Timeout',
-      type: 'info',
+      id: "timeout",
+      label: "Timeout",
+      type: "info",
     }),
     [],
   );
@@ -50,7 +50,7 @@ export function useCompletionTrigger(
   const [state, setState] = useState<CompletionTriggerState>({
     isOpen: false,
     triggerChar: null,
-    query: '',
+    query: "",
     position: { top: 0, left: 0 },
     items: [],
   });
@@ -70,7 +70,7 @@ export function useCompletionTrigger(
     setState({
       isOpen: false,
       triggerChar: null,
-      query: '',
+      query: "",
       position: { top: 0, left: 0 },
       items: [],
     });
@@ -78,7 +78,7 @@ export function useCompletionTrigger(
 
   const openCompletion = useCallback(
     async (
-      trigger: '@' | '/',
+      trigger: "@" | "/",
       query: string,
       position: { top: number; left: number },
     ) => {
@@ -111,7 +111,7 @@ export function useCompletionTrigger(
             prev.triggerChar === trigger &&
             prev.query === query &&
             prev.items.length > 0 &&
-            prev.items[0]?.id === 'loading'
+            prev.items[0]?.id === "loading"
           ) {
             return { ...prev, items: [TIMEOUT_ITEM] };
           }
@@ -161,16 +161,16 @@ export function useCompletionTrigger(
       if (a.label !== b.label) {
         return false;
       }
-      if ((a.description ?? '') !== (b.description ?? '')) {
+      if ((a.description ?? "") !== (b.description ?? "")) {
         return false;
       }
       if (a.type !== b.type) {
         return false;
       }
-      if ((a.value ?? '') !== (b.value ?? '')) {
+      if ((a.value ?? "") !== (b.value ?? "")) {
         return false;
       }
-      if ((a.path ?? '') !== (b.path ?? '')) {
+      if ((a.path ?? "") !== (b.path ?? "")) {
         return false;
       }
     }
@@ -230,7 +230,7 @@ export function useCompletionTrigger(
         };
       } catch (error) {
         console.error(
-          '[useCompletionTrigger] Error getting cursor position:',
+          "[useCompletionTrigger] Error getting cursor position:",
           error,
         );
         const inputRect = inputElement.getBoundingClientRect();
@@ -242,10 +242,10 @@ export function useCompletionTrigger(
     };
 
     const handleInput = async () => {
-      const text = inputElement.textContent || '';
+      const text = inputElement.textContent || "";
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) {
-        console.log('[useCompletionTrigger] No selection or rangeCount === 0');
+        console.log("[useCompletionTrigger] No selection or rangeCount === 0");
         return;
       }
 
@@ -298,35 +298,35 @@ export function useCompletionTrigger(
         cursorPosition === 0 && text.length > 0 ? text.length : cursorPosition;
 
       const textBeforeCursor = text.substring(0, effectiveCursorPosition);
-      const lastAtMatch = textBeforeCursor.lastIndexOf('@');
-      const lastSlashMatch = textBeforeCursor.lastIndexOf('/');
+      const lastAtMatch = textBeforeCursor.lastIndexOf("@");
+      const lastSlashMatch = textBeforeCursor.lastIndexOf("/");
 
       // Check if we're in a trigger context
       let triggerPos = -1;
-      let triggerChar: '@' | '/' | null = null;
+      let triggerChar: "@" | "/" | null = null;
 
       // Priority: @ trigger takes precedence over / trigger
       // This allows path-like queries (e.g., "src/components/Button") in @ mentions
       // But skip if the trigger is inside a file tag
       if (lastAtMatch >= 0) {
         triggerPos = lastAtMatch;
-        triggerChar = '@';
+        triggerChar = "@";
       } else if (lastSlashMatch >= 0) {
         triggerPos = lastSlashMatch;
-        triggerChar = '/';
+        triggerChar = "/";
       }
 
       // Check if trigger is at word boundary (start of line or after space)
       if (triggerPos >= 0 && triggerChar) {
-        const charBefore = triggerPos > 0 ? text[triggerPos - 1] : ' ';
+        const charBefore = triggerPos > 0 ? text[triggerPos - 1] : " ";
         const isValidTrigger =
-          charBefore === ' ' || charBefore === '\n' || triggerPos === 0;
+          charBefore === " " || charBefore === "\n" || triggerPos === 0;
 
         if (isValidTrigger) {
           const query = text.substring(triggerPos + 1, effectiveCursorPosition);
 
           // Only show if query doesn't contain spaces (still typing the reference)
-          if (!query.includes(' ') && !query.includes('\n')) {
+          if (!query.includes(" ") && !query.includes("\n")) {
             // Get precise cursor position for menu
             const cursorPos = getCursorPosition();
             if (cursorPos) {
@@ -343,8 +343,8 @@ export function useCompletionTrigger(
       }
     };
 
-    inputElement.addEventListener('input', handleInput);
-    return () => inputElement.removeEventListener('input', handleInput);
+    inputElement.addEventListener("input", handleInput);
+    return () => inputElement.removeEventListener("input", handleInput);
   }, [inputRef, state.isOpen, openCompletion, closeCompletion]);
 
   return {

@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
 
-describe('package.json command metadata', () => {
-  it('describes focusChat as focusing the chat view', () => {
+describe("package.json command metadata", () => {
+  it("describes focusChat as focusing the chat view", () => {
     const manifest = JSON.parse(
-      readFileSync(resolve(import.meta.dirname, '../package.json'), 'utf8'),
+      readFileSync(resolve(import.meta.dirname, "../package.json"), "utf8"),
     ) as {
       contributes: {
         commands: Array<{ command: string; title: string }>;
@@ -19,9 +19,9 @@ describe('package.json command metadata', () => {
     };
 
     const command = manifest.contributes.commands.find(
-      (item) => item.command === 'tram.focusChat',
+      (item) => item.command === "tram.focusChat",
     );
 
-    expect(command?.title).toBe('TRAM: Focus Chat View');
+    expect(command?.title).toBe("TRAM: Focus Chat View");
   });
 });

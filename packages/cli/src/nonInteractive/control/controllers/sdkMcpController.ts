@@ -17,12 +17,12 @@
  * SDK MCP Server processes → control_response → CLI MCP Client
  */
 
-import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
-import { BaseController } from './baseController.js';
+import type { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
+import { BaseController } from "./baseController.js";
 import type {
   ControlRequestPayload,
   CLIControlMcpMessageRequest,
-} from '../../types.js';
+} from "../../types.js";
 
 const MCP_REQUEST_TIMEOUT = 30_000; // 30 seconds
 
@@ -39,11 +39,11 @@ export class SdkMcpController extends BaseController {
     signal: AbortSignal,
   ): Promise<Record<string, unknown>> {
     if (signal.aborted) {
-      throw new Error('Request aborted');
+      throw new Error("Request aborted");
     }
 
     switch (payload.subtype) {
-      case 'mcp_server_status':
+      case "mcp_server_status":
         return this.handleMcpStatus();
 
       default:
@@ -62,11 +62,11 @@ export class SdkMcpController extends BaseController {
 
     for (const serverName of this.context.sdkMcpServers) {
       // SDK MCP servers are "connected" once registered since they run in SDK process
-      status[serverName] = 'connected';
+      status[serverName] = "connected";
     }
 
     return {
-      subtype: 'mcp_server_status',
+      subtype: "mcp_server_status",
       status,
     };
   }
@@ -90,9 +90,9 @@ export class SdkMcpController extends BaseController {
     // Send control request to SDK with the MCP message
     const response = await this.sendControlRequest(
       {
-        subtype: 'mcp_message',
+        subtype: "mcp_message",
         server_name: serverName,
-        message: message as CLIControlMcpMessageRequest['message'],
+        message: message as CLIControlMcpMessageRequest["message"],
       },
       MCP_REQUEST_TIMEOUT,
       this.context.abortSignal,
@@ -100,7 +100,7 @@ export class SdkMcpController extends BaseController {
 
     // Extract MCP response from control response
     const responsePayload = response.response as Record<string, unknown>;
-    const mcpResponse = responsePayload?.['mcp_response'] as JSONRPCMessage;
+    const mcpResponse = responsePayload?.["mcp_response"] as JSONRPCMessage;
 
     if (!mcpResponse) {
       throw new Error(

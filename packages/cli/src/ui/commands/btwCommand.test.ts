@@ -1,17 +1,17 @@
 /**
  * @license
- * Copyright 2025 Qwen Code
+ * Copyright 2025 TRAM
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { btwCommand } from './btwCommand.js';
-import { type CommandContext } from './types.js';
-import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
-import { CommandKind } from './types.js';
-import { MessageType } from '../types.js';
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import { btwCommand } from "./btwCommand.js";
+import { type CommandContext } from "./types.js";
+import { createMockCommandContext } from "../../test-utils/mockCommandContext.js";
+import { CommandKind } from "./types.js";
+import { MessageType } from "../types.js";
 
-vi.mock('../../i18n/index.js', () => ({
+vi.mock("../../i18n/index.js", () => ({
   t: (key: string, params?: Record<string, string>) => {
     if (params) {
       return Object.entries(params).reduce(
@@ -23,7 +23,7 @@ vi.mock('../../i18n/index.js', () => ({
   },
 }));
 
-describe('btwCommand', () => {
+describe("btwCommand", () => {
   let mockContext: CommandContext;
   let mockGenerateContent: ReturnType<typeof vi.fn>;
   let mockGetHistory: ReturnType<typeof vi.fn>;
@@ -32,8 +32,8 @@ describe('btwCommand', () => {
       getHistory: mockGetHistory,
       generateContent: mockGenerateContent,
     }),
-    getModel: () => 'test-model',
-    getSessionId: () => 'test-session-id',
+    getModel: () => "test-model",
+    getSessionId: () => "test-session-id",
     ...overrides,
   });
 
@@ -50,87 +50,87 @@ describe('btwCommand', () => {
     });
   });
 
-  it('should have correct metadata', () => {
-    expect(btwCommand.name).toBe('btw');
+  it("should have correct metadata", () => {
+    expect(btwCommand.name).toBe("btw");
     expect(btwCommand.kind).toBe(CommandKind.BUILT_IN);
     expect(btwCommand.description).toBeTruthy();
   });
 
-  it('should return error when no question is provided', async () => {
-    const result = await btwCommand.action!(mockContext, '');
+  it("should return error when no question is provided", async () => {
+    const result = await btwCommand.action!(mockContext, "");
 
     expect(result).toEqual({
-      type: 'message',
-      messageType: 'error',
-      content: 'Please provide a question. Usage: /btw <your question>',
+      type: "message",
+      messageType: "error",
+      content: "Please provide a question. Usage: /btw <your question>",
     });
   });
 
-  it('should return error when only whitespace is provided', async () => {
-    const result = await btwCommand.action!(mockContext, '   ');
+  it("should return error when only whitespace is provided", async () => {
+    const result = await btwCommand.action!(mockContext, "   ");
 
     expect(result).toEqual({
-      type: 'message',
-      messageType: 'error',
-      content: 'Please provide a question. Usage: /btw <your question>',
+      type: "message",
+      messageType: "error",
+      content: "Please provide a question. Usage: /btw <your question>",
     });
   });
 
-  it('should return error when config is not loaded', async () => {
+  it("should return error when config is not loaded", async () => {
     const noConfigContext = createMockCommandContext({
       services: { config: null },
     });
 
-    const result = await btwCommand.action!(noConfigContext, 'test question');
+    const result = await btwCommand.action!(noConfigContext, "test question");
 
     expect(result).toEqual({
-      type: 'message',
-      messageType: 'error',
-      content: 'Config not loaded.',
+      type: "message",
+      messageType: "error",
+      content: "Config not loaded.",
     });
   });
 
-  it('should return error when model is not configured', async () => {
+  it("should return error when model is not configured", async () => {
     const noModelContext = createMockCommandContext({
       services: {
         config: createConfig({
-          getModel: () => '',
+          getModel: () => "",
         }),
       },
     });
 
-    const result = await btwCommand.action!(noModelContext, 'test question');
+    const result = await btwCommand.action!(noModelContext, "test question");
 
     expect(result).toEqual({
-      type: 'message',
-      messageType: 'error',
-      content: 'No model configured.',
+      type: "message",
+      messageType: "error",
+      content: "No model configured.",
     });
   });
 
-  describe('interactive mode', () => {
+  describe("interactive mode", () => {
     const flushPromises = () =>
       new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-    it('should set btwItem and update it on success', async () => {
+    it("should set btwItem and update it on success", async () => {
       mockGenerateContent.mockResolvedValue({
         candidates: [
           {
             content: {
-              parts: [{ text: 'The answer is 42.' }],
+              parts: [{ text: "The answer is 42." }],
             },
           },
         ],
       });
 
-      await btwCommand.action!(mockContext, 'what is the meaning of life?');
+      await btwCommand.action!(mockContext, "what is the meaning of life?");
 
       // Action returns immediately; btwItem is set synchronously
       expect(mockContext.ui.setBtwItem).toHaveBeenCalledWith({
         type: MessageType.BTW,
         btw: {
-          question: 'what is the meaning of life?',
-          answer: '',
+          question: "what is the meaning of life?",
+          answer: "",
           isPending: true,
         },
       });
@@ -144,8 +144,8 @@ describe('btwCommand', () => {
       expect(mockContext.ui.setBtwItem).toHaveBeenCalledWith({
         type: MessageType.BTW,
         btw: {
-          question: 'what is the meaning of life?',
-          answer: 'The answer is 42.',
+          question: "what is the meaning of life?",
+          answer: "The answer is 42.",
           isPending: false,
         },
       });
@@ -154,91 +154,91 @@ describe('btwCommand', () => {
       expect(mockContext.ui.addItem).not.toHaveBeenCalled();
     });
 
-    it('should pass conversation history to generateContent', async () => {
+    it("should pass conversation history to generateContent", async () => {
       const history = [
-        { role: 'user', parts: [{ text: 'Hello' }] },
-        { role: 'model', parts: [{ text: 'Hi!' }] },
+        { role: "user", parts: [{ text: "Hello" }] },
+        { role: "model", parts: [{ text: "Hi!" }] },
       ];
       mockGetHistory.mockReturnValue(history);
       mockGenerateContent.mockResolvedValue({
-        candidates: [{ content: { parts: [{ text: 'answer' }] } }],
+        candidates: [{ content: { parts: [{ text: "answer" }] } }],
       });
 
-      await btwCommand.action!(mockContext, 'my question');
+      await btwCommand.action!(mockContext, "my question");
       await flushPromises();
 
       expect(mockGenerateContent).toHaveBeenCalledWith(
         [
           ...history,
           {
-            role: 'user',
+            role: "user",
             parts: [
               {
-                text: expect.stringContaining('my question'),
+                text: expect.stringContaining("my question"),
               },
             ],
           },
         ],
         {},
         expect.any(AbortSignal),
-        'test-model',
+        "test-model",
         expect.stringMatching(/^test-session-id########btw-/),
       );
     });
 
-    it('should trim history to last 20 messages for long conversations', async () => {
+    it("should trim history to last 20 messages for long conversations", async () => {
       // Build 24 history entries — exceeds the 20-message limit
       const longHistory = Array.from({ length: 12 }, (_, i) => [
-        { role: 'user', parts: [{ text: `Q${i}` }] },
-        { role: 'model', parts: [{ text: `A${i}` }] },
+        { role: "user", parts: [{ text: `Q${i}` }] },
+        { role: "model", parts: [{ text: `A${i}` }] },
       ]).flat();
       mockGetHistory.mockReturnValue(longHistory);
       mockGenerateContent.mockResolvedValue({
-        candidates: [{ content: { parts: [{ text: 'answer' }] } }],
+        candidates: [{ content: { parts: [{ text: "answer" }] } }],
       });
 
-      await btwCommand.action!(mockContext, 'test');
+      await btwCommand.action!(mockContext, "test");
       await flushPromises();
 
       const calledContents = mockGenerateContent.mock.calls[0][0];
       // 20 history entries + 1 btw question = 21
       expect(calledContents).toHaveLength(21);
       // First entry should be user (Q2, since slice(-20) on 24 starts at index 4)
-      expect(calledContents[0].role).toBe('user');
-      expect(calledContents[0].parts[0].text).toBe('Q2');
+      expect(calledContents[0].role).toBe("user");
+      expect(calledContents[0].parts[0].text).toBe("Q2");
     });
 
-    it('should trim history and skip leading model entry to preserve alternation', async () => {
+    it("should trim history and skip leading model entry to preserve alternation", async () => {
       // Build 21 entries: 10 full turns + 1 trailing user message.
       // slice(-20) yields [M0, U1, M1, ..., U9, M9, U10] — starts with model.
       // trimHistory should drop that leading model entry.
       const oddHistory = [
         ...Array.from({ length: 11 }, (_, i) => [
-          { role: 'user', parts: [{ text: `Q${i}` }] },
-          { role: 'model', parts: [{ text: `A${i}` }] },
+          { role: "user", parts: [{ text: `Q${i}` }] },
+          { role: "model", parts: [{ text: `A${i}` }] },
         ]).flat(),
       ].slice(0, 21); // [U0, M0, U1, M1, ..., U9, M9, U10]
       expect(oddHistory).toHaveLength(21);
 
       mockGetHistory.mockReturnValue(oddHistory);
       mockGenerateContent.mockResolvedValue({
-        candidates: [{ content: { parts: [{ text: 'answer' }] } }],
+        candidates: [{ content: { parts: [{ text: "answer" }] } }],
       });
 
-      await btwCommand.action!(mockContext, 'test');
+      await btwCommand.action!(mockContext, "test");
       await flushPromises();
 
       const calledContents = mockGenerateContent.mock.calls[0][0];
       // slice(-20) = 20 entries starting with M0 (model) → slice(1) = 19, + 1 btw = 20
       expect(calledContents).toHaveLength(20);
-      expect(calledContents[0].role).toBe('user');
-      expect(calledContents[0].parts[0].text).toBe('Q1');
+      expect(calledContents[0].role).toBe("user");
+      expect(calledContents[0].parts[0].text).toBe("Q1");
     });
 
-    it('should add error item on failure and clear btwItem', async () => {
-      mockGenerateContent.mockRejectedValue(new Error('API error'));
+    it("should add error item on failure and clear btwItem", async () => {
+      mockGenerateContent.mockRejectedValue(new Error("API error"));
 
-      await btwCommand.action!(mockContext, 'test question');
+      await btwCommand.action!(mockContext, "test question");
       await flushPromises();
 
       // btwItem should be cleared on error
@@ -248,48 +248,48 @@ describe('btwCommand', () => {
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.ERROR,
-          text: 'Failed to answer btw question: API error',
+          text: "Failed to answer btw question: API error",
         },
         expect.any(Number),
       );
     });
 
-    it('should handle non-Error exceptions', async () => {
-      mockGenerateContent.mockRejectedValue('string error');
+    it("should handle non-Error exceptions", async () => {
+      mockGenerateContent.mockRejectedValue("string error");
 
-      await btwCommand.action!(mockContext, 'test question');
+      await btwCommand.action!(mockContext, "test question");
       await flushPromises();
 
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.ERROR,
-          text: 'Failed to answer btw question: string error',
+          text: "Failed to answer btw question: string error",
         },
         expect.any(Number),
       );
     });
 
-    it('should not block when another pendingItem exists', async () => {
+    it("should not block when another pendingItem exists", async () => {
       const busyContext = createMockCommandContext({
         services: {
           config: createConfig(),
         },
         ui: {
-          pendingItem: { type: 'info' },
+          pendingItem: { type: "info" },
         },
       });
 
       mockGenerateContent.mockResolvedValue({
-        candidates: [{ content: { parts: [{ text: 'answer' }] } }],
+        candidates: [{ content: { parts: [{ text: "answer" }] } }],
       });
 
       // btw should NOT be blocked by pendingItem anymore
-      const result = await btwCommand.action!(busyContext, 'test question');
+      const result = await btwCommand.action!(busyContext, "test question");
       expect(result).toBeUndefined();
       expect(busyContext.ui.setBtwItem).toHaveBeenCalled();
     });
 
-    it('should not update btwItem when cancelled via btwAbortControllerRef', async () => {
+    it("should not update btwItem when cancelled via btwAbortControllerRef", async () => {
       mockGenerateContent.mockImplementation(
         () =>
           new Promise((resolve) =>
@@ -297,7 +297,7 @@ describe('btwCommand', () => {
               () =>
                 resolve({
                   candidates: [
-                    { content: { parts: [{ text: 'late answer' }] } },
+                    { content: { parts: [{ text: "late answer" }] } },
                   ],
                 }),
               50,
@@ -305,7 +305,7 @@ describe('btwCommand', () => {
           ),
       );
 
-      await btwCommand.action!(mockContext, 'test question');
+      await btwCommand.action!(mockContext, "test question");
 
       // The btw command should have registered its AbortController
       expect(mockContext.ui.btwAbortControllerRef.current).toBeInstanceOf(
@@ -322,12 +322,12 @@ describe('btwCommand', () => {
       expect(mockContext.ui.addItem).not.toHaveBeenCalled();
     });
 
-    it('should clear btwAbortControllerRef after successful completion', async () => {
+    it("should clear btwAbortControllerRef after successful completion", async () => {
       mockGenerateContent.mockResolvedValue({
-        candidates: [{ content: { parts: [{ text: 'answer' }] } }],
+        candidates: [{ content: { parts: [{ text: "answer" }] } }],
       });
 
-      await btwCommand.action!(mockContext, 'test question');
+      await btwCommand.action!(mockContext, "test question");
 
       // Ref is set during the call
       expect(mockContext.ui.btwAbortControllerRef.current).toBeInstanceOf(
@@ -340,10 +340,10 @@ describe('btwCommand', () => {
       expect(mockContext.ui.btwAbortControllerRef.current).toBeNull();
     });
 
-    it('should clear btwAbortControllerRef after error', async () => {
-      mockGenerateContent.mockRejectedValue(new Error('API error'));
+    it("should clear btwAbortControllerRef after error", async () => {
+      mockGenerateContent.mockRejectedValue(new Error("API error"));
 
-      await btwCommand.action!(mockContext, 'test question');
+      await btwCommand.action!(mockContext, "test question");
 
       expect(mockContext.ui.btwAbortControllerRef.current).toBeInstanceOf(
         AbortController,
@@ -354,47 +354,47 @@ describe('btwCommand', () => {
       expect(mockContext.ui.btwAbortControllerRef.current).toBeNull();
     });
 
-    it('should cancel previous btw when starting a new one', async () => {
+    it("should cancel previous btw when starting a new one", async () => {
       mockGenerateContent.mockResolvedValue({
-        candidates: [{ content: { parts: [{ text: 'answer' }] } }],
+        candidates: [{ content: { parts: [{ text: "answer" }] } }],
       });
 
-      await btwCommand.action!(mockContext, 'first question');
+      await btwCommand.action!(mockContext, "first question");
 
       // cancelBtw should have been called to clean up any previous btw
       expect(mockContext.ui.cancelBtw).toHaveBeenCalledTimes(1);
 
       // Second btw call
-      await btwCommand.action!(mockContext, 'second question');
+      await btwCommand.action!(mockContext, "second question");
 
       // cancelBtw called again for the second invocation
       expect(mockContext.ui.cancelBtw).toHaveBeenCalledTimes(2);
     });
 
-    it('should return fallback text when response has no parts', async () => {
+    it("should return fallback text when response has no parts", async () => {
       mockGenerateContent.mockResolvedValue({
         candidates: [{ content: { parts: [] } }],
       });
 
-      await btwCommand.action!(mockContext, 'test question');
+      await btwCommand.action!(mockContext, "test question");
       await flushPromises();
 
       expect(mockContext.ui.setBtwItem).toHaveBeenCalledWith({
         type: MessageType.BTW,
         btw: {
-          question: 'test question',
-          answer: 'No response received.',
+          question: "test question",
+          answer: "No response received.",
           isPending: false,
         },
       });
     });
 
-    it('should return void immediately without blocking', async () => {
+    it("should return void immediately without blocking", async () => {
       mockGenerateContent.mockResolvedValue({
-        candidates: [{ content: { parts: [{ text: 'answer' }] } }],
+        candidates: [{ content: { parts: [{ text: "answer" }] } }],
       });
 
-      const result = await btwCommand.action!(mockContext, 'test question');
+      const result = await btwCommand.action!(mockContext, "test question");
 
       expect(result).toBeUndefined();
 
@@ -408,74 +408,74 @@ describe('btwCommand', () => {
     });
   });
 
-  describe('non-interactive mode', () => {
+  describe("non-interactive mode", () => {
     let nonInteractiveContext: CommandContext;
 
     beforeEach(() => {
       nonInteractiveContext = createMockCommandContext({
-        executionMode: 'non_interactive',
+        executionMode: "non_interactive",
         services: {
           config: createConfig(),
         },
       });
     });
 
-    it('should return info message on success', async () => {
+    it("should return info message on success", async () => {
       mockGenerateContent.mockResolvedValue({
-        candidates: [{ content: { parts: [{ text: 'the answer' }] } }],
+        candidates: [{ content: { parts: [{ text: "the answer" }] } }],
       });
 
       const result = await btwCommand.action!(
         nonInteractiveContext,
-        'my question',
+        "my question",
       );
 
       expect(result).toEqual({
-        type: 'message',
-        messageType: 'info',
-        content: 'btw> my question\nthe answer',
+        type: "message",
+        messageType: "info",
+        content: "btw> my question\nthe answer",
       });
     });
 
-    it('should return error message on failure', async () => {
-      mockGenerateContent.mockRejectedValue(new Error('network error'));
+    it("should return error message on failure", async () => {
+      mockGenerateContent.mockRejectedValue(new Error("network error"));
 
       const result = await btwCommand.action!(
         nonInteractiveContext,
-        'my question',
+        "my question",
       );
 
       expect(result).toEqual({
-        type: 'message',
-        messageType: 'error',
-        content: 'Failed to answer btw question: network error',
+        type: "message",
+        messageType: "error",
+        content: "Failed to answer btw question: network error",
       });
     });
   });
 
-  describe('acp mode', () => {
+  describe("acp mode", () => {
     let acpContext: CommandContext;
 
     beforeEach(() => {
       acpContext = createMockCommandContext({
-        executionMode: 'acp',
+        executionMode: "acp",
         services: {
           config: createConfig(),
         },
       });
     });
 
-    it('should return stream_messages generator on success', async () => {
+    it("should return stream_messages generator on success", async () => {
       mockGenerateContent.mockResolvedValue({
-        candidates: [{ content: { parts: [{ text: 'streamed answer' }] } }],
+        candidates: [{ content: { parts: [{ text: "streamed answer" }] } }],
       });
 
-      const result = (await btwCommand.action!(acpContext, 'my question')) as {
+      const result = (await btwCommand.action!(acpContext, "my question")) as {
         type: string;
         messages: AsyncGenerator;
       };
 
-      expect(result.type).toBe('stream_messages');
+      expect(result.type).toBe("stream_messages");
 
       const messages = [];
       for await (const msg of result.messages) {
@@ -483,15 +483,15 @@ describe('btwCommand', () => {
       }
 
       expect(messages).toEqual([
-        { messageType: 'info', content: 'Thinking...' },
-        { messageType: 'info', content: 'btw> my question\nstreamed answer' },
+        { messageType: "info", content: "Thinking..." },
+        { messageType: "info", content: "btw> my question\nstreamed answer" },
       ]);
     });
 
-    it('should yield error message on failure', async () => {
-      mockGenerateContent.mockRejectedValue(new Error('api failure'));
+    it("should yield error message on failure", async () => {
+      mockGenerateContent.mockRejectedValue(new Error("api failure"));
 
-      const result = (await btwCommand.action!(acpContext, 'my question')) as {
+      const result = (await btwCommand.action!(acpContext, "my question")) as {
         type: string;
         messages: AsyncGenerator;
       };
@@ -502,10 +502,10 @@ describe('btwCommand', () => {
       }
 
       expect(messages).toEqual([
-        { messageType: 'info', content: 'Thinking...' },
+        { messageType: "info", content: "Thinking..." },
         {
-          messageType: 'error',
-          content: 'Failed to answer btw question: api failure',
+          messageType: "error",
+          content: "Failed to answer btw question: api failure",
         },
       ]);
     });

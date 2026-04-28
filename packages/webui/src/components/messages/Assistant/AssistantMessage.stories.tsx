@@ -4,50 +4,50 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { AssistantMessage } from './AssistantMessage.js';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { AssistantMessage } from "./AssistantMessage.js";
 
 /**
  * AssistantMessage displays AI responses with markdown formatting.
  * Supports different status states for timeline bullet coloring.
  */
 const meta: Meta<typeof AssistantMessage> = {
-  title: 'Messages/AssistantMessage',
+  title: "Messages/AssistantMessage",
   component: AssistantMessage,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     content: {
-      control: 'text',
-      description: 'The markdown content to display',
+      control: "text",
+      description: "The markdown content to display",
     },
     status: {
-      control: 'select',
-      options: ['default', 'success', 'error', 'warning', 'loading'],
-      description: 'Status determines the bullet point color',
+      control: "select",
+      options: ["default", "success", "error", "warning", "loading"],
+      description: "Status determines the bullet point color",
     },
     hideStatusIcon: {
-      control: 'boolean',
-      description: 'Hide the status bullet point',
+      control: "boolean",
+      description: "Hide the status bullet point",
     },
     isFirst: {
-      control: 'boolean',
-      description: 'First item in timeline sequence',
+      control: "boolean",
+      description: "First item in timeline sequence",
     },
     isLast: {
-      control: 'boolean',
-      description: 'Last item in timeline sequence',
+      control: "boolean",
+      description: "Last item in timeline sequence",
     },
   },
   decorators: [
     (Story) => (
       <div
         style={{
-          background: 'var(--app-background, #1e1e1e)',
-          padding: '20px',
-          minHeight: '200px',
+          background: "var(--app-background, #1e1e1e)",
+          padding: "20px",
+          minHeight: "200px",
         }}
       >
         <Story />
@@ -61,8 +61,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    content: 'This is a default assistant message with **markdown** support.',
-    status: 'default',
+    content: "This is a default assistant message with **markdown** support.",
+    status: "default",
     isFirst: true,
     isLast: true,
   },
@@ -70,8 +70,8 @@ export const Default: Story = {
 
 export const Success: Story = {
   args: {
-    content: 'Task completed successfully! All tests passed.',
-    status: 'success',
+    content: "Task completed successfully! All tests passed.",
+    status: "success",
     isFirst: true,
     isLast: true,
   },
@@ -80,8 +80,8 @@ export const Success: Story = {
 export const Error: Story = {
   args: {
     content:
-      'An error occurred while processing your request. Please try again.',
-    status: 'error',
+      "An error occurred while processing your request. Please try again.",
+    status: "error",
     isFirst: true,
     isLast: true,
   },
@@ -90,8 +90,8 @@ export const Error: Story = {
 export const Warning: Story = {
   args: {
     content:
-      'Warning: This operation may take a long time. Consider using a smaller dataset.',
-    status: 'warning',
+      "Warning: This operation may take a long time. Consider using a smaller dataset.",
+    status: "warning",
     isFirst: true,
     isLast: true,
   },
@@ -99,8 +99,8 @@ export const Warning: Story = {
 
 export const Loading: Story = {
   args: {
-    content: 'Processing your request...',
-    status: 'loading',
+    content: "Processing your request...",
+    status: "loading",
     isFirst: true,
     isLast: true,
   },
@@ -127,7 +127,7 @@ const greeting = (name: string) => {
 > This is a blockquote for emphasis.
 
 Check the [documentation](https://example.com) for more details.`,
-    status: 'success',
+    status: "success",
     isFirst: true,
     isLast: true,
   },
@@ -163,7 +163,7 @@ export const App: FC = () => {
 ### Step 3: Run
 
 Start the development server and verify everything works correctly.`,
-    status: 'default',
+    status: "default",
     isFirst: true,
     isLast: true,
   },
@@ -171,7 +171,7 @@ Start the development server and verify everything works correctly.`,
 
 export const HiddenStatusIcon: Story = {
   args: {
-    content: 'This message has no status bullet point.',
+    content: "This message has no status bullet point.",
     hideStatusIcon: true,
     isFirst: true,
     isLast: true,
@@ -181,8 +181,8 @@ export const HiddenStatusIcon: Story = {
 // Timeline demonstration
 export const TimelineFirst: Story = {
   args: {
-    content: 'This is the first message in a sequence.',
-    status: 'default',
+    content: "This is the first message in a sequence.",
+    status: "default",
     isFirst: true,
     isLast: false,
   },
@@ -190,8 +190,8 @@ export const TimelineFirst: Story = {
 
 export const TimelineMiddle: Story = {
   args: {
-    content: 'This is a middle message in a sequence.',
-    status: 'default',
+    content: "This is a middle message in a sequence.",
+    status: "default",
     isFirst: false,
     isLast: false,
   },
@@ -199,8 +199,8 @@ export const TimelineMiddle: Story = {
 
 export const TimelineLast: Story = {
   args: {
-    content: 'This is the last message in a sequence.',
-    status: 'success',
+    content: "This is the last message in a sequence.",
+    status: "success",
     isFirst: false,
     isLast: true,
   },

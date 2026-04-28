@@ -1,6 +1,6 @@
 # Todo Write Tool (`todo_write`)
 
-This document describes the `todo_write` tool for Qwen Code.
+This document describes the `todo_write` tool for TRAM.
 
 ## Description
 
@@ -15,7 +15,7 @@ Use `todo_write` to create and manage a structured task list for your current co
   - `status` (string, required): The current status (`pending`, `in_progress`, or `completed`).
   - `activeForm` (string, required): The present continuous form describing what is being done (e.g., "Running tests", "Building the project").
 
-## How to use `todo_write` with Qwen Code
+## How to use `todo_write` with TRAM
 
 The AI assistant will automatically use this tool when working on complex, multi-step tasks. You don't need to explicitly request it, but you can ask the assistant to create a todo list if you want to see the planned approach for your request.
 

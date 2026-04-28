@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
-import { Box, Text } from 'ink';
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Box, Text } from "ink";
 import {
   type ArenaManager,
   type ArenaAgentState,
@@ -15,11 +15,11 @@ import {
   isSettledStatus,
   ArenaSessionStatus,
   DISPLAY_MODE,
-} from '@qwen-code/qwen-code-core';
-import { theme } from '../../semantic-colors.js';
-import { useKeypress } from '../../hooks/useKeypress.js';
-import { formatDuration } from '../../utils/formatters.js';
-import { getArenaStatusLabel } from '../../utils/displayUtils.js';
+} from "@tram-ai/tram-core";
+import { theme } from "../../semantic-colors.js";
+import { useKeypress } from "../../hooks/useKeypress.js";
+import { formatDuration } from "../../utils/formatters.js";
+import { getArenaStatusLabel } from "../../utils/displayUtils.js";
 
 const STATUS_REFRESH_INTERVAL_MS = 2000;
 const IN_PROCESS_REFRESH_INTERVAL_MS = 1000;
@@ -32,17 +32,17 @@ interface ArenaStatusDialogProps {
 
 function truncate(str: string, maxLen: number): string {
   if (str.length <= maxLen) return str;
-  return str.slice(0, maxLen - 1) + '…';
+  return str.slice(0, maxLen - 1) + "…";
 }
 
 function pad(
   str: string,
   len: number,
-  align: 'left' | 'right' = 'left',
+  align: "left" | "right" = "left",
 ): string {
   if (str.length >= len) return str.slice(0, len);
-  const padding = ' '.repeat(len - str.length);
-  return align === 'right' ? padding + str : str + padding;
+  const padding = " ".repeat(len - str.length);
+  return align === "right" ? padding + str : str + padding;
 }
 
 function getElapsedMs(agent: ArenaAgentState): number {
@@ -58,17 +58,17 @@ function getSessionStatusLabel(status: ArenaSessionStatus): {
 } {
   switch (status) {
     case ArenaSessionStatus.RUNNING:
-      return { text: 'Running', color: theme.status.success };
+      return { text: "Running", color: theme.status.success };
     case ArenaSessionStatus.INITIALIZING:
-      return { text: 'Initializing', color: theme.status.warning };
+      return { text: "Initializing", color: theme.status.warning };
     case ArenaSessionStatus.IDLE:
-      return { text: 'Idle', color: theme.status.success };
+      return { text: "Idle", color: theme.status.success };
     case ArenaSessionStatus.COMPLETED:
-      return { text: 'Completed', color: theme.status.success };
+      return { text: "Completed", color: theme.status.success };
     case ArenaSessionStatus.CANCELLED:
-      return { text: 'Cancelled', color: theme.status.warning };
+      return { text: "Cancelled", color: theme.status.warning };
     case ArenaSessionStatus.FAILED:
-      return { text: 'Failed', color: theme.status.error };
+      return { text: "Failed", color: theme.status.error };
     default:
       return { text: String(status), color: theme.text.secondary };
   }
@@ -104,7 +104,7 @@ export function ArenaStatusDialog({
   const sessionStatus = manager.getSessionStatus();
   const sessionLabel = getSessionStatusLabel(sessionStatus);
   const agents = manager.getAgentStates();
-  const task = manager.getTask() ?? '';
+  const task = manager.getTask() ?? "";
 
   // For in-process mode, read live stats directly from AgentInteractive
   const liveStats = useMemo(() => {
@@ -122,7 +122,7 @@ export function ArenaStatusDialog({
 
   const maxTaskLen = 60;
   const displayTask =
-    task.length > maxTaskLen ? task.slice(0, maxTaskLen - 1) + '…' : task;
+    task.length > maxTaskLen ? task.slice(0, maxTaskLen - 1) + "…" : task;
 
   const colStatus = 14;
   const colTime = 8;
@@ -132,7 +132,7 @@ export function ArenaStatusDialog({
 
   useKeypress(
     (key) => {
-      if (key.name === 'escape' || key.name === 'q' || key.name === 'return') {
+      if (key.name === "escape" || key.name === "q" || key.name === "return") {
         closeArenaDialog();
       }
     },
@@ -208,7 +208,7 @@ export function ArenaStatusDialog({
 
       {/* Separator */}
       <Box>
-        <Text color={theme.border.default}>{'─'.repeat(innerWidth)}</Text>
+        <Text color={theme.border.default}>{"─".repeat(innerWidth)}</Text>
       </Box>
 
       {/* Agent rows */}
@@ -241,17 +241,17 @@ export function ArenaStatusDialog({
               </Box>
               <Box width={colTime} justifyContent="flex-end">
                 <Text color={theme.text.primary}>
-                  {pad(formatDuration(elapsed), colTime - 1, 'right')}
+                  {pad(formatDuration(elapsed), colTime - 1, "right")}
                 </Text>
               </Box>
               <Box width={colTokens} justifyContent="flex-end">
                 <Text color={theme.text.primary}>
-                  {pad(totalTokens.toLocaleString(), colTokens - 1, 'right')}
+                  {pad(totalTokens.toLocaleString(), colTokens - 1, "right")}
                 </Text>
               </Box>
               <Box width={colRounds} justifyContent="flex-end">
                 <Text color={theme.text.primary}>
-                  {pad(String(rounds), colRounds - 1, 'right')}
+                  {pad(String(rounds), colRounds - 1, "right")}
                 </Text>
               </Box>
               <Box width={colTools} justifyContent="flex-end">
@@ -269,7 +269,7 @@ export function ArenaStatusDialog({
                       toolCalls > 0 ? theme.status.success : theme.text.primary
                     }
                   >
-                    {pad(String(toolCalls), colTools - 1, 'right')}
+                    {pad(String(toolCalls), colTools - 1, "right")}
                   </Text>
                 )}
               </Box>

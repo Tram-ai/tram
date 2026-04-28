@@ -5,9 +5,9 @@
  */
 
 export type McpContentBlock =
-  | { type: 'text'; text: string }
-  | { type: 'image'; data: string; mimeType: string }
-  | { type: 'resource'; uri: string; mimeType?: string; text?: string };
+  | { type: "text"; text: string }
+  | { type: "image"; data: string; mimeType: string }
+  | { type: "resource"; uri: string; mimeType?: string; text?: string };
 
 export interface ToolResult {
   content: McpContentBlock[];
@@ -20,8 +20,8 @@ export function formatToolResult(result: unknown): ToolResult {
     return {
       content: [
         {
-          type: 'text',
-          text: result.message || 'Unknown error',
+          type: "text",
+          text: result.message || "Unknown error",
         },
       ],
       isError: true,
@@ -33,19 +33,19 @@ export function formatToolResult(result: unknown): ToolResult {
     return {
       content: [
         {
-          type: 'text',
-          text: '',
+          type: "text",
+          text: "",
         },
       ],
     };
   }
 
   // Handle string
-  if (typeof result === 'string') {
+  if (typeof result === "string") {
     return {
       content: [
         {
-          type: 'text',
+          type: "text",
           text: result,
         },
       ],
@@ -53,11 +53,11 @@ export function formatToolResult(result: unknown): ToolResult {
   }
 
   // Handle number
-  if (typeof result === 'number') {
+  if (typeof result === "number") {
     return {
       content: [
         {
-          type: 'text',
+          type: "text",
           text: String(result),
         },
       ],
@@ -65,11 +65,11 @@ export function formatToolResult(result: unknown): ToolResult {
   }
 
   // Handle boolean
-  if (typeof result === 'boolean') {
+  if (typeof result === "boolean") {
     return {
       content: [
         {
-          type: 'text',
+          type: "text",
           text: String(result),
         },
       ],
@@ -77,12 +77,12 @@ export function formatToolResult(result: unknown): ToolResult {
   }
 
   // Handle object (including arrays)
-  if (typeof result === 'object') {
+  if (typeof result === "object") {
     try {
       return {
         content: [
           {
-            type: 'text',
+            type: "text",
             text: JSON.stringify(result, null, 2),
           },
         ],
@@ -92,7 +92,7 @@ export function formatToolResult(result: unknown): ToolResult {
       return {
         content: [
           {
-            type: 'text',
+            type: "text",
             text: String(result),
           },
         ],
@@ -104,7 +104,7 @@ export function formatToolResult(result: unknown): ToolResult {
   return {
     content: [
       {
-        type: 'text',
+        type: "text",
         text: String(result),
       },
     ],
@@ -117,7 +117,7 @@ export function formatToolError(error: Error | string): ToolResult {
   return {
     content: [
       {
-        type: 'text',
+        type: "text",
         text: message,
       },
     ],
@@ -129,7 +129,7 @@ export function formatTextResult(text: string): ToolResult {
   return {
     content: [
       {
-        type: 'text',
+        type: "text",
         text,
       },
     ],
@@ -140,7 +140,7 @@ export function formatJsonResult(data: unknown): ToolResult {
   return {
     content: [
       {
-        type: 'text',
+        type: "text",
         text: JSON.stringify(data, null, 2),
       },
     ],
@@ -165,28 +165,28 @@ export function mergeToolResults(results: ToolResult[]): ToolResult {
 }
 
 export function isValidContentBlock(block: unknown): block is McpContentBlock {
-  if (!block || typeof block !== 'object') {
+  if (!block || typeof block !== "object") {
     return false;
   }
 
   const blockObj = block as Record<string, unknown>;
 
-  if (!blockObj.type || typeof blockObj.type !== 'string') {
+  if (!blockObj.type || typeof blockObj.type !== "string") {
     return false;
   }
 
   switch (blockObj.type) {
-    case 'text':
-      return typeof blockObj.text === 'string';
+    case "text":
+      return typeof blockObj.text === "string";
 
-    case 'image':
+    case "image":
       return (
-        typeof blockObj.data === 'string' &&
-        typeof blockObj.mimeType === 'string'
+        typeof blockObj.data === "string" &&
+        typeof blockObj.mimeType === "string"
       );
 
-    case 'resource':
-      return typeof blockObj.uri === 'string';
+    case "resource":
+      return typeof blockObj.uri === "string";
 
     default:
       return false;

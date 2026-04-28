@@ -28,9 +28,9 @@ import type {
   LspReference,
   LspSymbolInformation,
   LspWorkspaceEdit,
-} from './types.js';
+} from "./types.js";
 
-import type { NativeLspService } from './NativeLspService.js';
+import type { NativeLspService } from "./NativeLspService.js";
 
 /**
  * Adapter class that implements LspClient by delegating to NativeLspService.

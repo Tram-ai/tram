@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ToolPlanConfirmationDetails, ToolResult } from './tools.js';
-import type { PermissionDecision } from '../permissions/types.js';
+import type { ToolPlanConfirmationDetails, ToolResult } from "./tools.js";
+import type { PermissionDecision } from "../permissions/types.js";
 import {
   BaseDeclarativeTool,
   BaseToolInvocation,
   Kind,
   ToolConfirmationOutcome,
-} from './tools.js';
-import type { FunctionDeclaration } from '@google/genai';
-import type { Config } from '../config/config.js';
-import { ApprovalMode } from '../config/config.js';
-import { ToolDisplayNames, ToolNames } from './tool-names.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "./tools.js";
+import type { FunctionDeclaration } from "@google/genai";
+import type { Config } from "../config/config.js";
+import { ApprovalMode } from "../config/config.js";
+import { ToolDisplayNames, ToolNames } from "./tool-names.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('EXIT_PLAN_MODE');
+const debugLogger = createDebugLogger("EXIT_PLAN_MODE");
 
 export interface ExitPlanModeParams {
   plan: string;
@@ -43,20 +43,20 @@ Ensure your plan is complete and unambiguous:
 `;
 
 const exitPlanModeToolSchemaData: FunctionDeclaration = {
-  name: 'exit_plan_mode',
+  name: "exit_plan_mode",
   description: exitPlanModeToolDescription,
   parametersJsonSchema: {
-    type: 'object',
+    type: "object",
     properties: {
       plan: {
-        type: 'string',
+        type: "string",
         description:
-          'The plan you came up with, that you want to run by the user for approval. Supports markdown. The plan should be pretty concise.',
+          "The plan you came up with, that you want to run by the user for approval. Supports markdown. The plan should be pretty concise.",
       },
     },
-    required: ['plan'],
+    required: ["plan"],
     additionalProperties: false,
-    $schema: 'http://json-schema.org/draft-07/schema#',
+    $schema: "http://json-schema.org/draft-07/schema#",
   },
 };
 
@@ -74,14 +74,14 @@ class ExitPlanModeToolInvocation extends BaseToolInvocation<
   }
 
   getDescription(): string {
-    return 'Plan:';
+    return "Plan:";
   }
 
   /**
    * Plan mode exit always requires user confirmation.
    */
   override async getDefaultPermission(): Promise<PermissionDecision> {
-    return 'ask';
+    return "ask";
   }
 
   override async getConfirmationDetails(
@@ -89,8 +89,8 @@ class ExitPlanModeToolInvocation extends BaseToolInvocation<
   ): Promise<ToolPlanConfirmationDetails> {
     const prePlanMode = this.config.getPrePlanMode();
     const details: ToolPlanConfirmationDetails = {
-      type: 'plan',
-      title: 'Would you like to proceed?',
+      type: "plan",
+      title: "Would you like to proceed?",
       plan: this.params.plan,
       prePlanMode,
       onConfirm: async (outcome: ToolConfirmationOutcome) => {
@@ -146,7 +146,7 @@ class ExitPlanModeToolInvocation extends BaseToolInvocation<
 
       if (!effectivelyApproved) {
         const rejectionMessage =
-          'Plan execution was not approved. Remaining in plan mode.';
+          "Plan execution was not approved. Remaining in plan mode.";
         return {
           llmContent: rejectionMessage,
           returnDisplay: rejectionMessage,
@@ -163,12 +163,12 @@ class ExitPlanModeToolInvocation extends BaseToolInvocation<
       }
 
       const llmMessage = `User has approved your plan. You can now start coding. Start with updating your todo list if applicable.`;
-      const displayMessage = 'User approved the plan.';
+      const displayMessage = "User approved the plan.";
 
       return {
         llmContent: llmMessage,
         returnDisplay: {
-          type: 'plan_summary',
+          type: "plan_summary",
           message: displayMessage,
           plan,
         },
@@ -213,8 +213,8 @@ export class ExitPlanModeTool extends BaseDeclarativeTool<
     // Validate plan parameter
     if (
       !params.plan ||
-      typeof params.plan !== 'string' ||
-      params.plan.trim() === ''
+      typeof params.plan !== "string" ||
+      params.plan.trim() === ""
     ) {
       return 'Parameter "plan" must be a non-empty string.';
     }

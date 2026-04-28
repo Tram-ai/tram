@@ -10,12 +10,12 @@ import type {
   ReadTextFileRequest,
   WriteTextFileRequest,
   WriteTextFileResponse,
-} from '@agentclientprotocol/sdk';
-import { RequestError } from '@agentclientprotocol/sdk';
+} from "@agentclientprotocol/sdk";
+import { RequestError } from "@agentclientprotocol/sdk";
 import type {
   FileSystemService,
   ReadTextFileResponse,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 
 const RESOURCE_NOT_FOUND_CODE = -32002;
 
@@ -24,7 +24,7 @@ function getErrorCode(error: unknown): unknown {
     return error.code;
   }
 
-  if (typeof error === 'object' && error !== null && 'code' in error) {
+  if (typeof error === "object" && error !== null && "code" in error) {
     return (error as { code?: unknown }).code;
   }
 
@@ -33,7 +33,7 @@ function getErrorCode(error: unknown): unknown {
 
 function createEnoentError(filePath: string): NodeJS.ErrnoException {
   const err = new Error(`File not found: ${filePath}`) as NodeJS.ErrnoException;
-  err.code = 'ENOENT';
+  err.code = "ENOENT";
   err.errno = -2;
   err.path = filePath;
   return err;
@@ -48,7 +48,7 @@ export class AcpFileSystemService implements FileSystemService {
   ) {}
 
   async readTextFile(
-    params: Omit<ReadTextFileRequest, 'sessionId'>,
+    params: Omit<ReadTextFileRequest, "sessionId">,
   ): Promise<ReadTextFileResponse> {
     if (!this.capabilities.readTextFile) {
       return this.fallback.readTextFile(params);
@@ -74,14 +74,14 @@ export class AcpFileSystemService implements FileSystemService {
   }
 
   async writeTextFile(
-    params: Omit<WriteTextFileRequest, 'sessionId'>,
+    params: Omit<WriteTextFileRequest, "sessionId">,
   ): Promise<WriteTextFileResponse> {
     if (!this.capabilities.writeTextFile) {
       return this.fallback.writeTextFile(params);
     }
 
-    const finalContent = params._meta?.['bom']
-      ? '\uFEFF' + params.content
+    const finalContent = params._meta?.["bom"]
+      ? "\uFEFF" + params.content
       : params.content;
 
     await this.connection.writeTextFile({

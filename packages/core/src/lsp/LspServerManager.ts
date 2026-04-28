@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Config as CoreConfig } from '../config/config.js';
-import type { FileDiscoveryService } from '../services/fileDiscoveryService.js';
-import type { WorkspaceContext } from '../utils/workspaceContext.js';
-import { spawn, type ChildProcess } from 'node:child_process';
-import * as fs from 'node:fs';
-import * as path from 'path';
-import { pathToFileURL } from 'url';
-import { globSync } from 'glob';
-import { LspConnectionFactory } from './LspConnectionFactory.js';
+import type { Config as CoreConfig } from "../config/config.js";
+import type { FileDiscoveryService } from "../services/fileDiscoveryService.js";
+import type { WorkspaceContext } from "../utils/workspaceContext.js";
+import { spawn, type ChildProcess } from "node:child_process";
+import * as fs from "node:fs";
+import * as path from "path";
+import { pathToFileURL } from "url";
+import { globSync } from "glob";
+import { LspConnectionFactory } from "./LspConnectionFactory.js";
 import {
   DEFAULT_LSP_COMMAND_CHECK_TIMEOUT_MS,
   DEFAULT_LSP_MAX_RESTARTS,
@@ -20,17 +20,17 @@ import {
   DEFAULT_LSP_SOCKET_RETRY_DELAY_MS,
   DEFAULT_LSP_STARTUP_TIMEOUT_MS,
   DEFAULT_LSP_WARMUP_DELAY_MS,
-} from './constants.js';
+} from "./constants.js";
 import type {
   LspConnectionResult,
   LspServerConfig,
   LspServerHandle,
   LspServerStatus,
   LspSocketOptions,
-} from './types.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "./types.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('LSP');
+const debugLogger = createDebugLogger("LSP");
 
 export interface LspServerManagerOptions {
   requireTrustedWorkspace: boolean;
@@ -57,7 +57,7 @@ export class LspServerManager {
     for (const config of configs) {
       this.serverHandles.set(config.name, {
         config,
-        status: 'NOT_STARTED',
+        status: "NOT_STARTED",
       });
     }
   }
@@ -115,18 +115,18 @@ export class LspServerManager {
     }
 
     const uri = pathToFileURL(tsFile).toString();
-    const languageId = tsFile.endsWith('.tsx')
-      ? 'typescriptreact'
-      : tsFile.endsWith('.jsx')
-        ? 'javascriptreact'
-        : tsFile.endsWith('.js')
-          ? 'javascript'
-          : 'typescript';
+    const languageId = tsFile.endsWith(".tsx")
+      ? "typescriptreact"
+      : tsFile.endsWith(".jsx")
+        ? "javascriptreact"
+        : tsFile.endsWith(".js")
+          ? "javascript"
+          : "typescript";
     try {
-      const text = fs.readFileSync(tsFile, 'utf-8');
+      const text = fs.readFileSync(tsFile, "utf-8");
       handle.connection.send({
-        jsonrpc: '2.0',
-        method: 'textDocument/didOpen',
+        jsonrpc: "2.0",
+        method: "textDocument/didOpen",
         params: {
           textDocument: {
             uri,
@@ -145,7 +145,7 @@ export class LspServerManager {
       return uri;
     } catch (error) {
       // Do not set warmedUp to true on failure, allowing retry
-      debugLogger.warn('TypeScript server warm-up failed:', error);
+      debugLogger.warn("TypeScript server warm-up failed:", error);
       return undefined;
     }
   }
@@ -158,8 +158,8 @@ export class LspServerManager {
    */
   isTypescriptServer(handle: LspServerHandle): boolean {
     return (
-      handle.config.name.includes('typescript') ||
-      (handle.config.command?.includes('typescript') ?? false)
+      handle.config.name.includes("typescript") ||
+      (handle.config.command?.includes("typescript") ?? false)
     );
   }
 
@@ -178,7 +178,7 @@ export class LspServerManager {
       return handle.startingPromise;
     }
 
-    if (handle.status === 'IN_PROGRESS' || handle.status === 'READY') {
+    if (handle.status === "IN_PROGRESS" || handle.status === "READY") {
       return;
     }
     handle.stopRequested = false;
@@ -209,7 +209,7 @@ export class LspServerManager {
       debugLogger.warn(
         `LSP server ${name} requires trusted workspace, skipping startup`,
       );
-      handle.status = 'FAILED';
+      handle.status = "FAILED";
       return;
     }
 
@@ -221,7 +221,7 @@ export class LspServerManager {
     );
     if (!consent) {
       debugLogger.info(`User declined to start LSP server ${name}`);
-      handle.status = 'FAILED';
+      handle.status = "FAILED";
       return;
     }
 
@@ -238,7 +238,7 @@ export class LspServerManager {
         debugLogger.warn(
           `LSP server ${name} command not found: ${handle.config.command}`,
         );
-        handle.status = 'FAILED';
+        handle.status = "FAILED";
         return;
       }
 
@@ -249,7 +249,7 @@ export class LspServerManager {
         debugLogger.warn(
           `LSP server ${name} command path is unsafe: ${handle.config.command}`,
         );
-        handle.status = 'FAILED';
+        handle.status = "FAILED";
         return;
       }
     }
@@ -257,7 +257,7 @@ export class LspServerManager {
     try {
       handle.error = undefined;
       handle.warmedUp = false;
-      handle.status = 'IN_PROGRESS';
+      handle.status = "IN_PROGRESS";
 
       // Create LSP connection
       const connection = await this.createLspConnection(handle.config);
@@ -267,11 +267,11 @@ export class LspServerManager {
       // Initialize LSP server
       await this.initializeLspServer(connection, handle.config);
 
-      handle.status = 'READY';
+      handle.status = "READY";
       this.attachRestartHandler(name, handle);
       debugLogger.info(`LSP server ${name} started successfully`);
     } catch (error) {
-      handle.status = 'FAILED';
+      handle.status = "FAILED";
       handle.error = error as Error;
       debugLogger.error(`LSP server ${name} failed to start:`, error);
     }
@@ -297,7 +297,7 @@ export class LspServerManager {
     }
     handle.connection = undefined;
     handle.process = undefined;
-    handle.status = 'NOT_STARTED';
+    handle.status = "NOT_STARTED";
     handle.warmedUp = false;
     handle.restartAttempts = 0;
   }
@@ -308,7 +308,7 @@ export class LspServerManager {
     }
     try {
       const shutdownPromise = handle.connection.shutdown();
-      if (typeof handle.config.shutdownTimeout === 'number') {
+      if (typeof handle.config.shutdownTimeout === "number") {
         await Promise.race([
           shutdownPromise,
           new Promise<void>((resolve) =>
@@ -327,17 +327,17 @@ export class LspServerManager {
     if (!handle.process) {
       return;
     }
-    handle.process.once('exit', (code) => {
+    handle.process.once("exit", (code) => {
       if (handle.stopRequested) {
         return;
       }
       if (!handle.config.restartOnCrash) {
-        handle.status = 'FAILED';
+        handle.status = "FAILED";
         return;
       }
       const maxRestarts = handle.config.maxRestarts ?? DEFAULT_LSP_MAX_RESTARTS;
       if (maxRestarts <= 0) {
-        handle.status = 'FAILED';
+        handle.status = "FAILED";
         return;
       }
       const attempts = handle.restartAttempts ?? 0;
@@ -345,12 +345,12 @@ export class LspServerManager {
         debugLogger.warn(
           `LSP server ${name} reached max restart attempts (${maxRestarts}), stopping restarts`,
         );
-        handle.status = 'FAILED';
+        handle.status = "FAILED";
         return;
       }
       handle.restartAttempts = attempts + 1;
       debugLogger.warn(
-        `LSP server ${name} exited (code ${code ?? 'unknown'}), restarting (${handle.restartAttempts}/${maxRestarts})`,
+        `LSP server ${name} exited (code ${code ?? "unknown"}), restarting (${handle.restartAttempts}/${maxRestarts})`,
       );
       this.resetHandle(handle);
       void this.startServer(name, handle);
@@ -366,7 +366,7 @@ export class LspServerManager {
     }
     handle.connection = undefined;
     handle.process = undefined;
-    handle.status = 'NOT_STARTED';
+    handle.status = "NOT_STARTED";
     handle.error = undefined;
     handle.warmedUp = false;
     handle.stopRequested = false;
@@ -392,7 +392,7 @@ export class LspServerManager {
     while (true) {
       const remaining = deadline - Date.now();
       if (remaining <= 0) {
-        throw new Error('LSP server connection timeout');
+        throw new Error("LSP server connection timeout");
       }
       try {
         return await LspConnectionFactory.createSocketConnection(
@@ -424,9 +424,9 @@ export class LspServerManager {
       config.startupTimeout ?? DEFAULT_LSP_STARTUP_TIMEOUT_MS;
     const env = this.buildProcessEnv(config.env);
 
-    if (config.transport === 'stdio') {
+    if (config.transport === "stdio") {
       if (!config.command) {
-        throw new Error('LSP stdio transport requires a command');
+        throw new Error("LSP stdio transport requires a command");
       }
 
       // Fix: use cwd as cwd instead of rootUri
@@ -452,9 +452,9 @@ export class LspServerManager {
         initialize: async (params: unknown) =>
           lspConnection.connection.initialize(params),
       };
-    } else if (config.transport === 'tcp' || config.transport === 'socket') {
+    } else if (config.transport === "tcp" || config.transport === "socket") {
       if (!config.socket) {
-        throw new Error('LSP socket transport requires host/port or path');
+        throw new Error("LSP socket transport requires host/port or path");
       }
 
       let process: ChildProcess | undefined;
@@ -462,11 +462,11 @@ export class LspServerManager {
         process = spawn(config.command, config.args ?? [], {
           cwd: workspaceFolder,
           env,
-          stdio: 'ignore',
+          stdio: "ignore",
         });
         await new Promise<void>((resolve, reject) => {
-          process?.once('spawn', () => resolve());
-          process?.once('error', (error) => {
+          process?.once("spawn", () => resolve());
+          process?.once("error", (error) => {
             reject(new Error(`Failed to spawn LSP server: ${error.message}`));
           });
         });
@@ -540,13 +540,13 @@ export class LspServerManager {
     // Send initialized notification and workspace folders change to help servers (e.g. tsserver)
     // create projects in the correct workspace.
     connection.connection.send({
-      jsonrpc: '2.0',
-      method: 'initialized',
+      jsonrpc: "2.0",
+      method: "initialized",
       params: {},
     });
     connection.connection.send({
-      jsonrpc: '2.0',
-      method: 'workspace/didChangeWorkspaceFolders',
+      jsonrpc: "2.0",
+      method: "workspace/didChangeWorkspaceFolders",
       params: {
         event: {
           added: [workspaceFolder],
@@ -557,8 +557,8 @@ export class LspServerManager {
 
     if (config.settings && Object.keys(config.settings).length > 0) {
       connection.connection.send({
-        jsonrpc: '2.0',
-        method: 'workspace/didChangeConfiguration',
+        jsonrpc: "2.0",
+        method: "workspace/didChangeConfiguration",
         params: {
           settings: config.settings,
         },
@@ -589,18 +589,18 @@ export class LspServerManager {
   ): Promise<boolean> {
     return new Promise((resolve) => {
       let settled = false;
-      const child = spawn(command, ['--version'], {
-        stdio: ['ignore', 'ignore', 'ignore'],
+      const child = spawn(command, ["--version"], {
+        stdio: ["ignore", "ignore", "ignore"],
         cwd: cwd ?? this.workspaceRoot,
         env: this.buildProcessEnv(env),
       });
 
-      child.on('error', () => {
+      child.on("error", () => {
         settled = true;
         resolve(false);
       });
 
-      child.on('exit', (code) => {
+      child.on("exit", (code) => {
         if (settled) {
           return;
         }
@@ -632,7 +632,7 @@ export class LspServerManager {
   ): boolean {
     // Allow commands without path separators (global PATH commands like 'typescript-language-server')
     // These are resolved by the shell from PATH and are generally safe
-    if (!command.includes(path.sep) && !command.includes('/')) {
+    if (!command.includes(path.sep) && !command.includes("/")) {
       return true;
     }
 
@@ -678,12 +678,12 @@ export class LspServerManager {
    * Find a representative TypeScript/JavaScript file to warm up tsserver.
    */
   private findFirstTypescriptFile(): string | undefined {
-    const patterns = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'];
+    const patterns = ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"];
     const excludePatterns = [
-      '**/node_modules/**',
-      '**/.git/**',
-      '**/dist/**',
-      '**/build/**',
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/dist/**",
+      "**/build/**",
     ];
 
     for (const root of this.workspaceContext.getDirectories()) {

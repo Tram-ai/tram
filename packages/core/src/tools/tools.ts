@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FunctionDeclaration, Part, PartListUnion } from '@google/genai';
-import { ToolErrorType } from './tool-error.js';
-import type { ShellExecutionConfig } from '../services/shellExecutionService.js';
-import { SchemaValidator } from '../utils/schemaValidator.js';
-import { type AgentStatsSummary } from '../agents/runtime/agent-statistics.js';
-import type { AnsiOutput } from '../utils/terminalSerializer.js';
-import type { PermissionDecision } from '../permissions/types.js';
+import type { FunctionDeclaration, Part, PartListUnion } from "@google/genai";
+import { ToolErrorType } from "./tool-error.js";
+import type { ShellExecutionConfig } from "../services/shellExecutionService.js";
+import { SchemaValidator } from "../utils/schemaValidator.js";
+import { type AgentStatsSummary } from "../agents/runtime/agent-statistics.js";
+import type { AnsiOutput } from "../utils/terminalSerializer.js";
+import type { PermissionDecision } from "../permissions/types.js";
 
 /**
  * Represents a validated and ready-to-execute tool call.
@@ -97,7 +97,7 @@ export abstract class BaseToolInvocation<
    * tools with side effects.
    */
   getDefaultPermission(): Promise<PermissionDecision> {
-    return Promise.resolve('allow');
+    return Promise.resolve("allow");
   }
 
   /**
@@ -112,8 +112,8 @@ export abstract class BaseToolInvocation<
     _abortSignal: AbortSignal,
   ): Promise<ToolCallConfirmationDetails> {
     const details: ToolInfoConfirmationDetails = {
-      type: 'info',
-      title: `Confirm ${this.constructor.name.replace(/Invocation$/, '')}`,
+      type: "info",
+      title: `Confirm ${this.constructor.name.replace(/Invocation$/, "")}`,
       prompt: this.getDescription(),
       onConfirm: async (
         _outcome: ToolConfirmationOutcome,
@@ -365,11 +365,11 @@ export type AnyDeclarativeTool = DeclarativeTool<object, ToolResult>;
  */
 export function isTool(obj: unknown): obj is AnyDeclarativeTool {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    'name' in obj &&
-    'build' in obj &&
-    typeof (obj as AnyDeclarativeTool).build === 'function'
+    "name" in obj &&
+    "build" in obj &&
+    typeof (obj as AnyDeclarativeTool).build === "function"
   );
 }
 
@@ -412,14 +412,14 @@ export interface ToolResult {
  */
 export function hasCycleInSchema(schema: object): boolean {
   function resolveRef(ref: string): object | null {
-    if (!ref.startsWith('#/')) {
+    if (!ref.startsWith("#/")) {
       return null;
     }
-    const path = ref.substring(2).split('/');
+    const path = ref.substring(2).split("/");
     let current: unknown = schema;
     for (const segment of path) {
       if (
-        typeof current !== 'object' ||
+        typeof current !== "object" ||
         current === null ||
         !Object.prototype.hasOwnProperty.call(current, segment)
       ) {
@@ -435,7 +435,7 @@ export function hasCycleInSchema(schema: object): boolean {
     visitedRefs: Set<string>,
     pathRefs: Set<string>,
   ): boolean {
-    if (typeof node !== 'object' || node === null) {
+    if (typeof node !== "object" || node === null) {
       return false;
     }
 
@@ -448,9 +448,9 @@ export function hasCycleInSchema(schema: object): boolean {
       return false;
     }
 
-    if ('$ref' in node && typeof node.$ref === 'string') {
+    if ("$ref" in node && typeof node.$ref === "string") {
       const ref = node.$ref;
-      if (ref === '#/' || pathRefs.has(ref)) {
+      if (ref === "#/" || pathRefs.has(ref)) {
         // A ref to just '#/' is always a cycle.
         return true; // Cycle detected!
       }
@@ -491,12 +491,12 @@ export function hasCycleInSchema(schema: object): boolean {
 }
 
 export interface AgentResultDisplay {
-  type: 'task_execution';
+  type: "task_execution";
   subagentName: string;
   subagentColor?: string;
   taskDescription: string;
   taskPrompt: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "running" | "completed" | "failed" | "cancelled";
   terminateReason?: string;
   result?: string;
   executionSummary?: AgentStatsSummary;
@@ -508,7 +508,7 @@ export interface AgentResultDisplay {
   toolCalls?: Array<{
     callId: string;
     name: string;
-    status: 'executing' | 'awaiting_approval' | 'success' | 'failed';
+    status: "executing" | "awaiting_approval" | "success" | "failed";
     error?: string;
     args?: Record<string, unknown>;
     result?: string;
@@ -527,7 +527,7 @@ export interface AnsiOutputDisplay {
  * @see https://modelcontextprotocol.io/specification/2025-06-18/basic/utilities/progress
  */
 export interface McpToolProgressData {
-  type: 'mcp_tool_progress';
+  type: "mcp_tool_progress";
   /** Current progress value (must increase with each notification) */
   progress: number;
   /** Optional total value indicating the operation's target */
@@ -565,23 +565,23 @@ export interface DiffStat {
 }
 
 export interface TodoResultDisplay {
-  type: 'todo_list';
+  type: "todo_list";
   todos: Array<{
     id: string;
     content: string;
-    status: 'pending' | 'in_progress' | 'completed';
+    status: "pending" | "in_progress" | "completed";
   }>;
 }
 
 export interface PlanResultDisplay {
-  type: 'plan_summary';
+  type: "plan_summary";
   message: string;
   plan: string;
   rejected?: boolean;
 }
 
 export interface ToolEditConfirmationDetails {
-  type: 'edit';
+  type: "edit";
   title: string;
   onConfirm: (
     outcome: ToolConfirmationOutcome,
@@ -616,7 +616,7 @@ export interface ToolConfirmationPayload {
 }
 
 export interface ToolExecuteConfirmationDetails {
-  type: 'exec';
+  type: "exec";
   title: string;
   onConfirm: (
     outcome: ToolConfirmationOutcome,
@@ -631,7 +631,7 @@ export interface ToolExecuteConfirmationDetails {
 }
 
 export interface ToolMcpConfirmationDetails {
-  type: 'mcp';
+  type: "mcp";
   title: string;
   /** @see ToolEditConfirmationDetails.hideAlwaysAllow */
   hideAlwaysAllow?: boolean;
@@ -647,7 +647,7 @@ export interface ToolMcpConfirmationDetails {
 }
 
 export interface ToolInfoConfirmationDetails {
-  type: 'info';
+  type: "info";
   title: string;
   onConfirm: (
     outcome: ToolConfirmationOutcome,
@@ -670,7 +670,7 @@ export type ToolCallConfirmationDetails =
   | ToolAskUserQuestionConfirmationDetails;
 
 export interface ToolPlanConfirmationDetails {
-  type: 'plan';
+  type: "plan";
   title: string;
   /** @see ToolEditConfirmationDetails.hideAlwaysAllow */
   hideAlwaysAllow?: boolean;
@@ -684,7 +684,7 @@ export interface ToolPlanConfirmationDetails {
 }
 
 export interface ToolAskUserQuestionConfirmationDetails {
-  type: 'ask_user_question';
+  type: "ask_user_question";
   title: string;
   questions: Array<{
     question: string;
@@ -710,32 +710,32 @@ export interface ToolAskUserQuestionConfirmationDetails {
  * 2. support proceed with modified input
  */
 export enum ToolConfirmationOutcome {
-  ProceedOnce = 'proceed_once',
-  ProceedAlways = 'proceed_always',
+  ProceedOnce = "proceed_once",
+  ProceedAlways = "proceed_always",
   /** @deprecated Use ProceedAlwaysProject or ProceedAlwaysUser instead. */
-  ProceedAlwaysServer = 'proceed_always_server',
+  ProceedAlwaysServer = "proceed_always_server",
   /** @deprecated Use ProceedAlwaysProject or ProceedAlwaysUser instead. */
-  ProceedAlwaysTool = 'proceed_always_tool',
+  ProceedAlwaysTool = "proceed_always_tool",
   /** Persist the permission rule to the project settings (workspace scope). */
-  ProceedAlwaysProject = 'proceed_always_project',
+  ProceedAlwaysProject = "proceed_always_project",
   /** Persist the permission rule to the user settings (user scope). */
-  ProceedAlwaysUser = 'proceed_always_user',
-  ModifyWithEditor = 'modify_with_editor',
+  ProceedAlwaysUser = "proceed_always_user",
+  ModifyWithEditor = "modify_with_editor",
   /** Restore the approval mode that was active before entering plan mode. */
-  RestorePrevious = 'restore_previous',
-  Cancel = 'cancel',
+  RestorePrevious = "restore_previous",
+  Cancel = "cancel",
 }
 
 export enum Kind {
-  Read = 'read',
-  Edit = 'edit',
-  Delete = 'delete',
-  Move = 'move',
-  Search = 'search',
-  Execute = 'execute',
-  Think = 'think',
-  Fetch = 'fetch',
-  Other = 'other',
+  Read = "read",
+  Edit = "edit",
+  Delete = "delete",
+  Move = "move",
+  Search = "search",
+  Execute = "execute",
+  Think = "think",
+  Fetch = "fetch",
+  Other = "other",
 }
 
 // Function kinds that have side effects

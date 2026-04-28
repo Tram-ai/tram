@@ -4,44 +4,44 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
-import * as path from 'node:path';
-import mock from 'mock-fs';
-import { FileCommandLoader } from './FileCommandLoader.js';
-import type { Config } from '@tram-ai/tram-core';
-import { Storage } from '@tram-ai/tram-core';
+import { describe, it, expect, afterEach, vi } from "vitest";
+import * as path from "node:path";
+import mock from "mock-fs";
+import { FileCommandLoader } from "./FileCommandLoader.js";
+import type { Config } from "@tram-ai/tram-core";
+import { Storage } from "@tram-ai/tram-core";
 
-describe('FileCommandLoader - Extension Commands Support', () => {
-  const projectRoot = '/test/project';
+describe("FileCommandLoader - Extension Commands Support", () => {
+  const projectRoot = "/test/project";
   const userCommandsDir = Storage.getUserCommandsDir();
-  const projectCommandsDir = path.join(projectRoot, '.tram', 'commands');
+  const projectCommandsDir = path.join(projectRoot, ".tram", "commands");
 
   afterEach(() => {
     mock.restore();
   });
 
-  it('should load commands from extension with config.commands path', async () => {
+  it("should load commands from extension with config.commands path", async () => {
     const extensionDir = path.join(
       projectRoot,
-      '.tram',
-      'extensions',
-      'test-ext',
+      ".tram",
+      "extensions",
+      "test-ext",
     );
 
     const extensionConfig = {
-      name: 'test-ext',
-      version: '1.0.0',
-      commands: 'custom-cmds',
+      name: "test-ext",
+      version: "1.0.0",
+      commands: "custom-cmds",
     };
 
     mock({
       [userCommandsDir]: {},
       [projectCommandsDir]: {},
       [extensionDir]: {
-        'tram-extension.json': JSON.stringify(extensionConfig),
-        'custom-cmds': {
-          'test.md':
-            '---\ndescription: Test command from extension\n---\nDo something',
+        "tram-extension.json": JSON.stringify(extensionConfig),
+        "custom-cmds": {
+          "test.md":
+            "---\ndescription: Test command from extension\n---\nDo something",
         },
       },
     });
@@ -53,10 +53,10 @@ describe('FileCommandLoader - Extension Commands Support', () => {
       storage: new Storage(projectRoot),
       getExtensions: vi.fn(() => [
         {
-          id: 'test-ext',
+          id: "test-ext",
           config: extensionConfig,
-          name: 'test-ext',
-          version: '1.0.0',
+          name: "test-ext",
+          version: "1.0.0",
           isActive: true,
           path: extensionDir,
           contextFiles: [],
@@ -68,37 +68,37 @@ describe('FileCommandLoader - Extension Commands Support', () => {
     const commands = await loader.loadCommands(new AbortController().signal);
 
     expect(commands).toHaveLength(1);
-    expect(commands[0].name).toBe('test');
-    expect(commands[0].extensionName).toBe('test-ext');
+    expect(commands[0].name).toBe("test");
+    expect(commands[0].extensionName).toBe("test-ext");
     expect(commands[0].description).toBe(
-      '[test-ext] Test command from extension',
+      "[test-ext] Test command from extension",
     );
   });
 
-  it('should load commands from extension with multiple commands paths', async () => {
+  it("should load commands from extension with multiple commands paths", async () => {
     const extensionDir = path.join(
       projectRoot,
-      '.tram',
-      'extensions',
-      'multi-ext',
+      ".tram",
+      "extensions",
+      "multi-ext",
     );
 
     const extensionConfig = {
-      name: 'multi-ext',
-      version: '1.0.0',
-      commands: ['commands1', 'commands2'],
+      name: "multi-ext",
+      version: "1.0.0",
+      commands: ["commands1", "commands2"],
     };
 
     mock({
       [userCommandsDir]: {},
       [projectCommandsDir]: {},
       [extensionDir]: {
-        'tram-extension.json': JSON.stringify(extensionConfig),
+        "tram-extension.json": JSON.stringify(extensionConfig),
         commands1: {
-          'cmd1.md': '---\n---\nCommand 1',
+          "cmd1.md": "---\n---\nCommand 1",
         },
         commands2: {
-          'cmd2.md': '---\n---\nCommand 2',
+          "cmd2.md": "---\n---\nCommand 2",
         },
       },
     });
@@ -110,11 +110,11 @@ describe('FileCommandLoader - Extension Commands Support', () => {
       storage: new Storage(projectRoot),
       getExtensions: vi.fn(() => [
         {
-          id: 'multi-ext',
+          id: "multi-ext",
           config: extensionConfig,
           contextFiles: [],
-          name: 'multi-ext',
-          version: '1.0.0',
+          name: "multi-ext",
+          version: "1.0.0",
           isActive: true,
           path: extensionDir,
         },
@@ -126,30 +126,30 @@ describe('FileCommandLoader - Extension Commands Support', () => {
 
     expect(commands).toHaveLength(2);
     const commandNames = commands.map((c) => c.name).sort();
-    expect(commandNames).toEqual(['cmd1', 'cmd2']);
-    expect(commands.every((c) => c.extensionName === 'multi-ext')).toBe(true);
+    expect(commandNames).toEqual(["cmd1", "cmd2"]);
+    expect(commands.every((c) => c.extensionName === "multi-ext")).toBe(true);
   });
 
   it('should fallback to default "commands" directory when config.commands not specified', async () => {
     const extensionDir = path.join(
       projectRoot,
-      '.tram',
-      'extensions',
-      'default-ext',
+      ".tram",
+      "extensions",
+      "default-ext",
     );
 
     const extensionConfig = {
-      name: 'default-ext',
-      version: '1.0.0',
+      name: "default-ext",
+      version: "1.0.0",
     };
 
     mock({
       [userCommandsDir]: {},
       [projectCommandsDir]: {},
       [extensionDir]: {
-        'tram-extension.json': JSON.stringify(extensionConfig),
+        "tram-extension.json": JSON.stringify(extensionConfig),
         commands: {
-          'default.md': '---\n---\nDefault command',
+          "default.md": "---\n---\nDefault command",
         },
       },
     });
@@ -161,11 +161,11 @@ describe('FileCommandLoader - Extension Commands Support', () => {
       storage: new Storage(projectRoot),
       getExtensions: vi.fn(() => [
         {
-          id: 'default-ext',
+          id: "default-ext",
           config: extensionConfig,
           contextFiles: [],
-          name: 'default-ext',
-          version: '1.0.0',
+          name: "default-ext",
+          version: "1.0.0",
           isActive: true,
           path: extensionDir,
         },
@@ -176,28 +176,28 @@ describe('FileCommandLoader - Extension Commands Support', () => {
     const commands = await loader.loadCommands(new AbortController().signal);
 
     expect(commands).toHaveLength(1);
-    expect(commands[0].name).toBe('default');
-    expect(commands[0].extensionName).toBe('default-ext');
+    expect(commands[0].name).toBe("default");
+    expect(commands[0].extensionName).toBe("default-ext");
   });
 
-  it('should handle extension without commands directory gracefully', async () => {
+  it("should handle extension without commands directory gracefully", async () => {
     const extensionDir = path.join(
       projectRoot,
-      '.tram',
-      'extensions',
-      'no-cmds-ext',
+      ".tram",
+      "extensions",
+      "no-cmds-ext",
     );
 
     const extensionConfig = {
-      name: 'no-cmds-ext',
-      version: '1.0.0',
+      name: "no-cmds-ext",
+      version: "1.0.0",
     };
 
     mock({
       [userCommandsDir]: {},
       [projectCommandsDir]: {},
       [extensionDir]: {
-        'tram-extension.json': JSON.stringify(extensionConfig),
+        "tram-extension.json": JSON.stringify(extensionConfig),
         // No commands directory
       },
     });
@@ -209,11 +209,11 @@ describe('FileCommandLoader - Extension Commands Support', () => {
       storage: new Storage(projectRoot),
       getExtensions: vi.fn(() => [
         {
-          id: 'no-cmds-ext',
+          id: "no-cmds-ext",
           config: extensionConfig,
           contextFiles: [],
-          name: 'no-cmds-ext',
-          version: '1.0.0',
+          name: "no-cmds-ext",
+          version: "1.0.0",
           isActive: true,
           path: extensionDir,
         },
@@ -227,26 +227,26 @@ describe('FileCommandLoader - Extension Commands Support', () => {
     expect(commands).toHaveLength(0);
   });
 
-  it('should set extensionName property for extension commands', async () => {
+  it("should set extensionName property for extension commands", async () => {
     const extensionDir = path.join(
       projectRoot,
-      '.tram',
-      'extensions',
-      'prefix-ext',
+      ".tram",
+      "extensions",
+      "prefix-ext",
     );
 
     const extensionConfig = {
-      name: 'prefix-ext',
-      version: '1.0.0',
+      name: "prefix-ext",
+      version: "1.0.0",
     };
 
     mock({
       [userCommandsDir]: {},
       [projectCommandsDir]: {},
       [extensionDir]: {
-        'tram-extension.json': JSON.stringify(extensionConfig),
+        "tram-extension.json": JSON.stringify(extensionConfig),
         commands: {
-          'mycommand.md': '---\n---\nMy command',
+          "mycommand.md": "---\n---\nMy command",
         },
       },
     });
@@ -258,11 +258,11 @@ describe('FileCommandLoader - Extension Commands Support', () => {
       storage: new Storage(projectRoot),
       getExtensions: vi.fn(() => [
         {
-          id: 'prefix-ext',
+          id: "prefix-ext",
           config: extensionConfig,
           contextFiles: [],
-          name: 'prefix-ext',
-          version: '1.0.0',
+          name: "prefix-ext",
+          version: "1.0.0",
           isActive: true,
           path: extensionDir,
         },
@@ -273,34 +273,34 @@ describe('FileCommandLoader - Extension Commands Support', () => {
     const commands = await loader.loadCommands(new AbortController().signal);
 
     expect(commands).toHaveLength(1);
-    expect(commands[0].name).toBe('mycommand');
-    expect(commands[0].extensionName).toBe('prefix-ext');
+    expect(commands[0].name).toBe("mycommand");
+    expect(commands[0].extensionName).toBe("prefix-ext");
     expect(commands[0].description).toMatch(/^\[prefix-ext\]/);
   });
 
-  it('should load commands from multiple extensions in alphabetical order', async () => {
-    const ext1Dir = path.join(projectRoot, '.tram', 'extensions', 'ext-b');
-    const ext2Dir = path.join(projectRoot, '.tram', 'extensions', 'ext-a');
+  it("should load commands from multiple extensions in alphabetical order", async () => {
+    const ext1Dir = path.join(projectRoot, ".tram", "extensions", "ext-b");
+    const ext2Dir = path.join(projectRoot, ".tram", "extensions", "ext-a");
 
     mock({
       [userCommandsDir]: {},
       [projectCommandsDir]: {},
       [ext1Dir]: {
-        'tram-extension.json': JSON.stringify({
-          name: 'ext-b',
-          version: '1.0.0',
+        "tram-extension.json": JSON.stringify({
+          name: "ext-b",
+          version: "1.0.0",
         }),
         commands: {
-          'cmd.md': '---\n---\nCommand B',
+          "cmd.md": "---\n---\nCommand B",
         },
       },
       [ext2Dir]: {
-        'tram-extension.json': JSON.stringify({
-          name: 'ext-a',
-          version: '1.0.0',
+        "tram-extension.json": JSON.stringify({
+          name: "ext-a",
+          version: "1.0.0",
         }),
         commands: {
-          'cmd.md': '---\n---\nCommand A',
+          "cmd.md": "---\n---\nCommand A",
         },
       },
     });
@@ -312,20 +312,20 @@ describe('FileCommandLoader - Extension Commands Support', () => {
       storage: new Storage(projectRoot),
       getExtensions: vi.fn(() => [
         {
-          id: 'ext-b',
-          config: { name: 'ext-b', version: '1.0.0' },
+          id: "ext-b",
+          config: { name: "ext-b", version: "1.0.0" },
           contextFiles: [],
-          name: 'ext-b',
-          version: '1.0.0',
+          name: "ext-b",
+          version: "1.0.0",
           isActive: true,
           path: ext1Dir,
         },
         {
-          id: 'ext-a',
-          config: { name: 'ext-a', version: '1.0.0' },
+          id: "ext-a",
+          config: { name: "ext-a", version: "1.0.0" },
           contextFiles: [],
-          name: 'ext-a',
-          version: '1.0.0',
+          name: "ext-a",
+          version: "1.0.0",
           isActive: true,
           path: ext2Dir,
         },
@@ -337,7 +337,7 @@ describe('FileCommandLoader - Extension Commands Support', () => {
 
     expect(commands).toHaveLength(2);
     // Extensions are sorted alphabetically, so ext-a comes before ext-b
-    expect(commands[0].extensionName).toBe('ext-a');
-    expect(commands[1].extensionName).toBe('ext-b');
+    expect(commands[0].extensionName).toBe("ext-a");
+    expect(commands[1].extensionName).toBe("ext-b");
   });
 });

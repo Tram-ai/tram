@@ -4,51 +4,51 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import * as Diff from 'diff';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as Diff from "diff";
 import type {
   ToolCallConfirmationDetails,
   ToolEditConfirmationDetails,
   ToolInvocation,
   ToolLocation,
   ToolResult,
-} from './tools.js';
-import type { PermissionDecision } from '../permissions/types.js';
-import { BaseDeclarativeTool, Kind, ToolConfirmationOutcome } from './tools.js';
-import { ToolErrorType } from './tool-error.js';
-import { makeRelative, shortenPath } from '../utils/paths.js';
-import { isNodeError } from '../utils/errors.js';
-import type { Config } from '../config/config.js';
-import { ApprovalMode } from '../config/config.js';
+} from "./tools.js";
+import type { PermissionDecision } from "../permissions/types.js";
+import { BaseDeclarativeTool, Kind, ToolConfirmationOutcome } from "./tools.js";
+import { ToolErrorType } from "./tool-error.js";
+import { makeRelative, shortenPath } from "../utils/paths.js";
+import { isNodeError } from "../utils/errors.js";
+import type { Config } from "../config/config.js";
+import { ApprovalMode } from "../config/config.js";
 import {
   FileEncoding,
   needsUtf8Bom,
   detectLineEnding,
-} from '../services/fileSystemService.js';
-import type { LineEnding } from '../services/fileSystemService.js';
-import { DEFAULT_DIFF_OPTIONS, getDiffStat } from './diffOptions.js';
-import { ReadFileTool } from './read-file.js';
-import { ToolNames, ToolDisplayNames } from './tool-names.js';
-import { logFileOperation } from '../telemetry/loggers.js';
-import { FileOperationEvent } from '../telemetry/types.js';
-import { FileOperation } from '../telemetry/metrics.js';
+} from "../services/fileSystemService.js";
+import type { LineEnding } from "../services/fileSystemService.js";
+import { DEFAULT_DIFF_OPTIONS, getDiffStat } from "./diffOptions.js";
+import { ReadFileTool } from "./read-file.js";
+import { ToolNames, ToolDisplayNames } from "./tool-names.js";
+import { logFileOperation } from "../telemetry/loggers.js";
+import { FileOperationEvent } from "../telemetry/types.js";
+import { FileOperation } from "../telemetry/metrics.js";
 import {
   getSpecificMimeType,
   fileExists as isFilefileExists,
-} from '../utils/fileUtils.js';
-import { getLanguageFromFilePath } from '../utils/language-detection.js';
+} from "../utils/fileUtils.js";
+import { getLanguageFromFilePath } from "../utils/language-detection.js";
 import type {
   ModifiableDeclarativeTool,
   ModifyContext,
-} from './modifiable-tool.js';
-import { safeLiteralReplace } from '../utils/textUtils.js';
+} from "./modifiable-tool.js";
+import { safeLiteralReplace } from "../utils/textUtils.js";
 import {
   countOccurrences,
   extractEditSnippet,
   maybeAugmentOldStringForDeletion,
   normalizeEditStrings,
-} from '../utils/editHelper.js';
+} from "../utils/editHelper.js";
 
 export function applyReplacement(
   currentContent: string | null,
@@ -61,10 +61,10 @@ export function applyReplacement(
   }
   if (currentContent === null) {
     // Should not happen if not a new file, but defensively return empty or newString if oldString is also empty
-    return oldString === '' ? newString : '';
+    return oldString === "" ? newString : "";
   }
   // If oldString is empty and it's not a new file, do not modify the content.
-  if (oldString === '' && !isNewFile) {
+  if (oldString === "" && !isNewFile) {
     return currentContent;
   }
 
@@ -149,8 +149,8 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
       | { display: string; raw: string; type: ToolErrorType }
       | undefined = undefined;
     let useBOM = false;
-    let detectedEncoding = 'utf-8';
-    let detectedLineEnding: LineEnding = 'lf';
+    let detectedEncoding = "utf-8";
+    let detectedLineEnding: LineEnding = "lf";
     if (fileExists) {
       try {
         const fileInfo = await this.config
@@ -163,15 +163,15 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
             fileInfo.content.length > 0 &&
             fileInfo.content.codePointAt(0) === 0xfeff;
         }
-        detectedEncoding = fileInfo._meta?.encoding || 'utf-8';
+        detectedEncoding = fileInfo._meta?.encoding || "utf-8";
         // Detect original line ending style before normalizing
         detectedLineEnding = detectLineEnding(fileInfo.content);
         // Normalize line endings to LF for consistent processing.
-        currentContent = fileInfo.content.replace(/\r\n/g, '\n');
+        currentContent = fileInfo.content.replace(/\r\n/g, "\n");
         fileExists = true;
         // Encoding and BOM are returned from the same I/O pass, avoiding redundant reads.
       } catch (err: unknown) {
-        if (!isNodeError(err) || err.code !== 'ENOENT') {
+        if (!isNodeError(err) || err.code !== "ENOENT") {
           // Rethrow unexpected FS errors (permissions, etc.)
           throw err;
         }
@@ -187,7 +187,7 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
     finalOldString = normalizedStrings.oldString;
     finalNewString = normalizedStrings.newString;
 
-    if (finalOldString === '' && !fileExists) {
+    if (finalOldString === "" && !fileExists) {
       // Creating a new file
       isNewFile = true;
     } else if (!fileExists) {
@@ -205,7 +205,7 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
       );
 
       occurrences = countOccurrences(currentContent, finalOldString);
-      if (params.old_string === '') {
+      if (params.old_string === "") {
         // Error: Trying to create a file that already exists
         error = {
           display: `Failed to edit. Attempted to create a file that already exists.`,
@@ -247,12 +247,12 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
           finalNewString,
           isNewFile,
         )
-      : (currentContent ?? '');
+      : (currentContent ?? "");
 
     if (!error && fileExists && currentContent === newContent) {
       error = {
         display:
-          'No changes to apply. The new content is identical to the current content.',
+          "No changes to apply. The new content is identical to the current content.",
         raw: `No changes to apply. The new content is identical to the current content in file: ${params.file_path}`,
         type: ToolErrorType.EDIT_NO_CHANGE,
       };
@@ -274,7 +274,7 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
    * Edit operations always need user confirmation (unless overridden by PM or ApprovalMode).
    */
   async getDefaultPermission(): Promise<PermissionDecision> {
-    return 'ask';
+    return "ask";
   }
 
   /**
@@ -301,14 +301,14 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
     const fileName = path.basename(this.params.file_path);
     const fileDiff = Diff.createPatch(
       fileName,
-      editData.currentContent ?? '',
+      editData.currentContent ?? "",
       editData.newContent,
-      'Current',
-      'Proposed',
+      "Current",
+      "Proposed",
       DEFAULT_DIFF_OPTIONS,
     );
     const confirmationDetails: ToolEditConfirmationDetails = {
-      type: 'edit',
+      type: "edit",
       title: `Confirm Edit: ${shortenPath(makeRelative(this.params.file_path, this.config.getTargetDir()))}`,
       fileName,
       filePath: this.params.file_path,
@@ -329,16 +329,16 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
       this.params.file_path,
       this.config.getTargetDir(),
     );
-    if (this.params.old_string === '') {
+    if (this.params.old_string === "") {
       return `Create ${shortenPath(relativePath)}`;
     }
 
     const oldStringSnippet =
-      this.params.old_string.split('\n')[0].substring(0, 30) +
-      (this.params.old_string.length > 30 ? '...' : '');
+      this.params.old_string.split("\n")[0].substring(0, 30) +
+      (this.params.old_string.length > 30 ? "..." : "");
     const newStringSnippet =
-      this.params.new_string.split('\n')[0].substring(0, 30) +
-      (this.params.new_string.length > 30 ? '...' : '');
+      this.params.new_string.split("\n")[0].substring(0, 30) +
+      (this.params.new_string.length > 30 ? "..." : "");
 
     if (this.params.old_string === this.params.new_string) {
       return `No file changes to ${shortenPath(relativePath)}`;
@@ -419,17 +419,17 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
         this.params.ai_proposed_content || editData.newContent;
       const diffStat = getDiffStat(
         fileName,
-        editData.currentContent ?? '',
+        editData.currentContent ?? "",
         originallyProposedContent,
         editData.newContent,
       );
 
       const fileDiff = Diff.createPatch(
         fileName,
-        editData.currentContent ?? '', // Should not be null here if not isNewFile
+        editData.currentContent ?? "", // Should not be null here if not isNewFile
         editData.newContent,
-        'Current',
-        'Proposed',
+        "Current",
+        "Proposed",
         DEFAULT_DIFF_OPTIONS,
       );
       const displayResult = {
@@ -455,7 +455,7 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
         new FileOperationEvent(
           EditTool.Name,
           operation,
-          editData.newContent.split('\n').length,
+          editData.newContent.split("\n").length,
           mimetype,
           extension,
           programmingLanguage,
@@ -478,7 +478,7 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
       }
 
       return {
-        llmContent: llmSuccessMessageParts.join(' '),
+        llmContent: llmSuccessMessageParts.join(" "),
         returnDisplay: displayResult,
       };
     } catch (error) {
@@ -534,26 +534,26 @@ Expectation for required parameters:
           file_path: {
             description:
               "The absolute path to the file to modify. Must start with '/'.",
-            type: 'string',
+            type: "string",
           },
           old_string: {
             description:
-              'The exact literal text to replace, preferably unescaped. For single replacements (default), include at least 3 lines of context BEFORE and AFTER the target text, matching whitespace and indentation precisely. If this string is not the exact literal text (i.e. you escaped it) or does not match exactly, the tool will fail.',
-            type: 'string',
+              "The exact literal text to replace, preferably unescaped. For single replacements (default), include at least 3 lines of context BEFORE and AFTER the target text, matching whitespace and indentation precisely. If this string is not the exact literal text (i.e. you escaped it) or does not match exactly, the tool will fail.",
+            type: "string",
           },
           new_string: {
             description:
-              'The exact literal text to replace `old_string` with, preferably unescaped. Provide the EXACT text. Ensure the resulting code is correct and idiomatic.',
-            type: 'string',
+              "The exact literal text to replace `old_string` with, preferably unescaped. Provide the EXACT text. Ensure the resulting code is correct and idiomatic.",
+            type: "string",
           },
           replace_all: {
-            type: 'boolean',
+            type: "boolean",
             description:
-              'Replace all occurrences of old_string (default false).',
+              "Replace all occurrences of old_string (default false).",
           },
         },
-        required: ['file_path', 'old_string', 'new_string'],
-        type: 'object',
+        required: ["file_path", "old_string", "new_string"],
+        type: "object",
       },
     );
   }
@@ -595,11 +595,11 @@ Expectation for required parameters:
               .readTextFile({ path: params.file_path });
             return content;
           } catch (err) {
-            if (!isNodeError(err) || err.code !== 'ENOENT') throw err;
-            return '';
+            if (!isNodeError(err) || err.code !== "ENOENT") throw err;
+            return "";
           }
         } else {
-          return '';
+          return "";
         }
       },
       getProposedContent: async (params: EditToolParams): Promise<string> => {
@@ -612,14 +612,14 @@ Expectation for required parameters:
               currentContent,
               params.old_string,
               params.new_string,
-              params.old_string === '' && currentContent === '',
+              params.old_string === "" && currentContent === "",
             );
           } catch (err) {
-            if (!isNodeError(err) || err.code !== 'ENOENT') throw err;
-            return '';
+            if (!isNodeError(err) || err.code !== "ENOENT") throw err;
+            return "";
           }
         } else {
-          return '';
+          return "";
         }
       },
       createUpdatedParams: (

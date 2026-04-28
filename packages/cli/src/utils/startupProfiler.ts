@@ -3,7 +3,7 @@
  *
  * Activated by setting QWEN_CODE_PROFILE_STARTUP=1. When enabled, collects
  * high-resolution timestamps at key phases of CLI startup and writes a JSON
- * report to ~/.qwen/startup-perf/ on finalization.
+ * report to ~/.tram/startup-perf/ on finalization.
  *
  * Usage (already wired in index.ts / gemini.tsx):
  *   initStartupProfiler()        — call once at process start to record T0
@@ -13,10 +13,10 @@
  * Only profiles inside the sandbox child process to avoid duplicate reports.
  * Zero overhead when disabled (single env var check).
  */
-import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
-import { performance } from 'node:perf_hooks';
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import { performance } from "node:perf_hooks";
 
 interface Checkpoint {
   name: string;
@@ -51,12 +51,12 @@ export function initStartupProfiler(): void {
   // Reset any prior state so the function is idempotent.
   resetStartupProfiler();
 
-  if (process.env['QWEN_CODE_PROFILE_STARTUP'] !== '1') {
+  if (process.env["QWEN_CODE_PROFILE_STARTUP"] !== "1") {
     return;
   }
   // Skip profiling in the outer (pre-sandbox) process — the child will
   // re-run index.ts inside the sandbox and collect its own profile.
-  if (!process.env['SANDBOX']) {
+  if (!process.env["SANDBOX"]) {
     return;
   }
   enabled = true;
@@ -92,7 +92,7 @@ export function getStartupReport(): StartupReport | null {
 
   return {
     timestamp: new Date().toISOString(),
-    sessionId: 'unknown',
+    sessionId: "unknown",
     processUptimeAtT0Ms,
     totalMs: Math.round((lastTimestamp - t0) * 100) / 100,
     phases,
@@ -114,17 +114,15 @@ export function finalizeStartupProfile(sessionId?: string): void {
   }
 
   try {
-    const dir = path.join(os.homedir(), '.qwen', 'startup-perf');
+    const dir = path.join(os.homedir(), ".tram", "startup-perf");
     fs.mkdirSync(dir, { recursive: true });
 
-    const filename = `${report.timestamp.replace(/[:.]/g, '-')}-${report.sessionId}.json`;
+    const filename = `${report.timestamp.replace(/[:.]/g, "-")}-${report.sessionId}.json`;
     const filepath = path.join(dir, filename);
-    fs.writeFileSync(filepath, JSON.stringify(report, null, 2), 'utf-8');
+    fs.writeFileSync(filepath, JSON.stringify(report, null, 2), "utf-8");
     process.stderr.write(`Startup profile written to: ${filepath}\n`);
   } catch {
-    process.stderr.write(
-      'Warning: Failed to write startup profile report\n',
-    );
+    process.stderr.write("Warning: Failed to write startup profile report\n");
   }
 }
 

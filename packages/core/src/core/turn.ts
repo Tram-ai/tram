@@ -12,27 +12,27 @@ import {
   type FunctionCall,
   type FunctionDeclaration,
   type GenerateContentResponseUsageMetadata,
-} from '@google/genai';
+} from "@google/genai";
 import type {
   ToolCallConfirmationDetails,
   ToolResult,
   ToolResultDisplay,
-} from '../tools/tools.js';
-import type { ToolErrorType } from '../tools/tool-error.js';
-import { getResponseText } from '../utils/partUtils.js';
-import { reportError } from '../utils/errorReporting.js';
+} from "../tools/tools.js";
+import type { ToolErrorType } from "../tools/tool-error.js";
+import { getResponseText } from "../utils/partUtils.js";
+import { reportError } from "../utils/errorReporting.js";
 import {
   getErrorMessage,
   UnauthorizedError,
   toFriendlyError,
-} from '../utils/errors.js';
-import type { GeminiChat } from './geminiChat.js';
-import type { RetryInfo } from '../utils/rateLimit.js';
+} from "../utils/errors.js";
+import type { GeminiChat } from "./geminiChat.js";
+import type { RetryInfo } from "../utils/rateLimit.js";
 import {
   getThoughtText,
   parseThought,
   type ThoughtSummary,
-} from '../utils/thoughtUtils.js';
+} from "../utils/thoughtUtils.js";
 
 // Define a structure for tools passed to the server
 export interface ServerTool {
@@ -46,23 +46,23 @@ export interface ServerTool {
 }
 
 export enum GeminiEventType {
-  Content = 'content',
-  ToolCallRequest = 'tool_call_request',
-  ToolCallResponse = 'tool_call_response',
-  ToolCallConfirmation = 'tool_call_confirmation',
-  UserCancelled = 'user_cancelled',
-  Error = 'error',
-  ChatCompressed = 'chat_compressed',
-  Thought = 'thought',
-  MaxSessionTurns = 'max_session_turns',
-  SessionTokenLimitExceeded = 'session_token_limit_exceeded',
-  Finished = 'finished',
-  LoopDetected = 'loop_detected',
-  Citation = 'citation',
-  Retry = 'retry',
-  HookSystemMessage = 'hook_system_message',
-  UserPromptSubmitBlocked = 'user_prompt_submit_blocked',
-  StopHookLoop = 'stop_hook_loop',
+  Content = "content",
+  ToolCallRequest = "tool_call_request",
+  ToolCallResponse = "tool_call_response",
+  ToolCallConfirmation = "tool_call_confirmation",
+  UserCancelled = "user_cancelled",
+  Error = "error",
+  ChatCompressed = "chat_compressed",
+  Thought = "thought",
+  MaxSessionTurns = "max_session_turns",
+  SessionTokenLimitExceeded = "session_token_limit_exceeded",
+  Finished = "finished",
+  LoopDetected = "loop_detected",
+  Citation = "citation",
+  Retry = "retry",
+  HookSystemMessage = "hook_system_message",
+  UserPromptSubmitBlocked = "user_prompt_submit_blocked",
+  StopHookLoop = "stop_hook_loop",
 }
 
 export type ServerGeminiRetryEvent = {
@@ -283,7 +283,7 @@ export class Turn {
 
         // Handle the new RETRY event: clear accumulated state from the
         // previous attempt to avoid duplicate tool calls and stale metadata.
-        if (streamEvent.type === 'retry') {
+        if (streamEvent.type === "retry") {
           this.pendingToolCalls.length = 0;
           this.pendingCitations.clear();
           this.debugResponses = [];
@@ -348,7 +348,7 @@ export class Turn {
           if (this.pendingCitations.size > 0) {
             yield {
               type: GeminiEventType.Citation,
-              value: `Citations:\n${[...this.pendingCitations].sort().join('\n')}`,
+              value: `Citations:\n${[...this.pendingCitations].sort().join("\n")}`,
             };
             this.pendingCitations.clear();
           }
@@ -378,15 +378,15 @@ export class Turn {
       const contextForReport = [...this.chat.getHistory(/*curated*/ true), req];
       await reportError(
         error,
-        'Error when talking to API',
+        "Error when talking to API",
         contextForReport,
-        'Turn.run-sendMessageStream',
+        "Turn.run-sendMessageStream",
       );
       const status =
-        typeof error === 'object' &&
+        typeof error === "object" &&
         error !== null &&
-        'status' in error &&
-        typeof (error as { status: unknown }).status === 'number'
+        "status" in error &&
+        typeof (error as { status: unknown }).status === "number"
           ? (error as { status: number }).status
           : undefined;
       const structuredError: StructuredError = {
@@ -405,7 +405,7 @@ export class Turn {
     const callId =
       fnCall.id ??
       `${fnCall.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const name = fnCall.name || 'undefined_tool_name';
+    const name = fnCall.name || "undefined_tool_name";
     const args = (fnCall.args || {}) as Record<string, unknown>;
 
     const toolCallRequest: ToolCallRequestInfo = {

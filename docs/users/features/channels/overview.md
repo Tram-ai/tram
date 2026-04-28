@@ -1,10 +1,10 @@
 # Channels
 
-Channels let you interact with a Qwen Code agent from messaging platforms like Telegram, WeChat, or DingTalk, instead of the terminal. You send messages from your phone or desktop chat app, and the agent responds just like it would in the CLI.
+Channels let you interact with a TRAM agent from messaging platforms like Telegram, WeChat, or DingTalk, instead of the terminal. You send messages from your phone or desktop chat app, and the agent responds just like it would in the CLI.
 
 ## How It Works
 
-When you run `qwen channel start`, Qwen Code:
+When you run `qwen channel start`, TRAM:
 
 1. Reads channel configurations from your `settings.json`
 2. Spawns a single agent process using the [Agent Client Protocol (ACP)](../../developers/architecture)

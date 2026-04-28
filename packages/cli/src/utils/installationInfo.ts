@@ -4,24 +4,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createDebugLogger, isGitRepository } from '@tram-ai/tram-core';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import * as childProcess from 'node:child_process';
+import { createDebugLogger, isGitRepository } from "@tram-ai/tram-core";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as childProcess from "node:child_process";
 
 export enum PackageManager {
-  NPM = 'npm',
-  YARN = 'yarn',
-  PNPM = 'pnpm',
-  PNPX = 'pnpx',
-  BUN = 'bun',
-  BUNX = 'bunx',
-  HOMEBREW = 'homebrew',
-  NPX = 'npx',
-  UNKNOWN = 'unknown',
+  NPM = "npm",
+  YARN = "yarn",
+  PNPM = "pnpm",
+  PNPX = "pnpx",
+  BUN = "bun",
+  BUNX = "bunx",
+  HOMEBREW = "homebrew",
+  NPX = "npx",
+  UNKNOWN = "unknown",
 }
 
-const debugLogger = createDebugLogger('INSTALLATION_INFO');
+const debugLogger = createDebugLogger("INSTALLATION_INFO");
 
 export interface InstallationInfo {
   packageManager: PackageManager;
@@ -41,8 +41,8 @@ export function getInstallationInfo(
 
   try {
     // Normalize path separators to forward slashes for consistent matching.
-    const realPath = fs.realpathSync(cliPath).replace(/\\/g, '/');
-    const normalizedProjectRoot = projectRoot?.replace(/\\/g, '/');
+    const realPath = fs.realpathSync(cliPath).replace(/\\/g, "/");
+    const normalizedProjectRoot = projectRoot?.replace(/\\/g, "/");
     const isGit = isGitRepository(process.cwd());
 
     // Check for local git clone first
@@ -50,7 +50,7 @@ export function getInstallationInfo(
       isGit &&
       normalizedProjectRoot &&
       realPath.startsWith(normalizedProjectRoot) &&
-      !realPath.includes('/node_modules/')
+      !realPath.includes("/node_modules/")
     ) {
       return {
         packageManager: PackageManager.UNKNOWN, // Not managed by a package manager in this sense
@@ -61,27 +61,27 @@ export function getInstallationInfo(
     }
 
     // Check for npx/pnpx
-    if (realPath.includes('/.npm/_npx') || realPath.includes('/npm/_npx')) {
+    if (realPath.includes("/.npm/_npx") || realPath.includes("/npm/_npx")) {
       return {
         packageManager: PackageManager.NPX,
         isGlobal: false,
-        updateMessage: 'Running via npx, update not applicable.',
+        updateMessage: "Running via npx, update not applicable.",
       };
     }
-    if (realPath.includes('/.pnpm/_pnpx')) {
+    if (realPath.includes("/.pnpm/_pnpx")) {
       return {
         packageManager: PackageManager.PNPX,
         isGlobal: false,
-        updateMessage: 'Running via pnpx, update not applicable.',
+        updateMessage: "Running via pnpx, update not applicable.",
       };
     }
 
     // Check for Homebrew
-    if (process.platform === 'darwin') {
+    if (process.platform === "darwin") {
       try {
         // We do not support homebrew for now, keep forward compatibility for future use
         childProcess.execSync('brew list -1 | grep -q "^tram$"', {
-          stdio: 'ignore',
+          stdio: "ignore",
         });
         return {
           packageManager: PackageManager.HOMEBREW,
@@ -95,47 +95,47 @@ export function getInstallationInfo(
     }
 
     // Check for pnpm
-    if (realPath.includes('/.pnpm/global')) {
-      const updateCommand = 'pnpm add -g @tram-ai/tram@latest';
+    if (realPath.includes("/.pnpm/global")) {
+      const updateCommand = "pnpm add -g @tram-ai/tram@latest";
       return {
         packageManager: PackageManager.PNPM,
         isGlobal: true,
         updateCommand,
         updateMessage: isAutoUpdateEnabled
-          ? 'Installed with pnpm. Attempting to automatically update now...'
+          ? "Installed with pnpm. Attempting to automatically update now..."
           : `Please run ${updateCommand} to update`,
       };
     }
 
     // Check for yarn
-    if (realPath.includes('/.yarn/global')) {
-      const updateCommand = 'yarn global add @tram-ai/tram@latest';
+    if (realPath.includes("/.yarn/global")) {
+      const updateCommand = "yarn global add @tram-ai/tram@latest";
       return {
         packageManager: PackageManager.YARN,
         isGlobal: true,
         updateCommand,
         updateMessage: isAutoUpdateEnabled
-          ? 'Installed with yarn. Attempting to automatically update now...'
+          ? "Installed with yarn. Attempting to automatically update now..."
           : `Please run ${updateCommand} to update`,
       };
     }
 
     // Check for bun
-    if (realPath.includes('/.bun/install/cache')) {
+    if (realPath.includes("/.bun/install/cache")) {
       return {
         packageManager: PackageManager.BUNX,
         isGlobal: false,
-        updateMessage: 'Running via bunx, update not applicable.',
+        updateMessage: "Running via bunx, update not applicable.",
       };
     }
-    if (realPath.includes('/.bun/bin')) {
-      const updateCommand = 'bun add -g @tram-ai/tram@latest';
+    if (realPath.includes("/.bun/bin")) {
+      const updateCommand = "bun add -g @tram-ai/tram@latest";
       return {
         packageManager: PackageManager.BUN,
         isGlobal: true,
         updateCommand,
         updateMessage: isAutoUpdateEnabled
-          ? 'Installed with bun. Attempting to automatically update now...'
+          ? "Installed with bun. Attempting to automatically update now..."
           : `Please run ${updateCommand} to update`,
       };
     }
@@ -146,11 +146,11 @@ export function getInstallationInfo(
       realPath.startsWith(`${normalizedProjectRoot}/node_modules`)
     ) {
       let pm = PackageManager.NPM;
-      if (fs.existsSync(path.join(projectRoot, 'yarn.lock'))) {
+      if (fs.existsSync(path.join(projectRoot, "yarn.lock"))) {
         pm = PackageManager.YARN;
-      } else if (fs.existsSync(path.join(projectRoot, 'pnpm-lock.yaml'))) {
+      } else if (fs.existsSync(path.join(projectRoot, "pnpm-lock.yaml"))) {
         pm = PackageManager.PNPM;
-      } else if (fs.existsSync(path.join(projectRoot, 'bun.lockb'))) {
+      } else if (fs.existsSync(path.join(projectRoot, "bun.lockb"))) {
         pm = PackageManager.BUN;
       }
       return {
@@ -162,17 +162,17 @@ export function getInstallationInfo(
     }
 
     // Assume global npm
-    const updateCommand = 'npm install -g @tram-ai/tram@latest';
+    const updateCommand = "npm install -g @tram-ai/tram@latest";
     return {
       packageManager: PackageManager.NPM,
       isGlobal: true,
       updateCommand,
       updateMessage: isAutoUpdateEnabled
-        ? 'Installed with npm. Attempting to automatically update now...'
+        ? "Installed with npm. Attempting to automatically update now..."
         : `Please run ${updateCommand} to update`,
     };
   } catch (error) {
-    debugLogger.error('Failed to detect installation info:', error);
+    debugLogger.error("Failed to detect installation info:", error);
     return { packageManager: PackageManager.UNKNOWN, isGlobal: false };
   }
 }

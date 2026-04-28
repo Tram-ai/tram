@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { GenerateContentResponseUsageMetadata } from '@google/genai';
-import type { SubagentMeta } from '../types.js';
-import type { Usage } from '@agentclientprotocol/sdk';
-import { BaseEmitter } from './BaseEmitter.js';
+import type { GenerateContentResponseUsageMetadata } from "@google/genai";
+import type { SubagentMeta } from "../types.js";
+import type { Usage } from "@agentclientprotocol/sdk";
+import { BaseEmitter } from "./BaseEmitter.js";
 
 /**
  * Handles emission of text message chunks (user, agent, thought).
@@ -29,8 +29,8 @@ export class MessageEmitter extends BaseEmitter {
   ): Promise<void> {
     const epochMs = BaseEmitter.toEpochMs(timestamp);
     await this.sendUpdate({
-      sessionUpdate: 'user_message_chunk',
-      content: { type: 'text', text },
+      sessionUpdate: "user_message_chunk",
+      content: { type: "text", text },
       ...(epochMs != null && { _meta: { timestamp: epochMs } }),
     });
   }
@@ -47,8 +47,8 @@ export class MessageEmitter extends BaseEmitter {
   ): Promise<void> {
     const epochMs = BaseEmitter.toEpochMs(timestamp);
     await this.sendUpdate({
-      sessionUpdate: 'agent_thought_chunk',
-      content: { type: 'text', text },
+      sessionUpdate: "agent_thought_chunk",
+      content: { type: "text", text },
       ...(epochMs != null && { _meta: { timestamp: epochMs } }),
     });
   }
@@ -65,8 +65,8 @@ export class MessageEmitter extends BaseEmitter {
   ): Promise<void> {
     const epochMs = BaseEmitter.toEpochMs(timestamp);
     await this.sendUpdate({
-      sessionUpdate: 'agent_message_chunk',
-      content: { type: 'text', text },
+      sessionUpdate: "agent_message_chunk",
+      content: { type: "text", text },
       ...(epochMs != null && { _meta: { timestamp: epochMs } }),
     });
   }
@@ -76,7 +76,7 @@ export class MessageEmitter extends BaseEmitter {
    */
   async emitUsageMetadata(
     usageMetadata: GenerateContentResponseUsageMetadata,
-    text: string = '',
+    text: string = "",
     durationMs?: number,
     subagentMeta?: SubagentMeta,
   ): Promise<void> {
@@ -89,13 +89,13 @@ export class MessageEmitter extends BaseEmitter {
     };
 
     const meta =
-      typeof durationMs === 'number'
+      typeof durationMs === "number"
         ? { usage, durationMs, ...subagentMeta }
         : { usage, ...subagentMeta };
 
     await this.sendUpdate({
-      sessionUpdate: 'agent_message_chunk',
-      content: { type: 'text', text },
+      sessionUpdate: "agent_message_chunk",
+      content: { type: "text", text },
       _meta: meta,
     });
   }
@@ -111,11 +111,11 @@ export class MessageEmitter extends BaseEmitter {
    */
   async emitMessage(
     text: string,
-    role: 'user' | 'assistant',
+    role: "user" | "assistant",
     isThought: boolean = false,
     timestamp?: string | number,
   ): Promise<void> {
-    if (role === 'user') {
+    if (role === "user") {
       return this.emitUserMessage(text, timestamp);
     }
     return isThought

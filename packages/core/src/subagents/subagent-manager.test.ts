@@ -4,26 +4,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as os from 'os';
-import { SubagentManager } from './subagent-manager.js';
-import { type SubagentConfig, SubagentError } from './types.js';
-import type { ToolRegistry } from '../tools/tool-registry.js';
-import type { Config } from '../config/config.js';
-import { makeFakeConfig } from '../test-utils/config.js';
-import { AuthType } from '../core/contentGenerator.js';
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import * as fs from "fs/promises";
+import * as path from "path";
+import * as os from "os";
+import { SubagentManager } from "./subagent-manager.js";
+import { type SubagentConfig, SubagentError } from "./types.js";
+import type { ToolRegistry } from "../tools/tool-registry.js";
+import type { Config } from "../config/config.js";
+import { makeFakeConfig } from "../test-utils/config.js";
+import { AuthType } from "../core/contentGenerator.js";
 
 // Mock file system operations
-vi.mock('fs/promises');
-vi.mock('os');
+vi.mock("fs/promises");
+vi.mock("os");
 
 // Mock yaml parser - use vi.hoisted for proper hoisting
 const mockParseYaml = vi.hoisted(() => vi.fn());
 const mockStringifyYaml = vi.hoisted(() => vi.fn());
 
-vi.mock('../utils/yaml-parser.js', () => ({
+vi.mock("../utils/yaml-parser.js", () => ({
   parse: mockParseYaml,
   stringify: mockStringifyYaml,
 }));
@@ -32,34 +32,34 @@ vi.mock('../utils/yaml-parser.js', () => ({
 const mockValidateConfig = vi.hoisted(() => vi.fn());
 const mockValidateOrThrow = vi.hoisted(() => vi.fn());
 
-vi.mock('./validation.js', () => ({
+vi.mock("./validation.js", () => ({
   SubagentValidator: class MockSubagentValidator {
     validateConfig = mockValidateConfig;
     validateOrThrow = mockValidateOrThrow;
   },
 }));
 
-vi.mock('./subagent.js');
+vi.mock("./subagent.js");
 
 // Mock AgentHeadless for createAgentHeadless tests
 const mockAgentHeadlessCreate = vi.hoisted(() => vi.fn());
-vi.mock('../agents/runtime/agent-headless.js', () => ({
+vi.mock("../agents/runtime/agent-headless.js", () => ({
   AgentHeadless: { create: mockAgentHeadlessCreate },
   ContextState: class {},
 }));
 
 // Mock createContentGenerator for model override tests
 const mockCreateContentGenerator = vi.hoisted(() => vi.fn());
-vi.mock('../core/contentGenerator.js', async (importOriginal) => {
+vi.mock("../core/contentGenerator.js", async (importOriginal) => {
   const original =
-    await importOriginal<typeof import('../core/contentGenerator.js')>();
+    await importOriginal<typeof import("../core/contentGenerator.js")>();
   return {
     ...original,
     createContentGenerator: mockCreateContentGenerator,
   };
 });
 
-describe('SubagentManager', () => {
+describe("SubagentManager", () => {
   let manager: SubagentManager;
   let mockToolRegistry: ToolRegistry;
   let mockConfig: Config;
@@ -67,9 +67,9 @@ describe('SubagentManager', () => {
   beforeEach(() => {
     mockToolRegistry = {
       getAllTools: vi.fn().mockReturnValue([
-        { name: 'read_file', displayName: 'Read File' },
-        { name: 'write_file', displayName: 'Write File' },
-        { name: 'grep', displayName: 'Search Files' },
+        { name: "read_file", displayName: "Read File" },
+        { name: "write_file", displayName: "Write File" },
+        { name: "grep", displayName: "Search Files" },
       ]),
     } as unknown as ToolRegistry;
 
@@ -77,11 +77,11 @@ describe('SubagentManager', () => {
     mockConfig = makeFakeConfig({});
 
     // Mock the tool registry and project root methods
-    vi.spyOn(mockConfig, 'getToolRegistry').mockReturnValue(mockToolRegistry);
-    vi.spyOn(mockConfig, 'getProjectRoot').mockReturnValue('/test/project');
+    vi.spyOn(mockConfig, "getToolRegistry").mockReturnValue(mockToolRegistry);
+    vi.spyOn(mockConfig, "getProjectRoot").mockReturnValue("/test/project");
 
     // Mock os.homedir
-    vi.mocked(os.homedir).mockReturnValue('/home/user');
+    vi.mocked(os.homedir).mockReturnValue("/home/user");
 
     // Reset and setup mocks
     vi.clearAllMocks();
@@ -96,80 +96,80 @@ describe('SubagentManager', () => {
     mockParseYaml.mockImplementation((yamlString: string) => {
       // Handle different test cases based on YAML content
       // Check disallowedTools before tools to avoid substring match
-      if (yamlString.includes('disallowedTools: write_file')) {
+      if (yamlString.includes("disallowedTools: write_file")) {
         // Scalar form
         return {
-          name: 'test-agent',
-          description: 'A test subagent',
-          disallowedTools: 'write_file',
+          name: "test-agent",
+          description: "A test subagent",
+          disallowedTools: "write_file",
         };
       }
-      if (yamlString.includes('disallowedTools:')) {
+      if (yamlString.includes("disallowedTools:")) {
         return {
-          name: 'test-agent',
-          description: 'A test subagent',
-          disallowedTools: ['write_file', 'mcp__slack'],
+          name: "test-agent",
+          description: "A test subagent",
+          disallowedTools: ["write_file", "mcp__slack"],
         };
       }
-      if (yamlString.includes('tools:')) {
+      if (yamlString.includes("tools:")) {
         return {
-          name: 'test-agent',
-          description: 'A test subagent',
-          tools: ['read_file', 'write_file'],
+          name: "test-agent",
+          description: "A test subagent",
+          tools: ["read_file", "write_file"],
         };
       }
-      if (yamlString.includes('model:')) {
+      if (yamlString.includes("model:")) {
         return {
-          name: 'test-agent',
-          description: 'A test subagent',
-          model: 'custom-model',
+          name: "test-agent",
+          description: "A test subagent",
+          model: "custom-model",
         };
       }
-      if (yamlString.includes('runConfig:')) {
+      if (yamlString.includes("runConfig:")) {
         return {
-          name: 'test-agent',
-          description: 'A test subagent',
+          name: "test-agent",
+          description: "A test subagent",
           runConfig: { max_time_minutes: 5, max_turns: 10 },
         };
       }
-      if (yamlString.includes('name: agent1')) {
-        return { name: 'agent1', description: 'First agent' };
+      if (yamlString.includes("name: agent1")) {
+        return { name: "agent1", description: "First agent" };
       }
-      if (yamlString.includes('name: agent2')) {
-        return { name: 'agent2', description: 'Second agent' };
+      if (yamlString.includes("name: agent2")) {
+        return { name: "agent2", description: "Second agent" };
       }
-      if (yamlString.includes('name: agent3')) {
-        return { name: 'agent3', description: 'Third agent' };
+      if (yamlString.includes("name: agent3")) {
+        return { name: "agent3", description: "Third agent" };
       }
-      if (yamlString.includes('name: 11')) {
+      if (yamlString.includes("name: 11")) {
         return { name: 11, description: 333 }; // Numeric values test case
       }
-      if (yamlString.includes('name: true')) {
+      if (yamlString.includes("name: true")) {
         return { name: true, description: false }; // Boolean values test case
       }
-      if (!yamlString.includes('name:')) {
-        return { description: 'A test subagent' }; // Missing name case
+      if (!yamlString.includes("name:")) {
+        return { description: "A test subagent" }; // Missing name case
       }
-      if (!yamlString.includes('description:')) {
-        return { name: 'test-agent' }; // Missing description case
+      if (!yamlString.includes("description:")) {
+        return { name: "test-agent" }; // Missing description case
       }
       // Default case
       return {
-        name: 'test-agent',
-        description: 'A test subagent',
+        name: "test-agent",
+        description: "A test subagent",
       };
     });
 
     mockStringifyYaml.mockImplementation((obj: Record<string, unknown>) => {
-      let yaml = '';
+      let yaml = "";
       for (const [key, value] of Object.entries(obj)) {
-        if (key === 'disallowedTools' && Array.isArray(value)) {
-          yaml += `disallowedTools:\n${value.map((t) => `  - ${t}`).join('\n')}\n`;
-        } else if (key === 'tools' && Array.isArray(value)) {
-          yaml += `tools:\n${value.map((tool) => `  - ${tool}`).join('\n')}\n`;
-        } else if (key === 'model') {
+        if (key === "disallowedTools" && Array.isArray(value)) {
+          yaml += `disallowedTools:\n${value.map((t) => `  - ${t}`).join("\n")}\n`;
+        } else if (key === "tools" && Array.isArray(value)) {
+          yaml += `tools:\n${value.map((tool) => `  - ${tool}`).join("\n")}\n`;
+        } else if (key === "model") {
           yaml += `model: ${value}\n`;
-        } else if (key === 'runConfig' && typeof value === 'object' && value) {
+        } else if (key === "runConfig" && typeof value === "object" && value) {
           yaml += `runConfig:\n`;
           for (const [k, v] of Object.entries(
             value as Record<string, unknown>,
@@ -191,11 +191,11 @@ describe('SubagentManager', () => {
   });
 
   const validConfig: SubagentConfig = {
-    name: 'test-agent',
-    description: 'A test subagent',
-    systemPrompt: 'You are a helpful assistant.',
-    level: 'project',
-    filePath: '/test/project/.tram/agents/test-agent.md',
+    name: "test-agent",
+    description: "A test subagent",
+    systemPrompt: "You are a helpful assistant.",
+    level: "project",
+    filePath: "/test/project/.tram/agents/test-agent.md",
   };
 
   const validMarkdown = `---
@@ -206,37 +206,37 @@ description: A test subagent
 You are a helpful assistant.
 `;
 
-  describe('parseSubagentContent', () => {
-    it('should parse valid markdown content', () => {
+  describe("parseSubagentContent", () => {
+    it("should parse valid markdown content", () => {
       const config = manager.parseSubagentContent(
         validMarkdown,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
-      expect(config.name).toBe('test-agent');
-      expect(config.description).toBe('A test subagent');
-      expect(config.systemPrompt).toBe('You are a helpful assistant.');
-      expect(config.level).toBe('project');
+      expect(config.name).toBe("test-agent");
+      expect(config.description).toBe("A test subagent");
+      expect(config.systemPrompt).toBe("You are a helpful assistant.");
+      expect(config.level).toBe("project");
       expect(config.filePath).toBe(validConfig.filePath);
     });
 
-    it('should parse valid markdown content with CRLF line endings', () => {
+    it("should parse valid markdown content with CRLF line endings", () => {
       const markdownWithCRLF = `---\r\nname: test-agent\r\ndescription: A test subagent\r\n---\r\n\r\nYou are a helpful assistant.\r\n`;
       const config = manager.parseSubagentContent(
         markdownWithCRLF,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
-      expect(config.name).toBe('test-agent');
-      expect(config.description).toBe('A test subagent');
+      expect(config.name).toBe("test-agent");
+      expect(config.description).toBe("A test subagent");
       // The system prompt logic applies .trim(), so the trailing \r is removed regardless,
       // but the central test is that frontmatterRegex didn't throw an error.
-      expect(config.systemPrompt).toBe('You are a helpful assistant.');
+      expect(config.systemPrompt).toBe("You are a helpful assistant.");
     });
 
-    it('should parse content with tools', () => {
+    it("should parse content with tools", () => {
       const markdownWithTools = `---
 name: test-agent
 description: A test subagent
@@ -251,13 +251,13 @@ You are a helpful assistant.
       const config = manager.parseSubagentContent(
         markdownWithTools,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
-      expect(config.tools).toEqual(['read_file', 'write_file']);
+      expect(config.tools).toEqual(["read_file", "write_file"]);
     });
 
-    it('should parse content with disallowedTools array', () => {
+    it("should parse content with disallowedTools array", () => {
       const markdownWithDisallowed = `---
 name: test-agent
 description: A test subagent
@@ -272,13 +272,13 @@ You are a helpful assistant.
       const config = manager.parseSubagentContent(
         markdownWithDisallowed,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
-      expect(config.disallowedTools).toEqual(['write_file', 'mcp__slack']);
+      expect(config.disallowedTools).toEqual(["write_file", "mcp__slack"]);
     });
 
-    it('should normalize scalar disallowedTools to array', () => {
+    it("should normalize scalar disallowedTools to array", () => {
       const markdownWithScalar = `---
 name: test-agent
 description: A test subagent
@@ -291,13 +291,13 @@ You are a helpful assistant.
       const config = manager.parseSubagentContent(
         markdownWithScalar,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
-      expect(config.disallowedTools).toEqual(['write_file']);
+      expect(config.disallowedTools).toEqual(["write_file"]);
     });
 
-    it('should parse content with model selector', () => {
+    it("should parse content with model selector", () => {
       const markdownWithModel = `---
 name: test-agent
 description: A test subagent
@@ -310,13 +310,13 @@ You are a helpful assistant.
       const config = manager.parseSubagentContent(
         markdownWithModel,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
-      expect(config.model).toBe('custom-model');
+      expect(config.model).toBe("custom-model");
     });
 
-    it('should parse legacy modelConfig frontmatter for compatibility', () => {
+    it("should parse legacy modelConfig frontmatter for compatibility", () => {
       const markdownWithLegacyModel = `---
 name: test-agent
 description: A test subagent
@@ -328,21 +328,21 @@ You are a helpful assistant.
 `;
 
       mockParseYaml.mockReturnValueOnce({
-        name: 'test-agent',
-        description: 'A test subagent',
-        modelConfig: { model: 'legacy-model' },
+        name: "test-agent",
+        description: "A test subagent",
+        modelConfig: { model: "legacy-model" },
       });
 
       const config = manager.parseSubagentContent(
         markdownWithLegacyModel,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
-      expect(config.model).toBe('legacy-model');
+      expect(config.model).toBe("legacy-model");
     });
 
-    it('should parse content with run config', () => {
+    it("should parse content with run config", () => {
       const markdownWithRun = `---
 name: test-agent
 description: A test subagent
@@ -357,13 +357,13 @@ You are a helpful assistant.
       const config = manager.parseSubagentContent(
         markdownWithRun,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
       expect(config.runConfig).toEqual({ max_time_minutes: 5, max_turns: 10 });
     });
 
-    it('should handle numeric name and description values', () => {
+    it("should handle numeric name and description values", () => {
       const markdownWithNumeric = `---
 name: 11
 description: 333
@@ -375,16 +375,16 @@ You are a helpful assistant.
       const config = manager.parseSubagentContent(
         markdownWithNumeric,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
-      expect(config.name).toBe('11');
-      expect(config.description).toBe('333');
-      expect(typeof config.name).toBe('string');
-      expect(typeof config.description).toBe('string');
+      expect(config.name).toBe("11");
+      expect(config.description).toBe("333");
+      expect(typeof config.name).toBe("string");
+      expect(typeof config.description).toBe("string");
     });
 
-    it('should handle boolean name and description values', () => {
+    it("should handle boolean name and description values", () => {
       const markdownWithBoolean = `---
 name: true
 description: false
@@ -396,35 +396,35 @@ You are a helpful assistant.
       const config = manager.parseSubagentContent(
         markdownWithBoolean,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
-      expect(config.name).toBe('true');
-      expect(config.description).toBe('false');
-      expect(typeof config.name).toBe('string');
-      expect(typeof config.description).toBe('string');
+      expect(config.name).toBe("true");
+      expect(config.description).toBe("false");
+      expect(typeof config.name).toBe("string");
+      expect(typeof config.description).toBe("string");
     });
 
-    it('should determine level from file path', () => {
-      const projectPath = '/test/project/.tram/agents/test-agent.md';
-      const userPath = '/home/user/.tram/agents/test-agent.md';
+    it("should determine level from file path", () => {
+      const projectPath = "/test/project/.tram/agents/test-agent.md";
+      const userPath = "/home/user/.tram/agents/test-agent.md";
 
       const projectConfig = manager.parseSubagentContent(
         validMarkdown,
         projectPath,
-        'project',
+        "project",
       );
       const userConfig = manager.parseSubagentContent(
         validMarkdown,
         userPath,
-        'user',
+        "user",
       );
 
-      expect(projectConfig.level).toBe('project');
-      expect(userConfig.level).toBe('user');
+      expect(projectConfig.level).toBe("project");
+      expect(userConfig.level).toBe("user");
     });
 
-    it('should throw error for invalid frontmatter format', () => {
+    it("should throw error for invalid frontmatter format", () => {
       const invalidMarkdown = `No frontmatter here
 Just content`;
 
@@ -432,12 +432,12 @@ Just content`;
         manager.parseSubagentContent(
           invalidMarkdown,
           validConfig.filePath!,
-          'project',
+          "project",
         ),
       ).toThrow(SubagentError);
     });
 
-    it('should throw error for missing name', () => {
+    it("should throw error for missing name", () => {
       const markdownWithoutName = `---
 description: A test subagent
 ---
@@ -449,12 +449,12 @@ You are a helpful assistant.
         manager.parseSubagentContent(
           markdownWithoutName,
           validConfig.filePath!,
-          'project',
+          "project",
         ),
       ).toThrow(SubagentError);
     });
 
-    it('should throw error for missing description', () => {
+    it("should throw error for missing description", () => {
       const markdownWithoutDescription = `---
 name: test-agent
 ---
@@ -466,231 +466,231 @@ You are a helpful assistant.
         manager.parseSubagentContent(
           markdownWithoutDescription,
           validConfig.filePath!,
-          'project',
+          "project",
         ),
       ).toThrow(SubagentError);
     });
 
-    it('should not warn when filename matches subagent name', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const matchingPath = '/test/project/.tram/agents/test-agent.md';
+    it("should not warn when filename matches subagent name", () => {
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const matchingPath = "/test/project/.tram/agents/test-agent.md";
 
       const config = manager.parseSubagentContent(
         validMarkdown,
         matchingPath,
-        'project',
+        "project",
       );
 
-      expect(config.name).toBe('test-agent');
+      expect(config.name).toBe("test-agent");
       expect(consoleSpy).not.toHaveBeenCalled();
 
       consoleSpy.mockRestore();
     });
   });
 
-  describe('serializeSubagent', () => {
-    it('should serialize basic configuration', () => {
+  describe("serializeSubagent", () => {
+    it("should serialize basic configuration", () => {
       const serialized = manager.serializeSubagent(validConfig);
 
-      expect(serialized).toContain('name: test-agent');
-      expect(serialized).toContain('description: A test subagent');
-      expect(serialized).toContain('You are a helpful assistant.');
+      expect(serialized).toContain("name: test-agent");
+      expect(serialized).toContain("description: A test subagent");
+      expect(serialized).toContain("You are a helpful assistant.");
       expect(serialized).toMatch(/^---\n[\s\S]*\n---\n\n[\s\S]*\n$/);
     });
 
-    it('should serialize configuration with tools', () => {
+    it("should serialize configuration with tools", () => {
       const configWithTools: SubagentConfig = {
         ...validConfig,
-        tools: ['read_file', 'write_file'],
+        tools: ["read_file", "write_file"],
       };
 
       const serialized = manager.serializeSubagent(configWithTools);
 
-      expect(serialized).toContain('tools:');
-      expect(serialized).toContain('- read_file');
-      expect(serialized).toContain('- write_file');
+      expect(serialized).toContain("tools:");
+      expect(serialized).toContain("- read_file");
+      expect(serialized).toContain("- write_file");
     });
 
-    it('should serialize configuration with model selector', () => {
+    it("should serialize configuration with model selector", () => {
       const configWithModel: SubagentConfig = {
         ...validConfig,
-        model: 'custom-model',
+        model: "custom-model",
       };
 
       const serialized = manager.serializeSubagent(configWithModel);
 
-      expect(serialized).toContain('model: custom-model');
+      expect(serialized).toContain("model: custom-model");
     });
 
-    it('should not include empty optional fields', () => {
+    it("should not include empty optional fields", () => {
       const serialized = manager.serializeSubagent(validConfig);
 
-      expect(serialized).not.toContain('tools:');
-      expect(serialized).not.toContain('model:');
-      expect(serialized).not.toContain('runConfig:');
-      expect(serialized).not.toContain('disallowedTools:');
+      expect(serialized).not.toContain("tools:");
+      expect(serialized).not.toContain("model:");
+      expect(serialized).not.toContain("runConfig:");
+      expect(serialized).not.toContain("disallowedTools:");
     });
 
-    it('should serialize configuration with disallowedTools', () => {
+    it("should serialize configuration with disallowedTools", () => {
       const configWithDisallowed: SubagentConfig = {
         ...validConfig,
-        disallowedTools: ['write_file', 'mcp__slack'],
+        disallowedTools: ["write_file", "mcp__slack"],
       };
 
       const serialized = manager.serializeSubagent(configWithDisallowed);
 
-      expect(serialized).toContain('disallowedTools:');
-      expect(serialized).toContain('- write_file');
-      expect(serialized).toContain('- mcp__slack');
+      expect(serialized).toContain("disallowedTools:");
+      expect(serialized).toContain("- write_file");
+      expect(serialized).toContain("- mcp__slack");
     });
 
-    it('should roundtrip disallowedTools through serialize and parse', () => {
+    it("should roundtrip disallowedTools through serialize and parse", () => {
       const configWithDisallowed: SubagentConfig = {
         ...validConfig,
-        disallowedTools: ['write_file', 'mcp__slack'],
+        disallowedTools: ["write_file", "mcp__slack"],
       };
 
       const serialized = manager.serializeSubagent(configWithDisallowed);
 
-      expect(serialized).toContain('disallowedTools:');
-      expect(serialized).toContain('- write_file');
-      expect(serialized).toContain('- mcp__slack');
+      expect(serialized).toContain("disallowedTools:");
+      expect(serialized).toContain("- write_file");
+      expect(serialized).toContain("- mcp__slack");
 
       const parsed = manager.parseSubagentContent(
         serialized,
         validConfig.filePath!,
-        'project',
+        "project",
       );
 
-      expect(parsed.disallowedTools).toEqual(['write_file', 'mcp__slack']);
+      expect(parsed.disallowedTools).toEqual(["write_file", "mcp__slack"]);
     });
   });
 
-  describe('createSubagent', () => {
+  describe("createSubagent", () => {
     beforeEach(() => {
       // Mock successful file operations
-      vi.mocked(fs.access).mockRejectedValue(new Error('File not found'));
+      vi.mocked(fs.access).mockRejectedValue(new Error("File not found"));
       vi.mocked(fs.mkdir).mockResolvedValue(undefined);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
     });
 
-    it('should create subagent successfully', async () => {
-      await manager.createSubagent(validConfig, { level: 'project' });
+    it("should create subagent successfully", async () => {
+      await manager.createSubagent(validConfig, { level: "project" });
 
       expect(fs.mkdir).toHaveBeenCalledWith(
         path.normalize(path.dirname(validConfig.filePath!)),
         { recursive: true },
       );
       expect(fs.writeFile).toHaveBeenCalledWith(
-        expect.stringContaining('test-agent.md'),
-        expect.stringContaining('name: test-agent'),
-        'utf8',
+        expect.stringContaining("test-agent.md"),
+        expect.stringContaining("name: test-agent"),
+        "utf8",
       );
     });
 
-    it('should throw error if file already exists and overwrite is false', async () => {
+    it("should throw error if file already exists and overwrite is false", async () => {
       vi.mocked(fs.access).mockResolvedValue(undefined); // File exists
 
       await expect(
-        manager.createSubagent(validConfig, { level: 'project' }),
+        manager.createSubagent(validConfig, { level: "project" }),
       ).rejects.toThrow(SubagentError);
 
       await expect(
-        manager.createSubagent(validConfig, { level: 'project' }),
+        manager.createSubagent(validConfig, { level: "project" }),
       ).rejects.toThrow(/already exists/);
     });
 
-    it('should overwrite file when overwrite is true', async () => {
+    it("should overwrite file when overwrite is true", async () => {
       vi.mocked(fs.access).mockResolvedValue(undefined); // File exists
 
       await manager.createSubagent(validConfig, {
-        level: 'project',
+        level: "project",
         overwrite: true,
       });
 
       expect(fs.writeFile).toHaveBeenCalled();
     });
 
-    it('should use custom path when provided', async () => {
-      const customPath = '/custom/path/agent.md';
+    it("should use custom path when provided", async () => {
+      const customPath = "/custom/path/agent.md";
 
       await manager.createSubagent(validConfig, {
-        level: 'project',
+        level: "project",
         customPath,
       });
 
       expect(fs.writeFile).toHaveBeenCalledWith(
         customPath,
         expect.any(String),
-        'utf8',
+        "utf8",
       );
     });
 
-    it('should throw error on file write failure', async () => {
-      vi.mocked(fs.writeFile).mockRejectedValue(new Error('Write failed'));
+    it("should throw error on file write failure", async () => {
+      vi.mocked(fs.writeFile).mockRejectedValue(new Error("Write failed"));
 
       await expect(
-        manager.createSubagent(validConfig, { level: 'project' }),
+        manager.createSubagent(validConfig, { level: "project" }),
       ).rejects.toThrow(SubagentError);
 
       await expect(
-        manager.createSubagent(validConfig, { level: 'project' }),
+        manager.createSubagent(validConfig, { level: "project" }),
       ).rejects.toThrow(/Failed to write subagent file/);
     });
   });
 
-  describe('loadSubagent', () => {
-    it('should load subagent from project level first', async () => {
+  describe("loadSubagent", () => {
+    it("should load subagent from project level first", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vi.mocked(fs.readdir).mockResolvedValue(['test-agent.md'] as any);
+      vi.mocked(fs.readdir).mockResolvedValue(["test-agent.md"] as any);
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
 
-      const config = await manager.loadSubagent('test-agent');
+      const config = await manager.loadSubagent("test-agent");
 
       expect(config).toBeDefined();
-      expect(config!.name).toBe('test-agent');
+      expect(config!.name).toBe("test-agent");
       expect(fs.readdir).toHaveBeenCalledWith(
-        path.normalize('/test/project/.tram/agents'),
+        path.normalize("/test/project/.tram/agents"),
       );
       expect(fs.readFile).toHaveBeenCalledWith(
-        path.normalize('/test/project/.tram/agents/test-agent.md'),
-        'utf8',
+        path.normalize("/test/project/.tram/agents/test-agent.md"),
+        "utf8",
       );
     });
 
-    it('should fall back to user level if project level fails', async () => {
+    it("should fall back to user level if project level fails", async () => {
       vi.mocked(fs.readdir)
-        .mockRejectedValueOnce(new Error('Project dir not found')) // project level fails
+        .mockRejectedValueOnce(new Error("Project dir not found")) // project level fails
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValueOnce(['test-agent.md'] as any); // user level succeeds
+        .mockResolvedValueOnce(["test-agent.md"] as any); // user level succeeds
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
 
-      const config = await manager.loadSubagent('test-agent');
+      const config = await manager.loadSubagent("test-agent");
 
       expect(config).toBeDefined();
-      expect(config!.name).toBe('test-agent');
+      expect(config!.name).toBe("test-agent");
       expect(fs.readdir).toHaveBeenCalledWith(
-        path.normalize('/home/user/.tram/agents'),
+        path.normalize("/home/user/.tram/agents"),
       );
       expect(fs.readFile).toHaveBeenCalledWith(
-        path.normalize('/home/user/.tram/agents/test-agent.md'),
-        'utf8',
+        path.normalize("/home/user/.tram/agents/test-agent.md"),
+        "utf8",
       );
     });
 
-    it('should return null if not found at either level', async () => {
-      vi.mocked(fs.readdir).mockRejectedValue(new Error('Directory not found'));
+    it("should return null if not found at either level", async () => {
+      vi.mocked(fs.readdir).mockRejectedValue(new Error("Directory not found"));
 
-      const config = await manager.loadSubagent('nonexistent');
+      const config = await manager.loadSubagent("nonexistent");
 
       expect(config).toBeNull();
     });
 
-    it('should load subagent even when filename does not match name', async () => {
+    it("should load subagent even when filename does not match name", async () => {
       // Mock readdir to return files with different names
       vi.mocked(fs.readdir).mockResolvedValue([
-        'wrong-filename.md',
-        'another-file.md',
+        "wrong-filename.md",
+        "another-file.md",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any);
 
@@ -716,35 +716,35 @@ You are another assistant.`;
       // Mock parseYaml for different scenarios
       mockParseYaml
         .mockReturnValueOnce({
-          name: 'correct-agent-name',
-          description: 'A test subagent with mismatched filename',
+          name: "correct-agent-name",
+          description: "A test subagent with mismatched filename",
         })
         .mockReturnValueOnce({
-          name: 'other-agent',
-          description: 'Some other agent',
+          name: "other-agent",
+          description: "Some other agent",
         });
 
-      const config = await manager.loadSubagent('correct-agent-name');
+      const config = await manager.loadSubagent("correct-agent-name");
 
       expect(config).toBeDefined();
-      expect(config!.name).toBe('correct-agent-name');
+      expect(config!.name).toBe("correct-agent-name");
       expect(config!.filePath).toBe(
-        path.normalize('/test/project/.tram/agents/wrong-filename.md'),
+        path.normalize("/test/project/.tram/agents/wrong-filename.md"),
       );
 
       // Verify it scanned the directory instead of using direct path
       expect(fs.readdir).toHaveBeenCalledWith(
-        path.normalize('/test/project/.tram/agents'),
+        path.normalize("/test/project/.tram/agents"),
       );
     });
 
-    it('should search user level when filename mismatch at project level', async () => {
+    it("should search user level when filename mismatch at project level", async () => {
       // Mock project level to have no matching files
       vi.mocked(fs.readdir)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValueOnce(['other-file.md'] as any) // project level
+        .mockResolvedValueOnce(["other-file.md"] as any) // project level
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValueOnce(['user-agent.md'] as any); // user level
+        .mockResolvedValueOnce(["user-agent.md"] as any); // user level
 
       const projectMarkdown = `---
 name: wrong-agent
@@ -767,27 +767,27 @@ You are a helpful assistant.`;
       // Mock parseYaml for different scenarios
       mockParseYaml
         .mockReturnValueOnce({
-          name: 'wrong-agent',
-          description: 'Wrong agent',
+          name: "wrong-agent",
+          description: "Wrong agent",
         })
         .mockReturnValueOnce({
-          name: 'target-agent',
-          description: 'A test subagent at user level',
+          name: "target-agent",
+          description: "A test subagent at user level",
         });
 
-      const config = await manager.loadSubagent('target-agent');
+      const config = await manager.loadSubagent("target-agent");
 
       expect(config).toBeDefined();
-      expect(config!.name).toBe('target-agent');
+      expect(config!.name).toBe("target-agent");
       expect(config!.filePath).toBe(
-        path.normalize('/home/user/.tram/agents/user-agent.md'),
+        path.normalize("/home/user/.tram/agents/user-agent.md"),
       );
-      expect(config!.level).toBe('user');
+      expect(config!.level).toBe("user");
     });
 
-    it('should handle specific level search with filename mismatch', async () => {
+    it("should handle specific level search with filename mismatch", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vi.mocked(fs.readdir).mockResolvedValue(['misnamed-file.md'] as any);
+      vi.mocked(fs.readdir).mockResolvedValue(["misnamed-file.md"] as any);
 
       const levelMarkdown = `---
 name: specific-agent
@@ -799,126 +799,126 @@ You are a helpful assistant.`;
       vi.mocked(fs.readFile).mockResolvedValue(levelMarkdown);
 
       mockParseYaml.mockReturnValue({
-        name: 'specific-agent',
-        description: 'A test subagent for specific level',
+        name: "specific-agent",
+        description: "A test subagent for specific level",
       });
 
-      const config = await manager.loadSubagent('specific-agent', 'project');
+      const config = await manager.loadSubagent("specific-agent", "project");
 
       expect(config).toBeDefined();
-      expect(config!.name).toBe('specific-agent');
+      expect(config!.name).toBe("specific-agent");
       expect(config!.filePath).toBe(
-        path.normalize('/test/project/.tram/agents/misnamed-file.md'),
+        path.normalize("/test/project/.tram/agents/misnamed-file.md"),
       );
     });
   });
 
-  describe('updateSubagent', () => {
+  describe("updateSubagent", () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vi.mocked(fs.readdir).mockResolvedValue(['test-agent.md'] as any);
+      vi.mocked(fs.readdir).mockResolvedValue(["test-agent.md"] as any);
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
       vi.mocked(fs.writeFile).mockResolvedValue(undefined);
     });
 
-    it('should update existing subagent', async () => {
-      const updates = { description: 'Updated description' };
+    it("should update existing subagent", async () => {
+      const updates = { description: "Updated description" };
 
-      await manager.updateSubagent('test-agent', updates);
+      await manager.updateSubagent("test-agent", updates);
 
       expect(fs.writeFile).toHaveBeenCalledWith(
-        expect.stringContaining('test-agent.md'),
-        expect.stringContaining('Updated description'),
-        'utf8',
+        expect.stringContaining("test-agent.md"),
+        expect.stringContaining("Updated description"),
+        "utf8",
       );
     });
 
-    it('should throw error if subagent not found', async () => {
-      vi.mocked(fs.readdir).mockRejectedValue(new Error('Directory not found'));
+    it("should throw error if subagent not found", async () => {
+      vi.mocked(fs.readdir).mockRejectedValue(new Error("Directory not found"));
 
-      await expect(manager.updateSubagent('nonexistent', {})).rejects.toThrow(
+      await expect(manager.updateSubagent("nonexistent", {})).rejects.toThrow(
         SubagentError,
       );
 
-      await expect(manager.updateSubagent('nonexistent', {})).rejects.toThrow(
+      await expect(manager.updateSubagent("nonexistent", {})).rejects.toThrow(
         /not found/,
       );
     });
 
-    it('should throw error on write failure', async () => {
-      vi.mocked(fs.writeFile).mockRejectedValue(new Error('Write failed'));
+    it("should throw error on write failure", async () => {
+      vi.mocked(fs.writeFile).mockRejectedValue(new Error("Write failed"));
 
-      await expect(manager.updateSubagent('test-agent', {})).rejects.toThrow(
+      await expect(manager.updateSubagent("test-agent", {})).rejects.toThrow(
         SubagentError,
       );
 
-      await expect(manager.updateSubagent('test-agent', {})).rejects.toThrow(
+      await expect(manager.updateSubagent("test-agent", {})).rejects.toThrow(
         /Failed to update subagent file/,
       );
     });
   });
 
-  describe('deleteSubagent', () => {
-    it('should delete subagent from specified level', async () => {
+  describe("deleteSubagent", () => {
+    it("should delete subagent from specified level", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vi.mocked(fs.readdir).mockResolvedValue(['test-agent.md'] as any);
+      vi.mocked(fs.readdir).mockResolvedValue(["test-agent.md"] as any);
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
       vi.mocked(fs.unlink).mockResolvedValue(undefined);
 
-      await manager.deleteSubagent('test-agent', 'project');
+      await manager.deleteSubagent("test-agent", "project");
 
       expect(fs.unlink).toHaveBeenCalledWith(
-        path.normalize('/test/project/.tram/agents/test-agent.md'),
+        path.normalize("/test/project/.tram/agents/test-agent.md"),
       );
     });
 
-    it('should delete from both levels if no level specified', async () => {
+    it("should delete from both levels if no level specified", async () => {
       vi.mocked(fs.readdir)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValueOnce(['test-agent.md'] as any) // project level
+        .mockResolvedValueOnce(["test-agent.md"] as any) // project level
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValueOnce(['test-agent.md'] as any); // user level
+        .mockResolvedValueOnce(["test-agent.md"] as any); // user level
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
       vi.mocked(fs.unlink).mockResolvedValue(undefined);
 
-      await manager.deleteSubagent('test-agent');
+      await manager.deleteSubagent("test-agent");
 
       expect(fs.unlink).toHaveBeenCalledTimes(2);
       expect(fs.unlink).toHaveBeenCalledWith(
-        path.normalize('/test/project/.tram/agents/test-agent.md'),
+        path.normalize("/test/project/.tram/agents/test-agent.md"),
       );
       expect(fs.unlink).toHaveBeenCalledWith(
-        path.normalize('/home/user/.tram/agents/test-agent.md'),
+        path.normalize("/home/user/.tram/agents/test-agent.md"),
       );
     });
 
-    it('should throw error if subagent not found', async () => {
-      vi.mocked(fs.readdir).mockRejectedValue(new Error('Directory not found'));
+    it("should throw error if subagent not found", async () => {
+      vi.mocked(fs.readdir).mockRejectedValue(new Error("Directory not found"));
 
-      await expect(manager.deleteSubagent('nonexistent')).rejects.toThrow(
+      await expect(manager.deleteSubagent("nonexistent")).rejects.toThrow(
         SubagentError,
       );
 
-      await expect(manager.deleteSubagent('nonexistent')).rejects.toThrow(
+      await expect(manager.deleteSubagent("nonexistent")).rejects.toThrow(
         /not found/,
       );
     });
 
-    it('should succeed if deleted from at least one level', async () => {
+    it("should succeed if deleted from at least one level", async () => {
       vi.mocked(fs.readdir)
-        .mockRejectedValueOnce(new Error('Project dir not found')) // project level fails
+        .mockRejectedValueOnce(new Error("Project dir not found")) // project level fails
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValueOnce(['test-agent.md'] as any); // user level succeeds
+        .mockResolvedValueOnce(["test-agent.md"] as any); // user level succeeds
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
       vi.mocked(fs.unlink).mockResolvedValue(undefined);
 
-      await expect(manager.deleteSubagent('test-agent')).resolves.not.toThrow();
+      await expect(manager.deleteSubagent("test-agent")).resolves.not.toThrow();
     });
 
-    it('should delete subagent with mismatched filename', async () => {
+    it("should delete subagent with mismatched filename", async () => {
       // Mock directory listing to return files with different names
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vi.mocked(fs.readdir).mockResolvedValue(['wrong-name.md'] as any);
+      vi.mocked(fs.readdir).mockResolvedValue(["wrong-name.md"] as any);
 
       const mismatchedMarkdown = `---
 name: correct-name
@@ -931,24 +931,24 @@ You are a helpful assistant.`;
       vi.mocked(fs.unlink).mockResolvedValue(undefined);
 
       mockParseYaml.mockReturnValue({
-        name: 'correct-name',
-        description: 'A test subagent with mismatched filename',
+        name: "correct-name",
+        description: "A test subagent with mismatched filename",
       });
 
-      await manager.deleteSubagent('correct-name', 'project');
+      await manager.deleteSubagent("correct-name", "project");
 
       // Should delete the actual file, not the expected filename
       expect(fs.unlink).toHaveBeenCalledWith(
-        path.normalize('/test/project/.tram/agents/wrong-name.md'),
+        path.normalize("/test/project/.tram/agents/wrong-name.md"),
       );
     });
 
-    it('should handle deletion when multiple files exist but only one matches', async () => {
+    it("should handle deletion when multiple files exist but only one matches", async () => {
       // Mock directory listing with multiple files
       vi.mocked(fs.readdir).mockResolvedValue([
-        'file1.md',
-        'file2.md',
-        'target-file.md',
+        "file1.md",
+        "file2.md",
+        "target-file.md",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any);
 
@@ -979,216 +979,216 @@ Target content`,
 
       mockParseYaml
         .mockReturnValueOnce({
-          name: 'other-agent-1',
-          description: 'First other agent',
+          name: "other-agent-1",
+          description: "First other agent",
         })
         .mockReturnValueOnce({
-          name: 'other-agent-2',
-          description: 'Second other agent',
+          name: "other-agent-2",
+          description: "Second other agent",
         })
         .mockReturnValueOnce({
-          name: 'target-agent',
-          description: 'The target agent',
+          name: "target-agent",
+          description: "The target agent",
         });
 
-      await manager.deleteSubagent('target-agent', 'project');
+      await manager.deleteSubagent("target-agent", "project");
 
       // Should only delete the matching file
       expect(fs.unlink).toHaveBeenCalledTimes(1);
       expect(fs.unlink).toHaveBeenCalledWith(
-        path.normalize('/test/project/.tram/agents/target-file.md'),
+        path.normalize("/test/project/.tram/agents/target-file.md"),
       );
     });
   });
 
-  describe('listSubagents', () => {
+  describe("listSubagents", () => {
     beforeEach(() => {
       // Mock directory listing
       vi.mocked(fs.readdir)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValueOnce(['agent1.md', 'agent2.md', 'not-md.txt'] as any)
+        .mockResolvedValueOnce(["agent1.md", "agent2.md", "not-md.txt"] as any)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValueOnce(['agent3.md', 'agent1.md'] as any); // user level
+        .mockResolvedValueOnce(["agent3.md", "agent1.md"] as any); // user level
 
       // Mock file reading for valid agents
       vi.mocked(fs.readFile).mockImplementation((filePath) => {
         const pathStr = String(filePath);
-        if (pathStr.includes('agent1.md')) {
+        if (pathStr.includes("agent1.md")) {
           return Promise.resolve(`---
 name: agent1
 description: First agent
 ---
 System prompt 1`);
-        } else if (pathStr.includes('agent2.md')) {
+        } else if (pathStr.includes("agent2.md")) {
           return Promise.resolve(`---
 name: agent2
 description: Second agent
 ---
 System prompt 2`);
-        } else if (pathStr.includes('agent3.md')) {
+        } else if (pathStr.includes("agent3.md")) {
           return Promise.resolve(`---
 name: agent3
 description: Third agent
 ---
 System prompt 3`);
         }
-        return Promise.reject(new Error('File not found'));
+        return Promise.reject(new Error("File not found"));
       });
     });
 
-    it('should list subagents from both levels', async () => {
+    it("should list subagents from both levels", async () => {
       const subagents = await manager.listSubagents();
 
       expect(subagents).toHaveLength(6); // agent1 (project takes precedence), agent2, agent3, general-purpose, Explore, statusline-setup (built-in)
       expect(subagents.map((s) => s.name)).toEqual([
-        'agent1',
-        'agent2',
-        'agent3',
-        'general-purpose',
-        'Explore',
-        'statusline-setup',
+        "agent1",
+        "agent2",
+        "agent3",
+        "general-purpose",
+        "Explore",
+        "statusline-setup",
       ]);
     });
 
-    it('should prioritize project level over user level', async () => {
+    it("should prioritize project level over user level", async () => {
       const subagents = await manager.listSubagents();
-      const agent1 = subagents.find((s) => s.name === 'agent1');
+      const agent1 = subagents.find((s) => s.name === "agent1");
 
-      expect(agent1!.level).toBe('project');
+      expect(agent1!.level).toBe("project");
     });
 
-    it('should filter by level', async () => {
+    it("should filter by level", async () => {
       const projectSubagents = await manager.listSubagents({
-        level: 'project',
+        level: "project",
       });
 
       expect(projectSubagents).toHaveLength(2); // agent1, agent2
-      expect(projectSubagents.every((s) => s.level === 'project')).toBe(true);
+      expect(projectSubagents.every((s) => s.level === "project")).toBe(true);
     });
 
-    it('should sort by name', async () => {
+    it("should sort by name", async () => {
       const subagents = await manager.listSubagents({
-        sortBy: 'name',
-        sortOrder: 'asc',
+        sortBy: "name",
+        sortOrder: "asc",
       });
 
       const names = subagents.map((s) => s.name);
       expect(names).toEqual([
-        'agent1',
-        'agent2',
-        'agent3',
-        'Explore',
-        'general-purpose',
-        'statusline-setup',
+        "agent1",
+        "agent2",
+        "agent3",
+        "Explore",
+        "general-purpose",
+        "statusline-setup",
       ]);
     });
 
-    it('should handle empty directories', async () => {
+    it("should handle empty directories", async () => {
       // Reset all mocks for this specific test
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(fs.readdir).mockResolvedValue([] as any);
-      vi.mocked(fs.readFile).mockRejectedValue(new Error('No files'));
+      vi.mocked(fs.readFile).mockRejectedValue(new Error("No files"));
 
       const subagents = await manager.listSubagents();
 
       expect(subagents).toHaveLength(3); // Only built-in agents remain
       expect(subagents.map((s) => s.name)).toEqual([
-        'general-purpose',
-        'Explore',
-        'statusline-setup',
+        "general-purpose",
+        "Explore",
+        "statusline-setup",
       ]);
-      expect(subagents.every((s) => s.level === 'builtin')).toBe(true);
+      expect(subagents.every((s) => s.level === "builtin")).toBe(true);
     });
 
-    it('should handle directory read errors', async () => {
+    it("should handle directory read errors", async () => {
       // Reset all mocks for this specific test
-      vi.mocked(fs.readdir).mockRejectedValue(new Error('Directory not found'));
-      vi.mocked(fs.readFile).mockRejectedValue(new Error('No files'));
+      vi.mocked(fs.readdir).mockRejectedValue(new Error("Directory not found"));
+      vi.mocked(fs.readFile).mockRejectedValue(new Error("No files"));
 
       const subagents = await manager.listSubagents();
 
       expect(subagents).toHaveLength(3); // Only built-in agents remain
       expect(subagents.map((s) => s.name)).toEqual([
-        'general-purpose',
-        'Explore',
-        'statusline-setup',
+        "general-purpose",
+        "Explore",
+        "statusline-setup",
       ]);
-      expect(subagents.every((s) => s.level === 'builtin')).toBe(true);
+      expect(subagents.every((s) => s.level === "builtin")).toBe(true);
     });
   });
 
-  describe('findSubagentByName', () => {
-    it('should find existing subagent', async () => {
+  describe("findSubagentByName", () => {
+    it("should find existing subagent", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vi.mocked(fs.readdir).mockResolvedValue(['test-agent.md'] as any);
+      vi.mocked(fs.readdir).mockResolvedValue(["test-agent.md"] as any);
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
 
-      const metadata = await manager.findSubagentByName('test-agent');
+      const metadata = await manager.findSubagentByName("test-agent");
 
       expect(metadata).toBeDefined();
-      expect(metadata!.name).toBe('test-agent');
-      expect(metadata!.description).toBe('A test subagent');
+      expect(metadata!.name).toBe("test-agent");
+      expect(metadata!.description).toBe("A test subagent");
     });
 
-    it('should return null for non-existent subagent', async () => {
-      vi.mocked(fs.readdir).mockRejectedValue(new Error('Directory not found'));
+    it("should return null for non-existent subagent", async () => {
+      vi.mocked(fs.readdir).mockRejectedValue(new Error("Directory not found"));
 
-      const metadata = await manager.findSubagentByName('nonexistent');
+      const metadata = await manager.findSubagentByName("nonexistent");
 
       expect(metadata).toBeNull();
     });
   });
 
-  describe('isNameAvailable', () => {
-    it('should return true for available names', async () => {
-      vi.mocked(fs.readdir).mockRejectedValue(new Error('Directory not found'));
+  describe("isNameAvailable", () => {
+    it("should return true for available names", async () => {
+      vi.mocked(fs.readdir).mockRejectedValue(new Error("Directory not found"));
 
-      const available = await manager.isNameAvailable('new-agent');
+      const available = await manager.isNameAvailable("new-agent");
 
       expect(available).toBe(true);
     });
 
-    it('should return false for existing names', async () => {
+    it("should return false for existing names", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vi.mocked(fs.readdir).mockResolvedValue(['test-agent.md'] as any);
+      vi.mocked(fs.readdir).mockResolvedValue(["test-agent.md"] as any);
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
 
-      const available = await manager.isNameAvailable('test-agent');
+      const available = await manager.isNameAvailable("test-agent");
 
       expect(available).toBe(false);
     });
 
-    it('should check specific level when provided', async () => {
+    it("should check specific level when provided", async () => {
       // The isNameAvailable method loads from both levels and checks if found subagent is at different level
       // First call: loads subagent (found at user level), checks if it's at project level (different) -> available
       vi.mocked(fs.readdir)
-        .mockRejectedValueOnce(new Error('Project dir not found')) // project level
+        .mockRejectedValueOnce(new Error("Project dir not found")) // project level
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .mockResolvedValueOnce(['test-agent.md'] as any); // user level - found here
+        .mockResolvedValueOnce(["test-agent.md"] as any); // user level - found here
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
 
       const availableAtProject = await manager.isNameAvailable(
-        'test-agent',
-        'project',
+        "test-agent",
+        "project",
       );
       expect(availableAtProject).toBe(true); // Available at project because found at user level
 
       // Second call: loads subagent (found at user level), checks if it's at user level (same) -> not available
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vi.mocked(fs.readdir).mockResolvedValue(['test-agent.md'] as any); // user level - found here
+      vi.mocked(fs.readdir).mockResolvedValue(["test-agent.md"] as any); // user level - found here
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
 
       const availableAtUser = await manager.isNameAvailable(
-        'test-agent',
-        'user',
+        "test-agent",
+        "user",
       );
       expect(availableAtUser).toBe(false); // Not available at user because found at user level
     });
   });
 
-  describe('Runtime Configuration Methods', () => {
-    describe('convertToRuntimeConfig', () => {
-      it('should convert basic configuration', () => {
+  describe("Runtime Configuration Methods", () => {
+    describe("convertToRuntimeConfig", () => {
+      it("should convert basic configuration", () => {
         const runtimeConfig = manager.convertToRuntimeConfig(validConfig);
 
         expect(runtimeConfig.promptConfig.systemPrompt).toBe(
@@ -1199,25 +1199,25 @@ System prompt 3`);
         expect(runtimeConfig.toolConfig).toBeUndefined();
       });
 
-      it('should include tool configuration when tools are specified', () => {
+      it("should include tool configuration when tools are specified", () => {
         const configWithTools: SubagentConfig = {
           ...validConfig,
-          tools: ['read_file', 'write_file'],
+          tools: ["read_file", "write_file"],
         };
 
         const runtimeConfig = manager.convertToRuntimeConfig(configWithTools);
 
         expect(runtimeConfig.toolConfig).toBeDefined();
         expect(runtimeConfig.toolConfig!.tools).toEqual([
-          'read_file',
-          'write_file',
+          "read_file",
+          "write_file",
         ]);
       });
 
-      it('should transform display names to tool names in tool configuration', () => {
+      it("should transform display names to tool names in tool configuration", () => {
         const configWithDisplayNames: SubagentConfig = {
           ...validConfig,
-          tools: ['Read File', 'write_file', 'Search Files', 'unknown_tool'],
+          tools: ["Read File", "write_file", "Search Files", "unknown_tool"],
         };
 
         const runtimeConfig = manager.convertToRuntimeConfig(
@@ -1226,79 +1226,79 @@ System prompt 3`);
 
         expect(runtimeConfig.toolConfig).toBeDefined();
         expect(runtimeConfig.toolConfig!.tools).toEqual([
-          'read_file', // 'Read File' -> 'read_file' (display name match)
-          'write_file', // 'write_file' -> 'write_file' (exact name match)
-          'grep', // 'Search Files' -> 'grep' (display name match)
-          'unknown_tool', // 'unknown_tool' -> 'unknown_tool' (preserved as-is)
+          "read_file", // 'Read File' -> 'read_file' (display name match)
+          "write_file", // 'write_file' -> 'write_file' (exact name match)
+          "grep", // 'Search Files' -> 'grep' (display name match)
+          "unknown_tool", // 'unknown_tool' -> 'unknown_tool' (preserved as-is)
         ]);
       });
 
-      it('should set modelConfig.model from model selector and merge run configurations', () => {
+      it("should set modelConfig.model from model selector and merge run configurations", () => {
         const configWithCustom: SubagentConfig = {
           ...validConfig,
-          model: 'custom-model',
+          model: "custom-model",
           runConfig: { max_time_minutes: 5 },
         };
 
         const runtimeConfig = manager.convertToRuntimeConfig(configWithCustom);
 
-        expect(runtimeConfig.modelConfig.model).toBe('custom-model');
+        expect(runtimeConfig.modelConfig.model).toBe("custom-model");
         expect(runtimeConfig.runConfig.max_time_minutes).toBe(5);
       });
 
-      it('should accept cross-provider model selectors', () => {
+      it("should accept cross-provider model selectors", () => {
         const configWithCrossProvider: SubagentConfig = {
           ...validConfig,
-          model: 'openai:gpt-4',
+          model: "openai:gpt-4",
         };
 
         const runtimeConfig = manager.convertToRuntimeConfig(
           configWithCrossProvider,
         );
-        expect(runtimeConfig.modelConfig.model).toBe('gpt-4');
+        expect(runtimeConfig.modelConfig.model).toBe("gpt-4");
       });
     });
 
-    describe('mergeConfigurations', () => {
-      it('should merge basic properties', () => {
+    describe("mergeConfigurations", () => {
+      it("should merge basic properties", () => {
         const updates = {
-          description: 'Updated description',
-          systemPrompt: 'Updated prompt',
+          description: "Updated description",
+          systemPrompt: "Updated prompt",
         };
 
         const merged = manager.mergeConfigurations(validConfig, updates);
 
-        expect(merged.description).toBe('Updated description');
-        expect(merged.systemPrompt).toBe('Updated prompt');
+        expect(merged.description).toBe("Updated description");
+        expect(merged.systemPrompt).toBe("Updated prompt");
         expect(merged.name).toBe(validConfig.name); // Should keep original
       });
 
-      it('should merge nested configurations', () => {
+      it("should merge nested configurations", () => {
         const configWithNested: SubagentConfig = {
           ...validConfig,
-          model: 'original-model',
+          model: "original-model",
           runConfig: { max_time_minutes: 10, max_turns: 20 },
         };
 
         const updates = {
-          model: 'updated-model',
+          model: "updated-model",
           runConfig: { max_time_minutes: 5 },
         };
 
         const merged = manager.mergeConfigurations(configWithNested, updates);
 
-        expect(merged.model).toBe('updated-model');
+        expect(merged.model).toBe("updated-model");
         expect(merged.runConfig!.max_time_minutes).toBe(5); // Should update
         expect(merged.runConfig!.max_turns).toBe(20); // Should keep original
       });
     });
 
-    describe('createAgentHeadless model override', () => {
+    describe("createAgentHeadless model override", () => {
       const agentConfig: SubagentConfig = {
-        name: 'model-test-agent',
-        description: 'Test agent',
-        systemPrompt: 'You are a test agent.',
-        level: 'session' as const,
+        name: "model-test-agent",
+        description: "Test agent",
+        systemPrompt: "You are a test agent.",
+        level: "session" as const,
       };
 
       beforeEach(() => {
@@ -1310,14 +1310,14 @@ System prompt 3`);
           generateContentStream: vi.fn(),
         });
 
-        vi.spyOn(mockConfig, 'getContentGeneratorConfig').mockReturnValue({
-          model: 'parent-model',
+        vi.spyOn(mockConfig, "getContentGeneratorConfig").mockReturnValue({
+          model: "parent-model",
           authType: AuthType.USE_OPENAI,
-          apiKey: 'parent-key',
+          apiKey: "parent-key",
         });
-        vi.spyOn(mockConfig, 'getModelsConfig').mockReturnValue({
+        vi.spyOn(mockConfig, "getModelsConfig").mockReturnValue({
           getResolvedModel: vi.fn().mockReturnValue(undefined),
-        } as unknown as ReturnType<Config['getModelsConfig']>);
+        } as unknown as ReturnType<Config["getModelsConfig"]>);
       });
 
       afterEach(() => {
@@ -1325,47 +1325,47 @@ System prompt 3`);
         mockCreateContentGenerator.mockReset();
       });
 
-      it('should create a new ContentGenerator for bare model IDs', async () => {
-        const config = { ...agentConfig, model: 'custom-model' };
+      it("should create a new ContentGenerator for bare model IDs", async () => {
+        const config = { ...agentConfig, model: "custom-model" };
 
         await manager.createAgentHeadless(config, mockConfig);
 
         expect(mockCreateContentGenerator).toHaveBeenCalledWith(
-          expect.objectContaining({ model: 'custom-model' }),
+          expect.objectContaining({ model: "custom-model" }),
           expect.anything(),
         );
       });
 
-      it('should create a new ContentGenerator for cross-provider selectors', async () => {
-        const config = { ...agentConfig, model: 'anthropic:claude-sonnet' };
+      it("should create a new ContentGenerator for cross-provider selectors", async () => {
+        const config = { ...agentConfig, model: "anthropic:claude-sonnet" };
 
         await manager.createAgentHeadless(config, mockConfig);
 
         expect(mockCreateContentGenerator).toHaveBeenCalledWith(
           expect.objectContaining({
-            model: 'claude-sonnet',
-            authType: 'anthropic',
+            model: "claude-sonnet",
+            authType: "anthropic",
           }),
           expect.anything(),
         );
       });
 
-      it('should NOT create a new ContentGenerator for inherit', async () => {
-        const config = { ...agentConfig, model: 'inherit' };
+      it("should NOT create a new ContentGenerator for inherit", async () => {
+        const config = { ...agentConfig, model: "inherit" };
 
         await manager.createAgentHeadless(config, mockConfig);
 
         expect(mockCreateContentGenerator).not.toHaveBeenCalled();
       });
 
-      it('should NOT create a new ContentGenerator when model is omitted', async () => {
+      it("should NOT create a new ContentGenerator when model is omitted", async () => {
         await manager.createAgentHeadless(agentConfig, mockConfig);
 
         expect(mockCreateContentGenerator).not.toHaveBeenCalled();
       });
 
-      it('should pass the overridden Config to AgentHeadless.create', async () => {
-        const config = { ...agentConfig, model: 'custom-model' };
+      it("should pass the overridden Config to AgentHeadless.create", async () => {
+        const config = { ...agentConfig, model: "custom-model" };
         const fakeGenerator = { generateContentStream: vi.fn() };
         mockCreateContentGenerator.mockResolvedValue(fakeGenerator);
 
@@ -1373,7 +1373,7 @@ System prompt 3`);
 
         const passedConfig = mockAgentHeadlessCreate.mock.calls[0][1];
         expect(passedConfig.getContentGenerator()).toBe(fakeGenerator);
-        expect(passedConfig.getModel()).toBe('custom-model');
+        expect(passedConfig.getModel()).toBe("custom-model");
       });
     });
   });

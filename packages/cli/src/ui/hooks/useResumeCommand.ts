@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 import {
   SessionService,
   type Config,
   SessionStartSource,
   type PermissionMode,
-} from '@tram-ai/tram-core';
-import { buildResumedHistoryItems } from '../utils/resumeHistoryUtils.js';
-import type { UseHistoryManagerReturn } from './useHistoryManager.js';
+} from "@tram-ai/tram-core";
+import { buildResumedHistoryItems } from "../utils/resumeHistoryUtils.js";
+import type { UseHistoryManagerReturn } from "./useHistoryManager.js";
 
 export interface UseResumeCommandOptions {
   config: Config | null;
-  historyManager: Pick<UseHistoryManagerReturn, 'clearItems' | 'loadHistory'>;
+  historyManager: Pick<UseHistoryManagerReturn, "clearItems" | "loadHistory">;
   startNewSession: (sessionId: string) => void;
   remount?: () => void;
 }
@@ -78,7 +78,7 @@ export function useResumeCommand(
           .getHookSystem()
           ?.fireSessionStartEvent(
             SessionStartSource.Resume,
-            config.getModel() ?? '',
+            config.getModel() ?? "",
             String(config.getApprovalMode()) as PermissionMode,
           );
       } catch (err) {

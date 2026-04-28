@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 
 interface MessageProps {
   id: string;
   content: string;
-  sender: 'user' | 'system' | 'assistant';
+  sender: "user" | "system" | "assistant";
   timestamp?: Date;
   className?: string;
 }
@@ -18,10 +18,10 @@ const Message: FC<MessageProps> = ({
   content,
   sender,
   timestamp,
-  className = '',
+  className = "",
 }) => {
-  const alignment = sender === 'user' ? 'justify-end' : 'justify-start';
-  const bgColor = sender === 'user' ? 'bg-blue-500' : 'bg-gray-200';
+  const alignment = sender === "user" ? "justify-end" : "justify-start";
+  const bgColor = sender === "user" ? "bg-blue-500" : "bg-gray-200";
 
   return (
     <div className={`flex ${alignment} mb-4 ${className}`}>
@@ -32,8 +32,8 @@ const Message: FC<MessageProps> = ({
         {timestamp && (
           <div className="text-xs opacity-70 mt-1">
             {timestamp.toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
+              hour: "2-digit",
+              minute: "2-digit",
             })}
           </div>
         )}

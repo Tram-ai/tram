@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback, useRef } from 'react';
-import type { VSCodeAPI } from '../../hooks/useVSCode.js';
+import { useState, useCallback, useRef } from "react";
+import type { VSCodeAPI } from "../../hooks/useVSCode.js";
 
 /**
  * File context management Hook
@@ -67,7 +67,7 @@ export const useFileContext = (vscode: VSCodeAPI) => {
 
         searchTimerRef.current = setTimeout(() => {
           vscode.postMessage({
-            type: 'getWorkspaceFiles',
+            type: "getWorkspaceFiles",
             data: { query: normalizedQuery, requestId },
           });
         }, 300);
@@ -89,7 +89,7 @@ export const useFileContext = (vscode: VSCodeAPI) => {
           lastQueryRef.current = undefined;
           hasRequestedFilesRef.current = true;
           vscode.postMessage({
-            type: 'getWorkspaceFiles',
+            type: "getWorkspaceFiles",
             data: { requestId },
           });
         }
@@ -112,7 +112,7 @@ export const useFileContext = (vscode: VSCodeAPI) => {
       requestId?: number,
     ) => {
       if (
-        typeof requestId === 'number' &&
+        typeof requestId === "number" &&
         latestWorkspaceFilesRequestIdRef.current !== requestId
       ) {
         return;
@@ -150,7 +150,7 @@ export const useFileContext = (vscode: VSCodeAPI) => {
    * Request active editor info
    */
   const requestActiveEditor = useCallback(() => {
-    vscode.postMessage({ type: 'getActiveEditor', data: {} });
+    vscode.postMessage({ type: "getActiveEditor", data: {} });
   }, [vscode]);
 
   /**
@@ -158,7 +158,7 @@ export const useFileContext = (vscode: VSCodeAPI) => {
    */
   const focusActiveEditor = useCallback(() => {
     vscode.postMessage({
-      type: 'focusActiveEditor',
+      type: "focusActiveEditor",
       data: {},
     });
   }, [vscode]);

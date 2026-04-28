@@ -4,23 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type {
-  Config,
-  ConfigInitializeOptions,
-} from '@tram-ai/tram-core';
-import { createDebugLogger } from '@tram-ai/tram-core';
-import { StreamJsonInputReader } from './io/StreamJsonInputReader.js';
-import { StreamJsonOutputAdapter } from './io/StreamJsonOutputAdapter.js';
-import { ControlContext } from './control/ControlContext.js';
-import { ControlDispatcher } from './control/ControlDispatcher.js';
-import { ControlService } from './control/ControlService.js';
+import type { Config, ConfigInitializeOptions } from "@tram-ai/tram-core";
+import { createDebugLogger } from "@tram-ai/tram-core";
+import { StreamJsonInputReader } from "./io/StreamJsonInputReader.js";
+import { StreamJsonOutputAdapter } from "./io/StreamJsonOutputAdapter.js";
+import { ControlContext } from "./control/ControlContext.js";
+import { ControlDispatcher } from "./control/ControlDispatcher.js";
+import { ControlService } from "./control/ControlService.js";
 import type {
   CLIMessage,
   CLIUserMessage,
   CLIControlRequest,
   CLIControlResponse,
   ControlCancelRequest,
-} from './types.js';
+} from "./types.js";
 import {
   isCLIUserMessage,
   isCLIAssistantMessage,
@@ -30,11 +27,11 @@ import {
   isControlRequest,
   isControlResponse,
   isControlCancel,
-} from './types.js';
-import { createMinimalSettings } from '../config/settings.js';
-import { runNonInteractive } from '../nonInteractiveCli.js';
+} from "./types.js";
+import { createMinimalSettings } from "../config/settings.js";
+import { runNonInteractive } from "../nonInteractiveCli.js";
 
-const debugLogger = createDebugLogger('NON_INTERACTIVE_SESSION');
+const debugLogger = createDebugLogger("NON_INTERACTIVE_SESSION");
 
 class Session {
   private userMessageQueue: CLIUserMessage[] = [];
@@ -105,13 +102,13 @@ class Session {
       return;
     }
 
-    debugLogger.debug('[Session] Initializing config');
+    debugLogger.debug("[Session] Initializing config");
 
     try {
       await this.config.initialize(options);
       this.configInitialized = true;
     } catch (error) {
-      debugLogger.error('[Session] Failed to initialize config:', error);
+      debugLogger.error("[Session] Failed to initialize config:", error);
       throw error;
     }
   }
@@ -121,7 +118,7 @@ class Session {
    */
   private completeInitialization(): void {
     if (this.initializationResolve) {
-      debugLogger.debug('[Session] Initialization complete');
+      debugLogger.debug("[Session] Initialization complete");
       this.initializationResolve();
       this.initializationResolve = null;
       this.initializationReject = null;
@@ -133,7 +130,7 @@ class Session {
    */
   private failInitialization(error: Error): void {
     if (this.initializationReject) {
-      debugLogger.error('[Session] Initialization failed:', error);
+      debugLogger.error("[Session] Initialization failed:", error);
       this.initializationReject(error);
       this.initializationResolve = null;
       this.initializationReject = null;
@@ -199,14 +196,14 @@ class Session {
       this.controlSystemEnabled = true;
       this.ensureControlSystem();
 
-      if (request.request.subtype === 'initialize') {
+      if (request.request.subtype === "initialize") {
         // Start SDK mode initialization (fire-and-forget from loop perspective)
         void this.initializeSdkMode(request);
         return;
       }
 
       debugLogger.debug(
-        '[Session] Ignoring non-initialize control request during initialization',
+        "[Session] Ignoring non-initialize control request during initialization",
       );
       return;
     }
@@ -244,7 +241,7 @@ class Session {
       // Initialization complete!
       this.completeInitialization();
     } catch (error) {
-      debugLogger.error('[Session] SDK mode initialization failed:', error);
+      debugLogger.error("[Session] SDK mode initialization failed:", error);
       this.failInitialization(
         error instanceof Error ? error : new Error(String(error)),
       );
@@ -269,7 +266,7 @@ class Session {
       // Enqueue the first user message for processing
       this.enqueueUserMessage(userMessage);
     } catch (error) {
-      debugLogger.error('[Session] Direct mode initialization failed:', error);
+      debugLogger.error("[Session] Direct mode initialization failed:", error);
       this.failInitialization(
         error instanceof Error ? error : new Error(String(error)),
       );
@@ -283,14 +280,14 @@ class Session {
   private handleControlRequestAsync(request: CLIControlRequest): void {
     const dispatcher = this.getDispatcher();
     if (!dispatcher) {
-      debugLogger.warn('[Session] Control system not enabled');
+      debugLogger.warn("[Session] Control system not enabled");
       return;
     }
 
     // Fire-and-forget: dispatch runs concurrently
     // The dispatcher's pendingIncomingRequests tracks completion
     void dispatcher.dispatch(request).catch((error) => {
-      debugLogger.error('[Session] Control request dispatch error:', error);
+      debugLogger.error("[Session] Control request dispatch error:", error);
       // Error response is already sent by dispatcher.dispatch()
     });
   }
@@ -320,7 +317,7 @@ class Session {
   private async processUserMessage(userMessage: CLIUserMessage): Promise<void> {
     const input = extractUserMessageText(userMessage);
     if (!input) {
-      debugLogger.debug('[Session] No text content in user message');
+      debugLogger.debug("[Session] No text content in user message");
       return;
     }
 
@@ -342,7 +339,7 @@ class Session {
         },
       );
     } catch (error) {
-      debugLogger.error('[Session] Query execution error:', error);
+      debugLogger.error("[Session] Query execution error:", error);
     }
   }
 
@@ -360,7 +357,7 @@ class Session {
       try {
         await this.processUserMessage(userMessage);
       } catch (error) {
-        debugLogger.error('[Session] Error processing user message:', error);
+        debugLogger.error("[Session] Error processing user message:", error);
         this.emitErrorResult(error);
       }
     }
@@ -406,7 +403,7 @@ class Session {
   }
 
   private handleInterrupt(): void {
-    debugLogger.info('[Session] Interrupt requested');
+    debugLogger.info("[Session] Interrupt requested");
     this.abortController.abort();
     // Do not create a new AbortController to prevent listener leaks.
     // Subsequent queries will check signal.aborted and fail immediately.
@@ -414,13 +411,13 @@ class Session {
 
   private setupSignalHandlers(): void {
     this.shutdownHandler = () => {
-      debugLogger.info('[Session] Shutdown signal received');
+      debugLogger.info("[Session] Shutdown signal received");
       this.isShuttingDown = true;
       this.abortController.abort();
     };
 
-    process.on('SIGINT', this.shutdownHandler);
-    process.on('SIGTERM', this.shutdownHandler);
+    process.on("SIGINT", this.shutdownHandler);
+    process.on("SIGTERM", this.shutdownHandler);
   }
 
   /**
@@ -432,7 +429,7 @@ class Session {
       await this.waitForInitialization();
     } catch (error) {
       debugLogger.error(
-        '[Session] Initialization error during shutdown:',
+        "[Session] Initialization error during shutdown:",
         error,
       );
     }
@@ -450,17 +447,17 @@ class Session {
 
     // 3. Wait for user message processing queue
     while (this.processingPromise) {
-      debugLogger.debug('[Session] Waiting for user message processing');
+      debugLogger.debug("[Session] Waiting for user message processing");
       try {
         await this.processingPromise;
       } catch (error) {
-        debugLogger.error('[Session] Error in user message processing:', error);
+        debugLogger.error("[Session] Error in user message processing:", error);
       }
     }
   }
 
   private async shutdown(): Promise<void> {
-    debugLogger.debug('[Session] Shutting down');
+    debugLogger.debug("[Session] Shutting down");
 
     this.isShuttingDown = true;
 
@@ -473,8 +470,8 @@ class Session {
 
   private cleanupSignalHandlers(): void {
     if (this.shutdownHandler) {
-      process.removeListener('SIGINT', this.shutdownHandler);
-      process.removeListener('SIGTERM', this.shutdownHandler);
+      process.removeListener("SIGINT", this.shutdownHandler);
+      process.removeListener("SIGTERM", this.shutdownHandler);
       this.shutdownHandler = null;
     }
   }
@@ -496,7 +493,7 @@ class Session {
    */
   async run(): Promise<void> {
     try {
-      debugLogger.info('[Session] Starting session', this.sessionId);
+      debugLogger.info("[Session] Starting session", this.sessionId);
 
       // Handle initial prompt if provided (fire-and-forget)
       if (this.initialPrompt !== null) {
@@ -544,7 +541,7 @@ class Session {
             !isCLIPartialAssistantMessage(message)
           ) {
             debugLogger.warn(
-              '[Session] Unknown message type:',
+              "[Session] Unknown message type:",
               JSON.stringify(message, null, 2),
             );
           }
@@ -554,7 +551,7 @@ class Session {
           }
         }
       } catch (streamError) {
-        debugLogger.error('[Session] Stream reading error:', streamError);
+        debugLogger.error("[Session] Stream reading error:", streamError);
         throw streamError;
       }
 
@@ -569,7 +566,7 @@ class Session {
       await this.waitForAllPendingWork();
       await this.shutdown();
     } catch (error) {
-      debugLogger.error('[Session] Error:', error);
+      debugLogger.error("[Session] Error:", error);
       await this.shutdown();
       throw error;
     } finally {
@@ -580,24 +577,24 @@ class Session {
 
 function extractUserMessageText(message: CLIUserMessage): string | null {
   const content = message.message.content;
-  if (typeof content === 'string') {
+  if (typeof content === "string") {
     return content;
   }
 
   if (Array.isArray(content)) {
     const parts = content
       .map((block) => {
-        if (!block || typeof block !== 'object') {
-          return '';
+        if (!block || typeof block !== "object") {
+          return "";
         }
-        if ('type' in block && block.type === 'text' && 'text' in block) {
-          return typeof block.text === 'string' ? block.text : '';
+        if ("type" in block && block.type === "text" && "text" in block) {
+          return typeof block.text === "string" ? block.text : "";
         }
         return JSON.stringify(block);
       })
       .filter((part) => part.length > 0);
 
-    return parts.length > 0 ? parts.join('\n') : null;
+    return parts.length > 0 ? parts.join("\n") : null;
   }
 
   return null;
@@ -611,10 +608,10 @@ export async function runNonInteractiveStreamJson(
   if (input && input.trim().length > 0) {
     const sessionId = config.getSessionId();
     initialPrompt = {
-      type: 'user',
+      type: "user",
       session_id: sessionId,
       message: {
-        role: 'user',
+        role: "user",
         content: input.trim(),
       },
       parent_tool_use_id: null,

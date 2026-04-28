@@ -3,9 +3,9 @@
  * Tests message routing, lifecycle, and orchestration
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { Query } from '../../src/query/Query.js';
-import type { Transport } from '../../src/transport/Transport.js';
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { Query } from "../../src/query/Query.js";
+import type { Transport } from "../../src/transport/Transport.js";
 import type {
   SDKMessage,
   SDKUserMessage,
@@ -16,10 +16,10 @@ import type {
   CLIControlRequest,
   CLIControlResponse,
   ControlCancelRequest,
-} from '../../src/types/protocol.js';
-import { ControlRequestType } from '../../src/types/protocol.js';
-import { AbortError } from '../../src/types/errors.js';
-import { Stream } from '../../src/utils/Stream.js';
+} from "../../src/types/protocol.js";
+import { ControlRequestType } from "../../src/types/protocol.js";
+import { AbortError } from "../../src/types/errors.js";
+import { Stream } from "../../src/utils/Stream.js";
 
 // Mock Transport implementation
 class MockTransport implements Transport {
@@ -83,14 +83,14 @@ function findControlResponse(
 ): CLIControlResponse | undefined {
   return messages.find(
     (msg: unknown) =>
-      typeof msg === 'object' &&
+      typeof msg === "object" &&
       msg !== null &&
-      'type' in msg &&
-      msg.type === 'control_response' &&
-      'response' in msg &&
-      typeof msg.response === 'object' &&
+      "type" in msg &&
+      msg.type === "control_response" &&
+      "response" in msg &&
+      typeof msg.response === "object" &&
       msg.response !== null &&
-      'request_id' in msg.response &&
+      "request_id" in msg.response &&
       msg.response.request_id === requestId,
   ) as CLIControlResponse | undefined;
 }
@@ -102,14 +102,14 @@ function findControlRequest(
 ): CLIControlRequest | undefined {
   return messages.find(
     (msg: unknown) =>
-      typeof msg === 'object' &&
+      typeof msg === "object" &&
       msg !== null &&
-      'type' in msg &&
-      msg.type === 'control_request' &&
-      'request' in msg &&
-      typeof msg.request === 'object' &&
+      "type" in msg &&
+      msg.type === "control_request" &&
+      "request" in msg &&
+      typeof msg.request === "object" &&
       msg.request !== null &&
-      'subtype' in msg.request &&
+      "subtype" in msg.request &&
       msg.request.subtype === subtype,
   ) as CLIControlRequest | undefined;
 }
@@ -117,13 +117,13 @@ function findControlRequest(
 // Helper function to create test messages
 function createUserMessage(
   content: string,
-  sessionId = 'test-session',
+  sessionId = "test-session",
 ): SDKUserMessage {
   return {
-    type: 'user',
+    type: "user",
     session_id: sessionId,
     message: {
-      role: 'user',
+      role: "user",
       content,
     },
     parent_tool_use_id: null,
@@ -132,18 +132,18 @@ function createUserMessage(
 
 function createAssistantMessage(
   content: string,
-  sessionId = 'test-session',
+  sessionId = "test-session",
 ): SDKAssistantMessage {
   return {
-    type: 'assistant',
-    uuid: 'msg-123',
+    type: "assistant",
+    uuid: "msg-123",
     session_id: sessionId,
     message: {
-      id: 'msg-123',
-      type: 'message',
-      role: 'assistant',
-      model: 'test-model',
-      content: [{ type: 'text', text: content }],
+      id: "msg-123",
+      type: "message",
+      role: "assistant",
+      model: "test-model",
+      content: [{ type: "text", text: content }],
       usage: { input_tokens: 10, output_tokens: 20 },
     },
     parent_tool_use_id: null,
@@ -152,42 +152,42 @@ function createAssistantMessage(
 
 function createSystemMessage(
   subtype: string,
-  sessionId = 'test-session',
+  sessionId = "test-session",
 ): SDKSystemMessage {
   return {
-    type: 'system',
+    type: "system",
     subtype,
-    uuid: 'sys-123',
+    uuid: "sys-123",
     session_id: sessionId,
-    cwd: '/test/path',
-    tools: ['read_file', 'write_file'],
-    model: 'test-model',
+    cwd: "/test/path",
+    tools: ["read_file", "write_file"],
+    model: "test-model",
   };
 }
 
 function createResultMessage(
   success: boolean,
-  sessionId = 'test-session',
+  sessionId = "test-session",
 ): SDKResultMessage {
   if (success) {
     return {
-      type: 'result',
-      subtype: 'success',
-      uuid: 'result-123',
+      type: "result",
+      subtype: "success",
+      uuid: "result-123",
       session_id: sessionId,
       is_error: false,
       duration_ms: 1000,
       duration_api_ms: 800,
       num_turns: 1,
-      result: 'Success',
+      result: "Success",
       usage: { input_tokens: 10, output_tokens: 20 },
       permission_denials: [],
     };
   } else {
     return {
-      type: 'result',
-      subtype: 'error_during_execution',
-      uuid: 'result-123',
+      type: "result",
+      subtype: "error_during_execution",
+      uuid: "result-123",
       session_id: sessionId,
       is_error: true,
       duration_ms: 1000,
@@ -195,22 +195,22 @@ function createResultMessage(
       num_turns: 1,
       usage: { input_tokens: 10, output_tokens: 20 },
       permission_denials: [],
-      error: { message: 'Test error' },
+      error: { message: "Test error" },
     };
   }
 }
 
 function createPartialMessage(
-  sessionId = 'test-session',
+  sessionId = "test-session",
 ): SDKPartialAssistantMessage {
   return {
-    type: 'stream_event',
-    uuid: 'stream-123',
+    type: "stream_event",
+    uuid: "stream-123",
     session_id: sessionId,
     event: {
-      type: 'content_block_delta',
+      type: "content_block_delta",
       index: 0,
-      delta: { type: 'text_delta', text: 'Hello' },
+      delta: { type: "text_delta", text: "Hello" },
     },
     parent_tool_use_id: null,
   };
@@ -218,18 +218,18 @@ function createPartialMessage(
 
 function createControlRequest(
   subtype: string,
-  requestId = 'req-123',
+  requestId = "req-123",
 ): CLIControlRequest {
   return {
-    type: 'control_request',
+    type: "control_request",
     request_id: requestId,
     request: {
       subtype,
-      tool_name: 'test_tool',
-      input: { arg: 'value' },
+      tool_name: "test_tool",
+      input: { arg: "value" },
       permission_suggestions: null,
       blocked_path: null,
-    } as CLIControlRequest['request'],
+    } as CLIControlRequest["request"],
   };
 }
 
@@ -239,24 +239,24 @@ function createControlResponse(
   data?: unknown,
 ): CLIControlResponse {
   return {
-    type: 'control_response',
+    type: "control_response",
     response: success
       ? {
-          subtype: 'success',
+          subtype: "success",
           request_id: requestId,
           response: data ?? null,
         }
       : {
-          subtype: 'error',
+          subtype: "error",
           request_id: requestId,
-          error: 'Test error',
+          error: "Test error",
         },
   };
 }
 
 function createControlCancel(requestId: string): ControlCancelRequest {
   return {
-    type: 'control_cancel_request',
+    type: "control_cancel_request",
     request_id: requestId,
   };
 }
@@ -275,7 +275,7 @@ async function respondToInitialize(
   await query.initialized;
 }
 
-describe('Query', () => {
+describe("Query", () => {
   let transport: MockTransport;
 
   beforeEach(() => {
@@ -289,10 +289,10 @@ describe('Query', () => {
     }
   });
 
-  describe('Construction and Initialization', () => {
-    it('should create Query with transport and options', async () => {
+  describe("Construction and Initialization", () => {
+    it("should create Query with transport and options", async () => {
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
       });
 
       expect(query).toBeDefined();
@@ -306,18 +306,18 @@ describe('Query', () => {
 
       const initRequest =
         transport.getLastWrittenMessage() as CLIControlRequest;
-      expect(initRequest.type).toBe('control_request');
-      expect(initRequest.request.subtype).toBe('initialize');
+      expect(initRequest.type).toBe("control_request");
+      expect(initRequest.request.subtype).toBe("initialize");
 
       await respondToInitialize(transport, query);
       await query.close();
     });
 
-    it('should generate unique session ID', async () => {
+    it("should generate unique session ID", async () => {
       const transport2 = new MockTransport();
-      const query1 = new Query(transport, { cwd: '/test' });
+      const query1 = new Query(transport, { cwd: "/test" });
       const query2 = new Query(transport2, {
-        cwd: '/test',
+        cwd: "/test",
       });
 
       expect(query1.getSessionId()).not.toBe(query2.getSessionId());
@@ -329,10 +329,10 @@ describe('Query', () => {
       await transport2.close();
     });
 
-    it('should use resume parameter as session ID if provided', async () => {
-      const resumeId = '123e4567-e89b-12d3-a456-426614174000';
+    it("should use resume parameter as session ID if provided", async () => {
+      const resumeId = "123e4567-e89b-12d3-a456-426614174000";
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         resume: resumeId,
       });
 
@@ -342,9 +342,9 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should handle initialization errors', async () => {
+    it("should handle initialization errors", async () => {
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
       });
 
       // Simulate initialization failure
@@ -364,13 +364,13 @@ describe('Query', () => {
     });
   });
 
-  describe('Message Routing', () => {
-    it('should route user messages to output stream', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+  describe("Message Routing", () => {
+    it("should route user messages to output stream", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
-      const userMsg = createUserMessage('Hello');
+      const userMsg = createUserMessage("Hello");
       transport.simulateMessage(userMsg);
 
       const result = await query.next();
@@ -380,12 +380,12 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should route assistant messages to output stream', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should route assistant messages to output stream", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
-      const assistantMsg = createAssistantMessage('Response');
+      const assistantMsg = createAssistantMessage("Response");
       transport.simulateMessage(assistantMsg);
 
       const result = await query.next();
@@ -395,12 +395,12 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should route system messages to output stream', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should route system messages to output stream", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
-      const systemMsg = createSystemMessage('session_start');
+      const systemMsg = createSystemMessage("session_start");
       transport.simulateMessage(systemMsg);
 
       const result = await query.next();
@@ -410,8 +410,8 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should route result messages to output stream', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should route result messages to output stream", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -425,8 +425,8 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should route partial assistant messages to output stream', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should route partial assistant messages to output stream", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -440,12 +440,12 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should handle unknown message types', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should handle unknown message types", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
-      const unknownMsg = { type: 'unknown', data: 'test' };
+      const unknownMsg = { type: "unknown", data: "test" };
       transport.simulateMessage(unknownMsg);
 
       const result = await query.next();
@@ -455,13 +455,13 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should yield messages in order', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should yield messages in order", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
-      const msg1 = createUserMessage('First');
-      const msg2 = createAssistantMessage('Second');
+      const msg1 = createUserMessage("First");
+      const msg2 = createAssistantMessage("Second");
       const msg3 = createResultMessage(true);
 
       transport.simulateMessage(msg1);
@@ -481,23 +481,23 @@ describe('Query', () => {
     });
   });
 
-  describe('Control Plane - Permission Control', () => {
-    it('should handle can_use_tool control requests', async () => {
-      const canUseTool = vi.fn().mockResolvedValue({ behavior: 'allow' });
+  describe("Control Plane - Permission Control", () => {
+    it("should handle can_use_tool control requests", async () => {
+      const canUseTool = vi.fn().mockResolvedValue({ behavior: "allow" });
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         canUseTool,
       });
 
       await respondToInitialize(transport, query);
 
-      const controlReq = createControlRequest('can_use_tool');
+      const controlReq = createControlRequest("can_use_tool");
       transport.simulateMessage(controlReq);
 
       await vi.waitFor(() => {
         expect(canUseTool).toHaveBeenCalledWith(
-          'test_tool',
-          { arg: 'value' },
+          "test_tool",
+          { arg: "value" },
           expect.objectContaining({
             signal: expect.any(AbortSignal),
             suggestions: null,
@@ -508,27 +508,27 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should send control response with permission result - allow', async () => {
-      const canUseTool = vi.fn().mockResolvedValue({ behavior: 'allow' });
+    it("should send control response with permission result - allow", async () => {
+      const canUseTool = vi.fn().mockResolvedValue({ behavior: "allow" });
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         canUseTool,
       });
 
       await respondToInitialize(transport, query);
 
-      const controlReq = createControlRequest('can_use_tool', 'perm-req-1');
+      const controlReq = createControlRequest("can_use_tool", "perm-req-1");
       transport.simulateMessage(controlReq);
 
       await vi.waitFor(() => {
         const responses = transport.getAllWrittenMessages();
-        const response = findControlResponse(responses, 'perm-req-1');
+        const response = findControlResponse(responses, "perm-req-1");
 
         expect(response).toBeDefined();
-        expect(response?.response.subtype).toBe('success');
-        if (response?.response.subtype === 'success') {
+        expect(response?.response.subtype).toBe("success");
+        if (response?.response.subtype === "success") {
           expect(response.response.response).toMatchObject({
-            behavior: 'allow',
+            behavior: "allow",
           });
         }
       });
@@ -536,27 +536,27 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should send control response with permission result - deny', async () => {
-      const canUseTool = vi.fn().mockResolvedValue({ behavior: 'deny' });
+    it("should send control response with permission result - deny", async () => {
+      const canUseTool = vi.fn().mockResolvedValue({ behavior: "deny" });
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         canUseTool,
       });
 
       await respondToInitialize(transport, query);
 
-      const controlReq = createControlRequest('can_use_tool', 'perm-req-2');
+      const controlReq = createControlRequest("can_use_tool", "perm-req-2");
       transport.simulateMessage(controlReq);
 
       await vi.waitFor(() => {
         const responses = transport.getAllWrittenMessages();
-        const response = findControlResponse(responses, 'perm-req-2');
+        const response = findControlResponse(responses, "perm-req-2");
 
         expect(response).toBeDefined();
-        expect(response?.response.subtype).toBe('success');
-        if (response?.response.subtype === 'success') {
+        expect(response?.response.subtype).toBe("success");
+        if (response?.response.subtype === "success") {
           expect(response.response.response).toMatchObject({
-            behavior: 'deny',
+            behavior: "deny",
           });
         }
       });
@@ -564,25 +564,25 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should default to denying tools if no callback', async () => {
+    it("should default to denying tools if no callback", async () => {
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
       });
 
       await respondToInitialize(transport, query);
 
-      const controlReq = createControlRequest('can_use_tool', 'perm-req-3');
+      const controlReq = createControlRequest("can_use_tool", "perm-req-3");
       transport.simulateMessage(controlReq);
 
       await vi.waitFor(() => {
         const responses = transport.getAllWrittenMessages();
-        const response = findControlResponse(responses, 'perm-req-3');
+        const response = findControlResponse(responses, "perm-req-3");
 
         expect(response).toBeDefined();
-        expect(response?.response.subtype).toBe('success');
-        if (response?.response.subtype === 'success') {
+        expect(response?.response.subtype).toBe("success");
+        if (response?.response.subtype === "success") {
           expect(response.response.response).toMatchObject({
-            behavior: 'deny',
+            behavior: "deny",
           });
         }
       });
@@ -590,16 +590,16 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should handle permission callback timeout', async () => {
+    it("should handle permission callback timeout", async () => {
       const canUseTool = vi.fn().mockImplementation(
         () =>
           new Promise((resolve) => {
-            setTimeout(() => resolve({ behavior: 'allow' }), 15000);
+            setTimeout(() => resolve({ behavior: "allow" }), 15000);
           }),
       );
 
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         canUseTool,
         timeout: {
           canUseTool: 10000,
@@ -608,19 +608,19 @@ describe('Query', () => {
 
       await respondToInitialize(transport, query);
 
-      const controlReq = createControlRequest('can_use_tool', 'perm-req-4');
+      const controlReq = createControlRequest("can_use_tool", "perm-req-4");
       transport.simulateMessage(controlReq);
 
       await vi.waitFor(
         () => {
           const responses = transport.getAllWrittenMessages();
-          const response = findControlResponse(responses, 'perm-req-4');
+          const response = findControlResponse(responses, "perm-req-4");
 
           expect(response).toBeDefined();
-          expect(response?.response.subtype).toBe('success');
-          if (response?.response.subtype === 'success') {
+          expect(response?.response.subtype).toBe("success");
+          if (response?.response.subtype === "success") {
             expect(response.response.response).toMatchObject({
-              behavior: 'deny',
+              behavior: "deny",
             });
           }
         },
@@ -630,27 +630,27 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should handle permission callback errors', async () => {
-      const canUseTool = vi.fn().mockRejectedValue(new Error('Callback error'));
+    it("should handle permission callback errors", async () => {
+      const canUseTool = vi.fn().mockRejectedValue(new Error("Callback error"));
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         canUseTool,
       });
 
       await respondToInitialize(transport, query);
 
-      const controlReq = createControlRequest('can_use_tool', 'perm-req-5');
+      const controlReq = createControlRequest("can_use_tool", "perm-req-5");
       transport.simulateMessage(controlReq);
 
       await vi.waitFor(() => {
         const responses = transport.getAllWrittenMessages();
-        const response = findControlResponse(responses, 'perm-req-5');
+        const response = findControlResponse(responses, "perm-req-5");
 
         expect(response).toBeDefined();
-        expect(response?.response.subtype).toBe('success');
-        if (response?.response.subtype === 'success') {
+        expect(response?.response.subtype).toBe("success");
+        if (response?.response.subtype === "success") {
           expect(response.response.response).toMatchObject({
-            behavior: 'deny',
+            behavior: "deny",
           });
         }
       });
@@ -658,31 +658,31 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should handle PermissionResult format with updatedInput', async () => {
+    it("should handle PermissionResult format with updatedInput", async () => {
       const canUseTool = vi.fn().mockResolvedValue({
-        behavior: 'allow',
-        updatedInput: { arg: 'modified' },
+        behavior: "allow",
+        updatedInput: { arg: "modified" },
       });
 
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         canUseTool,
       });
 
       await respondToInitialize(transport, query);
 
-      const controlReq = createControlRequest('can_use_tool', 'perm-req-6');
+      const controlReq = createControlRequest("can_use_tool", "perm-req-6");
       transport.simulateMessage(controlReq);
 
       await vi.waitFor(() => {
         const responses = transport.getAllWrittenMessages();
-        const response = findControlResponse(responses, 'perm-req-6');
+        const response = findControlResponse(responses, "perm-req-6");
 
         expect(response).toBeDefined();
-        if (response?.response.subtype === 'success') {
+        if (response?.response.subtype === "success") {
           expect(response.response.response).toMatchObject({
-            behavior: 'allow',
-            updatedInput: { arg: 'modified' },
+            behavior: "allow",
+            updatedInput: { arg: "modified" },
           });
         }
       });
@@ -690,32 +690,32 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should handle permission denial with interrupt flag', async () => {
+    it("should handle permission denial with interrupt flag", async () => {
       const canUseTool = vi.fn().mockResolvedValue({
-        behavior: 'deny',
-        message: 'Denied by user',
+        behavior: "deny",
+        message: "Denied by user",
         interrupt: true,
       });
 
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         canUseTool,
       });
 
       await respondToInitialize(transport, query);
 
-      const controlReq = createControlRequest('can_use_tool', 'perm-req-7');
+      const controlReq = createControlRequest("can_use_tool", "perm-req-7");
       transport.simulateMessage(controlReq);
 
       await vi.waitFor(() => {
         const responses = transport.getAllWrittenMessages();
-        const response = findControlResponse(responses, 'perm-req-7');
+        const response = findControlResponse(responses, "perm-req-7");
 
         expect(response).toBeDefined();
-        if (response?.response.subtype === 'success') {
+        if (response?.response.subtype === "success") {
           expect(response.response.response).toMatchObject({
-            behavior: 'deny',
-            message: 'Denied by user',
+            behavior: "deny",
+            message: "Denied by user",
             interrupt: true,
           });
         }
@@ -725,8 +725,8 @@ describe('Query', () => {
     });
   });
 
-  describe('Control Plane - Control Cancel', () => {
-    it('should handle control cancel requests', async () => {
+  describe("Control Plane - Control Cancel", () => {
+    it("should handle control cancel requests", async () => {
       const canUseTool = vi.fn().mockImplementation(
         (
           _toolName: string,
@@ -734,24 +734,24 @@ describe('Query', () => {
           { signal }: { signal: AbortSignal },
         ) =>
           new Promise((resolve, reject) => {
-            signal.addEventListener('abort', () => reject(new AbortError()));
-            setTimeout(() => resolve({ behavior: 'allow' }), 5000);
+            signal.addEventListener("abort", () => reject(new AbortError()));
+            setTimeout(() => resolve({ behavior: "allow" }), 5000);
           }),
       );
 
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         canUseTool,
       });
 
       await respondToInitialize(transport, query);
 
-      const controlReq = createControlRequest('can_use_tool', 'cancel-req-1');
+      const controlReq = createControlRequest("can_use_tool", "cancel-req-1");
       transport.simulateMessage(controlReq);
 
       // Wait a bit then send cancel
       await new Promise((resolve) => setTimeout(resolve, 100));
-      transport.simulateMessage(createControlCancel('cancel-req-1'));
+      transport.simulateMessage(createControlCancel("cancel-req-1"));
 
       await vi.waitFor(() => {
         expect(canUseTool).toHaveBeenCalled();
@@ -760,15 +760,15 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should ignore cancel for unknown request_id', async () => {
+    it("should ignore cancel for unknown request_id", async () => {
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
       });
 
       await respondToInitialize(transport, query);
 
       // Send cancel for non-existent request
-      transport.simulateMessage(createControlCancel('unknown-req'));
+      transport.simulateMessage(createControlCancel("unknown-req"));
 
       // Should not throw or cause issues
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -777,15 +777,15 @@ describe('Query', () => {
     });
   });
 
-  describe('Multi-Turn Conversation', () => {
-    it('should support streamInput() for follow-up messages', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+  describe("Multi-Turn Conversation", () => {
+    it("should support streamInput() for follow-up messages", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
       async function* messageGenerator() {
-        yield createUserMessage('Follow-up 1');
-        yield createUserMessage('Follow-up 2');
+        yield createUserMessage("Follow-up 1");
+        yield createUserMessage("Follow-up 2");
       }
 
       const streamPromise = query.streamInput(messageGenerator());
@@ -795,25 +795,25 @@ describe('Query', () => {
       const messages = transport.getAllWrittenMessages();
       const userMessages = messages.filter(
         (msg: unknown) =>
-          typeof msg === 'object' &&
+          typeof msg === "object" &&
           msg !== null &&
-          'type' in msg &&
-          msg.type === 'user',
+          "type" in msg &&
+          msg.type === "user",
       );
       expect(userMessages.length).toBeGreaterThanOrEqual(2);
 
       await query.close();
     });
 
-    it('should maintain session context across turns', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should maintain session context across turns", async () => {
+      const query = new Query(transport, { cwd: "/test" });
       const sessionId = query.getSessionId();
 
       await respondToInitialize(transport, query);
 
       async function* messageGenerator() {
-        yield createUserMessage('Turn 1', sessionId);
-        yield createUserMessage('Turn 2', sessionId);
+        yield createUserMessage("Turn 1", sessionId);
+        yield createUserMessage("Turn 2", sessionId);
       }
 
       const streamPromise = query.streamInput(messageGenerator());
@@ -823,10 +823,10 @@ describe('Query', () => {
       const messages = transport.getAllWrittenMessages();
       const userMessages = messages.filter(
         (msg: unknown) =>
-          typeof msg === 'object' &&
+          typeof msg === "object" &&
           msg !== null &&
-          'type' in msg &&
-          msg.type === 'user',
+          "type" in msg &&
+          msg.type === "user",
       ) as SDKUserMessage[];
 
       userMessages.forEach((msg) => {
@@ -836,33 +836,33 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should throw if streamInput() called on closed query', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should throw if streamInput() called on closed query", async () => {
+      const query = new Query(transport, { cwd: "/test" });
       await respondToInitialize(transport, query);
       await query.close();
 
       async function* messageGenerator() {
-        yield createUserMessage('Test');
+        yield createUserMessage("Test");
       }
 
       await expect(query.streamInput(messageGenerator())).rejects.toThrow(
-        'Query is closed',
+        "Query is closed",
       );
     });
 
-    it('should handle abort during streamInput', async () => {
+    it("should handle abort during streamInput", async () => {
       const abortController = new AbortController();
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         abortController,
       });
 
       await respondToInitialize(transport, query);
 
       async function* messageGenerator() {
-        yield createUserMessage('Message 1');
+        yield createUserMessage("Message 1");
         abortController.abort();
-        yield createUserMessage('Message 2'); // Should not be sent
+        yield createUserMessage("Message 2"); // Should not be sent
       }
 
       const streamPromise = query.streamInput(messageGenerator());
@@ -873,9 +873,9 @@ describe('Query', () => {
     });
   });
 
-  describe('Lifecycle Management', () => {
-    it('should close transport on close()', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+  describe("Lifecycle Management", () => {
+    it("should close transport on close()", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
       await query.close();
@@ -883,8 +883,8 @@ describe('Query', () => {
       expect(transport.closed).toBe(true);
     });
 
-    it('should mark query as closed', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should mark query as closed", async () => {
+      const query = new Query(transport, { cwd: "/test" });
       await respondToInitialize(transport, query);
       expect(query.isClosed()).toBe(false);
 
@@ -892,8 +892,8 @@ describe('Query', () => {
       expect(query.isClosed()).toBe(true);
     });
 
-    it('should complete output stream on close()', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should complete output stream on close()", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -912,8 +912,8 @@ describe('Query', () => {
       expect(Array.isArray(messages)).toBe(true);
     });
 
-    it('should be idempotent when closing multiple times', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should be idempotent when closing multiple times", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -924,10 +924,10 @@ describe('Query', () => {
       expect(query.isClosed()).toBe(true);
     });
 
-    it('should handle abort signal cancellation', async () => {
+    it("should handle abort signal cancellation", async () => {
       const abortController = new AbortController();
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         abortController,
       });
 
@@ -940,12 +940,12 @@ describe('Query', () => {
       });
     });
 
-    it('should handle pre-aborted signal', async () => {
+    it("should handle pre-aborted signal", async () => {
       const abortController = new AbortController();
       abortController.abort();
 
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         abortController,
       });
 
@@ -955,9 +955,9 @@ describe('Query', () => {
     });
   });
 
-  describe('Async Iteration', () => {
-    it('should support for await loop', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+  describe("Async Iteration", () => {
+    it("should support for await loop", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -969,19 +969,19 @@ describe('Query', () => {
         }
       })();
 
-      transport.simulateMessage(createUserMessage('First'));
-      transport.simulateMessage(createAssistantMessage('Second'));
+      transport.simulateMessage(createUserMessage("First"));
+      transport.simulateMessage(createAssistantMessage("Second"));
 
       await iterationPromise;
 
       expect(messages).toHaveLength(2);
-      expect((messages[0] as SDKUserMessage).message.content).toBe('First');
+      expect((messages[0] as SDKUserMessage).message.content).toBe("First");
 
       await query.close();
     });
 
-    it('should complete iteration when query closes', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should complete iteration when query closes", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -992,7 +992,7 @@ describe('Query', () => {
         }
       })();
 
-      transport.simulateMessage(createUserMessage('Test'));
+      transport.simulateMessage(createUserMessage("Test"));
 
       // Give time for message to be processed
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -1004,8 +1004,8 @@ describe('Query', () => {
       expect(messages.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should propagate transport errors', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should propagate transport errors", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1015,17 +1015,17 @@ describe('Query', () => {
         }
       })();
 
-      transport.simulateError(new Error('Transport error'));
+      transport.simulateError(new Error("Transport error"));
 
-      await expect(iterationPromise).rejects.toThrow('Transport error');
+      await expect(iterationPromise).rejects.toThrow("Transport error");
 
       await query.close();
     });
   });
 
-  describe('Public API Methods', () => {
-    it('should provide interrupt() method', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+  describe("Public API Methods", () => {
+    it("should provide interrupt() method", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1054,12 +1054,12 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should provide setPermissionMode() method', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should provide setPermissionMode() method", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
-      const setModePromise = query.setPermissionMode('yolo');
+      const setModePromise = query.setPermissionMode("yolo");
 
       await vi.waitFor(() => {
         const messages = transport.getAllWrittenMessages();
@@ -1084,12 +1084,12 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should provide setModel() method', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should provide setModel() method", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
-      const setModelPromise = query.setModel('new-model');
+      const setModelPromise = query.setModel("new-model");
 
       await vi.waitFor(() => {
         const messages = transport.getAllWrittenMessages();
@@ -1114,8 +1114,8 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should provide supportedCommands() method', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should provide supportedCommands() method", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1138,18 +1138,18 @@ describe('Query', () => {
       )!;
       transport.simulateMessage(
         createControlResponse(commandsMsg.request_id, true, {
-          commands: ['interrupt', 'set_model'],
+          commands: ["interrupt", "set_model"],
         }),
       );
 
       const result = await commandsPromise;
-      expect(result).toMatchObject({ commands: ['interrupt', 'set_model'] });
+      expect(result).toMatchObject({ commands: ["interrupt", "set_model"] });
 
       await query.close();
     });
 
-    it('should provide mcpServerStatus() method', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should provide mcpServerStatus() method", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1172,20 +1172,20 @@ describe('Query', () => {
       )!;
       transport.simulateMessage(
         createControlResponse(statusMsg.request_id, true, {
-          servers: [{ name: 'test', status: 'connected' }],
+          servers: [{ name: "test", status: "connected" }],
         }),
       );
 
       const result = await statusPromise;
       expect(result).toMatchObject({
-        servers: [{ name: 'test', status: 'connected' }],
+        servers: [{ name: "test", status: "connected" }],
       });
 
       await query.close();
     });
 
-    it('should provide getContextUsage() method', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should provide getContextUsage() method", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1213,8 +1213,8 @@ describe('Query', () => {
 
       transport.simulateMessage(
         createControlResponse(usageMsg.request_id, true, {
-          subtype: 'get_context_usage',
-          modelName: 'test-model',
+          subtype: "get_context_usage",
+          modelName: "test-model",
           totalTokens: 50000,
           contextWindowSize: 200000,
           breakdown: {
@@ -1227,7 +1227,7 @@ describe('Query', () => {
             freeSpace: 145000,
             autocompactBuffer: 10000,
           },
-          builtinTools: [{ name: 'Read', tokens: 500 }],
+          builtinTools: [{ name: "Read", tokens: 500 }],
           mcpTools: [],
           memoryFiles: [],
           skills: [],
@@ -1237,7 +1237,7 @@ describe('Query', () => {
 
       const result = await usagePromise;
       expect(result).toMatchObject({
-        modelName: 'test-model',
+        modelName: "test-model",
         totalTokens: 50000,
         contextWindowSize: 200000,
         showDetails: true,
@@ -1246,41 +1246,41 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should throw if methods called on closed query', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should throw if methods called on closed query", async () => {
+      const query = new Query(transport, { cwd: "/test" });
       await respondToInitialize(transport, query);
       await query.close();
 
-      await expect(query.interrupt()).rejects.toThrow('Query is closed');
-      await expect(query.setPermissionMode('yolo')).rejects.toThrow(
-        'Query is closed',
+      await expect(query.interrupt()).rejects.toThrow("Query is closed");
+      await expect(query.setPermissionMode("yolo")).rejects.toThrow(
+        "Query is closed",
       );
-      await expect(query.setModel('model')).rejects.toThrow('Query is closed');
+      await expect(query.setModel("model")).rejects.toThrow("Query is closed");
       await expect(query.supportedCommands()).rejects.toThrow(
-        'Query is closed',
+        "Query is closed",
       );
-      await expect(query.mcpServerStatus()).rejects.toThrow('Query is closed');
-      await expect(query.getContextUsage()).rejects.toThrow('Query is closed');
+      await expect(query.mcpServerStatus()).rejects.toThrow("Query is closed");
+      await expect(query.getContextUsage()).rejects.toThrow("Query is closed");
     });
   });
 
-  describe('Error Handling', () => {
-    it('should propagate transport errors to stream', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+  describe("Error Handling", () => {
+    it("should propagate transport errors to stream", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
-      const error = new Error('Transport failure');
+      const error = new Error("Transport failure");
       transport.simulateError(error);
 
-      await expect(query.next()).rejects.toThrow('Transport failure');
+      await expect(query.next()).rejects.toThrow("Transport failure");
 
       await query.close();
     });
 
-    it('should handle control request timeout', async () => {
+    it("should handle control request timeout", async () => {
       const query = new Query(transport, {
-        cwd: '/test',
+        cwd: "/test",
         timeout: {
           controlRequest: 10000,
         },
@@ -1296,8 +1296,8 @@ describe('Query', () => {
       await query.close();
     }, 15000);
 
-    it('should handle malformed control responses', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should handle malformed control responses", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1320,21 +1320,21 @@ describe('Query', () => {
       )!;
 
       transport.simulateMessage({
-        type: 'control_response',
+        type: "control_response",
         response: {
-          subtype: 'error',
+          subtype: "error",
           request_id: interruptMsg.request_id,
-          error: { message: 'Malformed error' },
+          error: { message: "Malformed error" },
         },
       });
 
-      await expect(interruptPromise).rejects.toThrow('Malformed error');
+      await expect(interruptPromise).rejects.toThrow("Malformed error");
 
       await query.close();
     });
 
-    it('should handle CLI sending error result message', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should handle CLI sending error result message", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1349,11 +1349,11 @@ describe('Query', () => {
     });
   });
 
-  describe('Single-Turn Mode', () => {
-    it('should auto-close input after result in single-turn mode', async () => {
+  describe("Single-Turn Mode", () => {
+    it("should auto-close input after result in single-turn mode", async () => {
       const query = new Query(
         transport,
-        { cwd: '/test' },
+        { cwd: "/test" },
         true, // singleTurn = true
       );
 
@@ -1369,10 +1369,10 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should not auto-close input in multi-turn mode', async () => {
+    it("should not auto-close input in multi-turn mode", async () => {
       const query = new Query(
         transport,
-        { cwd: '/test' },
+        { cwd: "/test" },
         false, // singleTurn = false
       );
 
@@ -1389,21 +1389,21 @@ describe('Query', () => {
     });
   });
 
-  describe('State Management', () => {
-    it('should track session ID', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+  describe("State Management", () => {
+    it("should track session ID", async () => {
+      const query = new Query(transport, { cwd: "/test" });
       const sessionId = query.getSessionId();
 
       expect(sessionId).toBeTruthy();
-      expect(typeof sessionId).toBe('string');
+      expect(typeof sessionId).toBe("string");
       expect(sessionId.length).toBeGreaterThan(0);
 
       await respondToInitialize(transport, query);
       await query.close();
     });
 
-    it('should track closed state', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should track closed state", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       expect(query.isClosed()).toBe(false);
       await respondToInitialize(transport, query);
@@ -1411,8 +1411,8 @@ describe('Query', () => {
       expect(query.isClosed()).toBe(true);
     });
 
-    it('should provide endInput() method', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should provide endInput() method", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1422,18 +1422,18 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should throw if endInput() called on closed query', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should throw if endInput() called on closed query", async () => {
+      const query = new Query(transport, { cwd: "/test" });
       await respondToInitialize(transport, query);
       await query.close();
 
-      expect(() => query.endInput()).toThrow('Query is closed');
+      expect(() => query.endInput()).toThrow("Query is closed");
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle empty message stream', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+  describe("Edge Cases", () => {
+    it("should handle empty message stream", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1445,8 +1445,8 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should handle rapid message flow', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should handle rapid message flow", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1468,8 +1468,8 @@ describe('Query', () => {
       await query.close();
     });
 
-    it('should handle close during message iteration', async () => {
-      const query = new Query(transport, { cwd: '/test' });
+    it("should handle close during message iteration", async () => {
+      const query = new Query(transport, { cwd: "/test" });
 
       await respondToInitialize(transport, query);
 
@@ -1484,9 +1484,9 @@ describe('Query', () => {
         return messages;
       })();
 
-      transport.simulateMessage(createUserMessage('First'));
-      transport.simulateMessage(createUserMessage('Second'));
-      transport.simulateMessage(createUserMessage('Third'));
+      transport.simulateMessage(createUserMessage("First"));
+      transport.simulateMessage(createUserMessage("Second"));
+      transport.simulateMessage(createUserMessage("Third"));
       transport.simulateClose();
 
       const messages = await iterationPromise;

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthType } from '@tram-ai/tram-core';
-import { z } from 'zod';
+import { AuthType } from "@tram-ai/tram-core";
+import { z } from "zod";
 
 /**
  * ACP model IDs are represented as `${modelId}(${authType})` in the ACP protocol.
@@ -22,8 +22,8 @@ export function formatAcpModelId(modelId: string, authType: AuthType): string {
  */
 export function parseAcpBaseModelId(value: string): string {
   const trimmed = value.trim();
-  const closeIdx = trimmed.lastIndexOf(')');
-  const openIdx = trimmed.lastIndexOf('(');
+  const closeIdx = trimmed.lastIndexOf(")");
+  const openIdx = trimmed.lastIndexOf("(");
   if (openIdx >= 0 && closeIdx === trimmed.length - 1 && openIdx < closeIdx) {
     return trimmed.slice(0, openIdx);
   }
@@ -47,8 +47,8 @@ export function parseAcpModelOption(input: string): {
   authType?: AuthType;
 } {
   const trimmed = input.trim();
-  const closeIdx = trimmed.lastIndexOf(')');
-  const openIdx = trimmed.lastIndexOf('(');
+  const closeIdx = trimmed.lastIndexOf(")");
+  const openIdx = trimmed.lastIndexOf("(");
   if (openIdx >= 0 && closeIdx === trimmed.length - 1 && openIdx < closeIdx) {
     const maybeModelId = trimmed.slice(0, openIdx);
     const maybeAuthType = trimmed.slice(openIdx + 1, closeIdx);

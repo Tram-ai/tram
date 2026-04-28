@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ACP_ERROR_CODES } from '../constants/acpSchema.js';
+import { ACP_ERROR_CODES } from "../constants/acpSchema.js";
 
 const CODE_PATTERN = /\(\s*code:\s*(-?\d+)\s*\)/i;
 
 const toNumericCode = (value: unknown): number | null => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
+  if (typeof value === "number" && Number.isFinite(value)) {
     return value;
   }
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const trimmed = value.trim();
     if (/^-?\d+$/.test(trimmed)) {
       return Number.parseInt(trimmed, 10);
@@ -31,24 +31,24 @@ const extractCodeFromUnknown = (value: unknown): number | null => {
     return directCode;
   }
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const match = value.match(CODE_PATTERN);
     return match?.[1] ? Number.parseInt(match[1], 10) : null;
   }
 
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const record = value as Record<string, unknown>;
-    const topLevelCode = toNumericCode(record['code']);
+    const topLevelCode = toNumericCode(record["code"]);
     if (topLevelCode !== null) {
       return topLevelCode;
     }
 
-    const nestedCode = extractCodeFromUnknown(record['error']);
+    const nestedCode = extractCodeFromUnknown(record["error"]);
     if (nestedCode !== null) {
       return nestedCode;
     }
 
-    const messageCode = extractCodeFromUnknown(record['message']);
+    const messageCode = extractCodeFromUnknown(record["message"]);
     if (messageCode !== null) {
       return messageCode;
     }

@@ -10,23 +10,23 @@ import {
   Kind,
   type ToolInvocation,
   type ToolResult,
-} from './tools.js';
-import type { Config } from '../config/config.js';
-import { ToolDisplayNames, ToolNames } from './tool-names.js';
-import { DEFAULT_TRAM_FLASH_MODEL } from '../config/models.js';
-import { getResponseText } from '../utils/partUtils.js';
-import { ToolErrorType } from './tool-error.js';
-import { getErrorMessage } from '../utils/errors.js';
-import path from 'node:path';
-import { readFile } from 'node:fs/promises';
-import { resolveLogVariable } from '../services/serviceRuntimeManager.js';
-import { isSubpath } from '../utils/paths.js';
-import { Storage } from '../config/storage.js';
+} from "./tools.js";
+import type { Config } from "../config/config.js";
+import { ToolDisplayNames, ToolNames } from "./tool-names.js";
+import { DEFAULT_TRAM_FLASH_MODEL } from "../config/models.js";
+import { getResponseText } from "../utils/partUtils.js";
+import { ToolErrorType } from "./tool-error.js";
+import { getErrorMessage } from "../utils/errors.js";
+import path from "node:path";
+import { readFile } from "node:fs/promises";
+import { resolveLogVariable } from "../services/serviceRuntimeManager.js";
+import { isSubpath } from "../utils/paths.js";
+import { Storage } from "../config/storage.js";
 
 const DEFAULT_MAX_INPUT_CHARS = 12000;
-const SUBLM_PROMPT_ID_SUFFIX = ':sublm';
+const SUBLM_PROMPT_ID_SUFFIX = ":sublm";
 const DEFAULT_SYSTEM_PROMPT =
-  'You are a careful sub-model. Follow the user prompt exactly. Only use provided materials. If information is missing, explicitly state that it is not present in the provided input.';
+  "You are a careful sub-model. Follow the user prompt exactly. Only use provided materials. If information is missing, explicitly state that it is not present in the provided input.";
 
 export interface SubLmParams {
   systemPrompt?: string;
@@ -54,7 +54,10 @@ class SubLmToolInvocation extends BaseToolInvocation<SubLmParams, ToolResult> {
     const trimmedPath = filePath.trim();
 
     // Resolve $LOG_xxx variable names to actual file paths
-    const resolved = resolveLogVariable(trimmedPath, this.config.storage.getProjectTempDir());
+    const resolved = resolveLogVariable(
+      trimmedPath,
+      this.config.storage.getProjectTempDir(),
+    );
     const targetPath = resolved ?? trimmedPath;
 
     const absolutePath = path.isAbsolute(targetPath)
@@ -67,16 +70,21 @@ class SubLmToolInvocation extends BaseToolInvocation<SubLmParams, ToolResult> {
     const isWithinTempDir =
       isSubpath(projectTempDir, absolutePath) ||
       isSubpath(globalTempDir, absolutePath);
-    if (!workspaceContext.isPathWithinWorkspace(absolutePath) && !isWithinTempDir) {
+    if (
+      !workspaceContext.isPathWithinWorkspace(absolutePath) &&
+      !isWithinTempDir
+    ) {
       const directories = workspaceContext.getDirectories();
       throw new Error(
-        `File path must be within one of the workspace directories: ${directories.join(', ')}`,
+        `File path must be within one of the workspace directories: ${directories.join(", ")}`,
       );
     }
 
     const fileService = this.config.getFileService();
     if (fileService.shouldTramIgnoreFile(absolutePath)) {
-      throw new Error(`File path '${trimmedPath}' is ignored by .tramignore pattern(s).`);
+      throw new Error(
+        `File path '${trimmedPath}' is ignored by .tramignore pattern(s).`,
+      );
     }
 
     return absolutePath;
@@ -87,7 +95,7 @@ class SubLmToolInvocation extends BaseToolInvocation<SubLmParams, ToolResult> {
     state: { usedChars: number; maxInputChars: number },
   ): string {
     if (state.usedChars >= state.maxInputChars) {
-      return '';
+      return "";
     }
     const remain = state.maxInputChars - state.usedChars;
     const clipped = content.slice(0, remain);
@@ -119,7 +127,7 @@ class SubLmToolInvocation extends BaseToolInvocation<SubLmParams, ToolResult> {
     for (const rawPath of this.params.filePaths ?? []) {
       try {
         const absolutePath = this.resolveAndValidatePath(rawPath);
-        const fileContent = await readFile(absolutePath, 'utf8');
+        const fileContent = await readFile(absolutePath, "utf8");
         const fileSection = `File: ${absolutePath}\n${fileContent}\n`;
         const clipped = this.appendByBudget(fileSection, state);
         if (clipped.length < fileSection.length) {
@@ -138,7 +146,7 @@ class SubLmToolInvocation extends BaseToolInvocation<SubLmParams, ToolResult> {
     }
 
     return {
-      inputText: sections.join('\n\n'),
+      inputText: sections.join("\n\n"),
       truncated,
       warnings,
     };
@@ -149,15 +157,14 @@ class SubLmToolInvocation extends BaseToolInvocation<SubLmParams, ToolResult> {
     const systemPrompt =
       this.params.systemPrompt?.trim() || DEFAULT_SYSTEM_PROMPT;
 
-    const { inputText, truncated, warnings } = await this.buildInputMaterials(
-      maxInputChars,
-    );
+    const { inputText, truncated, warnings } =
+      await this.buildInputMaterials(maxInputChars);
 
     if (!inputText.trim()) {
       const reason =
         warnings.length > 0
-          ? `No readable content was collected. ${warnings.join(' | ')}`
-          : 'No readable content was collected from inlineContent or filePaths.';
+          ? `No readable content was collected. ${warnings.join(" | ")}`
+          : "No readable content was collected from inlineContent or filePaths.";
       return {
         llmContent: `Error: ${reason}`,
         returnDisplay: reason,
@@ -168,7 +175,12 @@ class SubLmToolInvocation extends BaseToolInvocation<SubLmParams, ToolResult> {
       };
     }
 
-    const prompt = [this.params.userPrompt.trim(), '', 'Provided input:', inputText].join('\n');
+    const prompt = [
+      this.params.userPrompt.trim(),
+      "",
+      "Provided input:",
+      inputText,
+    ].join("\n");
 
     const model =
       this.params.model || this.config.getModel() || DEFAULT_TRAM_FLASH_MODEL;
@@ -178,7 +190,7 @@ class SubLmToolInvocation extends BaseToolInvocation<SubLmParams, ToolResult> {
       const response = await this.config.getContentGenerator().generateContent(
         {
           model,
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
           config: {
             abortSignal: signal,
             temperature: 0,
@@ -188,12 +200,12 @@ class SubLmToolInvocation extends BaseToolInvocation<SubLmParams, ToolResult> {
         subLmPromptId,
       );
 
-      const summary = getResponseText(response)?.trim() || '';
+      const summary = getResponseText(response)?.trim() || "";
       const truncationNote = truncated
         ? `\n\n[Input was truncated to ${maxInputChars} characters.]`
-        : '';
+        : "";
       const warningNote =
-        warnings.length > 0 ? `\n\n[Warnings] ${warnings.join(' | ')}` : '';
+        warnings.length > 0 ? `\n\n[Warnings] ${warnings.join(" | ")}` : "";
 
       return {
         llmContent: summary,
@@ -220,54 +232,58 @@ export class SubLmTool extends BaseDeclarativeTool<SubLmParams, ToolResult> {
     super(
       SubLmTool.Name,
       ToolDisplayNames.SUBLM,
-      'Runs a sub-model call with custom system/user prompts and optional file paths. The tool reads files internally and sends only compacted input to reduce main-conversation context usage, then returns the summarized result back to the current model.',
+      "Runs a sub-model call with custom system/user prompts and optional file paths. The tool reads files internally and sends only compacted input to reduce main-conversation context usage, then returns the summarized result back to the current model.",
       Kind.Think,
       {
-        type: 'object',
+        type: "object",
         properties: {
           systemPrompt: {
-            type: 'string',
+            type: "string",
             description:
-              'Optional system prompt for sub-model behavior. If omitted, a strict anti-hallucination system prompt is used.',
+              "Optional system prompt for sub-model behavior. If omitted, a strict anti-hallucination system prompt is used.",
           },
           userPrompt: {
-            type: 'string',
+            type: "string",
             description:
               'User prompt for the sub-model task, for example: "Summarize key errors and root causes in bullet points."',
           },
           filePaths: {
-            type: 'array',
-            items: { type: 'string' },
+            type: "array",
+            items: { type: "string" },
             description:
-              'Optional list of file paths (absolute or workspace-relative). Files are read inside the tool and clipped by maxInputChars budget.',
+              "Optional list of file paths (absolute or workspace-relative). Files are read inside the tool and clipped by maxInputChars budget.",
           },
           inlineContent: {
-            type: 'string',
+            type: "string",
             description:
-              'Optional raw text content to include along with files. Useful for direct snippets.',
+              "Optional raw text content to include along with files. Useful for direct snippets.",
           },
           maxInputChars: {
-            type: 'number',
+            type: "number",
             description:
-              'Optional maximum number of input characters sent to sub-model. Default: 12000.',
+              "Optional maximum number of input characters sent to sub-model. Default: 12000.",
           },
           model: {
-            type: 'string',
+            type: "string",
             description:
-              'Optional model override for sub-model call. If omitted, uses current model.',
+              "Optional model override for sub-model call. If omitted, uses current model.",
           },
         },
-        required: ['userPrompt'],
+        required: ["userPrompt"],
         additionalProperties: false,
       },
     );
   }
 
-  protected override validateToolParamValues(params: SubLmParams): string | null {
-    if (!params.userPrompt || params.userPrompt.trim() === '') {
+  protected override validateToolParamValues(
+    params: SubLmParams,
+  ): string | null {
+    if (!params.userPrompt || params.userPrompt.trim() === "") {
       return "The 'userPrompt' parameter cannot be empty.";
     }
-    const hasInline = Boolean(params.inlineContent && params.inlineContent.trim());
+    const hasInline = Boolean(
+      params.inlineContent && params.inlineContent.trim(),
+    );
     const hasPaths = Boolean(params.filePaths && params.filePaths.length > 0);
     if (!hasInline && !hasPaths) {
       return "At least one of 'inlineContent' or 'filePaths' must be provided.";
@@ -279,12 +295,17 @@ export class SubLmTool extends BaseDeclarativeTool<SubLmParams, ToolResult> {
       if (params.filePaths.length > 50) {
         return "The 'filePaths' parameter cannot include more than 50 paths.";
       }
-      if (params.filePaths.some((p) => typeof p !== 'string' || p.trim() === '')) {
+      if (
+        params.filePaths.some((p) => typeof p !== "string" || p.trim() === "")
+      ) {
         return "Each item in 'filePaths' must be a non-empty string.";
       }
     }
     if (params.maxInputChars !== undefined) {
-      if (!Number.isInteger(params.maxInputChars) || params.maxInputChars <= 0) {
+      if (
+        !Number.isInteger(params.maxInputChars) ||
+        params.maxInputChars <= 0
+      ) {
         return "The 'maxInputChars' parameter must be a positive integer when provided.";
       }
       if (params.maxInputChars > 100000) {

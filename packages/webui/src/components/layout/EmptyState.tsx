@@ -7,8 +7,8 @@
  * Shows logo and welcome message based on authentication state
  */
 
-import type { FC } from 'react';
-import { usePlatform } from '../../context/PlatformContext.js';
+import type { FC } from "react";
+import { usePlatform } from "../../context/PlatformContext.js";
 
 /**
  * Props for EmptyState component
@@ -45,17 +45,17 @@ export const EmptyState: FC<EmptyStateProps> = ({
   isAuthenticated = false,
   loadingMessage,
   logoUrl,
-  appName = 'TRAM',
+  appName = "TRAM",
 }) => {
   const platform = usePlatform();
 
   // Get logo URL: custom prop > platform resource > undefined
-  const iconUri = logoUrl ?? platform.getResourceUrl?.('icon.png');
+  const iconUri = logoUrl ?? platform.getResourceUrl?.("icon.png");
 
   const description = loadingMessage
     ? `Preparing ${appName}…`
     : isAuthenticated
-      ? 'What would you like to do? Ask about this codebase or we can start writing code.'
+      ? "What would you like to do? Ask about this codebase or we can start writing code."
       : `Welcome! Please log in to start using ${appName}.`;
 
   return (
@@ -71,12 +71,12 @@ export const EmptyState: FC<EmptyStateProps> = ({
               onError={(e) => {
                 // Fallback to a div with text if image fails to load
                 const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
+                target.style.display = "none";
                 const parent = target.parentElement;
                 if (parent) {
-                  const fallback = document.createElement('div');
+                  const fallback = document.createElement("div");
                   fallback.className =
-                    'w-[60px] h-[60px] flex items-center justify-center text-2xl font-bold';
+                    "w-[60px] h-[60px] flex items-center justify-center text-2xl font-bold";
                   fallback.textContent = appName.charAt(0).toUpperCase();
                   parent.appendChild(fallback);
                 }

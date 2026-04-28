@@ -4,58 +4,58 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getExtensionManager, extensionToOutputString } from './utils.js';
-import type { Extension, ExtensionManager } from '@tram-ai/tram-core';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { getExtensionManager, extensionToOutputString } from "./utils.js";
+import type { Extension, ExtensionManager } from "@tram-ai/tram-core";
 
 const mockRefreshCache = vi.fn();
 const mockExtensionManagerInstance = {
   refreshCache: mockRefreshCache,
 };
 
-vi.mock('@tram-ai/tram-core', () => ({
+vi.mock("@tram-ai/tram-core", () => ({
   ExtensionManager: vi
     .fn()
     .mockImplementation(() => mockExtensionManagerInstance),
 }));
 
-vi.mock('../../config/settings.js', () => ({
+vi.mock("../../config/settings.js", () => ({
   loadSettings: vi.fn().mockReturnValue({
     merged: {},
   }),
 }));
 
-vi.mock('../../config/trustedFolders.js', () => ({
+vi.mock("../../config/trustedFolders.js", () => ({
   isWorkspaceTrusted: vi.fn().mockReturnValue({ isTrusted: true }),
 }));
 
-vi.mock('./consent.js', () => ({
+vi.mock("./consent.js", () => ({
   requestConsentOrFail: vi.fn(),
   requestConsentNonInteractive: vi.fn(),
   requestChoicePluginNonInteractive: vi.fn(),
 }));
 
-describe('getExtensionManager', () => {
+describe("getExtensionManager", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRefreshCache.mockResolvedValue(undefined);
   });
 
-  it('should return an ExtensionManager instance', async () => {
+  it("should return an ExtensionManager instance", async () => {
     const manager = await getExtensionManager();
 
     expect(manager).toBeDefined();
     expect(manager).toBe(mockExtensionManagerInstance);
   });
 
-  it('should call refreshCache on the ExtensionManager', async () => {
+  it("should call refreshCache on the ExtensionManager", async () => {
     await getExtensionManager();
 
     expect(mockRefreshCache).toHaveBeenCalled();
   });
 
-  it('should use current working directory as workspace', async () => {
-    const { ExtensionManager } = await import('@tram-ai/tram-core');
+  it("should use current working directory as workspace", async () => {
+    const { ExtensionManager } = await import("@tram-ai/tram-core");
 
     await getExtensionManager();
 
@@ -67,20 +67,20 @@ describe('getExtensionManager', () => {
   });
 });
 
-describe('extensionToOutputString', () => {
+describe("extensionToOutputString", () => {
   const mockIsEnabled = vi.fn();
   const mockExtensionManager = {
     isEnabled: mockIsEnabled,
   } as unknown as ExtensionManager;
 
   const createMockExtension = (overrides = {}): Extension => ({
-    id: 'test-ext-id',
-    name: 'test-extension',
-    version: '1.0.0',
+    id: "test-ext-id",
+    name: "test-extension",
+    version: "1.0.0",
     isActive: true,
-    path: '/path/to/extension',
+    path: "/path/to/extension",
     contextFiles: [],
-    config: { name: 'test-extension', version: '1.0.0' },
+    config: { name: "test-extension", version: "1.0.0" },
     ...overrides,
   });
 
@@ -89,26 +89,26 @@ describe('extensionToOutputString', () => {
     mockIsEnabled.mockReturnValue(true);
   });
 
-  it('should include status icon when inline is false', () => {
+  it("should include status icon when inline is false", () => {
     const extension = createMockExtension();
     const result = extensionToOutputString(
       extension,
       mockExtensionManager,
-      '/workspace',
+      "/workspace",
       false,
     );
 
     // Should contain either ✓ or ✗ (with ANSI color codes)
     expect(result).toMatch(/test-extension/);
-    expect(result).toContain('(1.0.0)');
+    expect(result).toContain("(1.0.0)");
   });
 
-  it('should exclude status icon when inline is true', () => {
+  it("should exclude status icon when inline is true", () => {
     const extension = createMockExtension();
     const result = extensionToOutputString(
       extension,
       mockExtensionManager,
-      '/workspace',
+      "/workspace",
       true,
     );
 
@@ -116,17 +116,17 @@ describe('extensionToOutputString', () => {
     expect(result.trim()).toMatch(/^test-extension/);
   });
 
-  it('should default inline to false', () => {
+  it("should default inline to false", () => {
     const extension = createMockExtension();
     const resultWithoutInline = extensionToOutputString(
       extension,
       mockExtensionManager,
-      '/workspace',
+      "/workspace",
     );
     const resultWithInlineFalse = extensionToOutputString(
       extension,
       mockExtensionManager,
-      '/workspace',
+      "/workspace",
       false,
     );
 

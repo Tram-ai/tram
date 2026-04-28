@@ -30,28 +30,28 @@ import {
   createDebugLogger,
   NativeLspService,
   isToolEnabled,
-} from '@tram-ai/tram-core';
-import { extensionsCommand } from '../commands/extensions.js';
-import { hooksCommand } from '../commands/hooks.js';
-import type { Settings } from './settings.js';
-import { loadSettings, SettingScope } from './settings.js';
-import { authCommand } from '../commands/auth.js';
+} from "@tram-ai/tram-core";
+import { extensionsCommand } from "../commands/extensions.js";
+import { hooksCommand } from "../commands/hooks.js";
+import type { Settings } from "./settings.js";
+import { loadSettings, SettingScope } from "./settings.js";
+import { authCommand } from "../commands/auth.js";
 import {
   resolveCliGenerationConfig,
   getAuthTypeFromEnv,
-} from '../utils/modelConfigUtils.js';
-import yargs, { type Argv } from 'yargs';
-import { hideBin } from 'yargs/helpers';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { homedir } from 'node:os';
+} from "../utils/modelConfigUtils.js";
+import yargs, { type Argv } from "yargs";
+import { hideBin } from "yargs/helpers";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { homedir } from "node:os";
 
-import { resolvePath } from '../utils/resolvePath.js';
-import { getCliVersion } from '../utils/version.js';
-import { loadSandboxConfig } from './sandboxConfig.js';
-import { appEvents } from '../utils/events.js';
-import { mcpCommand } from '../commands/mcp.js';
-import { channelCommand } from '../commands/channel.js';
+import { resolvePath } from "../utils/resolvePath.js";
+import { getCliVersion } from "../utils/version.js";
+import { loadSandboxConfig } from "./sandboxConfig.js";
+import { appEvents } from "../utils/events.js";
+import { mcpCommand } from "../commands/mcp.js";
+import { channelCommand } from "../commands/channel.js";
 
 // UUID v4 regex pattern for validation
 const SESSION_ID_REGEX =
@@ -66,29 +66,29 @@ function isValidSessionId(value: string): boolean {
   return SESSION_ID_REGEX.test(value);
 }
 
-import { isWorkspaceTrusted } from './trustedFolders.js';
-import { writeStderrLine } from '../utils/stdioHelpers.js';
+import { isWorkspaceTrusted } from "./trustedFolders.js";
+import { writeStderrLine } from "../utils/stdioHelpers.js";
 
-const debugLogger = createDebugLogger('CONFIG');
+const debugLogger = createDebugLogger("CONFIG");
 
 const PROXY_ENV_KEYS = [
-  'HTTPS_PROXY',
-  'https_proxy',
-  'HTTP_PROXY',
-  'http_proxy',
+  "HTTPS_PROXY",
+  "https_proxy",
+  "HTTP_PROXY",
+  "http_proxy",
 ] as const;
 
 const VALID_APPROVAL_MODE_VALUES = [
-  'plan',
-  'default',
-  'auto-edit',
-  'yolo',
+  "plan",
+  "default",
+  "auto-edit",
+  "yolo",
 ] as const;
 
 function formatApprovalModeError(value: string): Error {
   return new Error(
     `Invalid approval mode: ${value}. Valid values are: ${VALID_APPROVAL_MODE_VALUES.join(
-      ', ',
+      ", ",
     )}`,
   );
 }
@@ -96,15 +96,15 @@ function formatApprovalModeError(value: string): Error {
 function parseApprovalModeValue(value: string): ApprovalMode {
   const normalized = value.trim().toLowerCase();
   switch (normalized) {
-    case 'plan':
+    case "plan":
       return ApprovalMode.PLAN;
-    case 'default':
+    case "default":
       return ApprovalMode.DEFAULT;
-    case 'yolo':
+    case "yolo":
       return ApprovalMode.YOLO;
-    case 'auto_edit':
-    case 'autoedit':
-    case 'auto-edit':
+    case "auto_edit":
+    case "autoedit":
+    case "auto-edit":
       return ApprovalMode.AUTO_EDIT;
     default:
       throw formatApprovalModeError(value);
@@ -136,11 +136,11 @@ function resolveProxy(argvProxy: string | undefined, settings: Settings) {
   }
 
   const mode = settings.advanced?.proxy?.mode;
-  if (mode === 'off') {
+  if (mode === "off") {
     return undefined;
   }
 
-  if (mode === 'custom') {
+  if (mode === "custom") {
     return normalizeString(settings.advanced?.proxy?.customUrl);
   }
 
@@ -218,7 +218,7 @@ function normalizeOutputFormat(
   if (format === OutputFormat.STREAM_JSON) {
     return OutputFormat.STREAM_JSON;
   }
-  if (format === 'json' || format === OutputFormat.JSON) {
+  if (format === "json" || format === OutputFormat.JSON) {
     return OutputFormat.JSON;
   }
   return OutputFormat.TEXT;
@@ -230,337 +230,337 @@ export async function parseArguments(): Promise<CliArgs> {
   // hack: if the first argument is the CLI entry point, remove it
   if (
     rawArgv.length > 0 &&
-    (rawArgv[0].endsWith('/dist/tram-cli/cli.js') ||
-      rawArgv[0].endsWith('/dist/cli.js') ||
-      rawArgv[0].endsWith('/dist/cli/cli.js'))
+    (rawArgv[0].endsWith("/dist/tram-cli/cli.js") ||
+      rawArgv[0].endsWith("/dist/cli.js") ||
+      rawArgv[0].endsWith("/dist/cli/cli.js"))
   ) {
     rawArgv = rawArgv.slice(1);
   }
 
   const yargsInstance = yargs(rawArgv)
-    .locale('en')
-    .scriptName('tram')
+    .locale("en")
+    .scriptName("tram")
     .usage(
-      'Usage: tram [options] [command]\n\nTRAM - Launch an interactive CLI, use -p/--prompt for non-interactive mode',
+      "Usage: tram [options] [command]\n\nTRAM - Launch an interactive CLI, use -p/--prompt for non-interactive mode",
     )
-    .option('telemetry', {
-      type: 'boolean',
+    .option("telemetry", {
+      type: "boolean",
       description:
-        'Enable telemetry? This flag specifically controls if telemetry is sent. Other --telemetry-* flags set specific values but do not enable telemetry on their own.',
+        "Enable telemetry? This flag specifically controls if telemetry is sent. Other --telemetry-* flags set specific values but do not enable telemetry on their own.",
     })
-    .option('telemetry-target', {
-      type: 'string',
-      choices: ['local', 'gcp'],
+    .option("telemetry-target", {
+      type: "string",
+      choices: ["local", "gcp"],
       description:
-        'Set the telemetry target (local or gcp). Overrides settings files.',
+        "Set the telemetry target (local or gcp). Overrides settings files.",
     })
-    .option('telemetry-otlp-endpoint', {
-      type: 'string',
+    .option("telemetry-otlp-endpoint", {
+      type: "string",
       description:
-        'Set the OTLP endpoint for telemetry. Overrides environment variables and settings files.',
+        "Set the OTLP endpoint for telemetry. Overrides environment variables and settings files.",
     })
-    .option('telemetry-otlp-protocol', {
-      type: 'string',
-      choices: ['grpc', 'http'],
+    .option("telemetry-otlp-protocol", {
+      type: "string",
+      choices: ["grpc", "http"],
       description:
-        'Set the OTLP protocol for telemetry (grpc or http). Overrides settings files.',
+        "Set the OTLP protocol for telemetry (grpc or http). Overrides settings files.",
     })
-    .option('telemetry-log-prompts', {
-      type: 'boolean',
+    .option("telemetry-log-prompts", {
+      type: "boolean",
       description:
-        'Enable or disable logging of user prompts for telemetry. Overrides settings files.',
+        "Enable or disable logging of user prompts for telemetry. Overrides settings files.",
     })
-    .option('telemetry-outfile', {
-      type: 'string',
-      description: 'Redirect all telemetry output to the specified file.',
+    .option("telemetry-outfile", {
+      type: "string",
+      description: "Redirect all telemetry output to the specified file.",
     })
     .deprecateOption(
-      'telemetry',
+      "telemetry",
       'Use the "telemetry.enabled" setting in settings.json instead. This flag will be removed in a future version.',
     )
     .deprecateOption(
-      'telemetry-target',
+      "telemetry-target",
       'Use the "telemetry.target" setting in settings.json instead. This flag will be removed in a future version.',
     )
     .deprecateOption(
-      'telemetry-otlp-endpoint',
+      "telemetry-otlp-endpoint",
       'Use the "telemetry.otlpEndpoint" setting in settings.json instead. This flag will be removed in a future version.',
     )
     .deprecateOption(
-      'telemetry-otlp-protocol',
+      "telemetry-otlp-protocol",
       'Use the "telemetry.otlpProtocol" setting in settings.json instead. This flag will be removed in a future version.',
     )
     .deprecateOption(
-      'telemetry-log-prompts',
+      "telemetry-log-prompts",
       'Use the "telemetry.logPrompts" setting in settings.json instead. This flag will be removed in a future version.',
     )
     .deprecateOption(
-      'telemetry-outfile',
+      "telemetry-outfile",
       'Use the "telemetry.outfile" setting in settings.json instead. This flag will be removed in a future version.',
     )
-    .option('debug', {
-      alias: 'd',
-      type: 'boolean',
-      description: 'Run in debug mode?',
+    .option("debug", {
+      alias: "d",
+      type: "boolean",
+      description: "Run in debug mode?",
       default: false,
     })
-    .option('proxy', {
-      type: 'string',
-      description: 'Proxy for TRAM, like schema://user:password@host:port',
+    .option("proxy", {
+      type: "string",
+      description: "Proxy for TRAM, like schema://user:password@host:port",
     })
     .deprecateOption(
-      'proxy',
+      "proxy",
       'Use the "proxy" setting in settings.json instead. This flag will be removed in a future version.',
     )
-    .option('chat-recording', {
-      type: 'boolean',
+    .option("chat-recording", {
+      type: "boolean",
       description:
-        'Enable chat recording to disk. If false, chat history is not saved and --continue/--resume will not work.',
+        "Enable chat recording to disk. If false, chat history is not saved and --continue/--resume will not work.",
     })
-    .command('$0 [query..]', 'Launch TRAM CLI', (yargsInstance: Argv) =>
+    .command("$0 [query..]", "Launch TRAM CLI", (yargsInstance: Argv) =>
       yargsInstance
-        .positional('query', {
+        .positional("query", {
           description:
-            'Positional prompt. Defaults to one-shot; use -i/--prompt-interactive for interactive.',
+            "Positional prompt. Defaults to one-shot; use -i/--prompt-interactive for interactive.",
         })
-        .option('model', {
-          alias: 'm',
-          type: 'string',
+        .option("model", {
+          alias: "m",
+          type: "string",
           description: `Model`,
         })
-        .option('prompt', {
-          alias: 'p',
-          type: 'string',
-          description: 'Prompt. Appended to input on stdin (if any).',
+        .option("prompt", {
+          alias: "p",
+          type: "string",
+          description: "Prompt. Appended to input on stdin (if any).",
         })
-        .option('prompt-interactive', {
-          alias: 'i',
-          type: 'string',
+        .option("prompt-interactive", {
+          alias: "i",
+          type: "string",
           description:
-            'Execute the provided prompt and continue in interactive mode',
+            "Execute the provided prompt and continue in interactive mode",
         })
-        .option('system-prompt', {
-          type: 'string',
+        .option("system-prompt", {
+          type: "string",
           description:
-            'Override the main session system prompt for this run. Can be combined with --append-system-prompt.',
+            "Override the main session system prompt for this run. Can be combined with --append-system-prompt.",
         })
-        .option('append-system-prompt', {
-          type: 'string',
+        .option("append-system-prompt", {
+          type: "string",
           description:
-            'Append instructions to the main session system prompt for this run. Can be combined with --system-prompt.',
+            "Append instructions to the main session system prompt for this run. Can be combined with --system-prompt.",
         })
-        .option('sandbox', {
-          alias: 's',
-          type: 'boolean',
-          description: 'Run in sandbox?',
+        .option("sandbox", {
+          alias: "s",
+          type: "boolean",
+          description: "Run in sandbox?",
         })
-        .option('sandbox-image', {
-          type: 'string',
-          description: 'Sandbox image URI.',
+        .option("sandbox-image", {
+          type: "string",
+          description: "Sandbox image URI.",
         })
-        .option('yolo', {
-          alias: 'y',
-          type: 'boolean',
+        .option("yolo", {
+          alias: "y",
+          type: "boolean",
           description:
-            'Automatically accept all actions (aka YOLO mode, see https://www.youtube.com/watch?v=xvFZjo5PgG0 for more details)?',
+            "Automatically accept all actions (aka YOLO mode, see https://www.youtube.com/watch?v=xvFZjo5PgG0 for more details)?",
           default: false,
         })
-        .option('approval-mode', {
-          type: 'string',
-          choices: ['plan', 'default', 'auto-edit', 'yolo'],
+        .option("approval-mode", {
+          type: "string",
+          choices: ["plan", "default", "auto-edit", "yolo"],
           description:
-            'Set the approval mode: plan (plan only), default (prompt for approval), auto-edit (auto-approve edit tools), yolo (auto-approve all tools)',
+            "Set the approval mode: plan (plan only), default (prompt for approval), auto-edit (auto-approve edit tools), yolo (auto-approve all tools)",
         })
-        .option('checkpointing', {
-          type: 'boolean',
-          description: 'Enables checkpointing of file edits',
+        .option("checkpointing", {
+          type: "boolean",
+          description: "Enables checkpointing of file edits",
           default: false,
         })
-        .option('acp', {
-          type: 'boolean',
-          description: 'Starts the agent in ACP mode',
+        .option("acp", {
+          type: "boolean",
+          description: "Starts the agent in ACP mode",
         })
-        .option('experimental-acp', {
-          type: 'boolean',
+        .option("experimental-acp", {
+          type: "boolean",
           description:
-            'Starts the agent in ACP mode (deprecated, use --acp instead)',
+            "Starts the agent in ACP mode (deprecated, use --acp instead)",
           hidden: true,
         })
-        .option('experimental-skills', {
-          type: 'boolean',
+        .option("experimental-skills", {
+          type: "boolean",
           description:
-            'Deprecated: Skills are now enabled by default. This flag is ignored.',
+            "Deprecated: Skills are now enabled by default. This flag is ignored.",
           hidden: true,
         })
-        .option('experimental-lsp', {
-          type: 'boolean',
+        .option("experimental-lsp", {
+          type: "boolean",
           description:
-            'Enable experimental LSP (Language Server Protocol) feature for code intelligence',
+            "Enable experimental LSP (Language Server Protocol) feature for code intelligence",
           default: false,
         })
-        .option('channel', {
-          type: 'string',
-          choices: ['VSCode', 'ACP', 'SDK', 'CI'],
-          description: 'Channel identifier (VSCode, ACP, SDK, CI)',
+        .option("channel", {
+          type: "string",
+          choices: ["VSCode", "ACP", "SDK", "CI"],
+          description: "Channel identifier (VSCode, ACP, SDK, CI)",
         })
-        .option('allowed-mcp-server-names', {
-          type: 'array',
+        .option("allowed-mcp-server-names", {
+          type: "array",
           string: true,
-          description: 'Allowed MCP server names',
+          description: "Allowed MCP server names",
           coerce: (mcpServerNames: string[]) =>
             // Handle comma-separated values
             mcpServerNames.flatMap((mcpServerName) =>
-              mcpServerName.split(',').map((m) => m.trim()),
+              mcpServerName.split(",").map((m) => m.trim()),
             ),
         })
-        .option('allowed-tools', {
-          type: 'array',
+        .option("allowed-tools", {
+          type: "array",
           string: true,
-          description: 'Tools that are allowed to run without confirmation',
+          description: "Tools that are allowed to run without confirmation",
           coerce: (tools: string[]) =>
             // Handle comma-separated values
-            tools.flatMap((tool) => tool.split(',').map((t) => t.trim())),
+            tools.flatMap((tool) => tool.split(",").map((t) => t.trim())),
         })
-        .option('extensions', {
-          alias: 'e',
-          type: 'array',
+        .option("extensions", {
+          alias: "e",
+          type: "array",
           string: true,
           description:
-            'A list of extensions to use. If not provided, all extensions are used.',
+            "A list of extensions to use. If not provided, all extensions are used.",
           coerce: (extensions: string[]) =>
             // Handle comma-separated values
             extensions.flatMap((extension) =>
-              extension.split(',').map((e) => e.trim()),
+              extension.split(",").map((e) => e.trim()),
             ),
         })
-        .option('list-extensions', {
-          alias: 'l',
-          type: 'boolean',
-          description: 'List all available extensions and exit.',
+        .option("list-extensions", {
+          alias: "l",
+          type: "boolean",
+          description: "List all available extensions and exit.",
         })
-        .option('include-directories', {
-          alias: 'add-dir',
-          type: 'array',
+        .option("include-directories", {
+          alias: "add-dir",
+          type: "array",
           string: true,
           description:
-            'Additional directories to include in the workspace (comma-separated or multiple --include-directories)',
+            "Additional directories to include in the workspace (comma-separated or multiple --include-directories)",
           coerce: (dirs: string[]) =>
             // Handle comma-separated values
-            dirs.flatMap((dir) => dir.split(',').map((d) => d.trim())),
+            dirs.flatMap((dir) => dir.split(",").map((d) => d.trim())),
         })
-        .option('openai-logging', {
-          type: 'boolean',
+        .option("openai-logging", {
+          type: "boolean",
           description:
-            'Enable logging of OpenAI API calls for debugging and analysis',
+            "Enable logging of OpenAI API calls for debugging and analysis",
         })
-        .option('openai-logging-dir', {
-          type: 'string',
+        .option("openai-logging-dir", {
+          type: "string",
           description:
-            'Custom directory path for OpenAI API logs. Overrides settings files.',
+            "Custom directory path for OpenAI API logs. Overrides settings files.",
         })
-        .option('openai-api-key', {
-          type: 'string',
-          description: 'OpenAI API key to use for authentication',
+        .option("openai-api-key", {
+          type: "string",
+          description: "OpenAI API key to use for authentication",
         })
-        .option('openai-base-url', {
-          type: 'string',
-          description: 'OpenAI base URL (for custom endpoints)',
+        .option("openai-base-url", {
+          type: "string",
+          description: "OpenAI base URL (for custom endpoints)",
         })
-        .option('tavily-api-key', {
-          type: 'string',
-          description: 'Tavily API key for web search',
+        .option("tavily-api-key", {
+          type: "string",
+          description: "Tavily API key for web search",
         })
-        .option('google-api-key', {
-          type: 'string',
-          description: 'Google Custom Search API key',
+        .option("google-api-key", {
+          type: "string",
+          description: "Google Custom Search API key",
         })
-        .option('google-search-engine-id', {
-          type: 'string',
-          description: 'Google Custom Search Engine ID',
+        .option("google-search-engine-id", {
+          type: "string",
+          description: "Google Custom Search Engine ID",
         })
-        .option('web-search-default', {
-          type: 'string',
+        .option("web-search-default", {
+          type: "string",
           description:
-            'Default web search provider (dashscope, tavily, google)',
+            "Default web search provider (dashscope, tavily, google)",
         })
-        .option('screen-reader', {
-          type: 'boolean',
-          description: 'Enable screen reader mode for accessibility.',
+        .option("screen-reader", {
+          type: "boolean",
+          description: "Enable screen reader mode for accessibility.",
         })
-        .option('input-format', {
-          type: 'string',
-          choices: ['text', 'stream-json'],
-          description: 'The format consumed from standard input.',
-          default: 'text',
+        .option("input-format", {
+          type: "string",
+          choices: ["text", "stream-json"],
+          description: "The format consumed from standard input.",
+          default: "text",
         })
-        .option('output-format', {
-          alias: 'o',
-          type: 'string',
-          description: 'The format of the CLI output.',
-          choices: ['text', 'json', 'stream-json'],
+        .option("output-format", {
+          alias: "o",
+          type: "string",
+          description: "The format of the CLI output.",
+          choices: ["text", "json", "stream-json"],
         })
-        .option('include-partial-messages', {
-          type: 'boolean',
+        .option("include-partial-messages", {
+          type: "boolean",
           description:
-            'Include partial assistant messages when using stream-json output.',
+            "Include partial assistant messages when using stream-json output.",
           default: false,
         })
-        .option('initialize', {
-          type: 'boolean',
+        .option("initialize", {
+          type: "boolean",
           description:
-            'Run the initialization setup wizard to configure AI settings, approval mode, proxy, and theme.',
+            "Run the initialization setup wizard to configure AI settings, approval mode, proxy, and theme.",
           default: false,
         })
-        .option('initialize-local-model-list', {
-          type: 'boolean',
+        .option("initialize-local-model-list", {
+          type: "boolean",
           description:
-            'Enable local model list input during initialization for providers that cannot fetch models from APIs.',
+            "Enable local model list input during initialization for providers that cannot fetch models from APIs.",
           default: false,
         })
-        .option('continue', {
-          alias: 'c',
-          type: 'boolean',
+        .option("continue", {
+          alias: "c",
+          type: "boolean",
           description:
-            'Resume the most recent session for the current project.',
+            "Resume the most recent session for the current project.",
           default: false,
         })
-        .option('resume', {
-          alias: 'r',
-          type: 'string',
+        .option("resume", {
+          alias: "r",
+          type: "string",
           description:
-            'Resume a specific session by its ID. Use without an ID to show session picker.',
+            "Resume a specific session by its ID. Use without an ID to show session picker.",
         })
-        .option('session-id', {
-          type: 'string',
-          description: 'Specify a session ID for this run.',
+        .option("session-id", {
+          type: "string",
+          description: "Specify a session ID for this run.",
         })
-        .option('max-session-turns', {
-          type: 'number',
-          description: 'Maximum number of session turns',
+        .option("max-session-turns", {
+          type: "number",
+          description: "Maximum number of session turns",
         })
-        .option('core-tools', {
-          type: 'array',
+        .option("core-tools", {
+          type: "array",
           string: true,
-          description: 'Core tool paths',
+          description: "Core tool paths",
           coerce: (tools: string[]) =>
-            tools.flatMap((tool) => tool.split(',').map((t) => t.trim())),
+            tools.flatMap((tool) => tool.split(",").map((t) => t.trim())),
         })
-        .option('exclude-tools', {
-          type: 'array',
+        .option("exclude-tools", {
+          type: "array",
           string: true,
-          description: 'Tools to exclude',
+          description: "Tools to exclude",
           coerce: (tools: string[]) =>
-            tools.flatMap((tool) => tool.split(',').map((t) => t.trim())),
+            tools.flatMap((tool) => tool.split(",").map((t) => t.trim())),
         })
-        .option('allowed-tools', {
-          type: 'array',
+        .option("allowed-tools", {
+          type: "array",
           string: true,
-          description: 'Tools to allow, will bypass confirmation',
+          description: "Tools to allow, will bypass confirmation",
           coerce: (tools: string[]) =>
-            tools.flatMap((tool) => tool.split(',').map((t) => t.trim())),
+            tools.flatMap((tool) => tool.split(",").map((t) => t.trim())),
         })
-        .option('auth-type', {
-          type: 'string',
+        .option("auth-type", {
+          type: "string",
           choices: [
             AuthType.USE_OPENAI,
             AuthType.USE_ANTHROPIC,
@@ -568,81 +568,81 @@ export async function parseArguments(): Promise<CliArgs> {
             AuthType.USE_GEMINI,
             AuthType.USE_VERTEX_AI,
           ],
-          description: 'Authentication type',
+          description: "Authentication type",
         })
         .deprecateOption(
-          'sandbox-image',
+          "sandbox-image",
           'Use the "tools.sandboxImage" setting in settings.json instead. This flag will be removed in a future version.',
         )
         .deprecateOption(
-          'checkpointing',
+          "checkpointing",
           'Use the "general.checkpointing.enabled" setting in settings.json instead. This flag will be removed in a future version.',
         )
         .deprecateOption(
-          'prompt',
-          'Use the positional prompt instead. This flag will be removed in a future version.',
+          "prompt",
+          "Use the positional prompt instead. This flag will be removed in a future version.",
         )
         // Ensure validation flows through .fail() for clean UX
         .fail((msg: string, err: Error | undefined, yargs: Argv) => {
-          writeStderrLine(msg || err?.message || 'Unknown error');
+          writeStderrLine(msg || err?.message || "Unknown error");
           yargs.showHelp();
           process.exit(1);
         })
         .check((argv: { [x: string]: unknown }) => {
           // The 'query' positional can be a string (for one arg) or string[] (for multiple).
           // This guard safely checks if any positional argument was provided.
-          const query = argv['query'] as string | string[] | undefined;
+          const query = argv["query"] as string | string[] | undefined;
           const hasPositionalQuery = Array.isArray(query)
             ? query.length > 0
             : !!query;
 
-          if (argv['prompt'] && hasPositionalQuery) {
-            return 'Cannot use both a positional prompt and the --prompt (-p) flag together';
+          if (argv["prompt"] && hasPositionalQuery) {
+            return "Cannot use both a positional prompt and the --prompt (-p) flag together";
           }
-          if (argv['prompt'] && argv['promptInteractive']) {
-            return 'Cannot use both --prompt (-p) and --prompt-interactive (-i) together';
+          if (argv["prompt"] && argv["promptInteractive"]) {
+            return "Cannot use both --prompt (-p) and --prompt-interactive (-i) together";
           }
-          if (argv['yolo'] && argv['approvalMode']) {
-            return 'Cannot use both --yolo (-y) and --approval-mode together. Use --approval-mode=yolo instead.';
-          }
-          if (
-            argv['includePartialMessages'] &&
-            argv['outputFormat'] !== OutputFormat.STREAM_JSON
-          ) {
-            return '--include-partial-messages requires --output-format stream-json';
+          if (argv["yolo"] && argv["approvalMode"]) {
+            return "Cannot use both --yolo (-y) and --approval-mode together. Use --approval-mode=yolo instead.";
           }
           if (
-            argv['inputFormat'] === 'stream-json' &&
-            argv['outputFormat'] !== OutputFormat.STREAM_JSON
+            argv["includePartialMessages"] &&
+            argv["outputFormat"] !== OutputFormat.STREAM_JSON
           ) {
-            return '--input-format stream-json requires --output-format stream-json';
+            return "--include-partial-messages requires --output-format stream-json";
           }
-          if (argv['initialize']) {
+          if (
+            argv["inputFormat"] === "stream-json" &&
+            argv["outputFormat"] !== OutputFormat.STREAM_JSON
+          ) {
+            return "--input-format stream-json requires --output-format stream-json";
+          }
+          if (argv["initialize"]) {
             // When --initialize is used, other conflicting options should not be allowed
-            if (argv['prompt'] || argv['promptInteractive'] || argv['query']) {
-              return 'Cannot use --initialize with --prompt (-p), --prompt-interactive (-i), or positional query arguments.';
+            if (argv["prompt"] || argv["promptInteractive"] || argv["query"]) {
+              return "Cannot use --initialize with --prompt (-p), --prompt-interactive (-i), or positional query arguments.";
             }
-            if (argv['continue'] || argv['resume']) {
-              return 'Cannot use --initialize with --continue (-c) or --resume (-r).';
+            if (argv["continue"] || argv["resume"]) {
+              return "Cannot use --initialize with --continue (-c) or --resume (-r).";
             }
-            if (argv['sessionId']) {
-              return 'Cannot use --initialize with --session-id.';
+            if (argv["sessionId"]) {
+              return "Cannot use --initialize with --session-id.";
             }
           }
-          if (argv['continue'] && argv['resume']) {
-            return 'Cannot use both --continue and --resume together. Use --continue to resume the latest session, or --resume <sessionId> to resume a specific session.';
+          if (argv["continue"] && argv["resume"]) {
+            return "Cannot use both --continue and --resume together. Use --continue to resume the latest session, or --resume <sessionId> to resume a specific session.";
           }
-          if (argv['sessionId'] && (argv['continue'] || argv['resume'])) {
-            return 'Cannot use --session-id with --continue or --resume. Use --session-id to start a new session with a specific ID, or use --continue/--resume to resume an existing session.';
+          if (argv["sessionId"] && (argv["continue"] || argv["resume"])) {
+            return "Cannot use --session-id with --continue or --resume. Use --session-id to start a new session with a specific ID, or use --continue/--resume to resume an existing session.";
           }
           if (
-            argv['sessionId'] &&
-            !isValidSessionId(argv['sessionId'] as string)
+            argv["sessionId"] &&
+            !isValidSessionId(argv["sessionId"] as string)
           ) {
-            return `Invalid --session-id: "${argv['sessionId']}". Must be a valid UUID (e.g., "123e4567-e89b-12d3-a456-426614174000").`;
+            return `Invalid --session-id: "${argv["sessionId"]}". Must be a valid UUID (e.g., "123e4567-e89b-12d3-a456-426614174000").`;
           }
-          if (argv['resume'] && !isValidSessionId(argv['resume'] as string)) {
-            return `Invalid --resume: "${argv['resume']}". Must be a valid UUID (e.g., "123e4567-e89b-12d3-a456-426614174000").`;
+          if (argv["resume"] && !isValidSessionId(argv["resume"] as string)) {
+            return `Invalid --resume: "${argv["resume"]}". Must be a valid UUID (e.g., "123e4567-e89b-12d3-a456-426614174000").`;
           }
           return true;
         }),
@@ -656,13 +656,13 @@ export async function parseArguments(): Promise<CliArgs> {
     // Register Hooks subcommands
     .command(hooksCommand)
     // Register Channel subcommands
-    .command(channelCommand);
+    .command(channelCommand)
 
   yargsInstance
     .version(await getCliVersion()) // This will enable the --version flag based on package.json
-    .alias('v', 'version')
+    .alias("v", "version")
     .help()
-    .alias('h', 'help')
+    .alias("h", "help")
     .strict()
     .demandCommand(0, 0); // Allow base command to run with no subcommands
 
@@ -675,10 +675,12 @@ export async function parseArguments(): Promise<CliArgs> {
   // and not return to main CLI logic
   if (
     result._.length > 0 &&
-    (result._[0] === 'mcp' ||
-      result._[0] === 'extensions' ||
-      result._[0] === 'hooks' ||
-      result._[0] === 'channel')
+    (result._[0] === "mcp" ||
+      result._[0] === "extensions" ||
+      result._[0] === "hooks" ||
+      result._[0] === "web" ||
+      result._[0] === "webui" ||
+      result._[0] === "channel")
   ) {
     // MCP/Extensions/Hooks commands handle their own execution and process exit
     process.exit(0);
@@ -687,40 +689,40 @@ export async function parseArguments(): Promise<CliArgs> {
   // Normalize query args: handle both quoted "@path file" and unquoted @path file
   const queryArg = (result as { query?: string | string[] | undefined }).query;
   const q: string | undefined = Array.isArray(queryArg)
-    ? queryArg.join(' ')
+    ? queryArg.join(" ")
     : queryArg;
 
   // Route positional args: explicit -i flag -> interactive; else -> one-shot (even for @commands)
-  if (q && !result['prompt']) {
+  if (q && !result["prompt"]) {
     const hasExplicitInteractive =
-      result['promptInteractive'] === '' || !!result['promptInteractive'];
+      result["promptInteractive"] === "" || !!result["promptInteractive"];
     if (hasExplicitInteractive) {
-      result['promptInteractive'] = q;
+      result["promptInteractive"] = q;
     } else {
-      result['prompt'] = q;
+      result["prompt"] = q;
     }
   }
 
   // Keep CliArgs.query as a string for downstream typing
-  (result as Record<string, unknown>)['query'] = q || undefined;
+  (result as Record<string, unknown>)["query"] = q || undefined;
 
   // The import format is now only controlled by settings.memoryImportFormat
   // We no longer accept it as a CLI argument
 
   // Handle deprecated --experimental-acp flag
-  if (result['experimentalAcp']) {
+  if (result["experimentalAcp"]) {
     writeStderrLine(
-      '\x1b[33m⚠ Warning: --experimental-acp is deprecated and will be removed in a future release. Please use --acp instead.\x1b[0m',
+      "\x1b[33m⚠ Warning: --experimental-acp is deprecated and will be removed in a future release. Please use --acp instead.\x1b[0m",
     );
     // Map experimental-acp to acp if acp is not explicitly set
-    if (!result['acp']) {
-      (result as Record<string, unknown>)['acp'] = true;
+    if (!result["acp"]) {
+      (result as Record<string, unknown>)["acp"] = true;
     }
   }
 
   // Apply ACP fallback: if acp or experimental-acp is present but no explicit --channel, treat as ACP
-  if ((result['acp'] || result['experimentalAcp']) && !result['channel']) {
-    (result as Record<string, unknown>)['channel'] = 'ACP';
+  if ((result["acp"] || result["experimentalAcp"]) && !result["channel"]) {
+    (result as Record<string, unknown>)["channel"] = "ACP";
   }
 
   return result as unknown as CliArgs;
@@ -735,7 +737,7 @@ export async function loadHierarchicalGeminiMemory(
   fileService: FileDiscoveryService,
   extensionContextFilePaths: string[] = [],
   folderTrust: boolean,
-  memoryImportFormat: 'flat' | 'tree' = 'tree',
+  memoryImportFormat: "flat" | "tree" = "tree",
 ): Promise<{ memoryContent: string; fileCount: number }> {
   // FIX: Use real, canonical paths for a reliable comparison to handle symlinks.
   const realCwd = fs.realpathSync(path.resolve(currentWorkingDirectory));
@@ -744,7 +746,7 @@ export async function loadHierarchicalGeminiMemory(
 
   // If it is the home directory, pass an empty string to the core memory
   // function to signal that it should skip the workspace search.
-  const effectiveCwd = isHomeDirectory ? '' : currentWorkingDirectory;
+  const effectiveCwd = isHomeDirectory ? "" : currentWorkingDirectory;
 
   // Directly call the server function with the corrected path.
   return loadServerHierarchicalMemory(
@@ -760,8 +762,8 @@ export async function loadHierarchicalGeminiMemory(
 export function isDebugMode(argv: CliArgs): boolean {
   return (
     argv.debug ||
-    [process.env['DEBUG'], process.env['DEBUG_MODE']].some(
-      (v) => v === 'true' || v === '1',
+    [process.env["DEBUG"], process.env["DEBUG_MODE"]].some(
+      (v) => v === "true" || v === "1",
     )
   );
 }
@@ -776,10 +778,11 @@ export async function loadCliConfig(
 
   // Set runtime output directory from settings (env var QWEN_RUNTIME_DIR
   // is auto-detected inside getRuntimeBaseDir() at each call site).
-  // Pass cwd so that relative paths like ".qwen" resolve per-project.
+  // Pass cwd so that relative paths like ".tram" resolve per-project.
   Storage.setRuntimeBaseDir(settings.advanced?.runtimeOutputDir, cwd);
 
   const ideMode = settings.ide?.enabled ?? false;
+  const omitToolInstructions = settings.general?.omitToolInstructions ?? false;
 
   const folderTrust = settings.security?.folderTrust?.enabled ?? false;
   const trustedFolder = isWorkspaceTrusted(settings)?.isTrusted ?? true;
@@ -799,11 +802,11 @@ export async function loadCliConfig(
   const projectStorage = new Storage(cwd);
   const projectOutputLanguagePath = path.join(
     projectStorage.getTramDir(),
-    'output-language.md',
+    "output-language.md",
   );
   const globalOutputLanguagePath = path.join(
     Storage.getGlobalTramDir(),
-    'output-language.md',
+    "output-language.md",
   );
 
   let outputLanguageFilePath: string | undefined;
@@ -822,7 +825,7 @@ export async function loadCliConfig(
   // LSP configuration: enabled only via --experimental-lsp flag
   const lspEnabled = argv.experimentalLsp === true;
   let lspClient: LspClient | undefined;
-  const question = argv.promptInteractive || argv.prompt || '';
+  const question = argv.promptInteractive || argv.prompt || "";
   const inputFormat: InputFormat =
     (argv.inputFormat as InputFormat | undefined) ?? InputFormat.TEXT;
   const argvOutputFormat = normalizeOutputFormat(
@@ -956,7 +959,7 @@ export async function loadCliConfig(
     // 1. Check permissions.allow / allowedTools rules.
     if (
       mergedAllow.some((rule) => {
-        const openParen = rule.indexOf('(');
+        const openParen = rule.indexOf("(");
         const ruleName =
           openParen === -1 ? rule.trim() : rule.substring(0, openParen).trim();
         return ruleName === name;
@@ -1068,17 +1071,17 @@ export async function loadCliConfig(
         process.exit(1);
       }
     }
-  } else if (argv['sessionId']) {
+  } else if (argv["sessionId"]) {
     // Use provided session ID without session resumption
     // Check if session ID is already in use
     const sessionService = new SessionService(cwd);
-    const exists = await sessionService.sessionExists(argv['sessionId']);
+    const exists = await sessionService.sessionExists(argv["sessionId"]);
     if (exists) {
-      const message = `Error: Session Id ${argv['sessionId']} is already in use.`;
+      const message = `Error: Session Id ${argv["sessionId"]} is already in use.`;
       writeStderrLine(message);
       process.exit(1);
     }
-    sessionId = argv['sessionId'];
+    sessionId = argv["sessionId"];
   }
 
   const modelProvidersConfig = settings.modelProviders;
@@ -1092,7 +1095,7 @@ export async function loadCliConfig(
     includeDirectories,
     loadMemoryFromIncludeDirectories:
       settings.context?.loadFromIncludeDirectories || false,
-    importFormat: settings.context?.importFormat || 'tree',
+    importFormat: settings.context?.importFormat || "tree",
     debugMode,
     question,
     systemPrompt: argv.systemPrompt,
@@ -1111,7 +1114,7 @@ export async function loadCliConfig(
     onPersistPermissionRule: async (scope, ruleType, rule) => {
       const currentSettings = loadSettings(cwd);
       const settingScope =
-        scope === 'project' ? SettingScope.Workspace : SettingScope.User;
+        scope === "project" ? SettingScope.Workspace : SettingScope.User;
       const key = `permissions.${ruleType}`;
       const currentRules: string[] =
         currentSettings.forScope(settingScope).settings.permissions?.[
@@ -1147,6 +1150,7 @@ export async function loadCliConfig(
     fileDiscoveryService: fileService,
     bugCommand: settings.advanced?.bugCommand,
     model: resolvedModel,
+    fallbackModels: settings.model?.fallbacks,
     outputLanguageFilePath,
     sessionTokenLimit: settings.model?.sessionTokenLimit ?? -1,
     maxSessionTurns:
@@ -1155,7 +1159,7 @@ export async function loadCliConfig(
     cronEnabled: settings.experimental?.cron ?? false,
     listExtensions: argv.listExtensions || false,
     overrideExtensions: overrideExtensions || argv.extensions,
-    noBrowser: !!process.env['NO_BROWSER'],
+    noBrowser: !!process.env["NO_BROWSER"],
     authType: selectedAuthType,
     inputFormat,
     outputFormat,
@@ -1166,6 +1170,7 @@ export async function loadCliConfig(
     warnings: resolvedCliConfig.warnings,
     cliVersion: await getCliVersion(),
     ideMode,
+    omitToolInstructions,
     chatCompression: settings.model?.chatCompression,
     folderTrust,
     interactive,
@@ -1178,6 +1183,7 @@ export async function loadCliConfig(
     skipStartupContext: settings.model?.skipStartupContext ?? false,
     truncateToolOutputThreshold: settings.tools?.truncateToolOutputThreshold,
     truncateToolOutputLines: settings.tools?.truncateToolOutputLines,
+    serviceOutputToLLM: settings.tools?.serviceOutputToLLM,
     eventEmitter: appEvents,
     gitCoAuthor: settings.general?.gitCoAuthor,
     output: {
@@ -1229,7 +1235,7 @@ export async function loadCliConfig(
       lspClient = new NativeLspClient(lspService);
       config.setLspClient(lspClient);
     } catch (err) {
-      debugLogger.warn('Failed to initialize native LSP service:', err);
+      debugLogger.warn("Failed to initialize native LSP service:", err);
     }
   }
 

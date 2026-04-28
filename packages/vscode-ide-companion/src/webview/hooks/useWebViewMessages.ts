@@ -4,30 +4,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useCallback } from 'react';
-import { useVSCode } from './useVSCode.js';
-import type { Conversation } from '../../services/conversationStore.js';
-import type { PermissionOption, PermissionToolCall } from '@tram-ai/webui';
+import { useEffect, useRef, useCallback } from "react";
+import { useVSCode } from "./useVSCode.js";
+import type { Conversation } from "../../services/conversationStore.js";
+import type { PermissionOption, PermissionToolCall } from "@tram-ai/webui";
 import type {
   ToolCallUpdate,
   UsageStatsPayload,
-} from '../../types/chatTypes.js';
-import type { ApprovalModeValue } from '../../types/approvalModeValueTypes.js';
-import type { PlanEntry } from '../../types/chatTypes.js';
-import type { ModelInfo, AvailableCommand } from '@agentclientprotocol/sdk';
-import type { Question } from '../../types/acpTypes.js';
+} from "../../types/chatTypes.js";
+import type { ApprovalModeValue } from "../../types/approvalModeValueTypes.js";
+import type { PlanEntry } from "../../types/chatTypes.js";
+import type { ModelInfo, AvailableCommand } from "@agentclientprotocol/sdk";
+import type { Question } from "../../types/acpTypes.js";
 import {
   useImageResolution,
   type WebViewMessage,
   type WebViewMessageBase,
-} from './useImage.js';
+} from "./useImage.js";
 
 const FORCE_CLEAR_STREAM_END_REASONS = new Set([
-  'user_cancelled',
-  'cancelled',
-  'timeout',
-  'error',
-  'session_expired',
+  "user_cancelled",
+  "cancelled",
+  "timeout",
+  "error",
+  "session_expired",
 ]);
 
 interface UseWebViewMessagesProps {
@@ -145,22 +145,22 @@ interface UseWebViewMessagesProps {
 
 type ConversationResetHandlers = {
   messageHandling: Pick<
-    UseWebViewMessagesProps['messageHandling'],
-    | 'clearMessages'
-    | 'endStreaming'
-    | 'clearWaitingForResponse'
-    | 'clearThinking'
+    UseWebViewMessagesProps["messageHandling"],
+    | "clearMessages"
+    | "endStreaming"
+    | "clearWaitingForResponse"
+    | "clearThinking"
   >;
-  clearToolCalls: UseWebViewMessagesProps['clearToolCalls'];
+  clearToolCalls: UseWebViewMessagesProps["clearToolCalls"];
   clearActiveExecToolCalls: () => void;
-  setPlanEntries: UseWebViewMessagesProps['setPlanEntries'];
-  handlePermissionRequest: UseWebViewMessagesProps['handlePermissionRequest'];
-  handleAskUserQuestion: UseWebViewMessagesProps['handleAskUserQuestion'];
+  setPlanEntries: UseWebViewMessagesProps["setPlanEntries"];
+  handlePermissionRequest: UseWebViewMessagesProps["handlePermissionRequest"];
+  handleAskUserQuestion: UseWebViewMessagesProps["handleAskUserQuestion"];
   sessionManagement: Pick<
-    UseWebViewMessagesProps['sessionManagement'],
-    'setCurrentSessionId' | 'setCurrentSessionTitle'
+    UseWebViewMessagesProps["sessionManagement"],
+    "setCurrentSessionId" | "setCurrentSessionTitle"
   >;
-  setUsageStats?: UseWebViewMessagesProps['setUsageStats'];
+  setUsageStats?: UseWebViewMessagesProps["setUsageStats"];
 };
 
 export function resetConversationState({
@@ -184,11 +184,11 @@ export function resetConversationState({
   handlers.sessionManagement.setCurrentSessionId(null);
   clearImageResolutions();
   handlers.setUsageStats?.(undefined);
-  handlers.sessionManagement.setCurrentSessionTitle('Past Conversations');
+  handlers.sessionManagement.setCurrentSessionTitle("Past Conversations");
   // Reset the VS Code tab title to default label
   vscode.postMessage({
-    type: 'updatePanelTitle',
-    data: { title: 'Qwen Code' },
+    type: "updatePanelTitle",
+    data: { title: "TRAM" },
   });
 }
 
@@ -263,7 +263,7 @@ export const useWebViewMessages = ({
   const buildPlanLines = (entries: PlanEntry[]): string[] =>
     entries.map((e) => {
       const mark =
-        e.status === 'completed' ? 'x' : e.status === 'in_progress' ? '-' : ' ';
+        e.status === "completed" ? "x" : e.status === "in_progress" ? "-" : " ";
       return `- [${mark}] ${e.content}`.trim();
     });
 
@@ -273,7 +273,7 @@ export const useWebViewMessages = ({
   ): boolean => {
     // Consider "supplement" = old content text collection (ignoring status) is contained in new content
     const key = (line: string) => {
-      const idx = line.indexOf('] ');
+      const idx = line.indexOf("] ");
       return idx >= 0 ? line.slice(idx + 2).trim() : line.trim();
     };
     const nextSet = new Set(nextLines.map(key));
@@ -311,11 +311,11 @@ export const useWebViewMessages = ({
       const handlers = handlersRef.current;
 
       switch (message.type) {
-        case 'modeInfo': {
+        case "modeInfo": {
           // Initialize UI mode from ACP initialize
           try {
             const current = (message.data?.currentModeId ||
-              'default') as ApprovalModeValue;
+              "default") as ApprovalModeValue;
             setEditMode?.(current);
           } catch (_error) {
             // best effort
@@ -323,10 +323,10 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'modeChanged': {
+        case "modeChanged": {
           try {
             const modeId = (message.data?.modeId ||
-              'default') as ApprovalModeValue;
+              "default") as ApprovalModeValue;
             setEditMode?.(modeId);
           } catch (_error) {
             // Ignore error when setting mode
@@ -334,7 +334,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'modelChanged': {
+        case "modelChanged": {
           try {
             const model = message.data?.model as ModelInfo | undefined;
             if (model) {
@@ -346,7 +346,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'availableCommands': {
+        case "availableCommands": {
           try {
             const commands = message.data?.commands as
               | AvailableCommand[]
@@ -360,54 +360,54 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'availableModels': {
+        case "availableModels": {
           try {
             const models = message.data?.models as ModelInfo[] | undefined;
             console.log(
-              '[useWebViewMessages] availableModels message received:',
+              "[useWebViewMessages] availableModels message received:",
               models,
             );
             if (models) {
               handlers.setAvailableModels?.(models);
               console.log(
-                '[useWebViewMessages] setAvailableModels called with:',
+                "[useWebViewMessages] setAvailableModels called with:",
                 models,
               );
             }
           } catch (_error) {
             // Ignore error when setting available models
             console.error(
-              '[useWebViewMessages] Error setting available models:',
+              "[useWebViewMessages] Error setting available models:",
               _error,
             );
           }
           break;
         }
 
-        case 'usageStats': {
+        case "usageStats": {
           const stats = message.data as UsageStatsPayload | undefined;
           handlers.setUsageStats?.(stats);
           break;
         }
 
-        case 'modelInfo': {
+        case "modelInfo": {
           const info = message.data as Partial<ModelInfo> | undefined;
           if (
             info &&
-            typeof info.name === 'string' &&
+            typeof info.name === "string" &&
             info.name.trim().length > 0
           ) {
             const modelId =
-              typeof info.modelId === 'string' && info.modelId.trim().length > 0
+              typeof info.modelId === "string" && info.modelId.trim().length > 0
                 ? info.modelId.trim()
                 : info.name.trim();
             const normalized: ModelInfo = {
               modelId,
               name: info.name.trim(),
-              ...(typeof info.description !== 'undefined'
+              ...(typeof info.description !== "undefined"
                 ? { description: info.description ?? null }
                 : {}),
-              ...(typeof info._meta !== 'undefined'
+              ...(typeof info._meta !== "undefined"
                 ? { _meta: info._meta }
                 : {}),
             };
@@ -420,12 +420,12 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'loginSuccess': {
+        case "loginSuccess": {
           // Clear loading state and show a short assistant notice
           handlers.messageHandling.clearWaitingForResponse();
           handlers.messageHandling.addMessage({
-            role: 'assistant',
-            content: 'Successfully logged in. You can continue chatting.',
+            role: "assistant",
+            content: "Successfully logged in. You can continue chatting.",
             timestamp: Date.now(),
           });
           // Set authentication state to true
@@ -433,7 +433,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'agentConnected': {
+        case "agentConnected": {
           // Agent connected successfully; clear any pending spinner
           handlers.messageHandling.clearWaitingForResponse();
           // Set authentication state to true
@@ -441,15 +441,15 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'agentConnectionError': {
+        case "agentConnectionError": {
           // Agent connection failed; surface the error and unblock the UI
           handlers.messageHandling.clearWaitingForResponse();
           const errorMsg =
             (message?.data?.message as string) ||
-            'Failed to connect to TRAM agent.';
+            "Failed to connect to TRAM agent.";
 
           handlers.messageHandling.addMessage({
-            role: 'assistant',
+            role: "assistant",
             content: `Failed to connect to TRAM agent: ${errorMsg}\nYou can still use the chat UI, but messages won't be sent to AI.`,
             timestamp: Date.now(),
           });
@@ -458,14 +458,14 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'loginError': {
+        case "loginError": {
           // Clear loading state and show error notice
           handlers.messageHandling.clearWaitingForResponse();
           const errorMsg =
             (message?.data?.message as string) ||
-            'Login failed. Please try again.';
+            "Login failed. Please try again.";
           handlers.messageHandling.addMessage({
-            role: 'assistant',
+            role: "assistant",
             content: errorMsg,
             timestamp: Date.now(),
           });
@@ -474,11 +474,11 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'authState': {
+        case "authState": {
           const state = (
             message?.data as { authenticated?: boolean | null } | undefined
           )?.authenticated;
-          if (typeof state === 'boolean') {
+          if (typeof state === "boolean") {
             handlers.setIsAuthenticated?.(state);
           } else {
             handlers.setIsAuthenticated?.(null);
@@ -486,7 +486,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'accountInfo': {
+        case "accountInfo": {
           const info = message?.data as
             | {
                 authType?: string | null;
@@ -500,7 +500,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'conversationLoaded': {
+        case "conversationLoaded": {
           const conversation = message.data as Conversation;
           clearImageResolutions();
           handlers.messageHandling.setMessages(
@@ -509,9 +509,9 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'message': {
+        case "message": {
           const msg = message.data as {
-            role?: 'user' | 'assistant' | 'thinking';
+            role?: "user" | "assistant" | "thinking";
             content?: string;
             timestamp?: number;
             fileContext?: {
@@ -526,12 +526,12 @@ export const useWebViewMessages = ({
           );
           // Robustness: if an assistant message arrives outside the normal stream
           // pipeline (no explicit streamEnd), ensure we clear streaming/waiting states
-          if (msg.role === 'assistant') {
+          if (msg.role === "assistant") {
             try {
               handlers.messageHandling.endStreaming();
             } catch (_error) {
               // no-op: stream might not have been started
-              console.warn('[PanelManager] Failed to end streaming:', _error);
+              console.warn("[PanelManager] Failed to end streaming:", _error);
             }
             // Important: Do NOT blindly clear the waiting message if there are
             // still active tool calls running. We keep the waiting indicator
@@ -542,7 +542,7 @@ export const useWebViewMessages = ({
               } catch (_error) {
                 // no-op: already cleared
                 console.warn(
-                  '[PanelManager] Failed to clear waiting for response:',
+                  "[PanelManager] Failed to clear waiting for response:",
                   _error,
                 );
               }
@@ -551,7 +551,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'streamStart': {
+        case "streamStart": {
           const startData = message.data as
             | { timestamp?: number; requestId?: string }
             | undefined;
@@ -561,18 +561,18 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'streamChunk': {
+        case "streamChunk": {
           handlers.messageHandling.appendStreamChunk(message.data.chunk);
           break;
         }
 
-        case 'thoughtChunk': {
-          const chunk = message.data.content || message.data.chunk || '';
+        case "thoughtChunk": {
+          const chunk = message.data.content || message.data.chunk || "";
           handlers.messageHandling.appendThinkingChunk(chunk);
           break;
         }
 
-        case 'streamEnd': {
+        case "streamEnd": {
           const endData = message.data as
             | { reason?: string; requestId?: string }
             | undefined;
@@ -582,9 +582,9 @@ export const useWebViewMessages = ({
           if (activeRequestIdRef.current) {
             if (endRequestId !== activeRequestIdRef.current) {
               console.log(
-                '[useWebViewMessages] Ignoring stale/untagged streamEnd:',
+                "[useWebViewMessages] Ignoring stale/untagged streamEnd:",
                 endRequestId,
-                'active:',
+                "active:",
                 activeRequestIdRef.current,
               );
               break;
@@ -600,7 +600,7 @@ export const useWebViewMessages = ({
           // This avoids UI getting stuck with Stop button visible after
           // rejecting a permission request.
           try {
-            const reason = (endData?.reason || '').toLowerCase();
+            const reason = (endData?.reason || "").toLowerCase();
 
             /**
              * Handle different types of stream end reasons that require a full reset:
@@ -631,7 +631,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'error': {
+        case "error": {
           handlers.messageHandling.endStreaming();
           handlers.messageHandling.clearThinking();
           activeExecToolCallsRef.current.clear();
@@ -639,16 +639,16 @@ export const useWebViewMessages = ({
           // Display error message to user so they know what went wrong
           const errorMessage =
             (message?.data?.message as string) ||
-            'An unexpected error occurred.';
+            "An unexpected error occurred.";
           handlers.messageHandling.addMessage({
-            role: 'assistant',
+            role: "assistant",
             content: errorMessage,
             timestamp: Date.now(),
           });
           break;
         }
 
-        case 'permissionRequest': {
+        case "permissionRequest": {
           handlers.handlePermissionRequest(message.data);
 
           const permToolCall = message.data?.toolCall as {
@@ -664,26 +664,26 @@ export const useWebViewMessages = ({
             // Infer kind more robustly for permission preview:
             // - If content contains a diff entry, force 'edit' so the EditToolCall can handle it properly
             // - Else try title-based hints; fall back to provided kind or 'execute'
-            let kind = permToolCall.kind || 'execute';
+            let kind = permToolCall.kind || "execute";
             const contentArr = (permToolCall.content as unknown[]) || [];
             const hasDiff = Array.isArray(contentArr)
               ? contentArr.some(
                   (c: unknown) =>
                     !!c &&
-                    typeof c === 'object' &&
-                    (c as { type?: string }).type === 'diff',
+                    typeof c === "object" &&
+                    (c as { type?: string }).type === "diff",
                 )
               : false;
             if (hasDiff) {
-              kind = 'edit';
+              kind = "edit";
 
               // Auto-open diff view for edit operations with diff content
               // This replaces the useEffect auto-trigger in EditToolCall component
               const diffContent = contentArr.find(
                 (c: unknown) =>
                   !!c &&
-                  typeof c === 'object' &&
-                  (c as { type?: string }).type === 'diff',
+                  typeof c === "object" &&
+                  (c as { type?: string }).type === "diff",
               ) as
                 | { path?: string; oldText?: string; newText?: string }
                 | undefined;
@@ -694,7 +694,7 @@ export const useWebViewMessages = ({
                 diffContent?.newText !== undefined
               ) {
                 vscode.postMessage({
-                  type: 'openDiff',
+                  type: "openDiff",
                   data: {
                     path: diffContent.path,
                     oldText: diffContent.oldText,
@@ -704,31 +704,31 @@ export const useWebViewMessages = ({
               }
             } else if (permToolCall.title) {
               const title = permToolCall.title.toLowerCase();
-              if (title.includes('touch') || title.includes('echo')) {
-                kind = 'execute';
-              } else if (title.includes('read') || title.includes('cat')) {
-                kind = 'read';
-              } else if (title.includes('write') || title.includes('edit')) {
-                kind = 'edit';
+              if (title.includes("touch") || title.includes("echo")) {
+                kind = "execute";
+              } else if (title.includes("read") || title.includes("cat")) {
+                kind = "read";
+              } else if (title.includes("write") || title.includes("edit")) {
+                kind = "edit";
               }
             }
 
             const normalizedStatus = (
-              permToolCall.status === 'pending' ||
-              permToolCall.status === 'in_progress' ||
-              permToolCall.status === 'completed' ||
-              permToolCall.status === 'failed'
+              permToolCall.status === "pending" ||
+              permToolCall.status === "in_progress" ||
+              permToolCall.status === "completed" ||
+              permToolCall.status === "failed"
                 ? permToolCall.status
-                : 'pending'
-            ) as ToolCallUpdate['status'];
+                : "pending"
+            ) as ToolCallUpdate["status"];
 
             handlers.handleToolCallUpdate({
-              type: 'tool_call',
+              type: "tool_call",
               toolCallId: permToolCall.toolCallId,
               kind,
               title: permToolCall.title,
               status: normalizedStatus,
-              content: permToolCall.content as ToolCallUpdate['content'],
+              content: permToolCall.content as ToolCallUpdate["content"],
               locations: permToolCall.locations,
             });
 
@@ -739,20 +739,20 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'permissionResolved': {
+        case "permissionResolved": {
           // Extension proactively resolved a pending permission; close drawer.
           try {
             handlers.handlePermissionRequest(null);
           } catch (_error) {
             console.warn(
-              '[useWebViewMessages] failed to close permission UI:',
+              "[useWebViewMessages] failed to close permission UI:",
               _error,
             );
           }
           break;
         }
 
-        case 'askUserQuestion': {
+        case "askUserQuestion": {
           // Handle ask user question request from extension
           const questionsData = message.data as {
             questions: Question[];
@@ -765,14 +765,14 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'plan':
+        case "plan":
           if (message.data.entries && Array.isArray(message.data.entries)) {
             const entries = message.data.entries as PlanEntry[];
             handlers.setPlanEntries(entries);
 
             // Generate new snapshot text
             const lines = buildPlanLines(entries);
-            const text = lines.join('\n');
+            const text = lines.join("\n");
             const prev = lastPlanSnapshotRef.current;
 
             // 1) Identical -> Skip
@@ -786,15 +786,15 @@ export const useWebViewMessages = ({
               // 2) Supplement or status update -> Merge to previous (use tool_call_update to override content)
               if (prev && isSupplementOf(prev.lines, lines)) {
                 handlers.handleToolCallUpdate({
-                  type: 'tool_call_update',
+                  type: "tool_call_update",
                   toolCallId: prev.id,
-                  kind: 'todo_write',
-                  title: 'Updated Plan',
-                  status: 'completed',
+                  kind: "todo_write",
+                  title: "Updated Plan",
+                  status: "completed",
                   content: [
                     {
-                      type: 'content',
-                      content: { type: 'text', text },
+                      type: "content",
+                      content: { type: "text", text },
                     },
                   ],
                   timestamp: ts,
@@ -804,15 +804,15 @@ export const useWebViewMessages = ({
                 // 3) Other cases -> Add a new history card
                 const toolCallId = `plan-snapshot-${ts}`;
                 handlers.handleToolCallUpdate({
-                  type: 'tool_call',
+                  type: "tool_call",
                   toolCallId,
-                  kind: 'todo_write',
-                  title: 'Updated Plan',
-                  status: 'completed',
+                  kind: "todo_write",
+                  title: "Updated Plan",
+                  status: "completed",
                   content: [
                     {
-                      type: 'content',
-                      content: { type: 'text', text },
+                      type: "content",
+                      content: { type: "text", text },
                     },
                   ],
                   timestamp: ts,
@@ -825,15 +825,15 @@ export const useWebViewMessages = ({
               handlers.messageHandling.breakThinkingSegment?.();
             } catch (_error) {
               console.warn(
-                '[useWebViewMessages] failed to push/merge plan snapshot toolcall:',
+                "[useWebViewMessages] failed to push/merge plan snapshot toolcall:",
                 _error,
               );
             }
           }
           break;
 
-        case 'toolCall':
-        case 'toolCallUpdate': {
+        case "toolCall":
+        case "toolCallUpdate": {
           const toolCallData = message.data;
           if (toolCallData.sessionUpdate && !toolCallData.type) {
             toolCallData.type = toolCallData.sessionUpdate;
@@ -841,11 +841,11 @@ export const useWebViewMessages = ({
           handlers.handleToolCallUpdate(toolCallData);
 
           // Split assistant stream
-          const status = (toolCallData.status || '').toString();
-          const isStart = toolCallData.type === 'tool_call';
+          const status = (toolCallData.status || "").toString();
+          const isStart = toolCallData.type === "tool_call";
           const isFinalUpdate =
-            toolCallData.type === 'tool_call_update' &&
-            (status === 'completed' || status === 'failed');
+            toolCallData.type === "tool_call_update" &&
+            (status === "completed" || status === "failed");
           if (isStart || isFinalUpdate) {
             handlers.messageHandling.breakAssistantSegment();
             handlers.messageHandling.breakThinkingSegment();
@@ -854,10 +854,10 @@ export const useWebViewMessages = ({
           // While long-running tools (e.g., execute/bash/command) are in progress,
           // surface a lightweight loading indicator and expose the Stop button.
           try {
-            const id = (toolCallData.toolCallId || '').toString();
-            const kind = (toolCallData.kind || '').toString().toLowerCase();
+            const id = (toolCallData.toolCallId || "").toString();
+            const kind = (toolCallData.kind || "").toString().toLowerCase();
             const isExecKind =
-              kind === 'execute' || kind === 'bash' || kind === 'command';
+              kind === "execute" || kind === "bash" || kind === "command";
             // CLI sometimes omits kind in tool_call_update payloads; fall back to
             // whether we've already tracked this ID as an exec tool.
             const wasTrackedExec = activeExecToolCallsRef.current.has(id);
@@ -867,23 +867,23 @@ export const useWebViewMessages = ({
               break;
             }
 
-            if (status === 'pending' || status === 'in_progress') {
+            if (status === "pending" || status === "in_progress") {
               if (isExecKind) {
                 activeExecToolCallsRef.current.add(id);
 
                 // Build a helpful hint from rawInput
                 const rawInput = toolCallData.rawInput;
-                let cmd = '';
-                if (typeof rawInput === 'string') {
+                let cmd = "";
+                if (typeof rawInput === "string") {
                   cmd = rawInput;
-                } else if (rawInput && typeof rawInput === 'object') {
+                } else if (rawInput && typeof rawInput === "object") {
                   const maybe = rawInput as { command?: string };
-                  cmd = maybe.command || '';
+                  cmd = maybe.command || "";
                 }
-                const hint = cmd ? `Running: ${cmd}` : 'Running command...';
+                const hint = cmd ? `Running: ${cmd}` : "Running command...";
                 handlers.messageHandling.setWaitingForResponse(hint);
               }
-            } else if (status === 'completed' || status === 'failed') {
+            } else if (status === "completed" || status === "failed") {
               activeExecToolCallsRef.current.delete(id);
             }
 
@@ -897,7 +897,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'tramSessionList': {
+        case "tramSessionList": {
           const sessions =
             (message.data.sessions as Array<Record<string, unknown>>) || [];
           const append = Boolean(message.data.append);
@@ -926,14 +926,14 @@ export const useWebViewMessages = ({
               const title =
                 (currentSession.title as string) ||
                 (currentSession.name as string) ||
-                'Past Conversations';
+                "Past Conversations";
               handlers.sessionManagement.setCurrentSessionTitle(title);
             }
           }
           break;
         }
 
-        case 'tramSessionSwitched':
+        case "tramSessionSwitched":
           handlers.sessionManagement.setShowSessionSelector(false);
           if (message.data.sessionId) {
             handlers.sessionManagement.setCurrentSessionId(
@@ -945,10 +945,10 @@ export const useWebViewMessages = ({
             const title =
               (session.title as string) ||
               (session.name as string) ||
-              'Past Conversations';
+              "Past Conversations";
             handlers.sessionManagement.setCurrentSessionTitle(title);
             // Update the VS Code webview tab title as well
-            vscode.postMessage({ type: 'updatePanelTitle', data: { title } });
+            vscode.postMessage({ type: "updatePanelTitle", data: { title } });
           }
           if (message.data.messages) {
             clearImageResolutions();
@@ -971,7 +971,7 @@ export const useWebViewMessages = ({
           handlers.clearToolCalls();
           if (message.data.toolCalls && Array.isArray(message.data.toolCalls)) {
             message.data.toolCalls.forEach((toolCall: unknown) => {
-              if (toolCall && typeof toolCall === 'object') {
+              if (toolCall && typeof toolCall === "object") {
                 handlers.handleToolCallUpdate(toolCall as ToolCallUpdate);
               }
             });
@@ -989,7 +989,7 @@ export const useWebViewMessages = ({
           lastPlanSnapshotRef.current = null;
           break;
 
-        case 'conversationCleared':
+        case "conversationCleared":
           resetConversationState({
             handlers: {
               ...handlers,
@@ -1003,19 +1003,19 @@ export const useWebViewMessages = ({
           lastPlanSnapshotRef.current = null;
           break;
 
-        case 'sessionTitleUpdated': {
+        case "sessionTitleUpdated": {
           const sessionId = message.data?.sessionId as string;
           const title = message.data?.title as string;
           if (sessionId && title) {
             handlers.sessionManagement.setCurrentSessionId(sessionId);
             handlers.sessionManagement.setCurrentSessionTitle(title);
             // Ask extension host to reflect this title in the tab label
-            vscode.postMessage({ type: 'updatePanelTitle', data: { title } });
+            vscode.postMessage({ type: "updatePanelTitle", data: { title } });
           }
           break;
         }
 
-        case 'activeEditorChanged': {
+        case "activeEditorChanged": {
           const fileName = message.data?.fileName as string | null;
           const filePath = message.data?.filePath as string | null;
           const selection = message.data?.selection as {
@@ -1028,7 +1028,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'fileAttached': {
+        case "fileAttached": {
           const attachment = message.data as {
             id: string;
             type: string;
@@ -1042,7 +1042,7 @@ export const useWebViewMessages = ({
           );
 
           if (inputFieldRef.current) {
-            const currentText = inputFieldRef.current.textContent || '';
+            const currentText = inputFieldRef.current.textContent || "";
             const newText = currentText
               ? `${currentText} @${attachment.name} `
               : `@${attachment.name} `;
@@ -1059,7 +1059,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'workspaceFiles': {
+        case "workspaceFiles": {
           const files = message.data?.files as Array<{
             id: string;
             label: string;
@@ -1068,7 +1068,7 @@ export const useWebViewMessages = ({
           }>;
           const requestId = message.data?.requestId as number | undefined;
           if (files) {
-            console.log('[WebView] Received workspaceFiles:', files.length);
+            console.log("[WebView] Received workspaceFiles:", files.length);
             handlers.fileContext.setWorkspaceFilesFromResponse(
               files,
               requestId,
@@ -1077,7 +1077,7 @@ export const useWebViewMessages = ({
           break;
         }
 
-        case 'imagePathsResolved': {
+        case "imagePathsResolved": {
           const resolved =
             (
               message.data as
@@ -1089,7 +1089,7 @@ export const useWebViewMessages = ({
           );
           break;
         }
-        case 'cancelStreaming':
+        case "cancelStreaming":
           // Handle cancel streaming response from extension
           // Note: The "Interrupted" message is already added by handleCancel in App.tsx
           // to provide immediate UI feedback. We only need to ensure streaming states
@@ -1115,9 +1115,9 @@ export const useWebViewMessages = ({
   );
 
   useEffect(() => {
-    window.addEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
     // Notify extension that the webview is ready to receive initialization state.
-    vscode.postMessage({ type: 'webviewReady', data: {} });
-    return () => window.removeEventListener('message', handleMessage);
+    vscode.postMessage({ type: "webviewReady", data: {} });
+    return () => window.removeEventListener("message", handleMessage);
   }, [handleMessage, vscode]);
 };

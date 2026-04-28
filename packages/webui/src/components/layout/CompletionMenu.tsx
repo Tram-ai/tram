@@ -7,9 +7,9 @@
  * Supports keyboard navigation and mouse interaction
  */
 
-import type { FC } from 'react';
-import { useEffect, useRef, useState, useMemo } from 'react';
-import type { CompletionItem } from '../../types/completion.js';
+import type { FC } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import type { CompletionItem } from "../../types/completion.js";
 
 /**
  * Props for CompletionMenu component
@@ -115,29 +115,29 @@ export const CompletionMenu: FC<CompletionMenuProps> = ({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       switch (event.key) {
-        case 'ArrowDown':
+        case "ArrowDown":
           event.preventDefault();
           isKeyboardNavigation.current = true;
           setSelected((prev) => Math.min(prev + 1, items.length - 1));
           break;
-        case 'ArrowUp':
+        case "ArrowUp":
           event.preventDefault();
           isKeyboardNavigation.current = true;
           setSelected((prev) => Math.max(prev - 1, 0));
           break;
-        case 'Enter':
+        case "Enter":
           event.preventDefault();
           if (items[selected]) {
             onSelect(items[selected]);
           }
           break;
-        case 'Tab':
+        case "Tab":
           event.preventDefault();
           if (items[selected]) {
             (onFill ?? onSelect)(items[selected]);
           }
           break;
-        case 'Escape':
+        case "Escape":
           event.preventDefault();
           onClose();
           break;
@@ -146,11 +146,11 @@ export const CompletionMenu: FC<CompletionMenuProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [items, selected, onSelect, onFill, onClose]);
 
@@ -172,10 +172,10 @@ export const CompletionMenu: FC<CompletionMenuProps> = ({
       // Check if element is outside the visible area of the list
       if (elRect.top < listRect.top) {
         // Element is above visible area, scroll up
-        selectedEl.scrollIntoView({ block: 'start', behavior: 'instant' });
+        selectedEl.scrollIntoView({ block: "start", behavior: "instant" });
       } else if (elRect.bottom > listRect.bottom) {
         // Element is below visible area, scroll down
-        selectedEl.scrollIntoView({ block: 'end', behavior: 'instant' });
+        selectedEl.scrollIntoView({ block: "end", behavior: "instant" });
       }
     }
   }, [selected]);
@@ -191,16 +191,16 @@ export const CompletionMenu: FC<CompletionMenuProps> = ({
     <div
       ref={containerRef}
       role="listbox"
-      aria-label={title ? `${title} suggestions` : 'Suggestions'}
+      aria-label={title ? `${title} suggestions` : "Suggestions"}
       className={[
-        'completion-menu',
+        "completion-menu",
         // Positioning and container styling
-        'absolute bottom-full left-0 right-0 mb-2 flex flex-col overflow-hidden',
-        'rounded-large border bg-[var(--app-menu-background)]',
-        'border-[var(--app-input-border)] max-h-[50vh] z-[1000]',
+        "absolute bottom-full left-0 right-0 mb-2 flex flex-col overflow-hidden",
+        "rounded-large border bg-[var(--app-menu-background)]",
+        "border-[var(--app-input-border)] max-h-[50vh] z-[1000]",
         // Mount animation (fade + slight slide up) via keyframes
-        mounted ? 'animate-completion-menu-enter' : '',
-      ].join(' ')}
+        mounted ? "animate-completion-menu-enter" : "",
+      ].join(" ")}
     >
       {/* Optional top spacer for visual separation from the input */}
       <div className="h-1" />
@@ -208,12 +208,12 @@ export const CompletionMenu: FC<CompletionMenuProps> = ({
         ref={listRef}
         className={[
           // Semantic
-          'completion-menu-list',
+          "completion-menu-list",
           // Scroll area
-          'flex max-h-[300px] flex-col overflow-y-auto',
+          "flex max-h-[300px] flex-col overflow-y-auto",
           // Spacing driven by theme vars
-          'p-[var(--app-list-padding)] pb-2',
-        ].join(' ')}
+          "p-[var(--app-list-padding)] pb-2",
+        ].join(" ")}
       >
         {title && !hasGroups && (
           <div className="completion-menu-section-label px-3 py-1 text-[var(--app-primary-foreground)] opacity-50 text-[0.9em]">
@@ -244,13 +244,13 @@ export const CompletionMenu: FC<CompletionMenuProps> = ({
                     onMouseEnter={() => setSelected(currentIndex)}
                     className={[
                       // Semantic
-                      'completion-menu-item',
+                      "completion-menu-item",
                       // Hit area
-                      'mx-1 cursor-pointer rounded-[var(--app-list-border-radius)]',
-                      'p-[var(--app-list-item-padding)]',
+                      "mx-1 cursor-pointer rounded-[var(--app-list-border-radius)]",
+                      "p-[var(--app-list-item-padding)]",
                       // Active background
-                      isActive ? 'bg-[var(--app-list-active-background)]' : '',
-                    ].join(' ')}
+                      isActive ? "bg-[var(--app-list-active-background)]" : "",
+                    ].join(" ")}
                   >
                     <div className="completion-menu-item-row flex items-center justify-between gap-2">
                       {item.icon && (
@@ -260,11 +260,11 @@ export const CompletionMenu: FC<CompletionMenuProps> = ({
                       )}
                       <span
                         className={[
-                          'completion-menu-item-label flex-1 truncate',
+                          "completion-menu-item-label flex-1 truncate",
                           isActive
-                            ? 'text-[var(--app-list-active-foreground)]'
-                            : 'text-[var(--app-primary-foreground)]',
-                        ].join(' ')}
+                            ? "text-[var(--app-list-active-foreground)]"
+                            : "text-[var(--app-primary-foreground)]",
+                        ].join(" ")}
                       >
                         {item.label}
                       </span>

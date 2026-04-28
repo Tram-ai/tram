@@ -1,42 +1,42 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-undef */
-import { writeFile, readFile, mkdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import { build } from 'vite';
+import { writeFile, readFile, mkdir } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import { build } from "vite";
 
 const assetsDir = dirname(fileURLToPath(import.meta.url));
-const distDir = join(assetsDir, 'dist');
+const distDir = join(assetsDir, "dist");
 
-const generatedDir = join(assetsDir, '..', 'generated');
+const generatedDir = join(assetsDir, "..", "generated");
 await mkdir(generatedDir, { recursive: true });
 
-const templateModulePath = join(generatedDir, 'insightTemplate.ts');
+const templateModulePath = join(generatedDir, "insightTemplate.ts");
 
-console.log('Building insight assets with Vite...');
+console.log("Building insight assets with Vite...");
 await build();
 
-console.log('Reading generated files...');
-let jsContent = '';
-let cssContent = '';
+console.log("Reading generated files...");
+let jsContent = "";
+let cssContent = "";
 
 try {
-  jsContent = await readFile(join(distDir, 'main.js'), 'utf-8');
+  jsContent = await readFile(join(distDir, "main.js"), "utf-8");
 } catch (e) {
-  console.error('Failed to read main.js from dist');
+  console.error("Failed to read main.js from dist");
   throw e;
 }
 
 try {
   // Try style.css first (standard Vite lib mode output)
-  cssContent = await readFile(join(distDir, 'style.css'), 'utf-8');
+  cssContent = await readFile(join(distDir, "style.css"), "utf-8");
 } catch (e) {
   try {
     // Try main.css (if configured via assetFileNames)
-    cssContent = await readFile(join(distDir, 'main.css'), 'utf-8');
+    cssContent = await readFile(join(distDir, "main.css"), "utf-8");
   } catch (e2) {
     console.warn(
-      'No CSS file found in dist (style.css or main.css). Using empty string.',
+      "No CSS file found in dist (style.css or main.css). Using empty string.",
     );
   }
 }

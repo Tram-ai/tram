@@ -6,16 +6,16 @@
  * Search tool call component - specialized for search operations
  */
 
-import { useState, type FC } from 'react';
+import { useState, type FC } from "react";
 import {
   safeTitle,
   groupContent,
   mapToolStatusToContainerStatus,
   ToolCallContainer,
-} from './shared/index.js';
-import type { BaseToolCallProps, ContainerStatus } from './shared/index.js';
-import { FileLink } from '../layout/FileLink.js';
-import { getToolDisplayLabel } from './labelUtils.js';
+} from "./shared/index.js";
+import type { BaseToolCallProps, ContainerStatus } from "./shared/index.js";
+import { FileLink } from "../layout/FileLink.js";
+import { getToolDisplayLabel } from "./labelUtils.js";
 
 /**
  * Collapsible output component for search results
@@ -123,7 +123,7 @@ export const SearchToolCall: FC<BaseToolCallProps> = ({
           </SearchRow>
           <SearchRow label="Error">
             <div className="text-[#c74e39] font-medium">
-              {errors.join('\n')}
+              {errors.join("\n")}
             </div>
           </SearchRow>
         </SearchCardContent>
@@ -134,7 +134,7 @@ export const SearchToolCall: FC<BaseToolCallProps> = ({
   // Success case with results: show search query + file list
   if (locations && locations.length > 0) {
     // Use collapsible output for multiple results
-    const summaryText = `${locations.length} ${locations.length === 1 ? 'file' : 'files'} found`;
+    const summaryText = `${locations.length} ${locations.length === 1 ? "file" : "files"} found`;
     return (
       <ToolCallContainer
         label={displayLabel}
@@ -154,10 +154,10 @@ export const SearchToolCall: FC<BaseToolCallProps> = ({
   if (textOutputs.length > 0) {
     // Count total lines in output
     const totalLines = textOutputs.reduce(
-      (acc, text) => acc + text.split('\n').length,
+      (acc, text) => acc + text.split("\n").length,
       0,
     );
-    const summaryText = `${totalLines} ${totalLines === 1 ? 'line' : 'lines'} of output`;
+    const summaryText = `${totalLines} ${totalLines === 1 ? "line" : "lines"} of output`;
 
     return (
       <ToolCallContainer

@@ -21,14 +21,14 @@ import type {
   Content,
   GenerateContentConfig,
   GenerateContentResponseUsageMetadata,
-} from '@google/genai';
-import { GeminiChat, StreamEventType } from '../core/geminiChat.js';
-import type { Config } from '../config/config.js';
+} from "@google/genai";
+import { GeminiChat, StreamEventType } from "../core/geminiChat.js";
+import type { Config } from "../config/config.js";
 
 /** Per-request config that strips tools so the model never produces function calls. */
 const NO_TOOLS = Object.freeze({ tools: [] as const }) as Pick<
   GenerateContentConfig,
-  'tools'
+  "tools"
 >;
 
 /**
@@ -169,7 +169,7 @@ export function createForkedChat(
 
 function extractUsage(
   metadata?: GenerateContentResponseUsageMetadata,
-): ForkedQueryResult['usage'] {
+): ForkedQueryResult["usage"] {
   return {
     inputTokens: metadata?.promptTokenCount ?? 0,
     outputTokens: metadata?.candidatesTokenCount ?? 0,
@@ -199,7 +199,7 @@ export async function runForkedQuery(
 ): Promise<ForkedQueryResult> {
   const params = getCacheSafeParams();
   if (!params) {
-    throw new Error('CacheSafeParams not available');
+    throw new Error("CacheSafeParams not available");
   }
 
   const model = options?.model ?? params.model;
@@ -213,7 +213,7 @@ export async function runForkedQuery(
     requestConfig.abortSignal = options.abortSignal;
   }
   if (options?.jsonSchema) {
-    requestConfig.responseMimeType = 'application/json';
+    requestConfig.responseMimeType = "application/json";
     requestConfig.responseJsonSchema = options.jsonSchema;
   }
 
@@ -223,12 +223,12 @@ export async function runForkedQuery(
       message: [{ text: userMessage }],
       config: requestConfig,
     },
-    'forked_query',
+    "forked_query",
   );
 
   // Collect the full response
-  let fullText = '';
-  let usage: ForkedQueryResult['usage'] = {
+  let fullText = "";
+  let usage: ForkedQueryResult["usage"] = {
     inputTokens: 0,
     outputTokens: 0,
     cacheHitTokens: 0,
@@ -240,9 +240,9 @@ export async function runForkedQuery(
     // Extract text from candidates, skipping thought/reasoning parts.
     // Some providers may return thinking content even with enable_thinking: false.
     const text = response.candidates?.[0]?.content?.parts
-      ?.filter((p) => !(p as Record<string, unknown>)['thought'])
-      .map((p) => p.text ?? '')
-      .join('');
+      ?.filter((p) => !(p as Record<string, unknown>)["thought"])
+      .map((p) => p.text ?? "")
+      .join("");
     if (text) {
       fullText += text;
     }

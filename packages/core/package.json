@@ -1,6 +1,6 @@
 {
   "name": "@tram-ai/tram-core",
-  "version": "0.14.5",
+  "version": "0.0.9-U0145",
   "description": "TRAM Core",
   "repository": {
     "type": "git",
@@ -13,6 +13,7 @@
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write .",
     "test": "vitest run",
+    "test:knowledge-search": "vitest run src/tools/knowledge-search.test.ts",
     "test:ci": "vitest run",
     "typecheck": "tsc --noEmit",
     "postinstall": "node scripts/postinstall.js"
@@ -37,6 +38,7 @@
     "@opentelemetry/exporter-trace-otlp-http": "^0.203.0",
     "@opentelemetry/instrumentation-http": "^0.203.0",
     "@opentelemetry/sdk-node": "^0.203.0",
+    "@tram-ai/mcquery": "^1.0.0",
     "@types/html-to-text": "^9.0.4",
     "@xterm/headless": "5.5.0",
     "ajv": "^8.17.1",

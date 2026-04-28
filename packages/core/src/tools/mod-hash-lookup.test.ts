@@ -4,27 +4,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
-import type { ModHashLookupParams } from './mod-hash-lookup.js';
-import { ModHashLookupTool } from './mod-hash-lookup.js';
-import { ToolNames } from './tool-names.js';
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { deflateRawSync } from 'node:zlib';
+import { describe, it, expect } from "vitest";
+import type { ModHashLookupParams } from "./mod-hash-lookup.js";
+import { ModHashLookupTool } from "./mod-hash-lookup.js";
+import { ToolNames } from "./tool-names.js";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { deflateRawSync } from "node:zlib";
 
 /**
  * Helper: create a minimal ZIP/JAR buffer containing the given entries.
  * Each entry is { name: string, content: string }.
  */
-function createZipBuffer(entries: Array<{ name: string; content: string }>): Buffer {
+function createZipBuffer(
+  entries: Array<{ name: string; content: string }>,
+): Buffer {
   const localHeaders: Buffer[] = [];
   const centralHeaders: Buffer[] = [];
   let offset = 0;
 
   for (const entry of entries) {
-    const nameBytes = Buffer.from(entry.name, 'utf-8');
-    const contentBytes = Buffer.from(entry.content, 'utf-8');
+    const nameBytes = Buffer.from(entry.name, "utf-8");
+    const contentBytes = Buffer.from(entry.content, "utf-8");
     const compressed = deflateRawSync(contentBytes);
     const crc = crc32(contentBytes);
 
@@ -99,38 +101,38 @@ function crc32(buf: Buffer): number {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-describe('ModHashLookupTool', () => {
+describe("ModHashLookupTool", () => {
   const tool = new ModHashLookupTool();
 
-  it('should have correct name and display name', () => {
+  it("should have correct name and display name", () => {
     expect(tool.name).toBe(ToolNames.MOD_HASH_LOOKUP);
-    expect(tool.displayName).toBe('ModHashLookup');
+    expect(tool.displayName).toBe("ModHashLookup");
   });
 
-  it('should validate required filePath parameter', () => {
+  it("should validate required filePath parameter", () => {
     const params: ModHashLookupParams = {
-      filePath: '',
+      filePath: "",
     };
 
-    const error = tool['validateToolParamValues'](params);
+    const error = tool["validateToolParamValues"](params);
     expect(error).not.toBeNull();
-    expect(error).toContain('filePath');
+    expect(error).toContain("filePath");
   });
 
-  it('should accept valid parameters', () => {
+  it("should accept valid parameters", () => {
     const params: ModHashLookupParams = {
-      filePath: '/path/to/mod.jar',
-      hashType: 'sha1',
+      filePath: "/path/to/mod.jar",
+      hashType: "sha1",
     };
 
-    const error = tool['validateToolParamValues'](params);
+    const error = tool["validateToolParamValues"](params);
     expect(error).toBeNull();
   });
 
-  it('should create invocation with valid params', () => {
+  it("should create invocation with valid params", () => {
     const params: ModHashLookupParams = {
-      filePath: '/path/to/mod.jar',
-      hashType: 'sha1',
+      filePath: "/path/to/mod.jar",
+      hashType: "sha1",
     };
 
     const invocation = tool.build(params);
@@ -138,10 +140,10 @@ describe('ModHashLookupTool', () => {
     expect(invocation.params).toEqual(params);
   });
 
-  it('should handle file not found error gracefully', async () => {
+  it("should handle file not found error gracefully", async () => {
     const tool = new ModHashLookupTool();
     const params: ModHashLookupParams = {
-      filePath: '/nonexistent/file.jar',
+      filePath: "/nonexistent/file.jar",
     };
 
     const invocation = tool.build(params);
@@ -149,14 +151,14 @@ describe('ModHashLookupTool', () => {
     const result = await invocation.execute(controller.signal);
 
     expect(result).toBeDefined();
-    expect(result.returnDisplay).toContain('File not found');
+    expect(result.returnDisplay).toContain("File not found");
   });
 
-  it('should calculate hash for existing file', async () => {
+  it("should calculate hash for existing file", async () => {
     // Create a temporary test file
     const tempDir = os.tmpdir();
-    const testFile = path.join(tempDir, 'test-mod.jar');
-    const testContent = 'test mod content';
+    const testFile = path.join(tempDir, "test-mod.jar");
+    const testContent = "test mod content";
 
     // Write test file
     fs.writeFileSync(testFile, testContent);
@@ -165,7 +167,7 @@ describe('ModHashLookupTool', () => {
       const tool = new ModHashLookupTool();
       const params: ModHashLookupParams = {
         filePath: testFile,
-        hashType: 'sha1',
+        hashType: "sha1",
       };
 
       const invocation = tool.build(params);
@@ -173,8 +175,8 @@ describe('ModHashLookupTool', () => {
       const result = await invocation.execute(controller.signal);
 
       expect(result).toBeDefined();
-      expect(result.returnDisplay).toContain('test-mod.jar');
-      expect(result.returnDisplay).toContain('sha1');
+      expect(result.returnDisplay).toContain("test-mod.jar");
+      expect(result.returnDisplay).toContain("sha1");
       expect(result.returnDisplay).toMatch(/[a-f0-9]{40}/); // SHA1 hash format
     } finally {
       // Clean up
@@ -182,24 +184,24 @@ describe('ModHashLookupTool', () => {
     }
   });
 
-  it('should accept different hash algorithms', () => {
-    const algorithms = ['md5', 'sha1', 'sha256'] as const;
+  it("should accept different hash algorithms", () => {
+    const algorithms = ["md5", "sha1", "sha256"] as const;
 
     for (const algo of algorithms) {
       const params: ModHashLookupParams = {
-        filePath: '/path/to/mod.jar',
+        filePath: "/path/to/mod.jar",
         hashType: algo,
       };
 
-      const error = tool['validateToolParamValues'](params);
+      const error = tool["validateToolParamValues"](params);
       expect(error).toBeNull();
     }
   });
 
-  it('should extract mod metadata from filename', async () => {
+  it("should extract mod metadata from filename", async () => {
     const tempDir = os.tmpdir();
-    const testFile = path.join(tempDir, 'MyAwesomeMod-1.20.1-fabric.jar');
-    const testContent = 'test mod content';
+    const testFile = path.join(tempDir, "MyAwesomeMod-1.20.1-fabric.jar");
+    const testContent = "test mod content";
 
     fs.writeFileSync(testFile, testContent);
 
@@ -213,27 +215,29 @@ describe('ModHashLookupTool', () => {
       const controller = new AbortController();
       const result = await invocation.execute(controller.signal);
 
-      expect(result.returnDisplay).toContain('MyAwesomeMod');
-      expect(result.returnDisplay).toContain('1.20.1');
+      expect(result.returnDisplay).toContain("MyAwesomeMod");
+      expect(result.returnDisplay).toContain("1.20.1");
     } finally {
       fs.unlinkSync(testFile);
     }
   });
 
-  describe('archive metadata extraction', () => {
-    it('should extract metadata from fabric.mod.json inside JAR', async () => {
+  describe("archive metadata extraction", () => {
+    it("should extract metadata from fabric.mod.json inside JAR", async () => {
       const tempDir = os.tmpdir();
-      const testFile = path.join(tempDir, 'AuthMe-5.6.0.jar');
+      const testFile = path.join(tempDir, "AuthMe-5.6.0.jar");
 
       const fabricMod = JSON.stringify({
         schemaVersion: 1,
-        id: 'authme',
-        version: '5.6.0',
-        name: 'Auth Me',
-        environment: '*',
+        id: "authme",
+        version: "5.6.0",
+        name: "Auth Me",
+        environment: "*",
       });
 
-      const zipBuf = createZipBuffer([{ name: 'fabric.mod.json', content: fabricMod }]);
+      const zipBuf = createZipBuffer([
+        { name: "fabric.mod.json", content: fabricMod },
+      ]);
       fs.writeFileSync(testFile, zipBuf);
 
       try {
@@ -241,20 +245,23 @@ describe('ModHashLookupTool', () => {
         const invocation = tool.build({ filePath: testFile });
         const result = await invocation.execute(new AbortController().signal);
 
-        expect(result.returnDisplay).toContain('Auth Me');
-        expect(result.returnDisplay).toContain('5.6.0');
-        expect(result.returnDisplay).toContain('fabric');
+        expect(result.returnDisplay).toContain("Auth Me");
+        expect(result.returnDisplay).toContain("5.6.0");
+        expect(result.returnDisplay).toContain("fabric");
       } finally {
         fs.unlinkSync(testFile);
       }
     });
 
-    it('should extract metadata from plugin.yml inside JAR', async () => {
+    it("should extract metadata from plugin.yml inside JAR", async () => {
       const tempDir = os.tmpdir();
-      const testFile = path.join(tempDir, 'AuthMe-5.6.0.jar');
+      const testFile = path.join(tempDir, "AuthMe-5.6.0.jar");
 
-      const pluginYml = 'name: AuthMe\nversion: 5.6.0\nmain: fr.xephi.authme.AuthMe\napi-version: "1.13"\n';
-      const zipBuf = createZipBuffer([{ name: 'plugin.yml', content: pluginYml }]);
+      const pluginYml =
+        'name: AuthMe\nversion: 5.6.0\nmain: fr.xephi.authme.AuthMe\napi-version: "1.13"\n';
+      const zipBuf = createZipBuffer([
+        { name: "plugin.yml", content: pluginYml },
+      ]);
       fs.writeFileSync(testFile, zipBuf);
 
       try {
@@ -262,17 +269,17 @@ describe('ModHashLookupTool', () => {
         const invocation = tool.build({ filePath: testFile });
         const result = await invocation.execute(new AbortController().signal);
 
-        expect(result.returnDisplay).toContain('AuthMe');
-        expect(result.returnDisplay).toContain('5.6.0');
-        expect(result.returnDisplay).toContain('bukkit');
+        expect(result.returnDisplay).toContain("AuthMe");
+        expect(result.returnDisplay).toContain("5.6.0");
+        expect(result.returnDisplay).toContain("bukkit");
       } finally {
         fs.unlinkSync(testFile);
       }
     });
 
-    it('should extract metadata from META-INF/mods.toml (Forge)', async () => {
+    it("should extract metadata from META-INF/mods.toml (Forge)", async () => {
       const tempDir = os.tmpdir();
-      const testFile = path.join(tempDir, 'SomeForge-2.0.jar');
+      const testFile = path.join(tempDir, "SomeForge-2.0.jar");
 
       const modsToml = `
 modLoader="javafml"
@@ -283,7 +290,9 @@ modId="somemod"
 version="2.0.0"
 displayName="Some Forge Mod"
 `;
-      const zipBuf = createZipBuffer([{ name: 'META-INF/mods.toml', content: modsToml }]);
+      const zipBuf = createZipBuffer([
+        { name: "META-INF/mods.toml", content: modsToml },
+      ]);
       fs.writeFileSync(testFile, zipBuf);
 
       try {
@@ -291,26 +300,28 @@ displayName="Some Forge Mod"
         const invocation = tool.build({ filePath: testFile });
         const result = await invocation.execute(new AbortController().signal);
 
-        expect(result.returnDisplay).toContain('Some Forge Mod');
-        expect(result.returnDisplay).toContain('2.0.0');
-        expect(result.returnDisplay).toContain('forge');
+        expect(result.returnDisplay).toContain("Some Forge Mod");
+        expect(result.returnDisplay).toContain("2.0.0");
+        expect(result.returnDisplay).toContain("forge");
       } finally {
         fs.unlinkSync(testFile);
       }
     });
 
-    it('should extract metadata from velocity-plugin.json', async () => {
+    it("should extract metadata from velocity-plugin.json", async () => {
       const tempDir = os.tmpdir();
-      const testFile = path.join(tempDir, 'VelocityPlugin-1.0.jar');
+      const testFile = path.join(tempDir, "VelocityPlugin-1.0.jar");
 
       const velocityJson = JSON.stringify({
-        id: 'myplugin',
-        name: 'My Velocity Plugin',
-        version: '1.0.0',
-        main: 'com.example.VelocityPlugin',
+        id: "myplugin",
+        name: "My Velocity Plugin",
+        version: "1.0.0",
+        main: "com.example.VelocityPlugin",
       });
 
-      const zipBuf = createZipBuffer([{ name: 'velocity-plugin.json', content: velocityJson }]);
+      const zipBuf = createZipBuffer([
+        { name: "velocity-plugin.json", content: velocityJson },
+      ]);
       fs.writeFileSync(testFile, zipBuf);
 
       try {
@@ -318,27 +329,29 @@ displayName="Some Forge Mod"
         const invocation = tool.build({ filePath: testFile });
         const result = await invocation.execute(new AbortController().signal);
 
-        expect(result.returnDisplay).toContain('My Velocity Plugin');
-        expect(result.returnDisplay).toContain('1.0.0');
-        expect(result.returnDisplay).toContain('velocity');
+        expect(result.returnDisplay).toContain("My Velocity Plugin");
+        expect(result.returnDisplay).toContain("1.0.0");
+        expect(result.returnDisplay).toContain("velocity");
       } finally {
         fs.unlinkSync(testFile);
       }
     });
 
-    it('should prefer archive metadata over filename heuristics', async () => {
+    it("should prefer archive metadata over filename heuristics", async () => {
       const tempDir = os.tmpdir();
       // Filename says "SomeMod-1.0.jar" but internal metadata says different
-      const testFile = path.join(tempDir, 'SomeMod-1.0.jar');
+      const testFile = path.join(tempDir, "SomeMod-1.0.jar");
 
       const fabricMod = JSON.stringify({
         schemaVersion: 1,
-        id: 'real_mod_id',
-        version: '3.2.1',
-        name: 'Real Mod Name',
+        id: "real_mod_id",
+        version: "3.2.1",
+        name: "Real Mod Name",
       });
 
-      const zipBuf = createZipBuffer([{ name: 'fabric.mod.json', content: fabricMod }]);
+      const zipBuf = createZipBuffer([
+        { name: "fabric.mod.json", content: fabricMod },
+      ]);
       fs.writeFileSync(testFile, zipBuf);
 
       try {
@@ -347,20 +360,22 @@ displayName="Some Forge Mod"
         const result = await invocation.execute(new AbortController().signal);
 
         // Archive metadata should be used, not filename
-        expect(result.returnDisplay).toContain('Real Mod Name');
-        expect(result.returnDisplay).toContain('3.2.1');
-        expect(result.returnDisplay).toContain('fabric');
+        expect(result.returnDisplay).toContain("Real Mod Name");
+        expect(result.returnDisplay).toContain("3.2.1");
+        expect(result.returnDisplay).toContain("fabric");
       } finally {
         fs.unlinkSync(testFile);
       }
     });
 
-    it('should fall back to filename when JAR has no metadata files', async () => {
+    it("should fall back to filename when JAR has no metadata files", async () => {
       const tempDir = os.tmpdir();
-      const testFile = path.join(tempDir, 'MyMod-2.5.jar');
+      const testFile = path.join(tempDir, "MyMod-2.5.jar");
 
       // JAR with an unrelated file inside
-      const zipBuf = createZipBuffer([{ name: 'com/example/Main.class', content: 'deadbeef' }]);
+      const zipBuf = createZipBuffer([
+        { name: "com/example/Main.class", content: "deadbeef" },
+      ]);
       fs.writeFileSync(testFile, zipBuf);
 
       try {
@@ -369,19 +384,21 @@ displayName="Some Forge Mod"
         const result = await invocation.execute(new AbortController().signal);
 
         // Falls back to filename parse
-        expect(result.returnDisplay).toContain('MyMod');
-        expect(result.returnDisplay).toContain('2.5');
+        expect(result.returnDisplay).toContain("MyMod");
+        expect(result.returnDisplay).toContain("2.5");
       } finally {
         fs.unlinkSync(testFile);
       }
     });
   });
 
-  describe('Hangar version verification', () => {
-    it('should mark semver release as verified in result JSON', async () => {
+  describe("Hangar version verification", () => {
+    it("should mark semver release as verified in result JSON", async () => {
       // This tests the Hangar match structure; we simulate a response via invocation internal API
       const tool = new ModHashLookupTool();
-      const invocation = tool.build({ filePath: '/dummy/file.jar' }) as unknown as {
+      const invocation = tool.build({
+        filePath: "/dummy/file.jar",
+      }) as unknown as {
         lookupHangarByHash: (hash: string) => Promise<unknown>;
       };
 
@@ -390,20 +407,20 @@ displayName="Some Forge Mod"
       expect(invocation).toBeDefined();
     });
 
-    it('should display unverified label for non-semver Hangar version', () => {
+    it("should display unverified label for non-semver Hangar version", () => {
       // Simulate what the display output should look like for an unverified version
       const hangarMatch = {
-        name: 'ViaVersion/ViaVersion',
-        projectUrl: 'https://hangar.papermc.io/ViaVersion/ViaVersion',
-        versionName: 'Build 553',
+        name: "ViaVersion/ViaVersion",
+        projectUrl: "https://hangar.papermc.io/ViaVersion/ViaVersion",
+        versionName: "Build 553",
         versionVerified: false,
-        channel: 'Snapshot',
-        platform: 'PAPER',
+        channel: "Snapshot",
+        platform: "PAPER",
       };
 
       // Build display lines like the execute method does
       const displayLines: string[] = [];
-      displayLines.push('✓ Found on Hangar:');
+      displayLines.push("✓ Found on Hangar:");
       displayLines.push(`  Name: ${hangarMatch.name}`);
       if (hangarMatch.versionVerified) {
         displayLines.push(`  Version: ${hangarMatch.versionName}`);
@@ -414,23 +431,23 @@ displayName="Some Forge Mod"
         displayLines.push(`  Channel: ${hangarMatch.channel}`);
       }
 
-      const output = displayLines.join('\n');
-      expect(output).toContain('Build 553 (unverified)');
-      expect(output).toContain('Channel: Snapshot');
+      const output = displayLines.join("\n");
+      expect(output).toContain("Build 553 (unverified)");
+      expect(output).toContain("Channel: Snapshot");
     });
 
-    it('should display verified label for proper semver release Hangar version', () => {
+    it("should display verified label for proper semver release Hangar version", () => {
       const hangarMatch = {
-        name: 'EssentialsX/Essentials',
-        projectUrl: 'https://hangar.papermc.io/EssentialsX/Essentials',
-        versionName: '2.20.1',
+        name: "EssentialsX/Essentials",
+        projectUrl: "https://hangar.papermc.io/EssentialsX/Essentials",
+        versionName: "2.20.1",
         versionVerified: true,
-        channel: 'Release',
-        platform: 'PAPER',
+        channel: "Release",
+        platform: "PAPER",
       };
 
       const displayLines: string[] = [];
-      displayLines.push('✓ Found on Hangar:');
+      displayLines.push("✓ Found on Hangar:");
       displayLines.push(`  Name: ${hangarMatch.name}`);
       if (hangarMatch.versionVerified) {
         displayLines.push(`  Version: ${hangarMatch.versionName}`);
@@ -441,10 +458,10 @@ displayName="Some Forge Mod"
         displayLines.push(`  Channel: ${hangarMatch.channel}`);
       }
 
-      const output = displayLines.join('\n');
-      expect(output).toContain('Version: 2.20.1');
-      expect(output).not.toContain('(unverified)');
-      expect(output).toContain('Channel: Release');
+      const output = displayLines.join("\n");
+      expect(output).toContain("Version: 2.20.1");
+      expect(output).not.toContain("(unverified)");
+      expect(output).toContain("Channel: Release");
     });
   });
 });

@@ -8,16 +8,16 @@
  * CLI path resolution and subprocess spawning utilities
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { execSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { createRequire } from 'node:module';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { execSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 
 /**
  * Executable types supported by the SDK
  */
-export type ExecutableType = 'node' | 'bun' | 'tsx' | 'native';
+export type ExecutableType = "node" | "bun" | "tsx" | "native";
 
 /**
  * Spawn information for CLI process
@@ -40,7 +40,7 @@ function getCurrentModuleDir(): string {
   let moduleDir: string | null = null;
 
   try {
-    if (typeof import.meta !== 'undefined' && import.meta.url) {
+    if (typeof import.meta !== "undefined" && import.meta.url) {
       moduleDir = path.dirname(fileURLToPath(import.meta.url));
     }
   } catch {
@@ -49,7 +49,7 @@ function getCurrentModuleDir(): string {
 
   if (!moduleDir) {
     try {
-      if (typeof __dirname !== 'undefined') {
+      if (typeof __dirname !== "undefined") {
         moduleDir = __dirname;
       }
     } catch {
@@ -60,7 +60,7 @@ function getCurrentModuleDir(): string {
   if (moduleDir) {
     return path.normalize(moduleDir);
   }
-  throw new Error('Cannot find module directory.');
+  throw new Error("Cannot find module directory.");
 }
 
 /**
@@ -69,9 +69,9 @@ function getCurrentModuleDir(): string {
 function findSdkPackageRoot(): string | null {
   try {
     const require = createRequire(import.meta.url);
-    const packageJsonPath = require.resolve('@tram-ai/sdk/package.json');
+    const packageJsonPath = require.resolve("@tram-ai/sdk/package.json");
     const packageRoot = path.dirname(packageJsonPath);
-    const cliPath = path.join(packageRoot, 'dist', 'cli', 'cli.js');
+    const cliPath = path.join(packageRoot, "dist", "cli", "cli.js");
     if (fs.existsSync(cliPath)) {
       return packageRoot;
     }
@@ -85,15 +85,15 @@ function findSdkPackageRoot(): string | null {
   let bestMatch: string | null = null;
 
   while (dir !== root) {
-    const packageJsonPath = path.join(dir, 'package.json');
+    const packageJsonPath = path.join(dir, "package.json");
     if (fs.existsSync(packageJsonPath)) {
-      const cliPath = path.join(dir, 'dist', 'cli', 'cli.js');
+      const cliPath = path.join(dir, "dist", "cli", "cli.js");
       if (fs.existsSync(cliPath)) {
         try {
           const packageJson = JSON.parse(
-            fs.readFileSync(packageJsonPath, 'utf-8'),
+            fs.readFileSync(packageJsonPath, "utf-8"),
           );
-          if (packageJson.name === '@tram-ai/sdk') {
+          if (packageJson.name === "@tram-ai/sdk") {
             return dir;
           }
           if (!bestMatch) {
@@ -116,7 +116,7 @@ function findSdkPackageRoot(): string | null {
  * Normalize path separators for regex matching
  */
 function normalizeForRegex(dirPath: string): string {
-  return dirPath.replace(/\\/g, '/');
+  return dirPath.replace(/\\/g, "/");
 }
 
 /**
@@ -124,10 +124,10 @@ function normalizeForRegex(dirPath: string): string {
  */
 function tryResolveCliFromImportMeta(): string | null {
   try {
-    if (typeof import.meta !== 'undefined' && import.meta.url) {
+    if (typeof import.meta !== "undefined" && import.meta.url) {
       const currentFilePath = fileURLToPath(import.meta.url);
       const currentDir = path.dirname(currentFilePath);
-      const cliPath = path.join(currentDir, 'cli', 'cli.js');
+      const cliPath = path.join(currentDir, "cli", "cli.js");
       if (fs.existsSync(cliPath)) {
         return cliPath;
       }
@@ -153,16 +153,16 @@ function getBundledCliCandidatePaths(): string[] {
     const currentDir = getCurrentModuleDir();
     const normalizedDir = normalizeForRegex(currentDir);
 
-    candidates.push(path.join(currentDir, 'cli', 'cli.js'));
+    candidates.push(path.join(currentDir, "cli", "cli.js"));
 
     if (/\/src\/utils$/.test(normalizedDir)) {
       const packageRoot = path.dirname(path.dirname(currentDir));
-      candidates.push(path.join(packageRoot, 'dist', 'cli', 'cli.js'));
+      candidates.push(path.join(packageRoot, "dist", "cli", "cli.js"));
     }
 
     const packageRoot = findSdkPackageRoot();
     if (packageRoot) {
-      candidates.push(path.join(packageRoot, 'dist', 'cli', 'cli.js'));
+      candidates.push(path.join(packageRoot, "dist", "cli", "cli.js"));
     }
 
     const monorepoMatch = normalizedDir.match(
@@ -170,15 +170,15 @@ function getBundledCliCandidatePaths(): string[] {
     );
     if (monorepoMatch && monorepoMatch[1]) {
       const monorepoRoot =
-        process.platform === 'win32'
-          ? monorepoMatch[1].replace(/\//g, '\\')
+        process.platform === "win32"
+          ? monorepoMatch[1].replace(/\//g, "\\")
           : monorepoMatch[1];
-      candidates.push(path.join(monorepoRoot, 'dist', 'cli.js'));
+      candidates.push(path.join(monorepoRoot, "dist", "cli.js"));
     }
   } catch {
     const packageRoot = findSdkPackageRoot();
     if (packageRoot) {
-      candidates.push(path.join(packageRoot, 'dist', 'cli', 'cli.js'));
+      candidates.push(path.join(packageRoot, "dist", "cli", "cli.js"));
     }
   }
 
@@ -211,10 +211,10 @@ export function findBundledCliPath(): string {
 
   const candidates = getBundledCliCandidatePaths();
   throw new Error(
-    'Bundled tram CLI not found. The CLI should be included in the SDK package.\n' +
-      'Searched locations:\n' +
-      candidates.map((c) => `  - ${c}`).join('\n') +
-      '\n\nIf you need to use a custom CLI, provide explicit path:\n' +
+    "Bundled tram CLI not found. The CLI should be included in the SDK package.\n" +
+      "Searched locations:\n" +
+      candidates.map((c) => `  - ${c}`).join("\n") +
+      "\n\nIf you need to use a custom CLI, provide explicit path:\n" +
       '  • query({ pathToTramExecutable: "/path/to/cli.js" })',
   );
 }
@@ -226,7 +226,7 @@ function validateFilePath(filePath: string): void {
   if (!fs.existsSync(filePath)) {
     throw new Error(
       `Executable file not found at '${filePath}'. ` +
-        'Please check the file path and ensure the file exists.',
+        "Please check the file path and ensure the file exists.",
     );
   }
 
@@ -234,7 +234,7 @@ function validateFilePath(filePath: string): void {
   if (!stats.isFile()) {
     throw new Error(
       `Path '${filePath}' exists but is not a file. ` +
-        'Please provide a path to an executable file.',
+        "Please provide a path to an executable file.",
     );
   }
 }
@@ -243,7 +243,7 @@ function validateFilePath(filePath: string): void {
  * Check if path contains separators (file path vs command name)
  */
 function isFilePath(spec: string): boolean {
-  return spec.includes('/') || spec.includes('\\');
+  return spec.includes("/") || spec.includes("\\");
 }
 
 /**
@@ -251,7 +251,7 @@ function isFilePath(spec: string): boolean {
  */
 function isJavaScriptFile(filePath: string): boolean {
   const ext = path.extname(filePath).toLowerCase();
-  return ['.js', '.mjs', '.cjs'].includes(ext);
+  return [".js", ".mjs", ".cjs"].includes(ext);
 }
 
 /**
@@ -259,7 +259,7 @@ function isJavaScriptFile(filePath: string): boolean {
  */
 function isTypeScriptFile(filePath: string): boolean {
   const ext = path.extname(filePath).toLowerCase();
-  return ['.ts', '.tsx'].includes(ext);
+  return [".ts", ".tsx"].includes(ext);
 }
 
 /**
@@ -267,9 +267,9 @@ function isTypeScriptFile(filePath: string): boolean {
  */
 function isCommandAvailable(command: string): boolean {
   try {
-    const whichCommand = process.platform === 'win32' ? 'where' : 'which';
+    const whichCommand = process.platform === "win32" ? "where" : "which";
     execSync(`${whichCommand} ${command}`, {
-      stdio: 'ignore',
+      stdio: "ignore",
       timeout: 1000,
     });
     return true;
@@ -282,29 +282,29 @@ function isCommandAvailable(command: string): boolean {
  * Check if tsx is available
  */
 function isTsxAvailable(): boolean {
-  return isCommandAvailable('tsx');
+  return isCommandAvailable("tsx");
 }
 
 /**
  * Get JavaScript runtime type (bun if running under bun, otherwise node)
  */
-function getJsRuntimeType(): 'bun' | 'node' {
+function getJsRuntimeType(): "bun" | "node" {
   if (
-    typeof process !== 'undefined' &&
-    'versions' in process &&
-    'bun' in process.versions
+    typeof process !== "undefined" &&
+    "versions" in process &&
+    "bun" in process.versions
   ) {
-    return 'bun';
+    return "bun";
   }
-  return 'node';
+  return "node";
 }
 
 /**
  * Prepare spawn information for CLI process
  */
 export function prepareSpawnInfo(executableSpec?: string): SpawnInfo {
-  if (executableSpec !== undefined && executableSpec.trim() === '') {
-    throw new Error('Executable path cannot be empty');
+  if (executableSpec !== undefined && executableSpec.trim() === "") {
+    throw new Error("Executable path cannot be empty");
   }
 
   if (executableSpec === undefined) {
@@ -313,7 +313,7 @@ export function prepareSpawnInfo(executableSpec?: string): SpawnInfo {
       command: process.execPath,
       args: [bundledCliPath],
       type: getJsRuntimeType(),
-      originalInput: '',
+      originalInput: "",
     };
   }
 
@@ -321,13 +321,13 @@ export function prepareSpawnInfo(executableSpec?: string): SpawnInfo {
     if (!/^[a-zA-Z0-9._-]+$/.test(executableSpec)) {
       throw new Error(
         `Invalid command name '${executableSpec}'. ` +
-          'Command names should only contain letters, numbers, dots, hyphens, and underscores.',
+          "Command names should only contain letters, numbers, dots, hyphens, and underscores.",
       );
     }
     return {
       command: executableSpec,
       args: [],
-      type: 'native',
+      type: "native",
       originalInput: executableSpec,
     };
   }
@@ -347,9 +347,9 @@ export function prepareSpawnInfo(executableSpec?: string): SpawnInfo {
   if (isTypeScriptFile(resolvedPath)) {
     if (isTsxAvailable()) {
       return {
-        command: 'tsx',
+        command: "tsx",
         args: [resolvedPath],
-        type: 'tsx',
+        type: "tsx",
         originalInput: executableSpec,
       };
     }
@@ -358,7 +358,7 @@ export function prepareSpawnInfo(executableSpec?: string): SpawnInfo {
   return {
     command: resolvedPath,
     args: [],
-    type: 'native',
+    type: "native",
     originalInput: executableSpec,
   };
 }

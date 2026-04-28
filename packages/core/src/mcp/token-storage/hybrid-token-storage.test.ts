@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { HybridTokenStorage } from './hybrid-token-storage.js';
-import { KeychainTokenStorage } from './keychain-token-storage.js';
-import { FileTokenStorage } from './file-token-storage.js';
-import { type OAuthCredentials, TokenStorageType } from './types.js';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { HybridTokenStorage } from "./hybrid-token-storage.js";
+import { KeychainTokenStorage } from "./keychain-token-storage.js";
+import { FileTokenStorage } from "./file-token-storage.js";
+import { type OAuthCredentials, TokenStorageType } from "./types.js";
 
-vi.mock('./keychain-token-storage.js', () => ({
+vi.mock("./keychain-token-storage.js", () => ({
   KeychainTokenStorage: vi.fn().mockImplementation(() => ({
     isAvailable: vi.fn(),
     getCredentials: vi.fn(),
@@ -22,7 +22,7 @@ vi.mock('./keychain-token-storage.js', () => ({
   })),
 }));
 
-vi.mock('./file-token-storage.js', () => ({
+vi.mock("./file-token-storage.js", () => ({
   FileTokenStorage: vi.fn().mockImplementation(() => ({
     getCredentials: vi.fn(),
     setCredentials: vi.fn(),
@@ -43,7 +43,7 @@ interface MockStorage {
   clearAll: ReturnType<typeof vi.fn>;
 }
 
-describe('HybridTokenStorage', () => {
+describe("HybridTokenStorage", () => {
   let storage: HybridTokenStorage;
   let mockKeychainStorage: MockStorage;
   let mockFileStorage: MockStorage;
@@ -80,92 +80,92 @@ describe('HybridTokenStorage', () => {
       FileTokenStorage as unknown as ReturnType<typeof vi.fn>
     ).mockImplementation(() => mockFileStorage);
 
-    storage = new HybridTokenStorage('test-service');
+    storage = new HybridTokenStorage("test-service");
   });
 
   afterEach(() => {
     process.env = originalEnv;
   });
 
-  describe('storage selection', () => {
-    it('should use keychain when available', async () => {
+  describe("storage selection", () => {
+    it("should use keychain when available", async () => {
       mockKeychainStorage.isAvailable!.mockResolvedValue(true);
       mockKeychainStorage.getCredentials.mockResolvedValue(null);
 
-      await storage.getCredentials('test-server');
+      await storage.getCredentials("test-server");
 
       expect(mockKeychainStorage.isAvailable).toHaveBeenCalled();
       expect(mockKeychainStorage.getCredentials).toHaveBeenCalledWith(
-        'test-server',
+        "test-server",
       );
       expect(await storage.getStorageType()).toBe(TokenStorageType.KEYCHAIN);
     });
 
-    it('should use file storage when TRAM_CODE_FORCE_FILE_STORAGE is set', async () => {
-      process.env['TRAM_CODE_FORCE_FILE_STORAGE'] = 'true';
+    it("should use file storage when TRAM_CODE_FORCE_FILE_STORAGE is set", async () => {
+      process.env["TRAM_CODE_FORCE_FILE_STORAGE"] = "true";
       mockFileStorage.getCredentials.mockResolvedValue(null);
 
-      await storage.getCredentials('test-server');
+      await storage.getCredentials("test-server");
 
       expect(mockKeychainStorage.isAvailable).not.toHaveBeenCalled();
       expect(mockFileStorage.getCredentials).toHaveBeenCalledWith(
-        'test-server',
+        "test-server",
       );
       expect(await storage.getStorageType()).toBe(
         TokenStorageType.ENCRYPTED_FILE,
       );
     });
 
-    it('should fall back to file storage when keychain is unavailable', async () => {
+    it("should fall back to file storage when keychain is unavailable", async () => {
       mockKeychainStorage.isAvailable!.mockResolvedValue(false);
       mockFileStorage.getCredentials.mockResolvedValue(null);
 
-      await storage.getCredentials('test-server');
+      await storage.getCredentials("test-server");
 
       expect(mockKeychainStorage.isAvailable).toHaveBeenCalled();
       expect(mockFileStorage.getCredentials).toHaveBeenCalledWith(
-        'test-server',
+        "test-server",
       );
       expect(await storage.getStorageType()).toBe(
         TokenStorageType.ENCRYPTED_FILE,
       );
     });
 
-    it('should fall back to file storage when keychain throws error', async () => {
+    it("should fall back to file storage when keychain throws error", async () => {
       mockKeychainStorage.isAvailable!.mockRejectedValue(
-        new Error('Keychain error'),
+        new Error("Keychain error"),
       );
       mockFileStorage.getCredentials.mockResolvedValue(null);
 
-      await storage.getCredentials('test-server');
+      await storage.getCredentials("test-server");
 
       expect(mockKeychainStorage.isAvailable).toHaveBeenCalled();
       expect(mockFileStorage.getCredentials).toHaveBeenCalledWith(
-        'test-server',
+        "test-server",
       );
       expect(await storage.getStorageType()).toBe(
         TokenStorageType.ENCRYPTED_FILE,
       );
     });
 
-    it('should cache storage selection', async () => {
+    it("should cache storage selection", async () => {
       mockKeychainStorage.isAvailable!.mockResolvedValue(true);
       mockKeychainStorage.getCredentials.mockResolvedValue(null);
 
-      await storage.getCredentials('test-server');
-      await storage.getCredentials('another-server');
+      await storage.getCredentials("test-server");
+      await storage.getCredentials("another-server");
 
       expect(mockKeychainStorage.isAvailable).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('getCredentials', () => {
-    it('should delegate to selected storage', async () => {
+  describe("getCredentials", () => {
+    it("should delegate to selected storage", async () => {
       const credentials: OAuthCredentials = {
-        serverName: 'test-server',
+        serverName: "test-server",
         token: {
-          accessToken: 'access-token',
-          tokenType: 'Bearer',
+          accessToken: "access-token",
+          tokenType: "Bearer",
         },
         updatedAt: Date.now(),
       };
@@ -173,22 +173,22 @@ describe('HybridTokenStorage', () => {
       mockKeychainStorage.isAvailable!.mockResolvedValue(true);
       mockKeychainStorage.getCredentials.mockResolvedValue(credentials);
 
-      const result = await storage.getCredentials('test-server');
+      const result = await storage.getCredentials("test-server");
 
       expect(result).toEqual(credentials);
       expect(mockKeychainStorage.getCredentials).toHaveBeenCalledWith(
-        'test-server',
+        "test-server",
       );
     });
   });
 
-  describe('setCredentials', () => {
-    it('should delegate to selected storage', async () => {
+  describe("setCredentials", () => {
+    it("should delegate to selected storage", async () => {
       const credentials: OAuthCredentials = {
-        serverName: 'test-server',
+        serverName: "test-server",
         token: {
-          accessToken: 'access-token',
-          tokenType: 'Bearer',
+          accessToken: "access-token",
+          tokenType: "Bearer",
         },
         updatedAt: Date.now(),
       };
@@ -204,22 +204,22 @@ describe('HybridTokenStorage', () => {
     });
   });
 
-  describe('deleteCredentials', () => {
-    it('should delegate to selected storage', async () => {
+  describe("deleteCredentials", () => {
+    it("should delegate to selected storage", async () => {
       mockKeychainStorage.isAvailable!.mockResolvedValue(true);
       mockKeychainStorage.deleteCredentials.mockResolvedValue(undefined);
 
-      await storage.deleteCredentials('test-server');
+      await storage.deleteCredentials("test-server");
 
       expect(mockKeychainStorage.deleteCredentials).toHaveBeenCalledWith(
-        'test-server',
+        "test-server",
       );
     });
   });
 
-  describe('listServers', () => {
-    it('should delegate to selected storage', async () => {
-      const servers = ['server1', 'server2'];
+  describe("listServers", () => {
+    it("should delegate to selected storage", async () => {
+      const servers = ["server1", "server2"];
       mockKeychainStorage.isAvailable!.mockResolvedValue(true);
       mockKeychainStorage.listServers.mockResolvedValue(servers);
 
@@ -230,22 +230,22 @@ describe('HybridTokenStorage', () => {
     });
   });
 
-  describe('getAllCredentials', () => {
-    it('should delegate to selected storage', async () => {
+  describe("getAllCredentials", () => {
+    it("should delegate to selected storage", async () => {
       const credentialsMap = new Map([
         [
-          'server1',
+          "server1",
           {
-            serverName: 'server1',
-            token: { accessToken: 'token1', tokenType: 'Bearer' },
+            serverName: "server1",
+            token: { accessToken: "token1", tokenType: "Bearer" },
             updatedAt: Date.now(),
           },
         ],
         [
-          'server2',
+          "server2",
           {
-            serverName: 'server2',
-            token: { accessToken: 'token2', tokenType: 'Bearer' },
+            serverName: "server2",
+            token: { accessToken: "token2", tokenType: "Bearer" },
             updatedAt: Date.now(),
           },
         ],
@@ -261,8 +261,8 @@ describe('HybridTokenStorage', () => {
     });
   });
 
-  describe('clearAll', () => {
-    it('should delegate to selected storage', async () => {
+  describe("clearAll", () => {
+    it("should delegate to selected storage", async () => {
       mockKeychainStorage.isAvailable!.mockResolvedValue(true);
       mockKeychainStorage.clearAll.mockResolvedValue(undefined);
 

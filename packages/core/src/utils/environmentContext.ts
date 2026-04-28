@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Content, Part } from '@google/genai';
-import type { Config } from '../config/config.js';
-import { getFolderStructure } from './getFolderStructure.js';
+import type { Content, Part } from "@google/genai";
+import type { Config } from "../config/config.js";
+import { getFolderStructure } from "./getFolderStructure.js";
 
 /**
  * Generates a string describing the current workspace directories and their structures.
@@ -27,13 +27,13 @@ export async function getDirectoryContextString(
     ),
   );
 
-  const folderStructure = folderStructures.join('\n');
+  const folderStructure = folderStructures.join("\n");
 
   let workingDirPreamble: string;
   if (workspaceDirectories.length === 1) {
     workingDirPreamble = `I'm currently working in the directory: ${workspaceDirectories[0]}`;
   } else {
-    const dirList = workspaceDirectories.map((dir) => `  - ${dir}`).join('\n');
+    const dirList = workspaceDirectories.map((dir) => `  - ${dir}`).join("\n");
     workingDirPreamble = `I'm currently working in the following directories:\n${dirList}`;
   }
 
@@ -51,10 +51,10 @@ ${folderStructure}`;
  */
 export async function getEnvironmentContext(config: Config): Promise<Part[]> {
   const today = new Date().toLocaleDateString(undefined, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
   const platform = process.platform;
 
@@ -67,7 +67,7 @@ My operating system is: ${platform}
   return [{ text: context }];
 }
 
-const STARTUP_CONTEXT_MODEL_ACK = 'Got it. Thanks for the context!';
+const STARTUP_CONTEXT_MODEL_ACK = "Got it. Thanks for the context!";
 
 export async function getInitialChatHistory(
   config: Config,
@@ -78,15 +78,15 @@ export async function getInitialChatHistory(
   }
 
   const envParts = await getEnvironmentContext(config);
-  const envContextString = envParts.map((part) => part.text || '').join('\n\n');
+  const envContextString = envParts.map((part) => part.text || "").join("\n\n");
 
   return [
     {
-      role: 'user',
+      role: "user",
       parts: [{ text: envContextString }],
     },
     {
-      role: 'model',
+      role: "model",
       parts: [{ text: STARTUP_CONTEXT_MODEL_ACK }],
     },
     ...(extraHistory ?? []),
@@ -104,7 +104,7 @@ export function stripStartupContext(history: Content[]): Content[] {
 
   const secondEntry = history[1];
   const ackText = secondEntry?.parts?.[0]?.text;
-  if (secondEntry?.role === 'model' && ackText === STARTUP_CONTEXT_MODEL_ACK) {
+  if (secondEntry?.role === "model" && ackText === STARTUP_CONTEXT_MODEL_ACK) {
     return history.slice(2);
   }
 

@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { UpdateInfo } from 'update-notifier';
-import updateNotifier from 'update-notifier';
-import semver from 'semver';
-import { getPackageJson } from '../../utils/package.js';
-import { createDebugLogger } from '@tram-ai/tram-core';
+import type { UpdateInfo } from "update-notifier";
+import updateNotifier from "update-notifier";
+import semver from "semver";
+import { getPackageJson } from "../../utils/package.js";
+import { createDebugLogger } from "@tram-ai/tram-core";
 
-const debugLogger = createDebugLogger('UPDATE_CHECK');
+const debugLogger = createDebugLogger("UPDATE_CHECK");
 
 export const FETCH_TIMEOUT_MS = 2000;
 
@@ -45,7 +45,7 @@ function getBestAvailableUpdate(
 export async function checkForUpdates(): Promise<UpdateObject | null> {
   try {
     // Skip update check when running from source (development mode)
-    if (process.env['DEV'] === 'true') {
+    if (process.env["DEV"] === "true") {
       return null;
     }
     const packageJson = await getPackageJson();
@@ -54,8 +54,8 @@ export async function checkForUpdates(): Promise<UpdateObject | null> {
     }
 
     const { name, version: currentVersion } = packageJson;
-    const isNightly = currentVersion.includes('nightly');
-    const createNotifier = (distTag: 'latest' | 'nightly') =>
+    const isNightly = currentVersion.includes("nightly");
+    const createNotifier = (distTag: "latest" | "nightly") =>
       updateNotifier({
         pkg: {
           name,
@@ -68,8 +68,8 @@ export async function checkForUpdates(): Promise<UpdateObject | null> {
 
     if (isNightly) {
       const [nightlyUpdateInfo, latestUpdateInfo] = await Promise.all([
-        createNotifier('nightly').fetchInfo(),
-        createNotifier('latest').fetchInfo(),
+        createNotifier("nightly").fetchInfo(),
+        createNotifier("latest").fetchInfo(),
       ]);
 
       const bestUpdate = getBestAvailableUpdate(
@@ -85,7 +85,7 @@ export async function checkForUpdates(): Promise<UpdateObject | null> {
         };
       }
     } else {
-      const updateInfo = await createNotifier('latest').fetchInfo();
+      const updateInfo = await createNotifier("latest").fetchInfo();
 
       if (updateInfo && semver.gt(updateInfo.latest, currentVersion)) {
         const message = `TRAM update available! ${currentVersion} → ${updateInfo.latest}`;
@@ -98,7 +98,7 @@ export async function checkForUpdates(): Promise<UpdateObject | null> {
 
     return null;
   } catch (e) {
-    debugLogger.warn('Failed to check for updates: ' + e);
+    debugLogger.warn("Failed to check for updates: " + e);
     return null;
   }
 }

@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type * as vscode from 'vscode';
-import type { QwenAgentManager } from '../../services/qwenAgentManager.js';
-import type { ConversationStore } from '../../services/conversationStore.js';
+import type * as vscode from "vscode";
+import type { TramAgentManager } from "../../services/tramAgentManager.js";
+import type { ConversationStore } from "../../services/conversationStore.js";
 import type {
   PermissionResponseMessage,
   AskUserQuestionResponseMessage,
-} from '../../types/webviewMessageTypes.js';
-import { MessageRouter } from '../handlers/MessageRouter.js';
+} from "../../types/webviewMessageTypes.js";
+import { MessageRouter } from "../handlers/MessageRouter.js";
 
 /**
  * MessageHandler (Refactored Version)

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthType } from '../core/contentGenerator.js';
+import { AuthType } from "../core/contentGenerator.js";
 
 export interface ParsedSubagentModelSelection {
   authType?: AuthType;
@@ -26,11 +26,11 @@ export function parseSubagentModelSelection(
   model: string | undefined,
 ): ParsedSubagentModelSelection {
   const trimmed = model?.trim();
-  if (!trimmed || trimmed === 'inherit') {
+  if (!trimmed || trimmed === "inherit") {
     return { inherits: true };
   }
 
-  const colonIndex = trimmed.indexOf(':');
+  const colonIndex = trimmed.indexOf(":");
   if (colonIndex === -1) {
     return { modelId: trimmed, inherits: false };
   }
@@ -46,7 +46,7 @@ export function parseSubagentModelSelection(
 
   if (!modelId) {
     throw new Error(
-      'Model selector must include a model ID after the authType',
+      "Model selector must include a model ID after the authType",
     );
   }
 

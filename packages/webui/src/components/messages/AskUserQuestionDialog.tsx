@@ -7,8 +7,8 @@
  * and collecting their responses in the WebView
  */
 
-import type { FC } from 'react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import type { FC } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export interface QuestionOption {
   label: string;
@@ -70,11 +70,11 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
 
       if (q?.multiSelect) {
         const selections = [...(answerState.multiSelectedOptions || [])];
-        const customValue = (answerState.customInput || '').trim();
+        const customValue = (answerState.customInput || "").trim();
         if (answerState.customInputChecked && customValue) {
           selections.push(customValue);
         }
-        return selections.length > 0 ? selections.join(', ') : undefined;
+        return selections.length > 0 ? selections.join(", ") : undefined;
       }
 
       // Check if custom input was used (value doesn't match any option)
@@ -112,7 +112,7 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
 
     const answerState = answers[currentQuestionIndex] || {};
     const selections = [...(answerState.multiSelectedOptions || [])];
-    const customValue = (answerState.customInput || '').trim();
+    const customValue = (answerState.customInput || "").trim();
     if (answerState.customInputChecked && customValue) {
       selections.push(customValue);
     }
@@ -120,7 +120,7 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
       return;
     }
 
-    const value = selections.join(', ');
+    const value = selections.join(", ");
 
     const updatedAnswers = {
       ...answers,
@@ -213,7 +213,7 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
 
   // Handle custom input submit
   const handleCustomInputSubmit = () => {
-    const value = currentAnswer.customInput?.trim() || '';
+    const value = currentAnswer.customInput?.trim() || "";
     if (!value) {
       return;
     }
@@ -247,13 +247,13 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
   // Escape to cancel
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         e.preventDefault();
         onCancel();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onCancel]);
 
   // Focus custom input when shown
@@ -279,8 +279,8 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
             key={idx}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap cursor-pointer transition-colors border-none ${
               isActive
-                ? 'bg-[var(--app-button-background)] text-[var(--app-button-foreground)] font-bold'
-                : 'bg-[var(--app-button-secondary-background)] text-[var(--app-secondary-foreground)] hover:opacity-80'
+                ? "bg-[var(--app-button-background)] text-[var(--app-button-foreground)] font-bold"
+                : "bg-[var(--app-button-secondary-background)] text-[var(--app-secondary-foreground)] hover:opacity-80"
             }`}
             onClick={() => setCurrentQuestionIndex(idx)}
           >
@@ -292,8 +292,8 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
       <button
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap cursor-pointer transition-colors border-none ${
           isSubmitTab
-            ? 'bg-[var(--app-button-background)] text-[var(--app-button-foreground)] font-bold'
-            : 'bg-[var(--app-button-secondary-background)] text-[var(--app-secondary-foreground)] opacity-60 hover:opacity-80'
+            ? "bg-[var(--app-button-background)] text-[var(--app-button-foreground)] font-bold"
+            : "bg-[var(--app-button-secondary-background)] text-[var(--app-secondary-foreground)] opacity-60 hover:opacity-80"
         }`}
         onClick={() => setCurrentQuestionIndex(totalTabs - 1)}
       >
@@ -304,9 +304,9 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
 
   // Container style
   const containerStyle = {
-    backgroundColor: 'var(--app-input-secondary-background)',
-    borderColor: 'var(--app-input-border)',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    backgroundColor: "var(--app-input-secondary-background)",
+    borderColor: "var(--app-input-border)",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
   };
 
   // Render submit tab
@@ -331,9 +331,9 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
                 key={idx}
                 className="ml-2 mb-1 text-[var(--app-secondary-foreground)]"
               >
-                <span className="font-semibold">{q.header}:</span>{' '}
+                <span className="font-semibold">{q.header}:</span>{" "}
                 {answer ? (
-                  <span style={{ color: 'var(--app-link-color)' }}>
+                  <span style={{ color: "var(--app-link-color)" }}>
                     {answer}
                   </span>
                 ) : (
@@ -349,8 +349,8 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
           <button
             className="px-4 py-2 rounded-md font-medium transition-colors cursor-pointer border-none"
             style={{
-              backgroundColor: 'var(--app-button-background)',
-              color: 'var(--app-button-foreground)',
+              backgroundColor: "var(--app-button-background)",
+              color: "var(--app-button-foreground)",
             }}
             onClick={handleSubmit}
           >
@@ -359,8 +359,8 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
           <button
             className="px-4 py-2 rounded-md font-medium transition-colors cursor-pointer border-none hover:opacity-80"
             style={{
-              backgroundColor: 'var(--app-button-secondary-background)',
-              color: 'var(--app-primary-foreground)',
+              backgroundColor: "var(--app-button-secondary-background)",
+              color: "var(--app-primary-foreground)",
             }}
             onClick={onCancel}
           >
@@ -387,7 +387,7 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
           <div className="mb-2">
             <span
               className="font-bold text-lg"
-              style={{ color: 'var(--app-link-color)' }}
+              style={{ color: "var(--app-link-color)" }}
             >
               {currentQuestion!.header}
             </span>
@@ -412,24 +412,24 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
               <button
                 className={`flex items-center gap-2 px-3 py-2 text-left w-full rounded-md border transition-colors duration-150 cursor-pointer ${
                   isSelected || isMultiChecked
-                    ? 'bg-[var(--app-list-active-background)] text-[var(--app-list-active-foreground)]'
-                    : 'bg-[var(--app-button-secondary-background)] text-[var(--app-primary-foreground)] hover:bg-[var(--app-list-active-background)] hover:text-[var(--app-list-active-foreground)]'
+                    ? "bg-[var(--app-list-active-background)] text-[var(--app-list-active-foreground)]"
+                    : "bg-[var(--app-button-secondary-background)] text-[var(--app-primary-foreground)] hover:bg-[var(--app-list-active-background)] hover:text-[var(--app-list-active-foreground)]"
                 }`}
                 onClick={() => handleOptionSelect(index)}
               >
                 {isMultiSelect ? (
                   <span className="min-w-[18px]">
-                    {isMultiChecked ? '☑' : '☐'}
+                    {isMultiChecked ? "☑" : "☐"}
                   </span>
                 ) : (
-                  <span className="min-w-[18px]">{isSelected ? '●' : '○'}</span>
+                  <span className="min-w-[18px]">{isSelected ? "●" : "○"}</span>
                 )}
                 <span className="flex-1">{opt.label}</span>
               </button>
               {opt.description && (
                 <div
                   className="ml-8 mt-1 text-sm opacity-70"
-                  style={{ color: 'var(--app-secondary-foreground)' }}
+                  style={{ color: "var(--app-secondary-foreground)" }}
                 >
                   {opt.description}
                 </div>
@@ -456,7 +456,7 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
                     });
                   }}
                 >
-                  {currentAnswer.customInputChecked ? '☑' : '☐'}
+                  {currentAnswer.customInputChecked ? "☑" : "☐"}
                 </span>
               )}
               <input
@@ -464,14 +464,14 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
                 type="text"
                 className="flex-1 px-3 py-2 rounded-md border focus:outline-none focus:ring-1"
                 style={{
-                  backgroundColor: 'var(--app-input-background)',
-                  borderColor: 'var(--app-input-border)',
-                  color: 'var(--app-primary-foreground)',
+                  backgroundColor: "var(--app-input-background)",
+                  borderColor: "var(--app-input-border)",
+                  color: "var(--app-primary-foreground)",
                 }}
-                value={currentAnswer.customInput || ''}
+                value={currentAnswer.customInput || ""}
                 onChange={(e) => handleCustomInputChange(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     e.preventDefault();
                     e.stopPropagation();
                     handleCustomInputSubmit();
@@ -488,7 +488,7 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
             >
               <span className="min-w-[18px]">✎</span>
               <span className="flex-1 opacity-70">
-                {currentAnswer.customInput || 'Other...'}
+                {currentAnswer.customInput || "Other..."}
               </span>
             </button>
           )}
@@ -501,8 +501,8 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
           <button
             className="px-4 py-2 rounded-md font-medium transition-colors cursor-pointer border-none"
             style={{
-              backgroundColor: 'var(--app-button-background)',
-              color: 'var(--app-button-foreground)',
+              backgroundColor: "var(--app-button-background)",
+              color: "var(--app-button-foreground)",
             }}
             onClick={handleMultiSelectConfirm}
           >
@@ -512,8 +512,8 @@ export const AskUserQuestionDialog: FC<AskUserQuestionDialogProps> = ({
         <button
           className="px-4 py-2 rounded-md font-medium transition-colors cursor-pointer border-none hover:opacity-80"
           style={{
-            backgroundColor: 'var(--app-button-secondary-background)',
-            color: 'var(--app-primary-foreground)',
+            backgroundColor: "var(--app-button-secondary-background)",
+            color: "var(--app-primary-foreground)",
           }}
           onClick={onCancel}
         >

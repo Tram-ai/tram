@@ -6,9 +6,9 @@
  * Shared copy utilities for toolcall components
  */
 
-import type { FC } from 'react';
-import { useState, useCallback } from 'react';
-import { usePlatform } from '../../../context/PlatformContext.js';
+import type { FC } from "react";
+import { useState, useCallback } from "react";
+import { usePlatform } from "../../../context/PlatformContext.js";
 
 /**
  * Handle copy to clipboard using platform-specific API with fallback
@@ -30,7 +30,7 @@ export const handleCopyToClipboard = async (
       await navigator.clipboard.writeText(text);
     }
   } catch (err) {
-    console.error('Failed to copy text:', err);
+    console.error("Failed to copy text:", err);
   }
 };
 

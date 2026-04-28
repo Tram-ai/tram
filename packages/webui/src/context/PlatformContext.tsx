@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createContext, useContext } from 'react';
-import type { ReactNode } from 'react';
+import { createContext, useContext } from "react";
+import type { ReactNode } from "react";
 
 /**
  * Platform types supported by the webui library
  */
-export type PlatformType = 'vscode' | 'chrome' | 'web' | 'share';
+export type PlatformType = "vscode" | "chrome" | "web" | "share";
 
 /**
  * Platform context interface for cross-platform component reuse.
@@ -66,7 +66,7 @@ export interface PlatformContextValue {
  * Default noop implementation for platforms without message support
  */
 const defaultContext: PlatformContextValue = {
-  platform: 'web',
+  platform: "web",
   postMessage: () => {},
   onMessage: () => () => {},
 };

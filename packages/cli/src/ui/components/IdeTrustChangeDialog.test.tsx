@@ -4,78 +4,78 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import * as processUtils from '../../utils/processUtils.js';
-import { renderWithProviders } from '../../test-utils/render.js';
-import { IdeTrustChangeDialog } from './IdeTrustChangeDialog.js';
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import * as processUtils from "../../utils/processUtils.js";
+import { renderWithProviders } from "../../test-utils/render.js";
+import { IdeTrustChangeDialog } from "./IdeTrustChangeDialog.js";
 
-describe('IdeTrustChangeDialog', () => {
+describe("IdeTrustChangeDialog", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders the correct message for CONNECTION_CHANGE', () => {
+  it("renders the correct message for CONNECTION_CHANGE", () => {
     const { lastFrame } = renderWithProviders(
       <IdeTrustChangeDialog reason="CONNECTION_CHANGE" />,
     );
 
     const frameText = lastFrame();
     expect(frameText).toContain(
-      'Workspace trust has changed due to a change in the IDE connection.',
+      "Workspace trust has changed due to a change in the IDE connection.",
     );
     expect(frameText).toContain("Press 'r' to restart Gemini");
   });
 
-  it('renders the correct message for TRUST_CHANGE', () => {
+  it("renders the correct message for TRUST_CHANGE", () => {
     const { lastFrame } = renderWithProviders(
       <IdeTrustChangeDialog reason="TRUST_CHANGE" />,
     );
 
     const frameText = lastFrame();
     expect(frameText).toContain(
-      'Workspace trust has changed due to a change in the IDE trust.',
+      "Workspace trust has changed due to a change in the IDE trust.",
     );
     expect(frameText).toContain("Press 'r' to restart Gemini");
   });
 
-  it('renders a generic message for NONE reason', () => {
+  it("renders a generic message for NONE reason", () => {
     const { lastFrame } = renderWithProviders(
       <IdeTrustChangeDialog reason="NONE" />,
     );
 
     const frameText = lastFrame();
-    expect(frameText).toContain('Workspace trust has changed.');
+    expect(frameText).toContain("Workspace trust has changed.");
   });
 
   it('calls relaunchApp when "r" is pressed', () => {
-    const relaunchAppSpy = vi.spyOn(processUtils, 'relaunchApp');
+    const relaunchAppSpy = vi.spyOn(processUtils, "relaunchApp");
     const { stdin } = renderWithProviders(
       <IdeTrustChangeDialog reason="NONE" />,
     );
 
-    stdin.write('r');
+    stdin.write("r");
 
     expect(relaunchAppSpy).toHaveBeenCalledTimes(1);
   });
 
   it('calls relaunchApp when "R" is pressed', () => {
-    const relaunchAppSpy = vi.spyOn(processUtils, 'relaunchApp');
+    const relaunchAppSpy = vi.spyOn(processUtils, "relaunchApp");
     const { stdin } = renderWithProviders(
       <IdeTrustChangeDialog reason="CONNECTION_CHANGE" />,
     );
 
-    stdin.write('R');
+    stdin.write("R");
 
     expect(relaunchAppSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('does not call relaunchApp when another key is pressed', async () => {
-    const relaunchAppSpy = vi.spyOn(processUtils, 'relaunchApp');
+  it("does not call relaunchApp when another key is pressed", async () => {
+    const relaunchAppSpy = vi.spyOn(processUtils, "relaunchApp");
     const { stdin } = renderWithProviders(
       <IdeTrustChangeDialog reason="CONNECTION_CHANGE" />,
     );
 
-    stdin.write('a');
+    stdin.write("a");
 
     // Give it a moment to ensure no async actions are triggered
     await new Promise((resolve) => setTimeout(resolve, 50));

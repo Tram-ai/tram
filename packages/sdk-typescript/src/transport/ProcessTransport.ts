@@ -1,14 +1,14 @@
-import { spawn, fork, type ChildProcess } from 'node:child_process';
-import * as readline from 'node:readline';
-import type { Writable, Readable } from 'node:stream';
-import type { TransportOptions } from '../types/types.js';
-import type { Transport } from './Transport.js';
-import { parseJsonLinesStream } from '../utils/jsonLines.js';
-import { prepareSpawnInfo } from '../utils/cliPath.js';
-import { AbortError } from '../types/errors.js';
-import { SdkLogger } from '../utils/logger.js';
+import { spawn, fork, type ChildProcess } from "node:child_process";
+import * as readline from "node:readline";
+import type { Writable, Readable } from "node:stream";
+import type { TransportOptions } from "../types/types.js";
+import type { Transport } from "./Transport.js";
+import { parseJsonLinesStream } from "../utils/jsonLines.js";
+import { prepareSpawnInfo } from "../utils/cliPath.js";
+import { AbortError } from "../types/errors.js";
+import { SdkLogger } from "../utils/logger.js";
 
-const logger = SdkLogger.createLogger('ProcessTransport');
+const logger = SdkLogger.createLogger("ProcessTransport");
 
 export class ProcessTransport implements Transport {
   private childProcess: ChildProcess | null = null;
@@ -38,7 +38,7 @@ export class ProcessTransport implements Transport {
   private initialize(): void {
     try {
       if (this.abortController.signal.aborted) {
-        throw new AbortError('Transport start aborted');
+        throw new AbortError("Transport start aborted");
       }
 
       const cliArgs = this.buildCliArguments();
@@ -50,15 +50,15 @@ export class ProcessTransport implements Transport {
         prepareSpawnInfo(this.options.pathToTramExecutable);
 
       const stderrMode =
-        this.options.debug || this.options.stderr ? 'pipe' : 'ignore';
+        this.options.debug || this.options.stderr ? "pipe" : "ignore";
 
       // Check if we should use fork for Electron integration
-      const useFork = env.FORK_MODE === '1';
+      const useFork = env.FORK_MODE === "1";
 
       if (useFork) {
         // Detect Electron environment
         const isElectron =
-          typeof process !== 'undefined' &&
+          typeof process !== "undefined" &&
           process.versions &&
           !!process.versions.electron;
 
@@ -66,9 +66,9 @@ export class ProcessTransport implements Transport {
         // When spawnInfo uses process.execPath to run a JS file, we need to handle it specially
         const isUsingExecPathForJs =
           spawnInfo.args.length > 0 &&
-          (spawnInfo.args[0]?.endsWith('.js') ||
-            spawnInfo.args[0]?.endsWith('.mjs') ||
-            spawnInfo.args[0]?.endsWith('.cjs'));
+          (spawnInfo.args[0]?.endsWith(".js") ||
+            spawnInfo.args[0]?.endsWith(".mjs") ||
+            spawnInfo.args[0]?.endsWith(".cjs"));
 
         let forkModulePath: string;
         let forkArgs: string[];
@@ -76,14 +76,14 @@ export class ProcessTransport implements Transport {
 
         if (isElectron && isUsingExecPathForJs) {
           // In Electron with JS file: use the JS file as module path, rest as args
-          forkModulePath = spawnInfo.args[0] ?? '';
+          forkModulePath = spawnInfo.args[0] ?? "";
           forkArgs = [...spawnInfo.args.slice(1), ...cliArgs];
         } else if (
-          (spawnInfo.type === 'node' || spawnInfo.type === 'bun') &&
+          (spawnInfo.type === "node" || spawnInfo.type === "bun") &&
           spawnInfo.args.length > 0
         ) {
           // For node/bun type: command is the runtime, args[0] is the JS module
-          forkModulePath = spawnInfo.args[0] ?? '';
+          forkModulePath = spawnInfo.args[0] ?? "";
           forkArgs = [...spawnInfo.args.slice(1), ...cliArgs];
           forkExecPath = spawnInfo.command;
         } else {
@@ -91,23 +91,23 @@ export class ProcessTransport implements Transport {
           logger.debug(
             `FORK_MODE enabled but CLI type '${spawnInfo.type}' does not support fork. Falling back to spawn.`,
           );
-          forkModulePath = '';
+          forkModulePath = "";
           forkArgs = [];
         }
 
         // Only use fork if we have a valid module path
         if (forkModulePath) {
           logger.debug(
-            `Forking CLI (${spawnInfo.type}): ${forkModulePath} ${forkArgs.join(' ')}`,
+            `Forking CLI (${spawnInfo.type}): ${forkModulePath} ${forkArgs.join(" ")}`,
           );
 
           const forkOptions: Parameters<typeof fork>[2] = {
             cwd,
             env,
             stdio:
-              stderrMode === 'pipe'
-                ? ['pipe', 'pipe', 'pipe', 'ipc']
-                : ['pipe', 'pipe', 'ignore', 'ipc'],
+              stderrMode === "pipe"
+                ? ["pipe", "pipe", "pipe", "ipc"]
+                : ["pipe", "pipe", "ignore", "ipc"],
             signal: this.abortController.signal,
           };
 
@@ -119,7 +119,7 @@ export class ProcessTransport implements Transport {
         } else {
           // Fallback to spawn for native/unsupported types
           logger.debug(
-            `Spawning CLI (${spawnInfo.type}): ${spawnInfo.command} ${[...spawnInfo.args, ...cliArgs].join(' ')}`,
+            `Spawning CLI (${spawnInfo.type}): ${spawnInfo.command} ${[...spawnInfo.args, ...cliArgs].join(" ")}`,
           );
 
           this.childProcess = spawn(
@@ -128,14 +128,14 @@ export class ProcessTransport implements Transport {
             {
               cwd,
               env,
-              stdio: ['pipe', 'pipe', stderrMode],
+              stdio: ["pipe", "pipe", stderrMode],
               signal: this.abortController.signal,
             },
           );
         }
       } else {
         logger.debug(
-          `Spawning CLI (${spawnInfo.type}): ${spawnInfo.command} ${[...spawnInfo.args, ...cliArgs].join(' ')}`,
+          `Spawning CLI (${spawnInfo.type}): ${spawnInfo.command} ${[...spawnInfo.args, ...cliArgs].join(" ")}`,
         );
 
         this.childProcess = spawn(
@@ -144,7 +144,7 @@ export class ProcessTransport implements Transport {
           {
             cwd,
             env,
-            stdio: ['pipe', 'pipe', stderrMode],
+            stdio: ["pipe", "pipe", stderrMode],
             signal: this.abortController.signal,
           },
         );
@@ -154,29 +154,29 @@ export class ProcessTransport implements Transport {
       this.childStdout = this.childProcess.stdout;
 
       if (this.options.debug || this.options.stderr) {
-        this.childProcess.stderr?.on('data', (data) => {
+        this.childProcess.stderr?.on("data", (data) => {
           logger.debug(data.toString());
         });
       }
 
       const cleanup = (): void => {
         if (this.childProcess && !this.childProcess.killed) {
-          this.childProcess.kill('SIGTERM');
+          this.childProcess.kill("SIGTERM");
         }
       };
 
       this.processExitHandler = cleanup;
       this.abortHandler = cleanup;
-      process.on('exit', this.processExitHandler);
-      this.abortController.signal.addEventListener('abort', this.abortHandler);
+      process.on("exit", this.processExitHandler);
+      this.abortController.signal.addEventListener("abort", this.abortHandler);
 
       this.setupEventHandlers();
 
       this.ready = true;
-      logger.info('CLI process started successfully');
+      logger.info("CLI process started successfully");
     } catch (error) {
       this.ready = false;
-      logger.error('Failed to initialize CLI process:', error);
+      logger.error("Failed to initialize CLI process:", error);
       throw error;
     }
   }
@@ -184,20 +184,20 @@ export class ProcessTransport implements Transport {
   private setupEventHandlers(): void {
     if (!this.childProcess) return;
 
-    this.childProcess.on('error', (error) => {
+    this.childProcess.on("error", (error) => {
       this.ready = false;
       if (this.abortController.signal.aborted) {
-        this._exitError = new AbortError('CLI process aborted by user');
+        this._exitError = new AbortError("CLI process aborted by user");
       } else {
         this._exitError = new Error(`CLI process error: ${error.message}`);
         logger.error(this._exitError.message);
       }
     });
 
-    this.childProcess.on('close', (code, signal) => {
+    this.childProcess.on("close", (code, signal) => {
       this.ready = false;
       if (this.abortController.signal.aborted) {
-        this._exitError = new AbortError('CLI process aborted by user');
+        this._exitError = new AbortError("CLI process aborted by user");
       } else {
         const error = this.getProcessExitError(code, signal);
         if (error) {
@@ -221,61 +221,61 @@ export class ProcessTransport implements Transport {
   }
   private buildCliArguments(): string[] {
     const args: string[] = [
-      '--input-format',
-      'stream-json',
-      '--output-format',
-      'stream-json',
-      '--channel=SDK',
+      "--input-format",
+      "stream-json",
+      "--output-format",
+      "stream-json",
+      "--channel=SDK",
     ];
 
     if (this.options.model) {
-      args.push('--model', this.options.model);
+      args.push("--model", this.options.model);
     }
 
     if (this.options.systemPrompt) {
-      args.push('--system-prompt', this.options.systemPrompt);
+      args.push("--system-prompt", this.options.systemPrompt);
     }
 
     if (this.options.appendSystemPrompt) {
-      args.push('--append-system-prompt', this.options.appendSystemPrompt);
+      args.push("--append-system-prompt", this.options.appendSystemPrompt);
     }
 
     if (this.options.permissionMode) {
-      args.push('--approval-mode', this.options.permissionMode);
+      args.push("--approval-mode", this.options.permissionMode);
     }
 
     if (this.options.maxSessionTurns !== undefined) {
-      args.push('--max-session-turns', String(this.options.maxSessionTurns));
+      args.push("--max-session-turns", String(this.options.maxSessionTurns));
     }
 
     if (this.options.coreTools && this.options.coreTools.length > 0) {
-      args.push('--core-tools', this.options.coreTools.join(','));
+      args.push("--core-tools", this.options.coreTools.join(","));
     }
 
     if (this.options.excludeTools && this.options.excludeTools.length > 0) {
-      args.push('--exclude-tools', this.options.excludeTools.join(','));
+      args.push("--exclude-tools", this.options.excludeTools.join(","));
     }
 
     if (this.options.allowedTools && this.options.allowedTools.length > 0) {
-      args.push('--allowed-tools', this.options.allowedTools.join(','));
+      args.push("--allowed-tools", this.options.allowedTools.join(","));
     }
 
     if (this.options.authType) {
-      args.push('--auth-type', this.options.authType);
+      args.push("--auth-type", this.options.authType);
     }
 
     if (this.options.includePartialMessages) {
-      args.push('--include-partial-messages');
+      args.push("--include-partial-messages");
     }
 
     if (this.options.resume) {
       // Resume existing session
-      args.push('--resume', this.options.resume);
+      args.push("--resume", this.options.resume);
     } else if (this.options.continue) {
-      args.push('--continue');
+      args.push("--continue");
     } else if (this.options.sessionId) {
       // Start new session with specific session ID (for SDK-CLI alignment)
-      args.push('--session-id', this.options.sessionId);
+      args.push("--session-id", this.options.sessionId);
     }
 
     return args;
@@ -288,23 +288,23 @@ export class ProcessTransport implements Transport {
     }
 
     if (this.processExitHandler) {
-      process.off('exit', this.processExitHandler);
+      process.off("exit", this.processExitHandler);
       this.processExitHandler = null;
     }
 
     if (this.abortHandler) {
       this.abortController.signal.removeEventListener(
-        'abort',
+        "abort",
         this.abortHandler,
       );
       this.abortHandler = null;
     }
 
     if (this.childProcess && !this.childProcess.killed) {
-      this.childProcess.kill('SIGTERM');
+      this.childProcess.kill("SIGTERM");
       setTimeout(() => {
         if (this.childProcess && !this.childProcess.killed) {
-          this.childProcess.kill('SIGKILL');
+          this.childProcess.kill("SIGKILL");
         }
       }, 5000);
     }
@@ -335,7 +335,7 @@ export class ProcessTransport implements Transport {
         signal: NodeJS.Signals | null,
       ) => {
         if (this.abortController.signal.aborted) {
-          reject(new AbortError('Operation aborted'));
+          reject(new AbortError("Operation aborted"));
           return;
         }
 
@@ -347,48 +347,48 @@ export class ProcessTransport implements Transport {
         }
       };
 
-      this.childProcess!.once('close', exitHandler);
+      this.childProcess!.once("close", exitHandler);
 
       const errorHandler = (error: Error) => {
-        this.childProcess!.off('close', exitHandler);
+        this.childProcess!.off("close", exitHandler);
         reject(error);
       };
 
-      this.childProcess!.once('error', errorHandler);
+      this.childProcess!.once("error", errorHandler);
 
-      this.childProcess!.once('close', () => {
-        this.childProcess!.off('error', errorHandler);
+      this.childProcess!.once("close", () => {
+        this.childProcess!.off("error", errorHandler);
       });
     });
   }
 
   write(message: string): void {
     if (this.abortController.signal.aborted) {
-      throw new AbortError('Cannot write: operation aborted');
+      throw new AbortError("Cannot write: operation aborted");
     }
 
     if (!this.ready || !this.childStdin) {
-      throw new Error('Transport not ready for writing');
+      throw new Error("Transport not ready for writing");
     }
 
     if (this.closed) {
-      throw new Error('Cannot write to closed transport');
+      throw new Error("Cannot write to closed transport");
     }
 
     if (this.inputClosed) {
-      throw new Error('Input stream closed');
+      throw new Error("Input stream closed");
     }
 
     if (this.childStdin.writableEnded || this.childStdin.destroyed) {
       this.inputClosed = true;
       logger.warn(
-        `Cannot write to ${this.childStdin.writableEnded ? 'ended' : 'destroyed'} stdin stream`,
+        `Cannot write to ${this.childStdin.writableEnded ? "ended" : "destroyed"} stdin stream`,
       );
-      throw new Error('Input stream closed');
+      throw new Error("Input stream closed");
     }
 
     if (this.childProcess?.killed || this.childProcess?.exitCode !== null) {
-      throw new Error('Cannot write to terminated process');
+      throw new Error("Cannot write to terminated process");
     }
 
     if (this._exitError) {
@@ -414,14 +414,14 @@ export class ProcessTransport implements Transport {
       // Check if this is a stream-closed error (EPIPE, ERR_STREAM_WRITE_AFTER_END, etc.)
       const errorMsg = error instanceof Error ? error.message : String(error);
       const isStreamClosedError =
-        errorMsg.includes('EPIPE') ||
-        errorMsg.includes('ERR_STREAM_WRITE_AFTER_END') ||
-        errorMsg.includes('write after end');
+        errorMsg.includes("EPIPE") ||
+        errorMsg.includes("ERR_STREAM_WRITE_AFTER_END") ||
+        errorMsg.includes("write after end");
 
       if (isStreamClosedError) {
         this.inputClosed = true;
         logger.warn(`Stream closed, cannot write: ${errorMsg}`);
-        throw new Error('Input stream closed');
+        throw new Error("Input stream closed");
       }
 
       // For other errors, maintain original behavior
@@ -434,7 +434,7 @@ export class ProcessTransport implements Transport {
 
   async *readMessages(): AsyncGenerator<unknown, void, unknown> {
     if (!this.childStdout) {
-      throw new Error('Cannot read messages: process not started');
+      throw new Error("Cannot read messages: process not started");
     }
 
     const rl = readline.createInterface({
@@ -446,7 +446,7 @@ export class ProcessTransport implements Transport {
     try {
       for await (const message of parseJsonLinesStream(
         rl,
-        'ProcessTransport',
+        "ProcessTransport",
       )) {
         yield message;
       }

@@ -4,19 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { DataProcessor } from './DataProcessor.js';
-import type { Config, ChatRecord } from '@tram-ai/tram-core';
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { DataProcessor } from "./DataProcessor.js";
+import type { Config, ChatRecord } from "@tram-ai/tram-core";
 import type {
   InsightData,
   SessionFacets,
-} from '../types/StaticInsightTypes.js';
+} from "../types/StaticInsightTypes.js";
 
 // Mock dependencies
-vi.mock('@tram-ai/tram-core', async () => {
-  const actual = await vi.importActual<
-    typeof import('@tram-ai/tram-core')
-  >('@tram-ai/tram-core');
+vi.mock("@tram-ai/tram-core", async () => {
+  const actual =
+    await vi.importActual<typeof import("@tram-ai/tram-core")>(
+      "@tram-ai/tram-core",
+    );
   return {
     ...actual,
     read: vi.fn(),
@@ -29,7 +30,7 @@ vi.mock('@tram-ai/tram-core', async () => {
   };
 });
 
-vi.mock('fs/promises', () => ({
+vi.mock("fs/promises", () => ({
   default: {
     readdir: vi.fn(),
     stat: vi.fn(),
@@ -38,13 +39,13 @@ vi.mock('fs/promises', () => ({
   },
 }));
 
-import fs from 'fs/promises';
-import { read as readJsonlFile } from '@tram-ai/tram-core';
+import fs from "fs/promises";
+import { read as readJsonlFile } from "@tram-ai/tram-core";
 
 const mockedFs = vi.mocked(fs);
 const mockedReadJsonlFile = vi.mocked(readJsonlFile);
 
-describe('DataProcessor', () => {
+describe("DataProcessor", () => {
   let mockConfig: Config;
   let dataProcessor: DataProcessor;
   let mockGenerateJson: ReturnType<typeof vi.fn>;
@@ -57,7 +58,7 @@ describe('DataProcessor', () => {
       getBaseLlmClient: vi.fn(() => ({
         generateJson: mockGenerateJson,
       })),
-      getModel: vi.fn(() => 'test-model'),
+      getModel: vi.fn(() => "test-model"),
     } as unknown as Config;
 
     dataProcessor = new DataProcessor(mockConfig);
@@ -67,18 +68,18 @@ describe('DataProcessor', () => {
     vi.restoreAllMocks();
   });
 
-  describe('formatDate', () => {
-    it('should format date as YYYY-MM-DD', () => {
-      const date = new Date('2025-01-15T10:30:00Z');
+  describe("formatDate", () => {
+    it("should format date as YYYY-MM-DD", () => {
+      const date = new Date("2025-01-15T10:30:00Z");
       // Access private method through any cast for testing
       const result = (
         dataProcessor as unknown as { formatDate(date: Date): string }
       ).formatDate(date);
-      expect(result).toBe('2025-01-15');
+      expect(result).toBe("2025-01-15");
     });
 
-    it('should handle different timezones correctly', () => {
-      const date = new Date('2025-12-31T23:59:59Z');
+    it("should handle different timezones correctly", () => {
+      const date = new Date("2025-12-31T23:59:59Z");
       const result = (
         dataProcessor as unknown as { formatDate(date: Date): string }
       ).formatDate(date);
@@ -87,32 +88,32 @@ describe('DataProcessor', () => {
     });
   });
 
-  describe('formatRecordsForAnalysis', () => {
-    it('should format empty records array', () => {
+  describe("formatRecordsForAnalysis", () => {
+    it("should format empty records array", () => {
       const records: ChatRecord[] = [];
       const result = (
         dataProcessor as unknown as {
           formatRecordsForAnalysis(records: ChatRecord[]): string;
         }
       ).formatRecordsForAnalysis(records);
-      expect(result).toContain('Session: unknown');
-      expect(result).toContain('Duration: 0 turns');
+      expect(result).toContain("Session: unknown");
+      expect(result).toContain("Duration: 0 turns");
     });
 
-    it('should format user messages correctly', () => {
+    it("should format user messages correctly", () => {
       const records: ChatRecord[] = [
         {
-          sessionId: 'test-session',
+          sessionId: "test-session",
           timestamp: new Date().toISOString(),
-          type: 'user',
+          type: "user",
           message: {
-            role: 'user',
-            parts: [{ text: 'Hello, world!' }],
+            role: "user",
+            parts: [{ text: "Hello, world!" }],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
       const result = (
@@ -120,24 +121,24 @@ describe('DataProcessor', () => {
           formatRecordsForAnalysis(records: ChatRecord[]): string;
         }
       ).formatRecordsForAnalysis(records);
-      expect(result).toContain('Session: test-session');
-      expect(result).toContain('[User]: Hello, world!');
+      expect(result).toContain("Session: test-session");
+      expect(result).toContain("[User]: Hello, world!");
     });
 
-    it('should format assistant text messages correctly', () => {
+    it("should format assistant text messages correctly", () => {
       const records: ChatRecord[] = [
         {
-          sessionId: 'test-session',
+          sessionId: "test-session",
           timestamp: new Date().toISOString(),
-          type: 'assistant',
+          type: "assistant",
           message: {
-            role: 'assistant',
-            parts: [{ text: 'I can help you with that.' }],
+            role: "assistant",
+            parts: [{ text: "I can help you with that." }],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
       const result = (
@@ -145,23 +146,23 @@ describe('DataProcessor', () => {
           formatRecordsForAnalysis(records: ChatRecord[]): string;
         }
       ).formatRecordsForAnalysis(records);
-      expect(result).toContain('[Assistant]: I can help you with that.');
+      expect(result).toContain("[Assistant]: I can help you with that.");
     });
 
-    it('should format function calls correctly', () => {
+    it("should format function calls correctly", () => {
       const records: ChatRecord[] = [
         {
-          sessionId: 'test-session',
+          sessionId: "test-session",
           timestamp: new Date().toISOString(),
-          type: 'assistant',
+          type: "assistant",
           message: {
-            role: 'assistant',
-            parts: [{ functionCall: { name: 'read_file', args: {} } }],
+            role: "assistant",
+            parts: [{ functionCall: { name: "read_file", args: {} } }],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
       const result = (
@@ -169,26 +170,26 @@ describe('DataProcessor', () => {
           formatRecordsForAnalysis(records: ChatRecord[]): string;
         }
       ).formatRecordsForAnalysis(records);
-      expect(result).toContain('[Tool: read_file]');
+      expect(result).toContain("[Tool: read_file]");
     });
 
-    it('should handle multiple message parts', () => {
+    it("should handle multiple message parts", () => {
       const records: ChatRecord[] = [
         {
-          sessionId: 'test-session',
+          sessionId: "test-session",
           timestamp: new Date().toISOString(),
-          type: 'assistant',
+          type: "assistant",
           message: {
-            role: 'assistant',
+            role: "assistant",
             parts: [
-              { text: 'Let me check that.' },
-              { functionCall: { name: 'search', args: {} } },
+              { text: "Let me check that." },
+              { functionCall: { name: "search", args: {} } },
             ],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
       const result = (
@@ -196,23 +197,23 @@ describe('DataProcessor', () => {
           formatRecordsForAnalysis(records: ChatRecord[]): string;
         }
       ).formatRecordsForAnalysis(records);
-      expect(result).toContain('[Assistant]: Let me check that.');
-      expect(result).toContain('[Tool: search]');
+      expect(result).toContain("[Assistant]: Let me check that.");
+      expect(result).toContain("[Tool: search]");
     });
 
-    it('should handle messages without parts', () => {
+    it("should handle messages without parts", () => {
       const records: ChatRecord[] = [
         {
-          sessionId: 'test-session',
+          sessionId: "test-session",
           timestamp: new Date().toISOString(),
-          type: 'assistant',
+          type: "assistant",
           message: {
-            role: 'assistant',
+            role: "assistant",
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
       const result = (
@@ -220,12 +221,12 @@ describe('DataProcessor', () => {
           formatRecordsForAnalysis(records: ChatRecord[]): string;
         }
       ).formatRecordsForAnalysis(records);
-      expect(result).not.toContain('[Assistant]:');
+      expect(result).not.toContain("[Assistant]:");
     });
   });
 
-  describe('calculateStreaks', () => {
-    it('should return zero streaks for empty dates array', () => {
+  describe("calculateStreaks", () => {
+    it("should return zero streaks for empty dates array", () => {
       const result = (
         dataProcessor as unknown as {
           calculateStreaks(dates: string[]): {
@@ -240,7 +241,7 @@ describe('DataProcessor', () => {
       expect(result.dates).toEqual([]);
     });
 
-    it('should calculate streak of 1 for single date', () => {
+    it("should calculate streak of 1 for single date", () => {
       const result = (
         dataProcessor as unknown as {
           calculateStreaks(dates: string[]): {
@@ -249,13 +250,13 @@ describe('DataProcessor', () => {
             dates: string[];
           };
         }
-      ).calculateStreaks(['2025-01-15']);
+      ).calculateStreaks(["2025-01-15"]);
       expect(result.currentStreak).toBe(1);
       expect(result.longestStreak).toBe(1);
     });
 
-    it('should calculate consecutive day streak', () => {
-      const dates = ['2025-01-15', '2025-01-16', '2025-01-17'];
+    it("should calculate consecutive day streak", () => {
+      const dates = ["2025-01-15", "2025-01-16", "2025-01-17"];
       const result = (
         dataProcessor as unknown as {
           calculateStreaks(dates: string[]): {
@@ -269,8 +270,8 @@ describe('DataProcessor', () => {
       expect(result.longestStreak).toBe(3);
     });
 
-    it('should handle non-consecutive dates', () => {
-      const dates = ['2025-01-15', '2025-01-17', '2025-01-18'];
+    it("should handle non-consecutive dates", () => {
+      const dates = ["2025-01-15", "2025-01-17", "2025-01-18"];
       const result = (
         dataProcessor as unknown as {
           calculateStreaks(dates: string[]): {
@@ -283,8 +284,8 @@ describe('DataProcessor', () => {
       expect(result.longestStreak).toBe(2); // Jan 17-18
     });
 
-    it('should sort dates before calculating streaks', () => {
-      const dates = ['2025-01-18', '2025-01-15', '2025-01-16', '2025-01-17'];
+    it("should sort dates before calculating streaks", () => {
+      const dates = ["2025-01-18", "2025-01-15", "2025-01-16", "2025-01-17"];
       const result = (
         dataProcessor as unknown as {
           calculateStreaks(dates: string[]): {
@@ -297,8 +298,8 @@ describe('DataProcessor', () => {
       expect(result.longestStreak).toBe(4);
     });
 
-    it('should handle duplicate dates', () => {
-      const dates = ['2025-01-15', '2025-01-15', '2025-01-16'];
+    it("should handle duplicate dates", () => {
+      const dates = ["2025-01-15", "2025-01-15", "2025-01-16"];
       const result = (
         dataProcessor as unknown as {
           calculateStreaks(dates: string[]): {
@@ -312,8 +313,8 @@ describe('DataProcessor', () => {
     });
   });
 
-  describe('aggregateFacetsData', () => {
-    it('should return empty aggregates for empty facets array', () => {
+  describe("aggregateFacetsData", () => {
+    it("should return empty aggregates for empty facets array", () => {
       const result = (
         dataProcessor as unknown as {
           aggregateFacetsData(facets: SessionFacets[]): {
@@ -332,33 +333,33 @@ describe('DataProcessor', () => {
       expect(result.goalsAgg).toEqual({});
     });
 
-    it('should aggregate satisfaction counts', () => {
+    it("should aggregate satisfaction counts", () => {
       const facets: SessionFacets[] = [
         {
-          session_id: 's1',
-          underlying_goal: 'test',
+          session_id: "s1",
+          underlying_goal: "test",
           goal_categories: {},
-          outcome: 'fully_achieved',
+          outcome: "fully_achieved",
           user_satisfaction_counts: { satisfied: 2, neutral: 1 },
-          Tram_helpfulness: 'very_helpful',
-          session_type: 'single_task',
+          Tram_helpfulness: "very_helpful",
+          session_type: "single_task",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'none',
-          brief_summary: 'Test summary',
+          friction_detail: "",
+          primary_success: "none",
+          brief_summary: "Test summary",
         },
         {
-          session_id: 's2',
-          underlying_goal: 'test2',
+          session_id: "s2",
+          underlying_goal: "test2",
           goal_categories: {},
-          outcome: 'mostly_achieved',
+          outcome: "mostly_achieved",
           user_satisfaction_counts: { satisfied: 1, frustrated: 2 },
-          Tram_helpfulness: 'moderately_helpful',
-          session_type: 'multi_task',
+          Tram_helpfulness: "moderately_helpful",
+          session_type: "multi_task",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'none',
-          brief_summary: 'Test summary 2',
+          friction_detail: "",
+          primary_success: "none",
+          brief_summary: "Test summary 2",
         },
       ];
       const result = (
@@ -375,33 +376,33 @@ describe('DataProcessor', () => {
       });
     });
 
-    it('should aggregate friction counts', () => {
+    it("should aggregate friction counts", () => {
       const facets: SessionFacets[] = [
         {
-          session_id: 's1',
-          underlying_goal: 'test',
+          session_id: "s1",
+          underlying_goal: "test",
           goal_categories: {},
-          outcome: 'fully_achieved',
+          outcome: "fully_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'very_helpful',
-          session_type: 'single_task',
+          Tram_helpfulness: "very_helpful",
+          session_type: "single_task",
           friction_counts: { slow_response: 1, unclear_answer: 2 },
-          friction_detail: 'Some friction',
-          primary_success: 'none',
-          brief_summary: 'Test summary',
+          friction_detail: "Some friction",
+          primary_success: "none",
+          brief_summary: "Test summary",
         },
         {
-          session_id: 's2',
-          underlying_goal: 'test2',
+          session_id: "s2",
+          underlying_goal: "test2",
           goal_categories: {},
-          outcome: 'mostly_achieved',
+          outcome: "mostly_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'moderately_helpful',
-          session_type: 'multi_task',
+          Tram_helpfulness: "moderately_helpful",
+          session_type: "multi_task",
           friction_counts: { slow_response: 2 },
-          friction_detail: 'More friction',
-          primary_success: 'none',
-          brief_summary: 'Test summary 2',
+          friction_detail: "More friction",
+          primary_success: "none",
+          brief_summary: "Test summary 2",
         },
       ];
       const result = (
@@ -417,46 +418,46 @@ describe('DataProcessor', () => {
       });
     });
 
-    it('should aggregate primary success excluding none', () => {
+    it("should aggregate primary success excluding none", () => {
       const facets: SessionFacets[] = [
         {
-          session_id: 's1',
-          underlying_goal: 'test',
+          session_id: "s1",
+          underlying_goal: "test",
           goal_categories: {},
-          outcome: 'fully_achieved',
+          outcome: "fully_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'very_helpful',
-          session_type: 'single_task',
+          Tram_helpfulness: "very_helpful",
+          session_type: "single_task",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'correct_code_edits',
-          brief_summary: 'Test summary',
+          friction_detail: "",
+          primary_success: "correct_code_edits",
+          brief_summary: "Test summary",
         },
         {
-          session_id: 's2',
-          underlying_goal: 'test2',
+          session_id: "s2",
+          underlying_goal: "test2",
           goal_categories: {},
-          outcome: 'mostly_achieved',
+          outcome: "mostly_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'moderately_helpful',
-          session_type: 'multi_task',
+          Tram_helpfulness: "moderately_helpful",
+          session_type: "multi_task",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'none',
-          brief_summary: 'Test summary 2',
+          friction_detail: "",
+          primary_success: "none",
+          brief_summary: "Test summary 2",
         },
         {
-          session_id: 's3',
-          underlying_goal: 'test3',
+          session_id: "s3",
+          underlying_goal: "test3",
           goal_categories: {},
-          outcome: 'partially_achieved',
+          outcome: "partially_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'slightly_helpful',
-          session_type: 'exploration',
+          Tram_helpfulness: "slightly_helpful",
+          session_type: "exploration",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'good_explanations',
-          brief_summary: 'Test summary 3',
+          friction_detail: "",
+          primary_success: "good_explanations",
+          brief_summary: "Test summary 3",
         },
       ];
       const result = (
@@ -470,49 +471,49 @@ describe('DataProcessor', () => {
         correct_code_edits: 1,
         good_explanations: 1,
       });
-      expect(result.primarySuccessAgg['none']).toBeUndefined();
+      expect(result.primarySuccessAgg["none"]).toBeUndefined();
     });
 
-    it('should aggregate outcomes', () => {
+    it("should aggregate outcomes", () => {
       const facets: SessionFacets[] = [
         {
-          session_id: 's1',
-          underlying_goal: 'test',
+          session_id: "s1",
+          underlying_goal: "test",
           goal_categories: {},
-          outcome: 'fully_achieved',
+          outcome: "fully_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'very_helpful',
-          session_type: 'single_task',
+          Tram_helpfulness: "very_helpful",
+          session_type: "single_task",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'none',
-          brief_summary: 'Test summary',
+          friction_detail: "",
+          primary_success: "none",
+          brief_summary: "Test summary",
         },
         {
-          session_id: 's2',
-          underlying_goal: 'test2',
+          session_id: "s2",
+          underlying_goal: "test2",
           goal_categories: {},
-          outcome: 'fully_achieved',
+          outcome: "fully_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'moderately_helpful',
-          session_type: 'multi_task',
+          Tram_helpfulness: "moderately_helpful",
+          session_type: "multi_task",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'none',
-          brief_summary: 'Test summary 2',
+          friction_detail: "",
+          primary_success: "none",
+          brief_summary: "Test summary 2",
         },
         {
-          session_id: 's3',
-          underlying_goal: 'test3',
+          session_id: "s3",
+          underlying_goal: "test3",
           goal_categories: {},
-          outcome: 'partially_achieved',
+          outcome: "partially_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'slightly_helpful',
-          session_type: 'exploration',
+          Tram_helpfulness: "slightly_helpful",
+          session_type: "exploration",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'none',
-          brief_summary: 'Test summary 3',
+          friction_detail: "",
+          primary_success: "none",
+          brief_summary: "Test summary 3",
         },
       ];
       const result = (
@@ -528,33 +529,33 @@ describe('DataProcessor', () => {
       });
     });
 
-    it('should aggregate goal categories', () => {
+    it("should aggregate goal categories", () => {
       const facets: SessionFacets[] = [
         {
-          session_id: 's1',
-          underlying_goal: 'test',
+          session_id: "s1",
+          underlying_goal: "test",
           goal_categories: { coding: 2, debugging: 1 },
-          outcome: 'fully_achieved',
+          outcome: "fully_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'very_helpful',
-          session_type: 'single_task',
+          Tram_helpfulness: "very_helpful",
+          session_type: "single_task",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'none',
-          brief_summary: 'Test summary',
+          friction_detail: "",
+          primary_success: "none",
+          brief_summary: "Test summary",
         },
         {
-          session_id: 's2',
-          underlying_goal: 'test2',
+          session_id: "s2",
+          underlying_goal: "test2",
           goal_categories: { coding: 1, refactoring: 3 },
-          outcome: 'mostly_achieved',
+          outcome: "mostly_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'moderately_helpful',
-          session_type: 'multi_task',
+          Tram_helpfulness: "moderately_helpful",
+          session_type: "multi_task",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'none',
-          brief_summary: 'Test summary 2',
+          friction_detail: "",
+          primary_success: "none",
+          brief_summary: "Test summary 2",
         },
       ];
       const result = (
@@ -572,8 +573,8 @@ describe('DataProcessor', () => {
     });
   });
 
-  describe('analyzeSession', () => {
-    it('should return null for empty records', async () => {
+  describe("analyzeSession", () => {
+    it("should return null for empty records", async () => {
       const result = await (
         dataProcessor as unknown as {
           analyzeSession(records: ChatRecord[]): Promise<SessionFacets | null>;
@@ -582,35 +583,35 @@ describe('DataProcessor', () => {
       expect(result).toBeNull();
     });
 
-    it('should analyze session and return facets', async () => {
+    it("should analyze session and return facets", async () => {
       const mockFacet = {
-        underlying_goal: 'Test goal',
+        underlying_goal: "Test goal",
         goal_categories: { coding: 1 },
-        outcome: 'fully_achieved',
+        outcome: "fully_achieved",
         user_satisfaction_counts: { satisfied: 1 },
-        Tram_helpfulness: 'very_helpful',
-        session_type: 'single_task',
+        Tram_helpfulness: "very_helpful",
+        session_type: "single_task",
         friction_counts: {},
-        friction_detail: '',
-        primary_success: 'correct_code_edits',
-        brief_summary: 'Test summary',
+        friction_detail: "",
+        primary_success: "correct_code_edits",
+        brief_summary: "Test summary",
       };
 
       mockGenerateJson.mockResolvedValue(mockFacet);
 
       const records: ChatRecord[] = [
         {
-          sessionId: 'test-session',
+          sessionId: "test-session",
           timestamp: new Date().toISOString(),
-          type: 'user',
+          type: "user",
           message: {
-            role: 'user',
-            parts: [{ text: 'Help me with code' }],
+            role: "user",
+            parts: [{ text: "Help me with code" }],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
 
@@ -621,32 +622,32 @@ describe('DataProcessor', () => {
       ).analyzeSession(records);
 
       expect(result).not.toBeNull();
-      expect(result?.session_id).toBe('test-session');
-      expect(result?.underlying_goal).toBe('Test goal');
+      expect(result?.session_id).toBe("test-session");
+      expect(result?.underlying_goal).toBe("Test goal");
       expect(mockGenerateJson).toHaveBeenCalledWith(
         expect.objectContaining({
-          model: 'test-model',
+          model: "test-model",
           schema: expect.any(Object),
         }),
       );
     });
 
-    it('should return null when LLM returns empty result', async () => {
+    it("should return null when LLM returns empty result", async () => {
       mockGenerateJson.mockResolvedValue({});
 
       const records: ChatRecord[] = [
         {
-          sessionId: 'test-session',
+          sessionId: "test-session",
           timestamp: new Date().toISOString(),
-          type: 'user',
+          type: "user",
           message: {
-            role: 'user',
-            parts: [{ text: 'Help' }],
+            role: "user",
+            parts: [{ text: "Help" }],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
 
@@ -659,22 +660,22 @@ describe('DataProcessor', () => {
       expect(result).toBeNull();
     });
 
-    it('should handle LLM errors gracefully', async () => {
-      mockGenerateJson.mockRejectedValue(new Error('LLM Error'));
+    it("should handle LLM errors gracefully", async () => {
+      mockGenerateJson.mockRejectedValue(new Error("LLM Error"));
 
       const records: ChatRecord[] = [
         {
-          sessionId: 'test-session',
+          sessionId: "test-session",
           timestamp: new Date().toISOString(),
-          type: 'user',
+          type: "user",
           message: {
-            role: 'user',
-            parts: [{ text: 'Help' }],
+            role: "user",
+            parts: [{ text: "Help" }],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
 
@@ -688,10 +689,10 @@ describe('DataProcessor', () => {
     });
   });
 
-  describe('scanChatFiles', () => {
-    it('should return empty array when base directory does not exist', async () => {
-      const error = new Error('Directory not found') as NodeJS.ErrnoException;
-      error.code = 'ENOENT';
+  describe("scanChatFiles", () => {
+    it("should return empty array when base directory does not exist", async () => {
+      const error = new Error("Directory not found") as NodeJS.ErrnoException;
+      error.code = "ENOENT";
       mockedFs.readdir.mockRejectedValue(error);
 
       const result = await (
@@ -700,45 +701,45 @@ describe('DataProcessor', () => {
             baseDir: string,
           ): Promise<Array<{ path: string; mtime: number }>>;
         }
-      ).scanChatFiles('/nonexistent');
+      ).scanChatFiles("/nonexistent");
 
       expect(result).toEqual([]);
     });
 
-    it('should scan project directories and find chat files', async () => {
+    it("should scan project directories and find chat files", async () => {
       mockedFs.readdir.mockResolvedValueOnce([
-        'project1',
-        'project2',
+        "project1",
+        "project2",
       ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
 
       mockedFs.stat.mockImplementation((path) => {
         const pathStr = String(path);
-        if (pathStr.includes('project1') || pathStr.includes('project2')) {
+        if (pathStr.includes("project1") || pathStr.includes("project2")) {
           return Promise.resolve({
             isDirectory: () => true,
             mtimeMs: 1234567890,
           } as Awaited<ReturnType<typeof fs.stat>>);
         }
-        if (pathStr.endsWith('.jsonl')) {
+        if (pathStr.endsWith(".jsonl")) {
           return Promise.resolve({
             isDirectory: () => false,
             mtimeMs: 1234567890,
           } as Awaited<ReturnType<typeof fs.stat>>);
         }
-        throw new Error('Unexpected path');
+        throw new Error("Unexpected path");
       });
 
       mockedFs.readdir.mockImplementation((path) => {
         const pathStr = String(path);
-        if (pathStr.endsWith('chats')) {
-          if (pathStr.includes('project1')) {
+        if (pathStr.endsWith("chats")) {
+          if (pathStr.includes("project1")) {
             return Promise.resolve([
-              'chat1.jsonl',
-              'chat2.jsonl',
+              "chat1.jsonl",
+              "chat2.jsonl",
             ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
           }
-          if (pathStr.includes('project2')) {
-            return Promise.resolve(['chat3.jsonl'] as unknown as Awaited<
+          if (pathStr.includes("project2")) {
+            return Promise.resolve(["chat3.jsonl"] as unknown as Awaited<
               ReturnType<typeof fs.readdir>
             >);
           }
@@ -754,49 +755,49 @@ describe('DataProcessor', () => {
             baseDir: string,
           ): Promise<Array<{ path: string; mtime: number }>>;
         }
-      ).scanChatFiles('/base');
+      ).scanChatFiles("/base");
 
       expect(result).toHaveLength(3);
       const paths = result.map((r) => r.path);
-      expect(paths.some((p) => p.includes('chat1.jsonl'))).toBe(true);
-      expect(paths.some((p) => p.includes('chat2.jsonl'))).toBe(true);
-      expect(paths.some((p) => p.includes('chat3.jsonl'))).toBe(true);
+      expect(paths.some((p) => p.includes("chat1.jsonl"))).toBe(true);
+      expect(paths.some((p) => p.includes("chat2.jsonl"))).toBe(true);
+      expect(paths.some((p) => p.includes("chat3.jsonl"))).toBe(true);
     });
 
-    it('should skip projects without chats directory', async () => {
+    it("should skip projects without chats directory", async () => {
       mockedFs.readdir.mockResolvedValueOnce([
-        'project1',
-        'project2',
+        "project1",
+        "project2",
       ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
 
       mockedFs.stat.mockImplementation((path) => {
         const pathStr = String(path);
-        if (pathStr.includes('project1') || pathStr.includes('project2')) {
+        if (pathStr.includes("project1") || pathStr.includes("project2")) {
           return Promise.resolve({ isDirectory: () => true } as Awaited<
             ReturnType<typeof fs.stat>
           >);
         }
-        if (pathStr.endsWith('.jsonl')) {
+        if (pathStr.endsWith(".jsonl")) {
           return Promise.resolve({
             isDirectory: () => false,
             mtimeMs: 1234567890,
           } as Awaited<ReturnType<typeof fs.stat>>);
         }
-        throw new Error('Unexpected path');
+        throw new Error("Unexpected path");
       });
 
-      const error = new Error('No chats dir') as NodeJS.ErrnoException;
-      error.code = 'ENOENT';
+      const error = new Error("No chats dir") as NodeJS.ErrnoException;
+      error.code = "ENOENT";
 
       mockedFs.readdir.mockImplementation((path) => {
         const pathStr = String(path);
-        if (pathStr.endsWith('chats')) {
-          if (pathStr.includes('project1')) {
-            return Promise.resolve(['chat1.jsonl'] as unknown as Awaited<
+        if (pathStr.endsWith("chats")) {
+          if (pathStr.includes("project1")) {
+            return Promise.resolve(["chat1.jsonl"] as unknown as Awaited<
               ReturnType<typeof fs.readdir>
             >);
           }
-          if (pathStr.includes('project2')) {
+          if (pathStr.includes("project2")) {
             return Promise.reject(error);
           }
         }
@@ -811,34 +812,34 @@ describe('DataProcessor', () => {
             baseDir: string,
           ): Promise<Array<{ path: string; mtime: number }>>;
         }
-      ).scanChatFiles('/base');
+      ).scanChatFiles("/base");
 
       expect(result).toHaveLength(1);
-      expect(result[0].path).toContain('chat1.jsonl');
+      expect(result[0].path).toContain("chat1.jsonl");
     });
 
-    it('should handle file stat errors gracefully', async () => {
-      mockedFs.readdir.mockResolvedValueOnce(['project1'] as unknown as Awaited<
+    it("should handle file stat errors gracefully", async () => {
+      mockedFs.readdir.mockResolvedValueOnce(["project1"] as unknown as Awaited<
         ReturnType<typeof fs.readdir>
       >);
 
       mockedFs.stat.mockImplementation((path) => {
         const pathStr = String(path);
-        if (pathStr.includes('project1') && !pathStr.includes('chats')) {
+        if (pathStr.includes("project1") && !pathStr.includes("chats")) {
           return Promise.resolve({ isDirectory: () => true } as Awaited<
             ReturnType<typeof fs.stat>
           >);
         }
-        if (pathStr.endsWith('chat1.jsonl')) {
-          return Promise.reject(new Error('Stat failed'));
+        if (pathStr.endsWith("chat1.jsonl")) {
+          return Promise.reject(new Error("Stat failed"));
         }
-        throw new Error('Unexpected path: ' + pathStr);
+        throw new Error("Unexpected path: " + pathStr);
       });
 
       mockedFs.readdir.mockImplementation((path) => {
         const pathStr = String(path);
-        if (pathStr.endsWith('chats')) {
-          return Promise.resolve(['chat1.jsonl'] as unknown as Awaited<
+        if (pathStr.endsWith("chats")) {
+          return Promise.resolve(["chat1.jsonl"] as unknown as Awaited<
             ReturnType<typeof fs.readdir>
           >);
         }
@@ -853,64 +854,64 @@ describe('DataProcessor', () => {
             baseDir: string,
           ): Promise<Array<{ path: string; mtime: number }>>;
         }
-      ).scanChatFiles('/base');
+      ).scanChatFiles("/base");
 
       // When stat fails for a file, it should be skipped but not crash
       expect(result).toEqual([]);
     });
   });
 
-  describe('generateMetrics', () => {
-    it('should generate metrics from chat files', async () => {
+  describe("generateMetrics", () => {
+    it("should generate metrics from chat files", async () => {
       const mockRecords: ChatRecord[] = [
         {
-          sessionId: 'session1',
-          timestamp: '2025-01-15T10:00:00Z',
-          type: 'user',
-          message: { role: 'user', parts: [{ text: 'Hello' }] },
-          uuid: '',
+          sessionId: "session1",
+          timestamp: "2025-01-15T10:00:00Z",
+          type: "user",
+          message: { role: "user", parts: [{ text: "Hello" }] },
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
         {
-          sessionId: 'session1',
-          timestamp: '2025-01-15T10:01:00Z',
-          type: 'system',
-          subtype: 'slash_command',
-          uuid: '',
+          sessionId: "session1",
+          timestamp: "2025-01-15T10:01:00Z",
+          type: "system",
+          subtype: "slash_command",
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
         {
-          sessionId: 'session1',
-          timestamp: '2025-01-15T10:05:00Z',
-          type: 'assistant',
-          message: { role: 'assistant', parts: [{ text: 'Hi' }] },
-          uuid: '',
+          sessionId: "session1",
+          timestamp: "2025-01-15T10:05:00Z",
+          type: "assistant",
+          message: { role: "assistant", parts: [{ text: "Hi" }] },
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
         {
-          sessionId: 'session1',
-          timestamp: '2025-01-15T10:06:00Z',
-          type: 'assistant',
+          sessionId: "session1",
+          timestamp: "2025-01-15T10:06:00Z",
+          type: "assistant",
           message: {
-            role: 'assistant',
-            parts: [{ functionCall: { name: 'read_file', args: {} } }],
+            role: "assistant",
+            parts: [{ functionCall: { name: "read_file", args: {} } }],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
 
       mockedReadJsonlFile.mockResolvedValue(mockRecords);
 
-      const files = [{ path: '/test/chat.jsonl', mtime: 1234567890 }];
+      const files = [{ path: "/test/chat.jsonl", mtime: 1234567890 }];
       const result = await (
         dataProcessor as unknown as {
           generateMetrics(
@@ -928,52 +929,52 @@ describe('DataProcessor', () => {
       });
     });
 
-    it('should track tool usage correctly', async () => {
+    it("should track tool usage correctly", async () => {
       const mockRecords: ChatRecord[] = [
         {
-          sessionId: 'session1',
-          timestamp: '2025-01-15T10:00:00Z',
-          type: 'assistant',
+          sessionId: "session1",
+          timestamp: "2025-01-15T10:00:00Z",
+          type: "assistant",
           message: {
-            role: 'assistant',
-            parts: [{ functionCall: { name: 'read_file', args: {} } }],
+            role: "assistant",
+            parts: [{ functionCall: { name: "read_file", args: {} } }],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
         {
-          sessionId: 'session1',
-          timestamp: '2025-01-15T10:01:00Z',
-          type: 'assistant',
+          sessionId: "session1",
+          timestamp: "2025-01-15T10:01:00Z",
+          type: "assistant",
           message: {
-            role: 'assistant',
-            parts: [{ functionCall: { name: 'read_file', args: {} } }],
+            role: "assistant",
+            parts: [{ functionCall: { name: "read_file", args: {} } }],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
         {
-          sessionId: 'session1',
-          timestamp: '2025-01-15T10:02:00Z',
-          type: 'assistant',
+          sessionId: "session1",
+          timestamp: "2025-01-15T10:02:00Z",
+          type: "assistant",
           message: {
-            role: 'assistant',
-            parts: [{ functionCall: { name: 'write_file', args: {} } }],
+            role: "assistant",
+            parts: [{ functionCall: { name: "write_file", args: {} } }],
           },
-          uuid: '',
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
 
       mockedReadJsonlFile.mockResolvedValue(mockRecords);
 
-      const files = [{ path: '/test/chat.jsonl', mtime: 1234567890 }];
+      const files = [{ path: "/test/chat.jsonl", mtime: 1234567890 }];
       const result = await (
         dataProcessor as unknown as {
           generateMetrics(
@@ -982,14 +983,14 @@ describe('DataProcessor', () => {
         }
       ).generateMetrics(files);
 
-      expect(result.topTools).toContainEqual(['read_file', 2]);
-      expect(result.topTools).toContainEqual(['write_file', 1]);
+      expect(result.topTools).toContainEqual(["read_file", 2]);
+      expect(result.topTools).toContainEqual(["write_file", 1]);
     });
 
-    it('should handle file read errors gracefully', async () => {
-      mockedReadJsonlFile.mockRejectedValue(new Error('Read failed'));
+    it("should handle file read errors gracefully", async () => {
+      mockedReadJsonlFile.mockRejectedValue(new Error("Read failed"));
 
-      const files = [{ path: '/test/chat.jsonl', mtime: 1234567890 }];
+      const files = [{ path: "/test/chat.jsonl", mtime: 1234567890 }];
       const result = await (
         dataProcessor as unknown as {
           generateMetrics(
@@ -1001,25 +1002,25 @@ describe('DataProcessor', () => {
       expect(result.totalMessages).toBe(0);
     });
 
-    it('should call progress callback during processing', async () => {
+    it("should call progress callback during processing", async () => {
       const mockRecords: ChatRecord[] = [
         {
-          sessionId: 'session1',
-          timestamp: '2025-01-15T10:00:00Z',
-          type: 'user',
-          message: { role: 'user', parts: [{ text: 'Hello' }] },
-          uuid: '',
+          sessionId: "session1",
+          timestamp: "2025-01-15T10:00:00Z",
+          type: "user",
+          message: { role: "user", parts: [{ text: "Hello" }] },
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
 
       mockedReadJsonlFile.mockResolvedValue(mockRecords);
 
       const files = [
-        { path: '/test/chat1.jsonl', mtime: 1234567890 },
-        { path: '/test/chat2.jsonl', mtime: 1234567891 },
+        { path: "/test/chat1.jsonl", mtime: 1234567890 },
+        { path: "/test/chat2.jsonl", mtime: 1234567891 },
       ];
       const onProgress = vi.fn();
 
@@ -1036,93 +1037,93 @@ describe('DataProcessor', () => {
     });
   });
 
-  describe('prepareCommonPromptData', () => {
-    it('should prepare prompt data with all required sections', () => {
+  describe("prepareCommonPromptData", () => {
+    it("should prepare prompt data with all required sections", () => {
       const metrics = {
-        heatmap: { '2025-01-15': 5, '2025-01-16': 3 },
+        heatmap: { "2025-01-15": 5, "2025-01-16": 3 },
         totalSessions: 10,
         totalMessages: 100,
         totalHours: 5,
         topTools: [
-          ['read_file', 20],
-          ['write_file', 10],
+          ["read_file", 20],
+          ["write_file", 10],
         ],
-      } as unknown as Omit<InsightData, 'facets' | 'qualitative'>;
+      } as unknown as Omit<InsightData, "facets" | "qualitative">;
 
       const facets: SessionFacets[] = [
         {
-          session_id: 's1',
-          underlying_goal: 'Goal 1',
+          session_id: "s1",
+          underlying_goal: "Goal 1",
           goal_categories: { coding: 2, debugging: 1 },
-          outcome: 'fully_achieved',
+          outcome: "fully_achieved",
           user_satisfaction_counts: { satisfied: 2 },
-          Tram_helpfulness: 'very_helpful',
-          session_type: 'single_task',
+          Tram_helpfulness: "very_helpful",
+          session_type: "single_task",
           friction_counts: { slow: 1 },
-          friction_detail: 'Some friction detail',
-          primary_success: 'correct_code_edits',
-          brief_summary: 'Summary 1',
+          friction_detail: "Some friction detail",
+          primary_success: "correct_code_edits",
+          brief_summary: "Summary 1",
         },
       ];
 
       const result = (
         dataProcessor as unknown as {
           prepareCommonPromptData(
-            metrics: Omit<InsightData, 'facets' | 'qualitative'>,
+            metrics: Omit<InsightData, "facets" | "qualitative">,
             facets: SessionFacets[],
           ): string;
         }
       ).prepareCommonPromptData(metrics, facets);
 
-      expect(result).toContain('DATA:');
-      expect(result).toContain('SESSION SUMMARIES:');
-      expect(result).toContain('FRICTION DETAILS:');
-      expect(result).toContain('Summary 1');
-      expect(result).toContain('Some friction detail');
+      expect(result).toContain("DATA:");
+      expect(result).toContain("SESSION SUMMARIES:");
+      expect(result).toContain("FRICTION DETAILS:");
+      expect(result).toContain("Summary 1");
+      expect(result).toContain("Some friction detail");
     });
 
-    it('should filter out empty friction details', () => {
+    it("should filter out empty friction details", () => {
       const metrics = {
         heatmap: {},
         totalSessions: 1,
         totalMessages: 10,
         totalHours: 1,
         topTools: [],
-      } as unknown as Omit<InsightData, 'facets' | 'qualitative'>;
+      } as unknown as Omit<InsightData, "facets" | "qualitative">;
 
       const facets: SessionFacets[] = [
         {
-          session_id: 's1',
-          underlying_goal: 'Goal 1',
+          session_id: "s1",
+          underlying_goal: "Goal 1",
           goal_categories: {},
-          outcome: 'fully_achieved',
+          outcome: "fully_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'very_helpful',
-          session_type: 'single_task',
+          Tram_helpfulness: "very_helpful",
+          session_type: "single_task",
           friction_counts: {},
-          friction_detail: '',
-          primary_success: 'none',
-          brief_summary: 'Summary 1',
+          friction_detail: "",
+          primary_success: "none",
+          brief_summary: "Summary 1",
         },
         {
-          session_id: 's2',
-          underlying_goal: 'Goal 2',
+          session_id: "s2",
+          underlying_goal: "Goal 2",
           goal_categories: {},
-          outcome: 'mostly_achieved',
+          outcome: "mostly_achieved",
           user_satisfaction_counts: {},
-          Tram_helpfulness: 'moderately_helpful',
-          session_type: 'multi_task',
+          Tram_helpfulness: "moderately_helpful",
+          session_type: "multi_task",
           friction_counts: {},
-          friction_detail: '   ',
-          primary_success: 'none',
-          brief_summary: 'Summary 2',
+          friction_detail: "   ",
+          primary_success: "none",
+          brief_summary: "Summary 2",
         },
       ];
 
       const result = (
         dataProcessor as unknown as {
           prepareCommonPromptData(
-            metrics: Omit<InsightData, 'facets' | 'qualitative'>,
+            metrics: Omit<InsightData, "facets" | "qualitative">,
             facets: SessionFacets[],
           ): string;
         }
@@ -1130,62 +1131,62 @@ describe('DataProcessor', () => {
 
       // Check that FRICTION DETAILS section is empty or only contains whitespace
       const frictionSection =
-        result.split('FRICTION DETAILS:')[1]?.split('USER INSTRUCTIONS')[0] ||
-        '';
+        result.split("FRICTION DETAILS:")[1]?.split("USER INSTRUCTIONS")[0] ||
+        "";
       const hasNonEmptyFrictionDetail =
-        frictionSection.trim().length > 0 && frictionSection.includes('-');
+        frictionSection.trim().length > 0 && frictionSection.includes("-");
       expect(hasNonEmptyFrictionDetail).toBe(false);
     });
   });
 
-  describe('generateQualitativeInsights', () => {
+  describe("generateQualitativeInsights", () => {
     const mockMetrics = {
       totalSessions: 5,
       totalMessages: 50,
       totalHours: 2,
-      heatmap: { '2025-01-15': 3 },
-      topTools: [['read_file', 10]] as Array<[string, number]>,
+      heatmap: { "2025-01-15": 3 },
+      topTools: [["read_file", 10]] as Array<[string, number]>,
       activeDays: 1,
-      activeHours: { '10': 5 },
+      activeHours: { "10": 5 },
       totalLinesAdded: 100,
       totalLinesRemoved: 50,
       totalFiles: 10,
       streak: { currentStreak: 1, longestStreak: 1, dates: [] },
-    } as unknown as Omit<InsightData, 'facets' | 'qualitative'>;
+    } as unknown as Omit<InsightData, "facets" | "qualitative">;
 
     const mockFacets: SessionFacets[] = [
       {
-        session_id: 'test-1',
-        underlying_goal: 'Fix bug',
+        session_id: "test-1",
+        underlying_goal: "Fix bug",
         goal_categories: { debugging: 1 },
-        outcome: 'fully_achieved',
+        outcome: "fully_achieved",
         user_satisfaction_counts: { satisfied: 1 },
-        Tram_helpfulness: 'very_helpful',
-        session_type: 'single_task',
+        Tram_helpfulness: "very_helpful",
+        session_type: "single_task",
         friction_counts: {},
-        friction_detail: '',
-        primary_success: 'correct_code_edits',
-        brief_summary: 'Fixed a bug',
+        friction_detail: "",
+        primary_success: "correct_code_edits",
+        brief_summary: "Fixed a bug",
       },
     ];
 
-    it('should return partial qualitative data when some LLM calls fail', async () => {
+    it("should return partial qualitative data when some LLM calls fail", async () => {
       let callIndex = 0;
       mockGenerateJson.mockImplementation(() => {
         callIndex++;
         if (callIndex % 2 === 0) {
-          return Promise.reject(new Error('LLM timeout'));
+          return Promise.reject(new Error("LLM timeout"));
         }
-        return Promise.resolve({ intro: 'test', areas: [], opportunities: [] });
+        return Promise.resolve({ intro: "test", areas: [], opportunities: [] });
       });
 
       const result = await (
         dataProcessor as unknown as {
           generateQualitativeInsights(
-            metrics: Omit<InsightData, 'facets' | 'qualitative'>,
+            metrics: Omit<InsightData, "facets" | "qualitative">,
             facets: SessionFacets[],
           ): Promise<
-            | import('../types/QualitativeInsightTypes.js').QualitativeInsights
+            | import("../types/QualitativeInsightTypes.js").QualitativeInsights
             | undefined
           >;
         }
@@ -1198,14 +1199,14 @@ describe('DataProcessor', () => {
       expect(result!.frictionPoints).toBeUndefined();
     });
 
-    it('should return undefined when facets are empty', async () => {
+    it("should return undefined when facets are empty", async () => {
       const result = await (
         dataProcessor as unknown as {
           generateQualitativeInsights(
-            metrics: Omit<InsightData, 'facets' | 'qualitative'>,
+            metrics: Omit<InsightData, "facets" | "qualitative">,
             facets: SessionFacets[],
           ): Promise<
-            | import('../types/QualitativeInsightTypes.js').QualitativeInsights
+            | import("../types/QualitativeInsightTypes.js").QualitativeInsights
             | undefined
           >;
         }
@@ -1214,16 +1215,16 @@ describe('DataProcessor', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should return full qualitative data when all LLM calls succeed', async () => {
-      mockGenerateJson.mockResolvedValue({ intro: 'test', areas: [] });
+    it("should return full qualitative data when all LLM calls succeed", async () => {
+      mockGenerateJson.mockResolvedValue({ intro: "test", areas: [] });
 
       const result = await (
         dataProcessor as unknown as {
           generateQualitativeInsights(
-            metrics: Omit<InsightData, 'facets' | 'qualitative'>,
+            metrics: Omit<InsightData, "facets" | "qualitative">,
             facets: SessionFacets[],
           ): Promise<
-            | import('../types/QualitativeInsightTypes.js').QualitativeInsights
+            | import("../types/QualitativeInsightTypes.js").QualitativeInsights
             | undefined
           >;
         }
@@ -1234,41 +1235,41 @@ describe('DataProcessor', () => {
     });
   });
 
-  describe('generateFacets', () => {
-    it('should skip non-conversational sessions', async () => {
+  describe("generateFacets", () => {
+    it("should skip non-conversational sessions", async () => {
       const userOnlyRecords: ChatRecord[] = [
         {
-          sessionId: 'user-only',
-          timestamp: '2025-01-15T10:00:00Z',
-          type: 'user',
-          message: { role: 'user', parts: [{ text: 'Hello' }] },
-          uuid: '',
+          sessionId: "user-only",
+          timestamp: "2025-01-15T10:00:00Z",
+          type: "user",
+          message: { role: "user", parts: [{ text: "Hello" }] },
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
 
       const conversationalRecords: ChatRecord[] = [
         {
-          sessionId: 'conversational',
-          timestamp: '2025-01-15T10:00:00Z',
-          type: 'user',
-          message: { role: 'user', parts: [{ text: 'Hello' }] },
-          uuid: '',
+          sessionId: "conversational",
+          timestamp: "2025-01-15T10:00:00Z",
+          type: "user",
+          message: { role: "user", parts: [{ text: "Hello" }] },
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
         {
-          sessionId: 'conversational',
-          timestamp: '2025-01-15T10:01:00Z',
-          type: 'assistant',
-          message: { role: 'assistant', parts: [{ text: 'Hi' }] },
-          uuid: '',
+          sessionId: "conversational",
+          timestamp: "2025-01-15T10:01:00Z",
+          type: "assistant",
+          message: { role: "assistant", parts: [{ text: "Hi" }] },
+          uuid: "",
           parentUuid: null,
-          cwd: '',
-          version: '',
+          cwd: "",
+          version: "",
         },
       ];
 
@@ -1278,22 +1279,22 @@ describe('DataProcessor', () => {
         .mockResolvedValueOnce(conversationalRecords);
 
       const mockFacet = {
-        underlying_goal: 'Test',
+        underlying_goal: "Test",
         goal_categories: {},
-        outcome: 'fully_achieved',
+        outcome: "fully_achieved",
         user_satisfaction_counts: {},
-        Tram_helpfulness: 'very_helpful',
-        session_type: 'single_task',
+        Tram_helpfulness: "very_helpful",
+        session_type: "single_task",
         friction_counts: {},
-        friction_detail: '',
-        primary_success: 'none',
-        brief_summary: 'Test',
+        friction_detail: "",
+        primary_success: "none",
+        brief_summary: "Test",
       };
       mockGenerateJson.mockResolvedValue(mockFacet);
 
       const files = [
-        { path: '/test/user-only.jsonl', mtime: 2000 },
-        { path: '/test/conversational.jsonl', mtime: 1000 },
+        { path: "/test/user-only.jsonl", mtime: 2000 },
+        { path: "/test/conversational.jsonl", mtime: 1000 },
       ];
 
       const result = await (
@@ -1308,7 +1309,7 @@ describe('DataProcessor', () => {
       // Only the conversational session should be analyzed
       expect(mockGenerateJson).toHaveBeenCalledTimes(1);
       expect(result).toHaveLength(1);
-      expect(result[0].session_id).toBe('conversational');
+      expect(result[0].session_id).toBe("conversational");
     });
   });
 });

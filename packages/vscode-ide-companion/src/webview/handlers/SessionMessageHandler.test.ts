@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { mockProcessImageAttachments, mockShowErrorMessage } = vi.hoisted(
   () => ({
@@ -16,7 +16,7 @@ const { mockExecuteCommand } = vi.hoisted(() => ({
   mockExecuteCommand: vi.fn(),
 }));
 
-vi.mock('vscode', () => ({
+vi.mock("vscode", () => ({
   window: {
     showWarningMessage: vi.fn(),
     showErrorMessage: mockShowErrorMessage,
@@ -25,37 +25,37 @@ vi.mock('vscode', () => ({
     executeCommand: mockExecuteCommand,
   },
   workspace: {
-    workspaceFolders: [{ uri: { fsPath: '/workspace' } }],
+    workspaceFolders: [{ uri: { fsPath: "/workspace" } }],
   },
 }));
 
-vi.mock('../utils/imageHandler.js', async (importOriginal) => {
+vi.mock("../utils/imageHandler.js", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('../utils/imageHandler.js')>();
+    await importOriginal<typeof import("../utils/imageHandler.js")>();
   return {
     ...actual,
     processImageAttachments: mockProcessImageAttachments,
   };
 });
 
-import { SessionMessageHandler } from './SessionMessageHandler.js';
+import { SessionMessageHandler } from "./SessionMessageHandler.js";
 
-describe('SessionMessageHandler', () => {
+describe("SessionMessageHandler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockProcessImageAttachments.mockResolvedValue({
-      formattedText: '',
-      displayText: '',
+      formattedText: "",
+      displayText: "",
       savedImageCount: 0,
       promptImages: [],
     });
   });
 
-  it('forwards the active model when opening a new chat tab', async () => {
+  it("forwards the active model when opening a new chat tab", async () => {
     const handler = new SessionMessageHandler(
       {
         isConnected: true,
-        currentSessionId: 'session-1',
+        currentSessionId: "session-1",
       } as never,
       {} as never,
       null,
@@ -63,23 +63,23 @@ describe('SessionMessageHandler', () => {
     );
 
     await handler.handle({
-      type: 'openNewChatTab',
-      data: { modelId: 'glm-5' },
+      type: "openNewChatTab",
+      data: { modelId: "glm-5" },
     });
 
-    expect(mockExecuteCommand).toHaveBeenCalledWith('qwenCode.openNewChatTab', {
-      initialModelId: 'glm-5',
+    expect(mockExecuteCommand).toHaveBeenCalledWith("qwenCode.openNewChatTab", {
+      initialModelId: "glm-5",
     });
   });
 
-  it('does not create conversation state or send an empty prompt when all pasted images fail to materialize', async () => {
+  it("does not create conversation state or send an empty prompt when all pasted images fail to materialize", async () => {
     const agentManager = {
       isConnected: true,
-      currentSessionId: 'session-1',
+      currentSessionId: "session-1",
       sendMessage: vi.fn(),
     };
     const conversationStore = {
-      createConversation: vi.fn().mockResolvedValue({ id: 'conversation-1' }),
+      createConversation: vi.fn().mockResolvedValue({ id: "conversation-1" }),
       getConversation: vi.fn().mockResolvedValue(null),
       addMessage: vi.fn(),
     };
@@ -88,21 +88,21 @@ describe('SessionMessageHandler', () => {
     const handler = new SessionMessageHandler(
       agentManager as never,
       conversationStore as never,
-      'conversation-1',
+      "conversation-1",
       sendToWebView,
     );
 
     await handler.handle({
-      type: 'sendMessage',
+      type: "sendMessage",
       data: {
-        text: '',
+        text: "",
         attachments: [
           {
-            id: 'img-1',
-            name: 'pasted.png',
-            type: 'image/png',
+            id: "img-1",
+            name: "pasted.png",
+            type: "image/png",
             size: 3,
-            data: 'data:image/png;base64,YWJj',
+            data: "data:image/png;base64,YWJj",
             timestamp: Date.now(),
           },
         ],
@@ -114,35 +114,35 @@ describe('SessionMessageHandler', () => {
     expect(agentManager.sendMessage).not.toHaveBeenCalled();
     expect(sendToWebView).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'error',
+        type: "error",
         data: expect.objectContaining({
-          message: expect.stringContaining('image'),
+          message: expect.stringContaining("image"),
         }),
       }),
     );
   });
 
-  it('sends formatted prompt text so session restore can reconstruct pasted images', async () => {
+  it("sends formatted prompt text so session restore can reconstruct pasted images", async () => {
     mockProcessImageAttachments.mockResolvedValue({
-      formattedText: '这是什么内容\n\n@/tmp/clipboard/clipboard-123.png',
-      displayText: '这是什么内容\n\n@/tmp/clipboard/clipboard-123.png',
+      formattedText: "这是什么内容\n\n@/tmp/clipboard/clipboard-123.png",
+      displayText: "这是什么内容\n\n@/tmp/clipboard/clipboard-123.png",
       savedImageCount: 1,
       promptImages: [
         {
-          path: '/tmp/clipboard/clipboard-123.png',
-          name: 'clipboard-123.png',
-          mimeType: 'image/png',
+          path: "/tmp/clipboard/clipboard-123.png",
+          name: "clipboard-123.png",
+          mimeType: "image/png",
         },
       ],
     });
 
     const agentManager = {
       isConnected: true,
-      currentSessionId: 'session-1',
+      currentSessionId: "session-1",
       sendMessage: vi.fn().mockResolvedValue(undefined),
     };
     const conversationStore = {
-      createConversation: vi.fn().mockResolvedValue({ id: 'conversation-1' }),
+      createConversation: vi.fn().mockResolvedValue({ id: "conversation-1" }),
       getConversation: vi.fn().mockResolvedValue(null),
       addMessage: vi.fn(),
     };
@@ -156,16 +156,16 @@ describe('SessionMessageHandler', () => {
     );
 
     await handler.handle({
-      type: 'sendMessage',
+      type: "sendMessage",
       data: {
-        text: '这是什么内容',
+        text: "这是什么内容",
         attachments: [
           {
-            id: 'img-1',
-            name: 'clipboard-123.png',
-            type: 'image/png',
+            id: "img-1",
+            name: "clipboard-123.png",
+            type: "image/png",
             size: 3,
-            data: 'data:image/png;base64,YWJj',
+            data: "data:image/png;base64,YWJj",
             timestamp: Date.now(),
           },
         ],
@@ -174,23 +174,23 @@ describe('SessionMessageHandler', () => {
 
     expect(agentManager.sendMessage).toHaveBeenCalledWith([
       {
-        type: 'text',
-        text: '这是什么内容\n\n@/tmp/clipboard/clipboard-123.png',
+        type: "text",
+        text: "这是什么内容\n\n@/tmp/clipboard/clipboard-123.png",
       },
       {
-        type: 'resource_link',
-        name: 'clipboard-123.png',
-        mimeType: 'image/png',
-        uri: 'file:///tmp/clipboard/clipboard-123.png',
+        type: "resource_link",
+        name: "clipboard-123.png",
+        mimeType: "image/png",
+        uri: "file:///tmp/clipboard/clipboard-123.png",
       },
     ]);
   });
 
-  it('forces a fresh ACP session when the webview requests a new session', async () => {
+  it("forces a fresh ACP session when the webview requests a new session", async () => {
     const agentManager = {
       isConnected: true,
-      currentSessionId: 'session-1',
-      createNewSession: vi.fn().mockResolvedValue('session-2'),
+      currentSessionId: "session-1",
+      createNewSession: vi.fn().mockResolvedValue("session-2"),
     };
     const conversationStore = {
       createConversation: vi.fn(),
@@ -202,20 +202,20 @@ describe('SessionMessageHandler', () => {
     const handler = new SessionMessageHandler(
       agentManager as never,
       conversationStore as never,
-      'conversation-1',
+      "conversation-1",
       sendToWebView,
     );
 
     await handler.handle({
-      type: 'newQwenSession',
+      type: "newQwenSession",
     });
 
     expect(handler.getCurrentConversationId()).toBeNull();
-    expect(agentManager.createNewSession).toHaveBeenCalledWith('/workspace', {
+    expect(agentManager.createNewSession).toHaveBeenCalledWith("/workspace", {
       forceNew: true,
     });
     expect(sendToWebView).toHaveBeenCalledWith({
-      type: 'conversationCleared',
+      type: "conversationCleared",
       data: {},
     });
   });

@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useCallback, useContext, useMemo, useState } from 'react';
-import { Box, Text } from 'ink';
+import type React from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
+import { Box, Text } from "ink";
 import {
   AuthType,
   ModelSlashCommandEvent,
@@ -15,25 +15,25 @@ import {
   type AvailableModel as CoreAvailableModel,
   type ContentGeneratorConfig,
   type InputModalities,
-} from '@tram-ai/tram-core';
-import { useKeypress } from '../hooks/useKeypress.js';
-import { theme } from '../semantic-colors.js';
-import { DescriptiveRadioButtonSelect } from './shared/DescriptiveRadioButtonSelect.js';
-import { ConfigContext } from '../contexts/ConfigContext.js';
-import { UIStateContext, type UIState } from '../contexts/UIStateContext.js';
-import { useSettings } from '../contexts/SettingsContext.js';
-import { getPersistScopeForModelSelection } from '../../config/modelProvidersScope.js';
-import { t } from '../../i18n/index.js';
+} from "@tram-ai/tram-core";
+import { useKeypress } from "../hooks/useKeypress.js";
+import { theme } from "../semantic-colors.js";
+import { DescriptiveRadioButtonSelect } from "./shared/DescriptiveRadioButtonSelect.js";
+import { ConfigContext } from "../contexts/ConfigContext.js";
+import { UIStateContext, type UIState } from "../contexts/UIStateContext.js";
+import { useSettings } from "../contexts/SettingsContext.js";
+import { getPersistScopeForModelSelection } from "../../config/modelProvidersScope.js";
+import { t } from "../../i18n/index.js";
 
 function formatModalities(modalities?: InputModalities): string {
-  if (!modalities) return t('text-only');
+  if (!modalities) return t("text-only");
   const parts: string[] = [];
-  if (modalities.image) parts.push(t('image'));
-  if (modalities.pdf) parts.push(t('pdf'));
-  if (modalities.audio) parts.push(t('audio'));
-  if (modalities.video) parts.push(t('video'));
-  if (parts.length === 0) return t('text-only');
-  return `${t('text')} · ${parts.join(' · ')}`;
+  if (modalities.image) parts.push(t("image"));
+  if (modalities.pdf) parts.push(t("pdf"));
+  if (modalities.audio) parts.push(t("audio"));
+  if (modalities.video) parts.push(t("video"));
+  if (parts.length === 0) return t("text-only");
+  return `${t("text")} · ${parts.join(" · ")}`;
 }
 
 interface ModelDialogProps {
@@ -42,10 +42,10 @@ interface ModelDialogProps {
 }
 
 function maskApiKey(apiKey: string | undefined): string {
-  if (!apiKey) return `(${t('not set')})`;
+  if (!apiKey) return `(${t("not set")})`;
   const trimmed = apiKey.trim();
-  if (trimmed.length === 0) return `(${t('not set')})`;
-  if (trimmed.length <= 6) return '***';
+  if (trimmed.length === 0) return `(${t("not set")})`;
+  if (trimmed.length <= 6) return "***";
   const head = trimmed.slice(0, 3);
   const tail = trimmed.slice(-4);
   return `${head}…${tail}`;
@@ -56,7 +56,7 @@ function persistModelSelection(
   modelId: string,
 ): void {
   const scope = getPersistScopeForModelSelection(settings);
-  settings.setValue(scope, 'model.name', modelId);
+  settings.setValue(scope, "model.name", modelId);
 }
 
 function persistAuthTypeSelection(
@@ -64,7 +64,7 @@ function persistAuthTypeSelection(
   authType: AuthType,
 ): void {
   const scope = getPersistScopeForModelSelection(settings);
-  settings.setValue(scope, 'security.auth.selectedType', authType);
+  settings.setValue(scope, "security.auth.selectedType", authType);
 }
 
 interface HandleModelSwitchSuccessParams {
@@ -73,6 +73,7 @@ interface HandleModelSwitchSuccessParams {
   after: ContentGeneratorConfig | undefined;
   effectiveAuthType: AuthType | undefined;
   effectiveModelId: string;
+  effectiveModelDisplayName?: string;
   isRuntime: boolean;
 }
 
@@ -82,6 +83,7 @@ function handleModelSwitchSuccess({
   after,
   effectiveAuthType,
   effectiveModelId,
+  effectiveModelDisplayName,
   isRuntime,
 }: HandleModelSwitchSuccessParams): void {
   persistModelSelection(settings, effectiveModelId);
@@ -89,15 +91,16 @@ function handleModelSwitchSuccess({
     persistAuthTypeSelection(settings, effectiveAuthType);
   }
 
-  const baseUrl = after?.baseUrl ?? t('(default)');
+  const displayModel = effectiveModelDisplayName || effectiveModelId;
+  const baseUrl = after?.baseUrl ?? t("(default)");
   const maskedKey = maskApiKey(after?.apiKey);
   uiState?.historyManager.addItem(
     {
-      type: 'info',
+      type: "info",
       text:
-        `authType: ${effectiveAuthType ?? `(${t('none')})`}` +
+        `authType: ${effectiveAuthType ?? `(${t("none")})`}` +
         `\n` +
-        `Using ${isRuntime ? 'runtime ' : ''}model: ${effectiveModelId}` +
+        `Using ${isRuntime ? "runtime " : ""}model: ${displayModel}` +
         `\n` +
         `Base URL: ${baseUrl}` +
         `\n` +
@@ -108,8 +111,8 @@ function handleModelSwitchSuccess({
 }
 
 function formatContextWindow(size?: number): string {
-  if (!size) return `(${t('unknown')})`;
-  return `${size.toLocaleString('en-US')} tokens`;
+  if (!size) return `(${t("unknown")})`;
+  return `${size.toLocaleString("en-US")} tokens`;
 }
 
 function DetailRow({
@@ -227,7 +230,7 @@ export function ModelDialog({
           const value =
             isRuntime && snapshotId ? snapshotId : `${t2}::${model.id}`;
 
-          const isQwenOAuth = t2 === AuthType.QWEN_OAUTH;
+          const isQwenOAuth = t2 === AuthType.TRAM_OAUTH;
 
           const title = (
             <Text>
@@ -248,20 +251,20 @@ export function ModelDialog({
                 <Text color={theme.status.warning}> (Runtime)</Text>
               )}
               {isQwenOAuth && !isRuntime && (
-                <Text color={theme.status.warning}> ({t('Discontinued')})</Text>
+                <Text color={theme.status.warning}> ({t("Discontinued")})</Text>
               )}
             </Text>
           );
 
           // Include runtime / discontinued indicator in description
-          let description = model.description || '';
+          let description = model.description || "";
           if (isRuntime) {
             description = description
               ? `${description} (Runtime)`
-              : 'Runtime model';
+              : "Runtime model";
           }
           if (isQwenOAuth && !isRuntime) {
-            description = t('Discontinued — switch to Coding Plan or API Key');
+            description = t("Discontinued — switch to Coding Plan or API Key");
           }
 
           return {
@@ -290,11 +293,11 @@ export function ModelDialog({
     ? activeRuntimeSnapshot.id
     : authType
       ? `${authType}::${preferredModelId}`
-      : '';
+      : "";
 
   useKeypress(
     (key) => {
-      if (key.name === 'escape' || (key.name === 'left' && isFastModelMode)) {
+      if (key.name === "escape" || (key.name === "left" && isFastModelMode)) {
         onClose();
       }
     },
@@ -330,20 +333,20 @@ export function ModelDialog({
       if (isFastModelMode) {
         // Extract model ID from selection key (format: "authType::modelId" or "$runtime|authType|modelId")
         let modelId: string;
-        if (selected.includes('::')) {
-          modelId = selected.split('::').slice(1).join('::');
-        } else if (selected.startsWith('$runtime|')) {
-          const parts = selected.split('|');
+        if (selected.includes("::")) {
+          modelId = selected.split("::").slice(1).join("::");
+        } else if (selected.startsWith("$runtime|")) {
+          const parts = selected.split("|");
           modelId = parts[2] ?? selected;
         } else {
           modelId = selected;
         }
         const scope = getPersistScopeForModelSelection(settings);
-        settings.setValue(scope, 'fastModel', modelId);
+        settings.setValue(scope, "fastModel", modelId);
         uiState?.historyManager.addItem(
           {
-            type: 'success',
-            text: `${t('Fast Model')}: ${modelId}`,
+            type: "success",
+            text: `${t("Fast Model")}: ${modelId}`,
           },
           Date.now(),
         );
@@ -355,16 +358,16 @@ export function ModelDialog({
       // (only block non-runtime OAuth; runtime OAuth models from existing
       //  cached tokens are still allowed to work until the server rejects them)
       const isQwenOAuthSelection =
-        selected.startsWith(`${AuthType.QWEN_OAUTH}::`) ||
-        (selected.startsWith('$runtime|') &&
-          selected.split('|')[1] === AuthType.QWEN_OAUTH);
+        selected.startsWith(`${AuthType.TRAM_OAUTH}::`) ||
+        (selected.startsWith("$runtime|") &&
+          selected.split("|")[1] === AuthType.TRAM_OAUTH);
       const isRuntimeOAuthSelection = selected.startsWith(
-        `$runtime|${AuthType.QWEN_OAUTH}|`,
+        `$runtime|${AuthType.TRAM_OAUTH}|`,
       );
       if (isQwenOAuthSelection && !isRuntimeOAuthSelection) {
         setErrorMessage(
           t(
-            'Qwen OAuth free tier was discontinued on 2026-04-15. Please select a model from another provider or run /auth to switch.',
+            "Qwen OAuth free tier was discontinued on 2026-04-15. Please select a model from another provider or run /auth to switch.",
           ),
         );
         return;
@@ -383,7 +386,7 @@ export function ModelDialog({
       try {
         // Determine if this is a runtime model selection
         // Runtime model format: $runtime|${authType}|${modelId}
-        isRuntime = selected.startsWith('$runtime|');
+        isRuntime = selected.startsWith("$runtime|");
 
         let selectedAuthType: AuthType;
         let modelId: string;
@@ -391,15 +394,15 @@ export function ModelDialog({
         if (isRuntime) {
           // For runtime models, extract authType from the snapshot ID
           // Format: $runtime|${authType}|${modelId}
-          const parts = selected.split('|');
-          if (parts.length >= 2 && parts[0] === '$runtime') {
+          const parts = selected.split("|");
+          if (parts.length >= 2 && parts[0] === "$runtime") {
             selectedAuthType = parts[1] as AuthType;
           } else {
             selectedAuthType = authType as AuthType;
           }
           modelId = selected; // Pass the full snapshot ID to switchModel
         } else {
-          const sep = '::';
+          const sep = "::";
           const idx = selected.indexOf(sep);
           selectedAuthType = (
             idx >= 0 ? selected.slice(0, idx) : authType
@@ -429,7 +432,7 @@ export function ModelDialog({
       } catch (e) {
         const baseErrorMessage = e instanceof Error ? e.message : String(e);
         const errorPrefix = isRuntime
-          ? 'Failed to switch to runtime model.'
+          ? "Failed to switch to runtime model."
           : `Failed to switch model to '${effectiveModelId ?? selected}'.`;
         setErrorMessage(`${errorPrefix}\n\n${baseErrorMessage}`);
         return;
@@ -441,6 +444,7 @@ export function ModelDialog({
         after,
         effectiveAuthType,
         effectiveModelId,
+        effectiveModelDisplayName: config.getModelName(),
         isRuntime,
       });
       onClose();
@@ -466,22 +470,22 @@ export function ModelDialog({
       padding={1}
       width="100%"
     >
-      <Text bold>{t('Select Model')}</Text>
+      <Text bold>{t("Select Model")}</Text>
 
       {!hasModels ? (
         <Box marginTop={1} flexDirection="column">
           <Text color={theme.status.warning}>
             {t(
-              'No models available for the current authentication type ({{authType}}).',
+              "No models available for the current authentication type ({{authType}}).",
               {
-                authType: authType ? String(authType) : t('(none)'),
+                authType: authType ? String(authType) : t("(none)"),
               },
             )}
           </Text>
           <Box marginTop={1}>
             <Text color={theme.text.secondary}>
               {t(
-                'Please configure models in settings.modelProviders or use environment variables.',
+                "Please configure models in settings.modelProviders or use environment variables.",
               )}
             </Text>
           </Box>
@@ -508,20 +512,20 @@ export function ModelDialog({
             borderRight={false}
             borderColor={theme.border.default}
           />
-          {highlightedEntry.authType === AuthType.QWEN_OAUTH &&
+          {highlightedEntry.authType === AuthType.TRAM_OAUTH &&
             !highlightedEntry.isRuntime && (
               <Box marginTop={1}>
                 <Text color={theme.status.warning}>
-                  ⚠ {t('Discontinued — switch to Coding Plan or API Key')}
+                  ⚠ {t("Discontinued — switch to Coding Plan or API Key")}
                 </Text>
               </Box>
             )}
           <DetailRow
-            label={t('Modality')}
+            label={t("Modality")}
             value={formatModalities(highlightedEntry.model.modalities)}
           />
           <DetailRow
-            label={t('Context Window')}
+            label={t("Context Window")}
             value={formatContextWindow(
               highlightedEntry.model.contextWindowSize,
             )}
@@ -530,11 +534,11 @@ export function ModelDialog({
             <>
               <DetailRow
                 label="Base URL"
-                value={highlightedEntry.model.baseUrl ?? t('(default)')}
+                value={highlightedEntry.model.baseUrl ?? t("(default)")}
               />
               <DetailRow
                 label="API Key"
-                value={highlightedEntry.model.envKey ?? t('(not set)')}
+                value={highlightedEntry.model.envKey ?? t("(not set)")}
               />
             </>
           )}
@@ -551,7 +555,7 @@ export function ModelDialog({
 
       <Box marginTop={1} flexDirection="column">
         <Text color={theme.text.secondary}>
-          {t('Enter to select, ↑↓ to navigate, Esc to close')}
+          {t("Enter to select, ↑↓ to navigate, Esc to close")}
         </Text>
       </Box>
     </Box>

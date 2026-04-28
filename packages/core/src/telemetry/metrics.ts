@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Attributes, Meter, Counter, Histogram } from '@opentelemetry/api';
-import { diag, metrics, ValueType } from '@opentelemetry/api';
-import { SERVICE_NAME, EVENT_CHAT_COMPRESSION } from './constants.js';
-import type { Config } from '../config/config.js';
-import type { ModelSlashCommandEvent } from './types.js';
+import type { Attributes, Meter, Counter, Histogram } from "@opentelemetry/api";
+import { diag, metrics, ValueType } from "@opentelemetry/api";
+import { SERVICE_NAME, EVENT_CHAT_COMPRESSION } from "./constants.js";
+import type { Config } from "../config/config.js";
+import type { ModelSlashCommandEvent } from "./types.js";
 
 const TOOL_CALL_COUNT = `${SERVICE_NAME}.tool.call.count`;
 const TOOL_CALL_LATENCY = `${SERVICE_NAME}.tool.call.latency`;
@@ -46,24 +46,24 @@ const BASELINE_COMPARISON = `${SERVICE_NAME}.performance.baseline.comparison`;
 
 const baseMetricDefinition = {
   getCommonAttributes: (config: Config): Attributes => ({
-    'session.id': config.getSessionId(),
+    "session.id": config.getSessionId(),
   }),
 };
 
 const COUNTER_DEFINITIONS = {
   [TOOL_CALL_COUNT]: {
-    description: 'Counts tool calls, tagged by function name and success.',
+    description: "Counts tool calls, tagged by function name and success.",
     valueType: ValueType.INT,
     assign: (c: Counter) => (toolCallCounter = c),
     attributes: {} as {
       function_name: string;
       success: boolean;
-      decision?: 'accept' | 'reject' | 'modify' | 'auto_accept';
-      tool_type?: 'native' | 'mcp';
+      decision?: "accept" | "reject" | "modify" | "auto_accept";
+      tool_type?: "native" | "mcp";
     },
   },
   [API_REQUEST_COUNT]: {
-    description: 'Counts API requests, tagged by model and status.',
+    description: "Counts API requests, tagged by model and status.",
     valueType: ValueType.INT,
     assign: (c: Counter) => (apiRequestCounter = c),
     attributes: {} as {
@@ -73,22 +73,22 @@ const COUNTER_DEFINITIONS = {
     },
   },
   [TOKEN_USAGE]: {
-    description: 'Counts the total number of tokens used.',
+    description: "Counts the total number of tokens used.",
     valueType: ValueType.INT,
     assign: (c: Counter) => (tokenUsageCounter = c),
     attributes: {} as {
       model: string;
-      type: 'input' | 'output' | 'thought' | 'cache' | 'tool';
+      type: "input" | "output" | "thought" | "cache" | "tool";
     },
   },
   [SESSION_COUNT]: {
-    description: 'Count of CLI sessions started.',
+    description: "Count of CLI sessions started.",
     valueType: ValueType.INT,
     assign: (c: Counter) => (sessionCounter = c),
     attributes: {} as Record<string, never>,
   },
   [FILE_OPERATION_COUNT]: {
-    description: 'Counts file operations (create, read, update).',
+    description: "Counts file operations (create, read, update).",
     valueType: ValueType.INT,
     assign: (c: Counter) => (fileOperationCounter = c),
     attributes: {} as {
@@ -100,33 +100,33 @@ const COUNTER_DEFINITIONS = {
     },
   },
   [INVALID_CHUNK_COUNT]: {
-    description: 'Counts invalid chunks received from a stream.',
+    description: "Counts invalid chunks received from a stream.",
     valueType: ValueType.INT,
     assign: (c: Counter) => (invalidChunkCounter = c),
     attributes: {} as Record<string, never>,
   },
   [CONTENT_RETRY_COUNT]: {
-    description: 'Counts retries due to content errors (e.g., empty stream).',
+    description: "Counts retries due to content errors (e.g., empty stream).",
     valueType: ValueType.INT,
     assign: (c: Counter) => (contentRetryCounter = c),
     attributes: {} as Record<string, never>,
   },
   [CONTENT_RETRY_FAILURE_COUNT]: {
-    description: 'Counts occurrences of all content retries failing.',
+    description: "Counts occurrences of all content retries failing.",
     valueType: ValueType.INT,
     assign: (c: Counter) => (contentRetryFailureCounter = c),
     attributes: {} as Record<string, never>,
   },
   [MODEL_SLASH_COMMAND_CALL_COUNT]: {
-    description: 'Counts model slash command calls.',
+    description: "Counts model slash command calls.",
     valueType: ValueType.INT,
     assign: (c: Counter) => (modelSlashCommandCallCounter = c),
     attributes: {} as {
-      'slash_command.model.model_name': string;
+      "slash_command.model.model_name": string;
     },
   },
   [EVENT_CHAT_COMPRESSION]: {
-    description: 'Counts chat compression events.',
+    description: "Counts chat compression events.",
     valueType: ValueType.INT,
     assign: (c: Counter) => (chatCompressionCounter = c),
     attributes: {} as {
@@ -138,8 +138,8 @@ const COUNTER_DEFINITIONS = {
 
 const HISTOGRAM_DEFINITIONS = {
   [TOOL_CALL_LATENCY]: {
-    description: 'Latency of tool calls in milliseconds.',
-    unit: 'ms',
+    description: "Latency of tool calls in milliseconds.",
+    unit: "ms",
     valueType: ValueType.INT,
     assign: (h: Histogram) => (toolCallLatencyHistogram = h),
     attributes: {} as {
@@ -147,8 +147,8 @@ const HISTOGRAM_DEFINITIONS = {
     },
   },
   [API_REQUEST_LATENCY]: {
-    description: 'Latency of API requests in milliseconds.',
-    unit: 'ms',
+    description: "Latency of API requests in milliseconds.",
+    unit: "ms",
     valueType: ValueType.INT,
     assign: (h: Histogram) => (apiRequestLatencyHistogram = h),
     attributes: {} as {
@@ -159,12 +159,12 @@ const HISTOGRAM_DEFINITIONS = {
 
 const PERFORMANCE_COUNTER_DEFINITIONS = {
   [REGRESSION_DETECTION]: {
-    description: 'Performance regression detection events.',
+    description: "Performance regression detection events.",
     valueType: ValueType.INT,
     assign: (c: Counter) => (regressionDetectionCounter = c),
     attributes: {} as {
       metric: string;
-      severity: 'low' | 'medium' | 'high';
+      severity: "low" | "medium" | "high";
       current_value: number;
       baseline_value: number;
     },
@@ -174,8 +174,8 @@ const PERFORMANCE_COUNTER_DEFINITIONS = {
 const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
   [STARTUP_TIME]: {
     description:
-      'CLI startup time in milliseconds, broken down by initialization phase.',
-    unit: 'ms',
+      "CLI startup time in milliseconds, broken down by initialization phase.",
+    unit: "ms",
     valueType: ValueType.DOUBLE,
     assign: (h: Histogram) => (startupTimeHistogram = h),
     attributes: {} as {
@@ -184,8 +184,8 @@ const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
     },
   },
   [MEMORY_USAGE]: {
-    description: 'Memory usage in bytes.',
-    unit: 'bytes',
+    description: "Memory usage in bytes.",
+    unit: "bytes",
     valueType: ValueType.INT,
     assign: (h: Histogram) => (memoryUsageGauge = h),
     attributes: {} as {
@@ -194,8 +194,8 @@ const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
     },
   },
   [CPU_USAGE]: {
-    description: 'CPU usage percentage.',
-    unit: 'percent',
+    description: "CPU usage percentage.",
+    unit: "percent",
     valueType: ValueType.DOUBLE,
     assign: (h: Histogram) => (cpuUsageGauge = h),
     attributes: {} as {
@@ -203,15 +203,15 @@ const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
     },
   },
   [TOOL_QUEUE_DEPTH]: {
-    description: 'Number of tools in execution queue.',
-    unit: 'count',
+    description: "Number of tools in execution queue.",
+    unit: "count",
     valueType: ValueType.INT,
     assign: (h: Histogram) => (toolQueueDepthGauge = h),
     attributes: {} as Record<string, never>,
   },
   [TOOL_EXECUTION_BREAKDOWN]: {
-    description: 'Tool execution time breakdown by phase in milliseconds.',
-    unit: 'ms',
+    description: "Tool execution time breakdown by phase in milliseconds.",
+    unit: "ms",
     valueType: ValueType.INT,
     assign: (h: Histogram) => (toolExecutionBreakdownHistogram = h),
     attributes: {} as {
@@ -221,8 +221,8 @@ const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
   },
   [TOKEN_EFFICIENCY]: {
     description:
-      'Token efficiency metrics (tokens per operation, cache hit rate, etc.).',
-    unit: 'ratio',
+      "Token efficiency metrics (tokens per operation, cache hit rate, etc.).",
+    unit: "ratio",
     valueType: ValueType.DOUBLE,
     assign: (h: Histogram) => (tokenEfficiencyHistogram = h),
     attributes: {} as {
@@ -232,8 +232,8 @@ const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
     },
   },
   [API_REQUEST_BREAKDOWN]: {
-    description: 'API request time breakdown by phase in milliseconds.',
-    unit: 'ms',
+    description: "API request time breakdown by phase in milliseconds.",
+    unit: "ms",
     valueType: ValueType.INT,
     assign: (h: Histogram) => (apiRequestBreakdownHistogram = h),
     attributes: {} as {
@@ -242,8 +242,8 @@ const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
     },
   },
   [PERFORMANCE_SCORE]: {
-    description: 'Composite performance score (0-100).',
-    unit: 'score',
+    description: "Composite performance score (0-100).",
+    unit: "score",
     valueType: ValueType.DOUBLE,
     assign: (h: Histogram) => (performanceScoreGauge = h),
     attributes: {} as {
@@ -253,21 +253,21 @@ const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
   },
   [REGRESSION_PERCENTAGE_CHANGE]: {
     description:
-      'Percentage change compared to baseline for detected regressions.',
-    unit: 'percent',
+      "Percentage change compared to baseline for detected regressions.",
+    unit: "percent",
     valueType: ValueType.DOUBLE,
     assign: (h: Histogram) => (regressionPercentageChangeHistogram = h),
     attributes: {} as {
       metric: string;
-      severity: 'low' | 'medium' | 'high';
+      severity: "low" | "medium" | "high";
       current_value: number;
       baseline_value: number;
     },
   },
   [BASELINE_COMPARISON]: {
     description:
-      'Performance comparison to established baseline (percentage change).',
-    unit: 'percent',
+      "Performance comparison to established baseline (percentage change).",
+    unit: "percent",
     valueType: ValueType.DOUBLE,
     assign: (h: Histogram) => (baselineComparisonHistogram = h),
     attributes: {} as {
@@ -286,44 +286,44 @@ type AllMetricDefs = typeof COUNTER_DEFINITIONS &
 
 export type MetricDefinitions = {
   [K in keyof AllMetricDefs]: {
-    attributes: AllMetricDefs[K]['attributes'];
+    attributes: AllMetricDefs[K]["attributes"];
   };
 };
 
 export enum FileOperation {
-  CREATE = 'create',
-  READ = 'read',
-  UPDATE = 'update',
+  CREATE = "create",
+  READ = "read",
+  UPDATE = "update",
 }
 
 export enum PerformanceMetricType {
-  STARTUP = 'startup',
-  MEMORY = 'memory',
-  CPU = 'cpu',
-  TOOL_EXECUTION = 'tool_execution',
-  API_REQUEST = 'api_request',
-  TOKEN_EFFICIENCY = 'token_efficiency',
+  STARTUP = "startup",
+  MEMORY = "memory",
+  CPU = "cpu",
+  TOOL_EXECUTION = "tool_execution",
+  API_REQUEST = "api_request",
+  TOKEN_EFFICIENCY = "token_efficiency",
 }
 
 export enum MemoryMetricType {
-  HEAP_USED = 'heap_used',
-  HEAP_TOTAL = 'heap_total',
-  EXTERNAL = 'external',
-  RSS = 'rss',
+  HEAP_USED = "heap_used",
+  HEAP_TOTAL = "heap_total",
+  EXTERNAL = "external",
+  RSS = "rss",
 }
 
 export enum ToolExecutionPhase {
-  VALIDATION = 'validation',
-  PREPARATION = 'preparation',
-  EXECUTION = 'execution',
-  RESULT_PROCESSING = 'result_processing',
+  VALIDATION = "validation",
+  PREPARATION = "preparation",
+  EXECUTION = "execution",
+  RESULT_PROCESSING = "result_processing",
 }
 
 export enum ApiRequestPhase {
-  REQUEST_PREPARATION = 'request_preparation',
-  NETWORK_LATENCY = 'network_latency',
-  RESPONSE_PROCESSING = 'response_processing',
-  TOKEN_PROCESSING = 'token_processing',
+  REQUEST_PREPARATION = "request_preparation",
+  NETWORK_LATENCY = "network_latency",
+  RESPONSE_PROCESSING = "response_processing",
+  TOKEN_PROCESSING = "token_processing",
 }
 
 let cliMeter: Meter | undefined;
@@ -385,38 +385,38 @@ export function initializeMetrics(config: Config): void {
   );
   subagentExecutionCounter = meter.createCounter(SUBAGENT_EXECUTION_COUNT, {
     description:
-      'Counts subagent execution events, tagged by status and subagent name.',
+      "Counts subagent execution events, tagged by status and subagent name.",
     valueType: ValueType.INT,
   });
 
   // Arena metrics
   arenaSessionCounter = meter.createCounter(ARENA_SESSION_COUNT, {
-    description: 'Counts arena sessions by status and display backend.',
+    description: "Counts arena sessions by status and display backend.",
     valueType: ValueType.INT,
   });
   arenaSessionDurationHistogram = meter.createHistogram(
     ARENA_SESSION_DURATION,
     {
-      description: 'Duration of arena sessions in milliseconds.',
-      unit: 'ms',
+      description: "Duration of arena sessions in milliseconds.",
+      unit: "ms",
       valueType: ValueType.INT,
     },
   );
   arenaAgentCounter = meter.createCounter(ARENA_AGENT_COUNT, {
-    description: 'Counts arena agent completions by status and model.',
+    description: "Counts arena agent completions by status and model.",
     valueType: ValueType.INT,
   });
   arenaAgentDurationHistogram = meter.createHistogram(ARENA_AGENT_DURATION, {
-    description: 'Duration of arena agent execution in milliseconds.',
-    unit: 'ms',
+    description: "Duration of arena agent execution in milliseconds.",
+    unit: "ms",
     valueType: ValueType.INT,
   });
   arenaAgentTokensCounter = meter.createCounter(ARENA_AGENT_TOKENS, {
-    description: 'Token usage by arena agents.',
+    description: "Token usage by arena agents.",
     valueType: ValueType.INT,
   });
   arenaResultSelectedCounter = meter.createCounter(ARENA_RESULT_SELECTED, {
-    description: 'Counts arena result selections by model.',
+    description: "Counts arena result selections by model.",
     valueType: ValueType.INT,
   });
 
@@ -437,7 +437,7 @@ export function initializeMetrics(config: Config): void {
 
 export function recordChatCompressionMetrics(
   config: Config,
-  attributes: MetricDefinitions[typeof EVENT_CHAT_COMPRESSION]['attributes'],
+  attributes: MetricDefinitions[typeof EVENT_CHAT_COMPRESSION]["attributes"],
 ) {
   if (!chatCompressionCounter || !isMetricsInitialized) return;
   chatCompressionCounter.add(1, {
@@ -449,7 +449,7 @@ export function recordChatCompressionMetrics(
 export function recordToolCallMetrics(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof TOOL_CALL_COUNT]['attributes'],
+  attributes: MetricDefinitions[typeof TOOL_CALL_COUNT]["attributes"],
 ): void {
   if (!toolCallCounter || !toolCallLatencyHistogram || !isMetricsInitialized)
     return;
@@ -468,7 +468,7 @@ export function recordToolCallMetrics(
 export function recordTokenUsageMetrics(
   config: Config,
   tokenCount: number,
-  attributes: MetricDefinitions[typeof TOKEN_USAGE]['attributes'],
+  attributes: MetricDefinitions[typeof TOKEN_USAGE]["attributes"],
 ): void {
   if (!tokenUsageCounter || !isMetricsInitialized) return;
   tokenUsageCounter.add(tokenCount, {
@@ -480,7 +480,7 @@ export function recordTokenUsageMetrics(
 export function recordApiResponseMetrics(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof API_REQUEST_COUNT]['attributes'],
+  attributes: MetricDefinitions[typeof API_REQUEST_COUNT]["attributes"],
 ): void {
   if (
     !apiRequestCounter ||
@@ -491,7 +491,7 @@ export function recordApiResponseMetrics(
   const metricAttributes: Attributes = {
     ...baseMetricDefinition.getCommonAttributes(config),
     model: attributes.model,
-    status_code: attributes.status_code ?? 'ok',
+    status_code: attributes.status_code ?? "ok",
   };
   apiRequestCounter.add(1, metricAttributes);
   apiRequestLatencyHistogram.record(durationMs, {
@@ -503,7 +503,7 @@ export function recordApiResponseMetrics(
 export function recordApiErrorMetrics(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof API_REQUEST_COUNT]['attributes'],
+  attributes: MetricDefinitions[typeof API_REQUEST_COUNT]["attributes"],
 ): void {
   if (
     !apiRequestCounter ||
@@ -514,8 +514,8 @@ export function recordApiErrorMetrics(
   const metricAttributes: Attributes = {
     ...baseMetricDefinition.getCommonAttributes(config),
     model: attributes.model,
-    status_code: attributes.status_code ?? 'error',
-    error_type: attributes.error_type ?? 'unknown',
+    status_code: attributes.status_code ?? "error",
+    error_type: attributes.error_type ?? "unknown",
   };
   apiRequestCounter.add(1, metricAttributes);
   apiRequestLatencyHistogram.record(durationMs, {
@@ -526,7 +526,7 @@ export function recordApiErrorMetrics(
 
 export function recordFileOperationMetric(
   config: Config,
-  attributes: MetricDefinitions[typeof FILE_OPERATION_COUNT]['attributes'],
+  attributes: MetricDefinitions[typeof FILE_OPERATION_COUNT]["attributes"],
 ): void {
   if (!fileOperationCounter || !isMetricsInitialized) return;
   fileOperationCounter.add(1, {
@@ -571,7 +571,7 @@ export function recordModelSlashCommand(
   if (!modelSlashCommandCallCounter || !isMetricsInitialized) return;
   modelSlashCommandCallCounter.add(1, {
     ...baseMetricDefinition.getCommonAttributes(config),
-    'slash_command.model.model_name': event.model_name,
+    "slash_command.model.model_name": event.model_name,
   });
 }
 
@@ -604,7 +604,7 @@ export function initializePerformanceMonitoring(config: Config): void {
 export function recordStartupPerformance(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof STARTUP_TIME]['attributes'],
+  attributes: MetricDefinitions[typeof STARTUP_TIME]["attributes"],
 ): void {
   if (!startupTimeHistogram || !isPerformanceMonitoringEnabled) return;
 
@@ -620,7 +620,7 @@ export function recordStartupPerformance(
 export function recordMemoryUsage(
   config: Config,
   bytes: number,
-  attributes: MetricDefinitions[typeof MEMORY_USAGE]['attributes'],
+  attributes: MetricDefinitions[typeof MEMORY_USAGE]["attributes"],
 ): void {
   if (!memoryUsageGauge || !isPerformanceMonitoringEnabled) return;
 
@@ -635,7 +635,7 @@ export function recordMemoryUsage(
 export function recordCpuUsage(
   config: Config,
   percentage: number,
-  attributes: MetricDefinitions[typeof CPU_USAGE]['attributes'],
+  attributes: MetricDefinitions[typeof CPU_USAGE]["attributes"],
 ): void {
   if (!cpuUsageGauge || !isPerformanceMonitoringEnabled) return;
 
@@ -660,7 +660,7 @@ export function recordToolQueueDepth(config: Config, queueDepth: number): void {
 export function recordToolExecutionBreakdown(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof TOOL_EXECUTION_BREAKDOWN]['attributes'],
+  attributes: MetricDefinitions[typeof TOOL_EXECUTION_BREAKDOWN]["attributes"],
 ): void {
   if (!toolExecutionBreakdownHistogram || !isPerformanceMonitoringEnabled)
     return;
@@ -676,7 +676,7 @@ export function recordToolExecutionBreakdown(
 export function recordTokenEfficiency(
   config: Config,
   value: number,
-  attributes: MetricDefinitions[typeof TOKEN_EFFICIENCY]['attributes'],
+  attributes: MetricDefinitions[typeof TOKEN_EFFICIENCY]["attributes"],
 ): void {
   if (!tokenEfficiencyHistogram || !isPerformanceMonitoringEnabled) return;
 
@@ -691,7 +691,7 @@ export function recordTokenEfficiency(
 export function recordApiRequestBreakdown(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof API_REQUEST_BREAKDOWN]['attributes'],
+  attributes: MetricDefinitions[typeof API_REQUEST_BREAKDOWN]["attributes"],
 ): void {
   if (!apiRequestBreakdownHistogram || !isPerformanceMonitoringEnabled) return;
 
@@ -706,7 +706,7 @@ export function recordApiRequestBreakdown(
 export function recordPerformanceScore(
   config: Config,
   score: number,
-  attributes: MetricDefinitions[typeof PERFORMANCE_SCORE]['attributes'],
+  attributes: MetricDefinitions[typeof PERFORMANCE_SCORE]["attributes"],
 ): void {
   if (!performanceScoreGauge || !isPerformanceMonitoringEnabled) return;
 
@@ -720,7 +720,7 @@ export function recordPerformanceScore(
 
 export function recordPerformanceRegression(
   config: Config,
-  attributes: MetricDefinitions[typeof REGRESSION_DETECTION]['attributes'],
+  attributes: MetricDefinitions[typeof REGRESSION_DETECTION]["attributes"],
 ): void {
   if (!regressionDetectionCounter || !isPerformanceMonitoringEnabled) return;
 
@@ -745,12 +745,12 @@ export function recordPerformanceRegression(
 
 export function recordBaselineComparison(
   config: Config,
-  attributes: MetricDefinitions[typeof BASELINE_COMPARISON]['attributes'],
+  attributes: MetricDefinitions[typeof BASELINE_COMPARISON]["attributes"],
 ): void {
   if (!baselineComparisonHistogram || !isPerformanceMonitoringEnabled) return;
 
   if (attributes.baseline_value === 0) {
-    diag.warn('Baseline value is zero, skipping comparison.');
+    diag.warn("Baseline value is zero, skipping comparison.");
     return;
   }
   const percentageChange =
@@ -777,7 +777,7 @@ export function isPerformanceMonitoringActive(): boolean {
 export function recordSubagentExecutionMetrics(
   config: Config,
   subagentName: string,
-  status: 'started' | 'completed' | 'failed' | 'cancelled',
+  status: "started" | "completed" | "failed" | "cancelled",
   terminateReason?: string,
 ): void {
   if (!subagentExecutionCounter || !isMetricsInitialized) return;
@@ -789,7 +789,7 @@ export function recordSubagentExecutionMetrics(
   };
 
   if (terminateReason) {
-    attributes['terminate_reason'] = terminateReason;
+    attributes["terminate_reason"] = terminateReason;
   }
 
   subagentExecutionCounter.add(1, attributes);
@@ -801,7 +801,7 @@ export function recordArenaSessionStartedMetrics(config: Config): void {
   if (!isMetricsInitialized) return;
   arenaSessionCounter?.add(1, {
     ...baseMetricDefinition.getCommonAttributes(config),
-    status: 'started',
+    status: "started",
   });
 }
 
@@ -832,7 +832,7 @@ export function recordArenaAgentCompletedMetrics(
     arenaAgentTokensCounter?.add(inputTokens, {
       ...common,
       model_id: modelId,
-      type: 'input',
+      type: "input",
     });
   }
 
@@ -840,7 +840,7 @@ export function recordArenaAgentCompletedMetrics(
     arenaAgentTokensCounter?.add(outputTokens, {
       ...common,
       model_id: modelId,
-      type: 'output',
+      type: "output",
     });
   }
 }

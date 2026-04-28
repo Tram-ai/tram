@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
-import { Box, Text } from 'ink';
-import { RadioButtonSelect } from '../../shared/RadioButtonSelect.js';
-import { MANAGEMENT_STEPS } from '../types.js';
-import { theme } from '../../../semantic-colors.js';
-import { useLaunchEditor } from '../../../hooks/useLaunchEditor.js';
-import { type SubagentConfig } from '@tram-ai/tram-core';
-import { t } from '../../../../i18n/index.js';
+import { useState, useCallback } from "react";
+import { Box, Text } from "ink";
+import { RadioButtonSelect } from "../../shared/RadioButtonSelect.js";
+import { MANAGEMENT_STEPS } from "../types.js";
+import { theme } from "../../../semantic-colors.js";
+import { useLaunchEditor } from "../../../hooks/useLaunchEditor.js";
+import { type SubagentConfig } from "@tram-ai/tram-core";
+import { t } from "../../../../i18n/index.js";
 
 interface EditOption {
   id: string;
@@ -20,21 +20,21 @@ interface EditOption {
 
 const editOptions: EditOption[] = [
   {
-    id: 'editor',
+    id: "editor",
     get label() {
-      return t('Open in editor');
+      return t("Open in editor");
     },
   },
   {
-    id: 'tools',
+    id: "tools",
     get label() {
-      return t('Edit tools');
+      return t("Edit tools");
     },
   },
   {
-    id: 'color',
+    id: "color",
     get label() {
-      return t('Edit color');
+      return t("Edit color");
     },
   },
 ];
@@ -51,7 +51,7 @@ export function EditOptionsStep({
   selectedAgent,
   onNavigateToStep,
 }: EditOptionsStepProps) {
-  const [selectedOption, setSelectedOption] = useState<string>('editor');
+  const [selectedOption, setSelectedOption] = useState<string>("editor");
   const [error, setError] = useState<string | null>(null);
 
   const launchEditor = useLaunchEditor();
@@ -66,23 +66,23 @@ export function EditOptionsStep({
 
       setError(null);
 
-      if (selectedValue === 'editor') {
+      if (selectedValue === "editor") {
         // Launch editor directly
         try {
           if (!selectedAgent.filePath) {
-            throw new Error('Agent has no file path');
+            throw new Error("Agent has no file path");
           }
           await launchEditor(selectedAgent.filePath);
         } catch (err) {
           setError(
-            t('Failed to launch editor: {{error}}', {
-              error: err instanceof Error ? err.message : 'Unknown error',
+            t("Failed to launch editor: {{error}}", {
+              error: err instanceof Error ? err.message : "Unknown error",
             }),
           );
         }
-      } else if (selectedValue === 'tools') {
+      } else if (selectedValue === "tools") {
         onNavigateToStep(MANAGEMENT_STEPS.EDIT_TOOLS);
-      } else if (selectedValue === 'color') {
+      } else if (selectedValue === "color") {
         onNavigateToStep(MANAGEMENT_STEPS.EDIT_COLOR);
       }
     },
@@ -110,7 +110,7 @@ export function EditOptionsStep({
       {error && (
         <Box flexDirection="column">
           <Text bold color={theme.status.error}>
-            {t('❌ Error:')}
+            {t("❌ Error:")}
           </Text>
           <Box flexDirection="column" padding={1} paddingBottom={0}>
             <Text color={theme.status.error} wrap="wrap">

@@ -10,17 +10,17 @@ import {
   useState,
   useSyncExternalStore,
   useRef,
-} from 'react';
+} from "react";
 import {
   IdeClient,
   IDEConnectionStatus,
   ideContextStore,
   type IDEConnectionState,
-} from '@tram-ai/tram-core';
-import { useSettings } from '../contexts/SettingsContext.js';
-import { isWorkspaceTrusted } from '../../config/trustedFolders.js';
+} from "@tram-ai/tram-core";
+import { useSettings } from "../contexts/SettingsContext.js";
+import { isWorkspaceTrusted } from "../../config/trustedFolders.js";
 
-export type RestartReason = 'NONE' | 'CONNECTION_CHANGE' | 'TRUST_CHANGE';
+export type RestartReason = "NONE" | "CONNECTION_CHANGE" | "TRUST_CHANGE";
 
 /**
  * This hook listens for trust status updates from the IDE companion extension.
@@ -33,19 +33,19 @@ export function useIdeTrustListener() {
     IDEConnectionStatus.Disconnected,
   );
   const previousTrust = useRef<boolean | undefined>(undefined);
-  const [restartReason, setRestartReason] = useState<RestartReason>('NONE');
+  const [restartReason, setRestartReason] = useState<RestartReason>("NONE");
   const [needsRestart, setNeedsRestart] = useState(false);
 
   const subscribe = useCallback((onStoreChange: () => void) => {
     const handleStatusChange = (state: IDEConnectionState) => {
       setConnectionStatus(state.status);
-      setRestartReason('CONNECTION_CHANGE');
+      setRestartReason("CONNECTION_CHANGE");
       // Also notify useSyncExternalStore that the data has changed
       onStoreChange();
     };
 
     const handleTrustChange = () => {
-      setRestartReason('TRUST_CHANGE');
+      setRestartReason("TRUST_CHANGE");
       onStoreChange();
     };
 

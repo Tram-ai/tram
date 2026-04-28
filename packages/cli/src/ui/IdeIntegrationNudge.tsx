@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { IdeInfo } from '@tram-ai/tram-core';
-import { Box, Text } from 'ink';
-import type { RadioSelectItem } from './components/shared/RadioButtonSelect.js';
-import { RadioButtonSelect } from './components/shared/RadioButtonSelect.js';
-import { useKeypress } from './hooks/useKeypress.js';
-import { theme } from './semantic-colors.js';
+import type { IdeInfo } from "@tram-ai/tram-core";
+import { Box, Text } from "ink";
+import type { RadioSelectItem } from "./components/shared/RadioButtonSelect.js";
+import { RadioButtonSelect } from "./components/shared/RadioButtonSelect.js";
+import { useKeypress } from "./hooks/useKeypress.js";
+import { theme } from "./semantic-colors.js";
 
 export type IdeIntegrationNudgeResult = {
-  userSelection: 'yes' | 'no' | 'dismiss';
+  userSelection: "yes" | "no" | "dismiss";
   isExtensionPreInstalled: boolean;
 };
 
@@ -27,9 +27,9 @@ export function IdeIntegrationNudge({
 }: IdeIntegrationNudgeProps) {
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         onComplete({
-          userSelection: 'no',
+          userSelection: "no",
           isExtensionPreInstalled: false,
         });
       }
@@ -38,33 +38,33 @@ export function IdeIntegrationNudge({
   );
 
   const { displayName: ideName } = ide;
-  const isInSandbox = !!process.env['SANDBOX'];
+  const isInSandbox = !!process.env["SANDBOX"];
   // Assume extension is already installed if the env variables are set.
   const isExtensionPreInstalled =
-    !!process.env['TRAM_CODE_IDE_SERVER_PORT'] &&
-    !!process.env['TRAM_CODE_IDE_WORKSPACE_PATH'];
+    !!process.env["TRAM_CODE_IDE_SERVER_PORT"] &&
+    !!process.env["TRAM_CODE_IDE_WORKSPACE_PATH"];
 
   const OPTIONS: Array<RadioSelectItem<IdeIntegrationNudgeResult>> = [
     {
-      label: 'Yes',
+      label: "Yes",
       value: {
-        userSelection: 'yes',
+        userSelection: "yes",
         isExtensionPreInstalled,
       },
-      key: 'Yes',
+      key: "Yes",
     },
     {
-      label: 'No (esc)',
+      label: "No (esc)",
       value: {
-        userSelection: 'no',
+        userSelection: "no",
         isExtensionPreInstalled,
       },
-      key: 'No (esc)',
+      key: "No (esc)",
     },
     {
       label: "No, don't ask again",
       value: {
-        userSelection: 'dismiss',
+        userSelection: "dismiss",
         isExtensionPreInstalled,
       },
       key: "No, don't ask again",
@@ -75,10 +75,10 @@ export function IdeIntegrationNudge({
     ? `Note: In sandbox environments, IDE integration requires manual setup on the host system. If you select Yes, you'll receive instructions on how to set this up.`
     : isExtensionPreInstalled
       ? `If you select Yes, the CLI will connect to your ${
-          ideName ?? 'editor'
+          ideName ?? "editor"
         } and have access to your open files and display diffs directly.`
       : `If you select Yes, we'll install an extension that allows the CLI to access your open files and display diffs directly in ${
-          ideName ?? 'your editor'
+          ideName ?? "your editor"
         }.`;
 
   return (
@@ -92,8 +92,8 @@ export function IdeIntegrationNudge({
     >
       <Box marginBottom={1} flexDirection="column">
         <Text>
-          <Text color={theme.status.warning}>{'> '}</Text>
-          {`Do you want to connect ${ideName ?? 'your editor'} to TRAM?`}
+          <Text color={theme.status.warning}>{"> "}</Text>
+          {`Do you want to connect ${ideName ?? "your editor"} to TRAM?`}
         </Text>
         <Text color={theme.text.secondary}>{installText}</Text>
       </Box>

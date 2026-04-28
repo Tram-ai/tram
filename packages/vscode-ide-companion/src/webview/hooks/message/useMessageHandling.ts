@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from "react";
 
 export interface TextMessage {
-  role: 'user' | 'assistant' | 'thinking';
+  role: "user" | "assistant" | "thinking";
   content: string;
   timestamp: number;
-  kind?: 'image';
+  kind?: "image";
   imagePath?: string;
   imageSrc?: string;
   imageMissing?: boolean;
@@ -30,7 +30,7 @@ export const useMessageHandling = () => {
   const [messages, setMessages] = useState<TextMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState('');
+  const [loadingMessage, setLoadingMessage] = useState("");
   // Track the index of the assistant placeholder message during streaming
   const streamingMessageIndexRef = useRef<number | null>(null);
   // Track the index of the current aggregated thinking message
@@ -61,10 +61,10 @@ export const useMessageHandling = () => {
       return [
         ...prev,
         {
-          role: 'assistant',
-          content: '',
+          role: "assistant",
+          content: "",
           // Use provided timestamp (from extension) to keep ordering stable
-          timestamp: typeof timestamp === 'number' ? timestamp : Date.now(),
+          timestamp: typeof timestamp === "number" ? timestamp : Date.now(),
         },
       ];
     });
@@ -89,14 +89,14 @@ export const useMessageHandling = () => {
         if (idx === null) {
           idx = next.length;
           streamingMessageIndexRef.current = idx;
-          next.push({ role: 'assistant', content: '', timestamp: Date.now() });
+          next.push({ role: "assistant", content: "", timestamp: Date.now() });
         }
 
         if (idx < 0 || idx >= next.length) {
           return prev;
         }
         const target = next[idx];
-        next[idx] = { ...target, content: (target.content || '') + chunk };
+        next[idx] = { ...target, content: (target.content || "") + chunk };
         return next;
       });
     },
@@ -137,7 +137,7 @@ export const useMessageHandling = () => {
    */
   const clearWaitingForResponse = useCallback(() => {
     setIsWaitingForResponse(false);
-    setLoadingMessage('');
+    setLoadingMessage("");
   }, []);
 
   return {
@@ -175,14 +175,14 @@ export const useMessageHandling = () => {
               ? next[assistantIdx].timestamp
               : Date.now();
           next.push({
-            role: 'thinking',
-            content: '',
+            role: "thinking",
+            content: "",
             timestamp: assistantTs - 1,
           });
         }
         if (idx >= 0 && idx < next.length) {
           const target = next[idx];
-          next[idx] = { ...target, content: (target.content || '') + chunk };
+          next[idx] = { ...target, content: (target.content || "") + chunk };
         }
         return next;
       });

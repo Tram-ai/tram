@@ -6,13 +6,13 @@
  * SaveMemory tool call component - displays saved memory content
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 import {
   ToolCallContainer,
   groupContent,
   mapToolStatusToContainerStatus,
-} from './shared/index.js';
-import type { BaseToolCallProps } from './shared/index.js';
+} from "./shared/index.js";
+import type { BaseToolCallProps } from "./shared/index.js";
 
 /**
  * SaveMemory tool call component
@@ -41,7 +41,7 @@ export const SaveMemoryToolCall: FC<BaseToolCallProps> = ({
         isLast={isLast}
       >
         <div className="text-[#c74e39] text-[var(--app-secondary-foreground)] py-0.5">
-          {errors.join('\n')}
+          {errors.join("\n")}
         </div>
       </ToolCallContainer>
     );
@@ -52,7 +52,7 @@ export const SaveMemoryToolCall: FC<BaseToolCallProps> = ({
     return null;
   }
 
-  const memoryContent = textOutputs.join('\n\n');
+  const memoryContent = textOutputs.join("\n\n");
 
   return (
     <ToolCallContainer

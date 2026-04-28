@@ -4,26 +4,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   runMigrations,
   needsMigration,
   ALL_MIGRATIONS,
   MigrationScheduler,
-} from './index.js';
-import { SETTINGS_VERSION } from '../settings.js';
+} from "./index.js";
+import { SETTINGS_VERSION } from "../settings.js";
 
-describe('Migration Framework Integration', () => {
-  describe('runMigrations', () => {
-    it('should migrate V1 settings to V3', () => {
+describe("Migration Framework Integration", () => {
+  describe("runMigrations", () => {
+    it("should migrate V1 settings to V3", () => {
       const v1Settings = {
-        theme: 'dark',
-        model: 'gemini',
+        theme: "dark",
+        model: "gemini",
         disableAutoUpdate: true,
         disableLoadingPhrases: false,
       };
 
-      const result = runMigrations(v1Settings, 'user');
+      const result = runMigrations(v1Settings, "user");
 
       expect(result.finalVersion).toBe(3);
       expect(result.executedMigrations).toHaveLength(2);
@@ -38,27 +38,27 @@ describe('Migration Framework Integration', () => {
 
       // Check V2 structure was created
       const settings = result.settings as Record<string, unknown>;
-      expect(settings['$version']).toBe(3);
-      expect(settings['ui']).toEqual({
-        theme: 'dark',
+      expect(settings["$version"]).toBe(3);
+      expect(settings["ui"]).toEqual({
+        theme: "dark",
         accessibility: { enableLoadingPhrases: true },
       });
-      expect(settings['model']).toEqual({ name: 'gemini' });
+      expect(settings["model"]).toEqual({ name: "gemini" });
 
       // Check disableAutoUpdate was inverted to enableAutoUpdate: false
       expect(
-        (settings['general'] as Record<string, unknown>)['enableAutoUpdate'],
+        (settings["general"] as Record<string, unknown>)["enableAutoUpdate"],
       ).toBe(false);
     });
 
-    it('should migrate V2 settings to V3', () => {
+    it("should migrate V2 settings to V3", () => {
       const v2Settings = {
         $version: 2,
-        ui: { theme: 'light' },
+        ui: { theme: "light" },
         general: { disableAutoUpdate: false },
       };
 
-      const result = runMigrations(v2Settings, 'user');
+      const result = runMigrations(v2Settings, "user");
 
       expect(result.finalVersion).toBe(3);
       expect(result.executedMigrations).toHaveLength(1);
@@ -68,37 +68,37 @@ describe('Migration Framework Integration', () => {
       });
 
       const settings = result.settings as Record<string, unknown>;
-      expect(settings['$version']).toBe(3);
+      expect(settings["$version"]).toBe(3);
       expect(
-        (settings['general'] as Record<string, unknown>)['enableAutoUpdate'],
+        (settings["general"] as Record<string, unknown>)["enableAutoUpdate"],
       ).toBe(true);
       expect(
-        (settings['general'] as Record<string, unknown>)['disableAutoUpdate'],
+        (settings["general"] as Record<string, unknown>)["disableAutoUpdate"],
       ).toBeUndefined();
     });
 
-    it('should not modify V3 settings', () => {
+    it("should not modify V3 settings", () => {
       const v3Settings = {
         $version: 3,
-        ui: { theme: 'dark' },
+        ui: { theme: "dark" },
         general: { enableAutoUpdate: true },
       };
 
-      const result = runMigrations(v3Settings, 'user');
+      const result = runMigrations(v3Settings, "user");
 
       expect(result.finalVersion).toBe(3);
       expect(result.executedMigrations).toHaveLength(0);
       expect(result.settings).toEqual(v3Settings);
     });
 
-    it('should be idempotent', () => {
+    it("should be idempotent", () => {
       const v1Settings = {
-        theme: 'dark',
+        theme: "dark",
         disableAutoUpdate: true,
       };
 
-      const result1 = runMigrations(v1Settings, 'user');
-      const result2 = runMigrations(result1.settings, 'user');
+      const result1 = runMigrations(v1Settings, "user");
+      const result2 = runMigrations(result1.settings, "user");
 
       expect(result1.executedMigrations).toHaveLength(2);
       expect(result2.executedMigrations).toHaveLength(0);
@@ -106,17 +106,17 @@ describe('Migration Framework Integration', () => {
     });
   });
 
-  describe('needsMigration', () => {
-    it('should return true for V1 settings', () => {
+  describe("needsMigration", () => {
+    it("should return true for V1 settings", () => {
       const v1Settings = {
-        theme: 'dark',
-        model: 'gemini',
+        theme: "dark",
+        model: "gemini",
       };
 
       expect(needsMigration(v1Settings)).toBe(true);
     });
 
-    it('should return true for V2 settings with deprecated keys', () => {
+    it("should return true for V2 settings with deprecated keys", () => {
       const v2Settings = {
         $version: 2,
         general: { disableAutoUpdate: true },
@@ -125,17 +125,17 @@ describe('Migration Framework Integration', () => {
       expect(needsMigration(v2Settings)).toBe(true);
     });
 
-    it('should return true for V2 settings without deprecated keys', () => {
+    it("should return true for V2 settings without deprecated keys", () => {
       const cleanV2Settings = {
         $version: 2,
-        ui: { theme: 'dark' },
+        ui: { theme: "dark" },
       };
 
       // V2 settings should be migrated to V3 to update the version number
       expect(needsMigration(cleanV2Settings)).toBe(true);
     });
 
-    it('should return false for V3 settings', () => {
+    it("should return false for V3 settings", () => {
       const v3Settings = {
         $version: 3,
         general: { enableAutoUpdate: true },
@@ -144,18 +144,18 @@ describe('Migration Framework Integration', () => {
       expect(needsMigration(v3Settings)).toBe(false);
     });
 
-    it('should return false for legacy numeric version when no migration can execute', () => {
+    it("should return false for legacy numeric version when no migration can execute", () => {
       const legacyButUnknownSettings = {
         $version: 1,
-        customOnlyKey: 'value',
+        customOnlyKey: "value",
       };
 
       expect(needsMigration(legacyButUnknownSettings)).toBe(false);
     });
   });
 
-  describe('ALL_MIGRATIONS', () => {
-    it('should contain all migrations in order', () => {
+  describe("ALL_MIGRATIONS", () => {
+    it("should contain all migrations in order", () => {
       expect(ALL_MIGRATIONS).toHaveLength(2);
 
       expect(ALL_MIGRATIONS[0].fromVersion).toBe(1);
@@ -166,12 +166,12 @@ describe('Migration Framework Integration', () => {
     });
   });
 
-  describe('MigrationScheduler with all migrations', () => {
-    it('should execute full migration chain', () => {
-      const scheduler = new MigrationScheduler([...ALL_MIGRATIONS], 'user');
+  describe("MigrationScheduler with all migrations", () => {
+    it("should execute full migration chain", () => {
+      const scheduler = new MigrationScheduler([...ALL_MIGRATIONS], "user");
 
       const v1Settings = {
-        theme: 'dark',
+        theme: "dark",
         disableAutoUpdate: true,
         disableLoadingPhrases: true,
       };
@@ -181,25 +181,25 @@ describe('Migration Framework Integration', () => {
       expect(result.executedMigrations).toHaveLength(2);
 
       const settings = result.settings as Record<string, unknown>;
-      expect(settings['$version']).toBe(3);
-      expect((settings['ui'] as Record<string, unknown>)['theme']).toBe('dark');
+      expect(settings["$version"]).toBe(3);
+      expect((settings["ui"] as Record<string, unknown>)["theme"]).toBe("dark");
       expect(
-        (settings['general'] as Record<string, unknown>)['enableAutoUpdate'],
+        (settings["general"] as Record<string, unknown>)["enableAutoUpdate"],
       ).toBe(false);
       expect(
         (
-          (settings['ui'] as Record<string, unknown>)[
-            'accessibility'
+          (settings["ui"] as Record<string, unknown>)[
+            "accessibility"
           ] as Record<string, unknown>
-        )['enableLoadingPhrases'],
+        )["enableLoadingPhrases"],
       ).toBe(false);
     });
   });
 
-  describe('needsMigration and runMigrations consistency', () => {
-    it('needsMigration should return true when runMigrations would execute migrations', () => {
+  describe("needsMigration and runMigrations consistency", () => {
+    it("needsMigration should return true when runMigrations would execute migrations", () => {
       const v1Settings = {
-        theme: 'dark',
+        theme: "dark",
         disableAutoUpdate: true,
       };
 
@@ -207,11 +207,11 @@ describe('Migration Framework Integration', () => {
       expect(needsMigration(v1Settings)).toBe(true);
 
       // runMigrations should actually execute migrations
-      const result = runMigrations(v1Settings, 'user');
+      const result = runMigrations(v1Settings, "user");
       expect(result.executedMigrations.length).toBeGreaterThan(0);
     });
 
-    it('needsMigration should return false when runMigrations would execute no migrations', () => {
+    it("needsMigration should return false when runMigrations would execute no migrations", () => {
       const v3Settings = {
         $version: 3,
         general: { enableAutoUpdate: true },
@@ -221,34 +221,34 @@ describe('Migration Framework Integration', () => {
       expect(needsMigration(v3Settings)).toBe(false);
 
       // runMigrations should execute no migrations
-      const result = runMigrations(v3Settings, 'user');
+      const result = runMigrations(v3Settings, "user");
       expect(result.executedMigrations).toHaveLength(0);
     });
 
-    it('should handle V2 settings without deprecated keys consistently', () => {
+    it("should handle V2 settings without deprecated keys consistently", () => {
       const cleanV2Settings = {
         $version: 2,
-        ui: { theme: 'dark' },
+        ui: { theme: "dark" },
       };
 
       // needsMigration should report that migration is needed
       expect(needsMigration(cleanV2Settings)).toBe(true);
 
       // runMigrations should execute the V2->V3 migration
-      const result = runMigrations(cleanV2Settings, 'user');
+      const result = runMigrations(cleanV2Settings, "user");
       expect(result.executedMigrations.length).toBeGreaterThan(0);
       expect(result.finalVersion).toBe(3);
     });
   });
 
-  describe('migration chain integrity', () => {
-    it('should have strictly increasing versions (toVersion > fromVersion)', () => {
+  describe("migration chain integrity", () => {
+    it("should have strictly increasing versions (toVersion > fromVersion)", () => {
       for (const migration of ALL_MIGRATIONS) {
         expect(migration.toVersion).toBeGreaterThan(migration.fromVersion);
       }
     });
 
-    it('should have no gaps in the chain (adjacent versions)', () => {
+    it("should have no gaps in the chain (adjacent versions)", () => {
       for (let i = 1; i < ALL_MIGRATIONS.length; i++) {
         const prevMigration = ALL_MIGRATIONS[i - 1];
         const currMigration = ALL_MIGRATIONS[i];
@@ -256,19 +256,19 @@ describe('Migration Framework Integration', () => {
       }
     });
 
-    it('should have no duplicate fromVersions', () => {
+    it("should have no duplicate fromVersions", () => {
       const fromVersions = ALL_MIGRATIONS.map((m) => m.fromVersion);
       const uniqueFromVersions = new Set(fromVersions);
       expect(uniqueFromVersions.size).toBe(fromVersions.length);
     });
 
-    it('should have no duplicate toVersions', () => {
+    it("should have no duplicate toVersions", () => {
       const toVersions = ALL_MIGRATIONS.map((m) => m.toVersion);
       const uniqueToVersions = new Set(toVersions);
       expect(uniqueToVersions.size).toBe(toVersions.length);
     });
 
-    it('should be acyclic (no version appears as fromVersion more than once)', () => {
+    it("should be acyclic (no version appears as fromVersion more than once)", () => {
       const fromVersionCounts = new Map<number, number>();
       for (const migration of ALL_MIGRATIONS) {
         const count = fromVersionCounts.get(migration.fromVersion) || 0;
@@ -280,7 +280,7 @@ describe('Migration Framework Integration', () => {
       }
     });
 
-    it('should chain from version 1 to SETTINGS_VERSION', () => {
+    it("should chain from version 1 to SETTINGS_VERSION", () => {
       if (ALL_MIGRATIONS.length > 0) {
         expect(ALL_MIGRATIONS[0].fromVersion).toBe(1);
         const lastMigration = ALL_MIGRATIONS[ALL_MIGRATIONS.length - 1];
@@ -289,14 +289,14 @@ describe('Migration Framework Integration', () => {
     });
   });
 
-  describe('single source of truth for version constant', () => {
-    it('should use SETTINGS_VERSION from settings module', () => {
+  describe("single source of truth for version constant", () => {
+    it("should use SETTINGS_VERSION from settings module", () => {
       // The last migration's toVersion should match SETTINGS_VERSION
       const lastMigration = ALL_MIGRATIONS[ALL_MIGRATIONS.length - 1];
       expect(lastMigration.toVersion).toBe(SETTINGS_VERSION);
     });
 
-    it('needsMigration should use SETTINGS_VERSION for version comparison', () => {
+    it("needsMigration should use SETTINGS_VERSION for version comparison", () => {
       // Create settings with version equal to SETTINGS_VERSION
       const currentVersionSettings = {
         $version: SETTINGS_VERSION,
@@ -316,20 +316,20 @@ describe('Migration Framework Integration', () => {
       expect(needsMigration(oldVersionSettings)).toBe(true);
     });
 
-    it('should have SETTINGS_VERSION defined exactly once in codebase', () => {
+    it("should have SETTINGS_VERSION defined exactly once in codebase", () => {
       // SETTINGS_VERSION is imported from settings.js
       // This test verifies the wiring is correct
       expect(SETTINGS_VERSION).toBeDefined();
-      expect(typeof SETTINGS_VERSION).toBe('number');
+      expect(typeof SETTINGS_VERSION).toBe("number");
       expect(SETTINGS_VERSION).toBeGreaterThan(0);
     });
   });
 
-  describe('invalid version handling', () => {
-    it('should treat non-numeric version with V1 shape as needing migration', () => {
+  describe("invalid version handling", () => {
+    it("should treat non-numeric version with V1 shape as needing migration", () => {
       const settingsWithInvalidVersion = {
-        $version: 'invalid',
-        theme: 'dark',
+        $version: "invalid",
+        theme: "dark",
         disableAutoUpdate: true,
       };
 
@@ -337,14 +337,14 @@ describe('Migration Framework Integration', () => {
       expect(needsMigration(settingsWithInvalidVersion)).toBe(true);
 
       // Should run migrations
-      const result = runMigrations(settingsWithInvalidVersion, 'user');
+      const result = runMigrations(settingsWithInvalidVersion, "user");
       expect(result.executedMigrations.length).toBeGreaterThan(0);
       expect(result.finalVersion).toBe(SETTINGS_VERSION);
     });
 
-    it('should not migrate non-numeric version with already-migrated shape (normalized by loader)', () => {
+    it("should not migrate non-numeric version with already-migrated shape (normalized by loader)", () => {
       const settingsWithInvalidVersionButMigratedShape = {
-        $version: 'invalid',
+        $version: "invalid",
         general: { enableAutoUpdate: true },
       };
 
@@ -357,12 +357,12 @@ describe('Migration Framework Integration', () => {
       // No migrations should execute
       const result = runMigrations(
         settingsWithInvalidVersionButMigratedShape,
-        'user',
+        "user",
       );
       expect(result.executedMigrations).toHaveLength(0);
     });
 
-    it('should avoid repeated no-op migration loops', () => {
+    it("should avoid repeated no-op migration loops", () => {
       // Settings that might cause repeated migrations
       const v3Settings = {
         $version: 3,
@@ -371,12 +371,12 @@ describe('Migration Framework Integration', () => {
 
       // First check
       expect(needsMigration(v3Settings)).toBe(false);
-      const result1 = runMigrations(v3Settings, 'user');
+      const result1 = runMigrations(v3Settings, "user");
       expect(result1.executedMigrations).toHaveLength(0);
 
       // Second check should be consistent
       expect(needsMigration(result1.settings)).toBe(false);
-      const result2 = runMigrations(result1.settings, 'user');
+      const result2 = runMigrations(result1.settings, "user");
       expect(result2.executedMigrations).toHaveLength(0);
     });
   });

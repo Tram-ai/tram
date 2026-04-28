@@ -4,25 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import { HistoryItemDisplay } from './HistoryItemDisplay.js';
-import { type HistoryItem, ToolCallStatus } from '../types.js';
-import { MessageType } from '../types.js';
-import { SessionStatsProvider } from '../contexts/SessionContext.js';
+import { describe, it, expect, vi } from "vitest";
+import { HistoryItemDisplay } from "./HistoryItemDisplay.js";
+import { type HistoryItem, ToolCallStatus } from "../types.js";
+import { MessageType } from "../types.js";
+import { SessionStatsProvider } from "../contexts/SessionContext.js";
 import type {
   Config,
   ToolExecuteConfirmationDetails,
-} from '@tram-ai/tram-core';
-import { ToolGroupMessage } from './messages/ToolGroupMessage.js';
-import { renderWithProviders } from '../../test-utils/render.js';
-import { ConfigContext } from '../contexts/ConfigContext.js';
+} from "@tram-ai/tram-core";
+import { ToolGroupMessage } from "./messages/ToolGroupMessage.js";
+import { renderWithProviders } from "../../test-utils/render.js";
+import { ConfigContext } from "../contexts/ConfigContext.js";
 
 // Mock child components
-vi.mock('./messages/ToolGroupMessage.js', () => ({
+vi.mock("./messages/ToolGroupMessage.js", () => ({
   ToolGroupMessage: vi.fn(() => <div />),
 }));
 
-describe('<HistoryItemDisplay />', () => {
+describe("<HistoryItemDisplay />", () => {
   const mockConfig = {
     getChatRecordingService: () => undefined,
   } as unknown as Config;
@@ -38,38 +38,38 @@ describe('<HistoryItemDisplay />', () => {
     const item: HistoryItem = {
       ...baseItem,
       type: MessageType.USER,
-      text: 'Hello',
+      text: "Hello",
     };
     const { lastFrame } = renderWithProviders(
       <HistoryItemDisplay {...baseItem} item={item} />,
     );
-    expect(lastFrame()).toContain('Hello');
+    expect(lastFrame()).toContain("Hello");
   });
 
   it('renders UserMessage for "user" type with slash command', () => {
     const item: HistoryItem = {
       ...baseItem,
       type: MessageType.USER,
-      text: '/theme',
+      text: "/theme",
     };
     const { lastFrame } = renderWithProviders(
       <HistoryItemDisplay {...baseItem} item={item} />,
     );
-    expect(lastFrame()).toContain('/theme');
+    expect(lastFrame()).toContain("/theme");
   });
 
   it('renders StatsDisplay for "stats" type', () => {
     const item: HistoryItem = {
       ...baseItem,
       type: MessageType.STATS,
-      duration: '1s',
+      duration: "1s",
     };
     const { lastFrame } = renderWithProviders(
       <SessionStatsProvider>
         <HistoryItemDisplay {...baseItem} item={item} />
       </SessionStatsProvider>,
     );
-    expect(lastFrame()).toContain('Stats');
+    expect(lastFrame()).toContain("Stats");
   });
 
   it('renders AboutBox for "about" type', () => {
@@ -77,18 +77,18 @@ describe('<HistoryItemDisplay />', () => {
       id: 1,
       type: MessageType.ABOUT,
       systemInfo: {
-        cliVersion: '1.0.0',
-        osPlatform: 'test-os',
-        osArch: 'x64',
-        osRelease: '22.0.0',
-        nodeVersion: 'v20.0.0',
-        npmVersion: '10.0.0',
-        sandboxEnv: 'test-env',
-        modelVersion: 'test-model',
-        selectedAuthType: 'test-auth',
-        ideClient: 'test-ide',
-        sessionId: 'test-session-id',
-        memoryUsage: '100 MB',
+        cliVersion: "1.0.0",
+        osPlatform: "test-os",
+        osArch: "x64",
+        osRelease: "22.0.0",
+        nodeVersion: "v20.0.0",
+        npmVersion: "10.0.0",
+        sandboxEnv: "test-env",
+        modelVersion: "test-model",
+        selectedAuthType: "test-auth",
+        ideClient: "test-ide",
+        sessionId: "test-session-id",
+        memoryUsage: "100 MB",
         baseUrl: undefined,
         gitCommit: undefined,
       },
@@ -96,13 +96,13 @@ describe('<HistoryItemDisplay />', () => {
     const { lastFrame } = renderWithProviders(
       <HistoryItemDisplay {...baseItem} item={item} />,
     );
-    expect(lastFrame()).toContain('Status');
+    expect(lastFrame()).toContain("Status");
   });
 
   it('renders ModelStatsDisplay for "model_stats" type', () => {
     const item: HistoryItem = {
       ...baseItem,
-      type: 'model_stats',
+      type: "model_stats",
     };
     const { lastFrame } = renderWithProviders(
       <SessionStatsProvider>
@@ -110,14 +110,14 @@ describe('<HistoryItemDisplay />', () => {
       </SessionStatsProvider>,
     );
     expect(lastFrame()).toContain(
-      'No API calls have been made in this session.',
+      "No API calls have been made in this session.",
     );
   });
 
   it('renders ToolStatsDisplay for "tool_stats" type', () => {
     const item: HistoryItem = {
       ...baseItem,
-      type: 'tool_stats',
+      type: "tool_stats",
     };
     const { lastFrame } = renderWithProviders(
       <SessionStatsProvider>
@@ -125,15 +125,15 @@ describe('<HistoryItemDisplay />', () => {
       </SessionStatsProvider>,
     );
     expect(lastFrame()).toContain(
-      'No tool calls have been made in this session.',
+      "No tool calls have been made in this session.",
     );
   });
 
   it('renders SessionSummaryDisplay for "quit" type', () => {
     const item: HistoryItem = {
       ...baseItem,
-      type: 'quit',
-      duration: '1s',
+      type: "quit",
+      duration: "1s",
     };
     const { lastFrame } = renderWithProviders(
       <ConfigContext.Provider value={mockConfig as never}>
@@ -142,14 +142,14 @@ describe('<HistoryItemDisplay />', () => {
         </SessionStatsProvider>
       </ConfigContext.Provider>,
     );
-    expect(lastFrame()).toContain('Agent powering down. Goodbye!');
+    expect(lastFrame()).toContain("Agent powering down. Goodbye!");
   });
 
-  it('should escape ANSI codes in text content', () => {
+  it("should escape ANSI codes in text content", () => {
     const historyItem: HistoryItem = {
       id: 1,
-      type: 'user',
-      text: 'Hello, \u001b[31mred\u001b[0m world!',
+      type: "user",
+      text: "Hello, \u001b[31mred\u001b[0m world!",
     };
 
     const { lastFrame } = renderWithProviders(
@@ -161,27 +161,27 @@ describe('<HistoryItemDisplay />', () => {
     );
 
     // The ANSI codes should be escaped for display.
-    expect(lastFrame()).toContain('Hello, \\u001b[31mred\\u001b[0m world!');
+    expect(lastFrame()).toContain("Hello, \\u001b[31mred\\u001b[0m world!");
     // The raw ANSI codes should not be present.
-    expect(lastFrame()).not.toContain('Hello, \u001b[31mred\u001b[0m world!');
+    expect(lastFrame()).not.toContain("Hello, \u001b[31mred\u001b[0m world!");
   });
 
-  it('should escape ANSI codes in tool confirmation details', () => {
+  it("should escape ANSI codes in tool confirmation details", () => {
     const historyItem: HistoryItem = {
       id: 1,
-      type: 'tool_group',
+      type: "tool_group",
       tools: [
         {
-          callId: '123',
-          name: 'run_shell_command',
-          description: 'Run a shell command',
-          resultDisplay: 'blank',
+          callId: "123",
+          name: "run_shell_command",
+          description: "Run a shell command",
+          resultDisplay: "blank",
           status: ToolCallStatus.Confirming,
           confirmationDetails: {
-            type: 'exec',
-            title: 'Run Shell Command',
+            type: "exec",
+            title: "Run Shell Command",
             command: 'echo "\u001b[31mhello\u001b[0m"',
-            rootCommand: 'echo',
+            rootCommand: "echo",
             onConfirm: async () => {},
           },
         },
@@ -206,15 +206,15 @@ describe('<HistoryItemDisplay />', () => {
   });
 
   const longCode =
-    '# Example code block:\n' +
-    '```python\n' +
-    Array.from({ length: 50 }, (_, i) => `Line ${i + 1}`).join('\n') +
-    '\n```';
+    "# Example code block:\n" +
+    "```python\n" +
+    Array.from({ length: 50 }, (_, i) => `Line ${i + 1}`).join("\n") +
+    "\n```";
 
-  it('should render a truncated gemini item', () => {
+  it("should render a truncated gemini item", () => {
     const item: HistoryItem = {
       id: 1,
-      type: 'gemini',
+      type: "gemini",
       text: longCode,
     };
     const { lastFrame } = renderWithProviders(
@@ -229,10 +229,10 @@ describe('<HistoryItemDisplay />', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render a full gemini item when using availableTerminalHeightGemini', () => {
+  it("should render a full gemini item when using availableTerminalHeightGemini", () => {
     const item: HistoryItem = {
       id: 1,
-      type: 'gemini',
+      type: "gemini",
       text: longCode,
     };
     const { lastFrame } = renderWithProviders(
@@ -248,10 +248,10 @@ describe('<HistoryItemDisplay />', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render a truncated gemini_content item', () => {
+  it("should render a truncated gemini_content item", () => {
     const item: HistoryItem = {
       id: 1,
-      type: 'gemini_content',
+      type: "gemini_content",
       text: longCode,
     };
     const { lastFrame } = renderWithProviders(
@@ -266,10 +266,10 @@ describe('<HistoryItemDisplay />', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('should render a full gemini_content item when using availableTerminalHeightGemini', () => {
+  it("should render a full gemini_content item when using availableTerminalHeightGemini", () => {
     const item: HistoryItem = {
       id: 1,
-      type: 'gemini_content',
+      type: "gemini_content",
       text: longCode,
     };
     const { lastFrame } = renderWithProviders(

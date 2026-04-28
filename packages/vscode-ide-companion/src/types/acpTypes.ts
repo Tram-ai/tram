@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Usage } from '@agentclientprotocol/sdk';
+import type { Usage } from "@agentclientprotocol/sdk";
 
-import type { ApprovalModeValue } from './approvalModeValueTypes.js';
+import type { ApprovalModeValue } from "./approvalModeValueTypes.js";
 
 // ---------------------------------------------------------------------------
 // Private / TRAM-specific types (not part of ACP spec)
 // ---------------------------------------------------------------------------
 
-export const authMethod = 'tram-oauth';
+export const authMethod = "tram-oauth";
 
 /**
  * Authenticate update notification (TRAM extension, not ACP spec).
@@ -35,15 +35,15 @@ export {
   APPROVAL_MODE_MAP,
   APPROVAL_MODE_INFO,
   getApprovalModeInfoFromString,
-} from './approvalModeTypes.js';
+} from "./approvalModeTypes.js";
 
 export const NEXT_APPROVAL_MODE: {
   [k in ApprovalModeValue]: ApprovalModeValue;
 } = {
-  default: 'auto-edit',
-  'auto-edit': 'yolo',
-  plan: 'yolo',
-  yolo: 'default',
+  default: "auto-edit",
+  "auto-edit": "yolo",
+  plan: "yolo",
+  yolo: "default",
 };
 
 // Ask User Question types

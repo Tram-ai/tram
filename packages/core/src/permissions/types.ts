@@ -11,13 +11,13 @@
  * - 'deny': Blocked; will not run.
  * - 'default': No explicit rule matched; falls back to the global approval mode.
  */
-export type PermissionDecision = 'allow' | 'ask' | 'deny' | 'default';
+export type PermissionDecision = "allow" | "ask" | "deny" | "default";
 
 /** The type of a permission rule. */
-export type RuleType = 'allow' | 'ask' | 'deny';
+export type RuleType = "allow" | "ask" | "deny";
 
 /** The scope/source of a permission rule. */
-export type RuleScope = 'system' | 'user' | 'workspace' | 'session';
+export type RuleScope = "system" | "user" | "workspace" | "session";
 
 /**
  * The kind of specifier a rule uses, determines which matching algorithm
@@ -28,7 +28,7 @@ export type RuleScope = 'system' | 'user' | 'workspace' | 'session';
  * - 'domain': Domain matching with `domain:` prefix (for WebFetch)
  * - 'literal': Simple literal equality (fallback for unknown tool types)
  */
-export type SpecifierKind = 'command' | 'path' | 'domain' | 'literal';
+export type SpecifierKind = "command" | "path" | "domain" | "literal";
 
 /**
  * A parsed permission rule.

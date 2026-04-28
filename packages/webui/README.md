@@ -56,8 +56,8 @@ You can also use this library directly in the browser via CDN:
       };
 
       window.ReactJSXRuntime = jsxRuntime;
-      window['react/jsx-runtime'] = jsxRuntime;
-      window['react/jsx-dev-runtime'] = jsxRuntime;
+      window["react/jsx-runtime"] = jsxRuntime;
+      window["react/jsx-dev-runtime"] = jsxRuntime;
     </script>
 
     <!-- Load the webui library -->
@@ -118,8 +118,8 @@ You can also use this library directly in the browser via CDN:
       };
 
       window.ReactJSXRuntime = jsxRuntime;
-      window['react/jsx-runtime'] = jsxRuntime;
-      window['react/jsx-dev-runtime'] = jsxRuntime;
+      window["react/jsx-runtime"] = jsxRuntime;
+      window["react/jsx-dev-runtime"] = jsxRuntime;
     </script>
 
     <!-- Load the webui library -->
@@ -145,7 +145,7 @@ You can also use this library directly in the browser via CDN:
         ],
       });
 
-      ReactDOM.render(App, document.getElementById('root'));
+      ReactDOM.render(App, document.getElementById("root"));
     </script>
   </body>
 </html>
@@ -156,8 +156,8 @@ For a complete working example, see [examples/cdn-usage-demo.html](./examples/cd
 ## Quick Start
 
 ```tsx
-import { Button, Input, Tooltip } from '@tram-ai/webui';
-import { PlatformProvider } from '@tram-ai/webui/context';
+import { Button, Input, Tooltip } from "@tram-ai/webui";
+import { PlatformProvider } from "@tram-ai/webui/context";
 
 function App() {
   return (
@@ -177,7 +177,7 @@ function App() {
 #### Button
 
 ```tsx
-import { Button } from '@tram-ai/webui';
+import { Button } from "@tram-ai/webui";
 
 <Button variant="primary" size="md" loading={false}>
   Submit
@@ -196,7 +196,7 @@ import { Button } from '@tram-ai/webui';
 #### Input
 
 ```tsx
-import { Input } from '@tram-ai/webui';
+import { Input } from "@tram-ai/webui";
 
 <Input
   label="Email"
@@ -219,7 +219,7 @@ import { Input } from '@tram-ai/webui';
 #### Tooltip
 
 ```tsx
-import { Tooltip } from '@tram-ai/webui';
+import { Tooltip } from "@tram-ai/webui";
 
 <Tooltip content="Helpful tip">
   <span>Hover me</span>
@@ -229,7 +229,7 @@ import { Tooltip } from '@tram-ai/webui';
 ### Icons
 
 ```tsx
-import { FileIcon, FolderIcon, CheckIcon } from '@tram-ai/webui/icons';
+import { FileIcon, FolderIcon, CheckIcon } from "@tram-ai/webui/icons";
 
 <FileIcon size={16} className="text-gray-500" />;
 ```
@@ -263,18 +263,18 @@ Available icon categories:
 The Platform Context provides an abstraction layer for platform-specific capabilities:
 
 ```tsx
-import { PlatformProvider, usePlatform } from '@tram-ai/webui/context';
+import { PlatformProvider, usePlatform } from "@tram-ai/webui/context";
 
 const platformContext = {
   postMessage: (message) => vscode.postMessage(message),
   onMessage: (handler) => {
-    window.addEventListener('message', handler);
-    return () => window.removeEventListener('message', handler);
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
   },
   openFile: (path) => {
     /* platform-specific */
   },
-  platform: 'vscode',
+  platform: "vscode",
 };
 
 function App() {
@@ -298,7 +298,7 @@ Use the shared Tailwind preset for consistent styling:
 ```js
 // tailwind.config.js
 module.exports = {
-  presets: [require('@tram-ai/webui/tailwind.preset.cjs')],
+  presets: [require("@tram-ai/webui/tailwind.preset.cjs")],
   // your customizations
 };
 ```

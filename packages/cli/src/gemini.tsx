@@ -12,71 +12,71 @@ import {
   Storage,
   type Config,
   createDebugLogger,
-} from '@tram-ai/tram-core';
-import { render } from 'ink';
-import dns from 'node:dns';
-import os from 'node:os';
-import { basename } from 'node:path';
-import v8 from 'node:v8';
-import React from 'react';
-import { validateAuthMethod } from './config/auth.js';
-import * as cliConfig from './config/config.js';
-import { loadCliConfig, parseArguments } from './config/config.js';
+} from "@tram-ai/tram-core";
+import { render } from "ink";
+import dns from "node:dns";
+import os from "node:os";
+import { basename } from "node:path";
+import v8 from "node:v8";
+import React from "react";
+import { validateAuthMethod } from "./config/auth.js";
+import * as cliConfig from "./config/config.js";
+import { loadCliConfig, parseArguments } from "./config/config.js";
 import {
   SettingScope,
   type DnsResolutionOrder,
   type LoadedSettings,
-} from './config/settings.js';
-import { getSettingsWarnings, loadSettings } from './config/settings.js';
+} from "./config/settings.js";
+import { getSettingsWarnings, loadSettings } from "./config/settings.js";
 import {
   initializeApp,
   type InitializationResult,
-} from './core/initializer.js';
-import { runNonInteractive } from './nonInteractiveCli.js';
-import { runNonInteractiveStreamJson } from './nonInteractive/session.js';
-import { AppContainer } from './ui/AppContainer.js';
-import { setMaxSizedBoxDebugging } from './ui/components/shared/MaxSizedBox.js';
-import { KeypressProvider } from './ui/contexts/KeypressContext.js';
-import { SessionStatsProvider } from './ui/contexts/SessionContext.js';
-import { SettingsContext } from './ui/contexts/SettingsContext.js';
-import { VimModeProvider } from './ui/contexts/VimModeContext.js';
-import { AgentViewProvider } from './ui/contexts/AgentViewContext.js';
-import { useKittyKeyboardProtocol } from './ui/hooks/useKittyKeyboardProtocol.js';
-import { themeManager } from './ui/themes/theme-manager.js';
-import { detectAndEnableKittyProtocol } from './ui/utils/kittyProtocolDetector.js';
-import { checkForUpdates } from './ui/utils/updateCheck.js';
+} from "./core/initializer.js";
+import { runNonInteractive } from "./nonInteractiveCli.js";
+import { runNonInteractiveStreamJson } from "./nonInteractive/session.js";
+import { AppContainer } from "./ui/AppContainer.js";
+import { setMaxSizedBoxDebugging } from "./ui/components/shared/MaxSizedBox.js";
+import { KeypressProvider } from "./ui/contexts/KeypressContext.js";
+import { SessionStatsProvider } from "./ui/contexts/SessionContext.js";
+import { SettingsContext } from "./ui/contexts/SettingsContext.js";
+import { VimModeProvider } from "./ui/contexts/VimModeContext.js";
+import { AgentViewProvider } from "./ui/contexts/AgentViewContext.js";
+import { useKittyKeyboardProtocol } from "./ui/hooks/useKittyKeyboardProtocol.js";
+import { themeManager } from "./ui/themes/theme-manager.js";
+import { detectAndEnableKittyProtocol } from "./ui/utils/kittyProtocolDetector.js";
+import { checkForUpdates } from "./ui/utils/updateCheck.js";
 import {
   cleanupCheckpoints,
   registerCleanup,
   runExitCleanup,
-} from './utils/cleanup.js';
-import { AppEvent, appEvents } from './utils/events.js';
-import { handleAutoUpdate } from './utils/handleAutoUpdate.js';
-import { readStdin } from './utils/readStdin.js';
+} from "./utils/cleanup.js";
+import { AppEvent, appEvents } from "./utils/events.js";
+import { handleAutoUpdate } from "./utils/handleAutoUpdate.js";
+import { readStdin } from "./utils/readStdin.js";
 import {
   profileCheckpoint,
   finalizeStartupProfile,
-} from './utils/startupProfiler.js';
+} from "./utils/startupProfiler.js";
 import {
   relaunchAppInChildProcess,
   relaunchOnExitCode,
-} from './utils/relaunch.js';
-import { start_sandbox } from './utils/sandbox.js';
-import { getStartupWarnings } from './utils/startupWarnings.js';
-import { getUserStartupWarnings } from './utils/userStartupWarnings.js';
-import { getCliVersion } from './utils/version.js';
-import { writeStderrLine } from './utils/stdioHelpers.js';
-import { computeWindowTitle } from './utils/windowTitle.js';
-import { validateNonInteractiveAuth } from './validateNonInterActiveAuth.js';
-import { showResumeSessionPicker } from './ui/components/StandaloneSessionPicker.js';
-import { initializeLlmOutputLanguage } from './utils/languageUtils.js';
-import { initializeI18n, type SupportedLanguage } from './i18n/index.js';
+} from "./utils/relaunch.js";
+import { start_sandbox } from "./utils/sandbox.js";
+import { getStartupWarnings } from "./utils/startupWarnings.js";
+import { getUserStartupWarnings } from "./utils/userStartupWarnings.js";
+import { getCliVersion } from "./utils/version.js";
+import { writeStderrLine } from "./utils/stdioHelpers.js";
+import { computeWindowTitle } from "./utils/windowTitle.js";
+import { validateNonInteractiveAuth } from "./validateNonInterActiveAuth.js";
+import { showResumeSessionPicker } from "./ui/components/StandaloneSessionPicker.js";
+import { initializeLlmOutputLanguage } from "./utils/languageUtils.js";
+import { initializeI18n, type SupportedLanguage } from "./i18n/index.js";
 
-const debugLogger = createDebugLogger('STARTUP');
+const debugLogger = createDebugLogger("STARTUP");
 
 function hasAnyModelProviders(settings: LoadedSettings): boolean {
   const modelProviders = settings.merged.modelProviders;
-  if (!modelProviders || typeof modelProviders !== 'object') {
+  if (!modelProviders || typeof modelProviders !== "object") {
     return false;
   }
   return Object.values(modelProviders).some(
@@ -86,21 +86,21 @@ function hasAnyModelProviders(settings: LoadedSettings): boolean {
 
 function hasAnyApiKeyEnv(): boolean {
   return Boolean(
-    process.env['OPENAI_API_KEY'] ||
-      process.env['ANTHROPIC_API_KEY'] ||
-      process.env['GEMINI_API_KEY'] ||
-      process.env['GOOGLE_API_KEY'],
+    process.env["OPENAI_API_KEY"] ||
+      process.env["ANTHROPIC_API_KEY"] ||
+      process.env["GEMINI_API_KEY"] ||
+      process.env["GOOGLE_API_KEY"],
   );
 }
 
 export function validateDnsResolutionOrder(
   order: string | undefined,
 ): DnsResolutionOrder {
-  const defaultValue: DnsResolutionOrder = 'ipv4first';
+  const defaultValue: DnsResolutionOrder = "ipv4first";
   if (order === undefined) {
     return defaultValue;
   }
-  if (order === 'ipv4first' || order === 'verbatim') {
+  if (order === "ipv4first" || order === "verbatim") {
     return order;
   }
   // We don't want to throw here, just warn and use the default.
@@ -125,7 +125,7 @@ function getNodeMemoryArgs(isDebugMode: boolean): string[] {
     );
   }
 
-  if (process.env['TRAM_CODE_NO_RELAUNCH']) {
+  if (process.env["TRAM_CODE_NO_RELAUNCH"]) {
     return [];
   }
 
@@ -141,12 +141,12 @@ function getNodeMemoryArgs(isDebugMode: boolean): string[] {
   return [];
 }
 
-import { loadSandboxConfig } from './config/sandboxConfig.js';
-import { runAcpAgent } from './acp-integration/acpAgent.js';
+import { loadSandboxConfig } from "./config/sandboxConfig.js";
+import { runAcpAgent } from "./acp-integration/acpAgent.js";
 
 export function setupUnhandledRejectionHandler() {
   let unhandledRejectionOccurred = false;
-  process.on('unhandledRejection', (reason, _promise) => {
+  process.on("unhandledRejection", (reason, _promise) => {
     const errorMessage = `=========================================
 This is an unexpected error. Please file a bug report using the /bug tool.
 CRITICAL: Unhandled Promise Rejection!
@@ -156,7 +156,7 @@ Reason: ${reason}${
         ? `
 Stack trace:
 ${reason.stack}`
-        : ''
+        : ""
     }`;
     appEvents.emit(AppEvent.LogError, errorMessage);
     if (!unhandledRejectionOccurred) {
@@ -179,7 +179,7 @@ export async function startInteractiveUI(
   // Create wrapper component to use hooks inside render
   const AppWrapper = () => {
     const kittyProtocolStatus = useKittyKeyboardProtocol();
-    const nodeMajorVersion = parseInt(process.versions.node.split('.')[0], 10);
+    const nodeMajorVersion = parseInt(process.versions.node.split(".")[0], 10);
     return (
       <SettingsContext.Provider value={settings}>
         <KeypressProvider
@@ -187,7 +187,7 @@ export async function startInteractiveUI(
           config={config}
           debugKeystrokeLogging={settings.merged.general?.debugKeystrokeLogging}
           pasteWorkaround={
-            process.platform === 'win32' || nodeMajorVersion < 20
+            process.platform === "win32" || nodeMajorVersion < 20
           }
         >
           <SessionStatsProvider sessionId={config.getSessionId()}>
@@ -209,7 +209,7 @@ export async function startInteractiveUI(
   };
 
   const instance = render(
-    process.env['DEBUG'] ? (
+    process.env["DEBUG"] ? (
       <React.StrictMode>
         <AppWrapper />
       </React.StrictMode>
@@ -239,14 +239,14 @@ export async function startInteractiveUI(
 }
 
 export async function main() {
-  profileCheckpoint('main_entry');
+  profileCheckpoint("main_entry");
   setupUnhandledRejectionHandler();
   const settings = loadSettings();
   await cleanupCheckpoints();
-  profileCheckpoint('after_load_settings');
+  profileCheckpoint("after_load_settings");
 
   let argv = await parseArguments();
-  profileCheckpoint('after_parse_arguments');
+  profileCheckpoint("after_parse_arguments");
 
   // Handle auto-resume: if no session flags are provided in interactive mode, resume the last session for this directory
   const isAutoResumeEnabled = settings.merged.general?.autoResume ?? true;
@@ -261,7 +261,7 @@ export async function main() {
     process.stdin.isTTY &&
     process.stdout.isTTY
   ) {
-    const { SessionService } = await import('@tram-ai/tram-core');
+    const { SessionService } = await import("@tram-ai/tram-core");
     const sessionService = new SessionService(process.cwd());
     const lastSession = await sessionService.loadLastSession();
     if (lastSession) {
@@ -272,7 +272,7 @@ export async function main() {
   // Check for invalid input combinations early to prevent crashes
   if (argv.promptInteractive && !process.stdin.isTTY) {
     writeStderrLine(
-      'Error: The --prompt-interactive flag cannot be used when input is piped from stdin.',
+      "Error: The --prompt-interactive flag cannot be used when input is piped from stdin.",
     );
     process.exit(1);
   }
@@ -280,13 +280,13 @@ export async function main() {
   // Handle --initialize flag early
   if (argv.initialize) {
     const languageSetting =
-      process.env['TRAM_CODE_LANG'] ||
+      process.env["TRAM_CODE_LANG"] ||
       (settings.merged.general?.language as string) ||
-      'auto';
-    await initializeI18n(languageSetting as SupportedLanguage | 'auto');
+      "auto";
+    await initializeI18n(languageSetting as SupportedLanguage | "auto");
 
     const { runWebInitialization } = await import(
-      './initialization/WebInitDisplay.js'
+      "./initialization/WebInitDisplay.js"
     );
     const success = await runWebInitialization(settings);
     process.exit(success ? 0 : 1);
@@ -307,13 +307,13 @@ export async function main() {
 
   if (shouldAutoInitialize) {
     const languageSetting =
-      process.env['TRAM_CODE_LANG'] ||
+      process.env["TRAM_CODE_LANG"] ||
       (settings.merged.general?.language as string) ||
-      'auto';
-    await initializeI18n(languageSetting as SupportedLanguage | 'auto');
+      "auto";
+    await initializeI18n(languageSetting as SupportedLanguage | "auto");
 
     const { runWebInitialization } = await import(
-      './initialization/WebInitDisplay.js'
+      "./initialization/WebInitDisplay.js"
     );
     const initialized = await runWebInitialization(settings);
 
@@ -342,7 +342,7 @@ export async function main() {
   }
 
   // hop into sandbox if we are outside and sandboxing is enabled
-  if (!process.env['SANDBOX']) {
+  if (!process.env["SANDBOX"]) {
     const memoryArgs = settings.merged.advanced?.autoConfigureMemory
       ? getNodeMemoryArgs(isDebugMode)
       : [];
@@ -385,8 +385,8 @@ export async function main() {
       // intact via stdio: 'inherit'.
       const inputFormat = argv.inputFormat as string | undefined;
       const isAcpMode = argv.acp || argv.experimentalAcp;
-      let stdinData = '';
-      if (!process.stdin.isTTY && inputFormat !== 'stream-json' && !isAcpMode) {
+      let stdinData = "";
+      if (!process.stdin.isTTY && inputFormat !== "stream-json" && !isAcpMode) {
         stdinData = await readStdin();
       }
 
@@ -399,7 +399,7 @@ export async function main() {
         const finalArgs = [...args];
         if (stdinData) {
           const promptIndex = finalArgs.findIndex(
-            (arg) => arg === '--prompt' || arg === '-p',
+            (arg) => arg === "--prompt" || arg === "-p",
           );
           if (promptIndex > -1 && finalArgs.length > promptIndex + 1) {
             // If there's a prompt argument, prepend stdin to it
@@ -407,7 +407,7 @@ export async function main() {
               `${stdinData}\n\n${finalArgs[promptIndex + 1]}`;
           } else {
             // If there's no prompt argument, add stdin as the prompt
-            finalArgs.push('--prompt', stdinData);
+            finalArgs.push("--prompt", stdinData);
           }
         }
         return finalArgs;
@@ -430,7 +430,7 @@ export async function main() {
   // Set the runtime output dir early so the picker can find sessions stored
   // under a custom runtimeOutputDir (setRuntimeBaseDir is idempotent and will
   // be called again inside loadCliConfig).
-  if (argv.resume === '') {
+  if (argv.resume === "") {
     Storage.setRuntimeBaseDir(
       settings.merged.advanced?.runtimeOutputDir,
       process.cwd(),
@@ -448,7 +448,7 @@ export async function main() {
   // We are now past the logic handling potentially launching a child process
   // to run TRAM. It is now safe to perform expensive initialization that
   // may have side effects.
-  profileCheckpoint('after_sandbox_check');
+  profileCheckpoint("after_sandbox_check");
 
   // Initialize output language file before config loads to ensure it's included in context
   initializeLlmOutputLanguage(settings.merged.general?.outputLanguage);
@@ -460,7 +460,7 @@ export async function main() {
       process.cwd(),
       argv.extensions,
     );
-    profileCheckpoint('after_load_cli_config');
+    profileCheckpoint("after_load_cli_config");
 
     // Register cleanup for MCP clients as early as possible
     // This ensures MCP server subprocesses are properly terminated on exit
@@ -483,10 +483,10 @@ export async function main() {
       process.stdin.setRawMode(true);
 
       // This cleanup isn't strictly needed but may help in certain situations.
-      process.on('SIGTERM', () => {
+      process.on("SIGTERM", () => {
         process.stdin.setRawMode(wasRaw);
       });
-      process.on('SIGINT', () => {
+      process.on("SIGINT", () => {
         process.stdin.setRawMode(wasRaw);
       });
 
@@ -500,14 +500,14 @@ export async function main() {
     // In TTY mode, ignore stream-json input format to prevent process from hanging
     const inputFormat = process.stdin.isTTY
       ? InputFormat.TEXT
-      : typeof config.getInputFormat === 'function'
+      : typeof config.getInputFormat === "function"
         ? config.getInputFormat()
         : InputFormat.TEXT;
 
     // For stream-json mode, defer config.initialize() until after the initialize control request
     // For other modes, initialize normally
     const initializationResult = await initializeApp(config, settings);
-    profileCheckpoint('after_initialize_app');
+    profileCheckpoint("after_initialize_app");
 
     if (config.getExperimentalZedIntegration()) {
       await runAcpAgent(config, settings, argv);
@@ -528,16 +528,16 @@ export async function main() {
         ...getSettingsWarnings(settings),
         ...config.getWarnings(),
         ...(config.getModelsConfig().getCurrentAuthType() ===
-        AuthType.QWEN_OAUTH
+        AuthType.TRAM_OAUTH
           ? [
-              'Qwen OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan or another provider.',
+              "Qwen OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan or another provider.",
             ]
           : []),
       ]),
     ];
 
     // Render UI, passing necessary config values. Check that there is no command line question.
-    profileCheckpoint('before_render');
+    profileCheckpoint("before_render");
     finalizeStartupProfile(config.getSessionId());
 
     if (config.isInteractive()) {
@@ -555,13 +555,13 @@ export async function main() {
 
     // Print debug mode notice to stderr for non-interactive mode
     if (config.getDebugMode()) {
-      writeStderrLine('Debug mode enabled');
+      writeStderrLine("Debug mode enabled");
       writeStderrLine(
         `Logging to: ${Storage.getDebugLogPath(config.getSessionId())}`,
       );
       if (isDebugLoggingDegraded()) {
         writeStderrLine(
-          'Warning: Debug logging is degraded (write failures occurred)',
+          "Warning: Debug logging is degraded (write failures occurred)",
         );
       }
     }
@@ -590,11 +590,11 @@ export async function main() {
     const prompt_id = Math.random().toString(16).slice(2);
 
     if (inputFormat === InputFormat.STREAM_JSON) {
-      const trimmedInput = (input ?? '').trim();
+      const trimmedInput = (input ?? "").trim();
 
       await runNonInteractiveStreamJson(
         nonInteractiveConfig,
-        trimmedInput.length > 0 ? trimmedInput : '',
+        trimmedInput.length > 0 ? trimmedInput : "",
       );
       await runExitCleanup();
       process.exit(0);
@@ -608,8 +608,8 @@ export async function main() {
     }
 
     logUserPrompt(config, {
-      'event.name': 'user_prompt',
-      'event.timestamp': new Date().toISOString(),
+      "event.name": "user_prompt",
+      "event.timestamp": new Date().toISOString(),
       prompt: input,
       prompt_id,
       auth_type: config.getContentGeneratorConfig()?.authType,
@@ -630,7 +630,7 @@ function setWindowTitle(title: string, settings: LoadedSettings) {
     const windowTitle = computeWindowTitle(title);
     process.stdout.write(`\x1b]2;${windowTitle}\x07`);
 
-    process.on('exit', () => {
+    process.on("exit", () => {
       process.stdout.write(`\x1b]2;\x07`);
     });
   }

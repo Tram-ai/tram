@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type OpenAI from 'openai';
+import type OpenAI from "openai";
 import {
   type GenerateContentParameters,
   GenerateContentResponse,
-} from '@google/genai';
-import type { Config } from '../../config/config.js';
-import type { ContentGeneratorConfig } from '../contentGenerator.js';
-import type { OpenAICompatibleProvider } from './provider/index.js';
-import { OpenAIContentConverter } from './converter.js';
-import type { ErrorHandler, RequestContext } from './errorHandler.js';
+} from "@google/genai";
+import type { Config } from "../../config/config.js";
+import type { ContentGeneratorConfig } from "../contentGenerator.js";
+import type { OpenAICompatibleProvider } from "./provider/index.js";
+import { OpenAIContentConverter } from "./converter.js";
+import type { ErrorHandler, RequestContext } from "./errorHandler.js";
 
 /**
  * Error thrown when the API returns an error embedded as stream content
@@ -24,7 +24,7 @@ import type { ErrorHandler, RequestContext } from './errorHandler.js';
 export class StreamContentError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'StreamContentError';
+    this.name = "StreamContentError";
   }
 }
 
@@ -40,15 +40,11 @@ export class ContentGenerationPipeline {
   private converter: OpenAIContentConverter;
   private contentGeneratorConfig: ContentGeneratorConfig;
 
-  private getEffectiveRequestModel(): string {
-    return this.contentGeneratorConfig.requestModel || this.contentGeneratorConfig.model;
-  }
-
   constructor(private config: PipelineConfig) {
     this.contentGeneratorConfig = config.contentGeneratorConfig;
     this.client = this.config.provider.buildClient();
     this.converter = new OpenAIContentConverter(
-      this.getEffectiveRequestModel(),
+      this.contentGeneratorConfig.requestModel || this.contentGeneratorConfig.model,
       this.contentGeneratorConfig.schemaCompliance,
       this.contentGeneratorConfig.modalities ?? {},
     );
@@ -59,8 +55,21 @@ export class ContentGenerationPipeline {
     userPromptId: string,
   ): Promise<GenerateContentResponse> {
     // Use request.model when explicitly provided (e.g., fastModel for suggestion
-    // generation), falling back to the configured model as the default.
-    const effectiveModel = request.model || this.contentGeneratorConfig.model;
+    // generation), falling back to the configured requestModel or model as the default.
+    let effectiveModel =
+      request.model ||
+      this.contentGeneratorConfig.requestModel ||
+      this.contentGeneratorConfig.model;
+      
+    // If request.model was provided, it might be a disambiguated ID (like `glm-4-1`). 
+    // We should resolve it map it back to the true upstream model name (`glm-4`).
+    if (request.model) {
+      effectiveModel = this.config.cliConfig.resolveUpstreamModelId(
+        request.model,
+        this.contentGeneratorConfig.authType,
+      );
+    }
+    
     this.converter.setModel(effectiveModel);
     this.converter.setModalities(this.contentGeneratorConfig.modalities ?? {});
     return this.executeWithErrorHandling(
@@ -88,7 +97,18 @@ export class ContentGenerationPipeline {
     request: GenerateContentParameters,
     userPromptId: string,
   ): Promise<AsyncGenerator<GenerateContentResponse>> {
-    const effectiveModel = request.model || this.contentGeneratorConfig.model;
+    let effectiveModel =
+      request.model ||
+      this.contentGeneratorConfig.requestModel ||
+      this.contentGeneratorConfig.model;
+      
+    if (request.model) {
+      effectiveModel = this.config.cliConfig.resolveUpstreamModelId(
+        request.model,
+        this.contentGeneratorConfig.authType,
+      );
+    }
+    
     this.converter.setModel(effectiveModel);
     this.converter.setModalities(this.contentGeneratorConfig.modalities ?? {});
     return this.executeWithErrorHandling(
@@ -147,10 +167,10 @@ export class ContentGenerationPipeline {
         // Some providers return errors (e.g., TPM throttling) as a normal SSE chunk
         // with finish_reason="error_finish" and the error in delta.content,
         // instead of returning a proper HTTP error status.
-        if ((chunk.choices?.[0]?.finish_reason as string) === 'error_finish') {
+        if ((chunk.choices?.[0]?.finish_reason as string) === "error_finish") {
           const errorContent =
             chunk.choices?.[0]?.delta?.content?.trim() ||
-            'Unknown stream error';
+            "Unknown stream error";
           throw new StreamContentError(errorContent);
         }
 
@@ -354,13 +374,13 @@ export class ContentGenerationPipeline {
     // buildReasoningConfig's decision — we must post-process here.
     if (request.config?.thinkingConfig?.includeThoughts === false) {
       const typed = providerRequest as unknown as Record<string, unknown>;
-      if ('enable_thinking' in typed) {
-        typed['enable_thinking'] = false;
+      if ("enable_thinking" in typed) {
+        typed["enable_thinking"] = false;
       }
       // Also strip reasoning config — extra_body could inject it, overriding
       // buildReasoningConfig's decision to return {} for disabled thinking.
-      if ('reasoning' in typed) {
-        delete typed['reasoning'];
+      if ("reasoning" in typed) {
+        delete typed["reasoning"];
       }
     }
 
@@ -405,24 +425,24 @@ export class ContentGenerationPipeline {
 
     const params: Record<string, unknown> = {
       // Parameters with request fallback but no defaults
-      ...addParameterIfDefined('temperature', 'temperature', 'temperature'),
-      ...addParameterIfDefined('top_p', 'top_p', 'topP'),
+      ...addParameterIfDefined("temperature", "temperature", "temperature"),
+      ...addParameterIfDefined("top_p", "top_p", "topP"),
 
       // Max tokens (special case: different property names)
-      ...addParameterIfDefined('max_tokens', 'max_tokens', 'maxOutputTokens'),
+      ...addParameterIfDefined("max_tokens", "max_tokens", "maxOutputTokens"),
 
       // Config-only parameters (no request fallback)
-      ...addParameterIfDefined('top_k', 'top_k', 'topK'),
-      ...addParameterIfDefined('repetition_penalty', 'repetition_penalty'),
+      ...addParameterIfDefined("top_k", "top_k", "topK"),
+      ...addParameterIfDefined("repetition_penalty", "repetition_penalty"),
       ...addParameterIfDefined(
-        'presence_penalty',
-        'presence_penalty',
-        'presencePenalty',
+        "presence_penalty",
+        "presence_penalty",
+        "presencePenalty",
       ),
       ...addParameterIfDefined(
-        'frequency_penalty',
-        'frequency_penalty',
-        'frequencyPenalty',
+        "frequency_penalty",
+        "frequency_penalty",
+        "frequencyPenalty",
       ),
       ...this.buildReasoningConfig(request),
     };
@@ -520,7 +540,7 @@ export class ContentGenerationPipeline {
     return {
       userPromptId,
       model: effectiveModel,
-      authType: this.contentGeneratorConfig.authType || 'unknown',
+      authType: this.contentGeneratorConfig.authType || "unknown",
       startTime: Date.now(),
       duration: 0,
       isStreaming,

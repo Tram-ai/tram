@@ -15,36 +15,36 @@ import type {
   Part,
   Tool,
   GenerateContentResponseUsageMetadata,
-} from '@google/genai';
-import { createUserContent, FinishReason } from '@google/genai';
-import { retryWithBackoff } from '../utils/retry.js';
-import { getErrorStatus } from '../utils/errors.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import { parseAndFormatApiError } from '../utils/errorParsing.js';
-import { isRateLimitError, type RetryInfo } from '../utils/rateLimit.js';
-import type { Config } from '../config/config.js';
-import { ESCALATED_MAX_TOKENS } from './tokenLimits.js';
-import { hasCycleInSchema } from '../tools/tools.js';
-import type { StructuredError } from './turn.js';
+} from "@google/genai";
+import { createUserContent, FinishReason } from "@google/genai";
+import { retryWithBackoff } from "../utils/retry.js";
+import { getErrorStatus } from "../utils/errors.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import { parseAndFormatApiError } from "../utils/errorParsing.js";
+import { isRateLimitError, type RetryInfo } from "../utils/rateLimit.js";
+import type { Config, ModelRequestTarget } from "../config/config.js";
+import { ESCALATED_MAX_TOKENS } from "./tokenLimits.js";
+import { hasCycleInSchema } from "../tools/tools.js";
+import type { StructuredError } from "./turn.js";
 import {
   logContentRetry,
   logContentRetryFailure,
-} from '../telemetry/loggers.js';
-import { type ChatRecordingService } from '../services/chatRecordingService.js';
+} from "../telemetry/loggers.js";
+import { type ChatRecordingService } from "../services/chatRecordingService.js";
 import {
   ContentRetryEvent,
   ContentRetryFailureEvent,
-} from '../telemetry/types.js';
-import type { UiTelemetryService } from '../telemetry/uiTelemetry.js';
+} from "../telemetry/types.js";
+import type { UiTelemetryService } from "../telemetry/uiTelemetry.js";
 
-const debugLogger = createDebugLogger('TRAM_CODE_CHAT');
+const debugLogger = createDebugLogger("TRAM_CODE_CHAT");
 
 export enum StreamEventType {
   /** A regular content chunk from the API. */
-  CHUNK = 'chunk',
+  CHUNK = "chunk",
   /** A signal that a retry is about to happen. The UI should discard any partial
    * content from the attempt that just failed. */
-  RETRY = 'retry',
+  RETRY = "retry",
 }
 
 export type StreamEvent =
@@ -115,7 +115,7 @@ function delay(
     timeoutId = setTimeout(resolve, delayMs);
 
     signal?.addEventListener(
-      'abort',
+      "abort",
       () => {
         clearTimeout(timeoutId);
         reject(signal.reason);
@@ -160,7 +160,7 @@ function isValidResponse(response: GenerateContentResponse): boolean {
 
 export function isValidNonThoughtTextPart(part: Part): boolean {
   return (
-    typeof part.text === 'string' &&
+    typeof part.text === "string" &&
     !part.thought &&
     !part.thoughtSignature &&
     // Technically, the model should never generate parts that have text and
@@ -192,7 +192,7 @@ function isValidContentPart(part: Part): boolean {
     !part.thought &&
     !part.thoughtSignature &&
     part.text !== undefined &&
-    part.text === '' &&
+    part.text === "" &&
     part.functionCall === undefined;
 
   return !isInvalid;
@@ -206,7 +206,7 @@ function isValidContentPart(part: Part): boolean {
  */
 function validateHistory(history: Content[]) {
   for (const content of history) {
-    if (content.role !== 'user' && content.role !== 'model') {
+    if (content.role !== "user" && content.role !== "model") {
       throw new Error(`Role must be user or model, but got ${content.role}.`);
     }
   }
@@ -228,13 +228,13 @@ function extractCuratedHistory(comprehensiveHistory: Content[]): Content[] {
   const length = comprehensiveHistory.length;
   let i = 0;
   while (i < length) {
-    if (comprehensiveHistory[i].role === 'user') {
+    if (comprehensiveHistory[i].role === "user") {
       curatedHistory.push(comprehensiveHistory[i]);
       i++;
     } else {
       const modelOutput: Content[] = [];
       let isValid = true;
-      while (i < length && comprehensiveHistory[i].role === 'model') {
+      while (i < length && comprehensiveHistory[i].role === "model") {
         modelOutput.push(comprehensiveHistory[i]);
         if (isValid && !isValidContent(comprehensiveHistory[i])) {
           isValid = false;
@@ -254,11 +254,11 @@ function extractCuratedHistory(comprehensiveHistory: Content[]): Content[] {
  * which should trigger a retry.
  */
 export class InvalidStreamError extends Error {
-  readonly type: 'NO_FINISH_REASON' | 'NO_RESPONSE_TEXT';
+  readonly type: "NO_FINISH_REASON" | "NO_RESPONSE_TEXT";
 
-  constructor(message: string, type: 'NO_FINISH_REASON' | 'NO_RESPONSE_TEXT') {
+  constructor(message: string, type: "NO_FINISH_REASON" | "NO_RESPONSE_TEXT") {
     super(message);
-    this.name = 'InvalidStreamError';
+    this.name = "InvalidStreamError";
     this.type = type;
   }
 }
@@ -346,229 +346,265 @@ export class GeminiChat {
     const self = this;
     return (async function* () {
       try {
-        let lastError: unknown = new Error('Request failed after all retries.');
-        let rateLimitRetryCount = 0;
-        let invalidStreamRetryCount = 0;
+        let lastError: unknown = new Error(
+          "Request failed after all configured fallbacks.",
+        );
+        let hasFailedAttempt = false;
+        const seenTargets = new Set<string>();
 
-        // Read per-config overrides; fall back to built-in defaults.
-        const cgConfig = self.config.getContentGeneratorConfig();
-        const maxRateLimitRetries =
-          cgConfig?.maxRetries ?? RATE_LIMIT_RETRY_OPTIONS.maxRetries;
-        const extraRetryErrorCodes = cgConfig?.retryErrorCodes;
-
-        // Max output tokens escalation: when no user/env override is set,
-        // the capped default (8K) is used. If the model hits MAX_TOKENS,
-        // retry once with escalated limit (64K).
-        let maxTokensEscalated = false;
-        const hasUserMaxTokensOverride =
-          (cgConfig?.samplingParams?.max_tokens !== undefined &&
-            cgConfig?.samplingParams?.max_tokens !== null) ||
-          !!process.env['QWEN_CODE_MAX_OUTPUT_TOKENS'];
-
-        let lastFinishReason: string | undefined;
-
-        for (
-          let attempt = 0;
-          attempt < INVALID_CONTENT_RETRY_OPTIONS.maxAttempts;
-          attempt++
-        ) {
+        for (const reference of [model, ...self.config.getFallbackModels()]) {
+          let target: ModelRequestTarget;
           try {
-            if (
-              attempt > 0 ||
-              rateLimitRetryCount > 0 ||
-              invalidStreamRetryCount > 0
-            ) {
+            target = await self.config.createRequestModelTarget(reference);
+          } catch (error) {
+            lastError = error;
+            if (params.config?.abortSignal?.aborted) {
+              throw error;
+            }
+            debugLogger.warn(
+              `Skipping fallback model ${reference}: ${error instanceof Error ? error.message : String(error)}`,
+            );
+            continue;
+          }
+
+          if (seenTargets.has(target.key)) {
+            continue;
+          }
+          seenTargets.add(target.key);
+
+          try {
+            if (hasFailedAttempt) {
               yield { type: StreamEventType.RETRY };
             }
 
-            const stream = await self.makeApiCallAndProcessStream(
-              model,
+            yield* self.sendMessageStreamForTarget(
+              target,
               requestContents,
               params,
               prompt_id,
             );
-
-            lastFinishReason = undefined;
-            for await (const chunk of stream) {
-              const fr = chunk.candidates?.[0]?.finishReason;
-              if (fr) lastFinishReason = fr;
-              yield { type: StreamEventType.CHUNK, value: chunk };
-            }
-
-            lastError = null;
-            break;
+            return;
           } catch (error) {
             lastError = error;
-
-            // Handle rate-limit / throttling errors returned as stream content.
-            // These arrive as StreamContentError with finish_reason="error_finish"
-            // from the pipeline, containing the throttling message in the content.
-            // Covers TPM throttling, GLM rate limits, and other provider throttling.
-            const isRateLimit = isRateLimitError(error, extraRetryErrorCodes);
-            if (isRateLimit && rateLimitRetryCount < maxRateLimitRetries) {
-              rateLimitRetryCount++;
-              const delayMs = RATE_LIMIT_RETRY_OPTIONS.delayMs;
-              const message = parseAndFormatApiError(
-                error instanceof Error ? error.message : String(error),
-              );
-              debugLogger.warn(
-                `Rate limit throttling detected (retry ${rateLimitRetryCount}/${maxRateLimitRetries}). ` +
-                  `Waiting ${delayMs / 1000}s before retrying...`,
-              );
-              const { promise: delayPromise, skip } = delay(
-                delayMs,
-                params.config?.abortSignal,
-              );
-              yield {
-                type: StreamEventType.RETRY,
-                retryInfo: {
-                  message,
-                  attempt: rateLimitRetryCount,
-                  maxRetries: maxRateLimitRetries,
-                  delayMs,
-                  skipDelay: skip,
-                },
-              };
-              // Don't count rate-limit retries against the content retry limit
-              attempt--;
-              await delayPromise;
-              continue;
+            if (params.config?.abortSignal?.aborted) {
+              throw error;
             }
-
-            // Transient stream anomalies (NO_FINISH_REASON / NO_RESPONSE_TEXT):
-            // independent retry budget, similar to rate-limit handling.
-            // Does NOT consume the content retry budget.
-            const isTransientStreamError = error instanceof InvalidStreamError;
-            if (
-              isTransientStreamError &&
-              invalidStreamRetryCount < INVALID_STREAM_RETRY_CONFIG.maxRetries
-            ) {
-              invalidStreamRetryCount++;
-              const delayMs =
-                INVALID_STREAM_RETRY_CONFIG.initialDelayMs *
-                invalidStreamRetryCount;
-              debugLogger.warn(
-                `Invalid stream [${(error as InvalidStreamError).type}] ` +
-                  `(retry ${invalidStreamRetryCount}/${INVALID_STREAM_RETRY_CONFIG.maxRetries}). ` +
-                  `Waiting ${delayMs / 1000}s before retrying...`,
-              );
-              logContentRetry(
-                self.config,
-                new ContentRetryEvent(
-                  invalidStreamRetryCount - 1,
-                  (error as InvalidStreamError).type,
-                  delayMs,
-                  model,
-                ),
-              );
-              yield { type: StreamEventType.RETRY };
-              // Don't count transient retries against content retry limit.
-              attempt--;
-              await delay(delayMs, params.config?.abortSignal).promise;
-              continue;
-            }
-            // Transient budget exhausted — stop immediately.
-            if (isTransientStreamError) {
-              break;
-            }
-
-            // Other content validation errors (e.g. NO_FINISH_REASON).
-            const isContentError = error instanceof InvalidStreamError;
-            if (isContentError) {
-              if (attempt < INVALID_CONTENT_RETRY_OPTIONS.maxAttempts - 1) {
-                logContentRetry(
-                  self.config,
-                  new ContentRetryEvent(
-                    attempt,
-                    (error as InvalidStreamError).type,
-                    INVALID_CONTENT_RETRY_OPTIONS.initialDelayMs,
-                    model,
-                  ),
-                );
-                await delay(
-                  INVALID_CONTENT_RETRY_OPTIONS.initialDelayMs * (attempt + 1),
-                  params.config?.abortSignal,
-                ).promise;
-                continue;
-              }
-            }
-            break;
-          }
-        }
-
-        // Max output tokens escalation: if the retry loop succeeded with
-        // the capped default (8K) but hit MAX_TOKENS, retry once at 64K.
-        // Placed outside the retry loop so that any errors from the
-        // escalated stream propagate directly (not caught by retry logic).
-        if (
-          lastError === null &&
-          lastFinishReason === FinishReason.MAX_TOKENS &&
-          !maxTokensEscalated &&
-          !hasUserMaxTokensOverride
-        ) {
-          maxTokensEscalated = true;
-          debugLogger.info(
-            `Output truncated at capped default. Escalating to ${ESCALATED_MAX_TOKENS} tokens.`,
-          );
-          // Remove partial model response from history
-          // (processStreamResponse already pushed it)
-          if (
-            self.history.length > 0 &&
-            self.history[self.history.length - 1].role === 'model'
-          ) {
-            self.history.pop();
-          }
-          // Signal UI to discard partial output
-          yield { type: StreamEventType.RETRY };
-          // Retry with escalated max_tokens
-          const escalatedParams: SendMessageParameters = {
-            ...params,
-            config: {
-              ...params.config,
-              maxOutputTokens: ESCALATED_MAX_TOKENS,
-            },
-          };
-          const escalatedStream = await self.makeApiCallAndProcessStream(
-            model,
-            requestContents,
-            escalatedParams,
-            prompt_id,
-          );
-          for await (const chunk of escalatedStream) {
-            yield { type: StreamEventType.CHUNK, value: chunk };
-          }
-        }
-
-        if (lastError) {
-          if (lastError instanceof InvalidStreamError) {
-            const totalAttempts = invalidStreamRetryCount + 1;
-            logContentRetryFailure(
-              self.config,
-              new ContentRetryFailureEvent(
-                totalAttempts,
-                lastError.type,
-                model,
-              ),
+            hasFailedAttempt = true;
+            debugLogger.warn(
+              `Model request failed for ${target.reference}; trying next fallback if available: ${error instanceof Error ? error.message : String(error)}`,
             );
           }
-          throw lastError;
         }
+
+        throw lastError;
       } finally {
         streamDoneResolver!();
       }
     })();
   }
 
+  private async *sendMessageStreamForTarget(
+    target: ModelRequestTarget,
+    requestContents: Content[],
+    params: SendMessageParameters,
+    prompt_id: string,
+  ): AsyncGenerator<StreamEvent> {
+    let lastError: unknown = new Error("Request failed after all retries.");
+    let rateLimitRetryCount = 0;
+    let invalidStreamRetryCount = 0;
+
+    const cgConfig = target.contentGeneratorConfig;
+    const maxRateLimitRetries =
+      cgConfig?.maxRetries ?? RATE_LIMIT_RETRY_OPTIONS.maxRetries;
+    const extraRetryErrorCodes = cgConfig?.retryErrorCodes;
+
+    let maxTokensEscalated = false;
+    const hasUserMaxTokensOverride =
+      (cgConfig?.samplingParams?.max_tokens !== undefined &&
+        cgConfig?.samplingParams?.max_tokens !== null) ||
+      !!process.env["QWEN_CODE_MAX_OUTPUT_TOKENS"];
+
+    let lastFinishReason: string | undefined;
+
+    for (
+      let attempt = 0;
+      attempt < INVALID_CONTENT_RETRY_OPTIONS.maxAttempts;
+      attempt++
+    ) {
+      try {
+        if (
+          attempt > 0 ||
+          rateLimitRetryCount > 0 ||
+          invalidStreamRetryCount > 0
+        ) {
+          yield { type: StreamEventType.RETRY };
+        }
+
+        const stream = await this.makeApiCallAndProcessStream(
+          target,
+          requestContents,
+          params,
+          prompt_id,
+        );
+
+        lastFinishReason = undefined;
+        for await (const chunk of stream) {
+          const fr = chunk.candidates?.[0]?.finishReason;
+          if (fr) lastFinishReason = fr;
+          yield { type: StreamEventType.CHUNK, value: chunk };
+        }
+
+        lastError = null;
+        break;
+      } catch (error) {
+        lastError = error;
+
+        const isRateLimit = isRateLimitError(error, extraRetryErrorCodes);
+        if (isRateLimit && rateLimitRetryCount < maxRateLimitRetries) {
+          rateLimitRetryCount++;
+          const delayMs = RATE_LIMIT_RETRY_OPTIONS.delayMs;
+          const message = parseAndFormatApiError(
+            error instanceof Error ? error.message : String(error),
+          );
+          debugLogger.warn(
+            `Rate limit throttling detected (retry ${rateLimitRetryCount}/${maxRateLimitRetries}). ` +
+              `Waiting ${delayMs / 1000}s before retrying...`,
+          );
+          const { promise: delayPromise, skip } = delay(
+            delayMs,
+            params.config?.abortSignal,
+          );
+          yield {
+            type: StreamEventType.RETRY,
+            retryInfo: {
+              message,
+              attempt: rateLimitRetryCount,
+              maxRetries: maxRateLimitRetries,
+              delayMs,
+              skipDelay: skip,
+            },
+          };
+          attempt--;
+          await delayPromise;
+          continue;
+        }
+
+        const isTransientStreamError = error instanceof InvalidStreamError;
+        if (
+          isTransientStreamError &&
+          invalidStreamRetryCount < INVALID_STREAM_RETRY_CONFIG.maxRetries
+        ) {
+          invalidStreamRetryCount++;
+          const delayMs =
+            INVALID_STREAM_RETRY_CONFIG.initialDelayMs * invalidStreamRetryCount;
+          debugLogger.warn(
+            `Invalid stream [${(error as InvalidStreamError).type}] ` +
+              `(retry ${invalidStreamRetryCount}/${INVALID_STREAM_RETRY_CONFIG.maxRetries}). ` +
+              `Waiting ${delayMs / 1000}s before retrying...`,
+          );
+          logContentRetry(
+            this.config,
+            new ContentRetryEvent(
+              invalidStreamRetryCount - 1,
+              (error as InvalidStreamError).type,
+              delayMs,
+              target.model,
+            ),
+          );
+          yield { type: StreamEventType.RETRY };
+          attempt--;
+          await delay(delayMs, params.config?.abortSignal).promise;
+          continue;
+        }
+        if (isTransientStreamError) {
+          break;
+        }
+
+        const isContentError = error instanceof InvalidStreamError;
+        if (isContentError) {
+          if (attempt < INVALID_CONTENT_RETRY_OPTIONS.maxAttempts - 1) {
+            logContentRetry(
+              this.config,
+              new ContentRetryEvent(
+                attempt,
+                (error as InvalidStreamError).type,
+                INVALID_CONTENT_RETRY_OPTIONS.initialDelayMs,
+                target.model,
+              ),
+            );
+            await delay(
+              INVALID_CONTENT_RETRY_OPTIONS.initialDelayMs * (attempt + 1),
+              params.config?.abortSignal,
+            ).promise;
+            continue;
+          }
+        }
+        break;
+      }
+    }
+
+    if (
+      lastError === null &&
+      lastFinishReason === FinishReason.MAX_TOKENS &&
+      !maxTokensEscalated &&
+      !hasUserMaxTokensOverride
+    ) {
+      maxTokensEscalated = true;
+      debugLogger.info(
+        `Output truncated at capped default. Escalating to ${ESCALATED_MAX_TOKENS} tokens.`,
+      );
+      if (
+        this.history.length > 0 &&
+        this.history[this.history.length - 1].role === "model"
+      ) {
+        this.history.pop();
+      }
+      yield { type: StreamEventType.RETRY };
+      const escalatedParams: SendMessageParameters = {
+        ...params,
+        config: {
+          ...params.config,
+          maxOutputTokens: ESCALATED_MAX_TOKENS,
+        },
+      };
+      const escalatedStream = await this.makeApiCallAndProcessStream(
+        target,
+        requestContents,
+        escalatedParams,
+        prompt_id,
+      );
+      for await (const chunk of escalatedStream) {
+        yield { type: StreamEventType.CHUNK, value: chunk };
+      }
+      return;
+    }
+
+    if (lastError) {
+      if (lastError instanceof InvalidStreamError) {
+        const totalAttempts = invalidStreamRetryCount + 1;
+        logContentRetryFailure(
+          this.config,
+          new ContentRetryFailureEvent(
+            totalAttempts,
+            lastError.type,
+            target.model,
+          ),
+        );
+      }
+      throw lastError;
+    }
+  }
+
   private async makeApiCallAndProcessStream(
-    model: string,
+    target: ModelRequestTarget,
     requestContents: Content[],
     params: SendMessageParameters,
     prompt_id: string,
   ): Promise<AsyncGenerator<GenerateContentResponse>> {
     const apiCall = () =>
-      this.config.getContentGenerator().generateContentStream(
+      target.contentGenerator.generateContentStream(
         {
-          model,
+          model: target.model,
           contents: requestContents,
           config: { ...this.generationConfig, ...params.config },
         },
@@ -588,10 +624,10 @@ export class GeminiChat {
 
         return false;
       },
-      authType: this.config.getContentGeneratorConfig()?.authType,
+      authType: target.contentGeneratorConfig?.authType,
     });
 
-    return this.processStreamResponse(model, streamResponse);
+    return this.processStreamResponse(target.model, streamResponse);
   }
 
   /**
@@ -655,16 +691,16 @@ export class GeminiChat {
             (part) =>
               !(
                 part &&
-                typeof part === 'object' &&
-                'thought' in part &&
+                typeof part === "object" &&
+                "thought" in part &&
                 part.thought
               ),
           )
           .map((part) => {
             if (
               part &&
-              typeof part === 'object' &&
-              'thoughtSignature' in part
+              typeof part === "object" &&
+              "thoughtSignature" in part
             ) {
               const newPart = { ...part };
               delete (newPart as { thoughtSignature?: string })
@@ -705,12 +741,12 @@ export class GeminiChat {
     for (let i = 0; i < this.history.length; i++) {
       const content = this.history[i];
       if (
-        content.role === 'model' &&
+        content.role === "model" &&
         content.parts?.some(
           (part) =>
             part &&
-            typeof part === 'object' &&
-            'thought' in part &&
+            typeof part === "object" &&
+            "thought" in part &&
             part.thought,
         )
       ) {
@@ -738,16 +774,16 @@ export class GeminiChat {
             (part) =>
               !(
                 part &&
-                typeof part === 'object' &&
-                'thought' in part &&
+                typeof part === "object" &&
+                "thought" in part &&
                 part.thought
               ),
           )
           .map((part) => {
             if (
               part &&
-              typeof part === 'object' &&
-              'thoughtSignature' in part
+              typeof part === "object" &&
+              "thoughtSignature" in part
             ) {
               const newPart = { ...part };
               delete (newPart as { thoughtSignature?: string })
@@ -774,7 +810,7 @@ export class GeminiChat {
   stripOrphanedUserEntriesFromHistory(): void {
     while (
       this.history.length > 0 &&
-      this.history[this.history.length - 1]!.role === 'user'
+      this.history[this.history.length - 1]!.role === "user"
     ) {
       this.history.pop();
     }
@@ -870,10 +906,10 @@ export class GeminiChat {
     const thoughtText = allModelParts
       .filter((part) => part.thought)
       .map((part) => part.text)
-      .join('')
+      .join("")
       .trim();
 
-    if (thoughtText !== '') {
+    if (thoughtText !== "") {
       thoughtContentPart = {
         text: thoughtText,
         thought: true,
@@ -906,7 +942,7 @@ export class GeminiChat {
     const contentText = consolidatedHistoryParts
       .filter((part) => part.text)
       .map((part) => part.text)
-      .join('')
+      .join("")
       .trim();
 
     // Record assistant turn with raw Content and metadata
@@ -943,19 +979,19 @@ export class GeminiChat {
     if (!hasToolCall && (!hasFinishReason || !hasAnyContent)) {
       if (!hasFinishReason) {
         throw new InvalidStreamError(
-          'Model stream ended without a finish reason.',
-          'NO_FINISH_REASON',
+          "Model stream ended without a finish reason.",
+          "NO_FINISH_REASON",
         );
       } else {
         throw new InvalidStreamError(
-          'Model stream ended with empty response text.',
-          'NO_RESPONSE_TEXT',
+          "Model stream ended with empty response text.",
+          "NO_RESPONSE_TEXT",
         );
       }
     }
 
     this.history.push({
-      role: 'model',
+      role: "model",
       parts: [
         ...(thoughtContentPart ? [thoughtContentPart] : []),
         ...consolidatedHistoryParts,
@@ -966,9 +1002,9 @@ export class GeminiChat {
 
 /** Visible for Testing */
 export function isSchemaDepthError(errorMessage: string): boolean {
-  return errorMessage.includes('maximum schema depth exceeded');
+  return errorMessage.includes("maximum schema depth exceeded");
 }
 
 export function isInvalidArgumentError(errorMessage: string): boolean {
-  return errorMessage.includes('Request contains an invalid argument');
+  return errorMessage.includes("Request contains an invalid argument");
 }

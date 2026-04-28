@@ -4,39 +4,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   getAvailableModelsForAuthType,
   getFilteredTramModels,
   getOpenAIAvailableModelFromEnv,
-} from './availableModels.js';
-import { AuthType, type Config } from '@tram-ai/tram-core';
+} from "./availableModels.js";
+import { AuthType, type Config } from "@tram-ai/tram-core";
 
-describe('availableModels', () => {
-  describe('TRAM models', () => {
+describe("availableModels", () => {
+  describe("TRAM models", () => {
     const tramModels = getFilteredTramModels();
 
-    it('should include only coder-model', () => {
+    it("should include only coder-model", () => {
       expect(tramModels.length).toBe(1);
-      expect(tramModels[0].id).toBe('coder-model');
+      expect(tramModels[0].id).toBe("coder-model");
     });
 
-    it('should have coder-model with vision capability', () => {
+    it("should have coder-model with vision capability", () => {
       const coderModel = tramModels[0];
       expect(coderModel.isVision).toBe(true);
     });
   });
 
-  describe('getFilteredTramModels', () => {
-    it('should return coder-model with vision capability', () => {
+  describe("getFilteredTramModels", () => {
+    it("should return coder-model with vision capability", () => {
       const models = getFilteredTramModels();
       expect(models.length).toBe(1);
-      expect(models[0].id).toBe('coder-model');
+      expect(models[0].id).toBe("coder-model");
       expect(models[0].isVision).toBe(true);
     });
   });
 
-  describe('getOpenAIAvailableModelFromEnv', () => {
+  describe("getOpenAIAvailableModelFromEnv", () => {
     const originalEnv = process.env;
 
     beforeEach(() => {
@@ -47,26 +47,26 @@ describe('availableModels', () => {
       process.env = originalEnv;
     });
 
-    it('should return null when OPENAI_MODEL is not set', () => {
-      delete process.env['OPENAI_MODEL'];
+    it("should return null when OPENAI_MODEL is not set", () => {
+      delete process.env["OPENAI_MODEL"];
       expect(getOpenAIAvailableModelFromEnv()).toBeNull();
     });
 
-    it('should return model from OPENAI_MODEL env var', () => {
-      process.env['OPENAI_MODEL'] = 'gpt-4-turbo';
+    it("should return model from OPENAI_MODEL env var", () => {
+      process.env["OPENAI_MODEL"] = "gpt-4-turbo";
       const model = getOpenAIAvailableModelFromEnv();
-      expect(model?.id).toBe('gpt-4-turbo');
-      expect(model?.label).toBe('gpt-4-turbo');
+      expect(model?.id).toBe("gpt-4-turbo");
+      expect(model?.label).toBe("gpt-4-turbo");
     });
 
-    it('should trim whitespace from env var', () => {
-      process.env['OPENAI_MODEL'] = '  gpt-4  ';
+    it("should trim whitespace from env var", () => {
+      process.env["OPENAI_MODEL"] = "  gpt-4  ";
       const model = getOpenAIAvailableModelFromEnv();
-      expect(model?.id).toBe('gpt-4');
+      expect(model?.id).toBe("gpt-4");
     });
   });
 
-  describe('getAvailableModelsForAuthType', () => {
+  describe("getAvailableModelsForAuthType", () => {
     const originalEnv = process.env;
 
     beforeEach(() => {
@@ -77,20 +77,20 @@ describe('availableModels', () => {
       process.env = originalEnv;
     });
 
-    it('should return hard-coded tram models for tram-oauth', () => {
+    it("should return hard-coded tram models for tram-oauth", () => {
       const models = getAvailableModelsForAuthType(AuthType.TRAM_OAUTH);
       expect(models.length).toBe(1);
-      expect(models[0].id).toBe('coder-model');
+      expect(models[0].id).toBe("coder-model");
       expect(models[0].isVision).toBe(true);
     });
 
-    it('should use config models for tram-oauth when config is provided', () => {
+    it("should use config models for tram-oauth when config is provided", () => {
       const mockConfig = {
         getAvailableModelsForAuthType: vi.fn().mockReturnValue([
           {
-            id: 'custom',
-            label: 'Custom',
-            description: 'Custom model',
+            id: "custom",
+            label: "Custom",
+            description: "Custom model",
             authType: AuthType.TRAM_OAUTH,
             isVision: false,
           },
@@ -103,20 +103,20 @@ describe('availableModels', () => {
       );
       expect(models).toEqual([
         {
-          id: 'custom',
-          label: 'Custom',
-          description: 'Custom model',
+          id: "custom",
+          label: "Custom",
+          description: "Custom model",
           isVision: false,
         },
       ]);
     });
 
-    it('should use config.getAvailableModels for openai authType when available', () => {
+    it("should use config.getAvailableModels for openai authType when available", () => {
       const mockModels = [
         {
-          id: 'gpt-4',
-          label: 'GPT-4',
-          description: 'Test',
+          id: "gpt-4",
+          label: "GPT-4",
+          description: "Test",
           authType: AuthType.USE_OPENAI,
           isVision: false,
         },
@@ -133,11 +133,11 @@ describe('availableModels', () => {
       );
 
       expect(getAvailableModelsForAuthType).toHaveBeenCalled();
-      expect(models[0].id).toBe('gpt-4');
+      expect(models[0].id).toBe("gpt-4");
     });
 
-    it('should fallback to env var for openai when config returns empty', () => {
-      process.env['OPENAI_MODEL'] = 'fallback-model';
+    it("should fallback to env var for openai when config returns empty", () => {
+      process.env["OPENAI_MODEL"] = "fallback-model";
       const mockConfig = {
         getAvailableModelsForAuthType: vi.fn().mockReturnValue([]),
       } as unknown as Config;
@@ -150,11 +150,11 @@ describe('availableModels', () => {
       expect(models).toEqual([]);
     });
 
-    it('should fallback to env var for openai when config throws', () => {
-      process.env['OPENAI_MODEL'] = 'fallback-model';
+    it("should fallback to env var for openai when config throws", () => {
+      process.env["OPENAI_MODEL"] = "fallback-model";
       const mockConfig = {
         getAvailableModelsForAuthType: vi.fn().mockImplementation(() => {
-          throw new Error('Registry not initialized');
+          throw new Error("Registry not initialized");
         }),
       } as unknown as Config;
 
@@ -166,19 +166,19 @@ describe('availableModels', () => {
       expect(models).toEqual([]);
     });
 
-    it('should return env model for openai without config', () => {
-      process.env['OPENAI_MODEL'] = 'gpt-4-turbo';
+    it("should return env model for openai without config", () => {
+      process.env["OPENAI_MODEL"] = "gpt-4-turbo";
       const models = getAvailableModelsForAuthType(AuthType.USE_OPENAI);
-      expect(models[0].id).toBe('gpt-4-turbo');
+      expect(models[0].id).toBe("gpt-4-turbo");
     });
 
-    it('should return empty array for openai without config or env', () => {
-      delete process.env['OPENAI_MODEL'];
+    it("should return empty array for openai without config or env", () => {
+      delete process.env["OPENAI_MODEL"];
       const models = getAvailableModelsForAuthType(AuthType.USE_OPENAI);
       expect(models).toEqual([]);
     });
 
-    it('should return empty array for other auth types', () => {
+    it("should return empty array for other auth types", () => {
       const models = getAvailableModelsForAuthType(AuthType.USE_GEMINI);
       expect(models).toEqual([]);
     });

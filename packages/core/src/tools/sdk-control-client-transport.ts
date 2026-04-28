@@ -17,10 +17,10 @@
  * communicates with SDK MCP servers running in the SDK process.
  */
 
-import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import type { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('MCP_SDK_TRANSPORT');
+const debugLogger = createDebugLogger("MCP_SDK_TRANSPORT");
 
 /**
  * Callback to send MCP messages to SDK via control plane

@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { type SlashCommand, CommandKind } from '../commands/types.js';
-import { t } from '../../i18n/index.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import { type SlashCommand, CommandKind } from "../commands/types.js";
+import { t } from "../../i18n/index.js";
 
 interface Help {
   commands: readonly SlashCommand[];
@@ -25,32 +25,32 @@ export const Help: React.FC<Help> = ({ commands, width }) => (
   >
     {/* Basics */}
     <Text bold color={theme.text.primary}>
-      {t('Basics:')}
+      {t("Basics:")}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
-        {t('Add context')}
+        {t("Add context")}
       </Text>
-      :{' '}
+      :{" "}
       {t(
-        'Use {{symbol}} to specify files for context (e.g., {{example}}) to target specific files or folders.',
+        "Use {{symbol}} to specify files for context (e.g., {{example}}) to target specific files or folders.",
         {
-          symbol: t('@'),
-          example: t('@src/myFile.ts'),
+          symbol: t("@"),
+          example: t("@src/myFile.ts"),
         },
       )}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
-        {t('Shell mode')}
+        {t("Shell mode")}
       </Text>
-      :{' '}
+      :{" "}
       {t(
-        'Execute shell commands via {{symbol}} (e.g., {{example1}}) or use natural language (e.g., {{example2}}).',
+        "Execute shell commands via {{symbol}} (e.g., {{example1}}) or use natural language (e.g., {{example2}}).",
         {
-          symbol: t('!'),
-          example1: t('!npm run start'),
-          example2: t('start server'),
+          symbol: t("!"),
+          example1: t("!npm run start"),
+          example2: t("start server"),
         },
       )}
     </Text>
@@ -59,7 +59,7 @@ export const Help: React.FC<Help> = ({ commands, width }) => (
 
     {/* Commands */}
     <Text bold color={theme.text.primary}>
-      {t('Commands:')}
+      {t("Commands:")}
     </Text>
     {commands
       .filter((command) => command.description && !command.hidden)
@@ -67,13 +67,13 @@ export const Help: React.FC<Help> = ({ commands, width }) => (
         <Box key={command.name} flexDirection="column">
           <Text color={theme.text.primary}>
             <Text bold color={theme.text.accent}>
-              {' '}
-              {formatCommandLabel(command, '/')}
+              {" "}
+              {formatCommandLabel(command, "/")}
             </Text>
             {command.kind === CommandKind.MCP_PROMPT && (
               <Text color={theme.text.secondary}> [MCP]</Text>
             )}
-            {command.description && ' - ' + command.description}
+            {command.description && " - " + command.description}
           </Text>
           {command.subCommands &&
             command.subCommands
@@ -81,93 +81,93 @@ export const Help: React.FC<Help> = ({ commands, width }) => (
               .map((subCommand) => (
                 <Text key={subCommand.name} color={theme.text.primary}>
                   <Text bold color={theme.text.accent}>
-                    {'   '}
+                    {"   "}
                     {formatCommandLabel(subCommand)}
                   </Text>
-                  {subCommand.description && ' - ' + subCommand.description}
+                  {subCommand.description && " - " + subCommand.description}
                 </Text>
               ))}
         </Box>
       ))}
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
-        {' '}
-        !{' '}
+        {" "}
+        !{" "}
       </Text>
-      - {t('shell command')}
+      - {t("shell command")}
     </Text>
     <Text color={theme.text.primary}>
-      <Text color={theme.text.secondary}>[MCP]</Text> -{' '}
-      {t('Model Context Protocol command (from external servers)')}
+      <Text color={theme.text.secondary}>[MCP]</Text> -{" "}
+      {t("Model Context Protocol command (from external servers)")}
     </Text>
 
     <Box height={1} />
 
     {/* Shortcuts */}
     <Text bold color={theme.text.primary}>
-      {t('Keyboard Shortcuts:')}
+      {t("Keyboard Shortcuts:")}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
         Alt+Left/Right
-      </Text>{' '}
-      - {t('Jump through words in the input')}
+      </Text>{" "}
+      - {t("Jump through words in the input")}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
         Ctrl+C
-      </Text>{' '}
-      - {t('Close dialogs, cancel requests, or quit application')}
+      </Text>{" "}
+      - {t("Close dialogs, cancel requests, or quit application")}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
-        {process.platform === 'win32' ? 'Ctrl+Enter' : 'Ctrl+J'}
-      </Text>{' '}
-      -{' '}
-      {process.platform === 'linux'
-        ? t('New line (Alt+Enter works for certain linux distros)')
-        : t('New line')}
+        {process.platform === "win32" ? "Ctrl+Enter" : "Ctrl+J"}
+      </Text>{" "}
+      -{" "}
+      {process.platform === "linux"
+        ? t("New line (Alt+Enter works for certain linux distros)")
+        : t("New line")}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
         Ctrl+L
-      </Text>{' '}
-      - {t('Clear the screen')}
+      </Text>{" "}
+      - {t("Clear the screen")}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
-        {process.platform === 'darwin' ? 'Ctrl+X / Meta+Enter' : 'Ctrl+X'}
-      </Text>{' '}
-      - {t('Open input in external editor')}
+        {process.platform === "darwin" ? "Ctrl+X / Meta+Enter" : "Ctrl+X"}
+      </Text>{" "}
+      - {t("Open input in external editor")}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
         Enter
-      </Text>{' '}
-      - {t('Send message')}
+      </Text>{" "}
+      - {t("Send message")}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
         Esc
-      </Text>{' '}
-      - {t('Cancel operation / Clear input (double press)')}
+      </Text>{" "}
+      - {t("Cancel operation / Clear input (double press)")}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
-        {process.platform === 'win32' ? 'Tab' : 'Shift+Tab'}
-      </Text>{' '}
-      - {t('Cycle approval modes')}
+        {process.platform === "win32" ? "Tab" : "Shift+Tab"}
+      </Text>{" "}
+      - {t("Cycle approval modes")}
     </Text>
     <Text color={theme.text.primary}>
       <Text bold color={theme.text.accent}>
         Up/Down
-      </Text>{' '}
-      - {t('Cycle through your prompt history')}
+      </Text>{" "}
+      - {t("Cycle through your prompt history")}
     </Text>
     <Box height={1} />
     <Text color={theme.text.primary}>
-      {t('For a full list of shortcuts, see {{docPath}}', {
-        docPath: t('docs/keyboard-shortcuts.md'),
+      {t("For a full list of shortcuts, see {{docPath}}", {
+        docPath: t("docs/keyboard-shortcuts.md"),
       })}
     </Text>
   </Box>
@@ -176,7 +176,7 @@ export const Help: React.FC<Help> = ({ commands, width }) => (
 /**
  * Builds a display label for a slash command, including any alternate names.
  */
-function formatCommandLabel(command: SlashCommand, prefix = ''): string {
+function formatCommandLabel(command: SlashCommand, prefix = ""): string {
   const altNames = command.altNames?.filter(Boolean);
   const baseLabel = `${prefix}${command.name}`;
 
@@ -184,5 +184,5 @@ function formatCommandLabel(command: SlashCommand, prefix = ''): string {
     return baseLabel;
   }
 
-  return `${baseLabel} (${altNames.join(', ')})`;
+  return `${baseLabel} (${altNames.join(", ")})`;
 }

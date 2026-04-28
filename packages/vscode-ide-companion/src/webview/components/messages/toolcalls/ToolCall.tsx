@@ -9,16 +9,16 @@
  * It re-exports the router and types from the toolcalls module.
  */
 
-import type { FC } from 'react';
-import type { ToolCallData } from '@tram-ai/webui';
-import { ToolCallRouter } from './index.js';
+import type { FC } from "react";
+import type { ToolCallData } from "@tram-ai/webui";
+import { ToolCallRouter } from "./index.js";
 
 // Re-export types from webui for backward compatibility
 export type {
   ToolCallData,
   BaseToolCallProps as ToolCallProps,
   ToolCallContent,
-} from '@tram-ai/webui';
+} from "@tram-ai/webui";
 
 export const ToolCall: FC<{
   toolCall: ToolCallData;

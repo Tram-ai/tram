@@ -4,54 +4,54 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as os from 'os';
+import * as fs from "fs/promises";
+import * as path from "path";
+import * as os from "os";
 // Note: yaml package would need to be added as a dependency
 // For now, we'll use a simple YAML parser implementation
 import {
   parse as parseYaml,
   stringify as stringifyYaml,
-} from '../utils/yaml-parser.js';
+} from "../utils/yaml-parser.js";
 import type {
   SubagentConfig,
   SubagentRuntimeConfig,
   SubagentLevel,
   ListSubagentsOptions,
   CreateSubagentOptions,
-} from './types.js';
+} from "./types.js";
 import type {
   PromptConfig,
   ModelConfig,
   RunConfig,
   ToolConfig,
-} from '../agents/runtime/agent-types.js';
-import { SubagentError, SubagentErrorCode } from './types.js';
-import { SubagentValidator } from './validation.js';
-import { AgentHeadless } from '../agents/runtime/agent-headless.js';
+} from "../agents/runtime/agent-types.js";
+import { SubagentError, SubagentErrorCode } from "./types.js";
+import { SubagentValidator } from "./validation.js";
+import { AgentHeadless } from "../agents/runtime/agent-headless.js";
 import type {
   AgentEventEmitter,
   AgentHooks,
-} from '../agents/runtime/agent-events.js';
-import type { Config } from '../config/config.js';
-import { APPROVAL_MODES } from '../config/config.js';
+} from "../agents/runtime/agent-events.js";
+import type { Config } from "../config/config.js";
+import { APPROVAL_MODES } from "../config/config.js";
 import {
   type AuthType,
   type ContentGenerator,
   type ContentGeneratorConfig,
   createContentGenerator,
-} from '../core/contentGenerator.js';
-import { buildAgentContentGeneratorConfig } from '../models/content-generator-config.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import { normalizeContent } from '../utils/textUtils.js';
-import { parseSubagentModelSelection } from './model-selection.js';
+} from "../core/contentGenerator.js";
+import { buildAgentContentGeneratorConfig } from "../models/content-generator-config.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import { normalizeContent } from "../utils/textUtils.js";
+import { parseSubagentModelSelection } from "./model-selection.js";
 
-const debugLogger = createDebugLogger('SUBAGENT_MANAGER');
-import { BuiltinAgentRegistry } from './builtin-agents.js';
-import { ToolDisplayNamesMigration } from '../tools/tool-names.js';
+const debugLogger = createDebugLogger("SUBAGENT_MANAGER");
+import { BuiltinAgentRegistry } from "./builtin-agents.js";
+import { ToolDisplayNamesMigration } from "../tools/tool-names.js";
 
-const TRAM_CONFIG_DIR = '.tram';
-const AGENT_CONFIG_DIR = 'agents';
+const TRAM_CONFIG_DIR = ".tram";
+const AGENT_CONFIG_DIR = "agents";
 
 /**
  * Manages subagent configurations stored as Markdown files with YAML frontmatter.
@@ -78,7 +78,7 @@ export class SubagentManager {
       try {
         listener();
       } catch (error) {
-        debugLogger.warn('Subagent change listener threw an error:', error);
+        debugLogger.warn("Subagent change listener threw an error:", error);
       }
     }
   }
@@ -97,7 +97,7 @@ export class SubagentManager {
     this.validator.validateOrThrow(config);
 
     // Prevent creating session-level agents
-    if (options.level === 'session') {
+    if (options.level === "session") {
       throw new SubagentError(
         `Cannot create session-level subagent "${config.name}". Session agents are read-only and provided at runtime.`,
         SubagentErrorCode.INVALID_CONFIG,
@@ -139,12 +139,12 @@ export class SubagentManager {
     const content = this.serializeSubagent(finalConfig);
 
     try {
-      await fs.writeFile(filePath, content, 'utf8');
+      await fs.writeFile(filePath, content, "utf8");
       // Refresh cache after successful creation
       await this.refreshCache();
     } catch (error) {
       throw new SubagentError(
-        `Failed to write subagent file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to write subagent file: ${error instanceof Error ? error.message : "Unknown error"}`,
         SubagentErrorCode.FILE_ERROR,
         config.name,
       );
@@ -168,12 +168,12 @@ export class SubagentManager {
 
     if (level) {
       // Search only the specified level
-      if (level === 'builtin') {
+      if (level === "builtin") {
         return BuiltinAgentRegistry.getBuiltinAgent(name);
       }
 
-      if (level === 'session') {
-        const sessionSubagents = this.subagentsCache?.get('session') || [];
+      if (level === "session") {
+        const sessionSubagents = this.subagentsCache?.get("session") || [];
         return (
           sessionSubagents.find(
             (agent) => agent.name.toLowerCase() === lowerName,
@@ -185,7 +185,7 @@ export class SubagentManager {
     }
 
     // Try session level first (highest priority for runtime)
-    const sessionSubagents = this.subagentsCache?.get('session') || [];
+    const sessionSubagents = this.subagentsCache?.get("session") || [];
     const sessionConfig = sessionSubagents.find(
       (agent) => agent.name.toLowerCase() === lowerName,
     );
@@ -194,13 +194,13 @@ export class SubagentManager {
     }
 
     // Try project level
-    const projectConfig = await this.findSubagentByNameAtLevel(name, 'project');
+    const projectConfig = await this.findSubagentByNameAtLevel(name, "project");
     if (projectConfig) {
       return projectConfig;
     }
 
     // Try user level
-    const userConfig = await this.findSubagentByNameAtLevel(name, 'user');
+    const userConfig = await this.findSubagentByNameAtLevel(name, "user");
     if (userConfig) {
       return userConfig;
     }
@@ -208,7 +208,7 @@ export class SubagentManager {
     // Try extension level
     const extensionConfig = await this.findSubagentByNameAtLevel(
       name,
-      'extension',
+      "extension",
     );
     if (extensionConfig) {
       return extensionConfig;
@@ -249,7 +249,7 @@ export class SubagentManager {
     }
 
     // Prevent updating session-level agents
-    if (existing.level === 'session') {
+    if (existing.level === "session") {
       throw new SubagentError(
         `Cannot update session-level subagent "${name}"`,
         SubagentErrorCode.INVALID_CONFIG,
@@ -276,12 +276,12 @@ export class SubagentManager {
     const content = this.serializeSubagent(updatedConfig);
 
     try {
-      await fs.writeFile(existing.filePath, content, 'utf8');
+      await fs.writeFile(existing.filePath, content, "utf8");
       // Refresh cache after successful update
       await this.refreshCache();
     } catch (error) {
       throw new SubagentError(
-        `Failed to update subagent file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to update subagent file: ${error instanceof Error ? error.message : "Unknown error"}`,
         SubagentErrorCode.FILE_ERROR,
         name,
       );
@@ -308,7 +308,7 @@ export class SubagentManager {
         name,
       );
     }
-    if (level === 'extension') {
+    if (level === "extension") {
       throw new SubagentError(
         `Cannot delete subagent "${name}" in extension "${extensionName}", If needed, you can directly uninstall extension.`,
         SubagentErrorCode.INVALID_CONFIG,
@@ -318,12 +318,12 @@ export class SubagentManager {
 
     const levelsToCheck: SubagentLevel[] = level
       ? [level]
-      : ['project', 'user'];
+      : ["project", "user"];
     let deleted = false;
 
     for (const currentLevel of levelsToCheck) {
       // Skip builtin and session levels for deletion
-      if (currentLevel === 'builtin' || currentLevel === 'session') {
+      if (currentLevel === "builtin" || currentLevel === "session") {
         continue;
       }
 
@@ -367,7 +367,7 @@ export class SubagentManager {
     if (this.config.getSdkMode()) {
       const levelsToCheck: SubagentLevel[] = options.level
         ? [options.level]
-        : ['session'];
+        : ["session"];
 
       for (const level of levelsToCheck) {
         const levelSubagents = this.subagentsCache?.get(level) || [];
@@ -392,7 +392,7 @@ export class SubagentManager {
     // Normal mode: load from project, user, and builtin levels
     const levelsToCheck: SubagentLevel[] = options.level
       ? [options.level]
-      : ['project', 'user', 'builtin', 'extension'];
+      : ["project", "user", "builtin", "extension"];
 
     // Check if we should use cache or force refresh
     const shouldUseCache = !options.force && this.subagentsCache !== null;
@@ -431,10 +431,10 @@ export class SubagentManager {
         let comparison = 0;
 
         switch (options.sortBy) {
-          case 'name':
+          case "name":
             comparison = a.name.localeCompare(b.name);
             break;
-          case 'level': {
+          case "level": {
             // Project comes before user, user comes before builtin, session comes last
             const levelOrder = {
               project: 0,
@@ -453,7 +453,7 @@ export class SubagentManager {
             break;
         }
 
-        return options.sortOrder === 'desc' ? -comparison : comparison;
+        return options.sortOrder === "desc" ? -comparison : comparison;
       });
     }
 
@@ -473,11 +473,11 @@ export class SubagentManager {
 
     const sessionSubagents = subagents.map((config) => ({
       ...config,
-      level: 'session' as SubagentLevel,
+      level: "session" as SubagentLevel,
       filePath: `<session:${config.name}>`,
     }));
 
-    this.subagentsCache.set('session', sessionSubagents);
+    this.subagentsCache.set("session", sessionSubagents);
     this.notifyChangeListeners();
   }
 
@@ -490,7 +490,7 @@ export class SubagentManager {
   async refreshCache(): Promise<void> {
     const subagentsCache = new Map();
 
-    const levels: SubagentLevel[] = ['project', 'user', 'builtin', 'extension'];
+    const levels: SubagentLevel[] = ["project", "user", "builtin", "extension"];
 
     for (const level of levels) {
       const levelSubagents = await this.listSubagentsAtLevel(level);
@@ -498,9 +498,9 @@ export class SubagentManager {
     }
 
     // Preserve session subagents from old cache
-    const sessionSubagents = this.subagentsCache?.get('session');
+    const sessionSubagents = this.subagentsCache?.get("session");
     if (sessionSubagents) {
-      subagentsCache.set('session', sessionSubagents);
+      subagentsCache.set("session", sessionSubagents);
     }
 
     this.subagentsCache = subagentsCache;
@@ -539,10 +539,10 @@ export class SubagentManager {
     let content: string;
 
     try {
-      content = await fs.readFile(filePath, 'utf8');
+      content = await fs.readFile(filePath, "utf8");
     } catch (error) {
       throw new SubagentError(
-        `Failed to read subagent file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to read subagent file: ${error instanceof Error ? error.message : "Unknown error"}`,
         SubagentErrorCode.FILE_ERROR,
       );
     }
@@ -580,30 +580,30 @@ export class SubagentManager {
     };
 
     if (config.tools && config.tools.length > 0) {
-      frontmatter['tools'] = config.tools;
+      frontmatter["tools"] = config.tools;
     }
 
     if (config.disallowedTools && config.disallowedTools.length > 0) {
-      frontmatter['disallowedTools'] = config.disallowedTools;
+      frontmatter["disallowedTools"] = config.disallowedTools;
     }
 
-    if (config.model && config.model !== 'inherit') {
-      frontmatter['model'] = config.model;
+    if (config.model && config.model !== "inherit") {
+      frontmatter["model"] = config.model;
     }
 
     if (config.runConfig) {
-      frontmatter['runConfig'] = config.runConfig;
+      frontmatter["runConfig"] = config.runConfig;
     }
 
-    if (config.color && config.color !== 'auto') {
-      frontmatter['color'] = config.color;
+    if (config.color && config.color !== "auto") {
+      frontmatter["color"] = config.color;
     }
 
     if (
       config.approvalMode &&
       APPROVAL_MODES.includes(config.approvalMode as never)
     ) {
-      frontmatter['approvalMode'] = config.approvalMode;
+      frontmatter["approvalMode"] = config.approvalMode;
     }
 
     // Serialize to YAML
@@ -740,7 +740,7 @@ export class SubagentManager {
     ) {
       const toolNames = config.tools
         ? this.transformToToolNames(config.tools)
-        : ['*'];
+        : ["*"];
       toolConfig = {
         tools: toolNames,
         ...(config.disallowedTools && config.disallowedTools.length > 0
@@ -842,16 +842,16 @@ export class SubagentManager {
    * @returns Absolute file path
    */
   getSubagentPath(name: string, level: SubagentLevel): string {
-    if (level === 'builtin') {
+    if (level === "builtin") {
       return `<builtin:${name}>`;
     }
 
-    if (level === 'session') {
+    if (level === "session") {
       return `<session:${name}>`;
     }
 
     const baseDir =
-      level === 'project'
+      level === "project"
         ? path.join(
             this.config.getProjectRoot(),
             TRAM_CONFIG_DIR,
@@ -873,11 +873,11 @@ export class SubagentManager {
     level: SubagentLevel,
   ): Promise<SubagentConfig[]> {
     // Handle built-in agents
-    if (level === 'builtin') {
+    if (level === "builtin") {
       return BuiltinAgentRegistry.getBuiltinAgents();
     }
 
-    if (level === 'extension') {
+    if (level === "extension") {
       const extensions = this.config.getActiveExtensions();
       return extensions.flatMap((extension) => extension.agents || []);
     }
@@ -888,11 +888,11 @@ export class SubagentManager {
 
     // If project level is requested but project root is same as home directory,
     // return empty array to avoid conflicts between project and global agents
-    if (level === 'project' && isHomeDirectory) {
+    if (level === "project" && isHomeDirectory) {
       return [];
     }
 
-    let baseDir = level === 'project' ? projectRoot : homeDir;
+    let baseDir = level === "project" ? projectRoot : homeDir;
     baseDir = path.join(baseDir, TRAM_CONFIG_DIR, AGENT_CONFIG_DIR);
 
     try {
@@ -900,7 +900,7 @@ export class SubagentManager {
       const subagents: SubagentConfig[] = [];
 
       for (const file of files) {
-        if (!file.endsWith('.md')) continue;
+        if (!file.endsWith(".md")) continue;
 
         const filePath = path.join(baseDir, file);
 
@@ -974,16 +974,16 @@ export async function loadSubagentFromDir(
     const subagents: SubagentConfig[] = [];
 
     for (const file of files) {
-      if (!file.endsWith('.md')) continue;
+      if (!file.endsWith(".md")) continue;
 
       const filePath = path.join(baseDir, file);
 
       try {
-        const content = await fs.readFile(filePath, 'utf8');
+        const content = await fs.readFile(filePath, "utf8");
         const config = parseSubagentContent(
           content,
           filePath,
-          'extension',
+          "extension",
           new SubagentValidator(),
         );
         subagents.push(config);
@@ -1014,7 +1014,7 @@ function parseSubagentContent(
     const match = normalizedContent.match(frontmatterRegex);
 
     if (!match) {
-      throw new Error('Invalid format: missing YAML frontmatter');
+      throw new Error("Invalid format: missing YAML frontmatter");
     }
 
     const [, frontmatterYaml, systemPrompt] = match;
@@ -1023,14 +1023,14 @@ function parseSubagentContent(
     const frontmatter = parseYaml(frontmatterYaml) as Record<string, unknown>;
 
     // Extract required fields and convert to strings
-    const nameRaw = frontmatter['name'];
-    const descriptionRaw = frontmatter['description'];
+    const nameRaw = frontmatter["name"];
+    const descriptionRaw = frontmatter["description"];
 
-    if (nameRaw == null || nameRaw === '') {
+    if (nameRaw == null || nameRaw === "") {
       throw new Error('Missing "name" in frontmatter');
     }
 
-    if (descriptionRaw == null || descriptionRaw === '') {
+    if (descriptionRaw == null || descriptionRaw === "") {
       throw new Error('Missing "description" in frontmatter');
     }
 
@@ -1039,37 +1039,37 @@ function parseSubagentContent(
     const description = String(descriptionRaw);
 
     // Extract optional fields
-    const tools = frontmatter['tools'] as string[] | undefined;
-    const disallowedToolsRaw = frontmatter['disallowedTools'];
+    const tools = frontmatter["tools"] as string[] | undefined;
+    const disallowedToolsRaw = frontmatter["disallowedTools"];
     const disallowedTools: string[] | undefined = Array.isArray(
       disallowedToolsRaw,
     )
       ? disallowedToolsRaw.filter(
-          (item): item is string => typeof item === 'string',
+          (item): item is string => typeof item === "string",
         )
-      : typeof disallowedToolsRaw === 'string'
+      : typeof disallowedToolsRaw === "string"
         ? [disallowedToolsRaw]
         : undefined;
-    const modelRaw = frontmatter['model'];
-    const legacyModelConfig = frontmatter['modelConfig'] as
+    const modelRaw = frontmatter["model"];
+    const legacyModelConfig = frontmatter["modelConfig"] as
       | Record<string, unknown>
       | undefined;
-    const runConfig = frontmatter['runConfig'] as
+    const runConfig = frontmatter["runConfig"] as
       | Record<string, unknown>
       | undefined;
-    const color = frontmatter['color'] as string | undefined;
-    const approvalModeRaw = frontmatter['approvalMode'];
+    const color = frontmatter["color"] as string | undefined;
+    const approvalModeRaw = frontmatter["approvalMode"];
     if (
       approvalModeRaw !== undefined &&
       approvalModeRaw !== null &&
-      typeof approvalModeRaw !== 'string'
+      typeof approvalModeRaw !== "string"
     ) {
       throw new Error(
-        `Invalid "approvalMode" value: expected a string, got ${typeof approvalModeRaw}. Valid values: ${APPROVAL_MODES.join(', ')}`,
+        `Invalid "approvalMode" value: expected a string, got ${typeof approvalModeRaw}. Valid values: ${APPROVAL_MODES.join(", ")}`,
       );
     }
     const approvalMode =
-      typeof approvalModeRaw === 'string' && approvalModeRaw !== ''
+      typeof approvalModeRaw === "string" && approvalModeRaw !== ""
         ? approvalModeRaw
         : undefined;
     if (
@@ -1077,14 +1077,14 @@ function parseSubagentContent(
       !APPROVAL_MODES.includes(approvalMode as never)
     ) {
       throw new Error(
-        `Invalid "approvalMode" value "${approvalMode}". Valid values: ${APPROVAL_MODES.join(', ')}`,
+        `Invalid "approvalMode" value "${approvalMode}". Valid values: ${APPROVAL_MODES.join(", ")}`,
       );
     }
     const model =
-      modelRaw != null && modelRaw !== ''
+      modelRaw != null && modelRaw !== ""
         ? String(modelRaw)
-        : typeof legacyModelConfig?.['model'] === 'string'
-          ? legacyModelConfig['model']
+        : typeof legacyModelConfig?.["model"] === "string"
+          ? legacyModelConfig["model"]
           : undefined;
 
     const config: SubagentConfig = {
@@ -1104,13 +1104,13 @@ function parseSubagentContent(
     // Validate the parsed configuration
     const validation = validator.validateConfig(config);
     if (!validation.isValid) {
-      throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+      throw new Error(`Validation failed: ${validation.errors.join(", ")}`);
     }
 
     return config;
   } catch (error) {
     throw new SubagentError(
-      `Failed to parse subagent file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to parse subagent file: ${error instanceof Error ? error.message : "Unknown error"}`,
       SubagentErrorCode.INVALID_CONFIG,
     );
   }

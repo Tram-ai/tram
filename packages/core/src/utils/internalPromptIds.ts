@@ -12,9 +12,9 @@
 
 /** Prompt IDs that belong to internal background operations. */
 const INTERNAL_PROMPT_IDS: ReadonlySet<string> = new Set([
-  'prompt_suggestion',
-  'forked_query',
-  'speculation',
+  "prompt_suggestion",
+  "forked_query",
+  "speculation",
 ]);
 
 /**

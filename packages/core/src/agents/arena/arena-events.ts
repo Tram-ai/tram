@@ -4,45 +4,45 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 import type {
   ArenaModelConfig,
   ArenaAgentResult,
   ArenaSessionResult,
-} from './types.js';
-import type { AgentStatus } from '../runtime/agent-types.js';
+} from "./types.js";
+import type { AgentStatus } from "../runtime/agent-types.js";
 
 /**
  * Arena event types.
  */
 export enum ArenaEventType {
   /** Arena session started */
-  SESSION_START = 'session_start',
+  SESSION_START = "session_start",
   /** Informational or warning update during session lifecycle */
-  SESSION_UPDATE = 'session_update',
+  SESSION_UPDATE = "session_update",
   /** Arena session completed */
-  SESSION_COMPLETE = 'session_complete',
+  SESSION_COMPLETE = "session_complete",
   /** Arena session failed */
-  SESSION_ERROR = 'session_error',
+  SESSION_ERROR = "session_error",
   /** Agent started */
-  AGENT_START = 'agent_start',
+  AGENT_START = "agent_start",
   /** Agent status changed */
-  AGENT_STATUS_CHANGE = 'agent_status_change',
+  AGENT_STATUS_CHANGE = "agent_status_change",
   /** Agent completed */
-  AGENT_COMPLETE = 'agent_complete',
+  AGENT_COMPLETE = "agent_complete",
   /** Agent error */
-  AGENT_ERROR = 'agent_error',
+  AGENT_ERROR = "agent_error",
 }
 
 export type ArenaEvent =
-  | 'session_start'
-  | 'session_update'
-  | 'session_complete'
-  | 'session_error'
-  | 'agent_start'
-  | 'agent_status_change'
-  | 'agent_complete'
-  | 'agent_error';
+  | "session_start"
+  | "session_update"
+  | "session_complete"
+  | "session_error"
+  | "agent_start"
+  | "agent_status_change"
+  | "agent_complete"
+  | "agent_error";
 
 /**
  * Event payload for session start.
@@ -117,7 +117,7 @@ export interface ArenaAgentStatusChangeEvent {
 /**
  * Event payload for session update (informational or warning).
  */
-export type ArenaSessionUpdateType = 'info' | 'warning' | 'success';
+export type ArenaSessionUpdateType = "info" | "warning" | "success";
 
 export interface ArenaSessionUpdateEvent {
   sessionId: string;

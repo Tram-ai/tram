@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Config } from '@tram-ai/tram-core';
-import type { CLIAssistantMessage, CLIMessage } from '../types.js';
+import type { Config } from "@tram-ai/tram-core";
+import type { CLIAssistantMessage, CLIMessage } from "../types.js";
 import {
   BaseJsonOutputAdapter,
   type JsonOutputAdapterInterface,
   type ResultOptions,
-} from './BaseJsonOutputAdapter.js';
+} from "./BaseJsonOutputAdapter.js";
 
 /**
  * JSON output adapter that collects all messages and emits them
@@ -35,10 +35,10 @@ export class JsonOutputAdapter
     this.messages.push(message);
     // Track assistant messages for result generation
     if (
-      typeof message === 'object' &&
+      typeof message === "object" &&
       message !== null &&
-      'type' in message &&
-      message.type === 'assistant'
+      "type" in message &&
+      message.type === "assistant"
     ) {
       this.updateLastAssistantMessage(message as CLIAssistantMessage);
     }
@@ -65,9 +65,9 @@ export class JsonOutputAdapter
     );
     this.messages.push(resultMessage);
 
-    if (this.config.getOutputFormat() === 'text') {
+    if (this.config.getOutputFormat() === "text") {
       if (resultMessage.is_error) {
-        process.stderr.write(`${resultMessage.error?.message || ''}`);
+        process.stderr.write(`${resultMessage.error?.message || ""}`);
       } else {
         process.stdout.write(`${resultMessage.result}`);
       }

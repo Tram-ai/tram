@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type {
   GenerateContentParameters,
   GenerateContentResponseUsageMetadata,
-} from '@google/genai';
-import { GenerateContentResponse } from '@google/genai';
-import type { Config } from '../../config/config.js';
-import type { ContentGenerator } from '../contentGenerator.js';
-import { AuthType } from '../contentGenerator.js';
-import { LoggingContentGenerator } from './index.js';
-import { OpenAIContentConverter } from '../openaiContentGenerator/converter.js';
+} from "@google/genai";
+import { GenerateContentResponse } from "@google/genai";
+import type { Config } from "../../config/config.js";
+import type { ContentGenerator } from "../contentGenerator.js";
+import { AuthType } from "../contentGenerator.js";
+import { LoggingContentGenerator } from "./index.js";
+import { OpenAIContentConverter } from "../openaiContentGenerator/converter.js";
 import {
   logApiRequest,
   logApiResponse,
   logApiError,
-} from '../../telemetry/loggers.js';
-import { OpenAILogger } from '../../utils/openaiLogger.js';
-import type OpenAI from 'openai';
+} from "../../telemetry/loggers.js";
+import { OpenAILogger } from "../../utils/openaiLogger.js";
+import type OpenAI from "openai";
 
-vi.mock('../../telemetry/loggers.js', async (importOriginal) => {
+vi.mock("../../telemetry/loggers.js", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('../../telemetry/loggers.js')>();
+    await importOriginal<typeof import("../../telemetry/loggers.js")>();
   return {
     ...actual,
     logApiRequest: vi.fn(),
@@ -34,7 +34,7 @@ vi.mock('../../telemetry/loggers.js', async (importOriginal) => {
   };
 });
 
-vi.mock('../../utils/openaiLogger.js', () => ({
+vi.mock("../../utils/openaiLogger.js", () => ({
   OpenAILogger: vi.fn().mockImplementation(() => ({
     logInteraction: vi.fn().mockResolvedValue(undefined),
   })),
@@ -43,28 +43,28 @@ vi.mock('../../utils/openaiLogger.js', () => ({
 const realConvertGeminiRequestToOpenAI =
   OpenAIContentConverter.prototype.convertGeminiRequestToOpenAI;
 const convertGeminiRequestToOpenAISpy = vi
-  .spyOn(OpenAIContentConverter.prototype, 'convertGeminiRequestToOpenAI')
-  .mockReturnValue([{ role: 'user', content: 'converted' }]);
+  .spyOn(OpenAIContentConverter.prototype, "convertGeminiRequestToOpenAI")
+  .mockReturnValue([{ role: "user", content: "converted" }]);
 const convertGeminiToolsToOpenAISpy = vi
-  .spyOn(OpenAIContentConverter.prototype, 'convertGeminiToolsToOpenAI')
-  .mockResolvedValue([{ type: 'function', function: { name: 'tool' } }]);
+  .spyOn(OpenAIContentConverter.prototype, "convertGeminiToolsToOpenAI")
+  .mockResolvedValue([{ type: "function", function: { name: "tool" } }]);
 const convertGeminiResponseToOpenAISpy = vi
-  .spyOn(OpenAIContentConverter.prototype, 'convertGeminiResponseToOpenAI')
+  .spyOn(OpenAIContentConverter.prototype, "convertGeminiResponseToOpenAI")
   .mockReturnValue({
-    id: 'openai-response',
-    object: 'chat.completion',
+    id: "openai-response",
+    object: "chat.completion",
     created: 123456789,
-    model: 'test-model',
+    model: "test-model",
     choices: [],
   } as OpenAI.Chat.ChatCompletion);
 const setModalitiesSpy = vi.spyOn(
   OpenAIContentConverter.prototype,
-  'setModalities',
+  "setModalities",
 );
 
 const createConfig = (overrides: Record<string, unknown> = {}): Config => {
   const configContent = {
-    authType: 'openai',
+    authType: "openai",
     enableOpenAILogging: false,
     ...overrides,
   };
@@ -76,8 +76,8 @@ const createConfig = (overrides: Record<string, unknown> = {}): Config => {
 };
 
 const createWrappedGenerator = (
-  generateContent: ContentGenerator['generateContent'],
-  generateContentStream: ContentGenerator['generateContentStream'],
+  generateContent: ContentGenerator["generateContent"],
+  generateContentStream: ContentGenerator["generateContentStream"],
 ): ContentGenerator =>
   ({
     generateContent,
@@ -101,7 +101,7 @@ const createResponse = (
   response.candidates = [
     {
       content: {
-        role: 'model',
+        role: "model",
         parts: parts as never[],
       },
       finishReason: finishReason as never,
@@ -112,7 +112,7 @@ const createResponse = (
   return response;
 };
 
-describe('LoggingContentGenerator', () => {
+describe("LoggingContentGenerator", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -124,29 +124,29 @@ describe('LoggingContentGenerator', () => {
     setModalitiesSpy.mockClear();
   });
 
-  it('logs request/response, normalizes thought parts, and logs OpenAI interaction', async () => {
+  it("logs request/response, normalizes thought parts, and logs OpenAI interaction", async () => {
     const wrapped = createWrappedGenerator(
       vi.fn().mockResolvedValue(
         createResponse(
-          'resp-1',
-          'model-v2',
-          [{ text: 'ok' }],
+          "resp-1",
+          "model-v2",
+          [{ text: "ok" }],
           {
             promptTokenCount: 3,
             candidatesTokenCount: 5,
             totalTokenCount: 8,
           },
-          'STOP',
+          "STOP",
         ),
       ),
       vi.fn(),
     );
     const generatorConfig = {
-      model: 'test-model',
+      model: "test-model",
       authType: AuthType.USE_OPENAI,
       enableOpenAILogging: true,
-      openAILoggingDir: 'logs',
-      schemaCompliance: 'openapi_30' as const,
+      openAILoggingDir: "logs",
+      schemaCompliance: "openapi_30" as const,
     };
     const generator = new LoggingContentGenerator(
       wrapped,
@@ -155,15 +155,15 @@ describe('LoggingContentGenerator', () => {
     );
 
     const request = {
-      model: 'test-model',
+      model: "test-model",
       contents: [
         {
-          role: 'user',
+          role: "user",
           parts: [
-            { text: 'Hello', thought: 'internal' },
+            { text: "Hello", thought: "internal" },
             {
-              functionCall: { id: 'call-1', name: 'tool', args: '{}' },
-              thought: 'strip-me',
+              functionCall: { id: "call-1", name: "tool", args: "{}" },
+              thought: "strip-me",
             },
             null,
           ],
@@ -178,31 +178,31 @@ describe('LoggingContentGenerator', () => {
         tools: [
           {
             functionDeclarations: [
-              { name: 'tool', description: 'desc', parameters: {} },
+              { name: "tool", description: "desc", parameters: {} },
             ],
           },
         ],
       },
     } as unknown as GenerateContentParameters;
 
-    const response = await generator.generateContent(request, 'prompt-1');
+    const response = await generator.generateContent(request, "prompt-1");
 
-    expect(response.responseId).toBe('resp-1');
+    expect(response.responseId).toBe("resp-1");
     expect(logApiRequest).toHaveBeenCalledTimes(1);
     const [, requestEvent] = vi.mocked(logApiRequest).mock.calls[0];
-    const loggedContents = JSON.parse(requestEvent.request_text || '[]');
+    const loggedContents = JSON.parse(requestEvent.request_text || "[]");
     expect(loggedContents[0].parts[0]).toEqual({
-      text: 'Hello\n[Thought: internal]',
+      text: "Hello\n[Thought: internal]",
     });
     expect(loggedContents[0].parts[1]).toEqual({
-      functionCall: { id: 'call-1', name: 'tool', args: '{}' },
+      functionCall: { id: "call-1", name: "tool", args: "{}" },
     });
 
     expect(logApiResponse).toHaveBeenCalledTimes(1);
     const [, responseEvent] = vi.mocked(logApiResponse).mock.calls[0];
-    expect(responseEvent.response_id).toBe('resp-1');
-    expect(responseEvent.model).toBe('model-v2');
-    expect(responseEvent.prompt_id).toBe('prompt-1');
+    expect(responseEvent.response_id).toBe("resp-1");
+    expect(responseEvent.model).toBe("model-v2");
+    expect(responseEvent.prompt_id).toBe("prompt-1");
     expect(responseEvent.input_token_count).toBe(3);
 
     expect(convertGeminiRequestToOpenAISpy).toHaveBeenCalledTimes(1);
@@ -216,9 +216,9 @@ describe('LoggingContentGenerator', () => {
       openaiLoggerInstance.logInteraction.mock.calls[0];
     expect(openaiRequest).toEqual(
       expect.objectContaining({
-        model: 'test-model',
-        messages: [{ role: 'user', content: 'converted' }],
-        tools: [{ type: 'function', function: { name: 'tool' } }],
+        model: "test-model",
+        messages: [{ role: "user", content: "converted" }],
+        tools: [{ type: "function", function: { name: "tool" } }],
         temperature: 0.3,
         top_p: 0.9,
         max_tokens: 256,
@@ -227,27 +227,27 @@ describe('LoggingContentGenerator', () => {
       }),
     );
     expect(openaiResponse).toEqual({
-      id: 'openai-response',
-      object: 'chat.completion',
+      id: "openai-response",
+      object: "chat.completion",
       created: 123456789,
-      model: 'test-model',
+      model: "test-model",
       choices: [],
     });
     expect(openaiError).toBeUndefined();
   });
 
-  it('logs errors with status code and request id, then rethrows', async () => {
-    const error = Object.assign(new Error('boom'), {
+  it("logs errors with status code and request id, then rethrows", async () => {
+    const error = Object.assign(new Error("boom"), {
       status: 429,
-      request_id: 'req-99',
-      type: 'rate_limit',
+      request_id: "req-99",
+      type: "rate_limit",
     });
     const wrapped = createWrappedGenerator(
       vi.fn().mockRejectedValue(error),
       vi.fn(),
     );
     const generatorConfig = {
-      model: 'test-model',
+      model: "test-model",
       authType: AuthType.USE_OPENAI,
       enableOpenAILogging: true,
     };
@@ -258,29 +258,29 @@ describe('LoggingContentGenerator', () => {
     );
 
     const request = {
-      model: 'test-model',
-      contents: 'Hello',
+      model: "test-model",
+      contents: "Hello",
     } as unknown as GenerateContentParameters;
 
     await expect(
-      generator.generateContent(request, 'prompt-2'),
-    ).rejects.toThrow('boom');
+      generator.generateContent(request, "prompt-2"),
+    ).rejects.toThrow("boom");
 
     expect(logApiError).toHaveBeenCalledTimes(1);
     const [, errorEvent] = vi.mocked(logApiError).mock.calls[0];
-    expect(errorEvent.response_id).toBe('req-99');
+    expect(errorEvent.response_id).toBe("req-99");
     expect(errorEvent.status_code).toBe(429);
-    expect(errorEvent.error_type).toBe('rate_limit');
-    expect(errorEvent.prompt_id).toBe('prompt-2');
+    expect(errorEvent.error_type).toBe("rate_limit");
+    expect(errorEvent.prompt_id).toBe("prompt-2");
 
     const openaiLoggerInstance = vi.mocked(OpenAILogger).mock.results[0]
       ?.value as { logInteraction: ReturnType<typeof vi.fn> };
     const [, , loggedError] = openaiLoggerInstance.logInteraction.mock.calls[0];
     expect(loggedError).toBeInstanceOf(Error);
-    expect((loggedError as Error).message).toBe('boom');
+    expect((loggedError as Error).message).toBe("boom");
   });
 
-  it('logs streaming responses and consolidates tool calls', async () => {
+  it("logs streaming responses and consolidates tool calls", async () => {
     const usage1 = {
       promptTokenCount: 1,
     } as GenerateContentResponseUsageMetadata;
@@ -291,24 +291,24 @@ describe('LoggingContentGenerator', () => {
     } as GenerateContentResponseUsageMetadata;
 
     const response1 = createResponse(
-      'resp-1',
-      'model-stream',
+      "resp-1",
+      "model-stream",
       [
-        { text: 'Hello' },
-        { functionCall: { id: 'call-1', name: 'tool', args: '{}' } },
+        { text: "Hello" },
+        { functionCall: { id: "call-1", name: "tool", args: "{}" } },
       ],
       usage1,
     );
     const response2 = createResponse(
-      'resp-2',
-      'model-stream',
+      "resp-2",
+      "model-stream",
       [
-        { text: ' world' },
-        { functionCall: { id: 'call-1', name: 'tool', args: '{"x":1}' } },
-        { functionResponse: { name: 'tool', response: { output: 'ok' } } },
+        { text: " world" },
+        { functionCall: { id: "call-1", name: "tool", args: '{"x":1}' } },
+        { functionResponse: { name: "tool", response: { output: "ok" } } },
       ],
       usage2,
-      'STOP',
+      "STOP",
     );
 
     const wrapped = createWrappedGenerator(
@@ -321,7 +321,7 @@ describe('LoggingContentGenerator', () => {
       ),
     );
     const generatorConfig = {
-      model: 'test-model',
+      model: "test-model",
       authType: AuthType.USE_OPENAI,
       enableOpenAILogging: true,
     };
@@ -332,11 +332,11 @@ describe('LoggingContentGenerator', () => {
     );
 
     const request = {
-      model: 'test-model',
-      contents: 'Hello',
+      model: "test-model",
+      contents: "Hello",
     } as unknown as GenerateContentParameters;
 
-    const stream = await generator.generateContentStream(request, 'prompt-3');
+    const stream = await generator.generateContentStream(request, "prompt-3");
     const seen: GenerateContentResponse[] = [];
     for await (const item of stream) {
       seen.push(item);
@@ -345,7 +345,7 @@ describe('LoggingContentGenerator', () => {
 
     expect(logApiResponse).toHaveBeenCalledTimes(1);
     const [, responseEvent] = vi.mocked(logApiResponse).mock.calls[0];
-    expect(responseEvent.response_id).toBe('resp-1');
+    expect(responseEvent.response_id).toBe("resp-1");
     expect(responseEvent.input_token_count).toBe(2);
 
     expect(convertGeminiResponseToOpenAISpy).toHaveBeenCalledTimes(1);
@@ -354,21 +354,21 @@ describe('LoggingContentGenerator', () => {
     const consolidatedParts =
       consolidatedResponse.candidates?.[0]?.content?.parts || [];
     expect(consolidatedParts).toEqual([
-      { text: 'Hello' },
-      { functionCall: { id: 'call-1', name: 'tool', args: '{"x":1}' } },
-      { text: ' world' },
-      { functionResponse: { name: 'tool', response: { output: 'ok' } } },
+      { text: "Hello" },
+      { functionCall: { id: "call-1", name: "tool", args: '{"x":1}' } },
+      { text: " world" },
+      { functionResponse: { name: "tool", response: { output: "ok" } } },
     ]);
     expect(consolidatedResponse.usageMetadata).toBe(usage2);
-    expect(consolidatedResponse.responseId).toBe('resp-2');
-    expect(consolidatedResponse.candidates?.[0]?.finishReason).toBe('STOP');
+    expect(consolidatedResponse.responseId).toBe("resp-2");
+    expect(consolidatedResponse.candidates?.[0]?.finishReason).toBe("STOP");
   });
 
-  it('logs stream errors and skips response logging', async () => {
-    const response1 = createResponse('resp-1', 'model-stream', [
-      { text: 'partial' },
+  it("logs stream errors and skips response logging", async () => {
+    const response1 = createResponse("resp-1", "model-stream", [
+      { text: "partial" },
     ]);
-    const streamError = new Error('stream-fail');
+    const streamError = new Error("stream-fail");
     const wrapped = createWrappedGenerator(
       vi.fn(),
       vi.fn().mockResolvedValue(
@@ -379,7 +379,7 @@ describe('LoggingContentGenerator', () => {
       ),
     );
     const generatorConfig = {
-      model: 'test-model',
+      model: "test-model",
       authType: AuthType.USE_OPENAI,
       enableOpenAILogging: true,
     };
@@ -390,16 +390,16 @@ describe('LoggingContentGenerator', () => {
     );
 
     const request = {
-      model: 'test-model',
-      contents: 'Hello',
+      model: "test-model",
+      contents: "Hello",
     } as unknown as GenerateContentParameters;
 
-    const stream = await generator.generateContentStream(request, 'prompt-4');
+    const stream = await generator.generateContentStream(request, "prompt-4");
     await expect(async () => {
       for await (const _item of stream) {
         // Consume stream to trigger error.
       }
-    }).rejects.toThrow('stream-fail');
+    }).rejects.toThrow("stream-fail");
 
     expect(logApiResponse).not.toHaveBeenCalled();
     expect(logApiError).toHaveBeenCalledTimes(1);
@@ -408,7 +408,7 @@ describe('LoggingContentGenerator', () => {
     expect(openaiLoggerInstance.logInteraction).toHaveBeenCalledTimes(1);
   });
 
-  it('uses generator modalities when converting logged OpenAI requests', async () => {
+  it("uses generator modalities when converting logged OpenAI requests", async () => {
     convertGeminiRequestToOpenAISpy.mockImplementationOnce(function (
       this: OpenAIContentConverter,
       request,
@@ -421,12 +421,12 @@ describe('LoggingContentGenerator', () => {
       vi
         .fn()
         .mockResolvedValue(
-          createResponse('resp-5', 'test-model', [{ text: 'ok' }]),
+          createResponse("resp-5", "test-model", [{ text: "ok" }]),
         ),
       vi.fn(),
     );
     const generatorConfig = {
-      model: 'test-model',
+      model: "test-model",
       authType: AuthType.USE_OPENAI,
       enableOpenAILogging: true,
       modalities: { image: true },
@@ -438,17 +438,17 @@ describe('LoggingContentGenerator', () => {
     );
 
     const request = {
-      model: 'test-model',
+      model: "test-model",
       contents: [
         {
-          role: 'user',
+          role: "user",
           parts: [
-            { text: 'Inspect this' },
+            { text: "Inspect this" },
             {
               inlineData: {
-                mimeType: 'image/png',
-                data: 'img-data',
-                displayName: 'diagram.png',
+                mimeType: "image/png",
+                data: "img-data",
+                displayName: "diagram.png",
               },
             },
           ],
@@ -456,7 +456,7 @@ describe('LoggingContentGenerator', () => {
       ],
     } as unknown as GenerateContentParameters;
 
-    await generator.generateContent(request, 'prompt-5');
+    await generator.generateContent(request, "prompt-5");
 
     expect(setModalitiesSpy).toHaveBeenCalledWith({ image: true });
 
@@ -466,13 +466,13 @@ describe('LoggingContentGenerator', () => {
       .calls[0] as [OpenAI.Chat.ChatCompletionCreateParams];
     expect(openaiRequest.messages).toEqual([
       {
-        role: 'user',
+        role: "user",
         content: [
-          { type: 'text', text: 'Inspect this' },
+          { type: "text", text: "Inspect this" },
           {
-            type: 'image_url',
+            type: "image_url",
             image_url: {
-              url: 'data:image/png;base64,img-data',
+              url: "data:image/png;base64,img-data",
             },
           },
         ],
@@ -480,13 +480,13 @@ describe('LoggingContentGenerator', () => {
     ]);
   });
 
-  it.each(['prompt_suggestion', 'forked_query', 'speculation'])(
-    'skips logApiRequest and OpenAI logging for internal promptId %s (generateContent)',
+  it.each(["prompt_suggestion", "forked_query", "speculation"])(
+    "skips logApiRequest and OpenAI logging for internal promptId %s (generateContent)",
     async (promptId) => {
       const mockResponse = {
-        responseId: 'internal-resp',
-        modelVersion: 'test-model',
-        candidates: [{ content: { parts: [{ text: 'suggestion' }] } }],
+        responseId: "internal-resp",
+        modelVersion: "test-model",
+        candidates: [{ content: { parts: [{ text: "suggestion" }] } }],
         usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 5 },
       } as unknown as GenerateContentResponse;
 
@@ -496,14 +496,14 @@ describe('LoggingContentGenerator', () => {
       } as unknown as ContentGenerator;
 
       const gen = new LoggingContentGenerator(mockWrapped, createConfig(), {
-        model: 'test-model',
+        model: "test-model",
         enableOpenAILogging: true,
-        openAILoggingDir: '/tmp/test-logs',
+        openAILoggingDir: "/tmp/test-logs",
       });
 
       const request = {
-        model: 'test-model',
-        contents: [{ role: 'user', parts: [{ text: 'test' }] }],
+        model: "test-model",
+        contents: [{ role: "user", parts: [{ text: "test" }] }],
       } as unknown as GenerateContentParameters;
 
       await gen.generateContent(request, promptId);
@@ -521,13 +521,13 @@ describe('LoggingContentGenerator', () => {
     },
   );
 
-  it.each(['prompt_suggestion', 'forked_query', 'speculation'])(
-    'skips logApiRequest and OpenAI logging for internal promptId %s (generateContentStream)',
+  it.each(["prompt_suggestion", "forked_query", "speculation"])(
+    "skips logApiRequest and OpenAI logging for internal promptId %s (generateContentStream)",
     async (promptId) => {
       const mockChunk = {
-        responseId: 'stream-resp',
-        modelVersion: 'test-model',
-        candidates: [{ content: { parts: [{ text: 'suggestion' }] } }],
+        responseId: "stream-resp",
+        modelVersion: "test-model",
+        candidates: [{ content: { parts: [{ text: "suggestion" }] } }],
         usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 5 },
       } as unknown as GenerateContentResponse;
 
@@ -541,14 +541,14 @@ describe('LoggingContentGenerator', () => {
       } as unknown as ContentGenerator;
 
       const gen = new LoggingContentGenerator(mockWrapped, createConfig(), {
-        model: 'test-model',
+        model: "test-model",
         enableOpenAILogging: true,
-        openAILoggingDir: '/tmp/test-logs',
+        openAILoggingDir: "/tmp/test-logs",
       });
 
       const request = {
-        model: 'test-model',
-        contents: [{ role: 'user', parts: [{ text: 'test' }] }],
+        model: "test-model",
+        contents: [{ role: "user", parts: [{ text: "test" }] }],
       } as unknown as GenerateContentParameters;
 
       const stream = await gen.generateContentStream(request, promptId);

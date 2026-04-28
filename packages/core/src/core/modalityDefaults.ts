@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { InputModalities } from './contentGenerator.js';
-import { normalize } from './tokenLimits.js';
+import type { InputModalities } from "./contentGenerator.js";
+import { normalize } from "./tokenLimits.js";
 
 const FULL_MULTIMODAL: InputModalities = {
   image: true,

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 
 interface IconProps {
   name: string;
@@ -16,8 +16,8 @@ interface IconProps {
 const Icon: FC<IconProps> = ({
   name,
   size = 24,
-  color = 'currentColor',
-  className = '',
+  color = "currentColor",
+  className = "",
 }) => (
   // This is a placeholder - in a real implementation you might use an icon library
   <svg

@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createMockCommandContext } from '../../test-utils/mockCommandContext.js';
-import { MessageType } from '../types.js';
-import { extensionsCommand } from './extensionsCommand.js';
-import { type CommandContext } from './types.js';
+import { createMockCommandContext } from "../../test-utils/mockCommandContext.js";
+import { MessageType } from "../types.js";
+import { extensionsCommand } from "./extensionsCommand.js";
+import { type CommandContext } from "./types.js";
 import {
   describe,
   it,
@@ -15,16 +15,12 @@ import {
   vi,
   beforeEach,
   type MockedFunction,
-} from 'vitest';
+} from "vitest";
 
-import {
-  ExtensionManager,
-  parseInstallSource,
-} from '@tram-ai/tram-core';
+import { ExtensionManager, parseInstallSource } from "@tram-ai/tram-core";
 
-vi.mock('@tram-ai/tram-core', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@tram-ai/tram-core')>();
+vi.mock("@tram-ai/tram-core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tram-ai/tram-core")>();
   return {
     ...actual,
     parseInstallSource: vi.fn(),
@@ -40,7 +36,7 @@ const createMockExtensionManager = () => ({
   getLoadedExtensions: mockGetLoadedExtensions,
 });
 
-describe('extensionsCommand', () => {
+describe("extensionsCommand", () => {
   let mockContext: CommandContext;
   let mockExtensionManager: ReturnType<typeof createMockExtensionManager>;
 
@@ -53,7 +49,7 @@ describe('extensionsCommand', () => {
       services: {
         config: {
           getExtensions: mockGetExtensions,
-          getWorkingDir: () => '/test/dir',
+          getWorkingDir: () => "/test/dir",
           getExtensionManager: () =>
             mockExtensionManager as unknown as ExtensionManager,
         },
@@ -64,67 +60,67 @@ describe('extensionsCommand', () => {
     });
   });
 
-  describe('default action (manage)', () => {
-    it('should open extensions manager dialog when extensions exist', async () => {
-      if (!extensionsCommand.action) throw new Error('Action not defined');
-      mockGetExtensions.mockReturnValue([{ name: 'test-ext', isActive: true }]);
-      const result = await extensionsCommand.action(mockContext, '');
+  describe("default action (manage)", () => {
+    it("should open extensions manager dialog when extensions exist", async () => {
+      if (!extensionsCommand.action) throw new Error("Action not defined");
+      mockGetExtensions.mockReturnValue([{ name: "test-ext", isActive: true }]);
+      const result = await extensionsCommand.action(mockContext, "");
 
       expect(result).toEqual({
-        type: 'dialog',
-        dialog: 'extensions_manage',
+        type: "dialog",
+        dialog: "extensions_manage",
       });
     });
 
-    it('should open extensions manager dialog when no extensions installed', async () => {
-      if (!extensionsCommand.action) throw new Error('Action not defined');
+    it("should open extensions manager dialog when no extensions installed", async () => {
+      if (!extensionsCommand.action) throw new Error("Action not defined");
       mockGetExtensions.mockReturnValue([]);
-      const result = await extensionsCommand.action(mockContext, '');
+      const result = await extensionsCommand.action(mockContext, "");
 
       expect(result).toEqual({
-        type: 'dialog',
-        dialog: 'extensions_manage',
+        type: "dialog",
+        dialog: "extensions_manage",
       });
     });
   });
 
-  describe('manage', () => {
+  describe("manage", () => {
     const manageAction = extensionsCommand.subCommands?.find(
-      (cmd) => cmd.name === 'manage',
+      (cmd) => cmd.name === "manage",
     )?.action;
 
     if (!manageAction) {
-      throw new Error('Manage action not found');
+      throw new Error("Manage action not found");
     }
 
-    it('should return dialog action for extensions manager', async () => {
-      mockGetExtensions.mockReturnValue([{ name: 'test-ext', isActive: true }]);
-      const result = await manageAction(mockContext, '');
+    it("should return dialog action for extensions manager", async () => {
+      mockGetExtensions.mockReturnValue([{ name: "test-ext", isActive: true }]);
+      const result = await manageAction(mockContext, "");
 
       expect(result).toEqual({
-        type: 'dialog',
-        dialog: 'extensions_manage',
+        type: "dialog",
+        dialog: "extensions_manage",
       });
     });
 
-    it('should return dialog action even when no extensions installed', async () => {
+    it("should return dialog action even when no extensions installed", async () => {
       mockGetExtensions.mockReturnValue([]);
-      const result = await manageAction(mockContext, '');
+      const result = await manageAction(mockContext, "");
 
       expect(result).toEqual({
-        type: 'dialog',
-        dialog: 'extensions_manage',
+        type: "dialog",
+        dialog: "extensions_manage",
       });
     });
   });
 
-  describe('install', () => {
+  describe("install", () => {
     const installAction = extensionsCommand.subCommands?.find(
-      (cmd) => cmd.name === 'install',
+      (cmd) => cmd.name === "install",
     )?.action;
 
     if (!installAction) {
-      throw new Error('Install action not found');
+      throw new Error("Install action not found");
     }
 
     const mockParseInstallSource = parseInstallSource as MockedFunction<
@@ -144,7 +140,7 @@ describe('extensionsCommand', () => {
         services: {
           config: {
             getExtensions: mockGetExtensions,
-            getWorkingDir: () => '/test/dir',
+            getWorkingDir: () => "/test/dir",
             getExtensionManager: () => realMockExtensionManager,
           },
         },
@@ -154,28 +150,28 @@ describe('extensionsCommand', () => {
       });
     });
 
-    it('should show usage if no source is provided', async () => {
-      await installAction(mockContext, '');
+    it("should show usage if no source is provided", async () => {
+      await installAction(mockContext, "");
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
           type: MessageType.ERROR,
-          text: 'Usage: /extensions install <source>',
+          text: "Usage: /extensions install <source>",
         },
         expect.any(Number),
       );
     });
 
-    it('should install extension successfully', async () => {
+    it("should install extension successfully", async () => {
       mockParseInstallSource.mockResolvedValue({
-        type: 'git',
-        source: 'https://github.com/test/extension',
+        type: "git",
+        source: "https://github.com/test/extension",
       });
       mockInstallExtension.mockResolvedValue({
-        name: 'test-extension',
-        version: '1.0.0',
+        name: "test-extension",
+        version: "1.0.0",
       });
 
-      await installAction(mockContext, 'https://github.com/test/extension');
+      await installAction(mockContext, "https://github.com/test/extension");
 
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {
@@ -194,12 +190,12 @@ describe('extensionsCommand', () => {
       expect(mockContext.ui.reloadCommands).toHaveBeenCalled();
     });
 
-    it('should handle install errors', async () => {
+    it("should handle install errors", async () => {
       mockParseInstallSource.mockRejectedValue(
-        new Error('Install source not found.'),
+        new Error("Install source not found."),
       );
 
-      await installAction(mockContext, '/invalid/path');
+      await installAction(mockContext, "/invalid/path");
 
       expect(mockContext.ui.addItem).toHaveBeenCalledWith(
         {

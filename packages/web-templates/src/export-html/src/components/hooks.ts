@@ -1,5 +1,5 @@
-import type { PlatformContextValue } from './types.js';
-import { useModalState } from './TempFileModal.js';
+import type { PlatformContextValue } from "./types.js";
+import { useModalState } from "./TempFileModal.js";
 
 const React = window.React;
 
@@ -12,16 +12,16 @@ export const usePlatformContext = () => {
   const platformContext = React.useMemo(
     () =>
       ({
-        platform: 'web' as PlatformContextValue['platform'],
+        platform: "web" as PlatformContextValue["platform"],
         postMessage: (message: unknown) => {
-          console.log('Posted message:', message);
+          console.log("Posted message:", message);
         },
         onMessage: (handler: (event: MessageEvent) => void) => {
-          window.addEventListener('message', handler);
-          return () => window.removeEventListener('message', handler);
+          window.addEventListener("message", handler);
+          return () => window.removeEventListener("message", handler);
         },
         openFile: (path: string) => {
-          console.log('Opening file:', path);
+          console.log("Opening file:", path);
         },
         openTempFile: openModal,
         getResourceUrl: () => undefined,

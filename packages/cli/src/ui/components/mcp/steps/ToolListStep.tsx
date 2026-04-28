@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo } from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../../../semantic-colors.js';
-import { useKeypress } from '../../../hooks/useKeypress.js';
-import { t } from '../../../../i18n/index.js';
-import type { ToolListStepProps, MCPToolDisplayInfo } from '../types.js';
-import { VISIBLE_TOOLS_COUNT } from '../constants.js';
+import { useState, useMemo } from "react";
+import { Box, Text } from "ink";
+import { theme } from "../../../semantic-colors.js";
+import { useKeypress } from "../../../hooks/useKeypress.js";
+import { t } from "../../../../i18n/index.js";
+import type { ToolListStepProps, MCPToolDisplayInfo } from "../types.js";
+import { VISIBLE_TOOLS_COUNT } from "../constants.js";
 
 export const ToolListStep: React.FC<ToolListStepProps> = ({
   tools,
@@ -50,13 +50,13 @@ export const ToolListStep: React.FC<ToolListStepProps> = ({
 
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         onBack();
-      } else if (key.name === 'up') {
+      } else if (key.name === "up") {
         setSelectedIndex((prev) => Math.max(0, prev - 1));
-      } else if (key.name === 'down') {
+      } else if (key.name === "down") {
         setSelectedIndex((prev) => Math.min(tools.length - 1, prev + 1));
-      } else if (key.name === 'return') {
+      } else if (key.name === "return") {
         if (tools[selectedIndex]) {
           onSelect(tools[selectedIndex]);
         }
@@ -69,7 +69,7 @@ export const ToolListStep: React.FC<ToolListStepProps> = ({
     return (
       <Box flexDirection="column">
         <Text color={theme.text.secondary}>
-          {t('No tools available for this server.')}
+          {t("No tools available for this server.")}
         </Text>
       </Box>
     );
@@ -77,11 +77,11 @@ export const ToolListStep: React.FC<ToolListStepProps> = ({
 
   const getToolAnnotations = (tool: MCPToolDisplayInfo): string => {
     const hints: string[] = [];
-    if (tool.annotations?.destructiveHint) hints.push('destructive');
-    if (tool.annotations?.readOnlyHint) hints.push('read-only');
-    if (tool.annotations?.openWorldHint) hints.push('open-world');
-    if (tool.annotations?.idempotentHint) hints.push('idempotent');
-    return hints.join(', ');
+    if (tool.annotations?.destructiveHint) hints.push("destructive");
+    if (tool.annotations?.readOnlyHint) hints.push("read-only");
+    if (tool.annotations?.openWorldHint) hints.push("open-world");
+    if (tool.annotations?.idempotentHint) hints.push("idempotent");
+    return hints.join(", ");
   };
 
   return (
@@ -100,7 +100,7 @@ export const ToolListStep: React.FC<ToolListStepProps> = ({
                 <Text
                   color={isSelected ? theme.text.accent : theme.text.primary}
                 >
-                  {isSelected ? '❯' : ' '}
+                  {isSelected ? "❯" : " "}
                 </Text>
               </Box>
               {/* 工具名称 - 固定宽度 */}
@@ -115,8 +115,8 @@ export const ToolListStep: React.FC<ToolListStepProps> = ({
               {/* 显示无效工具警告 */}
               {!tool.isValid && (
                 <Text color={theme.status.warning}>
-                  {t('invalid: {{reason}}', {
-                    reason: tool.invalidReason || t('unknown'),
+                  {t("invalid: {{reason}}", {
+                    reason: tool.invalidReason || t("unknown"),
                   })}
                 </Text>
               )}
@@ -132,12 +132,12 @@ export const ToolListStep: React.FC<ToolListStepProps> = ({
       {tools.length > VISIBLE_TOOLS_COUNT && (
         <Box marginTop={1}>
           <Text color={theme.text.secondary}>
-            {scrollOffset > 0 ? '↑ ' : '  '}
-            {t('{{current}}/{{total}}', {
+            {scrollOffset > 0 ? "↑ " : "  "}
+            {t("{{current}}/{{total}}", {
               current: (selectedIndex + 1).toString(),
               total: tools.length.toString(),
             })}
-            {scrollOffset + VISIBLE_TOOLS_COUNT < tools.length ? ' ↓' : ''}
+            {scrollOffset + VISIBLE_TOOLS_COUNT < tools.length ? " ↓" : ""}
           </Text>
         </Box>
       )}

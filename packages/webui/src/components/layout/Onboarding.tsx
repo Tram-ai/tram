@@ -7,7 +7,7 @@
  * Platform-specific logic (icon URL) passed via props
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 
 export interface OnboardingProps {
   /** URL of the application icon */
@@ -29,9 +29,9 @@ export interface OnboardingProps {
 export const Onboarding: FC<OnboardingProps> = ({
   iconUrl,
   onGetStarted,
-  appName = 'TRAM',
-  subtitle = 'Unlock the power of AI to understand, navigate, and transform your codebase faster than ever before.',
-  buttonText = 'Get Started with TRAM',
+  appName = "TRAM",
+  subtitle = "Unlock the power of AI to understand, navigate, and transform your codebase faster than ever before.",
+  buttonText = "Get Started with TRAM",
 }) => (
   <div className="flex flex-col items-center justify-center h-full p-5 md:p-10">
     <div className="flex flex-col items-center gap-8 w-full max-w-md mx-auto">

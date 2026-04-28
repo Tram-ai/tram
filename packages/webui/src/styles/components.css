@@ -430,7 +430,7 @@
 }
 
 .composer-input:empty::before,
-.composer-input[data-empty='true']::before {
+.composer-input[data-empty="true"]::before {
   content: attr(data-placeholder);
   color: var(--app-input-placeholder-foreground);
   pointer-events: none;
@@ -442,15 +442,15 @@
 }
 
 /* Prompt suggestion styling - different from normal placeholder */
-.composer-input[data-has-suggestion='true']:empty::before,
-.composer-input[data-has-suggestion='true'][data-empty='true']::before {
+.composer-input[data-has-suggestion="true"]:empty::before,
+.composer-input[data-has-suggestion="true"][data-empty="true"]::before {
   color: var(--app-primary, #3b82f6);
   opacity: 0.7;
   font-style: italic;
 }
 
-.composer-input[data-has-suggestion='true']:hover:empty::before,
-.composer-input[data-has-suggestion='true']:hover[data-empty='true']::before {
+.composer-input[data-has-suggestion="true"]:hover:empty::before,
+.composer-input[data-has-suggestion="true"]:hover[data-empty="true"]::before {
   opacity: 0.9;
   text-decoration: underline;
   text-decoration-style: dotted;
@@ -462,7 +462,7 @@
 }
 
 .composer-input:disabled,
-.composer-input[contenteditable='false'] {
+.composer-input[contenteditable="false"] {
   color: #999;
   cursor: not-allowed;
 }

@@ -1,11 +1,11 @@
-import type { AcpBridge } from './AcpBridge.js';
-import type { ChannelBase, ChannelBaseOptions } from './ChannelBase.js';
+import type { AcpBridge } from "./AcpBridge.js";
+import type { ChannelBase, ChannelBaseOptions } from "./ChannelBase.js";
 
-export type SenderPolicy = 'allowlist' | 'pairing' | 'open';
-export type SessionScope = 'user' | 'thread' | 'single';
+export type SenderPolicy = "allowlist" | "pairing" | "open";
+export type SessionScope = "user" | "thread" | "single";
 export type ChannelType = string;
-export type GroupPolicy = 'disabled' | 'allowlist' | 'open';
-export type DispatchMode = 'collect' | 'steer' | 'followup';
+export type GroupPolicy = "disabled" | "allowlist" | "open";
+export type DispatchMode = "collect" | "steer" | "followup";
 
 export interface GroupConfig {
   requireMention?: boolean; // default: true
@@ -43,7 +43,7 @@ export interface ChannelConfig {
   dispatchMode?: DispatchMode;
 
   /** Enable block streaming — emit completed blocks as separate messages. */
-  blockStreaming?: 'on' | 'off';
+  blockStreaming?: "on" | "off";
   /** Chunk size bounds for block streaming. */
   blockStreamingChunk?: BlockStreamingChunkConfig;
   /** Idle coalescing for block streaming. */
@@ -52,7 +52,7 @@ export interface ChannelConfig {
 
 export interface Attachment {
   /** Content category. */
-  type: 'image' | 'file' | 'audio' | 'video';
+  type: "image" | "file" | "audio" | "video";
   /** Base64-encoded data (for images or small files). */
   data?: string;
   /** Absolute path to a local file (for large files saved to disk). */

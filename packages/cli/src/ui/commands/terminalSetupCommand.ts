@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { MessageActionReturn, SlashCommand } from './types.js';
-import { CommandKind } from './types.js';
-import { terminalSetup } from '../utils/terminalSetup.js';
-import { t } from '../../i18n/index.js';
+import type { MessageActionReturn, SlashCommand } from "./types.js";
+import { CommandKind } from "./types.js";
+import { terminalSetup } from "../utils/terminalSetup.js";
+import { t } from "../../i18n/index.js";
 
 /**
  * Command to configure terminal keybindings for multiline input support.
@@ -16,10 +16,10 @@ import { t } from '../../i18n/index.js';
  * to support Shift+Enter and Ctrl+Enter for multiline input.
  */
 export const terminalSetupCommand: SlashCommand = {
-  name: 'terminal-setup',
+  name: "terminal-setup",
   get description() {
     return t(
-      'Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)',
+      "Configure terminal keybindings for multiline input (VS Code, Cursor, Windsurf, Trae)",
     );
   },
   kind: CommandKind.BUILT_IN,
@@ -31,22 +31,22 @@ export const terminalSetupCommand: SlashCommand = {
       let content = result.message;
       if (result.requiresRestart) {
         content +=
-          '\n\n' +
-          t('Please restart your terminal for the changes to take effect.');
+          "\n\n" +
+          t("Please restart your terminal for the changes to take effect.");
       }
 
       return {
-        type: 'message',
+        type: "message",
         content,
-        messageType: result.success ? 'info' : 'error',
+        messageType: result.success ? "info" : "error",
       };
     } catch (error) {
       return {
-        type: 'message',
-        content: t('Failed to configure terminal: {{error}}', {
+        type: "message",
+        content: t("Failed to configure terminal: {{error}}", {
           error: String(error),
         }),
-        messageType: 'error',
+        messageType: "error",
       };
     }
   },

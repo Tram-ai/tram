@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, it, vi } from 'vitest';
-import { resetConversationState } from './useWebViewMessages.js';
+import { describe, expect, it, vi } from "vitest";
+import { resetConversationState } from "./useWebViewMessages.js";
 
-describe('resetConversationState', () => {
-  it('clears retained usage stats when a conversation is reset', () => {
+describe("resetConversationState", () => {
+  it("clears retained usage stats when a conversation is reset", () => {
     const clearMessages = vi.fn();
     const endStreaming = vi.fn();
     const clearWaitingForResponse = vi.fn();
@@ -61,10 +61,10 @@ describe('resetConversationState', () => {
     expect(setCurrentSessionId).toHaveBeenCalledWith(null);
     expect(clearImageResolutions).toHaveBeenCalled();
     expect(setUsageStats).toHaveBeenCalledWith(undefined);
-    expect(setCurrentSessionTitle).toHaveBeenCalledWith('Past Conversations');
+    expect(setCurrentSessionTitle).toHaveBeenCalledWith("Past Conversations");
     expect(postMessage).toHaveBeenCalledWith({
-      type: 'updatePanelTitle',
-      data: { title: 'Qwen Code' },
+      type: "updatePanelTitle",
+      data: { title: "TRAM" },
     });
   });
 });

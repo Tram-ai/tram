@@ -8,8 +8,8 @@
  * Supports clicking to open files and jump to specified line and column numbers
  */
 
-import type { FC } from 'react';
-import { usePlatform } from '../../context/PlatformContext.js';
+import type { FC } from "react";
+import { usePlatform } from "../../context/PlatformContext.js";
 
 /**
  * Props for FileLink component
@@ -82,7 +82,7 @@ export const FileLink: FC<FileLinkProps> = ({
   line,
   column,
   showFullPath = false,
-  className = '',
+  className = "",
   disableClick = false,
 }) => {
   const platform = usePlatform();
@@ -107,7 +107,7 @@ export const FileLink: FC<FileLinkProps> = ({
       platform.openFile(fullPath);
     } else {
       platform.postMessage({
-        type: 'openFile',
+        type: "openFile",
         data: { path: fullPath },
       });
     }
@@ -132,7 +132,7 @@ export const FileLink: FC<FileLinkProps> = ({
       return;
     }
     // Space key triggers button action (Enter is handled by default for buttons)
-    if (e.key === ' ' || e.key === 'Enter') {
+    if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
       openFile();
@@ -149,27 +149,27 @@ export const FileLink: FC<FileLinkProps> = ({
     <button
       type="button"
       className={[
-        'file-link',
+        "file-link",
         // Reset button styles
-        'bg-transparent border-none p-0 m-0 font-inherit',
+        "bg-transparent border-none p-0 m-0 font-inherit",
         // Layout + interaction
-        'inline-flex items-center leading-none',
+        "inline-flex items-center leading-none",
         isDisabled
-          ? 'cursor-default opacity-60'
-          : 'cursor-pointer hover:underline',
+          ? "cursor-default opacity-60"
+          : "cursor-pointer hover:underline",
         // Typography + color: match theme body text and fixed size
-        'text-[11px] no-underline',
-        'text-[var(--app-primary-foreground)]',
+        "text-[11px] no-underline",
+        "text-[var(--app-primary-foreground)]",
         // Transitions
-        'transition-colors duration-100 ease-in-out',
+        "transition-colors duration-100 ease-in-out",
         // Focus ring (keyboard nav)
-        'focus:outline focus:outline-1 focus:outline-[var(--vscode-focusBorder)] focus:outline-offset-2 focus:rounded-[2px]',
+        "focus:outline focus:outline-1 focus:outline-[var(--vscode-focusBorder)] focus:outline-offset-2 focus:rounded-[2px]",
         // Active state
-        !isDisabled && 'active:opacity-80',
+        !isDisabled && "active:opacity-80",
         className,
       ]
         .filter(Boolean)
-        .join(' ')}
+        .join(" ")}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       title={fullDisplayText}

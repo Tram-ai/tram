@@ -8,8 +8,8 @@
  * Tool definition helper for SDK-embedded MCP servers
  */
 
-import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import type { z, ZodRawShape, ZodObject, ZodTypeAny } from 'zod';
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { z, ZodRawShape, ZodObject, ZodTypeAny } from "zod";
 
 /**
  * SDK MCP Tool Definition with Zod schema type inference
@@ -19,7 +19,7 @@ export type SdkMcpToolDefinition<Schema extends ZodRawShape = ZodRawShape> = {
   description: string;
   inputSchema: Schema;
   handler: (
-    args: z.infer<ZodObject<Schema, 'strip', ZodTypeAny>>,
+    args: z.infer<ZodObject<Schema, "strip", ZodTypeAny>>,
     extra: unknown,
   ) => Promise<CallToolResult>;
 };
@@ -48,23 +48,23 @@ export function tool<Schema extends ZodRawShape>(
   description: string,
   inputSchema: Schema,
   handler: (
-    args: z.infer<ZodObject<Schema, 'strip', ZodTypeAny>>,
+    args: z.infer<ZodObject<Schema, "strip", ZodTypeAny>>,
     extra: unknown,
   ) => Promise<CallToolResult>,
 ): SdkMcpToolDefinition<Schema> {
-  if (!name || typeof name !== 'string') {
-    throw new Error('Tool name must be a non-empty string');
+  if (!name || typeof name !== "string") {
+    throw new Error("Tool name must be a non-empty string");
   }
 
-  if (!description || typeof description !== 'string') {
+  if (!description || typeof description !== "string") {
     throw new Error(`Tool '${name}' must have a description (string)`);
   }
 
-  if (!inputSchema || typeof inputSchema !== 'object') {
+  if (!inputSchema || typeof inputSchema !== "object") {
     throw new Error(`Tool '${name}' must have an inputSchema (object)`);
   }
 
-  if (!handler || typeof handler !== 'function') {
+  if (!handler || typeof handler !== "function") {
     throw new Error(`Tool '${name}' must have a handler (function)`);
   }
 
@@ -73,7 +73,7 @@ export function tool<Schema extends ZodRawShape>(
 
 export function validateToolName(name: string): void {
   if (!name) {
-    throw new Error('Tool name cannot be empty');
+    throw new Error("Tool name cannot be empty");
   }
 
   if (name.length > 64) {

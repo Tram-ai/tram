@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import * as os from 'node:os';
-import { ArenaAgentClient } from './ArenaAgentClient.js';
-import { safeAgentId } from './types.js';
-import type { ArenaControlSignal } from './types.js';
-import { uiTelemetryService } from '../../telemetry/uiTelemetry.js';
-import type { SessionMetrics } from '../../telemetry/uiTelemetry.js';
-import { ToolCallDecision } from '../../telemetry/tool-call-decision.js';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import * as os from "node:os";
+import { ArenaAgentClient } from "./ArenaAgentClient.js";
+import { safeAgentId } from "./types.js";
+import type { ArenaControlSignal } from "./types.js";
+import { uiTelemetryService } from "../../telemetry/uiTelemetry.js";
+import type { SessionMetrics } from "../../telemetry/uiTelemetry.js";
+import { ToolCallDecision } from "../../telemetry/tool-call-decision.js";
 
 const createMockMetrics = (
   overrides: Partial<{
@@ -28,7 +28,7 @@ const createMockMetrics = (
   }> = {},
 ): SessionMetrics => ({
   models: {
-    'test-model': {
+    "test-model": {
       api: {
         totalRequests: overrides.totalRequests ?? 0,
         totalErrors: 0,
@@ -63,12 +63,12 @@ const createMockMetrics = (
   },
 });
 
-describe('ArenaAgentClient', () => {
+describe("ArenaAgentClient", () => {
   let tempDir: string;
 
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'arena-reporter-test-'));
-    vi.spyOn(uiTelemetryService, 'getMetrics').mockReturnValue(
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "arena-reporter-test-"));
+    vi.spyOn(uiTelemetryService, "getMetrics").mockReturnValue(
       createMockMetrics(),
     );
   });
@@ -82,146 +82,146 @@ describe('ArenaAgentClient', () => {
     }
   });
 
-  describe('create() factory', () => {
-    it('should return null when ARENA_AGENT_ID is not set', () => {
-      const original = process.env['ARENA_AGENT_ID'];
-      const originalSession = process.env['ARENA_SESSION_ID'];
-      const originalDir = process.env['ARENA_SESSION_DIR'];
-      delete process.env['ARENA_AGENT_ID'];
-      delete process.env['ARENA_SESSION_ID'];
-      delete process.env['ARENA_SESSION_DIR'];
+  describe("create() factory", () => {
+    it("should return null when ARENA_AGENT_ID is not set", () => {
+      const original = process.env["ARENA_AGENT_ID"];
+      const originalSession = process.env["ARENA_SESSION_ID"];
+      const originalDir = process.env["ARENA_SESSION_DIR"];
+      delete process.env["ARENA_AGENT_ID"];
+      delete process.env["ARENA_SESSION_ID"];
+      delete process.env["ARENA_SESSION_DIR"];
 
       const reporter = ArenaAgentClient.create();
       expect(reporter).toBeNull();
 
       // Restore
       if (original !== undefined) {
-        process.env['ARENA_AGENT_ID'] = original;
+        process.env["ARENA_AGENT_ID"] = original;
       }
       if (originalSession !== undefined) {
-        process.env['ARENA_SESSION_ID'] = originalSession;
+        process.env["ARENA_SESSION_ID"] = originalSession;
       }
       if (originalDir !== undefined) {
-        process.env['ARENA_SESSION_DIR'] = originalDir;
+        process.env["ARENA_SESSION_DIR"] = originalDir;
       }
     });
 
-    it('should return null when ARENA_SESSION_ID is not set', () => {
-      const originalAgent = process.env['ARENA_AGENT_ID'];
-      const originalSession = process.env['ARENA_SESSION_ID'];
-      const originalDir = process.env['ARENA_SESSION_DIR'];
+    it("should return null when ARENA_SESSION_ID is not set", () => {
+      const originalAgent = process.env["ARENA_AGENT_ID"];
+      const originalSession = process.env["ARENA_SESSION_ID"];
+      const originalDir = process.env["ARENA_SESSION_DIR"];
 
-      process.env['ARENA_AGENT_ID'] = 'test-agent';
-      delete process.env['ARENA_SESSION_ID'];
-      process.env['ARENA_SESSION_DIR'] = tempDir;
+      process.env["ARENA_AGENT_ID"] = "test-agent";
+      delete process.env["ARENA_SESSION_ID"];
+      process.env["ARENA_SESSION_DIR"] = tempDir;
 
       const reporter = ArenaAgentClient.create();
       expect(reporter).toBeNull();
 
       // Restore
       if (originalAgent !== undefined) {
-        process.env['ARENA_AGENT_ID'] = originalAgent;
+        process.env["ARENA_AGENT_ID"] = originalAgent;
       } else {
-        delete process.env['ARENA_AGENT_ID'];
+        delete process.env["ARENA_AGENT_ID"];
       }
       if (originalSession !== undefined) {
-        process.env['ARENA_SESSION_ID'] = originalSession;
+        process.env["ARENA_SESSION_ID"] = originalSession;
       }
       if (originalDir !== undefined) {
-        process.env['ARENA_SESSION_DIR'] = originalDir;
+        process.env["ARENA_SESSION_DIR"] = originalDir;
       } else {
-        delete process.env['ARENA_SESSION_DIR'];
+        delete process.env["ARENA_SESSION_DIR"];
       }
     });
 
-    it('should return null when ARENA_SESSION_DIR is not set', () => {
-      const originalAgent = process.env['ARENA_AGENT_ID'];
-      const originalSession = process.env['ARENA_SESSION_ID'];
-      const originalDir = process.env['ARENA_SESSION_DIR'];
+    it("should return null when ARENA_SESSION_DIR is not set", () => {
+      const originalAgent = process.env["ARENA_AGENT_ID"];
+      const originalSession = process.env["ARENA_SESSION_ID"];
+      const originalDir = process.env["ARENA_SESSION_DIR"];
 
-      process.env['ARENA_AGENT_ID'] = 'test-agent';
-      process.env['ARENA_SESSION_ID'] = 'test-session';
-      delete process.env['ARENA_SESSION_DIR'];
+      process.env["ARENA_AGENT_ID"] = "test-agent";
+      process.env["ARENA_SESSION_ID"] = "test-session";
+      delete process.env["ARENA_SESSION_DIR"];
 
       const reporter = ArenaAgentClient.create();
       expect(reporter).toBeNull();
 
       // Restore
       if (originalAgent !== undefined) {
-        process.env['ARENA_AGENT_ID'] = originalAgent;
+        process.env["ARENA_AGENT_ID"] = originalAgent;
       } else {
-        delete process.env['ARENA_AGENT_ID'];
+        delete process.env["ARENA_AGENT_ID"];
       }
       if (originalSession !== undefined) {
-        process.env['ARENA_SESSION_ID'] = originalSession;
+        process.env["ARENA_SESSION_ID"] = originalSession;
       } else {
-        delete process.env['ARENA_SESSION_ID'];
+        delete process.env["ARENA_SESSION_ID"];
       }
       if (originalDir !== undefined) {
-        process.env['ARENA_SESSION_DIR'] = originalDir;
+        process.env["ARENA_SESSION_DIR"] = originalDir;
       } else {
-        delete process.env['ARENA_SESSION_DIR'];
+        delete process.env["ARENA_SESSION_DIR"];
       }
     });
 
-    it('should return an instance when all env vars are set', () => {
-      const originalAgent = process.env['ARENA_AGENT_ID'];
-      const originalSession = process.env['ARENA_SESSION_ID'];
-      const originalDir = process.env['ARENA_SESSION_DIR'];
+    it("should return an instance when all env vars are set", () => {
+      const originalAgent = process.env["ARENA_AGENT_ID"];
+      const originalSession = process.env["ARENA_SESSION_ID"];
+      const originalDir = process.env["ARENA_SESSION_DIR"];
 
-      process.env['ARENA_AGENT_ID'] = 'test-agent';
-      process.env['ARENA_SESSION_ID'] = 'test-session';
-      process.env['ARENA_SESSION_DIR'] = tempDir;
+      process.env["ARENA_AGENT_ID"] = "test-agent";
+      process.env["ARENA_SESSION_ID"] = "test-session";
+      process.env["ARENA_SESSION_DIR"] = tempDir;
 
       const reporter = ArenaAgentClient.create();
       expect(reporter).toBeInstanceOf(ArenaAgentClient);
 
       // Restore
       if (originalAgent !== undefined) {
-        process.env['ARENA_AGENT_ID'] = originalAgent;
+        process.env["ARENA_AGENT_ID"] = originalAgent;
       } else {
-        delete process.env['ARENA_AGENT_ID'];
+        delete process.env["ARENA_AGENT_ID"];
       }
       if (originalSession !== undefined) {
-        process.env['ARENA_SESSION_ID'] = originalSession;
+        process.env["ARENA_SESSION_ID"] = originalSession;
       } else {
-        delete process.env['ARENA_SESSION_ID'];
+        delete process.env["ARENA_SESSION_ID"];
       }
       if (originalDir !== undefined) {
-        process.env['ARENA_SESSION_DIR'] = originalDir;
+        process.env["ARENA_SESSION_DIR"] = originalDir;
       } else {
-        delete process.env['ARENA_SESSION_DIR'];
+        delete process.env["ARENA_SESSION_DIR"];
       }
     });
   });
 
-  describe('init()', () => {
-    it('should create the agents/ and control/ directories', async () => {
-      const reporter = new ArenaAgentClient('agent-1', tempDir);
+  describe("init()", () => {
+    it("should create the agents/ and control/ directories", async () => {
+      const reporter = new ArenaAgentClient("agent-1", tempDir);
       await reporter.init();
 
-      const agentsDir = path.join(tempDir, 'agents');
-      const controlDir = path.join(tempDir, 'control');
+      const agentsDir = path.join(tempDir, "agents");
+      const controlDir = path.join(tempDir, "control");
       const agentsStat = await fs.stat(agentsDir);
       const controlStat = await fs.stat(controlDir);
       expect(agentsStat.isDirectory()).toBe(true);
       expect(controlStat.isDirectory()).toBe(true);
     });
 
-    it('should be idempotent', async () => {
-      const reporter = new ArenaAgentClient('agent-1', tempDir);
+    it("should be idempotent", async () => {
+      const reporter = new ArenaAgentClient("agent-1", tempDir);
       await reporter.init();
       await reporter.init(); // Should not throw
 
-      const agentsDir = path.join(tempDir, 'agents');
+      const agentsDir = path.join(tempDir, "agents");
       const stat = await fs.stat(agentsDir);
       expect(stat.isDirectory()).toBe(true);
     });
   });
 
-  describe('updateStatus()', () => {
-    it('should write per-agent status file with stats from telemetry', async () => {
-      const agentId = 'model-a';
+  describe("updateStatus()", () => {
+    it("should write per-agent status file with stats from telemetry", async () => {
+      const agentId = "model-a";
       const reporter = new ArenaAgentClient(agentId, tempDir);
       await reporter.init();
 
@@ -237,19 +237,19 @@ describe('ArenaAgentClient', () => {
         }),
       );
 
-      await reporter.updateStatus('Editing files');
+      await reporter.updateStatus("Editing files");
 
       const statusPath = path.join(
         tempDir,
-        'agents',
+        "agents",
         `${safeAgentId(agentId)}.json`,
       );
-      const content = JSON.parse(await fs.readFile(statusPath, 'utf-8'));
+      const content = JSON.parse(await fs.readFile(statusPath, "utf-8"));
 
       expect(content.agentId).toBe(agentId);
-      expect(content.status).toBe('running');
+      expect(content.status).toBe("running");
       expect(content.rounds).toBe(3);
-      expect(content.currentActivity).toBe('Editing files');
+      expect(content.currentActivity).toBe("Editing files");
       expect(content.stats.totalTokens).toBe(1500);
       expect(content.stats.inputTokens).toBe(1000);
       expect(content.stats.outputTokens).toBe(500);
@@ -258,11 +258,11 @@ describe('ArenaAgentClient', () => {
       expect(content.stats.failedToolCalls).toBe(1);
       expect(content.finalSummary).toBeNull();
       expect(content.error).toBeNull();
-      expect(content.updatedAt).toBeTypeOf('number');
+      expect(content.updatedAt).toBeTypeOf("number");
     });
 
-    it('should perform atomic write (no partial reads)', async () => {
-      const agentId = 'model-a';
+    it("should perform atomic write (no partial reads)", async () => {
+      const agentId = "model-a";
       const reporter = new ArenaAgentClient(agentId, tempDir);
       await reporter.init();
 
@@ -276,16 +276,16 @@ describe('ArenaAgentClient', () => {
       // The file should be valid JSON (no corruption from concurrent writes)
       const statusPath = path.join(
         tempDir,
-        'agents',
+        "agents",
         `${safeAgentId(agentId)}.json`,
       );
-      const content = JSON.parse(await fs.readFile(statusPath, 'utf-8'));
+      const content = JSON.parse(await fs.readFile(statusPath, "utf-8"));
       expect(content.agentId).toBe(agentId);
-      expect(content.status).toBe('running');
+      expect(content.status).toBe("running");
     });
 
-    it('should reflect latest telemetry on each call', async () => {
-      const agentId = 'model-a';
+    it("should reflect latest telemetry on each call", async () => {
+      const agentId = "model-a";
       const reporter = new ArenaAgentClient(agentId, tempDir);
       await reporter.init();
 
@@ -311,18 +311,18 @@ describe('ArenaAgentClient', () => {
 
       const statusPath = path.join(
         tempDir,
-        'agents',
+        "agents",
         `${safeAgentId(agentId)}.json`,
       );
-      const content = JSON.parse(await fs.readFile(statusPath, 'utf-8'));
+      const content = JSON.parse(await fs.readFile(statusPath, "utf-8"));
 
       expect(content.rounds).toBe(2);
       expect(content.stats.totalTokens).toBe(200);
       expect(content.stats.toolCalls).toBe(8);
     });
 
-    it('should auto-initialize if not yet initialized', async () => {
-      const agentId = 'model-a';
+    it("should auto-initialize if not yet initialized", async () => {
+      const agentId = "model-a";
       const reporter = new ArenaAgentClient(agentId, tempDir);
       // Skip init() call
 
@@ -330,17 +330,17 @@ describe('ArenaAgentClient', () => {
 
       const statusPath = path.join(
         tempDir,
-        'agents',
+        "agents",
         `${safeAgentId(agentId)}.json`,
       );
-      const content = JSON.parse(await fs.readFile(statusPath, 'utf-8'));
+      const content = JSON.parse(await fs.readFile(statusPath, "utf-8"));
       expect(content.agentId).toBe(agentId);
     });
   });
 
-  describe('checkControlSignal()', () => {
-    it('should return null when no control file exists', async () => {
-      const agentId = 'model-a';
+  describe("checkControlSignal()", () => {
+    it("should return null when no control file exists", async () => {
+      const agentId = "model-a";
       const reporter = new ArenaAgentClient(agentId, tempDir);
       await reporter.init();
 
@@ -348,51 +348,51 @@ describe('ArenaAgentClient', () => {
       expect(signal).toBeNull();
     });
 
-    it('should read and delete control file', async () => {
-      const agentId = 'model-a';
+    it("should read and delete control file", async () => {
+      const agentId = "model-a";
       const reporter = new ArenaAgentClient(agentId, tempDir);
       await reporter.init();
 
       // Write a control signal
       const controlSignal: ArenaControlSignal = {
-        type: 'shutdown',
-        reason: 'User cancelled',
+        type: "shutdown",
+        reason: "User cancelled",
         timestamp: Date.now(),
       };
       const controlPath = path.join(
         tempDir,
-        'control',
+        "control",
         `${safeAgentId(agentId)}.json`,
       );
-      await fs.writeFile(controlPath, JSON.stringify(controlSignal), 'utf-8');
+      await fs.writeFile(controlPath, JSON.stringify(controlSignal), "utf-8");
 
       // Read it
       const signal = await reporter.checkControlSignal();
       expect(signal).not.toBeNull();
-      expect(signal!.type).toBe('shutdown');
-      expect(signal!.reason).toBe('User cancelled');
+      expect(signal!.type).toBe("shutdown");
+      expect(signal!.reason).toBe("User cancelled");
 
       // File should be deleted (consumed)
       await expect(fs.access(controlPath)).rejects.toThrow();
     });
 
-    it('should return null on subsequent reads (consume-once)', async () => {
-      const agentId = 'model-a';
+    it("should return null on subsequent reads (consume-once)", async () => {
+      const agentId = "model-a";
       const reporter = new ArenaAgentClient(agentId, tempDir);
       await reporter.init();
 
       // Write a control signal
       const controlSignal: ArenaControlSignal = {
-        type: 'cancel',
-        reason: 'Timeout',
+        type: "cancel",
+        reason: "Timeout",
         timestamp: Date.now(),
       };
       const controlPath = path.join(
         tempDir,
-        'control',
+        "control",
         `${safeAgentId(agentId)}.json`,
       );
-      await fs.writeFile(controlPath, JSON.stringify(controlSignal), 'utf-8');
+      await fs.writeFile(controlPath, JSON.stringify(controlSignal), "utf-8");
 
       // First read should return the signal
       const first = await reporter.checkControlSignal();
@@ -404,28 +404,28 @@ describe('ArenaAgentClient', () => {
     });
   });
 
-  describe('reportCompleted()', () => {
-    it('should write status with completed state and optional summary', async () => {
-      const agentId = 'model-a';
+  describe("reportCompleted()", () => {
+    it("should write status with completed state and optional summary", async () => {
+      const agentId = "model-a";
       const reporter = new ArenaAgentClient(agentId, tempDir);
       await reporter.init();
 
-      await reporter.reportCompleted('Successfully implemented feature X');
+      await reporter.reportCompleted("Successfully implemented feature X");
 
       const statusPath = path.join(
         tempDir,
-        'agents',
+        "agents",
         `${safeAgentId(agentId)}.json`,
       );
-      const content = JSON.parse(await fs.readFile(statusPath, 'utf-8'));
+      const content = JSON.parse(await fs.readFile(statusPath, "utf-8"));
 
-      expect(content.status).toBe('completed');
-      expect(content.finalSummary).toBe('Successfully implemented feature X');
+      expect(content.status).toBe("completed");
+      expect(content.finalSummary).toBe("Successfully implemented feature X");
       expect(content.error).toBeNull();
     });
 
-    it('should write status with idle state and no summary', async () => {
-      const agentId = 'model-a';
+    it("should write status with idle state and no summary", async () => {
+      const agentId = "model-a";
       const reporter = new ArenaAgentClient(agentId, tempDir);
       await reporter.init();
 
@@ -433,22 +433,22 @@ describe('ArenaAgentClient', () => {
 
       const statusPath = path.join(
         tempDir,
-        'agents',
+        "agents",
         `${safeAgentId(agentId)}.json`,
       );
-      const content = JSON.parse(await fs.readFile(statusPath, 'utf-8'));
+      const content = JSON.parse(await fs.readFile(statusPath, "utf-8"));
 
-      expect(content.status).toBe('completed');
+      expect(content.status).toBe("completed");
       expect(content.finalSummary).toBeNull();
       expect(content.error).toBeNull();
     });
   });
 
-  describe('stats aggregation and wall-clock durationMs', () => {
-    it('should aggregate multi-model stats and use wall-clock durationMs', async () => {
+  describe("stats aggregation and wall-clock durationMs", () => {
+    it("should aggregate multi-model stats and use wall-clock durationMs", async () => {
       vi.mocked(uiTelemetryService.getMetrics).mockReturnValue({
         models: {
-          'model-a': {
+          "model-a": {
             api: {
               totalRequests: 3,
               totalErrors: 0,
@@ -463,7 +463,7 @@ describe('ArenaAgentClient', () => {
               tool: 0,
             },
           },
-          'model-b': {
+          "model-b": {
             api: {
               totalRequests: 2,
               totalErrors: 1,
@@ -495,16 +495,16 @@ describe('ArenaAgentClient', () => {
         files: { totalLinesAdded: 0, totalLinesRemoved: 0 },
       });
 
-      const reporter = new ArenaAgentClient('model-a', tempDir);
+      const reporter = new ArenaAgentClient("model-a", tempDir);
       await reporter.init();
       await reporter.updateStatus();
 
       const statusPath = path.join(
         tempDir,
-        'agents',
-        `${safeAgentId('model-a')}.json`,
+        "agents",
+        `${safeAgentId("model-a")}.json`,
       );
-      const content = JSON.parse(await fs.readFile(statusPath, 'utf-8'));
+      const content = JSON.parse(await fs.readFile(statusPath, "utf-8"));
 
       expect(content.stats.rounds).toBe(5);
       expect(content.stats.totalTokens).toBe(450);
@@ -518,7 +518,7 @@ describe('ArenaAgentClient', () => {
       expect(content.stats.durationMs).toBeLessThan(5000);
     });
 
-    it('should return zeros when no models exist', async () => {
+    it("should return zeros when no models exist", async () => {
       vi.mocked(uiTelemetryService.getMetrics).mockReturnValue(
         createMockMetrics(),
       );
@@ -528,16 +528,16 @@ describe('ArenaAgentClient', () => {
         models: {},
       });
 
-      const reporter = new ArenaAgentClient('model-a', tempDir);
+      const reporter = new ArenaAgentClient("model-a", tempDir);
       await reporter.init();
       await reporter.updateStatus();
 
       const statusPath = path.join(
         tempDir,
-        'agents',
-        `${safeAgentId('model-a')}.json`,
+        "agents",
+        `${safeAgentId("model-a")}.json`,
       );
-      const content = JSON.parse(await fs.readFile(statusPath, 'utf-8'));
+      const content = JSON.parse(await fs.readFile(statusPath, "utf-8"));
 
       expect(content.stats.rounds).toBe(0);
       expect(content.stats.totalTokens).toBe(0);
@@ -548,21 +548,21 @@ describe('ArenaAgentClient', () => {
     });
   });
 
-  describe('safeAgentId()', () => {
-    it('should pass through typical model IDs unchanged', () => {
-      expect(safeAgentId('qwen-coder-plus')).toBe('qwen-coder-plus');
+  describe("safeAgentId()", () => {
+    it("should pass through typical model IDs unchanged", () => {
+      expect(safeAgentId("tramr-plus")).toBe("tramr-plus");
     });
 
-    it('should handle IDs without unsafe characters', () => {
-      expect(safeAgentId('simple-id')).toBe('simple-id');
+    it("should handle IDs without unsafe characters", () => {
+      expect(safeAgentId("simple-id")).toBe("simple-id");
     });
 
-    it('should replace slashes with double dashes', () => {
-      expect(safeAgentId('org/model-name')).toBe('org--model-name');
+    it("should replace slashes with double dashes", () => {
+      expect(safeAgentId("org/model-name")).toBe("org--model-name");
     });
 
-    it('should handle multiple unsafe characters', () => {
-      expect(safeAgentId('a/b\\c:d')).toBe('a--b--c--d');
+    it("should handle multiple unsafe characters", () => {
+      expect(safeAgentId("a/b\\c:d")).toBe("a--b--c--d");
     });
   });
 });

@@ -56,6 +56,11 @@
           "type": "boolean",
           "default": true
         },
+        "omitToolInstructions": {
+          "description": "Omit tool usage instructions from the system prompt. Tools will only be provided via API parameters.",
+          "type": "boolean",
+          "default": false
+        },
         "gitCoAuthor": {
           "description": "Automatically add a Co-authored-by trailer to git commit messages when commits are made through TRAM.",
           "type": "boolean",
@@ -78,11 +83,7 @@
           "default": false
         },
         "language": {
-<<<<<<< HEAD
-          "description": "The language for the user interface. Use \"auto\" to detect from system settings. You can also use custom language codes (e.g., \"es\", \"fr\") by placing JS language files in ~/.tram/locales/ (e.g., ~/.tram/locales/es.js). Options: auto, en, zh, ru, de, ja, pt",
-=======
-          "description": "The language for the user interface. Use \"auto\" to detect from system settings. You can also use custom language codes (e.g., \"es\", \"fr\") by placing JS language files in ~/.qwen/locales/ (e.g., ~/.qwen/locales/es.js). Options: auto, en, zh, ru, de, ja, pt, fr",
->>>>>>> v0.14.5
+          "description": "The language for the user interface. Use \"auto\" to detect from system settings. You can also use custom language codes (e.g., \"es\", \"fr\") by placing JS language files in ~/.tram/locales/ (e.g., ~/.tram/locales/es.js). Options: auto, en, zh, ru, de, ja, pt, fr",
           "enum": [
             "auto",
             "en",
@@ -102,6 +103,11 @@
         },
         "terminalBell": {
           "description": "Play terminal bell sound when response completes or needs approval.",
+          "type": "boolean",
+          "default": true
+        },
+        "desktopNotification": {
+          "description": "Send a desktop notification when a conversation completes or needs approval.",
           "type": "boolean",
           "default": true
         },
@@ -291,6 +297,13 @@
         "name": {
           "description": "The model to use for conversations.",
           "type": "string"
+        },
+        "fallbacks": {
+          "description": "Ordered backup models to try when the primary request fails. Use \"<authType>:<model>\" to disambiguate cross-provider fallbacks.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "maxSessionTurns": {
           "description": "Maximum number of user/model/tool turns to keep in a session. -1 means unlimited.",
@@ -561,6 +574,11 @@
           "description": "The number of lines to keep when truncating tool output.",
           "type": "number",
           "default": 1000
+        },
+        "serviceOutputToLLM": {
+          "description": "When true (default), service tool outputs (logs, analysis) are included directly in the main LLM context. Set to false to store them as file references only, protecting the main LLM context from log noise.",
+          "type": "boolean",
+          "default": true
         }
       }
     },
@@ -660,34 +678,28 @@
           "type": "object",
           "additionalProperties": true
         },
-<<<<<<< HEAD
-        "proxy": {
-          "description": "Outbound network proxy configuration for the TRAM CLI.",
-          "type": "object",
-          "properties": {
-            "mode": {
-              "description": "Proxy mode: use environment/system proxy, custom proxy, or disable proxy. Options: system, custom, off",
-              "enum": [
-                "system",
-                "custom",
-                "off"
-              ],
-              "default": "system"
-            },
-            "customUrl": {
-              "description": "Custom proxy URL used when advanced.proxy.mode is set to custom.",
-              "type": "string"
-            }
-          }
-=======
         "runtimeOutputDir": {
-          "description": "Custom directory for runtime output (temp files, debug logs, session data, todos, etc.). Config files remain at ~/.qwen. Env var QWEN_RUNTIME_DIR takes priority.",
+          "description": "Custom directory for runtime output (temp files, debug logs, session data, todos, etc.). Config files remain at ~/.tram. Env var QWEN_RUNTIME_DIR takes priority.",
           "type": "string"
->>>>>>> v0.14.5
         },
         "tavilyApiKey": {
           "description": "⚠️ DEPRECATED: Please use webSearch.provider configuration instead. Legacy API key for the Tavily API.",
           "type": "string"
+        },
+        "proxy": {
+          "description": "Proxy configuration for network requests.",
+          "type": "object",
+          "properties": {
+            "mode": {
+              "description": "Proxy mode: system (use env vars), custom (specify URL), or off.",
+              "type": "string",
+              "default": "system"
+            },
+            "customUrl": {
+              "description": "Custom proxy URL when mode is \"custom\".",
+              "type": "string"
+            }
+          }
         }
       }
     },
@@ -711,7 +723,7 @@
           "type": "object",
           "properties": {
             "worktreeBaseDir": {
-              "description": "Custom base directory for Arena worktrees. Defaults to ~/.qwen/arena.",
+              "description": "Custom base directory for Arena worktrees. Defaults to ~/.tram/arena.",
               "type": "string"
             },
             "preserveArtifacts": {
@@ -1537,7 +1549,7 @@
       "type": "object",
       "properties": {
         "cron": {
-          "description": "Enable in-session cron/loop tools (experimental). When enabled, the model can create recurring prompts using cron_create, cron_list, and cron_delete tools. Can also be enabled via QWEN_CODE_ENABLE_CRON=1 environment variable.",
+          "description": "Enable in-session cron/loop tools (experimental). When enabled, the model can schedule recurring or one-shot tasks with cron_create, including LM prompts and managed service actions, plus inspect them with cron_list and cancel them with cron_delete. Can also be enabled via QWEN_CODE_ENABLE_CRON=1 environment variable.",
           "type": "boolean",
           "default": false
         }

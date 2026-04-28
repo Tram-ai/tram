@@ -14,26 +14,26 @@ import type {
   ToolCallConfirmationDetails,
   AnyDeclarativeTool,
   AnyToolInvocation,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import {
   AgentEventType,
   ToolConfirmationOutcome,
   createDebugLogger,
-} from '@tram-ai/tram-core';
-import { z } from 'zod';
-import type { SessionContext } from './types.js';
-import { ToolCallEmitter } from './emitters/ToolCallEmitter.js';
-import { MessageEmitter } from './emitters/MessageEmitter.js';
+} from "@tram-ai/tram-core";
+import { z } from "zod";
+import type { SessionContext } from "./types.js";
+import { ToolCallEmitter } from "./emitters/ToolCallEmitter.js";
+import { MessageEmitter } from "./emitters/MessageEmitter.js";
 import type {
   AgentSideConnection,
   RequestPermissionRequest,
-} from '@agentclientprotocol/sdk';
+} from "@agentclientprotocol/sdk";
 import {
   buildPermissionRequestContent,
   toPermissionOptions,
-} from './permissionUtils.js';
+} from "./permissionUtils.js";
 
-const debugLogger = createDebugLogger('ACP_SUBAGENT_TRACKER');
+const debugLogger = createDebugLogger("ACP_SUBAGENT_TRACKER");
 
 /**
  * Tracks and emits events for sub-agent tool calls within AgentTool execution.
@@ -207,7 +207,7 @@ export class SubAgentTracker {
         options: toPermissionOptions(fullConfirmationDetails),
         toolCall: {
           toolCallId: event.callId,
-          status: 'pending',
+          status: "pending",
           title,
           content: buildPermissionRequestContent(fullConfirmationDetails),
           locations,
@@ -220,7 +220,7 @@ export class SubAgentTracker {
         // Request permission from client
         const output = await this.client.requestPermission(params);
         const outcome =
-          output.outcome.outcome === 'cancelled'
+          output.outcome.outcome === "cancelled"
             ? ToolConfirmationOutcome.Cancel
             : z
                 .nativeEnum(ToolConfirmationOutcome)
@@ -228,7 +228,7 @@ export class SubAgentTracker {
 
         // Respond to subagent with the outcome
         await event.respond(outcome, {
-          answers: 'answers' in output ? output.answers : undefined,
+          answers: "answers" in output ? output.answers : undefined,
         });
       } catch (error) {
         // If permission request fails, cancel the tool call
@@ -253,7 +253,7 @@ export class SubAgentTracker {
 
       this.messageEmitter.emitUsageMetadata(
         event.usage,
-        '',
+        "",
         event.durationMs,
         this.getSubagentMeta(),
       );
@@ -274,7 +274,7 @@ export class SubAgentTracker {
       // Emit streamed text as agent message or thought based on the flag
       void this.messageEmitter.emitMessage(
         event.text,
-        'assistant',
+        "assistant",
         event.thought ?? false,
       );
     };

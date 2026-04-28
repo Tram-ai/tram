@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { glob } from 'glob';
-import type { PartUnion } from '@google/genai';
-import { processSingleFileContent } from './fileUtils.js';
-import type { Config } from '../config/config.js';
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { glob } from "glob";
+import type { PartUnion } from "@google/genai";
+import { processSingleFileContent } from "./fileUtils.js";
+import type { Config } from "../config/config.js";
 
 /**
  * Reads the content of a file or recursively expands a directory from
@@ -62,7 +62,7 @@ export async function readPathFromWorkspace(
     });
 
     // Use glob to recursively find all files within the directory.
-    const files = await glob('**/*', {
+    const files = await glob("**/*", {
       cwd: absolutePath,
       nodir: true, // We only want files
       dot: true, // Include dotfiles
@@ -75,7 +75,7 @@ export async function readPathFromWorkspace(
     const filteringOptions = config.getFileFilteringOptions();
     const filteredFiles = fileService.filterFiles(relativeFiles, {
       respectGitIgnore: filteringOptions.respectGitIgnore,
-      respectQwenIgnore: filteringOptions.respectQwenIgnore,
+      respectTramIgnore: filteringOptions.respectTramIgnore,
     });
     const finalFiles = filteredFiles.map((p) =>
       path.resolve(config.getTargetDir(), p),
@@ -86,7 +86,7 @@ export async function readPathFromWorkspace(
       allParts.push({ text: `--- ${relativePathForDisplay} ---\n` });
       const result = await processSingleFileContent(filePath, config);
       allParts.push(result.llmContent);
-      allParts.push({ text: '\n' }); // Add a newline for separation
+      allParts.push({ text: "\n" }); // Add a newline for separation
     }
 
     allParts.push({ text: `--- End of content for directory: ${pathStr} ---` });
@@ -97,7 +97,7 @@ export async function readPathFromWorkspace(
     const singleFileFilteringOptions = config.getFileFilteringOptions();
     const filtered = fileService.filterFiles([relativePath], {
       respectGitIgnore: singleFileFilteringOptions.respectGitIgnore,
-      respectQwenIgnore: singleFileFilteringOptions.respectQwenIgnore,
+      respectTramIgnore: singleFileFilteringOptions.respectTramIgnore,
     });
 
     if (filtered.length === 0) {

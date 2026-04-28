@@ -7,20 +7,20 @@ import type {
   ModelInfo,
   AvailableCommand,
   RequestPermissionRequest,
-} from '@agentclientprotocol/sdk';
-import type { AskUserQuestionRequest } from './acpTypes.js';
-import type { ApprovalModeValue } from './approvalModeValueTypes.js';
+} from "@agentclientprotocol/sdk";
+import type { AskUserQuestionRequest } from "./acpTypes.js";
+import type { ApprovalModeValue } from "./approvalModeValueTypes.js";
 
 export interface ChatMessage {
-  role: 'user' | 'assistant' | 'thinking';
+  role: "user" | "assistant" | "thinking";
   content: string;
   timestamp: number;
 }
 
 export interface PlanEntry {
   content: string;
-  priority?: 'high' | 'medium' | 'low';
-  status: 'pending' | 'in_progress' | 'completed';
+  priority?: "high" | "medium" | "low";
+  status: "pending" | "in_progress" | "completed";
 }
 
 export interface ToolCallUpdateData {
@@ -82,14 +82,14 @@ export interface TramAgentCallbacks {
 }
 
 export interface ToolCallUpdate {
-  type: 'tool_call' | 'tool_call_update';
+  type: "tool_call" | "tool_call_update";
   toolCallId: string;
   kind?: string;
   title?: string;
-  status?: 'pending' | 'in_progress' | 'completed' | 'failed';
+  status?: "pending" | "in_progress" | "completed" | "failed";
   rawInput?: unknown;
   content?: Array<{
-    type: 'content' | 'diff';
+    type: "content" | "diff";
     content?: {
       type: string;
       text?: string;

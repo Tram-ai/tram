@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { AuthDialog } from './AuthDialog.js';
-import { LoadedSettings } from '../../config/settings.js';
-import type { Config } from '@tram-ai/tram-core';
-import { AuthType } from '@tram-ai/tram-core';
-import { renderWithProviders } from '../../test-utils/render.js';
-import { UIStateContext } from '../contexts/UIStateContext.js';
-import { UIActionsContext } from '../contexts/UIActionsContext.js';
-import type { UIState } from '../contexts/UIStateContext.js';
-import type { UIActions } from '../contexts/UIActionsContext.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { AuthDialog } from "./AuthDialog.js";
+import { LoadedSettings } from "../../config/settings.js";
+import type { Config } from "@tram-ai/tram-core";
+import { AuthType } from "@tram-ai/tram-core";
+import { renderWithProviders } from "../../test-utils/render.js";
+import { UIStateContext } from "../contexts/UIStateContext.js";
+import { UIActionsContext } from "../contexts/UIActionsContext.js";
+import type { UIState } from "../contexts/UIStateContext.js";
+import type { UIActions } from "../contexts/UIActionsContext.js";
 
 const createMockUIState = (overrides: Partial<UIState> = {}): UIState => {
   // AuthDialog only uses authError and pendingAuthType
@@ -69,15 +69,15 @@ const renderAuthDialog = (
   );
 };
 
-describe('AuthDialog', () => {
+describe("AuthDialog", () => {
   const wait = (ms = 50) => new Promise((resolve) => setTimeout(resolve, ms));
 
   let originalEnv: NodeJS.ProcessEnv;
 
   beforeEach(() => {
     originalEnv = { ...process.env };
-    process.env['GEMINI_API_KEY'] = '';
-    process.env['TRAM_DEFAULT_AUTH_TYPE'] = '';
+    process.env["GEMINI_API_KEY"] = "";
+    process.env["TRAM_DEFAULT_AUTH_TYPE"] = "";
     vi.clearAllMocks();
   });
 
@@ -85,19 +85,19 @@ describe('AuthDialog', () => {
     process.env = originalEnv;
   });
 
-  it('should show an error if the initial auth type is invalid', () => {
-    process.env['GEMINI_API_KEY'] = '';
+  it("should show an error if the initial auth type is invalid", () => {
+    process.env["GEMINI_API_KEY"] = "";
 
     const settings: LoadedSettings = new LoadedSettings(
       {
         settings: { ui: { customThemes: {} }, mcpServers: {} },
         originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-        path: '',
+        path: "",
       },
       {
         settings: {},
         originalSettings: {},
-        path: '',
+        path: "",
       },
       {
         settings: {
@@ -114,29 +114,29 @@ describe('AuthDialog', () => {
             },
           },
         },
-        path: '',
+        path: "",
       },
       {
         settings: { ui: { customThemes: {} }, mcpServers: {} },
         originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-        path: '',
+        path: "",
       },
       true,
       new Set(),
     );
 
     const { lastFrame } = renderAuthDialog(settings, {
-      authError: 'GEMINI_API_KEY  environment variable not found',
+      authError: "GEMINI_API_KEY  environment variable not found",
     });
 
     expect(lastFrame()).toContain(
-      'GEMINI_API_KEY  environment variable not found',
+      "GEMINI_API_KEY  environment variable not found",
     );
   });
 
-  describe('GEMINI_API_KEY environment variable', () => {
-    it('should detect GEMINI_API_KEY environment variable', () => {
-      process.env['GEMINI_API_KEY'] = 'foobar';
+  describe("GEMINI_API_KEY environment variable", () => {
+    it("should detect GEMINI_API_KEY environment variable", () => {
+      process.env["GEMINI_API_KEY"] = "foobar";
 
       const settings: LoadedSettings = new LoadedSettings(
         {
@@ -150,22 +150,22 @@ describe('AuthDialog', () => {
             ui: { customThemes: {} },
             mcpServers: {},
           },
-          path: '',
+          path: "",
         },
         {
           settings: {},
           originalSettings: {},
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         true,
         new Set(),
@@ -175,12 +175,12 @@ describe('AuthDialog', () => {
 
       // Since the auth dialog shows API Key option now,
       // it won't show GEMINI_API_KEY messages
-      expect(lastFrame()).toContain('API Key');
+      expect(lastFrame()).toContain("API Key");
     });
 
-    it('should not show the GEMINI_API_KEY message if TRAM_DEFAULT_AUTH_TYPE is set to something else', () => {
-      process.env['GEMINI_API_KEY'] = 'foobar';
-      process.env['TRAM_DEFAULT_AUTH_TYPE'] = AuthType.USE_OPENAI;
+    it("should not show the GEMINI_API_KEY message if TRAM_DEFAULT_AUTH_TYPE is set to something else", () => {
+      process.env["GEMINI_API_KEY"] = "foobar";
+      process.env["TRAM_DEFAULT_AUTH_TYPE"] = AuthType.USE_OPENAI;
 
       const settings: LoadedSettings = new LoadedSettings(
         {
@@ -194,22 +194,22 @@ describe('AuthDialog', () => {
             ui: { customThemes: {} },
             mcpServers: {},
           },
-          path: '',
+          path: "",
         },
         {
           settings: {},
           originalSettings: {},
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         true,
         new Set(),
@@ -218,13 +218,13 @@ describe('AuthDialog', () => {
       const { lastFrame } = renderAuthDialog(settings);
 
       expect(lastFrame()).not.toContain(
-        'Existing API key detected (GEMINI_API_KEY)',
+        "Existing API key detected (GEMINI_API_KEY)",
       );
     });
 
-    it('should show the GEMINI_API_KEY message if TRAM_DEFAULT_AUTH_TYPE is set to use api key', () => {
-      process.env['GEMINI_API_KEY'] = 'foobar';
-      process.env['TRAM_DEFAULT_AUTH_TYPE'] = AuthType.USE_OPENAI;
+    it("should show the GEMINI_API_KEY message if TRAM_DEFAULT_AUTH_TYPE is set to use api key", () => {
+      process.env["GEMINI_API_KEY"] = "foobar";
+      process.env["TRAM_DEFAULT_AUTH_TYPE"] = AuthType.USE_OPENAI;
 
       const settings: LoadedSettings = new LoadedSettings(
         {
@@ -238,22 +238,22 @@ describe('AuthDialog', () => {
             ui: { customThemes: {} },
             mcpServers: {},
           },
-          path: '',
+          path: "",
         },
         {
           settings: {},
           originalSettings: {},
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         true,
         new Set(),
@@ -263,15 +263,15 @@ describe('AuthDialog', () => {
 
       // Since the auth dialog shows API Key option now,
       // it won't show GEMINI_API_KEY messages
-      expect(lastFrame()).toContain('API Key');
+      expect(lastFrame()).toContain("API Key");
     });
   });
 
-  describe('TRAM_DEFAULT_AUTH_TYPE environment variable', () => {
-    it('should select the auth type specified by TRAM_DEFAULT_AUTH_TYPE', () => {
+  describe("TRAM_DEFAULT_AUTH_TYPE environment variable", () => {
+    it("should select the auth type specified by TRAM_DEFAULT_AUTH_TYPE", () => {
       // TRAM_OAUTH is the only valid AuthType that can be selected via env var
       // API-KEY is not an AuthType enum value, so it cannot be selected this way
-      process.env['TRAM_DEFAULT_AUTH_TYPE'] = AuthType.TRAM_OAUTH;
+      process.env["TRAM_DEFAULT_AUTH_TYPE"] = AuthType.TRAM_OAUTH;
 
       const settings: LoadedSettings = new LoadedSettings(
         {
@@ -285,22 +285,22 @@ describe('AuthDialog', () => {
             ui: { customThemes: {} },
             mcpServers: {},
           },
-          path: '',
+          path: "",
         },
         {
           settings: {},
           originalSettings: {},
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         true,
         new Set(),
@@ -309,10 +309,10 @@ describe('AuthDialog', () => {
       const { lastFrame } = renderAuthDialog(settings);
 
       // TRAM_OAUTH is the first option, so it should be selected
-      expect(lastFrame()).toContain('TRAM OAuth');
+      expect(lastFrame()).toContain("TRAM OAuth");
     });
 
-    it('should fall back to default if TRAM_DEFAULT_AUTH_TYPE is not set', () => {
+    it("should fall back to default if TRAM_DEFAULT_AUTH_TYPE is not set", () => {
       const settings: LoadedSettings = new LoadedSettings(
         {
           settings: {
@@ -325,22 +325,22 @@ describe('AuthDialog', () => {
             ui: { customThemes: {} },
             mcpServers: {},
           },
-          path: '',
+          path: "",
         },
         {
           settings: {},
           originalSettings: {},
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         true,
         new Set(),
@@ -349,11 +349,11 @@ describe('AuthDialog', () => {
       const { lastFrame } = renderAuthDialog(settings);
 
       // Default is Coding Plan (first option); Qwen OAuth is last (discontinued)
-      expect(lastFrame()).toContain('Alibaba Cloud Coding Plan');
+      expect(lastFrame()).toContain("Alibaba Cloud Coding Plan");
     });
 
-    it('should show an error and fall back to default if TRAM_DEFAULT_AUTH_TYPE is invalid', () => {
-      process.env['TRAM_DEFAULT_AUTH_TYPE'] = 'invalid-auth-type';
+    it("should show an error and fall back to default if TRAM_DEFAULT_AUTH_TYPE is invalid", () => {
+      process.env["TRAM_DEFAULT_AUTH_TYPE"] = "invalid-auth-type";
 
       const settings: LoadedSettings = new LoadedSettings(
         {
@@ -367,22 +367,22 @@ describe('AuthDialog', () => {
             ui: { customThemes: {} },
             mcpServers: {},
           },
-          path: '',
+          path: "",
         },
         {
           settings: {},
           originalSettings: {},
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         {
           settings: { ui: { customThemes: {} }, mcpServers: {} },
           originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-          path: '',
+          path: "",
         },
         true,
         new Set(),
@@ -392,22 +392,22 @@ describe('AuthDialog', () => {
 
       // Since the auth dialog doesn't show TRAM_DEFAULT_AUTH_TYPE errors anymore,
       // it will just show the default TRAM OAuth option
-      expect(lastFrame()).toContain('TRAM OAuth');
+      expect(lastFrame()).toContain("TRAM OAuth");
     });
   });
 
-  it('should prevent exiting when no auth method is selected and show error message', async () => {
+  it("should prevent exiting when no auth method is selected and show error message", async () => {
     const handleAuthSelect = vi.fn();
     const settings: LoadedSettings = new LoadedSettings(
       {
         settings: { ui: { customThemes: {} }, mcpServers: {} },
         originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-        path: '',
+        path: "",
       },
       {
         settings: {},
         originalSettings: {},
-        path: '',
+        path: "",
       },
       {
         settings: {
@@ -420,12 +420,12 @@ describe('AuthDialog', () => {
           ui: { customThemes: {} },
           mcpServers: {},
         },
-        path: '',
+        path: "",
       },
       {
         settings: { ui: { customThemes: {} }, mcpServers: {} },
         originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-        path: '',
+        path: "",
       },
       true,
       new Set(),
@@ -440,31 +440,31 @@ describe('AuthDialog', () => {
     await wait();
 
     // Simulate pressing escape key
-    stdin.write('\u001b'); // ESC key
+    stdin.write("\u001b"); // ESC key
     await wait();
 
     // Should show error message instead of calling handleAuthSelect
     await vi.waitFor(() => {
       const frame = lastFrame();
-      expect(frame).toContain('You must select an auth method');
-      expect(frame).toContain('Press Ctrl+C again to exit');
+      expect(frame).toContain("You must select an auth method");
+      expect(frame).toContain("Press Ctrl+C again to exit");
     });
     expect(handleAuthSelect).not.toHaveBeenCalled();
     unmount();
   });
 
-  it('should not exit if there is already an error message', async () => {
+  it("should not exit if there is already an error message", async () => {
     const handleAuthSelect = vi.fn();
     const settings: LoadedSettings = new LoadedSettings(
       {
         settings: { ui: { customThemes: {} }, mcpServers: {} },
         originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-        path: '',
+        path: "",
       },
       {
         settings: {},
         originalSettings: {},
-        path: '',
+        path: "",
       },
       {
         settings: {
@@ -477,12 +477,12 @@ describe('AuthDialog', () => {
           ui: { customThemes: {} },
           mcpServers: {},
         },
-        path: '',
+        path: "",
       },
       {
         settings: { ui: { customThemes: {} }, mcpServers: {} },
         originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-        path: '',
+        path: "",
       },
       true,
       new Set(),
@@ -490,16 +490,16 @@ describe('AuthDialog', () => {
 
     const { lastFrame, stdin, unmount } = renderAuthDialog(
       settings,
-      { authError: 'Initial error' },
+      { authError: "Initial error" },
       { handleAuthSelect },
       undefined, // config.getAuthType() returns undefined
     );
     await wait();
 
-    expect(lastFrame()).toContain('Initial error');
+    expect(lastFrame()).toContain("Initial error");
 
     // Simulate pressing escape key
-    stdin.write('\u001b'); // ESC key
+    stdin.write("\u001b"); // ESC key
     await wait();
 
     // Should not call handleAuthSelect
@@ -507,18 +507,18 @@ describe('AuthDialog', () => {
     unmount();
   });
 
-  it('should allow exiting when auth method is already selected', async () => {
+  it("should allow exiting when auth method is already selected", async () => {
     const handleAuthSelect = vi.fn();
     const settings: LoadedSettings = new LoadedSettings(
       {
         settings: { ui: { customThemes: {} }, mcpServers: {} },
         originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-        path: '',
+        path: "",
       },
       {
         settings: {},
         originalSettings: {},
-        path: '',
+        path: "",
       },
       {
         settings: {
@@ -531,12 +531,12 @@ describe('AuthDialog', () => {
           ui: { customThemes: {} },
           mcpServers: {},
         },
-        path: '',
+        path: "",
       },
       {
         settings: { ui: { customThemes: {} }, mcpServers: {} },
         originalSettings: { ui: { customThemes: {} }, mcpServers: {} },
-        path: '',
+        path: "",
       },
       true,
       new Set(),
@@ -551,7 +551,7 @@ describe('AuthDialog', () => {
     await wait();
 
     // Simulate pressing escape key
-    stdin.write('\u001b'); // ESC key
+    stdin.write("\u001b"); // ESC key
     await wait();
 
     // Should call handleAuthSelect with undefined to exit

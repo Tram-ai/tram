@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as Diff from 'diff';
-import type { DiffStat } from './tools.js';
+import * as Diff from "diff";
+import type { DiffStat } from "./tools.js";
 
 export const DEFAULT_DIFF_OPTIONS: Diff.PatchOptions = {
   context: 3,
@@ -26,10 +26,10 @@ export function getDiffStat(
 
     patch.hunks.forEach((hunk: Diff.Hunk) => {
       hunk.lines.forEach((line: string) => {
-        if (line.startsWith('+')) {
+        if (line.startsWith("+")) {
           addedLines++;
           addedChars += line.length - 1;
-        } else if (line.startsWith('-')) {
+        } else if (line.startsWith("-")) {
           removedLines++;
           removedChars += line.length - 1;
         }
@@ -43,8 +43,8 @@ export function getDiffStat(
     fileName,
     oldStr,
     aiStr,
-    'Current',
-    'Proposed',
+    "Current",
+    "Proposed",
     DEFAULT_DIFF_OPTIONS,
   );
   const modelStats = getStats(modelPatch);
@@ -54,8 +54,8 @@ export function getDiffStat(
     fileName,
     aiStr,
     userStr,
-    'Proposed',
-    'User',
+    "Proposed",
+    "User",
     DEFAULT_DIFF_OPTIONS,
   );
   const userStats = getStats(userPatch);

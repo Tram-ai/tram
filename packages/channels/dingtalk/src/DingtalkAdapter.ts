@@ -1,18 +1,18 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { randomUUID } from 'node:crypto';
-import { basename, join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { DWClient, TOPIC_ROBOT, EventAck } from 'dingtalk-stream-sdk-nodejs';
-import type { DWClientDownStream } from 'dingtalk-stream-sdk-nodejs';
-import { ChannelBase } from '@qwen-code/channel-base';
-import { normalizeDingTalkMarkdown, extractTitle } from './markdown.js';
-import { downloadMedia } from './media.js';
+import { mkdirSync, writeFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
+import { basename, join } from "node:path";
+import { tmpdir } from "node:os";
+import { DWClient, TOPIC_ROBOT, EventAck } from "dingtalk-stream-sdk-nodejs";
+import type { DWClientDownStream } from "dingtalk-stream-sdk-nodejs";
+import { ChannelBase } from "@tram-ai/channel-base";
+import { normalizeDingTalkMarkdown, extractTitle } from "./markdown.js";
+import { downloadMedia } from "./media.js";
 import type {
   ChannelConfig,
   ChannelBaseOptions,
   Envelope,
   AcpBridge,
-} from '@qwen-code/channel-base';
+} from "@tram-ai/channel-base";
 
 /**
  * Raw DingTalk message data — the SDK's RobotMessage type only covers text,
@@ -71,10 +71,10 @@ interface DingTalkMessageData {
 /** Track seen msgIds to deduplicate retried callbacks. */
 const DEDUP_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-const ACK_REACTION_NAME = '👀';
-const ACK_EMOTION_ID = '2659900';
-const ACK_EMOTION_BG_ID = 'im_bg_1';
-const EMOTION_API = 'https://api.dingtalk.com/v1.0/robot/emotion';
+const ACK_REACTION_NAME = "👀";
+const ACK_EMOTION_ID = "2659900";
+const ACK_EMOTION_BG_ID = "im_bg_1";
+const EMOTION_API = "https://api.dingtalk.com/v1.0/robot/emotion";
 
 export class DingtalkChannel extends ChannelBase {
   private client: DWClient;
@@ -112,7 +112,7 @@ export class DingtalkChannel extends ChannelBase {
         // ACK immediately so DingTalk doesn't retry
         this.client.send(msg.headers.messageId, {
           status: EventAck.SUCCESS,
-          message: 'ok',
+          message: "ok",
         });
         this.onMessage(msg);
       },
@@ -148,7 +148,7 @@ export class DingtalkChannel extends ChannelBase {
 
     for (const chunk of chunks) {
       const body = {
-        msgtype: 'markdown',
+        msgtype: "markdown",
         markdown: {
           title: chunks.length > 1 ? `${title} (cont.)` : title,
           text: chunk,
@@ -156,13 +156,13 @@ export class DingtalkChannel extends ChannelBase {
       };
 
       const resp = await fetch(webhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
       if (!resp.ok) {
-        const detail = await resp.text().catch(() => '');
+        const detail = await resp.text().catch(() => "");
         process.stderr.write(
           `[DingTalk:${this.name}] sendMessage failed: HTTP ${resp.status} ${detail}\n`,
         );
@@ -175,7 +175,7 @@ export class DingtalkChannel extends ChannelBase {
   }
 
   private async emotionApi(
-    endpoint: 'reply' | 'recall',
+    endpoint: "reply" | "recall",
     msgId: string,
     conversationId: string,
   ): Promise<void> {
@@ -187,10 +187,10 @@ export class DingtalkChannel extends ChannelBase {
 
     try {
       const resp = await fetch(`${EMOTION_API}/${endpoint}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'x-acs-dingtalk-access-token': token,
-          'Content-Type': 'application/json',
+          "x-acs-dingtalk-access-token": token,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           robotCode,
@@ -207,7 +207,7 @@ export class DingtalkChannel extends ChannelBase {
         }),
       });
       if (!resp.ok) {
-        const detail = await resp.text().catch(() => '');
+        const detail = await resp.text().catch(() => "");
         process.stderr.write(
           `[DingTalk:${this.name}] emotion/${endpoint} failed: ${resp.status} ${detail}\n`,
         );
@@ -221,14 +221,14 @@ export class DingtalkChannel extends ChannelBase {
     msgId: string,
     conversationId: string,
   ): Promise<void> {
-    await this.emotionApi('reply', msgId, conversationId);
+    await this.emotionApi("reply", msgId, conversationId);
   }
 
   private async recallReaction(
     msgId: string,
     conversationId: string,
   ): Promise<void> {
-    await this.emotionApi('recall', msgId, conversationId);
+    await this.emotionApi("recall", msgId, conversationId);
   }
 
   disconnect(): void {
@@ -313,34 +313,34 @@ export class DingtalkChannel extends ChannelBase {
     if (content?.richText && Array.isArray(content.richText)) {
       const parts: string[] = [];
       for (const part of content.richText) {
-        const partType = part.type || 'text';
-        if (partType === 'text' && part.text) {
+        const partType = part.type || "text";
+        if (partType === "text" && part.text) {
           parts.push(part.text);
-        } else if (partType === 'picture') {
-          parts.push('[image]');
-        } else if (partType === 'at' && part.atName) {
+        } else if (partType === "picture") {
+          parts.push("[image]");
+        } else if (partType === "at" && part.atName) {
           parts.push(`@${part.atName}`);
         }
       }
-      const summary = parts.join('').trim();
+      const summary = parts.join("").trim();
       if (summary) return summary;
     }
 
     // Media type placeholders
     switch (msgType) {
-      case 'picture':
-        return '[image]';
-      case 'file':
-        return `[file: ${content?.fileName || 'file'}]`;
-      case 'audio':
-        return '[audio]';
-      case 'video':
-        return '[video]';
+      case "picture":
+        return "[image]";
+      case "file":
+        return `[file: ${content?.fileName || "file"}]`;
+      case "audio":
+        return "[audio]";
+      case "video":
+        return "[video]";
       default:
         break;
     }
 
-    return '';
+    return "";
   }
 
   /**
@@ -350,74 +350,74 @@ export class DingtalkChannel extends ChannelBase {
   private extractContent(data: DingTalkMessageData): {
     text: string;
     downloadCodes: string[];
-    mediaType?: 'image' | 'file' | 'audio' | 'video';
+    mediaType?: "image" | "file" | "audio" | "video";
     fileName?: string;
   } {
-    const msgtype = data.msgtype || 'text';
+    const msgtype = data.msgtype || "text";
 
-    if (msgtype === 'richText') {
+    if (msgtype === "richText") {
       const richText = data.content?.richText;
       if (!Array.isArray(richText)) {
-        return { text: '', downloadCodes: [] };
+        return { text: "", downloadCodes: [] };
       }
-      let text = '';
+      let text = "";
       const codes: string[] = [];
       for (const part of richText) {
-        const partType = part.type || 'text';
-        if (partType === 'text' && part.text) {
+        const partType = part.type || "text";
+        if (partType === "text" && part.text) {
           text += part.text;
-        } else if (partType === 'picture' && part.downloadCode) {
+        } else if (partType === "picture" && part.downloadCode) {
           codes.push(part.downloadCode);
         }
       }
       return {
-        text: text.trim() || (codes.length > 0 ? '(image)' : ''),
+        text: text.trim() || (codes.length > 0 ? "(image)" : ""),
         downloadCodes: codes,
-        mediaType: codes.length > 0 ? 'image' : undefined,
+        mediaType: codes.length > 0 ? "image" : undefined,
       };
     }
 
-    if (msgtype === 'picture') {
+    if (msgtype === "picture") {
       const code = data.content?.downloadCode;
       return {
-        text: '(image)',
+        text: "(image)",
         downloadCodes: code ? [code] : [],
-        mediaType: 'image',
+        mediaType: "image",
       };
     }
 
-    if (msgtype === 'file') {
+    if (msgtype === "file") {
       const code = data.content?.downloadCode;
       const fileName = data.content?.fileName || undefined;
       return {
-        text: `(file: ${fileName || 'file'})`,
+        text: `(file: ${fileName || "file"})`,
         downloadCodes: code ? [code] : [],
-        mediaType: 'file',
+        mediaType: "file",
         fileName,
       };
     }
 
-    if (msgtype === 'audio') {
+    if (msgtype === "audio") {
       const code = data.content?.downloadCode;
       const recognition = data.content?.recognition;
       return {
-        text: recognition || '(audio)',
+        text: recognition || "(audio)",
         downloadCodes: code ? [code] : [],
-        mediaType: 'audio',
+        mediaType: "audio",
       };
     }
 
-    if (msgtype === 'video') {
+    if (msgtype === "video") {
       const code = data.content?.downloadCode;
       return {
-        text: '(video)',
+        text: "(video)",
         downloadCodes: code ? [code] : [],
-        mediaType: 'video',
+        mediaType: "video",
       };
     }
 
     // Default: text message
-    return { text: data.text?.content?.trim() || '', downloadCodes: [] };
+    return { text: data.text?.content?.trim() || "", downloadCodes: [] };
   }
 
   /**
@@ -427,7 +427,7 @@ export class DingtalkChannel extends ChannelBase {
   private async attachMedia(
     envelope: Envelope,
     downloadCode: string,
-    mediaType: 'image' | 'file' | 'audio' | 'video',
+    mediaType: "image" | "file" | "audio" | "video",
     fileName?: string,
   ): Promise<void> {
     const token = this.getAccessToken();
@@ -442,34 +442,34 @@ export class DingtalkChannel extends ChannelBase {
     const media = await downloadMedia(downloadCode, robotCode, token);
     if (!media) return;
 
-    if (mediaType === 'image') {
-      const mimeType = media.mimeType.startsWith('image/')
+    if (mediaType === "image") {
+      const mimeType = media.mimeType.startsWith("image/")
         ? media.mimeType
-        : 'image/jpeg';
+        : "image/jpeg";
       envelope.attachments = [
         ...(envelope.attachments || []),
         {
-          type: 'image',
-          data: media.buffer.toString('base64'),
+          type: "image",
+          data: media.buffer.toString("base64"),
           mimeType,
         },
       ];
     } else {
       // Save non-image files to temp dir so the agent can read them
-      const dir = join(tmpdir(), 'channel-files', randomUUID());
+      const dir = join(tmpdir(), "channel-files", randomUUID());
       mkdirSync(dir, { recursive: true });
       const safeName =
-        basename(fileName || '') || `dingtalk_${mediaType}_${Date.now()}`;
+        basename(fileName || "") || `dingtalk_${mediaType}_${Date.now()}`;
       const filePath = join(dir, safeName);
       writeFileSync(filePath, media.buffer);
 
       // Clean up placeholder text like "(audio)", "(video)", "(file: name)"
       if (
-        envelope.text === `(file: ${fileName || 'file'})` ||
-        envelope.text === '(audio)' ||
-        envelope.text === '(video)'
+        envelope.text === `(file: ${fileName || "file"})` ||
+        envelope.text === "(audio)" ||
+        envelope.text === "(video)"
       ) {
-        envelope.text = '';
+        envelope.text = "";
       }
 
       envelope.attachments = [
@@ -487,7 +487,7 @@ export class DingtalkChannel extends ChannelBase {
   private onMessage(downstream: DWClientDownStream): void {
     try {
       const data: DingTalkMessageData =
-        typeof downstream.data === 'string'
+        typeof downstream.data === "string"
           ? JSON.parse(downstream.data)
           : (downstream.data as DingTalkMessageData);
       const msgId = data.msgId || downstream.headers.messageId;
@@ -500,7 +500,7 @@ export class DingtalkChannel extends ChannelBase {
         this.seenMessages.set(msgId, Date.now());
       }
 
-      const isGroup = data.conversationType === '2';
+      const isGroup = data.conversationType === "2";
       const sessionWebhook = data.sessionWebhook;
       const conversationId = data.conversationId;
 
@@ -524,7 +524,7 @@ export class DingtalkChannel extends ChannelBase {
 
       // Strip first @mention (the bot) from text, keep other @mentions intact
       if (isMentioned) {
-        cleanText = cleanText.replace(/@\S+/, '').trim();
+        cleanText = cleanText.replace(/@\S+/, "").trim();
       }
 
       // Extract quoted message context
@@ -534,8 +534,8 @@ export class DingtalkChannel extends ChannelBase {
 
       const envelope: Envelope = {
         channelName: this.name,
-        senderId: data.senderStaffId || data.senderId || '',
-        senderName: data.senderNick || 'Unknown',
+        senderId: data.senderStaffId || data.senderId || "",
+        senderName: data.senderNick || "Unknown",
         chatId,
         text: cleanText || content.text,
         isGroup,
@@ -573,7 +573,7 @@ export class DingtalkChannel extends ChannelBase {
         );
         this.sendMessage(
           chatId,
-          'Sorry, something went wrong processing your message.',
+          "Sorry, something went wrong processing your message.",
         ).catch(() => {});
       });
     } catch (err) {

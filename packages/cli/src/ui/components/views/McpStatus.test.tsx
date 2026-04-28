@@ -4,32 +4,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import { describe, it, expect, vi } from 'vitest';
-import { McpStatus } from './McpStatus.js';
-import { MCPServerStatus } from '@tram-ai/tram-core';
-import { MessageType } from '../../types.js';
+import { render } from "ink-testing-library";
+import { describe, it, expect, vi } from "vitest";
+import { McpStatus } from "./McpStatus.js";
+import { MCPServerStatus } from "@tram-ai/tram-core";
+import { MessageType } from "../../types.js";
 
-describe('McpStatus', () => {
+describe("McpStatus", () => {
   const baseProps = {
     type: MessageType.MCP_STATUS,
     servers: {
-      'server-1': {
-        url: 'http://localhost:8080',
-        name: 'server-1',
-        description: 'A test server',
+      "server-1": {
+        url: "http://localhost:8080",
+        name: "server-1",
+        description: "A test server",
       },
     },
     tools: [
       {
-        serverName: 'server-1',
-        name: 'tool-1',
-        description: 'A test tool',
+        serverName: "server-1",
+        name: "tool-1",
+        description: "A test tool",
         schema: {
           parameters: {
-            type: 'object',
+            type: "object",
             properties: {
-              param1: { type: 'string' },
+              param1: { type: "string" },
             },
           },
         },
@@ -46,72 +46,72 @@ describe('McpStatus', () => {
     showTips: false,
   };
 
-  it('renders correctly with a connected server', () => {
+  it("renders correctly with a connected server", () => {
     const { lastFrame } = render(<McpStatus {...baseProps} />);
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly with authenticated OAuth status', () => {
+  it("renders correctly with authenticated OAuth status", () => {
     const { lastFrame } = render(
-      <McpStatus {...baseProps} authStatus={{ 'server-1': 'authenticated' }} />,
+      <McpStatus {...baseProps} authStatus={{ "server-1": "authenticated" }} />,
     );
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly with expired OAuth status', () => {
+  it("renders correctly with expired OAuth status", () => {
     const { lastFrame } = render(
-      <McpStatus {...baseProps} authStatus={{ 'server-1': 'expired' }} />,
+      <McpStatus {...baseProps} authStatus={{ "server-1": "expired" }} />,
     );
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly with unauthenticated OAuth status', () => {
+  it("renders correctly with unauthenticated OAuth status", () => {
     const { lastFrame } = render(
       <McpStatus
         {...baseProps}
-        authStatus={{ 'server-1': 'unauthenticated' }}
+        authStatus={{ "server-1": "unauthenticated" }}
       />,
     );
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly with a disconnected server', async () => {
+  it("renders correctly with a disconnected server", async () => {
     vi.spyOn(
-      await import('@tram-ai/tram-core'),
-      'getMCPServerStatus',
+      await import("@tram-ai/tram-core"),
+      "getMCPServerStatus",
     ).mockReturnValue(MCPServerStatus.DISCONNECTED);
     const { lastFrame } = render(<McpStatus {...baseProps} />);
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly when discovery is in progress', () => {
+  it("renders correctly when discovery is in progress", () => {
     const { lastFrame } = render(
       <McpStatus {...baseProps} discoveryInProgress={true} />,
     );
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly with schema enabled', () => {
+  it("renders correctly with schema enabled", () => {
     const { lastFrame } = render(
       <McpStatus {...baseProps} showSchema={true} />,
     );
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly with parametersJsonSchema', () => {
+  it("renders correctly with parametersJsonSchema", () => {
     const { lastFrame } = render(
       <McpStatus
         {...baseProps}
         tools={[
           {
-            serverName: 'server-1',
-            name: 'tool-1',
-            description: 'A test tool',
+            serverName: "server-1",
+            name: "tool-1",
+            description: "A test tool",
             schema: {
               parametersJsonSchema: {
-                type: 'object',
+                type: "object",
                 properties: {
-                  param1: { type: 'string' },
+                  param1: { type: "string" },
                 },
               },
             },
@@ -123,20 +123,20 @@ describe('McpStatus', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly with tips enabled', () => {
+  it("renders correctly with tips enabled", () => {
     const { lastFrame } = render(<McpStatus {...baseProps} showTips={true} />);
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly with prompts', () => {
+  it("renders correctly with prompts", () => {
     const { lastFrame } = render(
       <McpStatus
         {...baseProps}
         prompts={[
           {
-            serverName: 'server-1',
-            name: 'prompt-1',
-            description: 'A test prompt',
+            serverName: "server-1",
+            name: "prompt-1",
+            description: "A test prompt",
           },
         ]}
       />,
@@ -144,19 +144,19 @@ describe('McpStatus', () => {
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly with a blocked server', () => {
+  it("renders correctly with a blocked server", () => {
     const { lastFrame } = render(
       <McpStatus
         {...baseProps}
-        blockedServers={[{ name: 'server-1', extensionName: 'test-extension' }]}
+        blockedServers={[{ name: "server-1", extensionName: "test-extension" }]}
       />,
     );
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('renders correctly with a connecting server', () => {
+  it("renders correctly with a connecting server", () => {
     const { lastFrame } = render(
-      <McpStatus {...baseProps} connectingServers={['server-1']} />,
+      <McpStatus {...baseProps} connectingServers={["server-1"]} />,
     );
     expect(lastFrame()).toMatchSnapshot();
   });

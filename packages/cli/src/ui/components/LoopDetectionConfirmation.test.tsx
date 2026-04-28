@@ -4,36 +4,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderWithProviders } from '../../test-utils/render.js';
-import { describe, it, expect, vi } from 'vitest';
-import { LoopDetectionConfirmation } from './LoopDetectionConfirmation.js';
+import { renderWithProviders } from "../../test-utils/render.js";
+import { describe, it, expect, vi } from "vitest";
+import { LoopDetectionConfirmation } from "./LoopDetectionConfirmation.js";
 
-describe('LoopDetectionConfirmation', () => {
+describe("LoopDetectionConfirmation", () => {
   const onComplete = vi.fn();
 
-  it('renders correctly', () => {
+  it("renders correctly", () => {
     const { lastFrame } = renderWithProviders(
       <LoopDetectionConfirmation onComplete={onComplete} />,
     );
     expect(lastFrame()).toMatchSnapshot();
   });
 
-  it('contains the expected options', () => {
+  it("contains the expected options", () => {
     const { lastFrame } = renderWithProviders(
       <LoopDetectionConfirmation onComplete={onComplete} />,
     );
     const output = lastFrame()!.toString();
 
-    expect(output).toContain('A potential loop was detected');
-    expect(output).toContain('Keep loop detection enabled (esc)');
-    expect(output).toContain('Disable loop detection for this session');
+    expect(output).toContain("A potential loop was detected");
+    expect(output).toContain("Keep loop detection enabled (esc)");
+    expect(output).toContain("Disable loop detection for this session");
     expect(output).toContain(
-      'This can happen due to repetitive tool calls or other model behavior',
+      "This can happen due to repetitive tool calls or other model behavior",
     );
     expect(output).toContain(
-      'Note: To disable loop detection checks for all future sessions',
+      "Note: To disable loop detection checks for all future sessions",
     );
-    expect(output).toContain('model.skipLoopDetection');
-    expect(output).toContain('settings.json');
+    expect(output).toContain("model.skipLoopDetection");
+    expect(output).toContain("settings.json");
   });
 });

@@ -8,14 +8,14 @@ import {
   type CommandContext,
   type SlashCommand,
   CommandKind,
-} from './types.js';
-import { MessageType, type HistoryItemToolsList } from '../types.js';
-import { t } from '../../i18n/index.js';
+} from "./types.js";
+import { MessageType, type HistoryItemToolsList } from "../types.js";
+import { t } from "../../i18n/index.js";
 
 export const toolsCommand: SlashCommand = {
-  name: 'tools',
+  name: "tools",
   get description() {
-    return t('list available TRAM tools. Usage: /tools [desc]');
+    return t("list available TRAM tools. Usage: /tools [desc]");
   },
   kind: CommandKind.BUILT_IN,
   action: async (context: CommandContext, args?: string): Promise<void> => {
@@ -23,7 +23,7 @@ export const toolsCommand: SlashCommand = {
 
     // Default to NOT showing descriptions. The user must opt in with an argument.
     let useShowDescriptions = false;
-    if (subCommand === 'desc' || subCommand === 'descriptions') {
+    if (subCommand === "desc" || subCommand === "descriptions") {
       useShowDescriptions = true;
     }
 
@@ -32,7 +32,7 @@ export const toolsCommand: SlashCommand = {
       context.ui.addItem(
         {
           type: MessageType.ERROR,
-          text: t('Could not retrieve tool registry.'),
+          text: t("Could not retrieve tool registry."),
         },
         Date.now(),
       );
@@ -43,7 +43,7 @@ export const toolsCommand: SlashCommand = {
     // Filter out MCP tools by checking for the absence of a serverName property
     // Also filter out LM-only tools (those marked with isLmOnly: true)
     const geminiTools = tools.filter(
-      (tool) => !('serverName' in tool) && !(tool as any).isLmOnly,
+      (tool) => !("serverName" in tool) && !(tool as any).isLmOnly,
     );
 
     const toolsListItem: HistoryItemToolsList = {

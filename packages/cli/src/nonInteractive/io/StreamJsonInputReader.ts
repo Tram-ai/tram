@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createInterface } from 'node:readline/promises';
-import type { Readable } from 'node:stream';
-import process from 'node:process';
+import { createInterface } from "node:readline/promises";
+import type { Readable } from "node:stream";
+import process from "node:process";
 import type {
   CLIControlRequest,
   CLIControlResponse,
   CLIMessage,
   ControlCancelRequest,
-} from '../types.js';
+} from "../types.js";
 
 export type StreamJsonInputMessage =
   | CLIMessage
@@ -53,10 +53,10 @@ export class StreamJsonInputReader {
   private parse(line: string): StreamJsonInputMessage {
     try {
       const parsed = JSON.parse(line) as StreamJsonInputMessage;
-      if (!parsed || typeof parsed !== 'object') {
-        throw new StreamJsonParseError('Parsed value is not an object');
+      if (!parsed || typeof parsed !== "object") {
+        throw new StreamJsonParseError("Parsed value is not an object");
       }
-      if (!('type' in parsed) || typeof parsed.type !== 'string') {
+      if (!("type" in parsed) || typeof parsed.type !== "string") {
         throw new StreamJsonParseError('Missing required "type" field');
       }
       return parsed;

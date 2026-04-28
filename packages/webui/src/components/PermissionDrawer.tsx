@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useState } from 'react';
-import type { FC } from 'react';
+import { useEffect, useRef, useState } from "react";
+import type { FC } from "react";
 
 export interface PermissionOption {
   name: string;
@@ -55,32 +55,32 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
   const getAffectedFileName = (): string => {
     const fromLocations = toolCall.locations?.[0]?.path;
     if (fromLocations) {
-      return fromLocations.split('/').pop() || fromLocations;
+      return fromLocations.split("/").pop() || fromLocations;
     }
     // Some tool calls (e.g. write/edit with diff content) only include path in content
     const fromContent = Array.isArray(toolCall.content)
       ? (
           toolCall.content.find(
             (c: unknown) =>
-              typeof c === 'object' &&
+              typeof c === "object" &&
               c !== null &&
-              'path' in (c as Record<string, unknown>),
+              "path" in (c as Record<string, unknown>),
           ) as { path?: unknown } | undefined
         )?.path
       : undefined;
-    if (typeof fromContent === 'string' && fromContent.length > 0) {
-      return fromContent.split('/').pop() || fromContent;
+    if (typeof fromContent === "string" && fromContent.length > 0) {
+      return fromContent.split("/").pop() || fromContent;
     }
-    return 'file';
+    return "file";
   };
 
   // Get the title for the permission request
   const getTitle = () => {
-    if (toolCall.kind === 'edit' || toolCall.kind === 'write') {
+    if (toolCall.kind === "edit" || toolCall.kind === "write") {
       const fileName = getAffectedFileName();
       return (
         <>
-          Make this edit to{' '}
+          Make this edit to{" "}
           <span className="font-mono text-[var(--app-primary-foreground)]">
             {fileName}
           </span>
@@ -88,14 +88,14 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
         </>
       );
     }
-    if (toolCall.kind === 'execute' || toolCall.kind === 'bash') {
-      return 'Allow this bash command?';
+    if (toolCall.kind === "execute" || toolCall.kind === "bash") {
+      return "Allow this bash command?";
     }
-    if (toolCall.kind === 'read') {
+    if (toolCall.kind === "read") {
       const fileName = getAffectedFileName();
       return (
         <>
-          Allow read from{' '}
+          Allow read from{" "}
           <span className="font-mono text-[var(--app-primary-foreground)]">
             {fileName}
           </span>
@@ -103,7 +103,7 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
         </>
       );
     }
-    return toolCall.title || 'Permission Required';
+    return toolCall.title || "Permission Required";
   };
 
   // Handle keyboard navigation
@@ -125,13 +125,13 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
       }
 
       // Arrow keys for navigation
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.preventDefault();
         if (options.length === 0) {
           return;
         }
         const totalItems = options.length;
-        if (e.key === 'ArrowDown') {
+        if (e.key === "ArrowDown") {
           setFocusedIndex((prev) => (prev + 1) % totalItems);
         } else {
           setFocusedIndex((prev) => (prev - 1 + totalItems) % totalItems);
@@ -139,7 +139,7 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
       }
 
       // Enter to select
-      if (e.key === 'Enter') {
+      if (e.key === "Enter") {
         e.preventDefault();
         if (focusedIndex < options.length) {
           onResponse(options[focusedIndex].optionId);
@@ -147,12 +147,12 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
       }
 
       // Escape to cancel permission and close (align with CLI behavior)
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         e.preventDefault();
         const rejectOptionId =
-          options.find((o) => o.kind.includes('reject'))?.optionId ||
-          options.find((o) => o.optionId === 'cancel')?.optionId ||
-          'cancel';
+          options.find((o) => o.kind.includes("reject"))?.optionId ||
+          options.find((o) => o.optionId === "cancel")?.optionId ||
+          "cancel";
         onResponse(rejectOptionId);
         if (onClose) {
           onClose();
@@ -160,8 +160,8 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, options, onResponse, onClose, focusedIndex]);
 
   // Focus container when opened
@@ -189,8 +189,8 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
         ref={containerRef}
         className="relative flex flex-col rounded-large border p-2 outline-none animate-slide-up"
         style={{
-          backgroundColor: 'var(--app-input-secondary-background)',
-          borderColor: 'var(--app-input-border)',
+          backgroundColor: "var(--app-input-secondary-background)",
+          borderColor: "var(--app-input-border)",
         }}
         tabIndex={0}
         data-focused-index={focusedIndex}
@@ -198,7 +198,7 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
         {/* Background layer */}
         <div
           className="p-2 absolute inset-0 rounded-large"
-          style={{ backgroundColor: 'var(--app-input-background)' }}
+          style={{ backgroundColor: "var(--app-input-background)" }}
         />
 
         {/* Title + Description (from toolCall.title) */}
@@ -206,19 +206,19 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
           <div className="font-bold text-[var(--app-primary-foreground)] mb-0.5">
             {getTitle()}
           </div>
-          {(toolCall.kind === 'edit' ||
-            toolCall.kind === 'write' ||
-            toolCall.kind === 'read' ||
-            toolCall.kind === 'execute' ||
-            toolCall.kind === 'bash') &&
+          {(toolCall.kind === "edit" ||
+            toolCall.kind === "write" ||
+            toolCall.kind === "read" ||
+            toolCall.kind === "execute" ||
+            toolCall.kind === "bash") &&
             toolCall.title && (
               <div
                 /* 13px, normal font weight; normal whitespace wrapping + long word breaking; maximum 3 lines with overflow ellipsis */
                 className="text-[13px] font-normal text-[var(--app-secondary-foreground)] opacity-90 font-mono whitespace-normal break-words q-line-clamp-3 mb-2"
                 style={{
-                  fontSize: '.9em',
-                  color: 'var(--app-secondary-foreground)',
-                  marginBottom: '6px',
+                  fontSize: ".9em",
+                  color: "var(--app-secondary-foreground)",
+                  marginBottom: "6px",
                 }}
                 title={toolCall.title}
               >
@@ -237,8 +237,8 @@ export const PermissionDrawer: FC<PermissionDrawerProps> = ({
                 key={option.optionId}
                 className={`flex items-center gap-2 px-2 py-1.5 text-left w-full box-border rounded-[4px] border-0 shadow-[inset_0_0_0_1px_var(--app-transparent-inner-border)] transition-colors duration-150 text-[var(--app-primary-foreground)] hover:bg-[var(--app-button-background)] ${
                   isFocused
-                    ? 'text-[var(--app-list-active-foreground)] bg-[var(--app-list-active-background)] hover:text-[var(--app-button-foreground)] hover:font-bold hover:relative hover:border-0'
-                    : 'hover:bg-[var(--app-button-background)] hover:text-[var(--app-button-foreground)] hover:font-bold hover:relative hover:border-0'
+                    ? "text-[var(--app-list-active-foreground)] bg-[var(--app-list-active-background)] hover:text-[var(--app-button-foreground)] hover:font-bold hover:relative hover:border-0"
+                    : "hover:bg-[var(--app-button-background)] hover:text-[var(--app-button-foreground)] hover:font-bold hover:relative hover:border-0"
                 }`}
                 onClick={() => onResponse(option.optionId)}
                 onMouseEnter={() => setFocusedIndex(index)}

@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ExtensionManager } from '@tram-ai/tram-core';
-import { getErrorMessage } from '../../utils/errors.js';
+import type { ExtensionManager } from "@tram-ai/tram-core";
+import { getErrorMessage } from "../../utils/errors.js";
 import {
   ExtensionUpdateState,
   extensionUpdatesReducer,
   initialExtensionUpdatesState,
-} from '../state/extensions.js';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
-import type { UseHistoryManagerReturn } from './useHistoryManager.js';
+} from "../state/extensions.js";
+import { useCallback, useEffect, useMemo, useReducer } from "react";
+import type { UseHistoryManagerReturn } from "./useHistoryManager.js";
 import {
   MessageType,
   type ConfirmationRequest,
   type SettingInputRequest,
   type PluginChoiceRequest,
-} from '../types.js';
-import { checkExhaustive } from '../../utils/checks.js';
+} from "../types.js";
+import { checkExhaustive } from "../../utils/checks.js";
 
 type ConfirmationRequestWrapper = {
   prompt: React.ReactNode;
@@ -27,17 +27,17 @@ type ConfirmationRequestWrapper = {
 };
 
 type ConfirmationRequestAction =
-  | { type: 'add'; request: ConfirmationRequestWrapper }
-  | { type: 'remove'; request: ConfirmationRequestWrapper };
+  | { type: "add"; request: ConfirmationRequestWrapper }
+  | { type: "remove"; request: ConfirmationRequestWrapper };
 
 function confirmationRequestsReducer(
   state: ConfirmationRequestWrapper[],
   action: ConfirmationRequestAction,
 ): ConfirmationRequestWrapper[] {
   switch (action.type) {
-    case 'add':
+    case "add":
       return [...state, action.request];
-    case 'remove':
+    case "remove":
       return state.filter((r) => r !== action.request);
     default:
       checkExhaustive(action);
@@ -57,14 +57,14 @@ export const useConfirmUpdateRequests = () => {
         onConfirm: (confirmed: boolean) => {
           // Remove it from the outstanding list of requests by identity.
           dispatchConfirmUpdateExtensionRequests({
-            type: 'remove',
+            type: "remove",
             request: wrappedRequest,
           });
           original.onConfirm(confirmed);
         },
       };
       dispatchConfirmUpdateExtensionRequests({
-        type: 'add',
+        type: "add",
         request: wrappedRequest,
       });
     },
@@ -86,17 +86,17 @@ type SettingInputRequestWrapper = {
 };
 
 type SettingInputRequestAction =
-  | { type: 'add'; request: SettingInputRequestWrapper }
-  | { type: 'remove'; request: SettingInputRequestWrapper };
+  | { type: "add"; request: SettingInputRequestWrapper }
+  | { type: "remove"; request: SettingInputRequestWrapper };
 
 function settingInputRequestsReducer(
   state: SettingInputRequestWrapper[],
   action: SettingInputRequestAction,
 ): SettingInputRequestWrapper[] {
   switch (action.type) {
-    case 'add':
+    case "add":
       return [...state, action.request];
-    case 'remove':
+    case "remove":
       return state.filter((r) => r !== action.request);
     default:
       checkExhaustive(action);
@@ -118,21 +118,21 @@ export const useSettingInputRequests = () => {
         onSubmit: (value: string) => {
           // Remove it from the outstanding list of requests by identity.
           dispatchSettingInputRequests({
-            type: 'remove',
+            type: "remove",
             request: wrappedRequest,
           });
           original.onSubmit(value);
         },
         onCancel: () => {
           dispatchSettingInputRequests({
-            type: 'remove',
+            type: "remove",
             request: wrappedRequest,
           });
           original.onCancel();
         },
       };
       dispatchSettingInputRequests({
-        type: 'add',
+        type: "add",
         request: wrappedRequest,
       });
     },
@@ -153,17 +153,17 @@ type PluginChoiceRequestWrapper = {
 };
 
 type PluginChoiceRequestAction =
-  | { type: 'add'; request: PluginChoiceRequestWrapper }
-  | { type: 'remove'; request: PluginChoiceRequestWrapper };
+  | { type: "add"; request: PluginChoiceRequestWrapper }
+  | { type: "remove"; request: PluginChoiceRequestWrapper };
 
 function pluginChoiceRequestsReducer(
   state: PluginChoiceRequestWrapper[],
   action: PluginChoiceRequestAction,
 ): PluginChoiceRequestWrapper[] {
   switch (action.type) {
-    case 'add':
+    case "add":
       return [...state, action.request];
-    case 'remove':
+    case "remove":
       return state.filter((r) => r !== action.request);
     default:
       checkExhaustive(action);
@@ -183,21 +183,21 @@ export const usePluginChoiceRequests = () => {
         plugins: original.plugins,
         onSelect: (pluginName: string) => {
           dispatchPluginChoiceRequests({
-            type: 'remove',
+            type: "remove",
             request: wrappedRequest,
           });
           original.onSelect(pluginName);
         },
         onCancel: () => {
           dispatchPluginChoiceRequests({
-            type: 'remove',
+            type: "remove",
             request: wrappedRequest,
           });
           original.onCancel();
         },
       };
       dispatchPluginChoiceRequests({
-        type: 'add',
+        type: "add",
         request: wrappedRequest,
       });
     },
@@ -212,7 +212,7 @@ export const usePluginChoiceRequests = () => {
 
 export const useExtensionUpdates = (
   extensionManager: ExtensionManager,
-  addItem: UseHistoryManagerReturn['addItem'],
+  addItem: UseHistoryManagerReturn["addItem"],
   cwd: string,
 ) => {
   const [extensionsUpdateState, dispatchExtensionStateUpdate] = useReducer(
@@ -232,16 +232,16 @@ export const useExtensionUpdates = (
         return !currentState || currentState === ExtensionUpdateState.UNKNOWN;
       });
       if (extensionsToCheck.length === 0) return;
-      dispatchExtensionStateUpdate({ type: 'BATCH_CHECK_START' });
+      dispatchExtensionStateUpdate({ type: "BATCH_CHECK_START" });
       await extensionManager.checkForAllExtensionUpdates(
         (extensionName: string, state: ExtensionUpdateState) => {
           dispatchExtensionStateUpdate({
-            type: 'SET_STATE',
+            type: "SET_STATE",
             payload: { name: extensionName, state },
           });
         },
       );
-      dispatchExtensionStateUpdate({ type: 'BATCH_CHECK_END' });
+      dispatchExtensionStateUpdate({ type: "BATCH_CHECK_END" });
     })();
   }, [
     extensions,
@@ -270,7 +270,7 @@ export const useExtensionUpdates = (
 
       // Mark as processed immediately to avoid re-triggering.
       dispatchExtensionStateUpdate({
-        type: 'SET_PROCESSED',
+        type: "SET_PROCESSED",
         payload: { name: extension.name, processed: true },
       });
 
@@ -281,7 +281,7 @@ export const useExtensionUpdates = (
             currentState.status,
             (extensionName, state) => {
               dispatchExtensionStateUpdate({
-                type: 'SET_STATE',
+                type: "SET_STATE",
                 payload: { name: extensionName, state },
               });
             },
@@ -310,7 +310,7 @@ export const useExtensionUpdates = (
       }
     }
     if (extensionsWithUpdatesCount > 0) {
-      const s = extensionsWithUpdatesCount > 1 ? 's' : '';
+      const s = extensionsWithUpdatesCount > 1 ? "s" : "";
       addItem(
         {
           type: MessageType.INFO,

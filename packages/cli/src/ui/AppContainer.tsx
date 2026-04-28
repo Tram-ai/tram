@@ -11,22 +11,22 @@ import {
   useEffect,
   useRef,
   useLayoutEffect,
-} from 'react';
-import { type DOMElement, measureElement } from 'ink';
-import { App } from './App.js';
-import { AppContext } from './contexts/AppContext.js';
-import { UIStateContext, type UIState } from './contexts/UIStateContext.js';
+} from "react";
+import { type DOMElement, measureElement } from "ink";
+import { App } from "./App.js";
+import { AppContext } from "./contexts/AppContext.js";
+import { UIStateContext, type UIState } from "./contexts/UIStateContext.js";
 import {
   UIActionsContext,
   type UIActions,
-} from './contexts/UIActionsContext.js';
-import { ConfigContext } from './contexts/ConfigContext.js';
+} from "./contexts/UIActionsContext.js";
+import { ConfigContext } from "./contexts/ConfigContext.js";
 import {
   type HistoryItem,
   ToolCallStatus,
   type HistoryItemWithoutId,
-} from './types.js';
-import { MessageType, StreamingState } from './types.js';
+} from "./types.js";
+import { MessageType, StreamingState } from "./types.js";
 import {
   type EditorType,
   type Config,
@@ -53,91 +53,92 @@ import {
   IDLE_SPECULATION,
   ApprovalMode,
   type PermissionMode,
-} from '@tram-ai/tram-core';
-import { buildResumedHistoryItems } from './utils/resumeHistoryUtils.js';
-import { validateAuthMethod } from '../config/auth.js';
-import { loadHierarchicalGeminiMemory } from '../config/config.js';
-import process from 'node:process';
-import { useHistory } from './hooks/useHistoryManager.js';
-import { useMemoryMonitor } from './hooks/useMemoryMonitor.js';
-import { useThemeCommand } from './hooks/useThemeCommand.js';
-import { useFeedbackDialog } from './hooks/useFeedbackDialog.js';
-import { useAuthCommand } from './auth/useAuth.js';
-import { useEditorSettings } from './hooks/useEditorSettings.js';
-import { useSettingsCommand } from './hooks/useSettingsCommand.js';
-import { useModelCommand } from './hooks/useModelCommand.js';
-import { useArenaCommand } from './hooks/useArenaCommand.js';
-import { useApprovalModeCommand } from './hooks/useApprovalModeCommand.js';
-import { useResumeCommand } from './hooks/useResumeCommand.js';
-import { useSlashCommandProcessor } from './hooks/slashCommandProcessor.js';
-import { useVimMode } from './contexts/VimModeContext.js';
-import { CompactModeProvider } from './contexts/CompactModeContext.js';
-import { useTerminalSize } from './hooks/useTerminalSize.js';
-import { calculatePromptWidths } from './components/InputPrompt.js';
-import { useStdin, useStdout } from 'ink';
-import ansiEscapes from 'ansi-escapes';
-import * as fs from 'node:fs';
-import { basename } from 'node:path';
-import { computeWindowTitle } from '../utils/windowTitle.js';
-import { clearScreen } from '../utils/stdioHelpers.js';
-import { useTextBuffer } from './components/shared/text-buffer.js';
-import { useLogger } from './hooks/useLogger.js';
-import { useGeminiStream } from './hooks/useGeminiStream.js';
-import { useVim } from './hooks/vim.js';
-import { isBtwCommand } from './utils/commandUtils.js';
-import { type LoadedSettings, SettingScope } from '../config/settings.js';
-import { type InitializationResult } from '../core/initializer.js';
-import { useFocus } from './hooks/useFocus.js';
-import { useBracketedPaste } from './hooks/useBracketedPaste.js';
-import { useKeypress, type Key } from './hooks/useKeypress.js';
-import { keyMatchers, Command } from './keyMatchers.js';
-import { useLoadingIndicator } from './hooks/useLoadingIndicator.js';
-import { useFolderTrust } from './hooks/useFolderTrust.js';
-import { useIdeTrustListener } from './hooks/useIdeTrustListener.js';
-import { type IdeIntegrationNudgeResult } from './IdeIntegrationNudge.js';
-import { type CommandMigrationNudgeResult } from './CommandFormatMigrationNudge.js';
-import { useCommandMigration } from './hooks/useCommandMigration.js';
-import { migrateTomlCommands } from '../services/command-migration-tool.js';
-import { type UpdateObject } from './utils/updateCheck.js';
-import { setUpdateHandler } from '../utils/handleAutoUpdate.js';
-import { registerCleanup, runExitCleanup } from '../utils/cleanup.js';
-import { ServiceRuntimeManager } from '@tram-ai/tram-core';
-import { useMessageQueue } from './hooks/useMessageQueue.js';
-import { useAutoAcceptIndicator } from './hooks/useAutoAcceptIndicator.js';
-import { useSessionStats } from './contexts/SessionContext.js';
-import { useGitBranchName } from './hooks/useGitBranchName.js';
+} from "@tram-ai/tram-core";
+import { buildResumedHistoryItems } from "./utils/resumeHistoryUtils.js";
+import { validateAuthMethod } from "../config/auth.js";
+import { loadHierarchicalGeminiMemory } from "../config/config.js";
+import process from "node:process";
+import { useHistory } from "./hooks/useHistoryManager.js";
+import { useMemoryMonitor } from "./hooks/useMemoryMonitor.js";
+import { useThemeCommand } from "./hooks/useThemeCommand.js";
+import { useFeedbackDialog } from "./hooks/useFeedbackDialog.js";
+import { useAuthCommand } from "./auth/useAuth.js";
+import { useEditorSettings } from "./hooks/useEditorSettings.js";
+import { useSettingsCommand } from "./hooks/useSettingsCommand.js";
+import { useModelCommand } from "./hooks/useModelCommand.js";
+import { useArenaCommand } from "./hooks/useArenaCommand.js";
+import { useApprovalModeCommand } from "./hooks/useApprovalModeCommand.js";
+import { useResumeCommand } from "./hooks/useResumeCommand.js";
+import { useSlashCommandProcessor } from "./hooks/slashCommandProcessor.js";
+import { useVimMode } from "./contexts/VimModeContext.js";
+import { CompactModeProvider } from "./contexts/CompactModeContext.js";
+import { useTerminalSize } from "./hooks/useTerminalSize.js";
+import { calculatePromptWidths } from "./components/InputPrompt.js";
+import { useStdin, useStdout } from "ink";
+import ansiEscapes from "ansi-escapes";
+import * as fs from "node:fs";
+import { basename } from "node:path";
+import { computeWindowTitle } from "../utils/windowTitle.js";
+import { clearScreen } from "../utils/stdioHelpers.js";
+import { useTextBuffer } from "./components/shared/text-buffer.js";
+import { useLogger } from "./hooks/useLogger.js";
+import { useGeminiStream } from "./hooks/useGeminiStream.js";
+import { useVim } from "./hooks/vim.js";
+import { isBtwCommand } from "./utils/commandUtils.js";
+import { type LoadedSettings, SettingScope } from "../config/settings.js";
+import { type InitializationResult } from "../core/initializer.js";
+import { useFocus } from "./hooks/useFocus.js";
+import { useBracketedPaste } from "./hooks/useBracketedPaste.js";
+import { useKeypress, type Key } from "./hooks/useKeypress.js";
+import { keyMatchers, Command } from "./keyMatchers.js";
+import { useLoadingIndicator } from "./hooks/useLoadingIndicator.js";
+import { useFolderTrust } from "./hooks/useFolderTrust.js";
+import { useIdeTrustListener } from "./hooks/useIdeTrustListener.js";
+import { type IdeIntegrationNudgeResult } from "./IdeIntegrationNudge.js";
+import { type CommandMigrationNudgeResult } from "./CommandFormatMigrationNudge.js";
+import { useCommandMigration } from "./hooks/useCommandMigration.js";
+import { migrateTomlCommands } from "../services/command-migration-tool.js";
+import { type UpdateObject } from "./utils/updateCheck.js";
+import { setUpdateHandler } from "../utils/handleAutoUpdate.js";
+import { registerCleanup, runExitCleanup } from "../utils/cleanup.js";
+import { ServiceRuntimeManager } from "@tram-ai/tram-core";
+import { useMessageQueue } from "./hooks/useMessageQueue.js";
+import { useAutoAcceptIndicator } from "./hooks/useAutoAcceptIndicator.js";
+import { useSessionStats } from "./contexts/SessionContext.js";
+import { useGitBranchName } from "./hooks/useGitBranchName.js";
 import {
   useExtensionUpdates,
   useConfirmUpdateRequests,
   useSettingInputRequests,
   usePluginChoiceRequests,
-} from './hooks/useExtensionUpdates.js';
-import { useCodingPlanUpdates } from './hooks/useCodingPlanUpdates.js';
-import { ShellFocusContext } from './contexts/ShellFocusContext.js';
-import { useAgentViewState } from './contexts/AgentViewContext.js';
-import { t } from '../i18n/index.js';
-import { useWelcomeBack } from './hooks/useWelcomeBack.js';
-import { useDialogClose } from './hooks/useDialogClose.js';
-import { useInitializationAuthError } from './hooks/useInitializationAuthError.js';
-import { useSubagentCreateDialog } from './hooks/useSubagentCreateDialog.js';
-import { useAgentsManagerDialog } from './hooks/useAgentsManagerDialog.js';
-import { useExtensionsManagerDialog } from './hooks/useExtensionsManagerDialog.js';
-import { useMcpDialog } from './hooks/useMcpDialog.js';
-import { useHooksDialog } from './hooks/useHooksDialog.js';
-import { useAttentionNotifications } from './hooks/useAttentionNotifications.js';
-import { useContextualTips } from './hooks/useContextualTips.js';
-import { getTipHistory } from '../services/tips/index.js';
+} from "./hooks/useExtensionUpdates.js";
+import { useCodingPlanUpdates } from "./hooks/useCodingPlanUpdates.js";
+import { ShellFocusContext } from "./contexts/ShellFocusContext.js";
+import { useAgentViewState } from "./contexts/AgentViewContext.js";
+import { t } from "../i18n/index.js";
+import { useWelcomeBack } from "./hooks/useWelcomeBack.js";
+import { useDialogClose } from "./hooks/useDialogClose.js";
+import { useInitializationAuthError } from "./hooks/useInitializationAuthError.js";
+import { useSubagentCreateDialog } from "./hooks/useSubagentCreateDialog.js";
+import { useAgentsManagerDialog } from "./hooks/useAgentsManagerDialog.js";
+import { useExtensionsManagerDialog } from "./hooks/useExtensionsManagerDialog.js";
+import { useMcpDialog } from "./hooks/useMcpDialog.js";
+import { useHooksDialog } from "./hooks/useHooksDialog.js";
+import { useInitializeDialog } from "./hooks/useInitializeDialog.js";
+import { useAttentionNotifications } from "./hooks/useAttentionNotifications.js";
+import { useContextualTips } from "./hooks/useContextualTips.js";
+import { getTipHistory } from "../services/tips/index.js";
 import {
   requestConsentInteractive,
   requestConsentOrFail,
-} from '../commands/extensions/consent.js';
+} from "../commands/extensions/consent.js";
 
 const CTRL_EXIT_PROMPT_DURATION_MS = 1000;
-const debugLogger = createDebugLogger('APP_CONTAINER');
+const debugLogger = createDebugLogger("APP_CONTAINER");
 
 function isToolExecuting(pendingHistoryItems: HistoryItemWithoutId[]) {
   return pendingHistoryItems.some((item) => {
-    if (item && item.type === 'tool_group') {
+    if (item && item.type === "tool_group") {
       return item.tools.some(
         (tool) => ToolCallStatus.Executing === tool.status,
       );
@@ -170,7 +171,7 @@ export const AppContainer = (props: AppContainerProps) => {
   const { settings, config, initializationResult } = props;
   const historyManager = useHistory();
   useMemoryMonitor(historyManager);
-  const [debugMessage, setDebugMessage] = useState<string>('');
+  const [debugMessage, setDebugMessage] = useState<string>("");
   const [quittingMessages, setQuittingMessages] = useState<
     HistoryItem[] | null
   >(null);
@@ -222,7 +223,7 @@ export const AppContainer = (props: AppContainerProps) => {
             resolve(pluginName);
           },
           onCancel: () => {
-            reject(new Error('Plugin selection cancelled'));
+            reject(new Error("Plugin selection cancelled"));
           },
         });
       }),
@@ -239,7 +240,7 @@ export const AppContainer = (props: AppContainerProps) => {
             resolve(value);
           },
           onCancel: () => {
-            reject(new Error('Setting input cancelled'));
+            reject(new Error("Setting input cancelled"));
           },
         });
       }),
@@ -326,18 +327,18 @@ export const AppContainer = (props: AppContainerProps) => {
         hookSystem
           .fireSessionStartEvent(
             sessionStartSource,
-            config.getModel() ?? '',
+            config.getModel() ?? "",
             String(config.getApprovalMode()) as PermissionMode,
           )
           .then(() => {
-            debugLogger.debug('SessionStart event completed successfully');
+            debugLogger.debug("SessionStart event completed successfully");
           })
           .catch((err) => {
             debugLogger.warn(`SessionStart hook failed: ${err}`);
           });
       } else {
         debugLogger.debug(
-          'SessionStart: HookSystem not available, skipping event',
+          "SessionStart: HookSystem not available, skipping event",
         );
       }
     })();
@@ -348,7 +349,7 @@ export const AppContainer = (props: AppContainerProps) => {
         await config
           .getHookSystem()
           ?.fireSessionEndEvent(SessionEndReason.PromptInputExit);
-        debugLogger.debug('SessionEnd event completed successfully!!!');
+        debugLogger.debug("SessionEnd event completed successfully!!!");
       } catch (err) {
         debugLogger.error(`SessionEnd hook failed: ${err}`);
       }
@@ -362,7 +363,7 @@ export const AppContainer = (props: AppContainerProps) => {
     registerCleanup(async () => {
       try {
         const manager = ServiceRuntimeManager.forConfig(config);
-        const runningServices = manager.listServices().filter(s => s.running);
+        const runningServices = manager.listServices().filter((s) => s.running);
         for (const svc of runningServices) {
           await manager.stopService(svc.name);
         }
@@ -412,7 +413,7 @@ export const AppContainer = (props: AppContainerProps) => {
   }, []);
 
   const buffer = useTextBuffer({
-    initialText: '',
+    initialText: "",
     viewport: { height: 10, width: inputWidth },
     stdin,
     setRawMode,
@@ -425,10 +426,10 @@ export const AppContainer = (props: AppContainerProps) => {
       const pastMessagesRaw = (await logger?.getPreviousUserMessages()) || [];
       const currentSessionUserMessages = historyManager.history
         .filter(
-          (item): item is HistoryItem & { type: 'user'; text: string } =>
-            item.type === 'user' &&
-            typeof item.text === 'string' &&
-            item.text.trim() !== '',
+          (item): item is HistoryItem & { type: "user"; text: string } =>
+            item.type === "user" &&
+            typeof item.text === "string" &&
+            item.text.trim() !== "",
         )
         .map((item) => item.text)
         .reverse();
@@ -510,7 +511,7 @@ export const AppContainer = (props: AppContainerProps) => {
     ) {
       onAuthError(
         t(
-          'Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.',
+          "Authentication is enforced to be {{enforcedType}}, but you are currently using {{currentType}}.",
           {
             enforcedType: String(settings.merged.security?.auth.enforcedType),
             currentType: String(currentAuthType),
@@ -586,6 +587,11 @@ export const AppContainer = (props: AppContainerProps) => {
   const { isMcpDialogOpen, openMcpDialog, closeMcpDialog } = useMcpDialog();
   const { isHooksDialogOpen, openHooksDialog, closeHooksDialog } =
     useHooksDialog();
+  const {
+    isInitializeDialogOpen,
+    openInitializeDialog,
+    closeInitializeDialog,
+  } = useInitializeDialog();
 
   const slashCommandActions = useMemo(
     () => ({
@@ -614,6 +620,7 @@ export const AppContainer = (props: AppContainerProps) => {
       openMcpDialog,
       openHooksDialog,
       openResumeDialog,
+      openInitializeDialog,
     }),
     [
       openAuthDialog,
@@ -634,6 +641,7 @@ export const AppContainer = (props: AppContainerProps) => {
       openMcpDialog,
       openHooksDialog,
       openResumeDialog,
+      openInitializeDialog,
     ],
   );
 
@@ -676,7 +684,7 @@ export const AppContainer = (props: AppContainerProps) => {
     historyManager.addItem(
       {
         type: MessageType.INFO,
-        text: 'Refreshing hierarchical memory (TRAM.md or other context files)...',
+        text: "Refreshing hierarchical memory (TRAM.md or other context files)...",
       },
       Date.now(),
     );
@@ -689,7 +697,7 @@ export const AppContainer = (props: AppContainerProps) => {
         config.getFileService(),
         config.getExtensionContextFilePaths(),
         config.isTrustedFolder(),
-        settings.merged.context?.importFormat || 'tree', // Use setting or default to 'tree'
+        settings.merged.context?.importFormat || "tree", // Use setting or default to 'tree'
       );
 
       config.setUserMemory(memoryContent);
@@ -702,7 +710,7 @@ export const AppContainer = (props: AppContainerProps) => {
           text: `Memory refreshed successfully. ${
             memoryContent.length > 0
               ? `Loaded ${memoryContent.length} characters from ${fileCount} file(s).`
-              : 'No memory content found.'
+              : "No memory content found."
           }`,
         },
         Date.now(),
@@ -722,7 +730,7 @@ export const AppContainer = (props: AppContainerProps) => {
         },
         Date.now(),
       );
-      debugLogger.error('Error refreshing memory:', error);
+      debugLogger.error("Error refreshing memory:", error);
     }
   }, [config, historyManager, settings.merged]);
 
@@ -808,7 +816,7 @@ export const AppContainer = (props: AppContainerProps) => {
     addItem: historyManager.addItem,
     onApprovalModeChange: handleApprovalModeChange,
     shouldBlockTab: () => hasSuggestionsVisible,
-    disabled: agentViewState.activeView !== 'main',
+    disabled: agentViewState.activeView !== "main",
   });
 
   const { messageQueue, addMessage, popAllMessages, drainQueue } =
@@ -827,7 +835,7 @@ export const AppContainer = (props: AppContainerProps) => {
   const handleFinalSubmit = useCallback(
     (submittedValue: string) => {
       // Route to active in-process agent if viewing a sub-agent tab.
-      if (agentViewState.activeView !== 'main') {
+      if (agentViewState.activeView !== "main") {
         const agent = agentViewState.agents.get(agentViewState.activeView);
         if (agent) {
           agent.interactiveAgent.enqueueMessage(submittedValue.trim());
@@ -844,20 +852,20 @@ export const AppContainer = (props: AppContainerProps) => {
 
       // Handle bare exit/quit commands (without the / prefix)
       if (
-        ['exit', 'quit', ':q', ':q!', ':wq', ':wq!'].includes(
+        ["exit", "quit", ":q", ":q!", ":wq", ":wq!"].includes(
           submittedValue.trim(),
         )
       ) {
-        void handleSlashCommand('/quit');
+        void handleSlashCommand("/quit");
         return;
       }
 
       // Check if speculation has results for this submission
       const spec = speculationRef.current;
       if (
-        spec.status !== 'idle' &&
+        spec.status !== "idle" &&
         spec.suggestion === submittedValue &&
-        spec.status === 'completed'
+        spec.status === "completed"
       ) {
         // Accept completed speculation: inject messages and apply files
         acceptSpeculation(spec, geminiClient)
@@ -865,8 +873,8 @@ export const AppContainer = (props: AppContainerProps) => {
             logSpeculation(
               config,
               new SpeculationEvent({
-                outcome: 'accepted',
-                turns_used: spec.messages.filter((m) => m.role === 'model')
+                outcome: "accepted",
+                turns_used: spec.messages.filter((m) => m.role === "model")
                   .length,
                 files_written: result.filesApplied.length,
                 tool_use_count: spec.toolUseCount,
@@ -882,35 +890,35 @@ export const AppContainer = (props: AppContainerProps) => {
               // Render each speculated message as the appropriate HistoryItem
               for (let mi = 0; mi < result.messages.length; mi++) {
                 const msg = result.messages[mi];
-                if (msg.role === 'user' && msg.parts) {
+                if (msg.role === "user" && msg.parts) {
                   // Check if this is a tool result (functionResponse) or user text
                   const hasText = msg.parts.some(
                     (p) => p.text && !p.functionResponse,
                   );
                   if (hasText) {
                     const text = msg.parts
-                      .map((p) => p.text ?? '')
+                      .map((p) => p.text ?? "")
                       .filter(Boolean)
-                      .join('');
+                      .join("");
                     if (text) {
                       historyManager.addItem(
-                        { type: 'user' as const, text },
+                        { type: "user" as const, text },
                         now,
                       );
                     }
                   }
                   // functionResponse parts are rendered as part of the tool_group below
-                } else if (msg.role === 'model' && msg.parts) {
+                } else if (msg.role === "model" && msg.parts) {
                   // Extract text and tool calls separately
                   const textParts = msg.parts
                     .filter((p) => p.text && !p.functionCall)
                     .map((p) => p.text!)
-                    .join('');
+                    .join("");
                   const toolCalls = msg.parts.filter((p) => p.functionCall);
 
                   if (textParts) {
                     historyManager.addItem(
-                      { type: 'gemini' as const, text: textParts },
+                      { type: "gemini" as const, text: textParts },
                       now,
                     );
                   }
@@ -922,21 +930,21 @@ export const AppContainer = (props: AppContainerProps) => {
                       nextMsg?.parts?.filter((p) => p.functionResponse) ?? [];
 
                     const tools = toolCalls.map((tc, i) => {
-                      const name = tc.functionCall?.name ?? 'unknown';
+                      const name = tc.functionCall?.name ?? "unknown";
                       const args = tc.functionCall?.args ?? {};
                       const resp = toolResults[i]?.functionResponse?.response;
                       const resultText =
-                        typeof resp === 'object' && resp
-                          ? ((resp as Record<string, unknown>)['output'] ??
+                        typeof resp === "object" && resp
+                          ? ((resp as Record<string, unknown>)["output"] ??
                             JSON.stringify(resp))
-                          : String(resp ?? '');
+                          : String(resp ?? "");
                       return {
                         callId: `spec-${name}-${i}`,
                         name,
                         description:
                           Object.entries(args)
                             .map(([k, v]) => `${k}: ${String(v).slice(0, 80)}`)
-                            .join(', ') || name,
+                            .join(", ") || name,
                         resultDisplay: String(resultText).slice(0, 500),
                         status: ToolCallStatus.Success,
                         confirmationDetails: undefined,
@@ -944,7 +952,7 @@ export const AppContainer = (props: AppContainerProps) => {
                     });
 
                     const toolGroupItem: HistoryItemWithoutId = {
-                      type: 'tool_group' as const,
+                      type: "tool_group" as const,
                       tools,
                     };
                     historyManager.addItem(toolGroupItem, now);
@@ -965,7 +973,7 @@ export const AppContainer = (props: AppContainerProps) => {
       }
 
       // Abort any running speculation since we're submitting something different
-      if (spec.status === 'running') {
+      if (spec.status === "running") {
         abortSpeculation(spec).catch(() => {});
         speculationRef.current = IDLE_SPECULATION;
       }
@@ -986,7 +994,7 @@ export const AppContainer = (props: AppContainerProps) => {
 
   const handleArenaModelsSelected = useCallback(
     (models: string[]) => {
-      const value = models.join(',');
+      const value = models.join(",");
       buffer.setText(`/arena start --models ${value} `);
       closeArenaDialog();
     },
@@ -1013,7 +1021,7 @@ export const AppContainer = (props: AppContainerProps) => {
       ...pendingGeminiHistoryItems,
     ];
     if (isToolExecuting(pendingHistoryItems)) {
-      buffer.setText(''); // Just clear the prompt
+      buffer.setText(""); // Just clear the prompt
       return;
     }
 
@@ -1131,7 +1139,7 @@ export const AppContainer = (props: AppContainerProps) => {
       !isThemeDialogOpen &&
       !isEditorDialogOpen &&
       !showWelcomeBackDialog &&
-      welcomeBackChoice !== 'restart' &&
+      welcomeBackChoice !== "restart" &&
       geminiClient?.isInitialized?.()
     ) {
       handleFinalSubmit(initialPrompt);
@@ -1177,7 +1185,7 @@ export const AppContainer = (props: AppContainerProps) => {
     if (!followupSuggestionsEnabled) {
       suggestionAbortRef.current?.abort();
       setPromptSuggestion(null);
-      if (speculationRef.current.status === 'running') {
+      if (speculationRef.current.status === "running") {
         abortSpeculation(speculationRef.current).catch(() => {});
         speculationRef.current = IDLE_SPECULATION;
       }
@@ -1190,7 +1198,7 @@ export const AppContainer = (props: AppContainerProps) => {
     ) {
       suggestionAbortRef.current?.abort();
       setPromptSuggestion(null);
-      if (speculationRef.current.status !== 'idle') {
+      if (speculationRef.current.status !== "idle") {
         abortSpeculation(speculationRef.current).catch(() => {});
         speculationRef.current = IDLE_SPECULATION;
       }
@@ -1207,8 +1215,8 @@ export const AppContainer = (props: AppContainerProps) => {
       // Check both committed history and pending items for errors
       // (API errors go to pendingGeminiHistoryItems, not historyManager.history)
       historyManager.history[historyManager.history.length - 1]?.type !==
-        'error' &&
-      !pendingGeminiHistoryItems.some((item) => item.type === 'error') &&
+        "error" &&
+      !pendingGeminiHistoryItems.some((item) => item.type === "error") &&
       !shellConfirmationRequest &&
       !confirmationRequest &&
       !loopDetectionConfirmationRequest &&
@@ -1249,7 +1257,7 @@ export const AppContainer = (props: AppContainerProps) => {
             logPromptSuggestion(
               config,
               new PromptSuggestionEvent({
-                outcome: 'suppressed',
+                outcome: "suppressed",
                 reason: result.filterReason,
               }),
             );
@@ -1269,7 +1277,7 @@ export const AppContainer = (props: AppContainerProps) => {
     return () => {
       suggestionAbortRef.current?.abort();
       // Cleanup speculation on unmount (#21)
-      if (speculationRef.current.status !== 'idle') {
+      if (speculationRef.current.status !== "idle") {
         abortSpeculation(speculationRef.current).catch(() => {});
         speculationRef.current = IDLE_SPECULATION;
       }
@@ -1289,7 +1297,7 @@ export const AppContainer = (props: AppContainerProps) => {
   // user-initiated dismiss via typing/paste). InputPrompt calls onPromptSuggestionDismiss
   // on user input, which clears promptSuggestion, triggering this effect to abort speculation.
   useEffect(() => {
-    if (!promptSuggestion && speculationRef.current.status !== 'idle') {
+    if (!promptSuggestion && speculationRef.current.status !== "idle") {
       abortSpeculation(speculationRef.current).catch(() => {});
       speculationRef.current = IDLE_SPECULATION;
     }
@@ -1398,16 +1406,16 @@ export const AppContainer = (props: AppContainerProps) => {
 
   const handleIdePromptComplete = useCallback(
     (result: IdeIntegrationNudgeResult) => {
-      if (result.userSelection === 'yes') {
+      if (result.userSelection === "yes") {
         // Check whether the extension has been pre-installed
         if (result.isExtensionPreInstalled) {
-          handleSlashCommand('/ide enable');
+          handleSlashCommand("/ide enable");
         } else {
-          handleSlashCommand('/ide install');
+          handleSlashCommand("/ide install");
         }
-        settings.setValue(SettingScope.User, 'ide.hasSeenNudge', true);
-      } else if (result.userSelection === 'dismiss') {
-        settings.setValue(SettingScope.User, 'ide.hasSeenNudge', true);
+        settings.setValue(SettingScope.User, "ide.hasSeenNudge", true);
+      } else if (result.userSelection === "dismiss") {
+        settings.setValue(SettingScope.User, "ide.hasSeenNudge", true);
       }
       setIdePromptAnswered(true);
     },
@@ -1418,7 +1426,7 @@ export const AppContainer = (props: AppContainerProps) => {
     async (result: CommandMigrationNudgeResult) => {
       setShowCommandMigrationNudge(false);
 
-      if (result.userSelection === 'yes') {
+      if (result.userSelection === "yes") {
         // Perform migration for both workspace and user levels
         try {
           const results = [];
@@ -1434,7 +1442,7 @@ export const AppContainer = (props: AppContainerProps) => {
             workspaceResult.convertedFiles.length > 0 ||
             workspaceResult.failedFiles.length > 0
           ) {
-            results.push({ level: 'workspace', result: workspaceResult });
+            results.push({ level: "workspace", result: workspaceResult });
           }
 
           // Migrate user commands
@@ -1448,7 +1456,7 @@ export const AppContainer = (props: AppContainerProps) => {
             userResult.convertedFiles.length > 0 ||
             userResult.failedFiles.length > 0
           ) {
-            results.push({ level: 'user', result: userResult });
+            results.push({ level: "user", result: userResult });
           }
 
           // Report results
@@ -1460,7 +1468,7 @@ export const AppContainer = (props: AppContainerProps) => {
               historyManager.addItem(
                 {
                   type: MessageType.INFO,
-                  text: `[${level}] Successfully migrated ${migrationResult.convertedFiles.length} command file${migrationResult.convertedFiles.length > 1 ? 's' : ''} to Markdown format. Original files backed up as .toml.backup`,
+                  text: `[${level}] Successfully migrated ${migrationResult.convertedFiles.length} command file${migrationResult.convertedFiles.length > 1 ? "s" : ""} to Markdown format. Original files backed up as .toml.backup`,
                 },
                 Date.now(),
               );
@@ -1470,7 +1478,7 @@ export const AppContainer = (props: AppContainerProps) => {
               historyManager.addItem(
                 {
                   type: MessageType.ERROR,
-                  text: `[${level}] Failed to migrate ${migrationResult.failedFiles.length} file${migrationResult.failedFiles.length > 1 ? 's' : ''}:\n${migrationResult.failedFiles.map((f) => `  • ${f.file}: ${f.error}`).join('\n')}`,
+                  text: `[${level}] Failed to migrate ${migrationResult.failedFiles.length} file${migrationResult.failedFiles.length > 1 ? "s" : ""}:\n${migrationResult.failedFiles.map((f) => `  • ${f.file}: ${f.error}`).join("\n")}`,
                 },
                 Date.now(),
               );
@@ -1481,7 +1489,7 @@ export const AppContainer = (props: AppContainerProps) => {
             historyManager.addItem(
               {
                 type: MessageType.INFO,
-                text: 'No TOML files found to migrate.',
+                text: "No TOML files found to migrate.",
               },
               Date.now(),
             );
@@ -1551,7 +1559,7 @@ export const AppContainer = (props: AppContainerProps) => {
           clearTimeout(timerRef.current);
         }
         // Exit directly
-        handleSlashCommand('/quit');
+        handleSlashCommand("/quit");
         return;
       }
 
@@ -1590,7 +1598,7 @@ export const AppContainer = (props: AppContainerProps) => {
 
       // 5. Clear input buffer (if has content)
       if (buffer.text.length > 0) {
-        buffer.setText('');
+        buffer.setText("");
         return; // Input cleared, end processing
       }
 
@@ -1616,7 +1624,7 @@ export const AppContainer = (props: AppContainerProps) => {
     (key: Key) => {
       // Debug log keystrokes if enabled
       if (settings.merged.general?.debugKeystrokeLogging) {
-        debugLogger.debug('[DEBUG] Keystroke:', JSON.stringify(key));
+        debugLogger.debug("[DEBUG] Keystroke:", JSON.stringify(key));
       }
 
       if (keyMatchers[Command.QUIT](key)) {
@@ -1664,7 +1672,7 @@ export const AppContainer = (props: AppContainerProps) => {
         if (buffer.text.length > 0) {
           if (escapePressedOnce) {
             // Second press: clear input, keep the flag to allow immediate cancel
-            buffer.setText('');
+            buffer.setText("");
             return;
           }
           // First press: set flag and show prompt
@@ -1704,7 +1712,7 @@ export const AppContainer = (props: AppContainerProps) => {
         !dialogsVisibleRef.current &&
         buffer.text.length === 0
       ) {
-        if (key.name === 'return' || key.sequence === ' ') {
+        if (key.name === "return" || key.sequence === " ") {
           setBtwItem(null);
           return;
         }
@@ -1725,14 +1733,14 @@ export const AppContainer = (props: AppContainerProps) => {
 
         const mcpServers = config.getMcpServers();
         if (Object.keys(mcpServers || {}).length > 0) {
-          handleSlashCommand(newValue ? '/mcp desc' : '/mcp nodesc');
+          handleSlashCommand(newValue ? "/mcp desc" : "/mcp nodesc");
         }
       } else if (
         keyMatchers[Command.TOGGLE_IDE_CONTEXT_DETAIL](key) &&
         config.getIdeMode() &&
         ideContextState
       ) {
-        handleSlashCommand('/ide status');
+        handleSlashCommand("/ide status");
       } else if (
         keyMatchers[Command.SHOW_MORE_LINES](key) &&
         !enteringConstrainHeightMode
@@ -1745,7 +1753,7 @@ export const AppContainer = (props: AppContainerProps) => {
       } else if (keyMatchers[Command.TOGGLE_COMPACT_MODE](key)) {
         const newValue = !compactMode;
         setCompactMode(newValue);
-        void settings.setValue(SettingScope.User, 'ui.compactMode', newValue);
+        void settings.setValue(SettingScope.User, "ui.compactMode", newValue);
         refreshStatic();
         // Only freeze during the actual responding phase. WaitingForConfirmation
         // must keep focus so the user can approve/cancel tool confirmation UI.
@@ -1811,13 +1819,13 @@ export const AppContainer = (props: AppContainerProps) => {
       title = originalTitleRef.current;
     } else {
       const statusText = thought?.subject
-        ?.replace(/[\r\n]+/g, ' ')
+        ?.replace(/[\r\n]+/g, " ")
         .substring(0, 80);
       title = statusText || originalTitleRef.current;
     }
 
     // Pad the title to a fixed width to prevent taskbar icon resizing.
-    const paddedTitle = title.padEnd(80, ' ');
+    const paddedTitle = title.padEnd(80, " ");
 
     // Only update the title if it's different from the last value we set
     if (lastTitleRef.current !== paddedTitle) {
@@ -1833,7 +1841,7 @@ export const AppContainer = (props: AppContainerProps) => {
     stdout,
   ]);
 
-  const nightly = props.version.includes('nightly');
+  const nightly = props.version.includes("nightly");
 
   const dialogsVisible =
     showWelcomeBackDialog ||
@@ -1861,6 +1869,7 @@ export const AppContainer = (props: AppContainerProps) => {
     isAgentsManagerDialogOpen ||
     isMcpDialogOpen ||
     isHooksDialogOpen ||
+    isInitializeDialogOpen ||
     isApprovalModeDialogOpen ||
     isResumeDialogOpen ||
     isExtensionsManagerDialogOpen;
@@ -1981,6 +1990,8 @@ export const AppContainer = (props: AppContainerProps) => {
       isMcpDialogOpen,
       // Hooks dialog
       isHooksDialogOpen,
+      // Initialize dialog
+      isInitializeDialogOpen,
       // Feedback dialog
       isFeedbackDialogOpen,
       // Per-task token tracking
@@ -2088,6 +2099,8 @@ export const AppContainer = (props: AppContainerProps) => {
       isMcpDialogOpen,
       // Hooks dialog
       isHooksDialogOpen,
+      // Initialize dialog
+      isInitializeDialogOpen,
       // Feedback dialog
       isFeedbackDialogOpen,
       // Per-task token tracking
@@ -2149,6 +2162,9 @@ export const AppContainer = (props: AppContainerProps) => {
       openHooksDialog,
       // Hooks dialog
       closeHooksDialog,
+      // Initialize dialog
+      openInitializeDialog,
+      closeInitializeDialog,
       // Resume session dialog
       openResumeDialog,
       closeResumeDialog,
@@ -2207,6 +2223,9 @@ export const AppContainer = (props: AppContainerProps) => {
       openHooksDialog,
       // Hooks dialog
       closeHooksDialog,
+      // Initialize dialog
+      openInitializeDialog,
+      closeInitializeDialog,
       // Resume session dialog
       openResumeDialog,
       closeResumeDialog,

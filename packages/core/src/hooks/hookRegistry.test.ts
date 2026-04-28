@@ -4,27 +4,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { HookRegistryConfig, FeedbackEmitter } from './hookRegistry.js';
-import { HookRegistry } from './hookRegistry.js';
-import { HookEventName, HooksConfigSource, HookType } from './types.js';
-import type { HookConfig } from './types.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { HookRegistryConfig, FeedbackEmitter } from "./hookRegistry.js";
+import { HookRegistry } from "./hookRegistry.js";
+import { HookEventName, HooksConfigSource, HookType } from "./types.js";
+import type { HookConfig } from "./types.js";
 
 // Mock TrustedHooksManager
-vi.mock('./trustedHooks.js', () => ({
+vi.mock("./trustedHooks.js", () => ({
   TrustedHooksManager: vi.fn().mockImplementation(() => ({
     getUntrustedHooks: vi.fn().mockReturnValue([]),
     trustHooks: vi.fn(),
   })),
 }));
 
-describe('HookRegistry', () => {
+describe("HookRegistry", () => {
   let mockConfig: HookRegistryConfig;
   let mockFeedbackEmitter: FeedbackEmitter;
 
   beforeEach(() => {
     mockConfig = {
-      getProjectRoot: vi.fn().mockReturnValue('/test/project'),
+      getProjectRoot: vi.fn().mockReturnValue("/test/project"),
       isTrustedFolder: vi.fn().mockReturnValue(true),
       getHooks: vi.fn().mockReturnValue(undefined),
       getProjectHooks: vi.fn().mockReturnValue(undefined),
@@ -36,22 +36,22 @@ describe('HookRegistry', () => {
     vi.clearAllMocks();
   });
 
-  describe('initialize', () => {
-    it('should initialize with empty hooks when no config provided', async () => {
+  describe("initialize", () => {
+    it("should initialize with empty hooks when no config provided", async () => {
       const registry = new HookRegistry(mockConfig);
       await registry.initialize();
       expect(registry.getAllHooks()).toHaveLength(0);
     });
 
-    it('should process project hooks from config', async () => {
+    it("should process project hooks from config", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo test',
-                name: 'test-hook',
+                command: "echo test",
+                name: "test-hook",
               },
             ],
           },
@@ -68,12 +68,12 @@ describe('HookRegistry', () => {
       expect(allHooks[0].source).toBe(HooksConfigSource.Project);
     });
 
-    it('should not process project hooks in untrusted folder', async () => {
+    it("should not process project hooks in untrusted folder", async () => {
       mockConfig.isTrustedFolder = vi.fn().mockReturnValue(false);
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
-            hooks: [{ type: HookType.Command, command: 'echo test' }],
+            hooks: [{ type: HookType.Command, command: "echo test" }],
           },
         ],
       };
@@ -86,13 +86,13 @@ describe('HookRegistry', () => {
     });
   });
 
-  describe('getHooksForEvent', () => {
-    it('should return hooks for specific event', async () => {
+  describe("getHooksForEvent", () => {
+    it("should return hooks for specific event", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
             hooks: [
-              { type: HookType.Command, command: 'echo pre', name: 'pre-hook' },
+              { type: HookType.Command, command: "echo pre", name: "pre-hook" },
             ],
           },
         ],
@@ -101,8 +101,8 @@ describe('HookRegistry', () => {
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo post',
-                name: 'post-hook',
+                command: "echo post",
+                name: "post-hook",
               },
             ],
           },
@@ -115,27 +115,27 @@ describe('HookRegistry', () => {
 
       const preHooks = registry.getHooksForEvent(HookEventName.PreToolUse);
       expect(preHooks).toHaveLength(1);
-      expect(preHooks[0].config.name).toBe('pre-hook');
+      expect(preHooks[0].config.name).toBe("pre-hook");
 
       const postHooks = registry.getHooksForEvent(HookEventName.PostToolUse);
       expect(postHooks).toHaveLength(1);
-      expect(postHooks[0].config.name).toBe('post-hook');
+      expect(postHooks[0].config.name).toBe("post-hook");
     });
 
-    it('should register all hooks as enabled by default', async () => {
+    it("should register all hooks as enabled by default", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo first',
-                name: 'first-hook',
+                command: "echo first",
+                name: "first-hook",
               },
               {
                 type: HookType.Command,
-                command: 'echo second',
-                name: 'second-hook',
+                command: "echo second",
+                name: "second-hook",
               },
             ],
           },
@@ -152,7 +152,7 @@ describe('HookRegistry', () => {
       expect(hooks[1].enabled).toBe(true);
     });
 
-    it('should sort hooks by source priority', async () => {
+    it("should sort hooks by source priority", async () => {
       // This test requires multiple sources, which would need getUserHooks
       // For now, we test with extensions which are processed after project hooks
       const projectHooks = {
@@ -161,8 +161,8 @@ describe('HookRegistry', () => {
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo project',
-                name: 'project-hook',
+                command: "echo project",
+                name: "project-hook",
               },
             ],
           },
@@ -179,16 +179,16 @@ describe('HookRegistry', () => {
     });
   });
 
-  describe('setHookEnabled', () => {
-    it('should disable an enabled hook', async () => {
+  describe("setHookEnabled", () => {
+    it("should disable an enabled hook", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo test',
-                name: 'test-hook',
+                command: "echo test",
+                name: "test-hook",
               },
             ],
           },
@@ -203,21 +203,21 @@ describe('HookRegistry', () => {
         1,
       );
 
-      registry.setHookEnabled('test-hook', false);
+      registry.setHookEnabled("test-hook", false);
 
       const hooks = registry.getHooksForEvent(HookEventName.PreToolUse);
       expect(hooks).toHaveLength(0);
     });
 
-    it('should enable a disabled hook', async () => {
+    it("should enable a disabled hook", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo test',
-                name: 'test-hook',
+                command: "echo test",
+                name: "test-hook",
               },
             ],
           },
@@ -229,31 +229,31 @@ describe('HookRegistry', () => {
       await registry.initialize();
 
       // First disable the hook
-      registry.setHookEnabled('test-hook', false);
+      registry.setHookEnabled("test-hook", false);
       expect(registry.getHooksForEvent(HookEventName.PreToolUse)).toHaveLength(
         0,
       );
 
       // Then enable it again
-      registry.setHookEnabled('test-hook', true);
+      registry.setHookEnabled("test-hook", true);
       expect(registry.getHooksForEvent(HookEventName.PreToolUse)).toHaveLength(
         1,
       );
     });
 
-    it('should update all hooks with matching name', async () => {
+    it("should update all hooks with matching name", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
             hooks: [
-              { type: HookType.Command, command: 'echo 1', name: 'same-name' },
+              { type: HookType.Command, command: "echo 1", name: "same-name" },
             ],
           },
         ],
         [HookEventName.PostToolUse]: [
           {
             hooks: [
-              { type: HookType.Command, command: 'echo 2', name: 'same-name' },
+              { type: HookType.Command, command: "echo 2", name: "same-name" },
             ],
           },
         ],
@@ -271,7 +271,7 @@ describe('HookRegistry', () => {
         1,
       );
 
-      registry.setHookEnabled('same-name', false);
+      registry.setHookEnabled("same-name", false);
 
       expect(registry.getHooksForEvent(HookEventName.PreToolUse)).toHaveLength(
         0,
@@ -282,15 +282,15 @@ describe('HookRegistry', () => {
     });
   });
 
-  describe('hook validation', () => {
-    it('should discard hooks with invalid type', async () => {
+  describe("hook validation", () => {
+    it("should discard hooks with invalid type", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
             hooks: [
               {
-                type: 'invalid-type',
-                command: 'echo test',
+                type: "invalid-type",
+                command: "echo test",
               } as unknown as HookConfig,
             ],
           },
@@ -304,7 +304,7 @@ describe('HookRegistry', () => {
       expect(registry.getAllHooks()).toHaveLength(0);
     });
 
-    it('should discard command hooks without command field', async () => {
+    it("should discard command hooks without command field", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
@@ -320,11 +320,11 @@ describe('HookRegistry', () => {
       expect(registry.getAllHooks()).toHaveLength(0);
     });
 
-    it('should skip invalid event names', async () => {
+    it("should skip invalid event names", async () => {
       const hooksConfig = {
         InvalidEventName: [
           {
-            hooks: [{ type: HookType.Command, command: 'echo test' }],
+            hooks: [{ type: HookType.Command, command: "echo test" }],
           },
         ],
       };
@@ -335,22 +335,22 @@ describe('HookRegistry', () => {
 
       expect(registry.getAllHooks()).toHaveLength(0);
       expect(mockFeedbackEmitter.emitFeedback).toHaveBeenCalledWith(
-        'warning',
-        expect.stringContaining('Invalid hook event name'),
+        "warning",
+        expect.stringContaining("Invalid hook event name"),
       );
     });
 
-    it('should skip hooks config fields like enabled and disabled', async () => {
+    it("should skip hooks config fields like enabled and disabled", async () => {
       const hooksConfig = {
-        enabled: ['hook1'],
-        disabled: ['hook2'],
+        enabled: ["hook1"],
+        disabled: ["hook2"],
         [HookEventName.PreToolUse]: [
           {
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo test',
-                name: 'valid-hook',
+                command: "echo test",
+                name: "valid-hook",
               },
             ],
           },
@@ -362,27 +362,27 @@ describe('HookRegistry', () => {
       await registry.initialize();
 
       expect(registry.getAllHooks()).toHaveLength(1);
-      expect(registry.getAllHooks()[0].config.name).toBe('valid-hook');
+      expect(registry.getAllHooks()[0].config.name).toBe("valid-hook");
     });
   });
 
-  describe('duplicate detection', () => {
-    it('should skip duplicate hooks with same name+source+event+matcher+sequential', async () => {
+  describe("duplicate detection", () => {
+    it("should skip duplicate hooks with same name+source+event+matcher+sequential", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
-            matcher: '*.ts',
+            matcher: "*.ts",
             sequential: true,
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo test',
-                name: 'dup-hook',
+                command: "echo test",
+                name: "dup-hook",
               },
               {
                 type: HookType.Command,
-                command: 'echo test',
-                name: 'dup-hook',
+                command: "echo test",
+                name: "dup-hook",
               },
             ],
           },
@@ -396,19 +396,19 @@ describe('HookRegistry', () => {
       expect(registry.getAllHooks()).toHaveLength(1);
     });
 
-    it('should allow hooks with same name but different matcher', async () => {
+    it("should allow hooks with same name but different matcher", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
-            matcher: '*.ts',
+            matcher: "*.ts",
             hooks: [
-              { type: HookType.Command, command: 'echo ts', name: 'my-hook' },
+              { type: HookType.Command, command: "echo ts", name: "my-hook" },
             ],
           },
           {
-            matcher: '*.js',
+            matcher: "*.js",
             hooks: [
-              { type: HookType.Command, command: 'echo js', name: 'my-hook' },
+              { type: HookType.Command, command: "echo js", name: "my-hook" },
             ],
           },
         ],
@@ -421,19 +421,19 @@ describe('HookRegistry', () => {
       expect(registry.getAllHooks()).toHaveLength(2);
     });
 
-    it('should allow hooks with same name but different sequential', async () => {
+    it("should allow hooks with same name but different sequential", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
             sequential: true,
             hooks: [
-              { type: HookType.Command, command: 'echo seq', name: 'my-hook' },
+              { type: HookType.Command, command: "echo seq", name: "my-hook" },
             ],
           },
           {
             sequential: false,
             hooks: [
-              { type: HookType.Command, command: 'echo par', name: 'my-hook' },
+              { type: HookType.Command, command: "echo par", name: "my-hook" },
             ],
           },
         ],
@@ -447,13 +447,13 @@ describe('HookRegistry', () => {
     });
   });
 
-  describe('extension hooks', () => {
-    it('should process hooks from active extensions', async () => {
+  describe("extension hooks", () => {
+    it("should process hooks from active extensions", async () => {
       const extensionHooks = {
         [HookEventName.PreToolUse]: [
           {
             hooks: [
-              { type: HookType.Command, command: 'echo ext', name: 'ext-hook' },
+              { type: HookType.Command, command: "echo ext", name: "ext-hook" },
             ],
           },
         ],
@@ -468,14 +468,14 @@ describe('HookRegistry', () => {
       const allHooks = registry.getAllHooks();
       expect(allHooks).toHaveLength(1);
       expect(allHooks[0].source).toBe(HooksConfigSource.Extensions);
-      expect(allHooks[0].config.name).toBe('ext-hook');
+      expect(allHooks[0].config.name).toBe("ext-hook");
     });
 
-    it('should skip hooks from inactive extensions', async () => {
+    it("should skip hooks from inactive extensions", async () => {
       const extensionHooks = {
         [HookEventName.PreToolUse]: [
           {
-            hooks: [{ type: HookType.Command, command: 'echo ext' }],
+            hooks: [{ type: HookType.Command, command: "echo ext" }],
           },
         ],
       };
@@ -489,7 +489,7 @@ describe('HookRegistry', () => {
       expect(registry.getAllHooks()).toHaveLength(0);
     });
 
-    it('should process multiple extensions', async () => {
+    it("should process multiple extensions", async () => {
       mockConfig.getExtensions = vi.fn().mockReturnValue([
         {
           isActive: true,
@@ -499,8 +499,8 @@ describe('HookRegistry', () => {
                 hooks: [
                   {
                     type: HookType.Command,
-                    command: 'echo ext1',
-                    name: 'ext1-hook',
+                    command: "echo ext1",
+                    name: "ext1-hook",
                   },
                 ],
               },
@@ -515,8 +515,8 @@ describe('HookRegistry', () => {
                 hooks: [
                   {
                     type: HookType.Command,
-                    command: 'echo ext2',
-                    name: 'ext2-hook',
+                    command: "echo ext2",
+                    name: "ext2-hook",
                   },
                 ],
               },
@@ -532,17 +532,17 @@ describe('HookRegistry', () => {
     });
   });
 
-  describe('hook metadata', () => {
-    it('should preserve matcher in registry entry', async () => {
+  describe("hook metadata", () => {
+    it("should preserve matcher in registry entry", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
-            matcher: 'ReadFileTool',
+            matcher: "ReadFileTool",
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo test',
-                name: 'matcher-hook',
+                command: "echo test",
+                name: "matcher-hook",
               },
             ],
           },
@@ -554,10 +554,10 @@ describe('HookRegistry', () => {
       await registry.initialize();
 
       const hooks = registry.getAllHooks();
-      expect(hooks[0].matcher).toBe('ReadFileTool');
+      expect(hooks[0].matcher).toBe("ReadFileTool");
     });
 
-    it('should preserve sequential flag in registry entry', async () => {
+    it("should preserve sequential flag in registry entry", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
@@ -565,8 +565,8 @@ describe('HookRegistry', () => {
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo test',
-                name: 'seq-hook',
+                command: "echo test",
+                name: "seq-hook",
               },
             ],
           },
@@ -581,15 +581,15 @@ describe('HookRegistry', () => {
       expect(hooks[0].sequential).toBe(true);
     });
 
-    it('should add source to hook config', async () => {
+    it("should add source to hook config", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo test',
-                name: 'source-hook',
+                command: "echo test",
+                name: "source-hook",
               },
             ],
           },
@@ -605,16 +605,16 @@ describe('HookRegistry', () => {
     });
   });
 
-  describe('getAllHooks', () => {
-    it('should return a copy of entries array', async () => {
+  describe("getAllHooks", () => {
+    it("should return a copy of entries array", async () => {
       const hooksConfig = {
         [HookEventName.PreToolUse]: [
           {
             hooks: [
               {
                 type: HookType.Command,
-                command: 'echo test',
-                name: 'test-hook',
+                command: "echo test",
+                name: "test-hook",
               },
             ],
           },

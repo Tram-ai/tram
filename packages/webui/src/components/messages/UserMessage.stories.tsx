@@ -4,37 +4,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { UserMessage } from './UserMessage.js';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { UserMessage } from "./UserMessage.js";
 
 /**
  * UserMessage component displays messages from the user.
  * Supports file context display with line numbers.
  */
 const meta: Meta<typeof UserMessage> = {
-  title: 'Messages/UserMessage',
+  title: "Messages/UserMessage",
   component: UserMessage,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     content: {
-      control: 'text',
-      description: 'The message content',
+      control: "text",
+      description: "The message content",
     },
     timestamp: {
-      control: 'number',
-      description: 'Message timestamp',
+      control: "number",
+      description: "Message timestamp",
     },
-    onFileClick: { action: 'fileClicked' },
+    onFileClick: { action: "fileClicked" },
   },
   decorators: [
     (Story) => (
       <div
         style={{
-          background: 'var(--app-background, #1e1e1e)',
-          padding: '20px',
+          background: "var(--app-background, #1e1e1e)",
+          padding: "20px",
         }}
       >
         <Story />
@@ -48,7 +48,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    content: 'How do I fix this bug?',
+    content: "How do I fix this bug?",
     timestamp: Date.now(),
   },
 };
@@ -65,22 +65,22 @@ Can you help me understand what's wrong and how to fix it?`,
 
 export const WithFileContext: Story = {
   args: {
-    content: 'Can you explain what this function does?',
+    content: "Can you explain what this function does?",
     timestamp: Date.now(),
     fileContext: {
-      fileName: 'helpers.ts',
-      filePath: 'src/utils/helpers.ts',
+      fileName: "helpers.ts",
+      filePath: "src/utils/helpers.ts",
     },
   },
 };
 
 export const WithFileContextAndLines: Story = {
   args: {
-    content: 'This code seems inefficient. How can I optimize it?',
+    content: "This code seems inefficient. How can I optimize it?",
     timestamp: Date.now(),
     fileContext: {
-      fileName: 'api.ts',
-      filePath: 'src/services/api.ts',
+      fileName: "api.ts",
+      filePath: "src/services/api.ts",
       startLine: 45,
       endLine: 78,
     },
@@ -89,11 +89,11 @@ export const WithFileContextAndLines: Story = {
 
 export const WithSingleLine: Story = {
   args: {
-    content: 'What does this line do?',
+    content: "What does this line do?",
     timestamp: Date.now(),
     fileContext: {
-      fileName: 'config.ts',
-      filePath: 'src/config.ts',
+      fileName: "config.ts",
+      filePath: "src/config.ts",
       startLine: 12,
     },
   },
@@ -115,7 +115,7 @@ function foo() {}
 
 export const SimpleQuery: Story = {
   args: {
-    content: 'Help',
+    content: "Help",
     timestamp: Date.now(),
   },
 };

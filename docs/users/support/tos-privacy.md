@@ -1,10 +1,10 @@
-# Qwen Code: Terms of Service and Privacy Notice
+# TRAM: Terms of Service and Privacy Notice
 
-Qwen Code is an open-source AI coding assistant tool maintained by the Qwen Code team. This document outlines the terms of service and privacy policies that apply when using Qwen Code's authentication methods and AI model services.
+TRAM is an open-source AI coding assistant tool maintained by the TRAM team. This document outlines the terms of service and privacy policies that apply when using TRAM's authentication methods and AI model services.
 
 ## How to determine your authentication method
 
-Qwen Code supports three authentication methods to access AI models. Your authentication method determines which terms of service and privacy policies apply to your usage:
+TRAM supports three authentication methods to access AI models. Your authentication method determines which terms of service and privacy policies apply to your usage:
 
 1. **Qwen OAuth** — Log in with your qwen.ai account (free tier discontinued 2026-04-15)
 2. **Alibaba Cloud Coding Plan** — Use an API key from Alibaba Cloud
@@ -46,17 +46,17 @@ When you authenticate using API keys from other providers, the applicable Terms 
 
 > [!important]
 >
-> When using your own API key, you are subject to the terms and privacy policies of your chosen API provider, not Qwen Code's terms. Please review your provider's documentation for specific details about data usage, retention, and privacy practices.
+> When using your own API key, you are subject to the terms and privacy policies of your chosen API provider, not TRAM's terms. Please review your provider's documentation for specific details about data usage, retention, and privacy practices.
 
-Qwen Code supports various OpenAI-compatible providers. Please refer to your specific provider's terms of service and privacy policy for detailed information.
+TRAM supports various OpenAI-compatible providers. Please refer to your specific provider's terms of service and privacy policy for detailed information.
 
 ## Usage Statistics and Telemetry
 
-Qwen Code may collect anonymous usage statistics and [telemetry](../../developers/development/telemetry) data to improve the user experience and product quality. This data collection is optional and can be controlled through configuration settings.
+TRAM may collect anonymous usage statistics and [telemetry](../../developers/development/telemetry) data to improve the user experience and product quality. This data collection is optional and can be controlled through configuration settings.
 
 ### What Data is Collected
 
-When enabled, Qwen Code may collect:
+When enabled, TRAM may collect:
 
 - Anonymous usage statistics (commands run, performance metrics)
 - Error reports and crash data
@@ -64,9 +64,9 @@ When enabled, Qwen Code may collect:
 
 ### Data Collection by Authentication Method
 
-- **Qwen OAuth:** Usage statistics are governed by Qwen's privacy policy. You can opt-out through Qwen Code's configuration settings.
-- **Alibaba Cloud Coding Plan:** Usage statistics are governed by Alibaba Cloud's privacy policy. You can opt-out through Qwen Code's configuration settings.
-- **API Key:** No additional data is collected by Qwen Code beyond what your chosen API provider collects.
+- **Qwen OAuth:** Usage statistics are governed by Qwen's privacy policy. You can opt-out through TRAM's configuration settings.
+- **Alibaba Cloud Coding Plan:** Usage statistics are governed by Alibaba Cloud's privacy policy. You can opt-out through TRAM's configuration settings.
+- **API Key:** No additional data is collected by TRAM beyond what your chosen API provider collects.
 
 ## Frequently Asked Questions (FAQ)
 
@@ -80,26 +80,26 @@ Whether your code, including prompts and answers, is used to train AI models dep
 
 - **API Key**: Data usage depends entirely on your chosen API provider. Each provider has their own data usage policies. Please review the privacy policy and terms of service of your specific provider.
 
-**Important**: Qwen Code itself does not use your prompts, code, or responses for model training. Any data usage for training purposes would be governed by the policies of the AI service provider you authenticate with.
+**Important**: TRAM itself does not use your prompts, code, or responses for model training. Any data usage for training purposes would be governed by the policies of the AI service provider you authenticate with.
 
 ### 2. What are Usage Statistics and what does the opt-out control?
 
-The **Usage Statistics** setting controls optional data collection by Qwen Code for improving the user experience and product quality.
+The **Usage Statistics** setting controls optional data collection by TRAM for improving the user experience and product quality.
 
-When enabled, Qwen Code may collect:
+When enabled, TRAM may collect:
 
 - Anonymous telemetry (commands run, performance metrics, feature usage)
 - Error reports and crash data
 - General usage patterns
 
-**What is NOT collected by Qwen Code:**
+**What is NOT collected by TRAM:**
 
 - Your code content
 - Prompts sent to AI models
 - Responses from AI models
 - Personal information
 
-The Usage Statistics setting only controls data collection by Qwen Code itself. It does not affect what data your chosen AI service provider (Qwen, OpenAI, etc.) may collect according to their own privacy policies.
+The Usage Statistics setting only controls data collection by TRAM itself. It does not affect what data your chosen AI service provider (Qwen, OpenAI, etc.) may collect according to their own privacy policies.
 
 ### 3. How do I switch between authentication methods?
 

@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, type Mock, type MockInstance } from 'vitest';
-import type { Config } from '@tram-ai/tram-core';
+import { vi, type Mock, type MockInstance } from "vitest";
+import type { Config } from "@tram-ai/tram-core";
 import {
   OutputFormat,
   FatalInputError,
   ToolErrorType,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import {
   getErrorMessage,
   handleError,
   handleToolError,
   handleCancellationError,
   handleMaxTurnsExceededError,
-} from './errors.js';
+} from "./errors.js";
 
 const mockWriteStderrLine = vi.hoisted(() => vi.fn());
 const debugLoggerSpy = vi.hoisted(() => ({
@@ -28,9 +28,8 @@ const debugLoggerSpy = vi.hoisted(() => ({
 }));
 
 // Mock the core modules
-vi.mock('@tram-ai/tram-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('@tram-ai/tram-core')>();
+vi.mock("@tram-ai/tram-core", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@tram-ai/tram-core")>();
 
   return {
     ...original,
@@ -64,7 +63,7 @@ vi.mock('@tram-ai/tram-core', async (importOriginal) => {
     FatalToolExecutionError: class extends Error {
       constructor(message: string) {
         super(message);
-        this.name = 'FatalToolExecutionError';
+        this.name = "FatalToolExecutionError";
         this.exitCode = 54;
       }
       exitCode: number;
@@ -72,7 +71,7 @@ vi.mock('@tram-ai/tram-core', async (importOriginal) => {
     FatalCancellationError: class extends Error {
       constructor(message: string) {
         super(message);
-        this.name = 'FatalCancellationError';
+        this.name = "FatalCancellationError";
         this.exitCode = 130;
       }
       exitCode: number;
@@ -80,13 +79,13 @@ vi.mock('@tram-ai/tram-core', async (importOriginal) => {
   };
 });
 
-vi.mock('./stdioHelpers.js', () => ({
+vi.mock("./stdioHelpers.js", () => ({
   writeStderrLine: mockWriteStderrLine,
   writeStdoutLine: vi.fn(),
   clearScreen: vi.fn(),
 }));
 
-describe('errors', () => {
+describe("errors", () => {
   let mockConfig: Config;
   let processExitSpy: MockInstance;
   let processStderrWriteSpy: MockInstance;
@@ -102,18 +101,18 @@ describe('errors', () => {
 
     // Mock process.stderr.write
     processStderrWriteSpy = vi
-      .spyOn(process.stderr, 'write')
+      .spyOn(process.stderr, "write")
       .mockImplementation(() => true);
 
     // Mock process.exit to throw instead of actually exiting
-    processExitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
+    processExitSpy = vi.spyOn(process, "exit").mockImplementation((code) => {
       throw new Error(`process.exit called with code: ${code}`);
     });
 
     // Create mock config
     mockConfig = {
       getOutputFormat: vi.fn().mockReturnValue(OutputFormat.TEXT),
-      getContentGeneratorConfig: vi.fn().mockReturnValue({ authType: 'test' }),
+      getContentGeneratorConfig: vi.fn().mockReturnValue({ authType: "test" }),
       getDebugMode: vi.fn().mockReturnValue(true),
       isInteractive: vi.fn().mockReturnValue(false),
     } as unknown as Config;
@@ -124,103 +123,103 @@ describe('errors', () => {
     processExitSpy.mockRestore();
   });
 
-  describe('getErrorMessage', () => {
-    it('should return error message for Error instances', () => {
-      const error = new Error('Test error message');
-      expect(getErrorMessage(error)).toBe('Test error message');
+  describe("getErrorMessage", () => {
+    it("should return error message for Error instances", () => {
+      const error = new Error("Test error message");
+      expect(getErrorMessage(error)).toBe("Test error message");
     });
 
-    it('should convert non-Error values to strings', () => {
-      expect(getErrorMessage('string error')).toBe('string error');
-      expect(getErrorMessage(123)).toBe('123');
-      expect(getErrorMessage(null)).toBe('null');
-      expect(getErrorMessage(undefined)).toBe('undefined');
+    it("should convert non-Error values to strings", () => {
+      expect(getErrorMessage("string error")).toBe("string error");
+      expect(getErrorMessage(123)).toBe("123");
+      expect(getErrorMessage(null)).toBe("null");
+      expect(getErrorMessage(undefined)).toBe("undefined");
     });
 
-    it('should extract message from error-like objects', () => {
-      const obj = { message: 'test error message' };
-      expect(getErrorMessage(obj)).toBe('test error message');
+    it("should extract message from error-like objects", () => {
+      const obj = { message: "test error message" };
+      expect(getErrorMessage(obj)).toBe("test error message");
     });
 
-    it('should stringify plain objects without message property', () => {
-      const obj = { code: 500, details: 'internal error' };
+    it("should stringify plain objects without message property", () => {
+      const obj = { code: 500, details: "internal error" };
       expect(getErrorMessage(obj)).toBe(
         '{"code":500,"details":"internal error"}',
       );
     });
 
-    it('should handle empty objects', () => {
-      expect(getErrorMessage({})).toBe('{}');
+    it("should handle empty objects", () => {
+      expect(getErrorMessage({})).toBe("{}");
     });
 
-    it('should handle objects with non-string message property', () => {
+    it("should handle objects with non-string message property", () => {
       const obj = { message: 123 };
       expect(getErrorMessage(obj)).toBe('{"message":123}');
     });
 
-    it('should fallback to String() when toJSON returns undefined', () => {
+    it("should fallback to String() when toJSON returns undefined", () => {
       const obj = {
         toJSON() {
           return undefined;
         },
       };
-      expect(getErrorMessage(obj)).toBe('[object Object]');
+      expect(getErrorMessage(obj)).toBe("[object Object]");
     });
   });
 
-  describe('handleError', () => {
-    describe('in text mode', () => {
+  describe("handleError", () => {
+    describe("in text mode", () => {
       beforeEach(() => {
         (
           mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
         ).mockReturnValue(OutputFormat.TEXT);
       });
 
-      it('should log error message and re-throw', () => {
-        const testError = new Error('Test error');
+      it("should log error message and re-throw", () => {
+        const testError = new Error("Test error");
 
         expect(() => {
           handleError(testError, mockConfig);
         }).toThrow(testError);
 
         expect(mockWriteStderrLine).toHaveBeenCalledWith(
-          'API Error: Test error',
+          "API Error: Test error",
         );
       });
 
-      it('should handle non-Error objects', () => {
-        const testError = 'String error';
+      it("should handle non-Error objects", () => {
+        const testError = "String error";
 
         expect(() => {
           handleError(testError, mockConfig);
         }).toThrow(testError);
 
         expect(mockWriteStderrLine).toHaveBeenCalledWith(
-          'API Error: String error',
+          "API Error: String error",
         );
       });
     });
 
-    describe('in JSON mode', () => {
+    describe("in JSON mode", () => {
       beforeEach(() => {
         (
           mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
         ).mockReturnValue(OutputFormat.JSON);
       });
 
-      it('should format error as JSON and exit with default code', () => {
-        const testError = new Error('Test error');
+      it("should format error as JSON and exit with default code", () => {
+        const testError = new Error("Test error");
 
         expect(() => {
           handleError(testError, mockConfig);
-        }).toThrow('process.exit called with code: 1');
+        }).toThrow("process.exit called with code: 1");
 
         expect(mockWriteStderrLine).toHaveBeenCalledWith(
           JSON.stringify(
             {
               error: {
-                type: 'Error',
-                message: 'Test error',
+                type: "Error",
+                message: "Test error",
                 code: 1,
               },
             },
@@ -230,19 +229,19 @@ describe('errors', () => {
         );
       });
 
-      it('should use custom error code when provided', () => {
-        const testError = new Error('Test error');
+      it("should use custom error code when provided", () => {
+        const testError = new Error("Test error");
 
         expect(() => {
           handleError(testError, mockConfig, 42);
-        }).toThrow('process.exit called with code: 42');
+        }).toThrow("process.exit called with code: 42");
 
         expect(mockWriteStderrLine).toHaveBeenCalledWith(
           JSON.stringify(
             {
               error: {
-                type: 'Error',
-                message: 'Test error',
+                type: "Error",
+                message: "Test error",
                 code: 42,
               },
             },
@@ -252,19 +251,19 @@ describe('errors', () => {
         );
       });
 
-      it('should extract exitCode from FatalError instances', () => {
-        const fatalError = new FatalInputError('Fatal error');
+      it("should extract exitCode from FatalError instances", () => {
+        const fatalError = new FatalInputError("Fatal error");
 
         expect(() => {
           handleError(fatalError, mockConfig);
-        }).toThrow('process.exit called with code: 42');
+        }).toThrow("process.exit called with code: 42");
 
         expect(mockWriteStderrLine).toHaveBeenCalledWith(
           JSON.stringify(
             {
               error: {
-                type: 'FatalInputError',
-                message: 'Fatal error',
+                type: "FatalInputError",
+                message: "Fatal error",
                 code: 42,
               },
             },
@@ -274,34 +273,34 @@ describe('errors', () => {
         );
       });
 
-      it('should handle error with code property', () => {
-        const errorWithCode = new Error('Error with code') as Error & {
+      it("should handle error with code property", () => {
+        const errorWithCode = new Error("Error with code") as Error & {
           code: number;
         };
         errorWithCode.code = 404;
 
         expect(() => {
           handleError(errorWithCode, mockConfig);
-        }).toThrow('process.exit called with code: 404');
+        }).toThrow("process.exit called with code: 404");
       });
 
-      it('should handle error with status property', () => {
-        const errorWithStatus = new Error('Error with status') as Error & {
+      it("should handle error with status property", () => {
+        const errorWithStatus = new Error("Error with status") as Error & {
           status: string;
         };
-        errorWithStatus.status = 'TIMEOUT';
+        errorWithStatus.status = "TIMEOUT";
 
         expect(() => {
           handleError(errorWithStatus, mockConfig);
-        }).toThrow('process.exit called with code: 1'); // string codes become 1
+        }).toThrow("process.exit called with code: 1"); // string codes become 1
 
         expect(mockWriteStderrLine).toHaveBeenCalledWith(
           JSON.stringify(
             {
               error: {
-                type: 'Error',
-                message: 'Error with status',
-                code: 'TIMEOUT',
+                type: "Error",
+                message: "Error with status",
+                code: "TIMEOUT",
               },
             },
             null,
@@ -312,126 +311,126 @@ describe('errors', () => {
     });
   });
 
-  describe('handleToolError', () => {
-    const toolName = 'test-tool';
-    const toolError = new Error('Tool failed');
+  describe("handleToolError", () => {
+    const toolName = "test-tool";
+    const toolError = new Error("Tool failed");
 
-    describe('when debug mode is enabled', () => {
+    describe("when debug mode is enabled", () => {
       beforeEach(() => {
         (mockConfig.getDebugMode as Mock).mockReturnValue(true);
       });
 
-      describe('in text mode', () => {
+      describe("in text mode", () => {
         beforeEach(() => {
           (
             mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
           ).mockReturnValue(OutputFormat.TEXT);
         });
 
-        it('should log error message to stderr and not exit', () => {
+        it("should log error message to stderr and not exit", () => {
           handleToolError(toolName, toolError, mockConfig);
 
           expect(debugLoggerSpy.error).toHaveBeenCalledWith(
-            'Error executing tool test-tool: Tool failed',
+            "Error executing tool test-tool: Tool failed",
           );
           expect(processExitSpy).not.toHaveBeenCalled();
         });
 
-        it('should use resultDisplay when provided and not exit', () => {
+        it("should use resultDisplay when provided and not exit", () => {
           handleToolError(
             toolName,
             toolError,
             mockConfig,
-            'CUSTOM_ERROR',
-            'Custom display message',
+            "CUSTOM_ERROR",
+            "Custom display message",
           );
 
           expect(debugLoggerSpy.error).toHaveBeenCalledWith(
-            'Error executing tool test-tool: Custom display message',
+            "Error executing tool test-tool: Custom display message",
           );
           expect(processExitSpy).not.toHaveBeenCalled();
         });
       });
 
-      describe('in JSON mode', () => {
+      describe("in JSON mode", () => {
         beforeEach(() => {
           (
             mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
           ).mockReturnValue(OutputFormat.JSON);
         });
 
-        it('should log error message to stderr and not exit', () => {
+        it("should log error message to stderr and not exit", () => {
           handleToolError(toolName, toolError, mockConfig);
 
           // In JSON mode, should not exit (just log to stderr when debug mode is on)
           expect(debugLoggerSpy.error).toHaveBeenCalledWith(
-            'Error executing tool test-tool: Tool failed',
+            "Error executing tool test-tool: Tool failed",
           );
           expect(processExitSpy).not.toHaveBeenCalled();
         });
 
-        it('should log error with custom error code and not exit', () => {
-          handleToolError(toolName, toolError, mockConfig, 'CUSTOM_TOOL_ERROR');
+        it("should log error with custom error code and not exit", () => {
+          handleToolError(toolName, toolError, mockConfig, "CUSTOM_TOOL_ERROR");
 
           // In JSON mode, should not exit (just log to stderr when debug mode is on)
           expect(debugLoggerSpy.error).toHaveBeenCalledWith(
-            'Error executing tool test-tool: Tool failed',
+            "Error executing tool test-tool: Tool failed",
           );
           expect(processExitSpy).not.toHaveBeenCalled();
         });
 
-        it('should log error with numeric error code and not exit', () => {
+        it("should log error with numeric error code and not exit", () => {
           handleToolError(toolName, toolError, mockConfig, 500);
 
           // In JSON mode, should not exit (just log to stderr when debug mode is on)
           expect(debugLoggerSpy.error).toHaveBeenCalledWith(
-            'Error executing tool test-tool: Tool failed',
+            "Error executing tool test-tool: Tool failed",
           );
           expect(processExitSpy).not.toHaveBeenCalled();
         });
 
-        it('should prefer resultDisplay over error message and not exit', () => {
+        it("should prefer resultDisplay over error message and not exit", () => {
           handleToolError(
             toolName,
             toolError,
             mockConfig,
-            'DISPLAY_ERROR',
-            'Display message',
+            "DISPLAY_ERROR",
+            "Display message",
           );
 
           // In JSON mode, should not exit (just log to stderr when debug mode is on)
           expect(debugLoggerSpy.error).toHaveBeenCalledWith(
-            'Error executing tool test-tool: Display message',
+            "Error executing tool test-tool: Display message",
           );
           expect(processExitSpy).not.toHaveBeenCalled();
         });
       });
 
-      describe('in STREAM_JSON mode', () => {
+      describe("in STREAM_JSON mode", () => {
         beforeEach(() => {
           (
             mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
           ).mockReturnValue(OutputFormat.STREAM_JSON);
         });
 
-        it('should log error message to stderr and not exit', () => {
+        it("should log error message to stderr and not exit", () => {
           handleToolError(toolName, toolError, mockConfig);
 
           // Should not exit in STREAM_JSON mode (just log to stderr when debug mode is on)
           expect(debugLoggerSpy.error).toHaveBeenCalledWith(
-            'Error executing tool test-tool: Tool failed',
+            "Error executing tool test-tool: Tool failed",
           );
           expect(processExitSpy).not.toHaveBeenCalled();
         });
       });
     });
 
-    describe('when debug mode is disabled', () => {
+    describe("when debug mode is disabled", () => {
       beforeEach(() => {
         (mockConfig.getDebugMode as Mock).mockReturnValue(false);
       });
 
-      it('should log error and not exit in text mode', () => {
+      it("should log error and not exit in text mode", () => {
         (
           mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
         ).mockReturnValue(OutputFormat.TEXT);
@@ -439,12 +438,12 @@ describe('errors', () => {
         handleToolError(toolName, toolError, mockConfig);
 
         expect(debugLoggerSpy.error).toHaveBeenCalledWith(
-          'Error executing tool test-tool: Tool failed',
+          "Error executing tool test-tool: Tool failed",
         );
         expect(processExitSpy).not.toHaveBeenCalled();
       });
 
-      it('should log error and not exit in JSON mode', () => {
+      it("should log error and not exit in JSON mode", () => {
         (
           mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
         ).mockReturnValue(OutputFormat.JSON);
@@ -452,12 +451,12 @@ describe('errors', () => {
         handleToolError(toolName, toolError, mockConfig);
 
         expect(debugLoggerSpy.error).toHaveBeenCalledWith(
-          'Error executing tool test-tool: Tool failed',
+          "Error executing tool test-tool: Tool failed",
         );
         expect(processExitSpy).not.toHaveBeenCalled();
       });
 
-      it('should log error and not exit in STREAM_JSON mode', () => {
+      it("should log error and not exit in STREAM_JSON mode", () => {
         (
           mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
         ).mockReturnValue(OutputFormat.STREAM_JSON);
@@ -465,18 +464,18 @@ describe('errors', () => {
         handleToolError(toolName, toolError, mockConfig);
 
         expect(debugLoggerSpy.error).toHaveBeenCalledWith(
-          'Error executing tool test-tool: Tool failed',
+          "Error executing tool test-tool: Tool failed",
         );
         expect(processExitSpy).not.toHaveBeenCalled();
       });
     });
 
-    describe('process exit behavior', () => {
+    describe("process exit behavior", () => {
       beforeEach(() => {
         (mockConfig.getDebugMode as Mock).mockReturnValue(true);
       });
 
-      it('should never exit regardless of output format', () => {
+      it("should never exit regardless of output format", () => {
         // Test in TEXT mode
         (
           mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
@@ -500,8 +499,8 @@ describe('errors', () => {
       });
     });
 
-    describe('permission denied warnings', () => {
-      it('should show warning when EXECUTION_DENIED in non-interactive text mode', () => {
+    describe("permission denied warnings", () => {
+      it("should show warning when EXECUTION_DENIED in non-interactive text mode", () => {
         (mockConfig.getDebugMode as Mock).mockReturnValue(false);
         (mockConfig.isInteractive as Mock).mockReturnValue(false);
         (
@@ -521,12 +520,12 @@ describe('errors', () => {
           ),
         );
         expect(processStderrWriteSpy).toHaveBeenCalledWith(
-          expect.stringContaining('use the -y flag (YOLO mode)'),
+          expect.stringContaining("use the -y flag (YOLO mode)"),
         );
         expect(processExitSpy).not.toHaveBeenCalled();
       });
 
-      it('should not show warning when EXECUTION_DENIED in interactive mode', () => {
+      it("should not show warning when EXECUTION_DENIED in interactive mode", () => {
         (mockConfig.getDebugMode as Mock).mockReturnValue(false);
         (mockConfig.isInteractive as Mock).mockReturnValue(true);
         (
@@ -544,7 +543,7 @@ describe('errors', () => {
         expect(processExitSpy).not.toHaveBeenCalled();
       });
 
-      it('should not show warning when EXECUTION_DENIED in JSON mode', () => {
+      it("should not show warning when EXECUTION_DENIED in JSON mode", () => {
         (mockConfig.getDebugMode as Mock).mockReturnValue(false);
         (mockConfig.isInteractive as Mock).mockReturnValue(false);
         (
@@ -562,7 +561,7 @@ describe('errors', () => {
         expect(processExitSpy).not.toHaveBeenCalled();
       });
 
-      it('should not show warning for non-EXECUTION_DENIED errors', () => {
+      it("should not show warning for non-EXECUTION_DENIED errors", () => {
         (mockConfig.getDebugMode as Mock).mockReturnValue(false);
         (mockConfig.isInteractive as Mock).mockReturnValue(false);
         (
@@ -582,43 +581,43 @@ describe('errors', () => {
     });
   });
 
-  describe('handleCancellationError', () => {
-    describe('in text mode', () => {
+  describe("handleCancellationError", () => {
+    describe("in text mode", () => {
       beforeEach(() => {
         (
           mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
         ).mockReturnValue(OutputFormat.TEXT);
       });
 
-      it('should log cancellation message and exit with 130', () => {
+      it("should log cancellation message and exit with 130", () => {
         expect(() => {
           handleCancellationError(mockConfig);
-        }).toThrow('process.exit called with code: 130');
+        }).toThrow("process.exit called with code: 130");
 
         expect(mockWriteStderrLine).toHaveBeenCalledWith(
-          'Operation cancelled.',
+          "Operation cancelled.",
         );
       });
     });
 
-    describe('in JSON mode', () => {
+    describe("in JSON mode", () => {
       beforeEach(() => {
         (
           mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
         ).mockReturnValue(OutputFormat.JSON);
       });
 
-      it('should format cancellation as JSON and exit with 130', () => {
+      it("should format cancellation as JSON and exit with 130", () => {
         expect(() => {
           handleCancellationError(mockConfig);
-        }).toThrow('process.exit called with code: 130');
+        }).toThrow("process.exit called with code: 130");
 
         expect(mockWriteStderrLine).toHaveBeenCalledWith(
           JSON.stringify(
             {
               error: {
-                type: 'FatalCancellationError',
-                message: 'Operation cancelled.',
+                type: "FatalCancellationError",
+                message: "Operation cancelled.",
                 code: 130,
               },
             },
@@ -630,44 +629,44 @@ describe('errors', () => {
     });
   });
 
-  describe('handleMaxTurnsExceededError', () => {
-    describe('in text mode', () => {
+  describe("handleMaxTurnsExceededError", () => {
+    describe("in text mode", () => {
       beforeEach(() => {
         (
           mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
         ).mockReturnValue(OutputFormat.TEXT);
       });
 
-      it('should log max turns message and exit with 53', () => {
+      it("should log max turns message and exit with 53", () => {
         expect(() => {
           handleMaxTurnsExceededError(mockConfig);
-        }).toThrow('process.exit called with code: 53');
+        }).toThrow("process.exit called with code: 53");
 
         expect(mockWriteStderrLine).toHaveBeenCalledWith(
-          'Reached max session turns for this session. Increase the number of turns by specifying maxSessionTurns in settings.json.',
+          "Reached max session turns for this session. Increase the number of turns by specifying maxSessionTurns in settings.json.",
         );
       });
     });
 
-    describe('in JSON mode', () => {
+    describe("in JSON mode", () => {
       beforeEach(() => {
         (
           mockConfig.getOutputFormat as ReturnType<typeof vi.fn>
         ).mockReturnValue(OutputFormat.JSON);
       });
 
-      it('should format max turns error as JSON and exit with 53', () => {
+      it("should format max turns error as JSON and exit with 53", () => {
         expect(() => {
           handleMaxTurnsExceededError(mockConfig);
-        }).toThrow('process.exit called with code: 53');
+        }).toThrow("process.exit called with code: 53");
 
         expect(mockWriteStderrLine).toHaveBeenCalledWith(
           JSON.stringify(
             {
               error: {
-                type: 'FatalTurnLimitedError',
+                type: "FatalTurnLimitedError",
                 message:
-                  'Reached max session turns for this session. Increase the number of turns by specifying maxSessionTurns in settings.json.',
+                  "Reached max session turns for this session. Increase the number of turns by specifying maxSessionTurns in settings.json.",
                 code: 53,
               },
             },

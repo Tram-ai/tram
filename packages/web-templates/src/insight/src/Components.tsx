@@ -1,10 +1,10 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React from 'react';
-import { useState } from 'react';
+import React from "react";
+import { useState } from "react";
 
 // Simple Markdown Parser Component
 export function MarkdownText({ children }: { children: string }) {
-  if (!children || typeof children !== 'string') return children;
+  if (!children || typeof children !== "string") return children;
 
   // Split by bold markers (**text**)
   const parts = children.split(/(\*\*.*?\*\*)/g);
@@ -12,7 +12,7 @@ export function MarkdownText({ children }: { children: string }) {
   return (
     <>
       {parts.map((part, i) => {
-        if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+        if (part.startsWith("**") && part.endsWith("**") && part.length >= 4) {
           return <strong key={i}>{part.slice(2, -2)}</strong>;
         }
         return part;
@@ -23,7 +23,7 @@ export function MarkdownText({ children }: { children: string }) {
 
 export function CopyButton({
   text,
-  label = 'Copy',
+  label = "Copy",
 }: {
   text: string;
   label?: string;
@@ -39,7 +39,7 @@ export function CopyButton({
 
   return (
     <button className="copy-btn" onClick={handleCopy}>
-      {copied ? 'Copied!' : label}
+      {copied ? "Copied!" : label}
     </button>
   );
 }

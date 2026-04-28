@@ -14,30 +14,30 @@
  * For persistent interactive agents, see AgentInteractive (Phase 2).
  */
 
-import type { Config } from '../../config/config.js';
-import { createDebugLogger } from '../../utils/debugLogger.js';
+import type { Config } from "../../config/config.js";
+import { createDebugLogger } from "../../utils/debugLogger.js";
 import type {
   AgentEventEmitter,
   AgentStartEvent,
   AgentErrorEvent,
   AgentFinishEvent,
   AgentHooks,
-} from './agent-events.js';
-import { AgentEventType } from './agent-events.js';
-import type { AgentStatsSummary } from './agent-statistics.js';
+} from "./agent-events.js";
+import { AgentEventType } from "./agent-events.js";
+import type { AgentStatsSummary } from "./agent-statistics.js";
 import type {
   PromptConfig,
   ModelConfig,
   RunConfig,
   ToolConfig,
-} from './agent-types.js';
-import { AgentTerminateMode } from './agent-types.js';
-import { logSubagentExecution } from '../../telemetry/loggers.js';
-import { SubagentExecutionEvent } from '../../telemetry/types.js';
-import { AgentCore } from './agent-core.js';
-import { DEFAULT_QWEN_MODEL } from '../../config/models.js';
+} from "./agent-types.js";
+import { AgentTerminateMode } from "./agent-types.js";
+import { logSubagentExecution } from "../../telemetry/loggers.js";
+import { SubagentExecutionEvent } from "../../telemetry/types.js";
+import { AgentCore } from "./agent-core.js";
+import { DEFAULT_TRAM_MODEL } from "../../config/models.js";
 
-const debugLogger = createDebugLogger('SUBAGENT');
+const debugLogger = createDebugLogger("SUBAGENT");
 
 // ─── Utilities (unchanged, re-exported for consumers) ────────
 
@@ -111,7 +111,7 @@ export function templateString(
   if (missingKeys.length > 0) {
     throw new Error(
       `Missing context values for the following keys: ${missingKeys.join(
-        ', ',
+        ", ",
       )}`,
     );
   }
@@ -134,7 +134,7 @@ export function templateString(
  */
 export class AgentHeadless {
   private readonly core: AgentCore;
-  private finalText: string = '';
+  private finalText: string = "";
   private terminateMode: AgentTerminateMode = AgentTerminateMode.ERROR;
 
   private constructor(core: AgentCore) {
@@ -193,11 +193,11 @@ export class AgentHeadless {
     context: ContextState,
     externalSignal?: AbortSignal,
     options?: {
-      extraHistory?: Array<import('@google/genai').Content>;
+      extraHistory?: Array<import("@google/genai").Content>;
       /** Override generationConfig for cache sharing (fork subagent). */
-      generationConfigOverride?: import('@google/genai').GenerateContentConfig;
+      generationConfigOverride?: import("@google/genai").GenerateContentConfig;
       /** Override tool declarations for cache sharing (fork subagent). */
-      toolsOverride?: Array<import('@google/genai').FunctionDeclaration>;
+      toolsOverride?: Array<import("@google/genai").FunctionDeclaration>;
       /** Skip env bootstrap injection (fork already inherits parent env). */
       skipEnvHistory?: boolean;
     },
@@ -219,7 +219,7 @@ export class AgentHeadless {
       abortController.abort();
     };
     if (externalSignal) {
-      externalSignal.addEventListener('abort', onExternalAbort);
+      externalSignal.addEventListener("abort", onExternalAbort);
     }
     if (externalSignal?.aborted) {
       abortController.abort();
@@ -228,10 +228,10 @@ export class AgentHeadless {
     const toolsList = options?.toolsOverride ?? this.core.prepareTools();
 
     const initialTaskText = String(
-      (context.get('task_prompt') as string) ?? 'Get Started!',
+      (context.get("task_prompt") as string) ?? "Get Started!",
     );
     const initialMessages = [
-      { role: 'user' as const, parts: [{ text: initialTaskText }] },
+      { role: "user" as const, parts: [{ text: initialTaskText }] },
     ];
 
     const startTime = Date.now();
@@ -246,15 +246,15 @@ export class AgentHeadless {
         model:
           this.core.modelConfig.model ||
           this.core.runtimeContext.getModel() ||
-          DEFAULT_QWEN_MODEL,
-        tools: (this.core.toolConfig?.tools || ['*']).map((t) =>
-          typeof t === 'string' ? t : t.name,
+          DEFAULT_TRAM_MODEL,
+        tools: (this.core.toolConfig?.tools || ["*"]).map((t) =>
+          typeof t === "string" ? t : t.name,
         ),
         timestamp: Date.now(),
       } as AgentStartEvent);
 
       // Log telemetry for subagent start
-      const startEvent = new SubagentExecutionEvent(this.core.name, 'started');
+      const startEvent = new SubagentExecutionEvent(this.core.name, "started");
       logSubagentExecution(this.core.runtimeContext, startEvent);
 
       // Delegate to AgentCore's reasoning loop
@@ -273,7 +273,7 @@ export class AgentHeadless {
       this.finalText = result.text;
       this.terminateMode = result.terminateMode ?? AgentTerminateMode.GOAL;
     } catch (error) {
-      debugLogger.error('Error during subagent execution:', error);
+      debugLogger.error("Error during subagent execution:", error);
       this.terminateMode = AgentTerminateMode.ERROR;
       this.core.eventEmitter?.emit(AgentEventType.ERROR, {
         subagentId: this.core.subagentId,
@@ -284,7 +284,7 @@ export class AgentHeadless {
       throw error;
     } finally {
       if (externalSignal) {
-        externalSignal.removeEventListener('abort', onExternalAbort);
+        externalSignal.removeEventListener("abort", onExternalAbort);
       }
       this.core.executionStats.totalDurationMs = Date.now() - startTime;
       const summary = this.core.stats.getSummary(Date.now());
@@ -304,12 +304,12 @@ export class AgentHeadless {
 
       const completionEvent = new SubagentExecutionEvent(
         this.core.name,
-        this.terminateMode === AgentTerminateMode.GOAL ? 'completed' : 'failed',
+        this.terminateMode === AgentTerminateMode.GOAL ? "completed" : "failed",
         {
           terminate_reason: this.terminateMode,
           result: this.finalText,
           execution_summary: this.core.stats.formatCompact(
-            'Subagent execution completed',
+            "Subagent execution completed",
           ),
         },
       );

@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type OpenAI from 'openai';
-import { DeepSeekOpenAICompatibleProvider } from './deepseek.js';
-import type { ContentGeneratorConfig } from '../../contentGenerator.js';
-import type { Config } from '../../../config/config.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import type OpenAI from "openai";
+import { DeepSeekOpenAICompatibleProvider } from "./deepseek.js";
+import type { ContentGeneratorConfig } from "../../contentGenerator.js";
+import type { Config } from "../../../config/config.js";
 
 // Mock OpenAI client to avoid real network calls
-vi.mock('openai', () => ({
+vi.mock("openai", () => ({
   default: vi.fn().mockImplementation((config) => ({
     config,
   })),
 }));
 
-describe('DeepSeekOpenAICompatibleProvider', () => {
+describe("DeepSeekOpenAICompatibleProvider", () => {
   let provider: DeepSeekOpenAICompatibleProvider;
   let mockContentGeneratorConfig: ContentGeneratorConfig;
   let mockCliConfig: Config;
@@ -26,13 +26,13 @@ describe('DeepSeekOpenAICompatibleProvider', () => {
     vi.clearAllMocks();
 
     mockContentGeneratorConfig = {
-      apiKey: 'test-api-key',
-      baseUrl: 'https://api.deepseek.com/v1',
-      model: 'deepseek-chat',
+      apiKey: "test-api-key",
+      baseUrl: "https://api.deepseek.com/v1",
+      model: "deepseek-chat",
     } as ContentGeneratorConfig;
 
     mockCliConfig = {
-      getCliVersion: vi.fn().mockReturnValue('1.0.0'),
+      getCliVersion: vi.fn().mockReturnValue("1.0.0"),
     } as unknown as Config;
 
     provider = new DeepSeekOpenAICompatibleProvider(
@@ -41,18 +41,18 @@ describe('DeepSeekOpenAICompatibleProvider', () => {
     );
   });
 
-  describe('isDeepSeekProvider', () => {
-    it('returns true when baseUrl includes deepseek', () => {
+  describe("isDeepSeekProvider", () => {
+    it("returns true when baseUrl includes deepseek", () => {
       const result = DeepSeekOpenAICompatibleProvider.isDeepSeekProvider(
         mockContentGeneratorConfig,
       );
       expect(result).toBe(true);
     });
 
-    it('returns false for non deepseek baseUrl', () => {
+    it("returns false for non deepseek baseUrl", () => {
       const config = {
         ...mockContentGeneratorConfig,
-        baseUrl: 'https://api.example.com/v1',
+        baseUrl: "https://api.example.com/v1",
       } as ContentGeneratorConfig;
 
       const result =
@@ -61,18 +61,18 @@ describe('DeepSeekOpenAICompatibleProvider', () => {
     });
   });
 
-  describe('buildRequest', () => {
-    const userPromptId = 'prompt-123';
+  describe("buildRequest", () => {
+    const userPromptId = "prompt-123";
 
-    it('converts array content into a string', () => {
+    it("converts array content into a string", () => {
       const originalRequest: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'deepseek-chat',
+        model: "deepseek-chat",
         messages: [
           {
-            role: 'user',
+            role: "user",
             content: [
-              { type: 'text', text: 'Hello' },
-              { type: 'text', text: ' world' },
+              { type: "text", text: "Hello" },
+              { type: "text", text: " world" },
             ],
           },
         ],
@@ -82,40 +82,40 @@ describe('DeepSeekOpenAICompatibleProvider', () => {
 
       expect(result.messages).toHaveLength(1);
       expect(result.messages?.[0]).toEqual({
-        role: 'user',
-        content: 'Hello\n\n world',
+        role: "user",
+        content: "Hello\n\n world",
       });
       expect(originalRequest.messages?.[0].content).toEqual([
-        { type: 'text', text: 'Hello' },
-        { type: 'text', text: ' world' },
+        { type: "text", text: "Hello" },
+        { type: "text", text: " world" },
       ]);
     });
 
-    it('leaves string content unchanged', () => {
+    it("leaves string content unchanged", () => {
       const originalRequest: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'deepseek-chat',
+        model: "deepseek-chat",
         messages: [
           {
-            role: 'user',
-            content: 'Hello world',
+            role: "user",
+            content: "Hello world",
           },
         ],
       };
 
       const result = provider.buildRequest(originalRequest, userPromptId);
 
-      expect(result.messages?.[0].content).toBe('Hello world');
+      expect(result.messages?.[0].content).toBe("Hello world");
     });
 
-    it('handles plain string parts in the content array', () => {
+    it("handles plain string parts in the content array", () => {
       const originalRequest = {
-        model: 'deepseek-chat',
+        model: "deepseek-chat",
         messages: [
           {
-            role: 'user' as const,
+            role: "user" as const,
             content: [
-              'Hello',
-              { type: 'text' as const, text: ' world' },
+              "Hello",
+              { type: "text" as const, text: " world" },
             ] as unknown as OpenAI.Chat.ChatCompletionContentPart[],
           },
         ],
@@ -124,22 +124,22 @@ describe('DeepSeekOpenAICompatibleProvider', () => {
       const result = provider.buildRequest(originalRequest, userPromptId);
 
       expect(result.messages?.[0]).toEqual({
-        role: 'user',
-        content: 'Hello\n\n world',
+        role: "user",
+        content: "Hello\n\n world",
       });
     });
 
-    it('replaces non-text parts with a placeholder', () => {
+    it("replaces non-text parts with a placeholder", () => {
       const originalRequest: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'deepseek-chat',
+        model: "deepseek-chat",
         messages: [
           {
-            role: 'user',
+            role: "user",
             content: [
-              { type: 'text', text: 'Hello ' },
+              { type: "text", text: "Hello " },
               {
-                type: 'image_url',
-                image_url: { url: 'https://example.com/image.png' },
+                type: "image_url",
+                image_url: { url: "https://example.com/image.png" },
               },
             ],
           },
@@ -149,14 +149,14 @@ describe('DeepSeekOpenAICompatibleProvider', () => {
       const result = provider.buildRequest(originalRequest, userPromptId);
 
       expect(result.messages?.[0]).toEqual({
-        role: 'user',
-        content: 'Hello \n\n[Unsupported content type: image_url]',
+        role: "user",
+        content: "Hello \n\n[Unsupported content type: image_url]",
       });
     });
   });
 
-  describe('getDefaultGenerationConfig', () => {
-    it('returns temperature 0', () => {
+  describe("getDefaultGenerationConfig", () => {
+    it("returns temperature 0", () => {
       expect(provider.getDefaultGenerationConfig()).toEqual({
         temperature: 0,
       });

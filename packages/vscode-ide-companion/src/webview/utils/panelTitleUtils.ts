@@ -24,5 +24,5 @@ export function truncatePanelTitle(title: string): string {
   if (codePoints.length <= MAX_PANEL_TITLE_LENGTH) {
     return title;
   }
-  return codePoints.slice(0, MAX_PANEL_TITLE_LENGTH).join('') + '…';
+  return codePoints.slice(0, MAX_PANEL_TITLE_LENGTH).join("") + "…";
 }

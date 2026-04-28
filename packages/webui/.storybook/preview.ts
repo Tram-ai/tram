@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Preview } from '@storybook/react-vite';
-import React from 'react';
-import './preview.css';
+import type { Preview } from "@storybook/react-vite";
+import React from "react";
+import "./preview.css";
 
 const preview: Preview = {
   parameters: {
@@ -17,17 +17,17 @@ const preview: Preview = {
       },
     },
     backgrounds: {
-      default: 'dark',
+      default: "dark",
       values: [
-        { name: 'dark', value: '#1e1e1e' },
-        { name: 'light', value: '#ffffff' },
+        { name: "dark", value: "#1e1e1e" },
+        { name: "light", value: "#ffffff" },
       ],
     },
-    layout: 'fullscreen',
+    layout: "fullscreen",
     options: {
       // Set ChatViewer Playground as the default story
       storySort: {
-        order: ['Chat', ['ChatViewer', ['Playground', '*']], '*'],
+        order: ["Chat", ["ChatViewer", ["Playground", "*"]], "*"],
       },
     },
   },
@@ -35,23 +35,23 @@ const preview: Preview = {
     (Story, context) => {
       // For ChatViewer stories, use full height container with internal scroll
       const isFullHeight =
-        context.title?.includes('ChatViewer') ||
+        context.title?.includes("ChatViewer") ||
         context.parameters?.fullHeight === true;
 
       return React.createElement(
-        'div',
+        "div",
         {
           className: isFullHeight
-            ? 'storybook-container storybook-fullheight'
-            : 'storybook-container',
+            ? "storybook-container storybook-fullheight"
+            : "storybook-container",
           style: {
-            backgroundColor: 'var(--app-background)',
-            color: 'var(--app-primary-foreground)',
-            height: isFullHeight ? '100vh' : 'auto',
-            minHeight: isFullHeight ? '100vh' : '100px',
-            padding: isFullHeight ? '0' : '16px',
-            display: isFullHeight ? 'flex' : 'block',
-            flexDirection: 'column',
+            backgroundColor: "var(--app-background)",
+            color: "var(--app-primary-foreground)",
+            height: isFullHeight ? "100vh" : "auto",
+            minHeight: isFullHeight ? "100vh" : "100px",
+            padding: isFullHeight ? "0" : "16px",
+            display: isFullHeight ? "flex" : "block",
+            flexDirection: "column",
           },
         },
         React.createElement(Story),
@@ -60,7 +60,7 @@ const preview: Preview = {
   ],
   // Set initial path to ChatViewer Playground
   initialGlobals: {
-    backgrounds: { value: 'dark' },
+    backgrounds: { value: "dark" },
   },
 };
 

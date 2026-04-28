@@ -7,12 +7,12 @@
  * This allows webui components to work with VSCode's messaging system
  */
 
-import { useMemo, useCallback, useEffect, useRef } from 'react';
-import type { FC, ReactNode } from 'react';
-import { PlatformProvider } from '@tram-ai/webui';
-import type { PlatformContextValue } from '@tram-ai/webui';
-import { useVSCode } from '../hooks/useVSCode.js';
-import { generateIconUrl } from '../utils/resourceUrl.js';
+import { useMemo, useCallback, useEffect, useRef } from "react";
+import type { FC, ReactNode } from "react";
+import { PlatformProvider } from "@tram-ai/webui";
+import type { PlatformContextValue } from "@tram-ai/webui";
+import { useVSCode } from "../hooks/useVSCode.js";
+import { generateIconUrl } from "../utils/resourceUrl.js";
 
 /**
  * Props for VSCodePlatformProvider
@@ -41,15 +41,15 @@ export const VSCodePlatformProvider: FC<VSCodePlatformProviderProps> = ({
       });
     };
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, []);
 
   // Open file handler
   const openFile = useCallback(
     (path: string) => {
       vscode.postMessage({
-        type: 'openFile',
+        type: "openFile",
         data: { path },
       });
     },
@@ -64,11 +64,11 @@ export const VSCodePlatformProvider: FC<VSCodePlatformProviderProps> = ({
       newText: string | undefined,
     ) => {
       vscode.postMessage({
-        type: 'openDiff',
+        type: "openDiff",
         data: {
           path,
-          oldText: oldText ?? '',
-          newText: newText ?? '',
+          oldText: oldText ?? "",
+          newText: newText ?? "",
         },
       });
     },
@@ -77,9 +77,9 @@ export const VSCodePlatformProvider: FC<VSCodePlatformProviderProps> = ({
 
   // Open temp file handler
   const openTempFile = useCallback(
-    (content: string, fileName: string = 'temp') => {
+    (content: string, fileName: string = "temp") => {
       vscode.postMessage({
-        type: 'createAndOpenTempFile',
+        type: "createAndOpenTempFile",
         data: {
           content,
           fileName,
@@ -92,7 +92,7 @@ export const VSCodePlatformProvider: FC<VSCodePlatformProviderProps> = ({
   // Attach file handler
   const attachFile = useCallback(() => {
     vscode.postMessage({
-      type: 'attachFile',
+      type: "attachFile",
       data: {},
     });
   }, [vscode]);
@@ -100,7 +100,7 @@ export const VSCodePlatformProvider: FC<VSCodePlatformProviderProps> = ({
   // Login handler
   const login = useCallback(() => {
     vscode.postMessage({
-      type: 'login',
+      type: "login",
       data: {},
     });
   }, [vscode]);
@@ -110,7 +110,7 @@ export const VSCodePlatformProvider: FC<VSCodePlatformProviderProps> = ({
     try {
       await navigator.clipboard.writeText(text);
     } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
+      console.error("Failed to copy to clipboard:", err);
     }
   }, []);
 
@@ -131,7 +131,7 @@ export const VSCodePlatformProvider: FC<VSCodePlatformProviderProps> = ({
   // Build platform context value
   const platformValue = useMemo<PlatformContextValue>(
     () => ({
-      platform: 'vscode',
+      platform: "vscode",
       postMessage: vscode.postMessage,
       onMessage,
       openFile,

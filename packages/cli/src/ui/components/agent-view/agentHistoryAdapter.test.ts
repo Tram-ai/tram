@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect } from 'vitest';
-import { agentMessagesToHistoryItems } from './agentHistoryAdapter.js';
+import { describe, it, expect } from "vitest";
+import { agentMessagesToHistoryItems } from "./agentHistoryAdapter.js";
 import type {
   AgentMessage,
   ToolCallConfirmationDetails,
-} from '@qwen-code/qwen-code-core';
-import { ToolCallStatus } from '../../types.js';
+} from "@tram-ai/tram-core";
+import { ToolCallStatus } from "../../types.js";
 
 // ─── Helpers ────────────────────────────────────────────────
 
 function msg(
-  role: AgentMessage['role'],
+  role: AgentMessage["role"],
   content: string,
   extra?: Partial<AgentMessage>,
 ): AgentMessage {
@@ -29,11 +29,11 @@ function toolCallMsg(
   toolName: string,
   opts?: { description?: string; renderOutputAsMarkdown?: boolean },
 ): AgentMessage {
-  return msg('tool_call', `Tool call: ${toolName}`, {
+  return msg("tool_call", `Tool call: ${toolName}`, {
     metadata: {
       callId,
       toolName,
-      description: opts?.description ?? '',
+      description: opts?.description ?? "",
       renderOutputAsMarkdown: opts?.renderOutputAsMarkdown,
     },
   });
@@ -48,7 +48,7 @@ function toolResultMsg(
     outputFile?: string;
   },
 ): AgentMessage {
-  return msg('tool_result', `Tool ${toolName}`, {
+  return msg("tool_result", `Tool ${toolName}`, {
     metadata: {
       callId,
       toolName,
@@ -61,166 +61,166 @@ function toolResultMsg(
 
 // ─── Role mapping ────────────────────────────────────────────
 
-describe('agentMessagesToHistoryItems — role mapping', () => {
-  it('maps user message', () => {
+describe("agentMessagesToHistoryItems — role mapping", () => {
+  it("maps user message", () => {
     const items = agentMessagesToHistoryItems(
-      [msg('user', 'hello')],
+      [msg("user", "hello")],
       noApprovals,
     );
     expect(items).toHaveLength(1);
-    expect(items[0]).toMatchObject({ type: 'user', text: 'hello' });
+    expect(items[0]).toMatchObject({ type: "user", text: "hello" });
   });
 
-  it('maps plain assistant message', () => {
+  it("maps plain assistant message", () => {
     const items = agentMessagesToHistoryItems(
-      [msg('assistant', 'response')],
+      [msg("assistant", "response")],
       noApprovals,
     );
-    expect(items[0]).toMatchObject({ type: 'gemini', text: 'response' });
+    expect(items[0]).toMatchObject({ type: "gemini", text: "response" });
   });
 
-  it('maps thought assistant message', () => {
+  it("maps thought assistant message", () => {
     const items = agentMessagesToHistoryItems(
-      [msg('assistant', 'thinking...', { thought: true })],
+      [msg("assistant", "thinking...", { thought: true })],
       noApprovals,
     );
     expect(items[0]).toMatchObject({
-      type: 'gemini_thought',
-      text: 'thinking...',
+      type: "gemini_thought",
+      text: "thinking...",
     });
   });
 
-  it('maps assistant message with error metadata', () => {
+  it("maps assistant message with error metadata", () => {
     const items = agentMessagesToHistoryItems(
-      [msg('assistant', 'oops', { metadata: { error: true } })],
+      [msg("assistant", "oops", { metadata: { error: true } })],
       noApprovals,
     );
-    expect(items[0]).toMatchObject({ type: 'error', text: 'oops' });
+    expect(items[0]).toMatchObject({ type: "error", text: "oops" });
   });
 
-  it('maps info message with no level → type info', () => {
+  it("maps info message with no level → type info", () => {
     const items = agentMessagesToHistoryItems(
-      [msg('info', 'note')],
+      [msg("info", "note")],
       noApprovals,
     );
-    expect(items[0]).toMatchObject({ type: 'info', text: 'note' });
+    expect(items[0]).toMatchObject({ type: "info", text: "note" });
   });
 
   it.each([
-    ['warning', 'warning'],
-    ['success', 'success'],
-    ['error', 'error'],
-  ] as const)('maps info message with level=%s', (level, expectedType) => {
+    ["warning", "warning"],
+    ["success", "success"],
+    ["error", "error"],
+  ] as const)("maps info message with level=%s", (level, expectedType) => {
     const items = agentMessagesToHistoryItems(
-      [msg('info', 'text', { metadata: { level } })],
+      [msg("info", "text", { metadata: { level } })],
       noApprovals,
     );
     expect(items[0]).toMatchObject({ type: expectedType });
   });
 
-  it('maps unknown info level → type info', () => {
+  it("maps unknown info level → type info", () => {
     const items = agentMessagesToHistoryItems(
-      [msg('info', 'x', { metadata: { level: 'verbose' } })],
+      [msg("info", "x", { metadata: { level: "verbose" } })],
       noApprovals,
     );
-    expect(items[0]).toMatchObject({ type: 'info' });
+    expect(items[0]).toMatchObject({ type: "info" });
   });
 
-  it('skips unknown roles without crashing', () => {
+  it("skips unknown roles without crashing", () => {
     const items = agentMessagesToHistoryItems(
       [
-        msg('user', 'before'),
+        msg("user", "before"),
         // force an unknown role
-        { role: 'unknown' as AgentMessage['role'], content: 'x', timestamp: 0 },
-        msg('user', 'after'),
+        { role: "unknown" as AgentMessage["role"], content: "x", timestamp: 0 },
+        msg("user", "after"),
       ],
       noApprovals,
     );
     expect(items).toHaveLength(2);
-    expect(items[0]).toMatchObject({ type: 'user', text: 'before' });
-    expect(items[1]).toMatchObject({ type: 'user', text: 'after' });
+    expect(items[0]).toMatchObject({ type: "user", text: "before" });
+    expect(items[1]).toMatchObject({ type: "user", text: "after" });
   });
 });
 
 // ─── Tool grouping ───────────────────────────────────────────
 
-describe('agentMessagesToHistoryItems — tool grouping', () => {
-  it('merges a tool_call + tool_result pair into one tool_group', () => {
+describe("agentMessagesToHistoryItems — tool grouping", () => {
+  it("merges a tool_call + tool_result pair into one tool_group", () => {
     const items = agentMessagesToHistoryItems(
-      [toolCallMsg('c1', 'read_file'), toolResultMsg('c1', 'read_file')],
+      [toolCallMsg("c1", "read_file"), toolResultMsg("c1", "read_file")],
       noApprovals,
     );
     expect(items).toHaveLength(1);
-    expect(items[0]!.type).toBe('tool_group');
+    expect(items[0]!.type).toBe("tool_group");
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools).toHaveLength(1);
-    expect(group.tools[0]!.name).toBe('read_file');
+    expect(group.tools[0]!.name).toBe("read_file");
   });
 
-  it('merges multiple parallel tool calls into one tool_group', () => {
+  it("merges multiple parallel tool calls into one tool_group", () => {
     const items = agentMessagesToHistoryItems(
       [
-        toolCallMsg('c1', 'read_file'),
-        toolCallMsg('c2', 'write_file'),
-        toolResultMsg('c1', 'read_file'),
-        toolResultMsg('c2', 'write_file'),
+        toolCallMsg("c1", "read_file"),
+        toolCallMsg("c2", "write_file"),
+        toolResultMsg("c1", "read_file"),
+        toolResultMsg("c2", "write_file"),
       ],
       noApprovals,
     );
     expect(items).toHaveLength(1);
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools).toHaveLength(2);
-    expect(group.tools[0]!.name).toBe('read_file');
-    expect(group.tools[1]!.name).toBe('write_file');
+    expect(group.tools[0]!.name).toBe("read_file");
+    expect(group.tools[1]!.name).toBe("write_file");
   });
 
-  it('preserves tool call order by first appearance', () => {
+  it("preserves tool call order by first appearance", () => {
     const items = agentMessagesToHistoryItems(
       [
-        toolCallMsg('c2', 'second'),
-        toolCallMsg('c1', 'first'),
-        toolResultMsg('c1', 'first'),
-        toolResultMsg('c2', 'second'),
+        toolCallMsg("c2", "second"),
+        toolCallMsg("c1", "first"),
+        toolResultMsg("c1", "first"),
+        toolResultMsg("c2", "second"),
       ],
       noApprovals,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
-    expect(group.tools[0]!.name).toBe('second');
-    expect(group.tools[1]!.name).toBe('first');
+    expect(group.tools[0]!.name).toBe("second");
+    expect(group.tools[1]!.name).toBe("first");
   });
 
-  it('breaks tool groups at non-tool messages', () => {
+  it("breaks tool groups at non-tool messages", () => {
     const items = agentMessagesToHistoryItems(
       [
-        toolCallMsg('c1', 'tool_a'),
-        toolResultMsg('c1', 'tool_a'),
-        msg('assistant', 'between'),
-        toolCallMsg('c2', 'tool_b'),
-        toolResultMsg('c2', 'tool_b'),
+        toolCallMsg("c1", "tool_a"),
+        toolResultMsg("c1", "tool_a"),
+        msg("assistant", "between"),
+        toolCallMsg("c2", "tool_b"),
+        toolResultMsg("c2", "tool_b"),
       ],
       noApprovals,
     );
     expect(items).toHaveLength(3);
-    expect(items[0]!.type).toBe('tool_group');
-    expect(items[1]!.type).toBe('gemini');
-    expect(items[2]!.type).toBe('tool_group');
+    expect(items[0]!.type).toBe("tool_group");
+    expect(items[1]!.type).toBe("gemini");
+    expect(items[2]!.type).toBe("tool_group");
   });
 
-  it('handles tool_result arriving without a prior tool_call gracefully', () => {
+  it("handles tool_result arriving without a prior tool_call gracefully", () => {
     const items = agentMessagesToHistoryItems(
       [
-        toolResultMsg('c1', 'orphan', {
+        toolResultMsg("c1", "orphan", {
           success: true,
-          resultDisplay: 'output',
+          resultDisplay: "output",
         }),
       ],
       noApprovals,
@@ -228,83 +228,83 @@ describe('agentMessagesToHistoryItems — tool grouping', () => {
     expect(items).toHaveLength(1);
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
-    expect(group.tools[0]!.callId).toBe('c1');
+    expect(group.tools[0]!.callId).toBe("c1");
     expect(group.tools[0]!.status).toBe(ToolCallStatus.Success);
   });
 });
 
 // ─── Tool status ─────────────────────────────────────────────
 
-describe('agentMessagesToHistoryItems — tool status', () => {
-  it('Executing: tool_call with no result yet', () => {
+describe("agentMessagesToHistoryItems — tool status", () => {
+  it("Executing: tool_call with no result yet", () => {
     const items = agentMessagesToHistoryItems(
-      [toolCallMsg('c1', 'shell')],
+      [toolCallMsg("c1", "shell")],
       noApprovals,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools[0]!.status).toBe(ToolCallStatus.Executing);
   });
 
-  it('Success: tool_result with success=true', () => {
+  it("Success: tool_result with success=true", () => {
     const items = agentMessagesToHistoryItems(
       [
-        toolCallMsg('c1', 'read'),
-        toolResultMsg('c1', 'read', { success: true }),
+        toolCallMsg("c1", "read"),
+        toolResultMsg("c1", "read", { success: true }),
       ],
       noApprovals,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools[0]!.status).toBe(ToolCallStatus.Success);
   });
 
-  it('Error: tool_result with success=false', () => {
+  it("Error: tool_result with success=false", () => {
     const items = agentMessagesToHistoryItems(
       [
-        toolCallMsg('c1', 'write'),
-        toolResultMsg('c1', 'write', { success: false }),
+        toolCallMsg("c1", "write"),
+        toolResultMsg("c1", "write", { success: false }),
       ],
       noApprovals,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools[0]!.status).toBe(ToolCallStatus.Error);
   });
 
-  it('Confirming: tool_call present in pendingApprovals', () => {
+  it("Confirming: tool_call present in pendingApprovals", () => {
     const fakeApproval = {} as ToolCallConfirmationDetails;
-    const approvals = new Map([['c1', fakeApproval]]);
+    const approvals = new Map([["c1", fakeApproval]]);
     const items = agentMessagesToHistoryItems(
-      [toolCallMsg('c1', 'shell')],
+      [toolCallMsg("c1", "shell")],
       approvals,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools[0]!.status).toBe(ToolCallStatus.Confirming);
     expect(group.tools[0]!.confirmationDetails).toBe(fakeApproval);
   });
 
-  it('Confirming takes priority over Executing', () => {
+  it("Confirming takes priority over Executing", () => {
     // pending approval AND no result yet → Confirming, not Executing
-    const approvals = new Map([['c1', {} as ToolCallConfirmationDetails]]);
+    const approvals = new Map([["c1", {} as ToolCallConfirmationDetails]]);
     const items = agentMessagesToHistoryItems(
-      [toolCallMsg('c1', 'shell')],
+      [toolCallMsg("c1", "shell")],
       approvals,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools[0]!.status).toBe(ToolCallStatus.Confirming);
   });
@@ -312,78 +312,78 @@ describe('agentMessagesToHistoryItems — tool status', () => {
 
 // ─── Tool metadata ───────────────────────────────────────────
 
-describe('agentMessagesToHistoryItems — tool metadata', () => {
-  it('forwards resultDisplay from tool_result', () => {
+describe("agentMessagesToHistoryItems — tool metadata", () => {
+  it("forwards resultDisplay from tool_result", () => {
     const items = agentMessagesToHistoryItems(
       [
-        toolCallMsg('c1', 'read'),
-        toolResultMsg('c1', 'read', {
+        toolCallMsg("c1", "read"),
+        toolResultMsg("c1", "read", {
           success: true,
-          resultDisplay: 'file contents',
+          resultDisplay: "file contents",
         }),
       ],
       noApprovals,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
-    expect(group.tools[0]!.resultDisplay).toBe('file contents');
+    expect(group.tools[0]!.resultDisplay).toBe("file contents");
   });
 
-  it('forwards renderOutputAsMarkdown from tool_call', () => {
+  it("forwards renderOutputAsMarkdown from tool_call", () => {
     const items = agentMessagesToHistoryItems(
       [
-        toolCallMsg('c1', 'web_fetch', { renderOutputAsMarkdown: true }),
-        toolResultMsg('c1', 'web_fetch', { success: true }),
+        toolCallMsg("c1", "web_fetch", { renderOutputAsMarkdown: true }),
+        toolResultMsg("c1", "web_fetch", { success: true }),
       ],
       noApprovals,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools[0]!.renderOutputAsMarkdown).toBe(true);
   });
 
-  it('forwards description from tool_call', () => {
+  it("forwards description from tool_call", () => {
     const items = agentMessagesToHistoryItems(
-      [toolCallMsg('c1', 'read', { description: 'reading src/index.ts' })],
+      [toolCallMsg("c1", "read", { description: "reading src/index.ts" })],
       noApprovals,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
-    expect(group.tools[0]!.description).toBe('reading src/index.ts');
+    expect(group.tools[0]!.description).toBe("reading src/index.ts");
   });
 });
 
 // ─── liveOutputs overlay ─────────────────────────────────────
 
-describe('agentMessagesToHistoryItems — liveOutputs', () => {
-  it('uses liveOutput as resultDisplay for Executing tools', () => {
-    const liveOutputs = new Map([['c1', 'live stdout so far']]);
+describe("agentMessagesToHistoryItems — liveOutputs", () => {
+  it("uses liveOutput as resultDisplay for Executing tools", () => {
+    const liveOutputs = new Map([["c1", "live stdout so far"]]);
     const items = agentMessagesToHistoryItems(
-      [toolCallMsg('c1', 'shell')],
+      [toolCallMsg("c1", "shell")],
       noApprovals,
       liveOutputs,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
-    expect(group.tools[0]!.resultDisplay).toBe('live stdout so far');
+    expect(group.tools[0]!.resultDisplay).toBe("live stdout so far");
   });
 
-  it('ignores liveOutput for completed tools', () => {
-    const liveOutputs = new Map([['c1', 'stale live output']]);
+  it("ignores liveOutput for completed tools", () => {
+    const liveOutputs = new Map([["c1", "stale live output"]]);
     const items = agentMessagesToHistoryItems(
       [
-        toolCallMsg('c1', 'shell'),
-        toolResultMsg('c1', 'shell', {
+        toolCallMsg("c1", "shell"),
+        toolResultMsg("c1", "shell", {
           success: true,
-          resultDisplay: 'final output',
+          resultDisplay: "final output",
         }),
       ],
       noApprovals,
@@ -391,21 +391,21 @@ describe('agentMessagesToHistoryItems — liveOutputs', () => {
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
-    expect(group.tools[0]!.resultDisplay).toBe('final output');
+    expect(group.tools[0]!.resultDisplay).toBe("final output");
   });
 
-  it('falls back to entry resultDisplay when no liveOutput for callId', () => {
-    const liveOutputs = new Map([['other-id', 'unrelated']]);
+  it("falls back to entry resultDisplay when no liveOutput for callId", () => {
+    const liveOutputs = new Map([["other-id", "unrelated"]]);
     const items = agentMessagesToHistoryItems(
-      [toolCallMsg('c1', 'shell')],
+      [toolCallMsg("c1", "shell")],
       noApprovals,
       liveOutputs,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools[0]!.resultDisplay).toBeUndefined();
   });
@@ -413,28 +413,28 @@ describe('agentMessagesToHistoryItems — liveOutputs', () => {
 
 // ─── shellPids overlay ───────────────────────────────────────
 
-describe('agentMessagesToHistoryItems — shellPids', () => {
-  it('sets ptyId for Executing tools with a known PID', () => {
-    const shellPids = new Map([['c1', 12345]]);
+describe("agentMessagesToHistoryItems — shellPids", () => {
+  it("sets ptyId for Executing tools with a known PID", () => {
+    const shellPids = new Map([["c1", 12345]]);
     const items = agentMessagesToHistoryItems(
-      [toolCallMsg('c1', 'shell')],
+      [toolCallMsg("c1", "shell")],
       noApprovals,
       undefined,
       shellPids,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools[0]!.ptyId).toBe(12345);
   });
 
-  it('does not set ptyId for completed tools', () => {
-    const shellPids = new Map([['c1', 12345]]);
+  it("does not set ptyId for completed tools", () => {
+    const shellPids = new Map([["c1", 12345]]);
     const items = agentMessagesToHistoryItems(
       [
-        toolCallMsg('c1', 'shell'),
-        toolResultMsg('c1', 'shell', { success: true }),
+        toolCallMsg("c1", "shell"),
+        toolResultMsg("c1", "shell", { success: true }),
       ],
       noApprovals,
       undefined,
@@ -442,19 +442,19 @@ describe('agentMessagesToHistoryItems — shellPids', () => {
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools[0]!.ptyId).toBeUndefined();
   });
 
-  it('does not set ptyId when shellPids is not provided', () => {
+  it("does not set ptyId when shellPids is not provided", () => {
     const items = agentMessagesToHistoryItems(
-      [toolCallMsg('c1', 'shell')],
+      [toolCallMsg("c1", "shell")],
       noApprovals,
     );
     const group = items[0] as Extract<
       (typeof items)[0],
-      { type: 'tool_group' }
+      { type: "tool_group" }
     >;
     expect(group.tools[0]!.ptyId).toBeUndefined();
   });
@@ -462,15 +462,15 @@ describe('agentMessagesToHistoryItems — shellPids', () => {
 
 // ─── ID stability ────────────────────────────────────────────
 
-describe('agentMessagesToHistoryItems — ID stability', () => {
-  it('assigns monotonically increasing IDs', () => {
+describe("agentMessagesToHistoryItems — ID stability", () => {
+  it("assigns monotonically increasing IDs", () => {
     const items = agentMessagesToHistoryItems(
       [
-        msg('user', 'u1'),
-        msg('assistant', 'a1'),
-        msg('info', 'i1'),
-        toolCallMsg('c1', 'tool'),
-        toolResultMsg('c1', 'tool'),
+        msg("user", "u1"),
+        msg("assistant", "a1"),
+        msg("info", "i1"),
+        toolCallMsg("c1", "tool"),
+        toolResultMsg("c1", "tool"),
       ],
       noApprovals,
     );
@@ -478,15 +478,15 @@ describe('agentMessagesToHistoryItems — ID stability', () => {
     expect(ids).toEqual([0, 1, 2, 3]);
   });
 
-  it('tool_group consumes one ID regardless of how many calls it contains', () => {
+  it("tool_group consumes one ID regardless of how many calls it contains", () => {
     const items = agentMessagesToHistoryItems(
       [
-        msg('user', 'go'),
-        toolCallMsg('c1', 'tool_a'),
-        toolCallMsg('c2', 'tool_b'),
-        toolResultMsg('c1', 'tool_a'),
-        toolResultMsg('c2', 'tool_b'),
-        msg('assistant', 'done'),
+        msg("user", "go"),
+        toolCallMsg("c1", "tool_a"),
+        toolCallMsg("c2", "tool_b"),
+        toolResultMsg("c1", "tool_a"),
+        toolResultMsg("c2", "tool_b"),
+        msg("assistant", "done"),
       ],
       noApprovals,
     );
@@ -494,12 +494,12 @@ describe('agentMessagesToHistoryItems — ID stability', () => {
     expect(items.map((i) => i.id)).toEqual([0, 1, 2]);
   });
 
-  it('IDs from a prefix of messages are stable when more messages are appended', () => {
-    const base: AgentMessage[] = [msg('user', 'u'), msg('assistant', 'a')];
+  it("IDs from a prefix of messages are stable when more messages are appended", () => {
+    const base: AgentMessage[] = [msg("user", "u"), msg("assistant", "a")];
 
     const before = agentMessagesToHistoryItems(base, noApprovals);
     const after = agentMessagesToHistoryItems(
-      [...base, msg('info', 'i')],
+      [...base, msg("info", "i")],
       noApprovals,
     );
 

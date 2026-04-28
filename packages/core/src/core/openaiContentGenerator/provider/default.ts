@@ -1,15 +1,15 @@
-import OpenAI from 'openai';
-import type { GenerateContentConfig } from '@google/genai';
-import type { Config } from '../../../config/config.js';
-import type { ContentGeneratorConfig } from '../../contentGenerator.js';
-import { DEFAULT_TIMEOUT, DEFAULT_MAX_RETRIES } from '../constants.js';
-import type { OpenAICompatibleProvider } from './types.js';
-import { buildRuntimeFetchOptions } from '../../../utils/runtimeFetchOptions.js';
+import OpenAI from "openai";
+import type { GenerateContentConfig } from "@google/genai";
+import type { Config } from "../../../config/config.js";
+import type { ContentGeneratorConfig } from "../../contentGenerator.js";
+import { DEFAULT_TIMEOUT, DEFAULT_MAX_RETRIES } from "../constants.js";
+import type { OpenAICompatibleProvider } from "./types.js";
+import { buildRuntimeFetchOptions } from "../../../utils/runtimeFetchOptions.js";
 import {
   tokenLimit,
   CAPPED_DEFAULT_MAX_TOKENS,
   hasExplicitOutputLimit,
-} from '../../tokenLimits.js';
+} from "../../tokenLimits.js";
 
 /**
  * Default provider for standard OpenAI-compatible APIs
@@ -29,11 +29,11 @@ export class DefaultOpenAICompatibleProvider
   }
 
   buildHeaders(): Record<string, string | undefined> {
-    const version = this.cliConfig.getCliVersion() || 'unknown';
+    const version = this.cliConfig.getCliVersion() || "unknown";
     const userAgent = `TramCode/${version} (${process.platform}; ${process.arch})`;
     const { customHeaders } = this.contentGeneratorConfig;
     const defaultHeaders = {
-      'User-Agent': userAgent,
+      "User-Agent": userAgent,
     };
 
     return customHeaders
@@ -52,7 +52,7 @@ export class DefaultOpenAICompatibleProvider
     // Configure fetch options to ensure user-configured timeout works as expected
     // bodyTimeout is always disabled (0) to let OpenAI SDK timeout control the request
     const runtimeOptions = buildRuntimeFetchOptions(
-      'openai',
+      "openai",
       this.cliConfig.getProxy(),
     );
     return new OpenAI({
@@ -124,7 +124,7 @@ export class DefaultOpenAICompatibleProvider
     const userMaxTokens = request.max_tokens;
 
     // Get model-specific output limit and check if model is known
-    const modelLimit = tokenLimit(request.model, 'output');
+    const modelLimit = tokenLimit(request.model, "output");
     const isKnownModel = hasExplicitOutputLimit(request.model);
 
     // Determine the effective max_tokens
@@ -144,7 +144,7 @@ export class DefaultOpenAICompatibleProvider
       // No explicit user config — check env var, then use capped default.
       // Capped default (8K) reduces GPU slot over-reservation by ~4×.
       // Requests hitting the cap get one clean retry at 64K (geminiChat.ts).
-      const envVal = process.env['QWEN_CODE_MAX_OUTPUT_TOKENS'];
+      const envVal = process.env["QWEN_CODE_MAX_OUTPUT_TOKENS"];
       const envMaxTokens = envVal ? parseInt(envVal, 10) : NaN;
       if (!isNaN(envMaxTokens) && envMaxTokens > 0) {
         effectiveMaxTokens = isKnownModel

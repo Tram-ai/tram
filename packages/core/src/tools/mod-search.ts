@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FunctionDeclaration } from '@google/genai';
-import { ToolDisplayNames, ToolNames } from './tool-names.js';
-import type { ToolResult } from './tools.js';
-import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
-import { safeJsonStringify } from '../utils/safeJsonStringify.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import type { FunctionDeclaration } from "@google/genai";
+import { ToolDisplayNames, ToolNames } from "./tool-names.js";
+import type { ToolResult } from "./tools.js";
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from "./tools.js";
+import { safeJsonStringify } from "../utils/safeJsonStringify.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('MOD_SEARCH');
+const debugLogger = createDebugLogger("MOD_SEARCH");
 
 /**
  * Generate fuzzy search variants by removing one character at a time,
@@ -53,7 +53,13 @@ function generateFuzzyVariants(query: string): string[] {
 
 export interface ModSearchParams {
   query: string;
-  source?: 'curseforge' | 'modrinth' | 'hangar' | 'spiget' | 'both' | 'all';
+  source?:
+    | "curseforge"
+    | "modrinth"
+    | "hangar"
+    | "spigot"
+    | "both"
+    | "all";
   loaders?: string[];
   gameVersion?: string;
   limit?: number;
@@ -65,7 +71,7 @@ interface ModResult {
   slug: string;
   projectId: string;
   description: string;
-  source: 'curseforge' | 'modrinth' | 'hangar' | 'spiget';
+  source: "curseforge" | "modrinth" | "hangar" | "spigot";
   latestVersion?: string;
   versionId?: string;
   downloadUrl?: string;
@@ -74,48 +80,51 @@ interface ModResult {
   projectUrl: string;
   downloads?: number;
   datePublished?: string;
-  releaseChannel?: 'release' | 'beta' | 'alpha';
+  releaseChannel?: "release" | "beta" | "alpha";
 }
 
 const description =
-  'Search for Minecraft mods and plugins from CurseForge, Modrinth, Hangar (Paper plugins), and SpiGet (Spigot plugins). Supports filtering by loader and Minecraft version. Returns names, descriptions, project IDs, compatible loaders/versions, and URLs.';
+  "Search for Minecraft mods and plugins from CurseForge, Modrinth, Hangar (Paper plugins), and Spigot (backed by the SpiGet API). Supports filtering by loader and Minecraft version. Returns names, descriptions, project IDs, compatible loaders/versions, and URLs. Also accepts direct URLs (e.g. https://modrinth.com/mod/sodium, https://hangar.papermc.io/CORE/CoreProtect, https://www.spigotmc.org/resources/574/ or https://www.spigotmc.org/resources/example-plugin.574/) or slugs/IDs for direct project lookup. SpigotMC resource URLs should use this tool and be treated as Spigot lookups rather than web_fetch.";
 
 const schema: FunctionDeclaration = {
   name: ToolNames.MOD_SEARCH,
   description,
   parametersJsonSchema: {
-    $schema: 'https://json-schema.org/draft/2020-12/schema',
-    type: 'object',
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    type: "object",
     properties: {
       query: {
-        type: 'string',
-        description: 'Search keyword or mod name',
+        type: "string",
+        description:
+          "Search keyword, mod name, or a direct URL (e.g. https://modrinth.com/mod/sodium, https://hangar.papermc.io/CORE/CoreProtect, https://www.spigotmc.org/resources/574/ or https://www.spigotmc.org/resources/example-plugin.574/) or slug/ID for direct project lookup. SpigotMC resource URLs should be handled by this tool and mapped to the Spigot source instead of web_fetch.",
       },
       source: {
-        type: 'string',
-        enum: ['curseforge', 'modrinth', 'hangar', 'spiget', 'both', 'all'],
-        description: 'Which platform to search. "both" = Modrinth+CurseForge, "all" = all 4 platforms. Default is "both". Use "hangar" for Paper plugins, "spiget" for Spigot plugins.',
+        type: "string",
+        enum: ["curseforge", "modrinth", "hangar", "spigot", "both", "all"],
+        description:
+          'Which platform to search. "both" = Modrinth+CurseForge, "all" = all 4 platforms. Default is "both". Use "hangar" for Paper plugins and "spigot" for Spigot plugins. Spigot lookups are backed by the SpiGet API.',
       },
       loaders: {
-        type: 'array',
-        items: { type: 'string' },
+        type: "array",
+        items: { type: "string" },
         description:
           'Filter by loader types, e.g. ["fabric", "forge"]. Supported: fabric, forge, neoforge, quilt, paper, spigot, bukkit, waterfall, velocity, folia, bungeecord, sponge.',
       },
       gameVersion: {
-        type: 'string',
+        type: "string",
         description: 'Minecraft version to filter by, e.g. "1.20.1"',
       },
       limit: {
-        type: 'number',
-        description: 'Maximum number of results to return. Default is 10.',
+        type: "number",
+        description: "Maximum number of results to return. Default is 10.",
       },
       includePreRelease: {
-        type: 'boolean',
-        description: 'Include beta/alpha pre-release versions. Default is false (release only).',
+        type: "boolean",
+        description:
+          "Include beta/alpha pre-release versions. Default is false (release only).",
       },
     },
-    required: ['query'],
+    required: ["query"],
     additionalProperties: false,
   },
 };
@@ -125,23 +134,185 @@ class ModSearchInvocation extends BaseToolInvocation<
   ToolResult
 > {
   getDescription(): string {
-    return `Search mods: "${this.params.query}" (source: ${this.params.source || 'both'})`;
+    return `Search mods: "${this.params.query}" (source: ${this.params.source || "both"})`;
+  }
+
+  /**
+   * Parse a URL or query to detect direct project references.
+   * Returns { platform, identifier } if detected, or null for regular search.
+   */
+  private parseDirectReference(): {
+    platform: "modrinth" | "hangar" | "spigot";
+    identifier: string;
+  } | null {
+    const q = this.params.query.trim();
+
+    // Modrinth URL: https://modrinth.com/mod/<slug> or /plugin/<slug> etc.
+    const modrinthUrlMatch = q.match(
+      /^https?:\/\/(?:www\.)?modrinth\.com\/(?:mod|plugin|datapack|shader|resourcepack|modpack)\/([\w!@$()`.+,"\-']{1,64})(?:\/.*)?$/i,
+    );
+    if (modrinthUrlMatch) {
+      return { platform: "modrinth", identifier: modrinthUrlMatch[1]! };
+    }
+
+    // Hangar API URL: https://hangar.papermc.io/api/v1/projects/<slugOrId>
+    const hangarApiUrlMatch = q.match(
+      /^https?:\/\/(?:www\.)?hangar\.papermc\.io\/api\/v1\/projects\/(?:[^/?#]+\/)?([^/?#]+)(?:\/.*)?$/i,
+    );
+    if (hangarApiUrlMatch) {
+      return { platform: "hangar", identifier: hangarApiUrlMatch[1]! };
+    }
+
+    // Hangar project URL: https://hangar.papermc.io/<owner>/<slug>
+    const hangarProjectUrlMatch = q.match(
+      /^https?:\/\/(?:www\.)?hangar\.papermc\.io\/([^/?#]+)\/([^/?#]+)\/?(?:[?#].*)?$/i,
+    );
+    if (hangarProjectUrlMatch) {
+      return { platform: "hangar", identifier: hangarProjectUrlMatch[2]! };
+    }
+
+    // SpigotMC resource URL backed by SpiGet:
+    // https://www.spigotmc.org/resources/574/
+    // https://www.spigotmc.org/resources/example-plugin.574/
+    const spigotUrlMatch = q.match(
+      /^https?:\/\/(?:www\.)?spigotmc\.org\/resources\/(?:[\w-]+\.)?([\d]+)\/?$/i,
+    );
+    if (spigotUrlMatch) {
+      return { platform: "spigot", identifier: spigotUrlMatch[1]! };
+    }
+
+    // Raw Hangar slug or numeric ID lookup is only attempted when Hangar is the
+    // explicitly selected source, so free-text searches on other platforms keep
+    // their current behavior.
+    if (
+      this.params.source === "hangar" &&
+      /^[A-Za-z0-9][\w.-]{0,99}$/.test(q)
+    ) {
+      return { platform: "hangar", identifier: q };
+    }
+
+    return null;
+  }
+
+  /**
+   * Fetch a single Modrinth project by slug or ID directly.
+   */
+  private async fetchModrinthProject(
+    slugOrId: string,
+  ): Promise<ModResult[]> {
+    const projectUrl = `https://api.modrinth.com/v2/project/${encodeURIComponent(slugOrId)}`;
+    const response = await fetch(projectUrl, {
+      headers: { "User-Agent": "TRAM-AI/1.0" },
+    });
+    if (!response.ok) {
+      if (response.status === 404) return [];
+      throw new Error(`Modrinth project API error: ${response.statusText}`);
+    }
+
+    const project = (await response.json()) as {
+      id: string;
+      slug: string;
+      title: string;
+      description: string;
+      categories?: string[];
+      versions?: string[];
+      game_versions?: string[];
+      loaders?: string[];
+      downloads?: number;
+      updated?: string;
+      project_type?: string;
+    };
+
+    const base: ModResult = {
+      name: project.title,
+      slug: project.slug,
+      projectId: project.id,
+      description: project.description || "No description",
+      source: "modrinth" as const,
+      compatibleLoaders: project.loaders || project.categories || [],
+      compatibleVersions: project.game_versions || [],
+      projectUrl: `https://modrinth.com/${project.project_type || "mod"}/${project.slug}`,
+      downloads: project.downloads,
+      datePublished: project.updated,
+    };
+
+    try {
+      const versionInfo = await this.fetchModrinthLatestVersion(
+        project.id,
+        this.params.loaders,
+        this.params.gameVersion,
+        this.params.includePreRelease,
+      );
+      if (versionInfo) {
+        base.latestVersion = versionInfo.versionNumber;
+        base.versionId = versionInfo.versionId;
+        base.downloadUrl = versionInfo.downloadUrl;
+        base.datePublished = versionInfo.datePublished;
+        base.releaseChannel = versionInfo.releaseChannel;
+      }
+    } catch {
+      // Keep project-level data if version fetch fails
+    }
+
+    return [base];
+  }
+
+  /**
+   * Fetch a single SpiGet resource by numeric ID directly.
+   */
+  private async fetchSpiGetResource(
+    resourceId: string,
+  ): Promise<ModResult[]> {
+    const url = `https://api.spiget.org/v2/resources/${encodeURIComponent(resourceId)}`;
+    const response = await fetch(url, {
+      headers: { "User-Agent": "TRAM-AI/1.0" },
+    });
+    if (!response.ok) {
+      if (response.status === 404) return [];
+      throw new Error(`SpiGet resource API error: ${response.statusText}`);
+    }
+
+    const resource = (await response.json()) as {
+      id: number;
+      name: string;
+      tag: string;
+      downloads: number;
+      updateDate?: number;
+      testedVersions?: string[];
+    };
+
+    return [
+      {
+        name: resource.name,
+        slug: String(resource.id),
+        projectId: String(resource.id),
+        description: resource.tag || "No description",
+        source: "spigot" as const,
+        compatibleLoaders: ["spigot"],
+        compatibleVersions: resource.testedVersions || [],
+        projectUrl: `https://www.spigotmc.org/resources/${resource.id}`,
+        downloads: resource.downloads,
+        datePublished: resource.updateDate
+          ? new Date(resource.updateDate * 1000).toISOString()
+          : undefined,
+      },
+    ];
   }
 
   private async searchModrinth(): Promise<ModResult[]> {
-    const loaders = this.params.loaders?.join(',') || '';
+    const loaders = this.params.loaders?.join(",") || "";
     const limit = this.params.limit || 10;
 
-    const url = new URL('https://api.modrinth.com/v2/search');
-    url.searchParams.set('query', this.params.query);
-    url.searchParams.set('limit', String(limit));
+    const url = new URL("https://api.modrinth.com/v2/search");
+    url.searchParams.set("query", this.params.query);
+    url.searchParams.set("limit", String(limit));
     // Use 'updated' index to prioritize recently-updated projects
-    url.searchParams.set('index', 'updated');
+    url.searchParams.set("index", "updated");
 
     // Modrinth v2 search uses facets for filtering
     const facets: string[][] = [];
     if (loaders) {
-      for (const loader of loaders.split(',')) {
+      for (const loader of loaders.split(",")) {
         facets.push([`categories:${loader.trim()}`]);
       }
     }
@@ -149,7 +320,7 @@ class ModSearchInvocation extends BaseToolInvocation<
       facets.push([`versions:${this.params.gameVersion}`]);
     }
     if (facets.length > 0) {
-      url.searchParams.set('facets', JSON.stringify(facets));
+      url.searchParams.set("facets", JSON.stringify(facets));
     }
 
     const response = await fetch(url.toString());
@@ -180,8 +351,8 @@ class ModSearchInvocation extends BaseToolInvocation<
           name: hit.title,
           slug: hit.slug,
           projectId: hit.project_id,
-          description: hit.description || 'No description',
-          source: 'modrinth' as const,
+          description: hit.description || "No description",
+          source: "modrinth" as const,
           latestVersion: hit.latest_version,
           compatibleLoaders: hit.categories || [],
           compatibleVersions: hit.versions || [],
@@ -223,17 +394,25 @@ class ModSearchInvocation extends BaseToolInvocation<
     loaders?: string[],
     gameVersion?: string,
     includePreRelease?: boolean,
-  ): Promise<{ versionNumber: string; versionId: string; datePublished: string; downloadUrl: string; releaseChannel: 'release' | 'beta' | 'alpha' } | null> {
-    const url = new URL(`https://api.modrinth.com/v2/project/${projectId}/version`);
+  ): Promise<{
+    versionNumber: string;
+    versionId: string;
+    datePublished: string;
+    downloadUrl: string;
+    releaseChannel: "release" | "beta" | "alpha";
+  } | null> {
+    const url = new URL(
+      `https://api.modrinth.com/v2/project/${projectId}/version`,
+    );
     if (loaders && loaders.length > 0) {
-      url.searchParams.set('loaders', JSON.stringify(loaders));
+      url.searchParams.set("loaders", JSON.stringify(loaders));
     }
     if (gameVersion) {
-      url.searchParams.set('game_versions', JSON.stringify([gameVersion]));
+      url.searchParams.set("game_versions", JSON.stringify([gameVersion]));
     }
 
     const response = await fetch(url.toString(), {
-      headers: { 'User-Agent': 'TRAM-AI/1.0' },
+      headers: { "User-Agent": "TRAM-AI/1.0" },
     });
     if (!response.ok) return null;
 
@@ -241,7 +420,7 @@ class ModSearchInvocation extends BaseToolInvocation<
       id: string;
       version_number: string;
       date_published: string;
-      version_type: 'release' | 'beta' | 'alpha';
+      version_type: "release" | "beta" | "alpha";
       files?: Array<{ url: string; primary: boolean; filename: string }>;
     }>;
 
@@ -250,7 +429,7 @@ class ModSearchInvocation extends BaseToolInvocation<
     // Filter by release channel unless includePreRelease is set
     let candidates = versions;
     if (!includePreRelease) {
-      const releaseOnly = versions.filter(v => v.version_type === 'release');
+      const releaseOnly = versions.filter((v) => v.version_type === "release");
       if (releaseOnly.length > 0) {
         candidates = releaseOnly;
       }
@@ -258,13 +437,14 @@ class ModSearchInvocation extends BaseToolInvocation<
     }
 
     const latest = candidates[0]!;
-    const primaryFile = latest.files?.find(f => f.primary) || latest.files?.[0];
+    const primaryFile =
+      latest.files?.find((f) => f.primary) || latest.files?.[0];
     return {
       versionNumber: latest.version_number,
       versionId: latest.id,
       datePublished: latest.date_published,
-      downloadUrl: primaryFile?.url || '',
-      releaseChannel: latest.version_type || 'release',
+      downloadUrl: primaryFile?.url || "",
+      releaseChannel: latest.version_type || "release",
     };
   }
 
@@ -272,17 +452,15 @@ class ModSearchInvocation extends BaseToolInvocation<
     const limit = this.params.limit || 10;
 
     // Use proxy domain to avoid API key requirement
-    const url = new URL(
-      'https://curseforgeapi.912778.xyz/v1/mods/search',
-    );
-    url.searchParams.set('gameId', '432'); // 432 = Minecraft
-    url.searchParams.set('searchFilter', this.params.query);
-    url.searchParams.set('pageSize', String(limit));
-    url.searchParams.set('sortField', '6'); // 6 = TotalDownloads
-    url.searchParams.set('sortOrder', 'desc');
+    const url = new URL("https://curseforgeapi.912778.xyz/v1/mods/search");
+    url.searchParams.set("gameId", "432"); // 432 = Minecraft
+    url.searchParams.set("searchFilter", this.params.query);
+    url.searchParams.set("pageSize", String(limit));
+    url.searchParams.set("sortField", "6"); // 6 = TotalDownloads
+    url.searchParams.set("sortOrder", "desc");
 
     if (this.params.gameVersion) {
-      url.searchParams.set('gameVersion', this.params.gameVersion);
+      url.searchParams.set("gameVersion", this.params.gameVersion);
     }
 
     if (this.params.loaders && this.params.loaders.length > 0) {
@@ -298,7 +476,7 @@ class ModSearchInvocation extends BaseToolInvocation<
         .filter(Boolean) as number[];
       if (modLoaderTypes.length > 0) {
         // CurseForge API only accepts a single modLoaderType
-        url.searchParams.set('modLoaderType', String(modLoaderTypes[0]));
+        url.searchParams.set("modLoaderType", String(modLoaderTypes[0]));
       }
     }
 
@@ -341,26 +519,26 @@ class ModSearchInvocation extends BaseToolInvocation<
 
     // CurseForge modLoader number -> name mapping
     const cfLoaderMap: Record<number, string> = {
-      0: 'any',
-      1: 'forge',
-      2: 'cauldron',
-      3: 'liteloader',
-      4: 'fabric',
-      5: 'quilt',
-      6: 'neoforge',
+      0: "any",
+      1: "forge",
+      2: "cauldron",
+      3: "liteloader",
+      4: "fabric",
+      5: "quilt",
+      6: "neoforge",
     };
 
     return (data.data || []).map((mod) => {
       let latestVersion: string | undefined;
       let downloadUrl: string | undefined;
       let versionId: string | undefined;
-      let releaseChannel: 'release' | 'beta' | 'alpha' | undefined;
+      let releaseChannel: "release" | "beta" | "alpha" | undefined;
 
       if (mod.latestFiles && mod.latestFiles.length > 0) {
         // Filter by release type unless includePreRelease
         let candidates = mod.latestFiles;
         if (!this.params.includePreRelease) {
-          const releaseOnly = candidates.filter(f => f.releaseType === 1);
+          const releaseOnly = candidates.filter((f) => f.releaseType === 1);
           if (releaseOnly.length > 0) {
             candidates = releaseOnly;
           }
@@ -368,9 +546,16 @@ class ModSearchInvocation extends BaseToolInvocation<
         const latest = candidates[0]!;
         // Extract real version from displayName (e.g. "[Fabric] Sodium 0.5.8" -> use full displayName)
         latestVersion = latest.displayName || latest.fileName;
-        downloadUrl = latest.downloadUrl || `https://www.curseforge.com/api/v1/mods/${mod.id}/files/${latest.id}/download`;
+        downloadUrl =
+          latest.downloadUrl ||
+          `https://www.curseforge.com/api/v1/mods/${mod.id}/files/${latest.id}/download`;
         versionId = String(latest.id);
-        releaseChannel = latest.releaseType === 1 ? 'release' : latest.releaseType === 2 ? 'beta' : 'alpha';
+        releaseChannel =
+          latest.releaseType === 1
+            ? "release"
+            : latest.releaseType === 2
+              ? "beta"
+              : "alpha";
       }
 
       // Extract loaders and versions from latestFilesIndexes (more reliable than modLoaders field)
@@ -380,15 +565,17 @@ class ModSearchInvocation extends BaseToolInvocation<
       if (mod.latestFilesIndexes && mod.latestFilesIndexes.length > 0) {
         // Extract loaders from modLoader numbers
         const loaderNames = mod.latestFilesIndexes
-          .map(idx => idx.modLoader != null ? cfLoaderMap[idx.modLoader] : undefined)
-          .filter((name): name is string => !!name && name !== 'any');
+          .map((idx) =>
+            idx.modLoader != null ? cfLoaderMap[idx.modLoader] : undefined,
+          )
+          .filter((name): name is string => !!name && name !== "any");
         if (loaderNames.length > 0) {
           compatibleLoaders = [...new Set(loaderNames)];
         }
 
         // Extract game versions from latestFilesIndexes
         const fileVersions = mod.latestFilesIndexes
-          .map(idx => idx.gameVersion)
+          .map((idx) => idx.gameVersion)
           .filter(Boolean);
         if (fileVersions.length > 0) {
           compatibleVersions = [...new Set(fileVersions)];
@@ -397,22 +584,39 @@ class ModSearchInvocation extends BaseToolInvocation<
 
       // Fallback: extract loaders and versions from latestFiles[].gameVersions
       // gameVersions contains both loader names (e.g. "Fabric", "NeoForge") and version numbers (e.g. "1.21.8")
-      if ((compatibleLoaders.length === 0 || compatibleVersions.length === 0) && mod.latestFiles && mod.latestFiles.length > 0) {
-        const knownLoaderNames = new Set(['forge', 'fabric', 'neoforge', 'quilt', 'liteloader', 'cauldron', 'rift', 'bukkit']);
+      if (
+        (compatibleLoaders.length === 0 || compatibleVersions.length === 0) &&
+        mod.latestFiles &&
+        mod.latestFiles.length > 0
+      ) {
+        const knownLoaderNames = new Set([
+          "forge",
+          "fabric",
+          "neoforge",
+          "quilt",
+          "liteloader",
+          "cauldron",
+          "rift",
+          "bukkit",
+        ]);
         const versionPattern = /^\d+\.\d+/;
-        const allGameVersions = mod.latestFiles.flatMap(f => f.gameVersions || []);
+        const allGameVersions = mod.latestFiles.flatMap(
+          (f) => f.gameVersions || [],
+        );
 
         if (compatibleLoaders.length === 0) {
           const loaders = allGameVersions
-            .filter(v => knownLoaderNames.has(v.toLowerCase()))
-            .map(v => v.toLowerCase());
+            .filter((v) => knownLoaderNames.has(v.toLowerCase()))
+            .map((v) => v.toLowerCase());
           if (loaders.length > 0) {
             compatibleLoaders = [...new Set(loaders)];
           }
         }
 
         if (compatibleVersions.length === 0) {
-          const versions = allGameVersions.filter(v => versionPattern.test(v));
+          const versions = allGameVersions.filter((v) =>
+            versionPattern.test(v),
+          );
           if (versions.length > 0) {
             compatibleVersions = [...new Set(versions)];
           }
@@ -423,7 +627,9 @@ class ModSearchInvocation extends BaseToolInvocation<
       if (compatibleVersions.length === 0 && mod.gameVersionLatestFiles) {
         compatibleVersions = [
           ...new Set(
-            mod.gameVersionLatestFiles.map((f) => f.gameVersion).filter(Boolean),
+            mod.gameVersionLatestFiles
+              .map((f) => f.gameVersion)
+              .filter(Boolean),
           ),
         ];
       }
@@ -432,15 +638,18 @@ class ModSearchInvocation extends BaseToolInvocation<
         name: mod.name,
         slug: mod.slug,
         projectId: String(mod.id),
-        description: mod.summary || 'No description',
-        source: 'curseforge' as const,
+        description: mod.summary || "No description",
+        source: "curseforge" as const,
         latestVersion,
         versionId,
         downloadUrl,
         releaseChannel,
         compatibleLoaders,
         compatibleVersions,
-        projectUrl: mod.links?.websiteUrl || mod.websiteUrl || `https://www.curseforge.com/minecraft/mc-mods/${mod.slug}`,
+        projectUrl:
+          mod.links?.websiteUrl ||
+          mod.websiteUrl ||
+          `https://www.curseforge.com/minecraft/mc-mods/${mod.slug}`,
         downloads: mod.downloadCount,
         datePublished: mod.dateModified,
       };
@@ -450,59 +659,72 @@ class ModSearchInvocation extends BaseToolInvocation<
   private async searchHangar(): Promise<ModResult[]> {
     const limit = this.params.limit || 10;
 
-    const url = new URL('https://hangar.papermc.io/api/v1/projects');
-    url.searchParams.set('q', this.params.query);
-    url.searchParams.set('limit', String(limit));
-    url.searchParams.set('sort', '-downloads');
+    const url = new URL("https://hangar.papermc.io/api/v1/projects");
+    url.searchParams.set("q", this.params.query);
+    url.searchParams.set("limit", String(limit));
+    url.searchParams.set("sort", "-downloads");
 
     if (this.params.gameVersion) {
-      url.searchParams.set('version', this.params.gameVersion);
+      url.searchParams.set("version", this.params.gameVersion);
     }
 
     // Hangar uses platform filter: PAPER, WATERFALL, VELOCITY
     if (this.params.loaders && this.params.loaders.length > 0) {
       const platformMap: Record<string, string> = {
-        paper: 'PAPER',
-        waterfall: 'WATERFALL',
-        velocity: 'VELOCITY',
-        folia: 'PAPER',
+        paper: "PAPER",
+        waterfall: "WATERFALL",
+        velocity: "VELOCITY",
+        folia: "PAPER",
       };
       const platforms = this.params.loaders
         .map((l) => platformMap[l.toLowerCase()])
         .filter(Boolean);
       if (platforms.length > 0) {
-        url.searchParams.set('platform', platforms[0]!);
+        url.searchParams.set("platform", platforms[0]!);
       }
     }
 
     const response = await fetch(url.toString(), {
-      headers: { 'Accept': 'application/json', 'User-Agent': 'TRAM-AI/1.0' },
+      headers: { Accept: "application/json", "User-Agent": "TRAM-AI/1.0" },
     });
     if (!response.ok) {
-      throw new Error(`Hangar API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Hangar API error: ${response.status} ${response.statusText}`,
+      );
     }
 
     const data = (await response.json()) as {
       result?: Array<{
+        id: number;
         name: string;
         namespace: { owner: string; slug: string };
         description: string;
         stats: { downloads: number };
         lastUpdated?: string;
+        supportedPlatforms?: Record<string, string[]>;
       }>;
     };
 
     // Fetch latest version for each project
     const enriched = await Promise.all(
       (data.result || []).map(async (project) => {
+        const supportedPlatforms = project.supportedPlatforms || {};
+        const compatibleLoaders = Object.keys(supportedPlatforms).map((platform) =>
+          platform.toLowerCase(),
+        );
+        const compatibleVersions = [
+          ...new Set(Object.values(supportedPlatforms).flat()),
+        ];
+
         const base: ModResult = {
           name: project.name,
           slug: project.namespace.slug,
           projectId: `${project.namespace.owner}/${project.namespace.slug}`,
-          description: project.description || 'No description',
-          source: 'hangar' as const,
-          compatibleLoaders: ['paper'],
-          compatibleVersions: [],
+          description: project.description || "No description",
+          source: "hangar" as const,
+          compatibleLoaders:
+            compatibleLoaders.length > 0 ? compatibleLoaders : ["paper"],
+          compatibleVersions,
           projectUrl: `https://hangar.papermc.io/${project.namespace.owner}/${project.namespace.slug}`,
           downloads: project.stats.downloads,
           datePublished: project.lastUpdated,
@@ -531,25 +753,105 @@ class ModSearchInvocation extends BaseToolInvocation<
   }
 
   /**
+   * Fetch a single Hangar project by slug or numeric ID directly.
+   */
+  private async fetchHangarProject(slugOrId: string): Promise<ModResult[]> {
+    const projectUrl = `https://hangar.papermc.io/api/v1/projects/${encodeURIComponent(slugOrId)}`;
+    const response = await fetch(projectUrl, {
+      headers: { Accept: "application/json", "User-Agent": "TRAM-AI/1.0" },
+    });
+    if (!response.ok) {
+      if (response.status === 404) return [];
+      throw new Error(
+        `Hangar project API error: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    const project = (await response.json()) as {
+      id: number;
+      name: string;
+      namespace: { owner: string; slug: string };
+      description: string;
+      stats: { downloads: number };
+      lastUpdated?: string;
+      supportedPlatforms?: Record<string, string[]>;
+    };
+
+    const supportedPlatforms = project.supportedPlatforms || {};
+    const compatibleLoaders = Object.keys(supportedPlatforms).map((platform) =>
+      platform.toLowerCase(),
+    );
+    const compatibleVersions = [
+      ...new Set(Object.values(supportedPlatforms).flat()),
+    ];
+
+    const base: ModResult = {
+      name: project.name,
+      slug: project.namespace.slug,
+      projectId: `${project.namespace.owner}/${project.namespace.slug}`,
+      description: project.description || "No description",
+      source: "hangar" as const,
+      compatibleLoaders:
+        compatibleLoaders.length > 0 ? compatibleLoaders : ["paper"],
+      compatibleVersions,
+      projectUrl: `https://hangar.papermc.io/${project.namespace.owner}/${project.namespace.slug}`,
+      downloads: project.stats.downloads,
+      datePublished: project.lastUpdated,
+    };
+
+    try {
+      const versionInfo = await this.fetchHangarLatestVersion(project.namespace.slug);
+      if (versionInfo) {
+        base.latestVersion = versionInfo.versionName;
+        base.versionId = versionInfo.versionId;
+        base.downloadUrl = versionInfo.downloadUrl;
+        base.releaseChannel = versionInfo.channel;
+        if (base.compatibleVersions.length === 0) {
+          base.compatibleVersions = versionInfo.platformVersions;
+        }
+      }
+    } catch {
+      // Keep project-level data if version fetch fails
+    }
+
+    return [base];
+  }
+
+  /**
    * Fetch the latest version of a Hangar project.
    */
   private async fetchHangarLatestVersion(
     slug: string,
-  ): Promise<{ versionName: string; downloadUrl: string; channel: 'release' | 'beta' | 'alpha'; platformVersions: string[] } | null> {
-    const url = new URL(`https://hangar.papermc.io/api/v1/projects/${slug}/versions`);
-    url.searchParams.set('limit', '5');
-    url.searchParams.set('offset', '0');
+  ): Promise<{
+    versionName: string;
+    versionId: string;
+    downloadUrl: string;
+    channel: "release" | "beta" | "alpha";
+    platformVersions: string[];
+  } | null> {
+    const url = new URL(
+      `https://hangar.papermc.io/api/v1/projects/${slug}/versions`,
+    );
+    url.searchParams.set("limit", "5");
+    url.searchParams.set("offset", "0");
 
     const response = await fetch(url.toString(), {
-      headers: { 'Accept': 'application/json', 'User-Agent': 'TRAM-AI/1.0' },
+      headers: { Accept: "application/json", "User-Agent": "TRAM-AI/1.0" },
     });
     if (!response.ok) return null;
 
     const data = (await response.json()) as {
       result?: Array<{
+        id: number;
         name: string;
         channel: { name: string };
-        downloads: Record<string, number>;
+        downloads: Record<
+          string,
+          {
+            downloadUrl?: string | null;
+            externalUrl?: string | null;
+          }
+        >;
         platformDependencies: Record<string, string[]>;
       }>;
     };
@@ -559,8 +861,8 @@ class ModSearchInvocation extends BaseToolInvocation<
     // Pick first release channel version, or first if includePreRelease
     let candidates = data.result;
     if (!this.params.includePreRelease) {
-      const releaseOnly = candidates.filter(v =>
-        v.channel.name.toLowerCase() === 'release',
+      const releaseOnly = candidates.filter(
+        (v) => v.channel.name.toLowerCase() === "release",
       );
       if (releaseOnly.length > 0) {
         candidates = releaseOnly;
@@ -569,16 +871,30 @@ class ModSearchInvocation extends BaseToolInvocation<
 
     const latest = candidates[0]!;
     const channelName = latest.channel.name.toLowerCase();
-    const channel: 'release' | 'beta' | 'alpha' =
-      channelName === 'release' ? 'release' :
-      channelName === 'beta' || channelName === 'snapshot' ? 'beta' : 'alpha';
+    const channel: "release" | "beta" | "alpha" =
+      channelName === "release"
+        ? "release"
+        : channelName === "beta" || channelName === "snapshot"
+          ? "beta"
+          : "alpha";
+
+    const preferredPlatform =
+      Object.keys(latest.downloads).find((platform) => platform === "PAPER") ||
+      Object.keys(latest.downloads)[0];
+    const selectedDownload = preferredPlatform
+      ? latest.downloads[preferredPlatform]
+      : undefined;
 
     // Collect platform versions
     const platformVersions = Object.values(latest.platformDependencies).flat();
 
     return {
       versionName: latest.name,
-      downloadUrl: `https://hangar.papermc.io/api/v1/projects/${slug}/versions/${latest.name}/PAPER/download`,
+      versionId: String(latest.id),
+      downloadUrl:
+        selectedDownload?.downloadUrl ||
+        selectedDownload?.externalUrl ||
+        `https://hangar.papermc.io/api/v1/projects/${encodeURIComponent(slug)}/versions/${encodeURIComponent(latest.name)}/${preferredPlatform || "PAPER"}/download`,
       channel,
       platformVersions: [...new Set(platformVersions)],
     };
@@ -590,11 +906,11 @@ class ModSearchInvocation extends BaseToolInvocation<
     const url = new URL(
       `https://api.spiget.org/v2/search/resources/${encodeURIComponent(this.params.query)}`,
     );
-    url.searchParams.set('size', String(limit));
-    url.searchParams.set('sort', '-downloads');
+    url.searchParams.set("size", String(limit));
+    url.searchParams.set("sort", "-downloads");
 
     const response = await fetch(url.toString(), {
-      headers: { 'User-Agent': 'TRAM-AI/1.0' },
+      headers: { "User-Agent": "TRAM-AI/1.0" },
     });
     if (!response.ok) {
       throw new Error(`SpiGet API error: ${response.statusText}`);
@@ -613,13 +929,15 @@ class ModSearchInvocation extends BaseToolInvocation<
       name: resource.name,
       slug: String(resource.id),
       projectId: String(resource.id),
-      description: resource.tag || 'No description',
-      source: 'spiget' as const,
-      compatibleLoaders: ['spigot'],
+      description: resource.tag || "No description",
+      source: "spigot" as const,
+      compatibleLoaders: ["spigot"],
       compatibleVersions: resource.testedVersions || [],
       projectUrl: `https://www.spigotmc.org/resources/${resource.id}`,
       downloads: resource.downloads,
-      datePublished: resource.updateDate ? new Date(resource.updateDate * 1000).toISOString() : undefined,
+      datePublished: resource.updateDate
+        ? new Date(resource.updateDate * 1000).toISOString()
+        : undefined,
     }));
   }
 
@@ -629,17 +947,19 @@ class ModSearchInvocation extends BaseToolInvocation<
   private async executeSearch(source: string): Promise<ModResult[]> {
     const results: ModResult[] = [];
 
-    const searchModrinth = source === 'modrinth' || source === 'both' || source === 'all';
-    const searchCurseForge = source === 'curseforge' || source === 'both' || source === 'all';
-    const searchHangar = source === 'hangar' || source === 'all';
-    const searchSpiGet = source === 'spiget' || source === 'all';
+    const searchModrinth =
+      source === "modrinth" || source === "both" || source === "all";
+    const searchCurseForge =
+      source === "curseforge" || source === "both" || source === "all";
+    const searchHangar = source === "hangar" || source === "all";
+    const searchSpiGet = source === "spigot" || source === "all";
 
     if (searchModrinth) {
       try {
         const modrinthResults = await this.searchModrinth();
         results.push(...modrinthResults);
       } catch (err) {
-        debugLogger.warn('Modrinth search failed:', err);
+        debugLogger.warn("Modrinth search failed:", err);
       }
     }
 
@@ -648,7 +968,7 @@ class ModSearchInvocation extends BaseToolInvocation<
         const curseforgeResults = await this.searchCurseForge();
         results.push(...curseforgeResults);
       } catch (err) {
-        debugLogger.warn('CurseForge search failed:', err);
+        debugLogger.warn("CurseForge search failed:", err);
       }
     }
 
@@ -657,7 +977,7 @@ class ModSearchInvocation extends BaseToolInvocation<
         const hangarResults = await this.searchHangar();
         results.push(...hangarResults);
       } catch (err) {
-        debugLogger.warn('Hangar search failed:', err);
+        debugLogger.warn("Hangar search failed:", err);
       }
     }
 
@@ -666,7 +986,7 @@ class ModSearchInvocation extends BaseToolInvocation<
         const spigetResults = await this.searchSpiGet();
         results.push(...spigetResults);
       } catch (err) {
-        debugLogger.warn('SpiGet search failed:', err);
+        debugLogger.warn("SpiGet search failed:", err);
       }
     }
 
@@ -675,10 +995,34 @@ class ModSearchInvocation extends BaseToolInvocation<
 
   async execute(_signal: AbortSignal): Promise<ToolResult> {
     try {
-      const source = this.params.source || 'both';
+      const source = this.params.source || "both";
       let results: ModResult[] = [];
 
-      results = await this.executeSearch(source);
+      // Check for direct URL/slug reference first
+      const directRef = this.parseDirectReference();
+      if (directRef) {
+        debugLogger.debug(
+          `Direct lookup: platform=${directRef.platform}, id=${directRef.identifier}`,
+        );
+        try {
+          if (directRef.platform === "modrinth") {
+            results = await this.fetchModrinthProject(directRef.identifier);
+          } else if (directRef.platform === "hangar") {
+            results = await this.fetchHangarProject(directRef.identifier);
+          } else if (directRef.platform === "spigot") {
+            results = await this.fetchSpiGetResource(directRef.identifier);
+          }
+        } catch (err) {
+          debugLogger.warn(`Direct lookup failed, falling back to search:`, err);
+        }
+      }
+
+      // Fall back to regular search if direct lookup yielded nothing
+      if (results.length === 0) {
+        results = await this.executeSearch(source);
+      } else {
+        // Direct lookup succeeded, skip search
+      }
 
       // Fuzzy search fallback: if no results found, try with fuzzy query variants
       if (results.length === 0 && this.params.query.length >= 3) {
@@ -707,7 +1051,9 @@ class ModSearchInvocation extends BaseToolInvocation<
       // Use source+slug composite key to avoid merging different platform results
       const limit = this.params.limit || 10;
       const uniqueResults = Array.from(
-        new Map(results.map((r) => [`${r.source}:${r.slug.toLowerCase()}`, r])).values(),
+        new Map(
+          results.map((r) => [`${r.source}:${r.slug.toLowerCase()}`, r]),
+        ).values(),
       );
 
       // Sort: prefer results with a published date, then newer first, then downloads as tiebreaker
@@ -726,13 +1072,23 @@ class ModSearchInvocation extends BaseToolInvocation<
       const limitedResults = uniqueResults.slice(0, limit);
 
       const displayLines = limitedResults.map((mod, idx) => {
-        const loaders = mod.compatibleLoaders.join(', ') || 'N/A';
-        const versions = mod.compatibleVersions.slice(0, 5).join(', ') || 'N/A';
-        const downloads = mod.downloads != null ? ` | Downloads: ${mod.downloads.toLocaleString()}` : '';
-        const published = mod.datePublished ? ` | Updated: ${mod.datePublished}` : '';
-        const version = mod.latestVersion ? ` (v${mod.latestVersion})` : '';
-        const channel = mod.releaseChannel && mod.releaseChannel !== 'release' ? ` [${mod.releaseChannel}]` : '';
-        const dlUrl = mod.downloadUrl ? `\n   Download: ${mod.downloadUrl}` : '';
+        const loaders = mod.compatibleLoaders.join(", ") || "N/A";
+        const versions = mod.compatibleVersions.slice(0, 5).join(", ") || "N/A";
+        const downloads =
+          mod.downloads != null
+            ? ` | Downloads: ${mod.downloads.toLocaleString()}`
+            : "";
+        const published = mod.datePublished
+          ? ` | Updated: ${mod.datePublished}`
+          : "";
+        const version = mod.latestVersion ? ` (v${mod.latestVersion})` : "";
+        const channel =
+          mod.releaseChannel && mod.releaseChannel !== "release"
+            ? ` [${mod.releaseChannel}]`
+            : "";
+        const dlUrl = mod.downloadUrl
+          ? `\n   Download: ${mod.downloadUrl}`
+          : "";
         return `${idx + 1}. **${mod.name}**${version}${channel} [${mod.source}] (ID: ${mod.projectId})\n   Description: ${mod.description}\n   Loaders: ${loaders}\n   Versions: ${versions}${downloads}${published}\n   URL: ${mod.projectUrl}${dlUrl}`;
       });
 
@@ -742,7 +1098,7 @@ class ModSearchInvocation extends BaseToolInvocation<
           count: limitedResults.length,
           results: limitedResults,
         }),
-        returnDisplay: `Found ${limitedResults.length} mod(s):\n\n${displayLines.join('\n\n')}`,
+        returnDisplay: `Found ${limitedResults.length} mod(s):\n\n${displayLines.join("\n\n")}`,
       };
     } catch (error) {
       const errorMessage =
@@ -776,23 +1132,36 @@ export class ModSearchTool extends BaseDeclarativeTool<
 
   override validateToolParamValues(params: ModSearchParams): string | null {
     if (!params.query || params.query.trim().length === 0) {
-      return 'query parameter is required and cannot be empty.';
+      return "query parameter is required and cannot be empty.";
     }
 
     if (params.limit !== undefined) {
       if (!Number.isInteger(params.limit) || params.limit <= 0) {
-        return 'limit must be a positive integer when provided.';
+        return "limit must be a positive integer when provided.";
       }
       if (params.limit > 50) {
-        return 'limit cannot exceed 50.';
+        return "limit cannot exceed 50.";
       }
     }
 
-    const validLoaders = ['fabric', 'forge', 'neoforge', 'quilt', 'paper', 'spigot', 'bukkit', 'waterfall', 'velocity', 'folia', 'bungeecord', 'sponge'];
+    const validLoaders = [
+      "fabric",
+      "forge",
+      "neoforge",
+      "quilt",
+      "paper",
+      "spigot",
+      "bukkit",
+      "waterfall",
+      "velocity",
+      "folia",
+      "bungeecord",
+      "sponge",
+    ];
     if (params.loaders) {
       for (const loader of params.loaders) {
         if (!validLoaders.includes(loader.toLowerCase())) {
-          return `invalid loader "${loader}". Valid options: ${validLoaders.join(', ')}`;
+          return `invalid loader "${loader}". Valid options: ${validLoaders.join(", ")}`;
         }
       }
     }

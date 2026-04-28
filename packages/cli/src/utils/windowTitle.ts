@@ -11,12 +11,12 @@
  * @returns The computed window title, either from CLI_TITLE environment variable or the default Gemini title
  */
 export function computeWindowTitle(folderName: string): string {
-  const title = process.env['CLI_TITLE'] || `TRAM - ${folderName}`;
+  const title = process.env["CLI_TITLE"] || `TRAM - ${folderName}`;
 
   // Remove control characters that could cause issues in terminal titles
   return title.replace(
     // eslint-disable-next-line no-control-regex
     /[\x00-\x1F\x7F]/g,
-    '',
+    "",
   );
 }

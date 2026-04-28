@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { HistoryReplayer } from './HistoryReplayer.js';
-import type { SessionContext } from './types.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { HistoryReplayer } from "./HistoryReplayer.js";
+import type { SessionContext } from "./types.js";
 import type {
   Config,
   ChatRecord,
   ToolRegistry,
   ToolResultDisplay,
   TodoResultDisplay,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 
-describe('HistoryReplayer', () => {
+describe("HistoryReplayer", () => {
   let mockContext: SessionContext;
   let sendUpdateSpy: ReturnType<typeof vi.fn>;
   let replayer: HistoryReplayer;
@@ -27,7 +27,7 @@ describe('HistoryReplayer', () => {
     } as unknown as ToolRegistry;
 
     mockContext = {
-      sessionId: 'test-session-id',
+      sessionId: "test-session-id",
       config: {
         getToolRegistry: () => mockToolRegistry,
       } as unknown as Config,
@@ -40,15 +40,15 @@ describe('HistoryReplayer', () => {
   const toEpochMs = (ts: string) => new Date(ts).getTime();
 
   const createUserRecord = (text: string): ChatRecord => ({
-    uuid: 'user-uuid',
+    uuid: "user-uuid",
     parentUuid: null,
-    sessionId: 'test-session',
+    sessionId: "test-session",
     timestamp: new Date().toISOString(),
-    type: 'user',
-    cwd: '/test',
-    version: '1.0.0',
+    type: "user",
+    cwd: "/test",
+    version: "1.0.0",
     message: {
-      role: 'user',
+      role: "user",
       parts: [{ text }],
     },
   });
@@ -57,15 +57,15 @@ describe('HistoryReplayer', () => {
     text: string,
     thought = false,
   ): ChatRecord => ({
-    uuid: 'assistant-uuid',
-    parentUuid: 'user-uuid',
-    sessionId: 'test-session',
+    uuid: "assistant-uuid",
+    parentUuid: "user-uuid",
+    sessionId: "test-session",
     timestamp: new Date().toISOString(),
-    type: 'assistant',
-    cwd: '/test',
-    version: '1.0.0',
+    type: "assistant",
+    cwd: "/test",
+    version: "1.0.0",
     message: {
-      role: 'model',
+      role: "model",
       parts: [{ text, thought }],
     },
   });
@@ -75,75 +75,75 @@ describe('HistoryReplayer', () => {
     resultDisplay?: ToolResultDisplay,
     hasError = false,
   ): ChatRecord => ({
-    uuid: 'tool-uuid',
-    parentUuid: 'assistant-uuid',
-    sessionId: 'test-session',
+    uuid: "tool-uuid",
+    parentUuid: "assistant-uuid",
+    sessionId: "test-session",
     timestamp: new Date().toISOString(),
-    type: 'tool_result',
-    cwd: '/test',
-    version: '1.0.0',
+    type: "tool_result",
+    cwd: "/test",
+    version: "1.0.0",
     message: {
-      role: 'user',
+      role: "user",
       parts: [
         {
           functionResponse: {
             name: toolName,
-            response: { result: 'ok' },
+            response: { result: "ok" },
           },
         },
       ],
     },
     toolCallResult: {
-      callId: 'call-123',
+      callId: "call-123",
       responseParts: [],
       resultDisplay,
-      error: hasError ? new Error('Tool failed') : undefined,
+      error: hasError ? new Error("Tool failed") : undefined,
       errorType: undefined,
     },
   });
 
-  describe('replay', () => {
-    it('should replay empty records array', async () => {
+  describe("replay", () => {
+    it("should replay empty records array", async () => {
       await replayer.replay([]);
 
       expect(sendUpdateSpy).not.toHaveBeenCalled();
     });
 
-    it('should replay records in order', async () => {
+    it("should replay records in order", async () => {
       const records = [
-        createUserRecord('Hello'),
-        createAssistantRecord('Hi there'),
+        createUserRecord("Hello"),
+        createAssistantRecord("Hi there"),
       ];
 
       await replayer.replay(records);
 
       expect(sendUpdateSpy).toHaveBeenCalledTimes(2);
       expect(sendUpdateSpy.mock.calls[0][0].sessionUpdate).toBe(
-        'user_message_chunk',
+        "user_message_chunk",
       );
       expect(sendUpdateSpy.mock.calls[1][0].sessionUpdate).toBe(
-        'agent_message_chunk',
+        "agent_message_chunk",
       );
     });
   });
 
-  describe('user message replay', () => {
-    it('should emit user_message_chunk for user records', async () => {
-      const record = createUserRecord('Hello, world!');
+  describe("user message replay", () => {
+    it("should emit user_message_chunk for user records", async () => {
+      const record = createUserRecord("Hello, world!");
       const records = [record];
 
       await replayer.replay(records);
 
       expect(sendUpdateSpy).toHaveBeenCalledWith({
-        sessionUpdate: 'user_message_chunk',
-        content: { type: 'text', text: 'Hello, world!' },
+        sessionUpdate: "user_message_chunk",
+        content: { type: "text", text: "Hello, world!" },
         _meta: { timestamp: toEpochMs(record.timestamp) },
       });
     });
 
-    it('should skip user records without message', async () => {
+    it("should skip user records without message", async () => {
       const record: ChatRecord = {
-        ...createUserRecord('test'),
+        ...createUserRecord("test"),
         message: undefined,
       };
 
@@ -153,42 +153,42 @@ describe('HistoryReplayer', () => {
     });
   });
 
-  describe('assistant message replay', () => {
-    it('should emit agent_message_chunk for assistant records', async () => {
-      const record = createAssistantRecord('I can help with that.');
+  describe("assistant message replay", () => {
+    it("should emit agent_message_chunk for assistant records", async () => {
+      const record = createAssistantRecord("I can help with that.");
       const records = [record];
 
       await replayer.replay(records);
 
       expect(sendUpdateSpy).toHaveBeenCalledWith({
-        sessionUpdate: 'agent_message_chunk',
-        content: { type: 'text', text: 'I can help with that.' },
+        sessionUpdate: "agent_message_chunk",
+        content: { type: "text", text: "I can help with that." },
         _meta: { timestamp: toEpochMs(record.timestamp) },
       });
     });
 
-    it('should emit agent_thought_chunk for thought parts', async () => {
-      const record = createAssistantRecord('Thinking about this...', true);
+    it("should emit agent_thought_chunk for thought parts", async () => {
+      const record = createAssistantRecord("Thinking about this...", true);
       const records = [record];
 
       await replayer.replay(records);
 
       expect(sendUpdateSpy).toHaveBeenCalledWith({
-        sessionUpdate: 'agent_thought_chunk',
-        content: { type: 'text', text: 'Thinking about this...' },
+        sessionUpdate: "agent_thought_chunk",
+        content: { type: "text", text: "Thinking about this..." },
         _meta: { timestamp: toEpochMs(record.timestamp) },
       });
     });
 
-    it('should handle assistant records with multiple parts', async () => {
+    it("should handle assistant records with multiple parts", async () => {
       const record: ChatRecord = {
-        ...createAssistantRecord('First'),
+        ...createAssistantRecord("First"),
         message: {
-          role: 'model',
+          role: "model",
           parts: [
-            { text: 'First part' },
-            { text: 'Second part', thought: true },
-            { text: 'Third part' },
+            { text: "First part" },
+            { text: "Second part", thought: true },
+            { text: "Third part" },
           ],
         },
       };
@@ -197,34 +197,34 @@ describe('HistoryReplayer', () => {
 
       expect(sendUpdateSpy).toHaveBeenCalledTimes(3);
       expect(sendUpdateSpy.mock.calls[0][0]).toEqual({
-        sessionUpdate: 'agent_message_chunk',
-        content: { type: 'text', text: 'First part' },
+        sessionUpdate: "agent_message_chunk",
+        content: { type: "text", text: "First part" },
         _meta: { timestamp: toEpochMs(record.timestamp) },
       });
       expect(sendUpdateSpy.mock.calls[1][0]).toEqual({
-        sessionUpdate: 'agent_thought_chunk',
-        content: { type: 'text', text: 'Second part' },
+        sessionUpdate: "agent_thought_chunk",
+        content: { type: "text", text: "Second part" },
         _meta: { timestamp: toEpochMs(record.timestamp) },
       });
       expect(sendUpdateSpy.mock.calls[2][0]).toEqual({
-        sessionUpdate: 'agent_message_chunk',
-        content: { type: 'text', text: 'Third part' },
+        sessionUpdate: "agent_message_chunk",
+        content: { type: "text", text: "Third part" },
         _meta: { timestamp: toEpochMs(record.timestamp) },
       });
     });
   });
 
-  describe('function call replay', () => {
-    it('should emit tool_call for function call parts', async () => {
+  describe("function call replay", () => {
+    it("should emit tool_call for function call parts", async () => {
       const record: ChatRecord = {
-        ...createAssistantRecord(''),
+        ...createAssistantRecord(""),
         message: {
-          role: 'model',
+          role: "model",
           parts: [
             {
               functionCall: {
-                name: 'read_file',
-                args: { path: '/test.ts' },
+                name: "read_file",
+                args: { path: "/test.ts" },
               },
             },
           ],
@@ -235,28 +235,28 @@ describe('HistoryReplayer', () => {
 
       expect(sendUpdateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          sessionUpdate: 'tool_call',
-          status: 'in_progress',
-          title: 'read_file',
-          rawInput: { path: '/test.ts' },
+          sessionUpdate: "tool_call",
+          status: "in_progress",
+          title: "read_file",
+          rawInput: { path: "/test.ts" },
           _meta: {
-            toolName: 'read_file',
+            toolName: "read_file",
             timestamp: toEpochMs(record.timestamp),
           },
         }),
       );
     });
 
-    it('should use function call id as callId when available', async () => {
+    it("should use function call id as callId when available", async () => {
       const record: ChatRecord = {
-        ...createAssistantRecord(''),
+        ...createAssistantRecord(""),
         message: {
-          role: 'model',
+          role: "model",
           parts: [
             {
               functionCall: {
-                id: 'custom-call-id',
-                name: 'read_file',
+                id: "custom-call-id",
+                name: "read_file",
                 args: {},
               },
             },
@@ -268,69 +268,69 @@ describe('HistoryReplayer', () => {
 
       expect(sendUpdateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          toolCallId: 'custom-call-id',
+          toolCallId: "custom-call-id",
         }),
       );
     });
   });
 
-  describe('tool result replay', () => {
-    it('should emit tool_call_update for tool result records', async () => {
-      const record = createToolResultRecord('read_file', 'File contents here');
+  describe("tool result replay", () => {
+    it("should emit tool_call_update for tool result records", async () => {
+      const record = createToolResultRecord("read_file", "File contents here");
       const records = [record];
 
       await replayer.replay(records);
 
       expect(sendUpdateSpy).toHaveBeenCalledWith({
-        sessionUpdate: 'tool_call_update',
-        toolCallId: 'call-123',
-        status: 'completed',
+        sessionUpdate: "tool_call_update",
+        toolCallId: "call-123",
+        status: "completed",
         content: [
           {
-            type: 'content',
+            type: "content",
             // Content comes from functionResponse.response (stringified)
-            content: { type: 'text', text: '{"result":"ok"}' },
+            content: { type: "text", text: '{"result":"ok"}' },
           },
         ],
         // resultDisplay is included as rawOutput
-        rawOutput: 'File contents here',
+        rawOutput: "File contents here",
         _meta: {
-          toolName: 'read_file',
+          toolName: "read_file",
           timestamp: toEpochMs(record.timestamp),
         },
       });
     });
 
-    it('should emit failed status for tool results with errors', async () => {
-      const records = [createToolResultRecord('failing_tool', undefined, true)];
+    it("should emit failed status for tool results with errors", async () => {
+      const records = [createToolResultRecord("failing_tool", undefined, true)];
 
       await replayer.replay(records);
 
       expect(sendUpdateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          sessionUpdate: 'tool_call_update',
-          status: 'failed',
+          sessionUpdate: "tool_call_update",
+          status: "failed",
         }),
       );
     });
 
-    it('should emit plan update for TodoWriteTool results', async () => {
+    it("should emit plan update for TodoWriteTool results", async () => {
       const todoDisplay: TodoResultDisplay = {
-        type: 'todo_list',
+        type: "todo_list",
         todos: [
-          { id: '1', content: 'Task 1', status: 'pending' },
-          { id: '2', content: 'Task 2', status: 'completed' },
+          { id: "1", content: "Task 1", status: "pending" },
+          { id: "2", content: "Task 2", status: "completed" },
         ],
       };
-      const record = createToolResultRecord('todo_write', todoDisplay);
+      const record = createToolResultRecord("todo_write", todoDisplay);
       // Override the function response name
       record.message = {
-        role: 'user',
+        role: "user",
         parts: [
           {
             functionResponse: {
-              name: 'todo_write',
-              response: { result: 'ok' },
+              name: "todo_write",
+              response: { result: "ok" },
             },
           },
         ],
@@ -339,22 +339,22 @@ describe('HistoryReplayer', () => {
       await replayer.replay([record]);
 
       expect(sendUpdateSpy).toHaveBeenCalledWith({
-        sessionUpdate: 'plan',
+        sessionUpdate: "plan",
         entries: [
-          { content: 'Task 1', priority: 'medium', status: 'pending' },
-          { content: 'Task 2', priority: 'medium', status: 'completed' },
+          { content: "Task 1", priority: "medium", status: "pending" },
+          { content: "Task 2", priority: "medium", status: "completed" },
         ],
       });
     });
 
-    it('should use record uuid as callId when toolCallResult.callId is missing', async () => {
+    it("should use record uuid as callId when toolCallResult.callId is missing", async () => {
       const record: ChatRecord = {
-        ...createToolResultRecord('test_tool'),
-        uuid: 'fallback-uuid',
+        ...createToolResultRecord("test_tool"),
+        uuid: "fallback-uuid",
         toolCallResult: {
           callId: undefined as unknown as string,
           responseParts: [],
-          resultDisplay: 'Result',
+          resultDisplay: "Result",
           error: undefined,
           errorType: undefined,
         },
@@ -364,23 +364,23 @@ describe('HistoryReplayer', () => {
 
       expect(sendUpdateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          toolCallId: 'fallback-uuid',
+          toolCallId: "fallback-uuid",
         }),
       );
     });
   });
 
-  describe('system records', () => {
-    it('should skip system records', async () => {
+  describe("system records", () => {
+    it("should skip system records", async () => {
       const systemRecord: ChatRecord = {
-        uuid: 'system-uuid',
+        uuid: "system-uuid",
         parentUuid: null,
-        sessionId: 'test-session',
+        sessionId: "test-session",
         timestamp: new Date().toISOString(),
-        type: 'system',
-        subtype: 'chat_compression',
-        cwd: '/test',
-        version: '1.0.0',
+        type: "system",
+        subtype: "chat_compression",
+        cwd: "/test",
+        version: "1.0.0",
       };
 
       await replayer.replay([systemRecord]);
@@ -389,28 +389,28 @@ describe('HistoryReplayer', () => {
     });
   });
 
-  describe('mixed record types', () => {
-    it('should handle a complete conversation replay', async () => {
+  describe("mixed record types", () => {
+    it("should handle a complete conversation replay", async () => {
       const records: ChatRecord[] = [
-        createUserRecord('Read the file test.ts'),
+        createUserRecord("Read the file test.ts"),
         {
-          ...createAssistantRecord(''),
+          ...createAssistantRecord(""),
           message: {
-            role: 'model',
+            role: "model",
             parts: [
               { text: "I'll read that file for you.", thought: true },
               {
                 functionCall: {
-                  id: 'call-read',
-                  name: 'read_file',
-                  args: { path: 'test.ts' },
+                  id: "call-read",
+                  name: "read_file",
+                  args: { path: "test.ts" },
                 },
               },
             ],
           },
         },
-        createToolResultRecord('read_file', 'export const x = 1;'),
-        createAssistantRecord('The file contains a simple export.'),
+        createToolResultRecord("read_file", "export const x = 1;"),
+        createAssistantRecord("The file contains a simple export."),
       ];
 
       await replayer.replay(records);
@@ -421,28 +421,28 @@ describe('HistoryReplayer', () => {
           (call[0] as { sessionUpdate: string }).sessionUpdate,
       );
       expect(updateTypes).toEqual([
-        'user_message_chunk',
-        'agent_thought_chunk',
-        'tool_call',
-        'tool_call_update',
-        'agent_message_chunk',
+        "user_message_chunk",
+        "agent_thought_chunk",
+        "tool_call",
+        "tool_call_update",
+        "agent_message_chunk",
       ]);
     });
   });
 
-  describe('usage metadata replay', () => {
-    it('should emit usage metadata after assistant message content', async () => {
+  describe("usage metadata replay", () => {
+    it("should emit usage metadata after assistant message content", async () => {
       const record: ChatRecord = {
-        uuid: 'assistant-uuid',
-        parentUuid: 'user-uuid',
-        sessionId: 'test-session',
+        uuid: "assistant-uuid",
+        parentUuid: "user-uuid",
+        sessionId: "test-session",
         timestamp: new Date().toISOString(),
-        type: 'assistant',
-        cwd: '/test',
-        version: '1.0.0',
+        type: "assistant",
+        cwd: "/test",
+        version: "1.0.0",
         message: {
-          role: 'model',
-          parts: [{ text: 'Hello!' }],
+          role: "model",
+          parts: [{ text: "Hello!" }],
         },
         usageMetadata: {
           promptTokenCount: 100,
@@ -455,13 +455,13 @@ describe('HistoryReplayer', () => {
 
       expect(sendUpdateSpy).toHaveBeenCalledTimes(2);
       expect(sendUpdateSpy).toHaveBeenNthCalledWith(1, {
-        sessionUpdate: 'agent_message_chunk',
-        content: { type: 'text', text: 'Hello!' },
+        sessionUpdate: "agent_message_chunk",
+        content: { type: "text", text: "Hello!" },
         _meta: { timestamp: toEpochMs(record.timestamp) },
       });
       expect(sendUpdateSpy).toHaveBeenNthCalledWith(2, {
-        sessionUpdate: 'agent_message_chunk',
-        content: { type: 'text', text: '' },
+        sessionUpdate: "agent_message_chunk",
+        content: { type: "text", text: "" },
         _meta: {
           usage: {
             inputTokens: 100,

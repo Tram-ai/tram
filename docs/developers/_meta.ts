@@ -1,19 +1,19 @@
 export default {
-  'Contribute to Qwen Code': {
-    title: 'Contribute to Qwen Code',
+  'Contribute to TRAM': {
+    title: 'Contribute to TRAM',
     type: 'separator',
   },
   architecture: 'Architecture',
   roadmap: 'Roadmap',
   contributing: 'Contributing Guide',
-  'Qwen Code SDK': {
+  'TRAM SDK': {
     title: 'Agent SDK',
     type: 'separator',
   },
   'sdk-typescript': 'Typescript SDK',
   'sdk-java': 'Java SDK(alpha)',
-  'Dive Into Qwen Code': {
-    title: 'Dive Into Qwen Code',
+  'Dive Into TRAM': {
+    title: 'Dive Into TRAM',
     type: 'separator',
   },
 

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { reportError } from './errorReporting.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { reportError } from "./errorReporting.js";
 
 const debugLoggerSpy = vi.hoisted(() => ({
   error: vi.fn(),
@@ -15,7 +15,7 @@ const debugLoggerSpy = vi.hoisted(() => ({
 }));
 
 // Mock the debugLogger
-vi.mock('./debugLogger.js', () => ({
+vi.mock("./debugLogger.js", () => ({
   createDebugLogger: () => ({
     error: debugLoggerSpy.error,
     warn: debugLoggerSpy.warn,
@@ -24,7 +24,7 @@ vi.mock('./debugLogger.js', () => ({
   }),
 }));
 
-describe('reportError', () => {
+describe("reportError", () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
@@ -33,12 +33,12 @@ describe('reportError', () => {
     vi.restoreAllMocks();
   });
 
-  it('should not throw when called with a standard error', async () => {
-    const error = new Error('Test error');
-    error.stack = 'Test stack';
-    const baseMessage = 'An error occurred.';
-    const context = { data: 'test context' };
-    const type = 'test-type';
+  it("should not throw when called with a standard error", async () => {
+    const error = new Error("Test error");
+    error.stack = "Test stack";
+    const baseMessage = "An error occurred.";
+    const context = { data: "test context" };
+    const type = "test-type";
 
     await expect(
       reportError(error, baseMessage, context, type),
@@ -50,10 +50,10 @@ describe('reportError', () => {
     );
   });
 
-  it('should handle errors that are plain objects with a message property', async () => {
-    const error = { message: 'Test plain object error' };
-    const baseMessage = 'Another error.';
-    const type = 'general';
+  it("should handle errors that are plain objects with a message property", async () => {
+    const error = { message: "Test plain object error" };
+    const baseMessage = "Another error.";
+    const type = "general";
 
     await expect(
       reportError(error, baseMessage, undefined, type),
@@ -64,10 +64,10 @@ describe('reportError', () => {
     );
   });
 
-  it('should handle string errors', async () => {
-    const error = 'Just a string error';
-    const baseMessage = 'String error occurred.';
-    const type = 'general';
+  it("should handle string errors", async () => {
+    const error = "Just a string error";
+    const baseMessage = "String error occurred.";
+    const type = "general";
 
     await expect(
       reportError(error, baseMessage, undefined, type),
@@ -78,27 +78,27 @@ describe('reportError', () => {
     );
   });
 
-  it('should handle stringification failure of report content (e.g. BigInt in context)', async () => {
-    const error = new Error('Main error');
-    error.stack = 'Main stack';
-    const baseMessage = 'Failed operation with BigInt.';
+  it("should handle stringification failure of report content (e.g. BigInt in context)", async () => {
+    const error = new Error("Main error");
+    error.stack = "Main stack";
+    const baseMessage = "Failed operation with BigInt.";
     const context = { a: BigInt(1) }; // BigInt cannot be stringified by JSON.stringify
 
     // Simulate JSON.stringify throwing an error for the full report
     const originalJsonStringify = JSON.stringify;
     let callCount = 0;
-    vi.spyOn(JSON, 'stringify').mockImplementation((value, replacer, space) => {
+    vi.spyOn(JSON, "stringify").mockImplementation((value, replacer, space) => {
       callCount++;
       if (callCount === 1) {
         // First call is for the full report content
-        throw new TypeError('Do not know how to serialize a BigInt');
+        throw new TypeError("Do not know how to serialize a BigInt");
       }
       // Subsequent calls (for minimal report) should succeed
       return originalJsonStringify(value, replacer, space);
     });
 
     await expect(
-      reportError(error, baseMessage, context, 'bigint-fail'),
+      reportError(error, baseMessage, context, "bigint-fail"),
     ).resolves.not.toThrow();
     expect(debugLoggerSpy.error).toHaveBeenCalledWith(
       `${baseMessage} [bigint-fail] Could not stringify report content (likely due to context):`,
@@ -111,11 +111,11 @@ describe('reportError', () => {
     );
   });
 
-  it('should generate a report without context if context is not provided', async () => {
-    const error = new Error('Error without context');
-    error.stack = 'No context stack';
-    const baseMessage = 'Simple error.';
-    const type = 'general';
+  it("should generate a report without context if context is not provided", async () => {
+    const error = new Error("Error without context");
+    error.stack = "No context stack";
+    const baseMessage = "Simple error.";
+    const type = "general";
 
     await expect(
       reportError(error, baseMessage, undefined, type),

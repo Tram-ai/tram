@@ -23,10 +23,10 @@
  * Usage: npx tsx packages/core/src/lsp/__e2e__/lsp-e2e-test.ts
  */
 
-import { NativeLspService } from '../NativeLspService.js';
-import { EventEmitter } from 'events';
-import { pathToFileURL } from 'url';
-import * as path from 'path';
+import { NativeLspService } from "../NativeLspService.js";
+import { EventEmitter } from "events";
+import { pathToFileURL } from "url";
+import * as path from "path";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
@@ -52,7 +52,7 @@ function record(
   detail: string,
 ): void {
   results.push({ method, language, passed, detail });
-  const icon = passed ? green('PASS') : red('FAIL');
+  const icon = passed ? green("PASS") : red("FAIL");
   console.log(`  [${icon}] ${language}/${method}: ${detail}`);
 }
 
@@ -121,7 +121,7 @@ function createService(workspaceRoot: string): NativeLspService {
     getDirectories: () => [workspaceRoot],
     isPathWithinWorkspace: () => true,
     fileExists: async () => false,
-    readFile: async () => '{}',
+    readFile: async () => "{}",
     resolvePath: (p: string) => path.resolve(workspaceRoot, p),
   };
   const fileDiscovery = {
@@ -167,19 +167,19 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
     const status = service.getStatus();
     const serverStatuses = Array.from(status.entries());
     if (serverStatuses.length === 0) {
-      record('startup', langName, false, 'No servers discovered');
+      record("startup", langName, false, "No servers discovered");
       return;
     }
     let anyReady = false;
     for (const [name, s] of serverStatuses) {
       console.log(`  Server "${name}": ${s}`);
-      if (s === 'READY') anyReady = true;
+      if (s === "READY") anyReady = true;
     }
     if (!anyReady) {
-      record('startup', langName, false, 'No server reached READY');
+      record("startup", langName, false, "No server reached READY");
       return;
     }
-    record('startup', langName, true, 'Server ready');
+    record("startup", langName, true, "Server ready");
 
     /* ---------- warmup: open main files via documentSymbols ---------- */
     // This triggers ensureDocumentOpen for each file, so the server starts
@@ -216,16 +216,16 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
       const hover = await service.hover(hoverLoc);
       if (hover?.contents) {
         record(
-          'hover',
+          "hover",
           langName,
           true,
           `"${hover.contents.substring(0, 100)}"`,
         );
       } else {
-        record('hover', langName, false, 'Empty/null result');
+        record("hover", langName, false, "Empty/null result");
       }
     } catch (e: any) {
-      record('hover', langName, false, `Error: ${e.message}`);
+      record("hover", langName, false, `Error: ${e.message}`);
     }
 
     /* ---------- 2. definitions ---------- */
@@ -237,13 +237,13 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
       );
       const defs = await service.definitions(defLoc);
       record(
-        'definitions',
+        "definitions",
         langName,
         defs.length > 0,
-        defs.length > 0 ? `${defs.length} def(s)` : 'Empty result',
+        defs.length > 0 ? `${defs.length} def(s)` : "Empty result",
       );
     } catch (e: any) {
-      record('definitions', langName, false, `Error: ${e.message}`);
+      record("definitions", langName, false, `Error: ${e.message}`);
     }
 
     /* ---------- 3. references ---------- */
@@ -255,13 +255,13 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
       );
       const refs = await service.references(refLoc, undefined, true);
       record(
-        'references',
+        "references",
         langName,
         refs.length > 0,
-        refs.length > 0 ? `${refs.length} ref(s)` : 'Empty result',
+        refs.length > 0 ? `${refs.length} ref(s)` : "Empty result",
       );
     } catch (e: any) {
-      record('references', langName, false, `Error: ${e.message}`);
+      record("references", langName, false, `Error: ${e.message}`);
     }
 
     /* ---------- 4. documentSymbols ---------- */
@@ -272,18 +272,18 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
         const names = symbols
           .slice(0, 5)
           .map((s) => s.name)
-          .join(', ');
+          .join(", ");
         record(
-          'documentSymbols',
+          "documentSymbols",
           langName,
           true,
           `${symbols.length} symbol(s): ${names}`,
         );
       } else {
-        record('documentSymbols', langName, false, 'Empty result');
+        record("documentSymbols", langName, false, "Empty result");
       }
     } catch (e: any) {
-      record('documentSymbols', langName, false, `Error: ${e.message}`);
+      record("documentSymbols", langName, false, `Error: ${e.message}`);
     }
 
     /* ---------- 5. workspaceSymbols ---------- */
@@ -293,18 +293,18 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
         const names = wsSymbols
           .slice(0, 5)
           .map((s) => s.name)
-          .join(', ');
+          .join(", ");
         record(
-          'workspaceSymbols',
+          "workspaceSymbols",
           langName,
           true,
           `${wsSymbols.length} symbol(s): ${names}`,
         );
       } else {
-        record('workspaceSymbols', langName, false, 'Empty result');
+        record("workspaceSymbols", langName, false, "Empty result");
       }
     } catch (e: any) {
-      record('workspaceSymbols', langName, false, `Error: ${e.message}`);
+      record("workspaceSymbols", langName, false, `Error: ${e.message}`);
     }
 
     /* ---------- 6. implementations ---------- */
@@ -316,13 +316,13 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
       );
       const impls = await service.implementations(implLoc);
       record(
-        'implementations',
+        "implementations",
         langName,
         impls.length > 0,
-        impls.length > 0 ? `${impls.length} impl(s)` : 'Empty result',
+        impls.length > 0 ? `${impls.length} impl(s)` : "Empty result",
       );
     } catch (e: any) {
-      record('implementations', langName, false, `Error: ${e.message}`);
+      record("implementations", langName, false, `Error: ${e.message}`);
     }
 
     /* ---------- 7/8/9. call hierarchy ---------- */
@@ -335,7 +335,7 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
       const callItems = await service.prepareCallHierarchy(callLoc);
       if (callItems.length > 0) {
         record(
-          'prepareCallHierarchy',
+          "prepareCallHierarchy",
           langName,
           true,
           `${callItems.length} item(s): ${callItems[0]!.name}`,
@@ -344,53 +344,53 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
         try {
           const incoming = await service.incomingCalls(callItems[0]!);
           record(
-            'incomingCalls',
+            "incomingCalls",
             langName,
             incoming.length > 0,
             incoming.length > 0
               ? `${incoming.length} caller(s)`
-              : 'Empty (no callers found)',
+              : "Empty (no callers found)",
           );
         } catch (e: any) {
-          record('incomingCalls', langName, false, `Error: ${e.message}`);
+          record("incomingCalls", langName, false, `Error: ${e.message}`);
         }
 
         try {
           const outgoing = await service.outgoingCalls(callItems[0]!);
           if (outgoing.length > 0) {
             record(
-              'outgoingCalls',
+              "outgoingCalls",
               langName,
               true,
               `${outgoing.length} callee(s)`,
             );
-          } else if (isServerLimited('outgoingCalls')) {
+          } else if (isServerLimited("outgoingCalls")) {
             record(
-              'outgoingCalls',
+              "outgoingCalls",
               langName,
               true,
-              'Empty (server does not implement this method)',
+              "Empty (server does not implement this method)",
             );
           } else {
             record(
-              'outgoingCalls',
+              "outgoingCalls",
               langName,
               false,
-              'Empty (no callees found)',
+              "Empty (no callees found)",
             );
           }
         } catch (e: any) {
-          record('outgoingCalls', langName, false, `Error: ${e.message}`);
+          record("outgoingCalls", langName, false, `Error: ${e.message}`);
         }
       } else {
-        record('prepareCallHierarchy', langName, false, 'Empty result');
-        record('incomingCalls', langName, false, 'Skipped');
-        record('outgoingCalls', langName, false, 'Skipped');
+        record("prepareCallHierarchy", langName, false, "Empty result");
+        record("incomingCalls", langName, false, "Skipped");
+        record("outgoingCalls", langName, false, "Skipped");
       }
     } catch (e: any) {
-      record('prepareCallHierarchy', langName, false, `Error: ${e.message}`);
-      record('incomingCalls', langName, false, 'Skipped');
-      record('outgoingCalls', langName, false, 'Skipped');
+      record("prepareCallHierarchy", langName, false, `Error: ${e.message}`);
+      record("incomingCalls", langName, false, "Skipped");
+      record("outgoingCalls", langName, false, "Skipped");
     }
 
     /* ---------- 10. diagnostics ---------- */
@@ -398,9 +398,9 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
       const diagUri = pathToFileURL(positions.diagnosticsFile).toString();
       const diags = await service.diagnostics(diagUri);
       // 0 diagnostics is fine for clean code
-      record('diagnostics', langName, true, `${diags.length} diagnostic(s)`);
+      record("diagnostics", langName, true, `${diags.length} diagnostic(s)`);
     } catch (e: any) {
-      record('diagnostics', langName, false, `Error: ${e.message}`);
+      record("diagnostics", langName, false, `Error: ${e.message}`);
     }
 
     /* ---------- 11. codeActions ---------- */
@@ -409,25 +409,25 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
       const actions = await service.codeActions(
         caUri,
         { start: { line: 0, character: 0 }, end: { line: 0, character: 10 } },
-        { diagnostics: [], triggerKind: 'invoked' as const },
+        { diagnostics: [], triggerKind: "invoked" as const },
       );
       // 0 actions is fine when there are no diagnostics
-      record('codeActions', langName, true, `${actions.length} action(s)`);
+      record("codeActions", langName, true, `${actions.length} action(s)`);
     } catch (e: any) {
-      record('codeActions', langName, false, `Error: ${e.message}`);
+      record("codeActions", langName, false, `Error: ${e.message}`);
     }
 
     /* ---------- 12. workspaceDiagnostics ---------- */
     try {
       const wsDiags = await service.workspaceDiagnostics();
       record(
-        'workspaceDiagnostics',
+        "workspaceDiagnostics",
         langName,
         true,
         `${wsDiags.length} file(s) with diagnostics`,
       );
     } catch (e: any) {
-      record('workspaceDiagnostics', langName, false, `Error: ${e.message}`);
+      record("workspaceDiagnostics", langName, false, `Error: ${e.message}`);
     }
 
     await service.stop();
@@ -446,9 +446,9 @@ async function testLanguage(cfg: LanguageTestConfig): Promise<void> {
 /*  Language configs                                                   */
 /* ------------------------------------------------------------------ */
 
-const TS_ROOT = '/tmp/lsp-e2e-test/ts-project';
-const CPP_ROOT = '/tmp/lsp-e2e-test/cpp-project';
-const JAVA_ROOT = '/tmp/lsp-e2e-test/java-project';
+const TS_ROOT = "/tmp/lsp-e2e-test/ts-project";
+const CPP_ROOT = "/tmp/lsp-e2e-test/cpp-project";
+const JAVA_ROOT = "/tmp/lsp-e2e-test/java-project";
 
 /**
  * TypeScript positions (all in index.ts / math.ts):
@@ -466,7 +466,7 @@ const JAVA_ROOT = '/tmp/lsp-e2e-test/java-project';
  *   L15: export function createCalculator(): Calculator {
  */
 const tsConfig: LanguageTestConfig = {
-  langName: 'TypeScript',
+  langName: "TypeScript",
   workspaceRoot: TS_ROOT,
   indexWaitMs: 3000,
   positions: {
@@ -478,7 +478,7 @@ const tsConfig: LanguageTestConfig = {
     references: { file: `${TS_ROOT}/src/index.ts`, line: 2, char: 12 },
     // documentSymbols on math.ts (has interface, class, function)
     documentSymbolsFile: `${TS_ROOT}/src/math.ts`,
-    symbolQuery: 'Calculator',
+    symbolQuery: "Calculator",
     // implementations on `Calculator` interface → SimpleCalculator
     implementations: { file: `${TS_ROOT}/src/math.ts`, line: 0, char: 17 },
     // call hierarchy on `createCalculator` (called by index.ts, calls SimpleCalculator)
@@ -524,11 +524,11 @@ const tsConfig: LanguageTestConfig = {
  *   L2:  int Calculator::add(int a, int b) {
  */
 const cppConfig: LanguageTestConfig = {
-  langName: 'C++',
+  langName: "C++",
   workspaceRoot: CPP_ROOT,
   indexWaitMs: 5000,
   // clangd v19.x does not implement callHierarchy/outgoingCalls (returns -32601)
-  serverLimitedMethods: new Set(['outgoingCalls']),
+  serverLimitedMethods: new Set(["outgoingCalls"]),
   positions: {
     // hover on `Calculator` type at main.cpp L16:4 → class info
     hover: { file: `${CPP_ROOT}/src/main.cpp`, line: 16, char: 4 },
@@ -538,7 +538,7 @@ const cppConfig: LanguageTestConfig = {
     references: { file: `${CPP_ROOT}/src/calculator.h`, line: 4, char: 8 },
     // documentSymbols on main.cpp → addValues, subtractValues, computeSum, main
     documentSymbolsFile: `${CPP_ROOT}/src/main.cpp`,
-    symbolQuery: 'Calculator',
+    symbolQuery: "Calculator",
     // implementations on `Calculator` class at calculator.h L2:6
     // → should find AdvancedCalculator (derived class)
     implementations: { file: `${CPP_ROOT}/src/calculator.h`, line: 2, char: 6 },
@@ -578,7 +578,7 @@ const cppConfig: LanguageTestConfig = {
  *   L4:      public int add(int a, int b) {
  */
 const javaConfig: LanguageTestConfig = {
-  langName: 'Java',
+  langName: "Java",
   workspaceRoot: JAVA_ROOT,
   indexWaitMs: 20000,
   positions: {
@@ -602,7 +602,7 @@ const javaConfig: LanguageTestConfig = {
     },
     // documentSymbols on Main.java → Main class, computeSum, main
     documentSymbolsFile: `${JAVA_ROOT}/src/main/java/com/test/Main.java`,
-    symbolQuery: 'Calculator',
+    symbolQuery: "Calculator",
     // implementations on `Calculator` interface at Calculator.java L2:17
     implementations: {
       file: `${JAVA_ROOT}/src/main/java/com/test/Calculator.java`,
@@ -624,9 +624,9 @@ const javaConfig: LanguageTestConfig = {
 /*  Main                                                              */
 /* ------------------------------------------------------------------ */
 async function main(): Promise<void> {
-  console.log(bold('LSP End-to-End Test Suite'));
+  console.log(bold("LSP End-to-End Test Suite"));
   console.log(
-    'Verifying all 12 LSP methods with real servers (TS / C++ / Java)\n',
+    "Verifying all 12 LSP methods with real servers (TS / C++ / Java)\n",
   );
 
   await testLanguage(tsConfig);
@@ -634,48 +634,48 @@ async function main(): Promise<void> {
   await testLanguage(javaConfig);
 
   /* ---------- Summary ---------- */
-  console.log(bold('\n================== Summary =================='));
+  console.log(bold("\n================== Summary =================="));
   const passed = results.filter((r) => r.passed).length;
   const failed = results.filter((r) => !r.passed).length;
   console.log(
     `Total: ${results.length} | ${green(`Passed: ${passed}`)} | ${red(`Failed: ${failed}`)}`,
   );
 
-  console.log(bold('\nPer Language:'));
-  for (const lang of ['TypeScript', 'C++', 'Java']) {
+  console.log(bold("\nPer Language:"));
+  for (const lang of ["TypeScript", "C++", "Java"]) {
     const lr = results.filter((r) => r.language === lang);
     const lp = lr.filter((r) => r.passed).length;
     const icon =
-      lp === lr.length ? green('ALL PASS') : yellow(`${lp}/${lr.length}`);
+      lp === lr.length ? green("ALL PASS") : yellow(`${lp}/${lr.length}`);
     console.log(`  ${lang}: ${icon}`);
   }
 
-  console.log(bold('\nPer Method:'));
+  console.log(bold("\nPer Method:"));
   const methods = [
-    'startup',
-    'hover',
-    'definitions',
-    'references',
-    'documentSymbols',
-    'workspaceSymbols',
-    'implementations',
-    'prepareCallHierarchy',
-    'incomingCalls',
-    'outgoingCalls',
-    'diagnostics',
-    'codeActions',
-    'workspaceDiagnostics',
+    "startup",
+    "hover",
+    "definitions",
+    "references",
+    "documentSymbols",
+    "workspaceSymbols",
+    "implementations",
+    "prepareCallHierarchy",
+    "incomingCalls",
+    "outgoingCalls",
+    "diagnostics",
+    "codeActions",
+    "workspaceDiagnostics",
   ];
   for (const m of methods) {
     const mr = results.filter((r) => r.method === m);
     const langs = mr
       .map((r) => (r.passed ? green(r.language) : red(r.language)))
-      .join(' | ');
+      .join(" | ");
     console.log(`  ${m}: ${langs}`);
   }
 
   if (failed > 0) {
-    console.log(yellow('\nFailed tests:'));
+    console.log(yellow("\nFailed tests:"));
     for (const r of results.filter((rr) => !rr.passed)) {
       console.log(red(`  ${r.language}/${r.method}: ${r.detail}`));
     }

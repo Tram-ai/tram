@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type OpenAI from 'openai';
-import type { Config } from '../../../config/config.js';
-import type { ContentGeneratorConfig } from '../../contentGenerator.js';
-import { DefaultOpenAICompatibleProvider } from './default.js';
-import type { GenerateContentConfig } from '@google/genai';
+import type OpenAI from "openai";
+import type { Config } from "../../../config/config.js";
+import type { ContentGeneratorConfig } from "../../contentGenerator.js";
+import { DefaultOpenAICompatibleProvider } from "./default.js";
+import type { GenerateContentConfig } from "@google/genai";
 
 export class DeepSeekOpenAICompatibleProvider extends DefaultOpenAICompatibleProvider {
   constructor(
@@ -21,9 +21,9 @@ export class DeepSeekOpenAICompatibleProvider extends DefaultOpenAICompatiblePro
   static isDeepSeekProvider(
     contentGeneratorConfig: ContentGeneratorConfig,
   ): boolean {
-    const baseUrl = contentGeneratorConfig.baseUrl ?? '';
+    const baseUrl = contentGeneratorConfig.baseUrl ?? "";
 
-    return baseUrl.toLowerCase().includes('api.deepseek.com');
+    return baseUrl.toLowerCase().includes("api.deepseek.com");
   }
 
   /**
@@ -41,14 +41,14 @@ export class DeepSeekOpenAICompatibleProvider extends DefaultOpenAICompatiblePro
     }
 
     const messages = baseRequest.messages.map((message) => {
-      if (!('content' in message)) {
+      if (!("content" in message)) {
         return message;
       }
 
       const { content } = message;
 
       if (
-        typeof content === 'string' ||
+        typeof content === "string" ||
         content === null ||
         content === undefined
       ) {
@@ -61,15 +61,15 @@ export class DeepSeekOpenAICompatibleProvider extends DefaultOpenAICompatiblePro
 
       const text = content
         .map((part) => {
-          if (typeof part === 'string') {
+          if (typeof part === "string") {
             return part;
           }
-          if (part.type === 'text') {
-            return part.text ?? '';
+          if (part.type === "text") {
+            return part.text ?? "";
           }
           return `[Unsupported content type: ${part.type}]`;
         })
-        .join('\n\n');
+        .join("\n\n");
 
       return {
         ...message,

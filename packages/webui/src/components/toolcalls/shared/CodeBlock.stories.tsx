@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { CodeBlock } from './LayoutComponents.js';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { CodeBlock } from "./LayoutComponents.js";
 
 /**
  * CodeBlock displays formatted code or command output.
  */
 const meta: Meta<typeof CodeBlock> = {
-  title: 'ToolCalls/Shared/CodeBlock',
+  title: "ToolCalls/Shared/CodeBlock",
   component: CodeBlock,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;

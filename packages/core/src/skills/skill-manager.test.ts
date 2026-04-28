@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as os from 'os';
-import { SkillManager } from './skill-manager.js';
-import { type SkillConfig, SkillError } from './types.js';
-import type { Config } from '../config/config.js';
-import { makeFakeConfig } from '../test-utils/config.js';
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import * as fs from "fs/promises";
+import * as path from "path";
+import * as os from "os";
+import { SkillManager } from "./skill-manager.js";
+import { type SkillConfig, SkillError } from "./types.js";
+import type { Config } from "../config/config.js";
+import { makeFakeConfig } from "../test-utils/config.js";
 
 // Mock file system operations
-vi.mock('fs/promises');
-vi.mock('os');
+vi.mock("fs/promises");
+vi.mock("os");
 
 // Mock yaml parser - use vi.hoisted for proper hoisting
 const mockParseYaml = vi.hoisted(() => vi.fn());
 
-vi.mock('../utils/yaml-parser.js', () => ({
+vi.mock("../utils/yaml-parser.js", () => ({
   parse: mockParseYaml,
   stringify: vi.fn(),
 }));
 
-describe('SkillManager', () => {
+describe("SkillManager", () => {
   let manager: SkillManager;
   let mockConfig: Config;
 
@@ -34,10 +34,10 @@ describe('SkillManager', () => {
     mockConfig = makeFakeConfig({});
 
     // Mock the project root method
-    vi.spyOn(mockConfig, 'getProjectRoot').mockReturnValue('/test/project');
+    vi.spyOn(mockConfig, "getProjectRoot").mockReturnValue("/test/project");
 
     // Mock os.homedir
-    vi.mocked(os.homedir).mockReturnValue('/home/user');
+    vi.mocked(os.homedir).mockReturnValue("/home/user");
 
     // Reset and setup mocks
     vi.clearAllMocks();
@@ -45,52 +45,52 @@ describe('SkillManager', () => {
     // Setup yaml parser mocks with sophisticated behavior
     mockParseYaml.mockImplementation((yamlString: string) => {
       // Handle different test cases based on YAML content
-      if (yamlString.includes('allowedTools:')) {
+      if (yamlString.includes("allowedTools:")) {
         return {
-          name: 'test-skill',
-          description: 'A test skill',
-          allowedTools: ['read_file', 'write_file'],
+          name: "test-skill",
+          description: "A test skill",
+          allowedTools: ["read_file", "write_file"],
         };
       }
-      if (yamlString.includes('name: skill1')) {
-        return { name: 'skill1', description: 'First skill' };
+      if (yamlString.includes("name: skill1")) {
+        return { name: "skill1", description: "First skill" };
       }
-      if (yamlString.includes('name: skill2')) {
-        return { name: 'skill2', description: 'Second skill' };
+      if (yamlString.includes("name: skill2")) {
+        return { name: "skill2", description: "Second skill" };
       }
-      if (yamlString.includes('name: skill3')) {
-        return { name: 'skill3', description: 'Third skill' };
+      if (yamlString.includes("name: skill3")) {
+        return { name: "skill3", description: "Third skill" };
       }
-      if (yamlString.includes('name: symlink-skill')) {
+      if (yamlString.includes("name: symlink-skill")) {
         return {
-          name: 'symlink-skill',
-          description: 'A skill loaded from symlink',
+          name: "symlink-skill",
+          description: "A skill loaded from symlink",
         };
       }
-      if (yamlString.includes('A symlinked skill')) {
-        return { name: 'symlink-skill', description: 'A symlinked skill' };
+      if (yamlString.includes("A symlinked skill")) {
+        return { name: "symlink-skill", description: "A symlinked skill" };
       }
-      if (yamlString.includes('name: regular-skill')) {
-        return { name: 'regular-skill', description: 'A regular skill' };
+      if (yamlString.includes("name: regular-skill")) {
+        return { name: "regular-skill", description: "A regular skill" };
       }
-      if (yamlString.includes('name: shared-skill')) {
-        const desc = yamlString.includes('From qwen dir')
-          ? 'From qwen dir'
-          : yamlString.includes('From agent dir')
-            ? 'From agent dir'
-            : 'A shared skill';
-        return { name: 'shared-skill', description: desc };
+      if (yamlString.includes("name: shared-skill")) {
+        const desc = yamlString.includes("From qwen dir")
+          ? "From qwen dir"
+          : yamlString.includes("From agent dir")
+            ? "From agent dir"
+            : "A shared skill";
+        return { name: "shared-skill", description: desc };
       }
-      if (!yamlString.includes('name:')) {
-        return { description: 'A test skill' }; // Missing name case
+      if (!yamlString.includes("name:")) {
+        return { description: "A test skill" }; // Missing name case
       }
-      if (!yamlString.includes('description:')) {
-        return { name: 'test-skill' }; // Missing description case
+      if (!yamlString.includes("description:")) {
+        return { name: "test-skill" }; // Missing description case
       }
       // Default case
       return {
-        name: 'test-skill',
-        description: 'A test skill',
+        name: "test-skill",
+        description: "A test skill",
       };
     });
 
@@ -102,11 +102,11 @@ describe('SkillManager', () => {
   });
 
   const validSkillConfig: SkillConfig = {
-    name: 'test-skill',
-    description: 'A test skill',
-    level: 'project',
-    filePath: '/test/project/.tram/skills/test-skill/SKILL.md',
-    body: 'You are a helpful assistant with this skill.',
+    name: "test-skill",
+    description: "A test skill",
+    level: "project",
+    filePath: "/test/project/.tram/skills/test-skill/SKILL.md",
+    body: "You are a helpful assistant with this skill.",
   };
 
   const validMarkdown = `---
@@ -117,22 +117,22 @@ description: A test skill
 You are a helpful assistant with this skill.
 `;
 
-  describe('parseSkillContent', () => {
-    it('should parse valid markdown content', () => {
+  describe("parseSkillContent", () => {
+    it("should parse valid markdown content", () => {
       const config = manager.parseSkillContent(
         validMarkdown,
         validSkillConfig.filePath,
-        'project',
+        "project",
       );
 
-      expect(config.name).toBe('test-skill');
-      expect(config.description).toBe('A test skill');
-      expect(config.body).toBe('You are a helpful assistant with this skill.');
-      expect(config.level).toBe('project');
+      expect(config.name).toBe("test-skill");
+      expect(config.description).toBe("A test skill");
+      expect(config.body).toBe("You are a helpful assistant with this skill.");
+      expect(config.level).toBe("project");
       expect(config.filePath).toBe(validSkillConfig.filePath);
     });
 
-    it('should parse markdown with CRLF line endings', () => {
+    it("should parse markdown with CRLF line endings", () => {
       const markdownCrlf = `---\r
 name: test-skill\r
 description: A test skill\r
@@ -144,15 +144,15 @@ You are a helpful assistant with this skill.\r
       const config = manager.parseSkillContent(
         markdownCrlf,
         validSkillConfig.filePath,
-        'project',
+        "project",
       );
 
-      expect(config.name).toBe('test-skill');
-      expect(config.description).toBe('A test skill');
-      expect(config.body).toBe('You are a helpful assistant with this skill.');
+      expect(config.name).toBe("test-skill");
+      expect(config.description).toBe("A test skill");
+      expect(config.body).toBe("You are a helpful assistant with this skill.");
     });
 
-    it('should parse markdown with UTF-8 BOM', () => {
+    it("should parse markdown with UTF-8 BOM", () => {
       const markdownWithBom = `\uFEFF---
 name: test-skill
 description: A test skill
@@ -164,14 +164,14 @@ You are a helpful assistant with this skill.
       const config = manager.parseSkillContent(
         markdownWithBom,
         validSkillConfig.filePath,
-        'project',
+        "project",
       );
 
-      expect(config.name).toBe('test-skill');
-      expect(config.description).toBe('A test skill');
+      expect(config.name).toBe("test-skill");
+      expect(config.description).toBe("A test skill");
     });
 
-    it('should parse markdown when body is empty and file ends after frontmatter', () => {
+    it("should parse markdown when body is empty and file ends after frontmatter", () => {
       const frontmatterOnly = `---
 name: test-skill
 description: A test skill
@@ -180,15 +180,15 @@ description: A test skill
       const config = manager.parseSkillContent(
         frontmatterOnly,
         validSkillConfig.filePath,
-        'project',
+        "project",
       );
 
-      expect(config.name).toBe('test-skill');
-      expect(config.description).toBe('A test skill');
-      expect(config.body).toBe('');
+      expect(config.name).toBe("test-skill");
+      expect(config.description).toBe("A test skill");
+      expect(config.body).toBe("");
     });
 
-    it('should parse content with allowedTools', () => {
+    it("should parse content with allowedTools", () => {
       const markdownWithTools = `---
 name: test-skill
 description: A test skill
@@ -203,32 +203,32 @@ You are a helpful assistant with this skill.
       const config = manager.parseSkillContent(
         markdownWithTools,
         validSkillConfig.filePath,
-        'project',
+        "project",
       );
 
-      expect(config.allowedTools).toEqual(['read_file', 'write_file']);
+      expect(config.allowedTools).toEqual(["read_file", "write_file"]);
     });
 
-    it('should determine level from file path', () => {
-      const projectPath = '/test/project/.tram/skills/test-skill/SKILL.md';
-      const userPath = '/home/user/.tram/skills/test-skill/SKILL.md';
+    it("should determine level from file path", () => {
+      const projectPath = "/test/project/.tram/skills/test-skill/SKILL.md";
+      const userPath = "/home/user/.tram/skills/test-skill/SKILL.md";
 
       const projectConfig = manager.parseSkillContent(
         validMarkdown,
         projectPath,
-        'project',
+        "project",
       );
       const userConfig = manager.parseSkillContent(
         validMarkdown,
         userPath,
-        'user',
+        "user",
       );
 
-      expect(projectConfig.level).toBe('project');
-      expect(userConfig.level).toBe('user');
+      expect(projectConfig.level).toBe("project");
+      expect(userConfig.level).toBe("user");
     });
 
-    it('should throw error for invalid frontmatter format', () => {
+    it("should throw error for invalid frontmatter format", () => {
       const invalidMarkdown = `No frontmatter here
 Just content`;
 
@@ -236,12 +236,12 @@ Just content`;
         manager.parseSkillContent(
           invalidMarkdown,
           validSkillConfig.filePath,
-          'project',
+          "project",
         ),
       ).toThrow(SkillError);
     });
 
-    it('should throw error for missing name', () => {
+    it("should throw error for missing name", () => {
       const markdownWithoutName = `---
 description: A test skill
 ---
@@ -253,12 +253,12 @@ You are a helpful assistant.
         manager.parseSkillContent(
           markdownWithoutName,
           validSkillConfig.filePath,
-          'project',
+          "project",
         ),
       ).toThrow(SkillError);
     });
 
-    it('should throw error for missing description', () => {
+    it("should throw error for missing description", () => {
       const markdownWithoutDescription = `---
 name: test-skill
 ---
@@ -270,40 +270,40 @@ You are a helpful assistant.
         manager.parseSkillContent(
           markdownWithoutDescription,
           validSkillConfig.filePath,
-          'project',
+          "project",
         ),
       ).toThrow(SkillError);
     });
   });
 
-  describe('validateConfig', () => {
-    it('should validate valid configuration', () => {
+  describe("validateConfig", () => {
+    it("should validate valid configuration", () => {
       const result = manager.validateConfig(validSkillConfig);
 
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
-    it('should report error for missing name', () => {
-      const invalidConfig = { ...validSkillConfig, name: '' };
+    it("should report error for missing name", () => {
+      const invalidConfig = { ...validSkillConfig, name: "" };
       const result = manager.validateConfig(invalidConfig);
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toContain('"name" cannot be empty');
     });
 
-    it('should report error for missing description', () => {
-      const invalidConfig = { ...validSkillConfig, description: '' };
+    it("should report error for missing description", () => {
+      const invalidConfig = { ...validSkillConfig, description: "" };
       const result = manager.validateConfig(invalidConfig);
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toContain('"description" cannot be empty');
     });
 
-    it('should report error for invalid allowedTools type', () => {
+    it("should report error for invalid allowedTools type", () => {
       const invalidConfig = {
         ...validSkillConfig,
-        allowedTools: 'not-an-array' as unknown as string[],
+        allowedTools: "not-an-array" as unknown as string[],
       };
       const result = manager.validateConfig(invalidConfig);
 
@@ -311,20 +311,20 @@ You are a helpful assistant.
       expect(result.errors).toContain('"allowedTools" must be an array');
     });
 
-    it('should warn for empty body', () => {
-      const configWithEmptyBody = { ...validSkillConfig, body: '' };
+    it("should warn for empty body", () => {
+      const configWithEmptyBody = { ...validSkillConfig, body: "" };
       const result = manager.validateConfig(configWithEmptyBody);
 
       expect(result.isValid).toBe(true); // Still valid
-      expect(result.warnings).toContain('Skill body is empty');
+      expect(result.warnings).toContain("Skill body is empty");
     });
   });
 
-  describe('loadSkill', () => {
-    it('should load skill from project level first', async () => {
+  describe("loadSkill", () => {
+    it("should load skill from project level first", async () => {
       vi.mocked(fs.readdir).mockResolvedValue([
         {
-          name: 'test-skill',
+          name: "test-skill",
           isDirectory: () => true,
           isFile: () => false,
           isSymbolicLink: () => false,
@@ -333,18 +333,18 @@ You are a helpful assistant.
       vi.mocked(fs.access).mockResolvedValue(undefined);
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
 
-      const config = await manager.loadSkill('test-skill');
+      const config = await manager.loadSkill("test-skill");
 
       expect(config).toBeDefined();
-      expect(config!.name).toBe('test-skill');
+      expect(config!.name).toBe("test-skill");
     });
 
-    it('should fall back to user level if project level fails', async () => {
+    it("should fall back to user level if project level fails", async () => {
       vi.mocked(fs.readdir)
-        .mockRejectedValueOnce(new Error('Project dir not found')) // project level fails
+        .mockRejectedValueOnce(new Error("Project dir not found")) // project level fails
         .mockResolvedValueOnce([
           {
-            name: 'test-skill',
+            name: "test-skill",
             isDirectory: () => true,
             isFile: () => false,
             isSymbolicLink: () => false,
@@ -353,26 +353,26 @@ You are a helpful assistant.
       vi.mocked(fs.access).mockResolvedValue(undefined);
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown);
 
-      const config = await manager.loadSkill('test-skill');
+      const config = await manager.loadSkill("test-skill");
 
       expect(config).toBeDefined();
-      expect(config!.name).toBe('test-skill');
+      expect(config!.name).toBe("test-skill");
     });
 
-    it('should return null if not found at either level', async () => {
-      vi.mocked(fs.readdir).mockRejectedValue(new Error('Directory not found'));
+    it("should return null if not found at either level", async () => {
+      vi.mocked(fs.readdir).mockRejectedValue(new Error("Directory not found"));
 
-      const config = await manager.loadSkill('nonexistent');
+      const config = await manager.loadSkill("nonexistent");
 
       expect(config).toBeNull();
     });
   });
 
-  describe('loadSkillForRuntime', () => {
-    it('should load skill for runtime', async () => {
+  describe("loadSkillForRuntime", () => {
+    it("should load skill for runtime", async () => {
       vi.mocked(fs.readdir).mockResolvedValueOnce([
         {
-          name: 'test-skill',
+          name: "test-skill",
           isDirectory: () => true,
           isFile: () => false,
           isSymbolicLink: () => false,
@@ -382,31 +382,31 @@ You are a helpful assistant.
       vi.mocked(fs.access).mockResolvedValue(undefined);
       vi.mocked(fs.readFile).mockResolvedValue(validMarkdown); // SKILL.md
 
-      const config = await manager.loadSkillForRuntime('test-skill');
+      const config = await manager.loadSkillForRuntime("test-skill");
 
       expect(config).toBeDefined();
-      expect(config!.name).toBe('test-skill');
+      expect(config!.name).toBe("test-skill");
     });
 
-    it('should return null if skill not found', async () => {
-      vi.mocked(fs.readdir).mockRejectedValue(new Error('Directory not found'));
+    it("should return null if skill not found", async () => {
+      vi.mocked(fs.readdir).mockRejectedValue(new Error("Directory not found"));
 
-      const config = await manager.loadSkillForRuntime('nonexistent');
+      const config = await manager.loadSkillForRuntime("nonexistent");
 
       expect(config).toBeNull();
     });
   });
 
-  describe('listSkills', () => {
+  describe("listSkills", () => {
     beforeEach(() => {
       // Mock directory listing based on path to handle multiple base dirs per level.
       // Use path.join to construct expected paths so separators match on all platforms.
       const projectQwenSkillsDir = path.join(
-        '/test/project',
-        '.qwen',
-        'skills',
+        "/test/project",
+        ".tram",
+        "skills",
       );
-      const userQwenSkillsDir = path.join('/home/user', '.qwen', 'skills');
+      const userQwenSkillsDir = path.join("/home/user", ".tram", "skills");
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(fs.readdir).mockImplementation((dirPath: any) => {
@@ -414,19 +414,19 @@ You are a helpful assistant.
         if (pathStr === projectQwenSkillsDir) {
           return Promise.resolve([
             {
-              name: 'skill1',
+              name: "skill1",
               isDirectory: () => true,
               isFile: () => false,
               isSymbolicLink: () => false,
             },
             {
-              name: 'skill2',
+              name: "skill2",
               isDirectory: () => true,
               isFile: () => false,
               isSymbolicLink: () => false,
             },
             {
-              name: 'not-a-dir.txt',
+              name: "not-a-dir.txt",
               isDirectory: () => false,
               isFile: () => true,
               isSymbolicLink: () => false,
@@ -436,13 +436,13 @@ You are a helpful assistant.
         if (pathStr === userQwenSkillsDir) {
           return Promise.resolve([
             {
-              name: 'skill3',
+              name: "skill3",
               isDirectory: () => true,
               isFile: () => false,
               isSymbolicLink: () => false,
             },
             {
-              name: 'skill1',
+              name: "skill1",
               isDirectory: () => true,
               isFile: () => false,
               isSymbolicLink: () => false,
@@ -460,61 +460,61 @@ You are a helpful assistant.
       // Mock file reading for valid skills
       vi.mocked(fs.readFile).mockImplementation((filePath) => {
         const pathStr = String(filePath);
-        if (pathStr.includes('skill1')) {
+        if (pathStr.includes("skill1")) {
           return Promise.resolve(`---
 name: skill1
 description: First skill
 ---
 Skill 1 content`);
-        } else if (pathStr.includes('skill2')) {
+        } else if (pathStr.includes("skill2")) {
           return Promise.resolve(`---
 name: skill2
 description: Second skill
 ---
 Skill 2 content`);
-        } else if (pathStr.includes('skill3')) {
+        } else if (pathStr.includes("skill3")) {
           return Promise.resolve(`---
 name: skill3
 description: Third skill
 ---
 Skill 3 content`);
         }
-        return Promise.reject(new Error('File not found'));
+        return Promise.reject(new Error("File not found"));
       });
     });
 
-    it('should list skills from both levels', async () => {
+    it("should list skills from both levels", async () => {
       const skills = await manager.listSkills();
 
       expect(skills).toHaveLength(3); // skill1 (project takes precedence), skill2, skill3
       expect(skills.map((s) => s.name).sort()).toEqual([
-        'skill1',
-        'skill2',
-        'skill3',
+        "skill1",
+        "skill2",
+        "skill3",
       ]);
     });
 
-    it('should prioritize project level over user level', async () => {
+    it("should prioritize project level over user level", async () => {
       const skills = await manager.listSkills();
-      const skill1 = skills.find((s) => s.name === 'skill1');
+      const skill1 = skills.find((s) => s.name === "skill1");
 
-      expect(skill1!.level).toBe('project');
+      expect(skill1!.level).toBe("project");
     });
 
-    it('should filter by level', async () => {
+    it("should filter by level", async () => {
       const projectSkills = await manager.listSkills({
-        level: 'project',
+        level: "project",
       });
 
       expect(projectSkills).toHaveLength(2); // skill1, skill2
-      expect(projectSkills.every((s) => s.level === 'project')).toBe(true);
+      expect(projectSkills.every((s) => s.level === "project")).toBe(true);
     });
 
-    it('should deduplicate same-name skills across provider dirs within a level', async () => {
-      // Override readdir to return the same skill name from both .qwen and .agents dirs
+    it("should deduplicate same-name skills across provider dirs within a level", async () => {
+      // Override readdir to return the same skill name from both .tram and .agents dirs
       vi.mocked(fs.readdir).mockReset();
-      const projectQwenDir = path.join('/test/project', '.qwen', 'skills');
-      const projectAgentDir = path.join('/test/project', '.agents', 'skills');
+      const projectQwenDir = path.join("/test/project", ".tram", "skills");
+      const projectAgentDir = path.join("/test/project", ".agents", "skills");
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(fs.readdir).mockImplementation((dirPath: any) => {
@@ -522,7 +522,7 @@ Skill 3 content`);
         if (pathStr === projectQwenDir) {
           return Promise.resolve([
             {
-              name: 'shared-skill',
+              name: "shared-skill",
               isDirectory: () => true,
               isFile: () => false,
               isSymbolicLink: () => false,
@@ -532,7 +532,7 @@ Skill 3 content`);
         if (pathStr === projectAgentDir) {
           return Promise.resolve([
             {
-              name: 'shared-skill',
+              name: "shared-skill",
               isDirectory: () => true,
               isFile: () => false,
               isSymbolicLink: () => false,
@@ -546,31 +546,31 @@ Skill 3 content`);
 
       vi.mocked(fs.readFile).mockImplementation((filePath) => {
         const pathStr = String(filePath);
-        if (pathStr.includes('.qwen') && pathStr.includes('shared-skill')) {
+        if (pathStr.includes(".tram") && pathStr.includes("shared-skill")) {
           return Promise.resolve(
             `---\nname: shared-skill\ndescription: From qwen dir\n---\nQwen content`,
           );
         }
-        if (pathStr.includes('.agents') && pathStr.includes('shared-skill')) {
+        if (pathStr.includes(".agents") && pathStr.includes("shared-skill")) {
           return Promise.resolve(
             `---\nname: shared-skill\ndescription: From agents dir\n---\nAgents content`,
           );
         }
-        return Promise.reject(new Error('File not found'));
+        return Promise.reject(new Error("File not found"));
       });
 
       const skills = await manager.listSkills({
-        level: 'project',
+        level: "project",
         force: true,
       });
 
-      // Only one instance should remain, from .qwen (first in PROVIDER_CONFIG_DIRS)
+      // Only one instance should remain, from .tram (first in PROVIDER_CONFIG_DIRS)
       expect(skills).toHaveLength(1);
-      expect(skills[0].name).toBe('shared-skill');
-      expect(skills[0].description).toBe('From qwen dir');
+      expect(skills[0].name).toBe("shared-skill");
+      expect(skills[0].description).toBe("From qwen dir");
     });
 
-    it('should handle empty directories', async () => {
+    it("should handle empty directories", async () => {
       vi.mocked(fs.readdir).mockReset();
       vi.mocked(fs.readdir).mockResolvedValue(
         [] as unknown as Awaited<ReturnType<typeof fs.readdir>>,
@@ -581,9 +581,9 @@ Skill 3 content`);
       expect(skills).toHaveLength(0);
     });
 
-    it('should handle directory read errors', async () => {
+    it("should handle directory read errors", async () => {
       vi.mocked(fs.readdir).mockReset();
-      vi.mocked(fs.readdir).mockRejectedValue(new Error('Directory not found'));
+      vi.mocked(fs.readdir).mockRejectedValue(new Error("Directory not found"));
 
       const skills = await manager.listSkills({ force: true });
 
@@ -591,47 +591,47 @@ Skill 3 content`);
     });
   });
 
-  describe('getSkillsBaseDirs', () => {
-    it('should return all project-level base dirs', () => {
-      const baseDirs = manager.getSkillsBaseDirs('project');
+  describe("getSkillsBaseDirs", () => {
+    it("should return all project-level base dirs", () => {
+      const baseDirs = manager.getSkillsBaseDirs("project");
 
       expect(baseDirs).toHaveLength(2);
-      expect(baseDirs).toContain(path.join('/test/project', '.qwen', 'skills'));
+      expect(baseDirs).toContain(path.join("/test/project", ".tram", "skills"));
       expect(baseDirs).toContain(
-        path.join('/test/project', '.agents', 'skills'),
+        path.join("/test/project", ".agents", "skills"),
       );
     });
 
-    it('should return all user-level base dirs', () => {
-      const baseDirs = manager.getSkillsBaseDirs('user');
+    it("should return all user-level base dirs", () => {
+      const baseDirs = manager.getSkillsBaseDirs("user");
 
       expect(baseDirs).toHaveLength(2);
-      expect(baseDirs).toContain(path.join('/home/user', '.qwen', 'skills'));
-      expect(baseDirs).toContain(path.join('/home/user', '.agents', 'skills'));
+      expect(baseDirs).toContain(path.join("/home/user", ".tram", "skills"));
+      expect(baseDirs).toContain(path.join("/home/user", ".agents", "skills"));
     });
 
-    it('should return bundled-level base dir', () => {
-      const baseDirs = manager.getSkillsBaseDirs('bundled');
+    it("should return bundled-level base dir", () => {
+      const baseDirs = manager.getSkillsBaseDirs("bundled");
 
       expect(baseDirs[0]).toMatch(/skills[/\\]bundled$/);
     });
 
-    it('should throw for extension level', () => {
-      expect(() => manager.getSkillsBaseDirs('extension')).toThrow(
-        'Extension skills do not have a base directory',
+    it("should throw for extension level", () => {
+      expect(() => manager.getSkillsBaseDirs("extension")).toThrow(
+        "Extension skills do not have a base directory",
       );
     });
   });
 
-  describe('bundled skills', () => {
-    const bundledDirSegment = path.join('skills', 'bundled');
-    const projectDirSegment = path.join('.tram', 'skills');
-    const userDirSegment = path.join('.tram', 'skills');
-    const projectPrefix = path.join('/test/project');
-    const userPrefix = path.join('/home/user');
+  describe("bundled skills", () => {
+    const bundledDirSegment = path.join("skills", "bundled");
+    const projectDirSegment = path.join(".tram", "skills");
+    const userDirSegment = path.join(".tram", "skills");
+    const projectPrefix = path.join("/test/project");
+    const userPrefix = path.join("/home/user");
 
     const reviewDirEntry = {
-      name: 'review',
+      name: "review",
       isDirectory: () => true,
       isFile: () => false,
       isSymbolicLink: () => false,
@@ -643,7 +643,7 @@ Skill 3 content`);
       vi.mocked(fs.readdir).mockImplementation((dirPath) => {
         const pathStr = String(dirPath);
         const isBundled =
-          pathStr.endsWith(bundledDirSegment) && !pathStr.includes('.tram');
+          pathStr.endsWith(bundledDirSegment) && !pathStr.includes(".tram");
         const isProject =
           pathStr.includes(projectDirSegment) &&
           pathStr.startsWith(projectPrefix);
@@ -651,9 +651,9 @@ Skill 3 content`);
           pathStr.includes(userDirSegment) && pathStr.startsWith(userPrefix);
 
         if (
-          (levels.has('bundled') && isBundled) ||
-          (levels.has('project') && isProject) ||
-          (levels.has('user') && isUser)
+          (levels.has("bundled") && isBundled) ||
+          (levels.has("project") && isProject) ||
+          (levels.has("user") && isUser)
         ) {
           return Promise.resolve([reviewDirEntry] as unknown as Awaited<
             ReturnType<typeof fs.readdir>
@@ -672,59 +672,59 @@ description: Review code changes
 Review content`);
 
       mockParseYaml.mockReturnValue({
-        name: 'review',
-        description: 'Review code changes',
+        name: "review",
+        description: "Review code changes",
       });
     }
 
-    it('should load bundled skills in listSkills', async () => {
-      mockReaddirForLevels(new Set(['bundled']));
+    it("should load bundled skills in listSkills", async () => {
+      mockReaddirForLevels(new Set(["bundled"]));
       setupReviewSkillMocks();
 
       const skills = await manager.listSkills({ force: true });
 
-      expect(skills.some((s) => s.name === 'review')).toBe(true);
-      const reviewSkill = skills.find((s) => s.name === 'review');
-      expect(reviewSkill!.level).toBe('bundled');
+      expect(skills.some((s) => s.name === "review")).toBe(true);
+      const reviewSkill = skills.find((s) => s.name === "review");
+      expect(reviewSkill!.level).toBe("bundled");
     });
 
-    it('should prioritize project-level over bundled skills with same name', async () => {
-      mockReaddirForLevels(new Set(['project', 'bundled']));
+    it("should prioritize project-level over bundled skills with same name", async () => {
+      mockReaddirForLevels(new Set(["project", "bundled"]));
       setupReviewSkillMocks();
 
       const skills = await manager.listSkills({ force: true });
 
-      const reviewSkills = skills.filter((s) => s.name === 'review');
+      const reviewSkills = skills.filter((s) => s.name === "review");
       expect(reviewSkills).toHaveLength(1);
-      expect(reviewSkills[0].level).toBe('project');
+      expect(reviewSkills[0].level).toBe("project");
     });
 
-    it('should prioritize user-level over bundled skills with same name', async () => {
-      mockReaddirForLevels(new Set(['user', 'bundled']));
+    it("should prioritize user-level over bundled skills with same name", async () => {
+      mockReaddirForLevels(new Set(["user", "bundled"]));
       setupReviewSkillMocks();
 
       const skills = await manager.listSkills({ force: true });
 
-      const reviewSkills = skills.filter((s) => s.name === 'review');
+      const reviewSkills = skills.filter((s) => s.name === "review");
       expect(reviewSkills).toHaveLength(1);
-      expect(reviewSkills[0].level).toBe('user');
+      expect(reviewSkills[0].level).toBe("user");
     });
 
-    it('should fall back to bundled level in loadSkill', async () => {
+    it("should fall back to bundled level in loadSkill", async () => {
       // Project, user, extension all empty; bundled has the skill
-      mockReaddirForLevels(new Set(['bundled']));
+      mockReaddirForLevels(new Set(["bundled"]));
       setupReviewSkillMocks();
 
-      const skill = await manager.loadSkill('review');
+      const skill = await manager.loadSkill("review");
 
       expect(skill).toBeDefined();
-      expect(skill!.name).toBe('review');
-      expect(skill!.level).toBe('bundled');
+      expect(skill!.name).toBe("review");
+      expect(skill!.level).toBe("bundled");
     });
   });
 
-  describe('change listeners', () => {
-    it('should notify listeners when cache is refreshed', async () => {
+  describe("change listeners", () => {
+    it("should notify listeners when cache is refreshed", async () => {
       const listener = vi.fn();
       manager.addChangeListener(listener);
 
@@ -737,7 +737,7 @@ Review content`);
       expect(listener).toHaveBeenCalled();
     });
 
-    it('should remove listener when cleanup function is called', async () => {
+    it("should remove listener when cleanup function is called", async () => {
       const listener = vi.fn();
       const removeListener = manager.addChangeListener(listener);
 
@@ -753,11 +753,11 @@ Review content`);
     });
   });
 
-  describe('parse errors', () => {
-    it('should track parse errors', async () => {
+  describe("parse errors", () => {
+    it("should track parse errors", async () => {
       vi.mocked(fs.readdir).mockResolvedValue([
         {
-          name: 'bad-skill',
+          name: "bad-skill",
           isDirectory: () => true,
           isFile: () => false,
           isSymbolicLink: () => false,
@@ -765,7 +765,7 @@ Review content`);
       ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
       vi.mocked(fs.access).mockResolvedValue(undefined);
       vi.mocked(fs.readFile).mockResolvedValue(
-        'invalid content without frontmatter',
+        "invalid content without frontmatter",
       );
 
       await manager.listSkills({ force: true });
@@ -775,11 +775,11 @@ Review content`);
     });
   });
 
-  describe('symlink support', () => {
-    it('should load skills from symlinked directories', async () => {
+  describe("symlink support", () => {
+    it("should load skills from symlinked directories", async () => {
       vi.mocked(fs.readdir).mockResolvedValue([
         {
-          name: 'symlink-skill',
+          name: "symlink-skill",
           isDirectory: () => false,
           isSymbolicLink: () => true,
           isFile: () => false,
@@ -801,14 +801,14 @@ Symlink skill content`);
       const skills = await manager.listSkills({ force: true });
 
       expect(skills).toHaveLength(1);
-      expect(skills[0].name).toBe('symlink-skill');
-      expect(skills[0].description).toBe('A skill loaded from symlink');
+      expect(skills[0].name).toBe("symlink-skill");
+      expect(skills[0].description).toBe("A skill loaded from symlink");
     });
 
-    it('should skip symlinks that point to non-directory targets', async () => {
+    it("should skip symlinks that point to non-directory targets", async () => {
       vi.mocked(fs.readdir).mockResolvedValue([
         {
-          name: 'bad-symlink',
+          name: "bad-symlink",
           isDirectory: () => false,
           isSymbolicLink: () => true,
           isFile: () => false,
@@ -825,10 +825,10 @@ Symlink skill content`);
       expect(skills).toHaveLength(0);
     });
 
-    it('should skip broken/invalid symlinks', async () => {
+    it("should skip broken/invalid symlinks", async () => {
       vi.mocked(fs.readdir).mockResolvedValue([
         {
-          name: 'broken-symlink',
+          name: "broken-symlink",
           isDirectory: () => false,
           isSymbolicLink: () => true,
           isFile: () => false,
@@ -837,7 +837,7 @@ Symlink skill content`);
 
       // Mock fs.stat to throw error (symlink target doesn't exist)
       vi.mocked(fs.stat).mockRejectedValue(
-        new Error('ENOENT: no such file or directory'),
+        new Error("ENOENT: no such file or directory"),
       );
 
       const skills = await manager.listSkills({ force: true });
@@ -845,16 +845,16 @@ Symlink skill content`);
       expect(skills).toHaveLength(0);
     });
 
-    it('should load skills from both regular directories and symlinks', async () => {
+    it("should load skills from both regular directories and symlinks", async () => {
       vi.mocked(fs.readdir).mockResolvedValue([
         {
-          name: 'regular-skill',
+          name: "regular-skill",
           isDirectory: () => true,
           isSymbolicLink: () => false,
           isFile: () => false,
         },
         {
-          name: 'symlink-skill',
+          name: "symlink-skill",
           isDirectory: () => false,
           isSymbolicLink: () => true,
           isFile: () => false,
@@ -869,28 +869,28 @@ Symlink skill content`);
       vi.mocked(fs.access).mockResolvedValue(undefined);
       vi.mocked(fs.readFile).mockImplementation((filePath) => {
         const pathStr = String(filePath);
-        if (pathStr.includes('regular-skill')) {
+        if (pathStr.includes("regular-skill")) {
           return Promise.resolve(`---
 name: regular-skill
 description: A regular skill
 ---
 Regular skill content`);
-        } else if (pathStr.includes('symlink-skill')) {
+        } else if (pathStr.includes("symlink-skill")) {
           return Promise.resolve(`---
 name: symlink-skill
 description: A symlinked skill
 ---
 Symlinked skill content`);
         }
-        return Promise.reject(new Error('File not found'));
+        return Promise.reject(new Error("File not found"));
       });
 
       const skills = await manager.listSkills({ force: true });
 
       expect(skills).toHaveLength(2);
       expect(skills.map((s) => s.name).sort()).toEqual([
-        'regular-skill',
-        'symlink-skill',
+        "regular-skill",
+        "symlink-skill",
       ]);
     });
   });

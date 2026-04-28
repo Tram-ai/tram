@@ -31,12 +31,12 @@ export const MAX_TOTAL_IMAGE_SIZE = 20 * 1024 * 1024;
 export const SHELL_SPECIAL_CHARS = /[ \t()[\]{};|*?$`'"#&<>!~]/;
 
 export function escapePath(filePath: string): string {
-  let result = '';
+  let result = "";
   for (let i = 0; i < filePath.length; i += 1) {
     const char = filePath[i];
 
     let backslashCount = 0;
-    for (let j = i - 1; j >= 0 && filePath[j] === '\\'; j -= 1) {
+    for (let j = i - 1; j >= 0 && filePath[j] === "\\"; j -= 1) {
       backslashCount += 1;
     }
 
@@ -54,21 +54,21 @@ export function escapePath(filePath: string): string {
 
 export function unescapePath(filePath: string): string {
   return filePath.replace(
-    new RegExp(`\\\\([${SHELL_SPECIAL_CHARS.source.slice(1, -1)}])`, 'g'),
-    '$1',
+    new RegExp(`\\\\([${SHELL_SPECIAL_CHARS.source.slice(1, -1)}])`, "g"),
+    "$1",
   );
 }
 
 // ---------- Image format detection ----------
 
 const PASTED_IMAGE_MIME_TO_EXTENSION: Record<string, string> = {
-  'image/bmp': '.bmp',
-  'image/heic': '.heic',
-  'image/jpeg': '.jpg',
-  'image/jpg': '.jpg',
-  'image/png': '.png',
-  'image/tiff': '.tiff',
-  'image/webp': '.webp',
+  "image/bmp": ".bmp",
+  "image/heic": ".heic",
+  "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/png": ".png",
+  "image/tiff": ".tiff",
+  "image/webp": ".webp",
 };
 
 // Keep this list aligned with packages/core/src/utils/request-tokenizer/supportedImageFormats.ts.
@@ -77,15 +77,15 @@ export const SUPPORTED_PASTED_IMAGE_MIME_TYPES = new Set(
 );
 
 const DISPLAYABLE_IMAGE_EXTENSION_TO_MIME: Record<string, string> = {
-  '.bmp': 'image/bmp',
-  '.gif': 'image/gif',
-  '.heic': 'image/heic',
-  '.heif': 'image/heif',
-  '.jpeg': 'image/jpeg',
-  '.jpg': 'image/jpeg',
-  '.png': 'image/png',
-  '.tiff': 'image/tiff',
-  '.webp': 'image/webp',
+  ".bmp": "image/bmp",
+  ".gif": "image/gif",
+  ".heic": "image/heic",
+  ".heif": "image/heif",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".png": "image/png",
+  ".tiff": "image/tiff",
+  ".webp": "image/webp",
 };
 
 export function isSupportedPastedImageMimeType(mimeType: string): boolean {
@@ -93,14 +93,14 @@ export function isSupportedPastedImageMimeType(mimeType: string): boolean {
 }
 
 export function getImageExtensionForMimeType(mimeType: string): string {
-  return PASTED_IMAGE_MIME_TO_EXTENSION[mimeType] ?? '.png';
+  return PASTED_IMAGE_MIME_TO_EXTENSION[mimeType] ?? ".png";
 }
 
 export function getDisplayableImageMimeType(
   filePath: string,
 ): string | undefined {
   const lowerPath = filePath.toLowerCase();
-  const extensionIndex = lowerPath.lastIndexOf('.');
+  const extensionIndex = lowerPath.lastIndexOf(".");
   if (extensionIndex === -1) {
     return undefined;
   }
@@ -127,9 +127,9 @@ function extractBase64Payload(data: string): string | null {
 }
 
 function getDecodedByteSize(base64Payload: string): number {
-  const padding = base64Payload.endsWith('==')
+  const padding = base64Payload.endsWith("==")
     ? 2
-    : base64Payload.endsWith('=')
+    : base64Payload.endsWith("=")
       ? 1
       : 0;
   return Math.floor((base64Payload.length * 3) / 4) - padding;

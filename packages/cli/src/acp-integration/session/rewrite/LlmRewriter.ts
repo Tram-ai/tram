@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-import type { Config } from '@qwen-code/qwen-code-core';
-import { createDebugLogger } from '@qwen-code/qwen-code-core';
-import type { TurnContent, MessageRewriteConfig } from './types.js';
+import { readFileSync, existsSync } from "node:fs";
+import { resolve } from "node:path";
+import type { Config } from "@tram-ai/tram-core";
+import { createDebugLogger } from "@tram-ai/tram-core";
+import type { TurnContent, MessageRewriteConfig } from "./types.js";
 
-const debugLogger = createDebugLogger('MESSAGE_REWRITER');
+const debugLogger = createDebugLogger("MESSAGE_REWRITER");
 
 const DEFAULT_REWRITE_PROMPT = `You are an assistant that rewrites raw coding-agent output into concise, user-friendly progress updates.
 
@@ -51,14 +51,14 @@ export class LlmRewriter {
   ) {
     this.rewriteModel = rewriteConfig.model || undefined;
     this.contextTurns =
-      rewriteConfig.contextTurns === 'all'
+      rewriteConfig.contextTurns === "all"
         ? Infinity
         : (rewriteConfig.contextTurns ?? 1);
     // promptFile takes precedence over inline prompt
     if (rewriteConfig.promptFile) {
       const filePath = resolve(rewriteConfig.promptFile);
       if (existsSync(filePath)) {
-        this.prompt = readFileSync(filePath, 'utf-8').trim();
+        this.prompt = readFileSync(filePath, "utf-8").trim();
         debugLogger.info(
           `Loaded rewrite prompt from file: ${filePath} (${this.prompt.length} chars)`,
         );
@@ -85,10 +85,10 @@ export class LlmRewriter {
     const inputParts: string[] = [];
 
     if (turnContent.thoughts.length > 0) {
-      inputParts.push('[内部推理]\n' + turnContent.thoughts.join('\n'));
+      inputParts.push("[内部推理]\n" + turnContent.thoughts.join("\n"));
     }
     if (turnContent.messages.length > 0) {
-      inputParts.push('[回复文本]\n' + turnContent.messages.join('\n'));
+      inputParts.push("[回复文本]\n" + turnContent.messages.join("\n"));
     }
 
     // Prepend previous rewrite outputs as context for coherence
@@ -97,10 +97,10 @@ export class LlmRewriter {
         this.contextTurns === Infinity
           ? this.outputHistory
           : this.outputHistory.slice(-this.contextTurns);
-      inputParts.unshift('[上一轮改写结果]\n' + contextSlice.join('\n---\n'));
+      inputParts.unshift("[上一轮改写结果]\n" + contextSlice.join("\n---\n"));
     }
 
-    const inputText = inputParts.join('\n\n');
+    const inputText = inputParts.join("\n\n");
     if (!inputText.trim()) return null;
 
     // Skip very short turns that are likely just transitions
@@ -114,7 +114,7 @@ export class LlmRewriter {
     try {
       const contentGenerator = this.config.getContentGenerator();
       if (!contentGenerator) {
-        debugLogger.warn('No content generator available for rewriting');
+        debugLogger.warn("No content generator available for rewriting");
         return null;
       }
 
@@ -133,7 +133,7 @@ export class LlmRewriter {
           },
           contents: [
             {
-              role: 'user',
+              role: "user",
               parts: [{ text: inputText }],
             },
           ],
@@ -147,7 +147,7 @@ export class LlmRewriter {
           ?.filter((p) => !p.thought)
           .map((p) => p.text)
           .filter(Boolean)
-          .join('') ?? '';
+          .join("") ?? "";
 
       // If LLM returns empty or very short, skip
       if (!rewritten.trim() || rewritten.trim().length < 5) {

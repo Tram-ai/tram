@@ -3,7 +3,7 @@ export interface RumApp {
   id: string;
   env: string;
   version: string;
-  type: 'cli' | 'extension';
+  type: "cli" | "extension";
   channel?: string;
 }
 
@@ -37,7 +37,7 @@ export interface RumDevice {
 
 export interface RumEvent {
   timestamp?: number;
-  event_type?: 'view' | 'action' | 'exception' | 'resource';
+  event_type?: "view" | "action" | "exception" | "resource";
   type: string; // Event type
   name: string; // Event name
   snapshots?: string; // JSON string of event snapshots

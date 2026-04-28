@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 import type {
   Config,
   ToolCallRequestInfo,
@@ -13,13 +13,13 @@ import type {
   ServerGeminiStreamEvent,
   AgentResultDisplay,
   McpToolProgressData,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import {
   GeminiEventType,
   ToolErrorType,
   parseAndFormatApiError,
-} from '@tram-ai/tram-core';
-import type { Part, GenerateContentResponseUsageMetadata } from '@google/genai';
+} from "@tram-ai/tram-core";
+import type { Part, GenerateContentResponseUsageMetadata } from "@google/genai";
 import type {
   CLIAssistantMessage,
   CLIMessage,
@@ -35,8 +35,8 @@ import type {
   ToolResultBlock,
   ToolUseBlock,
   Usage,
-} from '../types.js';
-import { functionResponsePartsToString } from '../../utils/nonInteractiveHelpers.js';
+} from "../types.js";
+import { functionResponsePartsToString } from "../../utils/nonInteractiveHelpers.js";
 
 /**
  * Internal state for managing a single message context (main agent or subagent).
@@ -48,7 +48,7 @@ export interface MessageState {
   usage: Usage;
   messageStarted: boolean;
   finalized: boolean;
-  currentBlockType: ContentBlock['type'] | null;
+  currentBlockType: ContentBlock["type"] | null;
 }
 
 /**
@@ -110,7 +110,7 @@ export interface JsonOutputAdapterInterface extends MessageEmitter {
 
   startSubagentAssistantMessage?(parentToolUseId: string): void;
   processSubagentToolCall?(
-    toolCall: NonNullable<AgentResultDisplay['toolCalls']>[number],
+    toolCall: NonNullable<AgentResultDisplay["toolCalls"]>[number],
     parentToolUseId: string,
   ): void;
   finalizeSubagentAssistantMessage?(
@@ -202,16 +202,16 @@ export abstract class BaseJsonOutputAdapter {
       return usage;
     }
 
-    if (typeof metadata.promptTokenCount === 'number') {
+    if (typeof metadata.promptTokenCount === "number") {
       usage.input_tokens = metadata.promptTokenCount;
     }
-    if (typeof metadata.candidatesTokenCount === 'number') {
+    if (typeof metadata.candidatesTokenCount === "number") {
       usage.output_tokens = metadata.candidatesTokenCount;
     }
-    if (typeof metadata.cachedContentTokenCount === 'number') {
+    if (typeof metadata.cachedContentTokenCount === "number") {
       usage.cache_read_input_tokens = metadata.cachedContentTokenCount;
     }
-    if (typeof metadata.totalTokenCount === 'number') {
+    if (typeof metadata.totalTokenCount === "number") {
       usage.total_tokens = metadata.totalTokenCount;
     }
 
@@ -228,7 +228,7 @@ export abstract class BaseJsonOutputAdapter {
     const state = this.getMessageState(parentToolUseId);
 
     if (!state.messageId) {
-      throw new Error('Message not started');
+      throw new Error("Message not started");
     }
 
     // Enforce constraint: assistant message must contain only a single type of ContentBlock
@@ -236,7 +236,7 @@ export abstract class BaseJsonOutputAdapter {
       const blockTypes = new Set(state.blocks.map((block) => block.type));
       if (blockTypes.size > 1) {
         throw new Error(
-          `Assistant message must contain only one type of ContentBlock, found: ${Array.from(blockTypes).join(', ')}`,
+          `Assistant message must contain only one type of ContentBlock, found: ${Array.from(blockTypes).join(", ")}`,
         );
       }
     }
@@ -245,20 +245,20 @@ export abstract class BaseJsonOutputAdapter {
     // If the message contains only tool_use blocks, set stop_reason to 'tool_use'
     const stopReason =
       state.blocks.length > 0 &&
-      state.blocks.every((block) => block.type === 'tool_use')
-        ? 'tool_use'
+      state.blocks.every((block) => block.type === "tool_use")
+        ? "tool_use"
         : null;
 
     return {
-      type: 'assistant',
+      type: "assistant",
       uuid: state.messageId,
       session_id: this.config.getSessionId(),
       parent_tool_use_id: parentToolUseId,
       message: {
         id: state.messageId,
-        type: 'message',
-        role: 'assistant',
-        model: this.config.getModel(),
+        type: "message",
+        role: "assistant",
+        model: this.config.getModelName(),
         content: state.blocks,
         stop_reason: stopReason,
         usage: state.usage,
@@ -287,7 +287,7 @@ export abstract class BaseJsonOutputAdapter {
       return;
     }
 
-    if (lastBlock.type === 'text' || lastBlock.type === 'thinking') {
+    if (lastBlock.type === "text" || lastBlock.type === "thinking") {
       this.onBlockClosed(state, index, actualParentToolUseId);
       this.closeBlock(state, index);
     }
@@ -333,7 +333,7 @@ export abstract class BaseJsonOutputAdapter {
    */
   protected ensureBlockTypeConsistency(
     state: MessageState,
-    targetType: ContentBlock['type'],
+    targetType: ContentBlock["type"],
     parentToolUseId: string | null,
   ): void {
     if (state.currentBlockType === targetType) {
@@ -598,7 +598,7 @@ export abstract class BaseJsonOutputAdapter {
         this.appendText(state, event.value, null);
         break;
       case GeminiEventType.Citation:
-        if (typeof event.value === 'string') {
+        if (typeof event.value === "string") {
           this.appendText(state, `\n${event.value}`, null);
         }
         break;
@@ -693,15 +693,15 @@ export abstract class BaseJsonOutputAdapter {
    * @param parentToolUseId - Parent tool use ID
    */
   processSubagentToolCall(
-    toolCall: NonNullable<AgentResultDisplay['toolCalls']>[number],
+    toolCall: NonNullable<AgentResultDisplay["toolCalls"]>[number],
     parentToolUseId: string,
   ): void {
     const state = this.getMessageState(parentToolUseId);
 
     // Finalize any pending text message before starting tool_use
     const hasText =
-      state.blocks.some((b) => b.type === 'text') ||
-      (state.currentBlockType === 'text' && state.blocks.length > 0);
+      state.blocks.some((b) => b.type === "text") ||
+      (state.currentBlockType === "text" && state.blocks.length > 0);
     if (hasText) {
       this.finalizeSubagentAssistantMessage(parentToolUseId);
       this.startSubagentAssistantMessage(parentToolUseId);
@@ -712,7 +712,7 @@ export abstract class BaseJsonOutputAdapter {
       this.startAssistantMessageInternal(state);
     }
 
-    this.ensureBlockTypeConsistency(state, 'tool_use', parentToolUseId);
+    this.ensureBlockTypeConsistency(state, "tool_use", parentToolUseId);
     this.ensureMessageStarted(state, parentToolUseId);
     this.finalizePendingBlocks(state, parentToolUseId);
 
@@ -744,12 +744,12 @@ export abstract class BaseJsonOutputAdapter {
   protected processSubagentToolUseBlock(
     state: MessageState,
     index: number,
-    toolCall: NonNullable<AgentResultDisplay['toolCalls']>[number],
+    toolCall: NonNullable<AgentResultDisplay["toolCalls"]>[number],
     parentToolUseId: string,
   ): void {
     // Emit tool_use block creation event (with empty input)
     const startBlock: ToolUseBlock = {
-      type: 'tool_use',
+      type: "tool_use",
       id: toolCall.callId,
       name: toolCall.name,
       input: {},
@@ -789,15 +789,15 @@ export abstract class BaseJsonOutputAdapter {
       return;
     }
 
-    this.ensureBlockTypeConsistency(state, 'text', parentToolUseId);
+    this.ensureBlockTypeConsistency(state, "text", parentToolUseId);
     this.ensureMessageStarted(state, parentToolUseId);
 
     let current = state.blocks[state.blocks.length - 1] as
       | TextBlock
       | undefined;
-    const isNewBlock = !current || current.type !== 'text';
+    const isNewBlock = !current || current.type !== "text";
     if (isNewBlock) {
-      current = { type: 'text', text: '' } satisfies TextBlock;
+      current = { type: "text", text: "" } satisfies TextBlock;
       const index = state.blocks.length;
       state.blocks.push(current);
       this.openBlock(state, index, current);
@@ -837,22 +837,22 @@ export abstract class BaseJsonOutputAdapter {
       parts.push(description);
     }
 
-    const fragment = parts.join(': ');
+    const fragment = parts.join(": ");
     if (!fragment) {
       return;
     }
 
-    this.ensureBlockTypeConsistency(state, 'thinking', actualParentToolUseId);
+    this.ensureBlockTypeConsistency(state, "thinking", actualParentToolUseId);
     this.ensureMessageStarted(state, actualParentToolUseId);
 
     let current = state.blocks[state.blocks.length - 1] as
       | ThinkingBlock
       | undefined;
-    const isNewBlock = !current || current.type !== 'thinking';
+    const isNewBlock = !current || current.type !== "thinking";
     if (isNewBlock) {
       current = {
-        type: 'thinking',
-        thinking: '',
+        type: "thinking",
+        thinking: "",
         signature: subject,
       } satisfies ThinkingBlock;
       const index = state.blocks.length;
@@ -862,7 +862,7 @@ export abstract class BaseJsonOutputAdapter {
     }
 
     // current is guaranteed to be defined here (either existing or newly created)
-    current!.thinking = `${current!.thinking ?? ''}${fragment}`;
+    current!.thinking = `${current!.thinking ?? ""}${fragment}`;
     const index = state.blocks.length - 1;
     this.onThinkingAppended(state, index, fragment, actualParentToolUseId);
   }
@@ -880,13 +880,13 @@ export abstract class BaseJsonOutputAdapter {
     request: ToolCallRequestInfo,
     parentToolUseId: string | null,
   ): void {
-    this.ensureBlockTypeConsistency(state, 'tool_use', parentToolUseId);
+    this.ensureBlockTypeConsistency(state, "tool_use", parentToolUseId);
     this.ensureMessageStarted(state, parentToolUseId);
     this.finalizePendingBlocks(state, parentToolUseId);
 
     const index = state.blocks.length;
     const block: ToolUseBlock = {
-      type: 'tool_use',
+      type: "tool_use",
       id: request.callId,
       name: request.name,
       input: request.args,
@@ -896,7 +896,7 @@ export abstract class BaseJsonOutputAdapter {
 
     // Emit tool_use block creation event (with empty input)
     const startBlock: ToolUseBlock = {
-      type: 'tool_use',
+      type: "tool_use",
       id: request.callId,
       name: request.name,
       input: {},
@@ -937,12 +937,12 @@ export abstract class BaseJsonOutputAdapter {
    */
   protected createSubagentToolUseBlock(
     state: MessageState,
-    toolCall: NonNullable<AgentResultDisplay['toolCalls']>[number],
+    toolCall: NonNullable<AgentResultDisplay["toolCalls"]>[number],
     _parentToolUseId: string,
   ): { block: ToolUseBlock; index: number } {
     const index = state.blocks.length;
     const block: ToolUseBlock = {
-      type: 'tool_use',
+      type: "tool_use",
       id: toolCall.callId,
       name: toolCall.name,
       input: toolCall.args || {},
@@ -960,12 +960,12 @@ export abstract class BaseJsonOutputAdapter {
   emitUserMessage(parts: Part[], parentToolUseId?: string | null): void {
     const content = partsToContentBlock(parts);
     const message: CLIUserMessage = {
-      type: 'user',
+      type: "user",
       uuid: randomUUID(),
       session_id: this.getSessionId(),
       parent_tool_use_id: parentToolUseId ?? null,
       message: {
-        role: 'user',
+        role: "user",
         content,
       },
     };
@@ -1022,7 +1022,7 @@ export abstract class BaseJsonOutputAdapter {
     }
 
     const block: ToolResultBlock = {
-      type: 'tool_result',
+      type: "tool_result",
       tool_use_id: request.callId,
       is_error: hasError,
     };
@@ -1032,12 +1032,12 @@ export abstract class BaseJsonOutputAdapter {
     }
 
     const message: CLIUserMessage = {
-      type: 'user',
+      type: "user",
       uuid: randomUUID(),
       session_id: this.getSessionId(),
       parent_tool_use_id: parentToolUseId,
       message: {
-        role: 'user',
+        role: "user",
         content: [block],
       },
     };
@@ -1051,7 +1051,7 @@ export abstract class BaseJsonOutputAdapter {
    */
   emitSystemMessage(subtype: string, data?: unknown): void {
     const systemMessage = {
-      type: 'system',
+      type: "system",
       subtype,
       uuid: randomUUID(),
       session_id: this.getSessionId(),
@@ -1094,18 +1094,18 @@ export abstract class BaseJsonOutputAdapter {
       options.summary ??
       (lastAssistantMessage
         ? extractTextFromBlocks(lastAssistantMessage.message.content)
-        : '');
+        : "");
 
     const baseUuid = randomUUID();
     const baseSessionId = this.getSessionId();
 
     if (options.isError) {
-      const errorMessage = options.errorMessage ?? 'Unknown error';
+      const errorMessage = options.errorMessage ?? "Unknown error";
       return {
-        type: 'result',
+        type: "result",
         subtype:
-          (options.subtype as CLIResultMessageError['subtype']) ??
-          'error_during_execution',
+          (options.subtype as CLIResultMessageError["subtype"]) ??
+          "error_during_execution",
         uuid: baseUuid,
         session_id: baseSessionId,
         is_error: true,
@@ -1118,9 +1118,9 @@ export abstract class BaseJsonOutputAdapter {
       };
     } else {
       const success: CLIResultMessageSuccess & { stats?: SessionMetrics } = {
-        type: 'result',
+        type: "result",
         subtype:
-          (options.subtype as CLIResultMessageSuccess['subtype']) ?? 'success',
+          (options.subtype as CLIResultMessageSuccess["subtype"]) ?? "success",
         uuid: baseUuid,
         session_id: baseSessionId,
         is_error: false,
@@ -1159,8 +1159,8 @@ export abstract class BaseJsonOutputAdapter {
     };
 
     return {
-      type: 'result',
-      subtype: 'error_during_execution',
+      type: "result",
+      subtype: "error_during_execution",
       uuid: randomUUID(),
       session_id: this.getSessionId(),
       is_error: true,
@@ -1191,17 +1191,17 @@ export function partsToContentBlock(parts: Part[]): ContentBlock[] {
     let textContent: string | null = null;
 
     // Handle text parts
-    if ('text' in part && typeof part.text === 'string') {
+    if ("text" in part && typeof part.text === "string") {
       textContent = part.text;
     }
     // Handle functionResponse parts - extract output content
-    else if ('functionResponse' in part && part.functionResponse) {
+    else if ("functionResponse" in part && part.functionResponse) {
       const output =
-        part.functionResponse.response?.['output'] ??
-        part.functionResponse.response?.['content'] ??
-        '';
+        part.functionResponse.response?.["output"] ??
+        part.functionResponse.response?.["content"] ??
+        "";
       textContent =
-        typeof output === 'string' ? output : JSON.stringify(output);
+        typeof output === "string" ? output : JSON.stringify(output);
     }
     // Handle other part types - convert to JSON string
     else {
@@ -1212,7 +1212,7 @@ export function partsToContentBlock(parts: Part[]): ContentBlock[] {
     if (textContent !== null && textContent.length > 0) {
       if (currentTextBlock === null) {
         currentTextBlock = {
-          type: 'text',
+          type: "text",
           text: textContent,
         };
         blocks.push(currentTextBlock);
@@ -1238,12 +1238,12 @@ export function partsToContentBlock(parts: Part[]): ContentBlock[] {
 export function partsToString(parts: Part[]): string {
   return parts
     .map((part) => {
-      if ('text' in part && typeof part.text === 'string') {
+      if ("text" in part && typeof part.text === "string") {
         return part.text;
       }
       return JSON.stringify(part);
     })
-    .join('');
+    .join("");
 }
 
 /**
@@ -1261,14 +1261,14 @@ function checkResponsePartsForError(
 
   for (const part of responseParts) {
     if (
-      'functionResponse' in part &&
+      "functionResponse" in part &&
       part.functionResponse?.response &&
-      typeof part.functionResponse.response === 'object' &&
-      'error' in part.functionResponse.response &&
-      part.functionResponse.response['error']
+      typeof part.functionResponse.response === "object" &&
+      "error" in part.functionResponse.response &&
+      part.functionResponse.response["error"]
     ) {
-      const error = part.functionResponse.response['error'];
-      return typeof error === 'string' ? error : String(error);
+      const error = part.functionResponse.response["error"];
+      return typeof error === "string" ? error : String(error);
     }
   }
 
@@ -1297,7 +1297,7 @@ export function toolResultContent(
     return responsePartsError;
   }
   if (
-    typeof response.resultDisplay === 'string' &&
+    typeof response.resultDisplay === "string" &&
     response.resultDisplay.trim().length > 0
   ) {
     return response.resultDisplay;
@@ -1318,9 +1318,9 @@ export function toolResultContent(
  */
 export function extractTextFromBlocks(blocks: ContentBlock[]): string {
   return blocks
-    .filter((block) => block.type === 'text')
-    .map((block) => (block.type === 'text' ? block.text : ''))
-    .join('');
+    .filter((block) => block.type === "text")
+    .map((block) => (block.type === "text" ? block.text : ""))
+    .join("");
 }
 
 /**

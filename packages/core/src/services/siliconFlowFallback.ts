@@ -9,13 +9,13 @@
  * - Audio transcription: FunAudioLLM/SenseVoiceSmall (audio transcriptions)
  */
 
-import { createDebugLogger } from '../utils/debugLogger.js';
+import { createDebugLogger } from "../utils/debugLogger.js";
 
 const debugLogger = createDebugLogger();
 
-const SILICONFLOW_BASE_URL = 'https://api.siliconflow.cn/v1';
-const OCR_MODEL = 'deepseek-ai/DeepSeek-OCR';
-const ASR_MODEL = 'FunAudioLLM/SenseVoiceSmall';
+const SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1";
+const OCR_MODEL = "deepseek-ai/DeepSeek-OCR";
+const ASR_MODEL = "FunAudioLLM/SenseVoiceSmall";
 
 /**
  * Extract text from an image using DeepSeek-OCR via SiliconFlow API.
@@ -38,17 +38,17 @@ export async function extractImageText(
     model: OCR_MODEL,
     messages: [
       {
-        role: 'user',
+        role: "user",
         content: [
           {
-            type: 'image_url',
+            type: "image_url",
             image_url: {
               url: `data:${mimeType};base64,${base64Data}`,
             },
           },
           {
-            type: 'text',
-            text: 'Please extract and output all text content from this image. Preserve the original layout and formatting as much as possible. If there is no text, describe the image content briefly.',
+            type: "text",
+            text: "Please extract and output all text content from this image. Preserve the original layout and formatting as much as possible. If there is no text, describe the image content briefly.",
           },
         ],
       },
@@ -58,9 +58,9 @@ export async function extractImageText(
 
   try {
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(body),
@@ -122,7 +122,7 @@ export async function transcribeAudio(
       ),
     );
     parts.push(audioBuffer);
-    parts.push(Buffer.from('\r\n'));
+    parts.push(Buffer.from("\r\n"));
 
     // End boundary
     parts.push(Buffer.from(`--${boundary}--\r\n`));
@@ -130,9 +130,9 @@ export async function transcribeAudio(
     const body = Buffer.concat(parts);
 
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+        "Content-Type": `multipart/form-data; boundary=${boundary}`,
         Authorization: `Bearer ${apiKey}`,
       },
       body,

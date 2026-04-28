@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Config } from '../config/config.js';
-import type { HookPlanner, HookEventContext } from './hookPlanner.js';
-import type { HookRunner } from './hookRunner.js';
-import type { HookAggregator, AggregatedHookResult } from './hookAggregator.js';
-import { HookEventName } from './types.js';
+import type { Config } from "../config/config.js";
+import type { HookPlanner, HookEventContext } from "./hookPlanner.js";
+import type { HookRunner } from "./hookRunner.js";
+import type { HookAggregator, AggregatedHookResult } from "./hookAggregator.js";
+import { HookEventName } from "./types.js";
 import type {
   HookConfig,
   HookInput,
@@ -35,13 +35,13 @@ import type {
   SubagentStopInput,
   StopFailureInput,
   StopFailureErrorType,
-} from './types.js';
-import { PermissionMode } from './types.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import { logHookCall } from '../telemetry/loggers.js';
-import { HookCallEvent } from '../telemetry/types.js';
+} from "./types.js";
+import { PermissionMode } from "./types.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import { logHookCall } from "../telemetry/loggers.js";
+import { HookCallEvent } from "../telemetry/types.js";
 
-const debugLogger = createDebugLogger('TRUSTED_HOOKS');
+const debugLogger = createDebugLogger("TRUSTED_HOOKS");
 
 /**
  * Hook event bus that coordinates hook execution across the system
@@ -91,7 +91,7 @@ export class HookEventHandler {
    */
   async fireStopEvent(
     stopHookActive: boolean = false,
-    lastAssistantMessage: string = '',
+    lastAssistantMessage: string = "",
     signal?: AbortSignal,
   ): Promise<AggregatedHookResult> {
     const input: StopInput = {
@@ -259,7 +259,7 @@ export class HookEventHandler {
    */
   async firePreCompactEvent(
     trigger: PreCompactTrigger,
-    customInstructions: string = '',
+    customInstructions: string = "",
     signal?: AbortSignal,
   ): Promise<AggregatedHookResult> {
     const input: PreCompactInput = {
@@ -482,7 +482,7 @@ export class HookEventHandler {
       const onHookEnd = (config: HookConfig, result: HookExecutionResult) => {
         const hookName = this.getHookName(config);
         debugLogger.debug(
-          `Hook ${hookName} ended for event ${eventName}: ${result.success ? 'success' : 'failed'}`,
+          `Hook ${hookName} ended for event ${eventName}: ${result.success ? "success" : "failed"}`,
         );
       };
 
@@ -567,7 +567,7 @@ export class HookEventHandler {
       const stopReason =
         aggregated.finalOutput.stopReason ||
         aggregated.finalOutput.reason ||
-        'No reason provided';
+        "No reason provided";
       debugLogger.debug(`Hook requested to stop execution: ${stopReason}`);
     }
   }
@@ -588,7 +588,7 @@ export class HookEventHandler {
     if (errorCount > 0) {
       const failedNames = failedHooks
         .map((r) => this.getHookNameFromResult(r))
-        .join(', ');
+        .join(", ");
 
       debugLogger.warn(
         `Hook(s) [${failedNames}] failed for event ${eventName}. Check debug logs for more details.`,
@@ -630,10 +630,10 @@ export class HookEventHandler {
    * Get hook name from config for display or telemetry
    */
   private getHookName(config: HookConfig): string {
-    if (config.type === 'command') {
-      return config.name || config.command || 'unknown-command';
+    if (config.type === "command") {
+      return config.name || config.command || "unknown-command";
     }
-    return config.name || 'unknown-hook';
+    return config.name || "unknown-hook";
   }
 
   /**
@@ -646,7 +646,7 @@ export class HookEventHandler {
   /**
    * Get hook type from execution result for telemetry
    */
-  private getHookTypeFromResult(result: HookExecutionResult): 'command' {
-    return result.hookConfig.type as 'command';
+  private getHookTypeFromResult(result: HookExecutionResult): "command" {
+    return result.hookConfig.type as "command";
   }
 }

@@ -2,7 +2,7 @@
  * QR code login flow for WeChat iLink Bot.
  */
 
-import { buildHeaders } from './api.js';
+import { buildHeaders } from "./api.js";
 
 export interface LoginResult {
   connected: boolean;
@@ -24,7 +24,7 @@ export async function startLogin(apiBaseUrl: string): Promise<string> {
   };
 
   if (!data.qrcode) {
-    throw new Error('No qrcode in response');
+    throw new Error("No qrcode in response");
   }
 
   if (data.qrcode_img_content) {
@@ -33,7 +33,7 @@ export async function startLogin(apiBaseUrl: string): Promise<string> {
     );
   }
 
-  process.stderr.write('Scan the QR code with WeChat to connect.\n');
+  process.stderr.write("Scan the QR code with WeChat to connect.\n");
   return data.qrcode;
 }
 
@@ -73,35 +73,35 @@ export async function waitForLogin(params: {
       };
 
       switch (data.status) {
-        case 'confirmed':
+        case "confirmed":
           return {
             connected: true,
             token: data.bot_token,
             baseUrl: data.baseurl,
             userId: data.ilink_user_id,
-            message: 'Connected to WeChat successfully!',
+            message: "Connected to WeChat successfully!",
           };
-        case 'scaned':
+        case "scaned":
           process.stderr.write(
-            'QR code scanned, waiting for confirmation...\n',
+            "QR code scanned, waiting for confirmation...\n",
           );
           break;
-        case 'expired':
+        case "expired":
           retryCount++;
           if (retryCount >= 3) {
             return {
               connected: false,
-              message: 'QR code expired after maximum retries.',
+              message: "QR code expired after maximum retries.",
             };
           }
-          process.stderr.write('QR code expired, refreshing...\n');
+          process.stderr.write("QR code expired, refreshing...\n");
           currentQrcodeId = await startLogin(apiBaseUrl);
           break;
         default:
           break;
       }
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
+      if (err instanceof Error && err.name === "AbortError") {
         continue;
       }
       throw err;
@@ -110,5 +110,5 @@ export async function waitForLogin(params: {
     await new Promise((r) => setTimeout(r, 1000));
   }
 
-  return { connected: false, message: 'Login timed out.' };
+  return { connected: false, message: "Login timed out." };
 }

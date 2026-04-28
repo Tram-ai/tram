@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback } from 'react';
-import type React from 'react';
-import { useKeypress } from '../hooks/useKeypress.js';
-import { ShellExecutionService } from '@tram-ai/tram-core';
-import { keyToAnsi, type Key } from '../hooks/keyToAnsi.js';
-import { keyMatchers, Command } from '../keyMatchers.js';
+import { useCallback } from "react";
+import type React from "react";
+import { useKeypress } from "../hooks/useKeypress.js";
+import { ShellExecutionService } from "@tram-ai/tram-core";
+import { keyToAnsi, type Key } from "../hooks/keyToAnsi.js";
+import { keyMatchers, Command } from "../keyMatchers.js";
 
 export interface ShellInputPromptProps {
   activeShellPtyId: number | null;
@@ -39,12 +39,12 @@ export const ShellInputPrompt: React.FC<ShellInputPromptProps> = ({
       if (keyMatchers[Command.TOGGLE_SHELL_INPUT_FOCUS](key)) {
         return;
       }
-      if (key.ctrl && key.shift && key.name === 'up') {
+      if (key.ctrl && key.shift && key.name === "up") {
         ShellExecutionService.scrollPty(activeShellPtyId, -1);
         return;
       }
 
-      if (key.ctrl && key.shift && key.name === 'down') {
+      if (key.ctrl && key.shift && key.name === "down") {
         ShellExecutionService.scrollPty(activeShellPtyId, 1);
         return;
       }

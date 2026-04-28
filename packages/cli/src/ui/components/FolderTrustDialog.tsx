@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import type React from 'react';
-import { useEffect } from 'react';
-import { theme } from '../semantic-colors.js';
-import type { RadioSelectItem } from './shared/RadioButtonSelect.js';
-import { RadioButtonSelect } from './shared/RadioButtonSelect.js';
-import { useKeypress } from '../hooks/useKeypress.js';
-import * as process from 'node:process';
-import * as path from 'node:path';
-import { relaunchApp } from '../../utils/processUtils.js';
+import { Box, Text } from "ink";
+import type React from "react";
+import { useEffect } from "react";
+import { theme } from "../semantic-colors.js";
+import type { RadioSelectItem } from "./shared/RadioButtonSelect.js";
+import { RadioButtonSelect } from "./shared/RadioButtonSelect.js";
+import { useKeypress } from "../hooks/useKeypress.js";
+import * as process from "node:process";
+import * as path from "node:path";
+import { relaunchApp } from "../../utils/processUtils.js";
 
 export enum FolderTrustChoice {
-  TRUST_FOLDER = 'trust_folder',
-  TRUST_PARENT = 'trust_parent',
-  DO_NOT_TRUST = 'do_not_trust',
+  TRUST_FOLDER = "trust_folder",
+  TRUST_PARENT = "trust_parent",
+  DO_NOT_TRUST = "do_not_trust",
 }
 
 interface FolderTrustDialogProps {
@@ -43,7 +43,7 @@ export const FolderTrustDialog: React.FC<FolderTrustDialogProps> = ({
 
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         onSelect(FolderTrustChoice.DO_NOT_TRUST);
       }
     },
@@ -86,9 +86,9 @@ export const FolderTrustDialog: React.FC<FolderTrustDialogProps> = ({
             Do you trust this folder?
           </Text>
           <Text color={theme.text.primary}>
-            Trusting a folder allows TRAM to execute commands it suggests.
-            This is a security feature to prevent accidental execution in
-            untrusted directories.
+            Trusting a folder allows TRAM to execute commands it suggests. This
+            is a security feature to prevent accidental execution in untrusted
+            directories.
           </Text>
         </Box>
 

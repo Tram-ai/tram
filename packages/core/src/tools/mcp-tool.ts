@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { safeJsonStringify } from '../utils/safeJsonStringify.js';
+import { safeJsonStringify } from "../utils/safeJsonStringify.js";
 import type {
   ToolCallConfirmationDetails,
   ToolInvocation,
@@ -14,16 +14,16 @@ import type {
   ToolConfirmationPayload,
   McpToolProgressData,
   ToolConfirmationOutcome,
-} from './tools.js';
-import type { PermissionDecision } from '../permissions/types.js';
-import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
-import type { CallableTool, FunctionCall, Part } from '@google/genai';
-import { ToolErrorType } from './tool-error.js';
-import type { Config } from '../config/config.js';
-import { truncateToolOutput } from '../utils/truncation.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "./tools.js";
+import type { PermissionDecision } from "../permissions/types.js";
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from "./tools.js";
+import type { CallableTool, FunctionCall, Part } from "@google/genai";
+import { ToolErrorType } from "./tool-error.js";
+import type { Config } from "../config/config.js";
+import { truncateToolOutput } from "../utils/truncation.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('MCP_TOOL');
+const debugLogger = createDebugLogger("MCP_TOOL");
 
 type ToolParams = Record<string, unknown>;
 
@@ -63,18 +63,18 @@ interface McpCallToolResult {
 
 // Discriminated union for MCP Content Blocks to ensure type safety.
 type McpTextBlock = {
-  type: 'text';
+  type: "text";
   text: string;
 };
 
 type McpMediaBlock = {
-  type: 'image' | 'audio';
+  type: "image" | "audio";
   mimeType: string;
   data: string;
 };
 
 type McpResourceBlock = {
-  type: 'resource';
+  type: "resource";
   resource: {
     text?: string;
     blob?: string;
@@ -83,7 +83,7 @@ type McpResourceBlock = {
 };
 
 type McpResourceLinkBlock = {
-  type: 'resource_link';
+  type: "resource_link";
   uri: string;
   title?: string;
   name?: string;
@@ -139,13 +139,13 @@ class DiscoveredMCPToolInvocation extends BaseToolInvocation<
     // MCP servers explicitly marked as trusted bypass confirmation,
     // but only when the workspace folder is also trusted (security gate).
     if (this.trust === true && this.cliConfig?.isTrustedFolder()) {
-      return 'allow';
+      return "allow";
     }
     // MCP tools annotated with readOnlyHint: true are safe
     if (this.annotations?.readOnlyHint === true) {
-      return 'allow';
+      return "allow";
     }
-    return 'ask';
+    return "ask";
   }
 
   /**
@@ -158,8 +158,8 @@ class DiscoveredMCPToolInvocation extends BaseToolInvocation<
     const permissionRule = `mcp__${this.serverName}__${this.serverToolName}`;
 
     const confirmationDetails: ToolMcpConfirmationDetails = {
-      type: 'mcp',
-      title: 'Confirm MCP Tool Execution',
+      type: "mcp",
+      title: "Confirm MCP Tool Execution",
       serverName: this.serverName,
       toolName: this.serverToolName,
       toolDisplayName: this.displayName,
@@ -189,7 +189,7 @@ class DiscoveredMCPToolInvocation extends BaseToolInvocation<
       const error = (response as { error?: McpError })?.error;
       const isError = error?.isError;
 
-      if (error && (isError === true || isError === 'true')) {
+      if (error && (isError === true || isError === "true")) {
         return true;
       }
     }
@@ -240,14 +240,14 @@ class DiscoveredMCPToolInvocation extends BaseToolInvocation<
       const newTool = await this.attemptReconnect();
       if (newTool) {
         const newInvocation = new DiscoveredMCPToolInvocation(
-          newTool['mcpTool'],
+          newTool["mcpTool"],
           this.serverName,
           this.serverToolName,
           this.displayName,
           this.trust,
           this.params,
           this.cliConfig,
-          newTool['mcpClient'],
+          newTool["mcpClient"],
           this.mcpTimeout,
           this.annotations,
           this.retryCount + 1,
@@ -298,7 +298,7 @@ class DiscoveredMCPToolInvocation extends BaseToolInvocation<
           onprogress: (progress) => {
             if (updateOutput) {
               const progressData: McpToolProgressData = {
-                type: 'mcp_tool_progress',
+                type: "mcp_tool_progress",
                 progress: progress.progress,
                 ...(progress.total != null && { total: progress.total }),
                 ...(progress.message != null && { message: progress.message }),
@@ -366,21 +366,21 @@ class DiscoveredMCPToolInvocation extends BaseToolInvocation<
     try {
       const rawResponseParts = await new Promise<Part[]>((resolve, reject) => {
         if (signal.aborted) {
-          const error = new Error('Tool call aborted');
-          error.name = 'AbortError';
+          const error = new Error("Tool call aborted");
+          error.name = "AbortError";
           reject(error);
           return;
         }
         const onAbort = () => {
           cleanup();
-          const error = new Error('Tool call aborted');
-          error.name = 'AbortError';
+          const error = new Error("Tool call aborted");
+          error.name = "AbortError";
           reject(error);
         };
         const cleanup = () => {
-          signal.removeEventListener('abort', onAbort);
+          signal.removeEventListener("abort", onAbort);
         };
-        signal.addEventListener('abort', onAbort, { once: true });
+        signal.addEventListener("abort", onAbort, { once: true });
 
         this.mcpTool
           .callTool(functionCalls)
@@ -573,7 +573,7 @@ function transformResourceBlock(
     return { text: resource.text };
   }
   if (resource?.blob) {
-    const mimeType = resource.mimeType || 'application/octet-stream';
+    const mimeType = resource.mimeType || "application/octet-stream";
     return [
       {
         text: `[Tool '${toolName}' provided the following embedded resource with mime-type: ${mimeType}]`,
@@ -603,24 +603,24 @@ function transformResourceLinkBlock(block: McpResourceLinkBlock): Part {
  */
 function transformMcpContentToParts(sdkResponse: Part[]): Part[] {
   const funcResponse = sdkResponse?.[0]?.functionResponse;
-  const mcpContent = funcResponse?.response?.['content'] as McpContentBlock[];
-  const toolName = funcResponse?.name || 'unknown tool';
+  const mcpContent = funcResponse?.response?.["content"] as McpContentBlock[];
+  const toolName = funcResponse?.name || "unknown tool";
 
   if (!Array.isArray(mcpContent)) {
-    return [{ text: '[Error: Could not parse tool response]' }];
+    return [{ text: "[Error: Could not parse tool response]" }];
   }
 
   const transformed = mcpContent.flatMap(
     (block: McpContentBlock): Part | Part[] | null => {
       switch (block.type) {
-        case 'text':
+        case "text":
           return transformTextBlock(block);
-        case 'image':
-        case 'audio':
+        case "image":
+        case "audio":
           return transformImageAudioBlock(block, toolName);
-        case 'resource':
+        case "resource":
           return transformResourceBlock(block, toolName);
-        case 'resource_link':
+        case "resource_link":
           return transformResourceLinkBlock(block);
         default:
           return null;
@@ -637,7 +637,7 @@ function transformMcpContentToParts(sdkResponse: Part[]): Part[] {
  */
 function getDisplayFromParts(parts: Part[]): string {
   if (parts.length === 0) {
-    return '';
+    return "";
   }
 
   const displayParts: string[] = [];
@@ -649,19 +649,19 @@ function getDisplayFromParts(parts: Part[]): string {
     }
   }
 
-  return displayParts.join('\n');
+  return displayParts.join("\n");
 }
 
 /** Visible for testing */
 export function generateValidName(name: string) {
   // Replace invalid characters (based on 400 error message from Gemini API) with underscores
-  let validToolname = name.replace(/[^a-zA-Z0-9_.-]/g, '_');
+  let validToolname = name.replace(/[^a-zA-Z0-9_.-]/g, "_");
 
   // If longer than 63 characters, replace middle with '___'
   // (Gemini API says max length 64, but actual limit seems to be 63)
   if (validToolname.length > 63) {
     validToolname =
-      validToolname.slice(0, 28) + '___' + validToolname.slice(-32);
+      validToolname.slice(0, 28) + "___" + validToolname.slice(-32);
   }
   return validToolname;
 }

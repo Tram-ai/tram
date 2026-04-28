@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createDebugLogger } from '../../utils/debugLogger.js';
-import type { Config } from '../../config/config.js';
+import { createDebugLogger } from "../../utils/debugLogger.js";
+import type { Config } from "../../config/config.js";
 // import { TmuxBackend } from './TmuxBackend.js';
-import { InProcessBackend } from './InProcessBackend.js';
-import { type Backend, DISPLAY_MODE, type DisplayMode } from './types.js';
+import { InProcessBackend } from "./InProcessBackend.js";
+import { type Backend, DISPLAY_MODE, type DisplayMode } from "./types.js";
 // import { isTmuxAvailable } from './tmux-commands.js';
 
-const debugLogger = createDebugLogger('BACKEND_DETECT');
+const debugLogger = createDebugLogger("BACKEND_DETECT");
 
 export interface DetectBackendResult {
   backend: Backend;
@@ -41,7 +41,7 @@ export async function detectBackend(
     preference && preference !== DISPLAY_MODE.IN_PROCESS
       ? `Display mode "${preference}" is not currently supported. Using in-process mode instead.`
       : undefined;
-  debugLogger.info('Using InProcessBackend');
+  debugLogger.info("Using InProcessBackend");
   return { backend: new InProcessBackend(runtimeContext), warning };
 
   // --- Disabled backends (kept for future use) ---

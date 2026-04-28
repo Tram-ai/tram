@@ -10,18 +10,18 @@
  * Handles Tram Agent connection establishment, authentication, and session creation
  */
 
-import * as vscode from 'vscode';
-import type { AcpConnection } from './acpConnection.js';
-import { isAuthenticationRequiredError } from '../utils/authErrors.js';
-import { authMethod } from '../types/acpTypes.js';
+import * as vscode from "vscode";
+import type { AcpConnection } from "./acpConnection.js";
+import { isAuthenticationRequiredError } from "../utils/authErrors.js";
+import { authMethod } from "../types/acpTypes.js";
 import {
   extractModelInfoFromNewSessionResult,
   extractSessionModeState,
   extractSessionModelState,
-} from '../utils/acpModelInfo.js';
-import { getErrorMessage } from '../utils/errorMessage.js';
-import type { ModelInfo } from '@agentclientprotocol/sdk';
-import type { ApprovalModeValue } from '../types/approvalModeValueTypes.js';
+} from "../utils/acpModelInfo.js";
+import { getErrorMessage } from "../utils/errorMessage.js";
+import type { ModelInfo } from "@agentclientprotocol/sdk";
+import type { ApprovalModeValue } from "../types/approvalModeValueTypes.js";
 
 export interface TramConnectionResult {
   sessionCreated: boolean;
@@ -74,13 +74,13 @@ export class TramConnectionHandler {
 
     // Build extra CLI arguments (only essential parameters)
     const extraArgs: string[] = [];
-    const httpConfig = vscode.workspace.getConfiguration('http');
+    const httpConfig = vscode.workspace.getConfiguration("http");
     const proxyUrl =
-      httpConfig.get<string>('proxy') || httpConfig.get<string>('https.proxy');
+      httpConfig.get<string>("proxy") || httpConfig.get<string>("https.proxy");
     if (proxyUrl) {
-      extraArgs.push('--proxy', proxyUrl);
+      extraArgs.push("--proxy", proxyUrl);
       console.log(
-        '[QwenAgentManager] Using proxy from VSCode settings:',
+        "[TramAgentManager] Using proxy from VSCode settings:",
         proxyUrl,
       );
     }
@@ -91,21 +91,21 @@ export class TramConnectionHandler {
     for (let attempt = 1; attempt <= maxConnectAttempts; attempt++) {
       try {
         console.log(
-          `[QwenAgentManager] Connecting to ACP process (attempt ${attempt}/${maxConnectAttempts})...`,
+          `[TramAgentManager] Connecting to ACP process (attempt ${attempt}/${maxConnectAttempts})...`,
         );
         await connection.connect(cliEntryPath!, workingDir, extraArgs);
-        console.log('[QwenAgentManager] ACP process connected successfully');
+        console.log("[TramAgentManager] ACP process connected successfully");
         break;
       } catch (connectError) {
         console.error(
-          `[QwenAgentManager] Connect attempt ${attempt} failed:`,
+          `[TramAgentManager] Connect attempt ${attempt} failed:`,
           getErrorMessage(connectError),
         );
         if (attempt === maxConnectAttempts) {
           throw connectError;
         }
         const delay = Math.min(1000 * Math.pow(2, attempt - 1), 4000);
-        console.log(`[QwenAgentManager] Retrying connect in ${delay}ms...`);
+        console.log(`[TramAgentManager] Retrying connect in ${delay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
@@ -119,12 +119,12 @@ export class TramConnectionHandler {
     // Create new session if unable to restore
     if (!sessionRestored) {
       console.log(
-        '[TramAgentManager] no sessionRestored, Creating new session...',
+        "[TramAgentManager] no sessionRestored, Creating new session...",
       );
 
       try {
         console.log(
-          '[TramAgentManager] Creating new session (letting CLI handle authentication)...',
+          "[TramAgentManager] Creating new session (letting CLI handle authentication)...",
         );
         const newSessionResult = await this.newSessionWithRetry(
           connection,
@@ -144,7 +144,7 @@ export class TramConnectionHandler {
         ) {
           availableModels = modelState.availableModels;
           console.log(
-            '[TramAgentManager] Extracted availableModels from session/new:',
+            "[TramAgentManager] Extracted availableModels from session/new:",
             availableModels.map((m) => m.modelId),
           );
         }
@@ -152,7 +152,7 @@ export class TramConnectionHandler {
         currentModeId = modeState?.currentModeId;
         availableModes = modeState?.availableModes;
 
-        console.log('[TramAgentManager] New session created successfully');
+        console.log("[TramAgentManager] New session created successfully");
         sessionCreated = true;
       } catch (sessionError) {
         const needsAuth =
@@ -161,7 +161,7 @@ export class TramConnectionHandler {
         if (needsAuth) {
           requiresAuth = true;
           console.log(
-            '[TramAgentManager] Session creation requires authentication; waiting for user-triggered login.',
+            "[TramAgentManager] Session creation requires authentication; waiting for user-triggered login.",
           );
         } else {
           console.log(
@@ -210,7 +210,7 @@ export class TramConnectionHandler {
           `[TramAgentManager] Creating session (attempt ${attempt}/${maxRetries})...`,
         );
         const res = await connection.newSession(workingDir);
-        console.log('[TramAgentManager] Session created successfully');
+        console.log("[TramAgentManager] Session created successfully");
         return res;
       } catch (error) {
         lastError = error;
@@ -226,12 +226,12 @@ export class TramConnectionHandler {
         if (requiresAuth) {
           if (!autoAuthenticate) {
             console.log(
-              '[TramAgentManager] Authentication required but auto-authentication is disabled. Propagating error.',
+              "[TramAgentManager] Authentication required but auto-authentication is disabled. Propagating error.",
             );
             throw error;
           }
           console.log(
-            '[TramAgentManager] Tram requires authentication. Authenticating and retrying session/new...',
+            "[TramAgentManager] Tram requires authentication. Authenticating and retrying session/new...",
           );
           try {
             await connection.authenticate(authMethod);
@@ -240,17 +240,17 @@ export class TramConnectionHandler {
             // Add a slight delay to ensure auth state is settled
             await new Promise((resolve) => setTimeout(resolve, 300));
             console.log(
-              '[TramAgentManager] newSessionWithRetry Authentication successful',
+              "[TramAgentManager] newSessionWithRetry Authentication successful",
             );
             // Retry immediately after successful auth
             const res = await connection.newSession(workingDir);
             console.log(
-              '[TramAgentManager] Session created successfully after auth',
+              "[TramAgentManager] Session created successfully after auth",
             );
             return res;
           } catch (authErr) {
             console.error(
-              '[TramAgentManager] Re-authentication failed:',
+              "[TramAgentManager] Re-authentication failed:",
               authErr,
             );
             // Fall through to retry logic below
@@ -271,6 +271,6 @@ export class TramConnectionHandler {
       throw lastError;
     }
 
-    throw new Error('Session creation failed unexpectedly');
+    throw new Error("Session creation failed unexpectedly");
   }
 }

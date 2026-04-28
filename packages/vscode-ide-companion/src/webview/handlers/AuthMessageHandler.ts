@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as vscode from 'vscode';
-import { BaseMessageHandler } from './BaseMessageHandler.js';
-import { getErrorMessage } from '../../utils/errorMessage.js';
+import * as vscode from "vscode";
+import { BaseMessageHandler } from "./BaseMessageHandler.js";
+import { getErrorMessage } from "../../utils/errorMessage.js";
 
 /**
  * Auth message handler
@@ -16,23 +16,23 @@ export class AuthMessageHandler extends BaseMessageHandler {
   private loginHandler: (() => Promise<void>) | null = null;
 
   canHandle(messageType: string): boolean {
-    return ['login', 'getAccountInfo'].includes(messageType);
+    return ["login", "getAccountInfo"].includes(messageType);
   }
 
   async handle(message: { type: string; data?: unknown }): Promise<void> {
     switch (message.type) {
-      case 'login':
+      case "login":
         await this.handleLogin();
         break;
 
-      case 'getAccountInfo': {
+      case "getAccountInfo": {
         await this.handleGetAccountInfo();
         break;
       }
 
       default:
         console.warn(
-          '[AuthMessageHandler] Unknown message type:',
+          "[AuthMessageHandler] Unknown message type:",
           message.type,
         );
         break;
@@ -53,7 +53,7 @@ export class AuthMessageHandler extends BaseMessageHandler {
     try {
       const info = await this.agentManager.getAccountInfo();
       this.sendToWebView({
-        type: 'accountInfo',
+        type: "accountInfo",
         data: {
           authType: info.authType,
           baseUrl: info.baseUrl,
@@ -63,9 +63,9 @@ export class AuthMessageHandler extends BaseMessageHandler {
       });
     } catch (error) {
       const errorMsg = getErrorMessage(error);
-      console.error('[AuthMessageHandler] getAccountInfo failed:', error);
+      console.error("[AuthMessageHandler] getAccountInfo failed:", error);
       this.sendToWebView({
-        type: 'accountInfo',
+        type: "accountInfo",
         data: { error: errorMsg },
       });
     }
@@ -76,36 +76,36 @@ export class AuthMessageHandler extends BaseMessageHandler {
    */
   private async handleLogin(): Promise<void> {
     try {
-      console.log('[AuthMessageHandler] Login requested');
+      console.log("[AuthMessageHandler] Login requested");
       console.log(
-        '[AuthMessageHandler] Login handler available:',
+        "[AuthMessageHandler] Login handler available:",
         !!this.loginHandler,
       );
 
       // Direct login without additional confirmation
       if (this.loginHandler) {
-        console.log('[AuthMessageHandler] Calling login handler');
+        console.log("[AuthMessageHandler] Calling login handler");
         await this.loginHandler();
         console.log(
-          '[AuthMessageHandler] Login handler completed successfully',
+          "[AuthMessageHandler] Login handler completed successfully",
         );
       } else {
-        console.log('[AuthMessageHandler] Using fallback login method');
+        console.log("[AuthMessageHandler] Using fallback login method");
         // Fallback: show message and use command
         vscode.window.showInformationMessage(
-          'Please wait while we connect to TRAM...',
+          "Please wait while we connect to TRAM...",
         );
-        await vscode.commands.executeCommand('tram.login');
+        await vscode.commands.executeCommand("tram.login");
       }
     } catch (error) {
       const errorMsg = getErrorMessage(error);
-      console.error('[AuthMessageHandler] Login failed:', error);
+      console.error("[AuthMessageHandler] Login failed:", error);
       console.error(
-        '[AuthMessageHandler] Error stack:',
-        error instanceof Error ? error.stack : 'N/A',
+        "[AuthMessageHandler] Error stack:",
+        error instanceof Error ? error.stack : "N/A",
       );
       this.sendToWebView({
-        type: 'loginError',
+        type: "loginError",
         data: {
           message: `Login failed: ${errorMsg}`,
         },

@@ -4,39 +4,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { listMcpServers } from './list.js';
-import { loadSettings } from '../../config/settings.js';
-import { isWorkspaceTrusted } from '../../config/trustedFolders.js';
-import { createTransport, ExtensionManager } from '@tram-ai/tram-core';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import { listMcpServers } from "./list.js";
+import { loadSettings } from "../../config/settings.js";
+import { isWorkspaceTrusted } from "../../config/trustedFolders.js";
+import { createTransport, ExtensionManager } from "@tram-ai/tram-core";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 
 const mockWriteStdoutLine = vi.hoisted(() => vi.fn());
 const mockWriteStderrLine = vi.hoisted(() => vi.fn());
 
-vi.mock('../../utils/stdioHelpers.js', () => ({
+vi.mock("../../utils/stdioHelpers.js", () => ({
   writeStdoutLine: mockWriteStdoutLine,
   writeStderrLine: mockWriteStderrLine,
   clearScreen: vi.fn(),
 }));
 
-vi.mock('../../config/settings.js', () => ({
+vi.mock("../../config/settings.js", () => ({
   loadSettings: vi.fn(),
 }));
-vi.mock('../../config/trustedFolders.js', () => ({
+vi.mock("../../config/trustedFolders.js", () => ({
   isWorkspaceTrusted: vi.fn(),
 }));
-vi.mock('@tram-ai/tram-core', () => ({
+vi.mock("@tram-ai/tram-core", () => ({
   createTransport: vi.fn(),
   MCPServerStatus: {
-    CONNECTED: 'CONNECTED',
-    CONNECTING: 'CONNECTING',
-    DISCONNECTED: 'DISCONNECTED',
+    CONNECTED: "CONNECTED",
+    CONNECTING: "CONNECTING",
+    DISCONNECTED: "DISCONNECTED",
   },
   ExtensionManager: vi.fn(),
   getErrorMessage: (e: unknown) => (e instanceof Error ? e.message : String(e)),
 }));
-vi.mock('@modelcontextprotocol/sdk/client/index.js');
+vi.mock("@modelcontextprotocol/sdk/client/index.js");
 
 const mockedLoadSettings = loadSettings as vi.Mock;
 const mockedIsWorkspaceTrusted = isWorkspaceTrusted as vi.Mock;
@@ -54,7 +54,7 @@ interface MockTransport {
   close: vi.Mock;
 }
 
-describe('mcp list command', () => {
+describe("mcp list command", () => {
   let mockClient: MockClient;
   let mockTransport: MockTransport;
   let mockExtensionManager: {
@@ -84,23 +84,23 @@ describe('mcp list command', () => {
     mockedIsWorkspaceTrusted.mockReturnValue(true);
   });
 
-  it('should display message when no servers configured', async () => {
+  it("should display message when no servers configured", async () => {
     mockedLoadSettings.mockReturnValue({ merged: { mcpServers: {} } });
 
     await listMcpServers();
 
     expect(mockWriteStdoutLine).toHaveBeenCalledWith(
-      'No MCP servers configured.',
+      "No MCP servers configured.",
     );
   });
 
-  it('should display different server types with connected status', async () => {
+  it("should display different server types with connected status", async () => {
     mockedLoadSettings.mockReturnValue({
       merged: {
         mcpServers: {
-          'stdio-server': { command: '/path/to/server', args: ['arg1'] },
-          'sse-server': { url: 'https://example.com/sse' },
-          'http-server': { httpUrl: 'https://example.com/http' },
+          "stdio-server": { command: "/path/to/server", args: ["arg1"] },
+          "sse-server": { url: "https://example.com/sse" },
+          "http-server": { httpUrl: "https://example.com/http" },
         },
       },
     });
@@ -111,49 +111,49 @@ describe('mcp list command', () => {
     await listMcpServers();
 
     expect(mockWriteStdoutLine).toHaveBeenCalledWith(
-      'Configured MCP servers:\n',
+      "Configured MCP servers:\n",
     );
     expect(mockWriteStdoutLine).toHaveBeenCalledWith(
       expect.stringContaining(
-        'stdio-server: /path/to/server arg1 (stdio) - Connected',
+        "stdio-server: /path/to/server arg1 (stdio) - Connected",
       ),
     );
     expect(mockWriteStdoutLine).toHaveBeenCalledWith(
       expect.stringContaining(
-        'sse-server: https://example.com/sse (sse) - Connected',
+        "sse-server: https://example.com/sse (sse) - Connected",
       ),
     );
     expect(mockWriteStdoutLine).toHaveBeenCalledWith(
       expect.stringContaining(
-        'http-server: https://example.com/http (http) - Connected',
+        "http-server: https://example.com/http (http) - Connected",
       ),
     );
   });
 
-  it('should display disconnected status when connection fails', async () => {
+  it("should display disconnected status when connection fails", async () => {
     mockedLoadSettings.mockReturnValue({
       merged: {
         mcpServers: {
-          'test-server': { command: '/test/server' },
+          "test-server": { command: "/test/server" },
         },
       },
     });
 
-    mockClient.connect.mockRejectedValue(new Error('Connection failed'));
+    mockClient.connect.mockRejectedValue(new Error("Connection failed"));
 
     await listMcpServers();
 
     expect(mockWriteStdoutLine).toHaveBeenCalledWith(
       expect.stringContaining(
-        'test-server: /test/server  (stdio) - Disconnected',
+        "test-server: /test/server  (stdio) - Disconnected",
       ),
     );
   });
 
-  it('should merge extension servers with config servers', async () => {
+  it("should merge extension servers with config servers", async () => {
     mockedLoadSettings.mockReturnValue({
       merged: {
-        mcpServers: { 'config-server': { command: '/config/server' } },
+        mcpServers: { "config-server": { command: "/config/server" } },
       },
     });
 
@@ -161,8 +161,8 @@ describe('mcp list command', () => {
       {
         isActive: true,
         config: {
-          name: 'test-extension',
-          mcpServers: { 'extension-server': { command: '/ext/server' } },
+          name: "test-extension",
+          mcpServers: { "extension-server": { command: "/ext/server" } },
         },
       },
     ]);
@@ -174,12 +174,12 @@ describe('mcp list command', () => {
 
     expect(mockWriteStdoutLine).toHaveBeenCalledWith(
       expect.stringContaining(
-        'config-server: /config/server  (stdio) - Connected',
+        "config-server: /config/server  (stdio) - Connected",
       ),
     );
     expect(mockWriteStdoutLine).toHaveBeenCalledWith(
       expect.stringContaining(
-        'extension-server: /ext/server  (stdio) - Connected',
+        "extension-server: /ext/server  (stdio) - Connected",
       ),
     );
   });

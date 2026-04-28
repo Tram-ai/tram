@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('MOD_CACHE_SERVICE');
+const debugLogger = createDebugLogger("MOD_CACHE_SERVICE");
 
 export interface ModCacheEntry {
   hash: string;
@@ -18,7 +18,7 @@ export interface ModCacheEntry {
     slug: string;
     version?: string;
     projectUrl: string;
-    source: 'modrinth' | 'curseforge';
+    source: "modrinth" | "curseforge";
     loaders?: string[];
     gameVersions?: string[];
   };
@@ -42,19 +42,23 @@ export class ModCacheService {
     lastUpdated: new Date().toISOString(),
   };
 
-  private projectCachePath = '';
-  private globalCachePath = '';
+  private projectCachePath = "";
+  private globalCachePath = "";
 
   constructor(projectRoot?: string) {
     // Initialize paths
     if (projectRoot) {
-      this.projectCachePath = path.join(projectRoot, '.tram', 'mod-cache.json');
+      this.projectCachePath = path.join(projectRoot, ".tram", "mod-cache.json");
     }
 
     // Global cache in user home
-    const homeDir = process.env['HOME'] || process.env['USERPROFILE'] || '';
+    const homeDir = process.env["HOME"] || process.env["USERPROFILE"] || "";
     if (homeDir) {
-      this.globalCachePath = path.join(homeDir, '.tram', 'global-mod-cache.json');
+      this.globalCachePath = path.join(
+        homeDir,
+        ".tram",
+        "global-mod-cache.json",
+      );
     }
   }
 
@@ -103,7 +107,7 @@ export class ModCacheService {
    */
   async storeModInfo(
     entry: ModCacheEntry,
-    scope: 'session' | 'project' | 'global' = 'global',
+    scope: "session" | "project" | "global" = "global",
   ): Promise<void> {
     const entryWithTime = {
       ...entry,
@@ -111,12 +115,12 @@ export class ModCacheService {
     };
 
     switch (scope) {
-      case 'session':
+      case "session":
         this.sessionCache.entries.set(entry.hash, entryWithTime);
         debugLogger.debug(`Stored to session cache: ${entry.hash}`);
         break;
 
-      case 'project':
+      case "project":
         if (this.projectCachePath) {
           await this.addToProjectCache(entryWithTime);
           // Also promote to session
@@ -125,7 +129,7 @@ export class ModCacheService {
         }
         break;
 
-      case 'global':
+      case "global":
         if (this.globalCachePath) {
           await this.addToGlobalCache(entryWithTime);
           // Also store in lower tiers
@@ -142,18 +146,20 @@ export class ModCacheService {
   /**
    * Get all cached mods in a scope
    */
-  async getAllMods(scope: 'session' | 'project' | 'global'): Promise<ModCacheEntry[]> {
+  async getAllMods(
+    scope: "session" | "project" | "global",
+  ): Promise<ModCacheEntry[]> {
     switch (scope) {
-      case 'session':
+      case "session":
         return Array.from(this.sessionCache.entries.values());
 
-      case 'project':
+      case "project":
         if (this.projectCachePath) {
           return await this.readProjectCacheFile();
         }
         return [];
 
-      case 'global':
+      case "global":
         if (this.globalCachePath) {
           return await this.readGlobalCacheFile();
         }
@@ -164,36 +170,38 @@ export class ModCacheService {
   /**
    * Clear cache at specified scope
    */
-  async clearCache(scope: 'session' | 'project' | 'global' | 'all'): Promise<void> {
+  async clearCache(
+    scope: "session" | "project" | "global" | "all",
+  ): Promise<void> {
     switch (scope) {
-      case 'session':
+      case "session":
         this.sessionCache.entries.clear();
-        debugLogger.debug('Cleared session cache');
+        debugLogger.debug("Cleared session cache");
         break;
 
-      case 'project':
+      case "project":
         if (this.projectCachePath) {
           try {
             await fs.unlink(this.projectCachePath);
-            debugLogger.debug('Cleared project cache');
+            debugLogger.debug("Cleared project cache");
           } catch (err) {
-            debugLogger.warn('Failed to clear project cache:', err);
+            debugLogger.warn("Failed to clear project cache:", err);
           }
         }
         break;
 
-      case 'global':
+      case "global":
         if (this.globalCachePath) {
           try {
             await fs.unlink(this.globalCachePath);
-            debugLogger.debug('Cleared global cache');
+            debugLogger.debug("Cleared global cache");
           } catch (err) {
-            debugLogger.warn('Failed to clear global cache:', err);
+            debugLogger.warn("Failed to clear global cache:", err);
           }
         }
         break;
 
-      case 'all':
+      case "all":
         this.sessionCache.entries.clear();
         if (this.projectCachePath) {
           try {
@@ -209,29 +217,33 @@ export class ModCacheService {
             // Ignore
           }
         }
-        debugLogger.debug('Cleared all caches');
+        debugLogger.debug("Cleared all caches");
         break;
     }
   }
 
   // ============== Private Methods ==============
 
-  private async readFromProjectCache(hash: string): Promise<ModCacheEntry | null> {
+  private async readFromProjectCache(
+    hash: string,
+  ): Promise<ModCacheEntry | null> {
     try {
       const entries = await this.readProjectCacheFile();
       return entries.find((e) => e.hash === hash) || null;
     } catch (err) {
-      debugLogger.warn('Failed to read project cache:', err);
+      debugLogger.warn("Failed to read project cache:", err);
       return null;
     }
   }
 
-  private async readFromGlobalCache(hash: string): Promise<ModCacheEntry | null> {
+  private async readFromGlobalCache(
+    hash: string,
+  ): Promise<ModCacheEntry | null> {
     try {
       const entries = await this.readGlobalCacheFile();
       return entries.find((e) => e.hash === hash) || null;
     } catch (err) {
-      debugLogger.warn('Failed to read global cache:', err);
+      debugLogger.warn("Failed to read global cache:", err);
       return null;
     }
   }
@@ -240,7 +252,7 @@ export class ModCacheService {
     if (!this.projectCachePath) return [];
 
     try {
-      const content = await fs.readFile(this.projectCachePath, 'utf-8');
+      const content = await fs.readFile(this.projectCachePath, "utf-8");
       const data = JSON.parse(content);
       return data.entries || [];
     } catch (err) {
@@ -252,7 +264,7 @@ export class ModCacheService {
     if (!this.globalCachePath) return [];
 
     try {
-      const content = await fs.readFile(this.globalCachePath, 'utf-8');
+      const content = await fs.readFile(this.globalCachePath, "utf-8");
       const data = JSON.parse(content);
       return data.entries || [];
     } catch (err) {
@@ -270,7 +282,7 @@ export class ModCacheService {
       // Read existing entries
       let entries: ModCacheEntry[] = [];
       try {
-        const content = await fs.readFile(this.projectCachePath, 'utf-8');
+        const content = await fs.readFile(this.projectCachePath, "utf-8");
         const data = JSON.parse(content);
         entries = data.entries || [];
       } catch {
@@ -288,10 +300,14 @@ export class ModCacheService {
       // Write back
       await fs.writeFile(
         this.projectCachePath,
-        JSON.stringify({ entries, lastUpdated: new Date().toISOString() }, null, 2),
+        JSON.stringify(
+          { entries, lastUpdated: new Date().toISOString() },
+          null,
+          2,
+        ),
       );
     } catch (err) {
-      debugLogger.warn('Failed to write project cache:', err);
+      debugLogger.warn("Failed to write project cache:", err);
     }
   }
 
@@ -305,7 +321,7 @@ export class ModCacheService {
       // Read existing entries
       let entries: ModCacheEntry[] = [];
       try {
-        const content = await fs.readFile(this.globalCachePath, 'utf-8');
+        const content = await fs.readFile(this.globalCachePath, "utf-8");
         const data = JSON.parse(content);
         entries = data.entries || [];
       } catch {
@@ -337,8 +353,9 @@ export class ModCacheService {
 
       // Keep only latest 5 versions per mod
       if (modsOfType.length > 5) {
-        modsOfType.sort((a, b) => 
-          new Date(b.cachedAt).getTime() - new Date(a.cachedAt).getTime()
+        modsOfType.sort(
+          (a, b) =>
+            new Date(b.cachedAt).getTime() - new Date(a.cachedAt).getTime(),
         );
         modsGrouped.set(key, modsOfType.slice(0, 5));
       }
@@ -350,10 +367,14 @@ export class ModCacheService {
       // Write back
       await fs.writeFile(
         this.globalCachePath,
-        JSON.stringify({ entries: allEntries, lastUpdated: new Date().toISOString() }, null, 2),
+        JSON.stringify(
+          { entries: allEntries, lastUpdated: new Date().toISOString() },
+          null,
+          2,
+        ),
       );
     } catch (err) {
-      debugLogger.warn('Failed to write global cache:', err);
+      debugLogger.warn("Failed to write global cache:", err);
     }
   }
 }
@@ -361,7 +382,9 @@ export class ModCacheService {
 // Singleton instance
 let globalCacheService: ModCacheService | null = null;
 
-export function getGlobalModCacheService(projectRoot?: string): ModCacheService {
+export function getGlobalModCacheService(
+  projectRoot?: string,
+): ModCacheService {
   if (!globalCacheService) {
     globalCacheService = new ModCacheService(projectRoot);
   }

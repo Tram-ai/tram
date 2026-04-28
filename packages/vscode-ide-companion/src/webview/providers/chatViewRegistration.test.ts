@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   detectSecondarySidebarSupport,
   registerChatViewProviders,
-} from './chatViewRegistration.js';
+} from "./chatViewRegistration.js";
 
 const { registerWebviewViewProvider, executeCommand } = vi.hoisted(() => ({
   registerWebviewViewProvider: vi.fn(() => ({ dispose: vi.fn() })),
   executeCommand: vi.fn(),
 }));
 
-vi.mock('vscode', () => ({
+vi.mock("vscode", () => ({
   window: {
     registerWebviewViewProvider,
   },
@@ -24,18 +24,18 @@ vi.mock('vscode', () => ({
   },
 }));
 
-describe('detectSecondarySidebarSupport', () => {
+describe("detectSecondarySidebarSupport", () => {
   it.each([
-    { version: '1.106.0', supported: true },
-    { version: '1.106.0-insider', supported: true },
-    { version: '1.94.0', supported: false },
-    { version: 'invalid', supported: false },
-  ])('returns $supported for VS Code $version', ({ version, supported }) => {
+    { version: "1.106.0", supported: true },
+    { version: "1.106.0-insider", supported: true },
+    { version: "1.94.0", supported: false },
+    { version: "invalid", supported: false },
+  ])("returns $supported for VS Code $version", ({ version, supported }) => {
     expect(detectSecondarySidebarSupport(version)).toBe(supported);
   });
 });
 
-describe('registerChatViewProviders', () => {
+describe("registerChatViewProviders", () => {
   const context = { subscriptions: [] as Array<{ dispose: () => void }> };
 
   beforeEach(() => {
@@ -44,13 +44,13 @@ describe('registerChatViewProviders', () => {
     executeCommand.mockClear();
   });
 
-  it('registers sidebar and secondary hosts with retained webview context', () => {
+  it("registers sidebar and secondary hosts with retained webview context", () => {
     const createProvider = vi.fn();
 
     const supportsSecondarySidebar = registerChatViewProviders({
       context: context as never,
       createViewProvider: createProvider,
-      vscodeVersion: '1.106.0',
+      vscodeVersion: "1.106.0",
     });
 
     expect(supportsSecondarySidebar).toBe(true);
@@ -64,31 +64,31 @@ describe('registerChatViewProviders', () => {
     >;
 
     expect(calls.map((call) => call[0])).toEqual([
-      'tram.chatView.sidebar',
-      'tram.chatView.secondary',
+      "tram.chatView.sidebar",
+      "tram.chatView.secondary",
     ]);
     expect(calls[0]?.[1]).not.toBe(calls[1]?.[1]);
     expect(calls[0]?.[2]).toEqual({
       webviewOptions: { retainContextWhenHidden: true },
     });
     expect(executeCommand).toHaveBeenCalledWith(
-      'setContext',
-      'qwen-code:supportsSecondarySidebar',
+      "setContext",
+      "tram:supportsSecondarySidebar",
       true,
     );
     expect(context.subscriptions).toHaveLength(2);
   });
 
-  it('sets context key to false when secondary sidebar is unavailable', () => {
+  it("sets context key to false when secondary sidebar is unavailable", () => {
     registerChatViewProviders({
       context: context as never,
       createViewProvider: vi.fn(),
-      vscodeVersion: '1.94.0',
+      vscodeVersion: "1.94.0",
     });
 
     expect(executeCommand).toHaveBeenCalledWith(
-      'setContext',
-      'qwen-code:supportsSecondarySidebar',
+      "setContext",
+      "tram:supportsSecondarySidebar",
       false,
     );
   });

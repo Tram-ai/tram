@@ -8,9 +8,9 @@
  * Factory function to create SDK-embedded MCP servers
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { SdkMcpToolDefinition } from './tool.js';
-import { validateToolName } from './tool.js';
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { SdkMcpToolDefinition } from "./tool.js";
+import { validateToolName } from "./tool.js";
 
 /**
  * Options for creating an SDK MCP server
@@ -26,7 +26,7 @@ export type CreateSdkMcpServerOptions = {
  * SDK MCP Server configuration with instance
  */
 export type McpSdkServerConfigWithInstance = {
-  type: 'sdk';
+  type: "sdk";
   name: string;
   instance: McpServer;
 };
@@ -56,18 +56,18 @@ export type McpSdkServerConfigWithInstance = {
 export function createSdkMcpServer(
   options: CreateSdkMcpServerOptions,
 ): McpSdkServerConfigWithInstance {
-  const { name, version = '1.0.0', tools } = options;
+  const { name, version = "1.0.0", tools } = options;
 
-  if (!name || typeof name !== 'string') {
-    throw new Error('MCP server name must be a non-empty string');
+  if (!name || typeof name !== "string") {
+    throw new Error("MCP server name must be a non-empty string");
   }
 
-  if (!version || typeof version !== 'string') {
-    throw new Error('MCP server version must be a non-empty string');
+  if (!version || typeof version !== "string") {
+    throw new Error("MCP server version must be a non-empty string");
   }
 
   if (tools !== undefined && !Array.isArray(tools)) {
-    throw new Error('Tools must be an array');
+    throw new Error("Tools must be an array");
   }
 
   const toolNames = new Set<string>();
@@ -103,5 +103,5 @@ export function createSdkMcpServer(
     });
   }
 
-  return { type: 'sdk', name, instance: server };
+  return { type: "sdk", name, instance: server };
 }

@@ -4,22 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from 'ink-testing-library';
-import { describe, it, expect, vi } from 'vitest';
-import { Text } from 'ink';
-import type React from 'react';
-import { ToolGroupMessage } from './ToolGroupMessage.js';
-import type { IndividualToolCallDisplay } from '../../types.js';
-import { ToolCallStatus } from '../../types.js';
-import type {
-  Config,
-  ToolCallConfirmationDetails,
-} from '@tram-ai/tram-core';
-import { TOOL_STATUS } from '../../constants.js';
-import { ConfigContext } from '../../contexts/ConfigContext.js';
+import { render } from "ink-testing-library";
+import { describe, it, expect, vi } from "vitest";
+import { Text } from "ink";
+import type React from "react";
+import { ToolGroupMessage } from "./ToolGroupMessage.js";
+import type { IndividualToolCallDisplay } from "../../types.js";
+import { ToolCallStatus } from "../../types.js";
+import type { Config, ToolCallConfirmationDetails } from "@tram-ai/tram-core";
+import { TOOL_STATUS } from "../../constants.js";
+import { ConfigContext } from "../../contexts/ConfigContext.js";
 
 // Mock child components to isolate ToolGroupMessage behavior
-vi.mock('./ToolMessage.js', () => ({
+vi.mock("./ToolMessage.js", () => ({
   ToolMessage: function MockToolMessage({
     callId,
     name,
@@ -42,7 +39,7 @@ vi.mock('./ToolMessage.js', () => ({
       [ToolCallStatus.Canceled]: TOOL_STATUS.CANCELED,
       [ToolCallStatus.Error]: TOOL_STATUS.ERROR,
     };
-    const statusSymbol = statusSymbolMap[status] || '?';
+    const statusSymbol = statusSymbolMap[status] || "?";
     return (
       <Text>
         MockTool[{callId}]: {statusSymbol} {name} - {description} ({emphasis})
@@ -51,30 +48,30 @@ vi.mock('./ToolMessage.js', () => ({
   },
 }));
 
-vi.mock('./ToolConfirmationMessage.js', () => ({
+vi.mock("./ToolConfirmationMessage.js", () => ({
   ToolConfirmationMessage: function MockToolConfirmationMessage({
     confirmationDetails,
   }: {
     confirmationDetails: ToolCallConfirmationDetails;
   }) {
     const displayText =
-      confirmationDetails?.type === 'info'
+      confirmationDetails?.type === "info"
         ? (confirmationDetails as { prompt: string }).prompt
-        : confirmationDetails?.title || 'confirm';
+        : confirmationDetails?.title || "confirm";
     return <Text>MockConfirmation: {displayText}</Text>;
   },
 }));
 
-describe('<ToolGroupMessage />', () => {
+describe("<ToolGroupMessage />", () => {
   const mockConfig: Config = {} as Config;
 
   const createToolCall = (
     overrides: Partial<IndividualToolCallDisplay> = {},
   ): IndividualToolCallDisplay => ({
-    callId: 'tool-123',
-    name: 'test-tool',
-    description: 'A tool for testing',
-    resultDisplay: 'Test result',
+    callId: "tool-123",
+    name: "test-tool",
+    description: "A tool for testing",
+    resultDisplay: "Test result",
     status: ToolCallStatus.Success,
     confirmationDetails: undefined,
     renderOutputAsMarkdown: false,
@@ -95,8 +92,8 @@ describe('<ToolGroupMessage />', () => {
       </ConfigContext.Provider>,
     );
 
-  describe('Golden Snapshots', () => {
-    it('renders single successful tool call', () => {
+  describe("Golden Snapshots", () => {
+    it("renders single successful tool call", () => {
       const toolCalls = [createToolCall()];
       const { lastFrame } = renderWithProviders(
         <ToolGroupMessage {...baseProps} toolCalls={toolCalls} />,
@@ -104,24 +101,24 @@ describe('<ToolGroupMessage />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders multiple tool calls with different statuses', () => {
+    it("renders multiple tool calls with different statuses", () => {
       const toolCalls = [
         createToolCall({
-          callId: 'tool-1',
-          name: 'successful-tool',
-          description: 'This tool succeeded',
+          callId: "tool-1",
+          name: "successful-tool",
+          description: "This tool succeeded",
           status: ToolCallStatus.Success,
         }),
         createToolCall({
-          callId: 'tool-2',
-          name: 'pending-tool',
-          description: 'This tool is pending',
+          callId: "tool-2",
+          name: "pending-tool",
+          description: "This tool is pending",
           status: ToolCallStatus.Pending,
         }),
         createToolCall({
-          callId: 'tool-3',
-          name: 'error-tool',
-          description: 'This tool failed',
+          callId: "tool-3",
+          name: "error-tool",
+          description: "This tool failed",
           status: ToolCallStatus.Error,
         }),
       ];
@@ -131,17 +128,17 @@ describe('<ToolGroupMessage />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders tool call awaiting confirmation', () => {
+    it("renders tool call awaiting confirmation", () => {
       const toolCalls = [
         createToolCall({
-          callId: 'tool-confirm',
-          name: 'confirmation-tool',
-          description: 'This tool needs confirmation',
+          callId: "tool-confirm",
+          name: "confirmation-tool",
+          description: "This tool needs confirmation",
           status: ToolCallStatus.Confirming,
           confirmationDetails: {
-            type: 'info',
-            title: 'Confirm Tool Execution',
-            prompt: 'Are you sure you want to proceed?',
+            type: "info",
+            title: "Confirm Tool Execution",
+            prompt: "Are you sure you want to proceed?",
             onConfirm: vi.fn(),
           },
         }),
@@ -152,12 +149,12 @@ describe('<ToolGroupMessage />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders shell command with yellow border', () => {
+    it("renders shell command with yellow border", () => {
       const toolCalls = [
         createToolCall({
-          callId: 'shell-1',
-          name: 'run_shell_command',
-          description: 'Execute shell command',
+          callId: "shell-1",
+          name: "run_shell_command",
+          description: "Execute shell command",
           status: ToolCallStatus.Success,
         }),
       ];
@@ -167,24 +164,24 @@ describe('<ToolGroupMessage />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders mixed tool calls including shell command', () => {
+    it("renders mixed tool calls including shell command", () => {
       const toolCalls = [
         createToolCall({
-          callId: 'tool-1',
-          name: 'read_file',
-          description: 'Read a file',
+          callId: "tool-1",
+          name: "read_file",
+          description: "Read a file",
           status: ToolCallStatus.Success,
         }),
         createToolCall({
-          callId: 'tool-2',
-          name: 'run_shell_command',
-          description: 'Run command',
+          callId: "tool-2",
+          name: "run_shell_command",
+          description: "Run command",
           status: ToolCallStatus.Executing,
         }),
         createToolCall({
-          callId: 'tool-3',
-          name: 'write_file',
-          description: 'Write to file',
+          callId: "tool-3",
+          name: "write_file",
+          description: "Write to file",
           status: ToolCallStatus.Pending,
         }),
       ];
@@ -194,20 +191,20 @@ describe('<ToolGroupMessage />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders with limited terminal height', () => {
+    it("renders with limited terminal height", () => {
       const toolCalls = [
         createToolCall({
-          callId: 'tool-1',
-          name: 'tool-with-result',
-          description: 'Tool with output',
+          callId: "tool-1",
+          name: "tool-with-result",
+          description: "Tool with output",
           resultDisplay:
-            'This is a long result that might need height constraints',
+            "This is a long result that might need height constraints",
         }),
         createToolCall({
-          callId: 'tool-2',
-          name: 'another-tool',
-          description: 'Another tool',
-          resultDisplay: 'More output here',
+          callId: "tool-2",
+          name: "another-tool",
+          description: "Another tool",
+          resultDisplay: "More output here",
         }),
       ];
       const { lastFrame } = renderWithProviders(
@@ -220,7 +217,7 @@ describe('<ToolGroupMessage />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders when not focused', () => {
+    it("renders when not focused", () => {
       const toolCalls = [createToolCall()];
       const { lastFrame } = renderWithProviders(
         <ToolGroupMessage
@@ -232,12 +229,12 @@ describe('<ToolGroupMessage />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders with narrow terminal width', () => {
+    it("renders with narrow terminal width", () => {
       const toolCalls = [
         createToolCall({
-          name: 'very-long-tool-name-that-might-wrap',
+          name: "very-long-tool-name-that-might-wrap",
           description:
-            'This is a very long description that might cause wrapping issues',
+            "This is a very long description that might cause wrapping issues",
         }),
       ];
       const { lastFrame } = renderWithProviders(
@@ -250,7 +247,7 @@ describe('<ToolGroupMessage />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('renders empty tool calls array', () => {
+    it("renders empty tool calls array", () => {
       const { lastFrame } = renderWithProviders(
         <ToolGroupMessage {...baseProps} toolCalls={[]} />,
       );
@@ -258,8 +255,8 @@ describe('<ToolGroupMessage />', () => {
     });
   });
 
-  describe('Border Color Logic', () => {
-    it('uses yellow border when tools are pending', () => {
+  describe("Border Color Logic", () => {
+    it("uses yellow border when tools are pending", () => {
       const toolCalls = [createToolCall({ status: ToolCallStatus.Pending })];
       const { lastFrame } = renderWithProviders(
         <ToolGroupMessage {...baseProps} toolCalls={toolCalls} />,
@@ -268,10 +265,10 @@ describe('<ToolGroupMessage />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('uses yellow border for shell commands even when successful', () => {
+    it("uses yellow border for shell commands even when successful", () => {
       const toolCalls = [
         createToolCall({
-          name: 'run_shell_command',
+          name: "run_shell_command",
           status: ToolCallStatus.Success,
         }),
       ];
@@ -281,12 +278,12 @@ describe('<ToolGroupMessage />', () => {
       expect(lastFrame()).toMatchSnapshot();
     });
 
-    it('uses gray border when all tools are successful and no shell commands', () => {
+    it("uses gray border when all tools are successful and no shell commands", () => {
       const toolCalls = [
         createToolCall({ status: ToolCallStatus.Success }),
         createToolCall({
-          callId: 'tool-2',
-          name: 'another-tool',
+          callId: "tool-2",
+          name: "another-tool",
           status: ToolCallStatus.Success,
         }),
       ];
@@ -297,20 +294,20 @@ describe('<ToolGroupMessage />', () => {
     });
   });
 
-  describe('Height Calculation', () => {
-    it('calculates available height correctly with multiple tools with results', () => {
+  describe("Height Calculation", () => {
+    it("calculates available height correctly with multiple tools with results", () => {
       const toolCalls = [
         createToolCall({
-          callId: 'tool-1',
-          resultDisplay: 'Result 1',
+          callId: "tool-1",
+          resultDisplay: "Result 1",
         }),
         createToolCall({
-          callId: 'tool-2',
-          resultDisplay: 'Result 2',
+          callId: "tool-2",
+          resultDisplay: "Result 2",
         }),
         createToolCall({
-          callId: 'tool-3',
-          resultDisplay: '', // No result
+          callId: "tool-3",
+          resultDisplay: "", // No result
         }),
       ];
       const { lastFrame } = renderWithProviders(
@@ -324,28 +321,28 @@ describe('<ToolGroupMessage />', () => {
     });
   });
 
-  describe('Confirmation Handling', () => {
-    it('shows confirmation dialog for first confirming tool only', () => {
+  describe("Confirmation Handling", () => {
+    it("shows confirmation dialog for first confirming tool only", () => {
       const toolCalls = [
         createToolCall({
-          callId: 'tool-1',
-          name: 'first-confirm',
+          callId: "tool-1",
+          name: "first-confirm",
           status: ToolCallStatus.Confirming,
           confirmationDetails: {
-            type: 'info',
-            title: 'Confirm First Tool',
-            prompt: 'Confirm first tool',
+            type: "info",
+            title: "Confirm First Tool",
+            prompt: "Confirm first tool",
             onConfirm: vi.fn(),
           },
         }),
         createToolCall({
-          callId: 'tool-2',
-          name: 'second-confirm',
+          callId: "tool-2",
+          name: "second-confirm",
           status: ToolCallStatus.Confirming,
           confirmationDetails: {
-            type: 'info',
-            title: 'Confirm Second Tool',
-            prompt: 'Confirm second tool',
+            type: "info",
+            title: "Confirm Second Tool",
+            prompt: "Confirm second tool",
             onConfirm: vi.fn(),
           },
         }),

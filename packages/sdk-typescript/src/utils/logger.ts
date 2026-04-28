@@ -1,4 +1,4 @@
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface LoggerConfig {
   debug?: boolean;
@@ -22,7 +22,7 @@ const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
 
 export class SdkLogger {
   private static config: LoggerConfig = {};
-  private static effectiveLevel: LogLevel = 'error';
+  private static effectiveLevel: LogLevel = "error";
 
   static configure(config: LoggerConfig): void {
     this.config = config;
@@ -35,23 +35,23 @@ export class SdkLogger {
     }
 
     if (this.config.debug) {
-      return 'debug';
+      return "debug";
     }
 
-    const envLevel = process.env['DEBUG_TRAM_CODE_SDK_LEVEL'];
+    const envLevel = process.env["DEBUG_TRAM_CODE_SDK_LEVEL"];
     if (envLevel && this.isValidLogLevel(envLevel)) {
       return envLevel as LogLevel;
     }
 
-    if (process.env['DEBUG_TRAM_CODE_SDK']) {
-      return 'debug';
+    if (process.env["DEBUG_TRAM_CODE_SDK"]) {
+      return "debug";
     }
 
-    return 'error';
+    return "error";
   }
 
   private static isValidLogLevel(level: string): boolean {
-    return ['debug', 'info', 'warn', 'error'].includes(level);
+    return ["debug", "info", "warn", "error"].includes(level);
   }
 
   private static shouldLog(level: LogLevel): boolean {
@@ -61,11 +61,11 @@ export class SdkLogger {
   private static formatTimestamp(): string {
     const now = new Date();
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
 
@@ -82,7 +82,7 @@ export class SdkLogger {
     if (args.length > 0) {
       const argsStr = args
         .map((arg) => {
-          if (typeof arg === 'string') {
+          if (typeof arg === "string") {
             return arg;
           }
           if (arg instanceof Error) {
@@ -94,7 +94,7 @@ export class SdkLogger {
             return String(arg);
           }
         })
-        .join(' ');
+        .join(" ");
       fullMessage += ` ${argsStr}`;
     }
 
@@ -116,10 +116,10 @@ export class SdkLogger {
     if (this.config.stderr) {
       this.config.stderr(formattedMessage);
     } else {
-      if (level === 'warn' || level === 'error') {
-        process.stderr.write(formattedMessage + '\n');
+      if (level === "warn" || level === "error") {
+        process.stderr.write(formattedMessage + "\n");
       } else {
-        process.stdout.write(formattedMessage + '\n');
+        process.stdout.write(formattedMessage + "\n");
       }
     }
   }
@@ -127,16 +127,16 @@ export class SdkLogger {
   static createLogger(scope: string): ScopedLogger {
     return {
       debug: (message: string, ...args: unknown[]) => {
-        this.log('debug', scope, message, args);
+        this.log("debug", scope, message, args);
       },
       info: (message: string, ...args: unknown[]) => {
-        this.log('info', scope, message, args);
+        this.log("info", scope, message, args);
       },
       warn: (message: string, ...args: unknown[]) => {
-        this.log('warn', scope, message, args);
+        this.log("warn", scope, message, args);
       },
       error: (message: string, ...args: unknown[]) => {
-        this.log('error', scope, message, args);
+        this.log("error", scope, message, args);
       },
     };
   }

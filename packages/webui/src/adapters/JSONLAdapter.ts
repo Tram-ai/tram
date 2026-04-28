@@ -10,7 +10,7 @@ import type {
   UnifiedMessage,
   JSONLMessage,
   UnifiedMessageType,
-} from './types.js';
+} from "./types.js";
 
 /**
  * Extract text content from different message formats
@@ -19,15 +19,15 @@ function extractContent(message?: {
   parts?: Array<{ text: string }>;
   content?: string | unknown[];
 }): string {
-  if (!message) return '';
+  if (!message) return "";
 
   // TRAM format: parts array
   if (message.parts?.length) {
-    return message.parts.map((p) => p.text).join('');
+    return message.parts.map((p) => p.text).join("");
   }
 
   // Claude format: string content
-  if (typeof message.content === 'string') {
+  if (typeof message.content === "string") {
     return message.content;
   }
 
@@ -35,17 +35,17 @@ function extractContent(message?: {
   if (Array.isArray(message.content)) {
     return message.content
       .filter(
-        (item): item is { type: 'text'; text: string } =>
-          typeof item === 'object' &&
+        (item): item is { type: "text"; text: string } =>
+          typeof item === "object" &&
           item !== null &&
-          'type' in item &&
-          item.type === 'text',
+          "type" in item &&
+          item.type === "text",
       )
       .map((item) => item.text)
-      .join('');
+      .join("");
   }
 
-  return '';
+  return "";
 }
 
 /**
@@ -60,23 +60,23 @@ function parseTimestamp(timestamp: string): number {
  * Determine the unified message type from JSONL message
  */
 function getMessageType(msg: JSONLMessage): UnifiedMessageType {
-  if (msg.type === 'tool_call') {
-    return 'tool_call';
+  if (msg.type === "tool_call") {
+    return "tool_call";
   }
-  if (msg.type === 'user') {
-    return 'user';
+  if (msg.type === "user") {
+    return "user";
   }
-  if (msg.message?.role === 'thinking') {
-    return 'thinking';
+  if (msg.message?.role === "thinking") {
+    return "thinking";
   }
-  return 'assistant';
+  return "assistant";
 }
 
 /**
  * Check if a message is a user type (breaks AI sequence)
  */
 function isUserType(msg: JSONLMessage | undefined): boolean {
-  return !msg || msg.type === 'user';
+  return !msg || msg.type === "user";
 }
 
 /**
@@ -105,7 +105,7 @@ export function adaptJSONLMessages(messages: JSONLMessage[]): UnifiedMessage[] {
       id: msg.uuid,
       type,
       timestamp: parseTimestamp(msg.timestamp),
-      content: type !== 'tool_call' ? extractContent(msg.message) : undefined,
+      content: type !== "tool_call" ? extractContent(msg.message) : undefined,
       toolCall: msg.toolCall,
       isFirst,
       isLast,
@@ -120,7 +120,7 @@ export function filterEmptyMessages(
   messages: UnifiedMessage[],
 ): UnifiedMessage[] {
   return messages.filter((msg) => {
-    if (msg.type === 'tool_call') return true;
+    if (msg.type === "tool_call") return true;
     return msg.content && msg.content.trim().length > 0;
   });
 }

@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ReactNode } from 'react';
-import { forwardRef } from 'react';
+import type { ReactNode } from "react";
+import { forwardRef } from "react";
 
 /**
  * Input size types
  */
-export type InputSize = 'sm' | 'md' | 'lg';
+export type InputSize = "sm" | "md" | "lg";
 
 /**
  * Input component props interface
  */
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
   /** Input size */
   size?: InputSize;
   /** Error state */
@@ -51,7 +51,7 @@ export interface InputProps
 const Input = forwardRef<HTMLInputElement, InputProps>(
   (
     {
-      size = 'md',
+      size = "md",
       error = false,
       errorMessage,
       label,
@@ -59,7 +59,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       leftElement,
       rightElement,
       fullWidth = false,
-      className = '',
+      className = "",
       id,
       disabled,
       ...props
@@ -69,31 +69,31 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
 
     const baseClasses =
-      'border rounded transition-colors focus:outline-none focus:ring-2';
+      "border rounded transition-colors focus:outline-none focus:ring-2";
 
     const sizeClasses: Record<InputSize, string> = {
-      sm: 'px-2 py-1 text-sm',
-      md: 'px-3 py-2',
-      lg: 'px-4 py-3 text-lg',
+      sm: "px-2 py-1 text-sm",
+      md: "px-3 py-2",
+      lg: "px-4 py-3 text-lg",
     };
 
     const stateClasses = error
-      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-      : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500';
+      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500";
 
     const disabledClasses = disabled
-      ? 'bg-gray-100 cursor-not-allowed opacity-60'
-      : 'bg-white';
+      ? "bg-gray-100 cursor-not-allowed opacity-60"
+      : "bg-white";
 
-    const widthClass = fullWidth ? 'w-full' : '';
+    const widthClass = fullWidth ? "w-full" : "";
 
     const paddingClasses = [
-      leftElement ? 'pl-10' : '',
-      rightElement ? 'pr-10' : '',
-    ].join(' ');
+      leftElement ? "pl-10" : "",
+      rightElement ? "pr-10" : "",
+    ].join(" ");
 
     return (
-      <div className={`${fullWidth ? 'w-full' : 'inline-block'}`}>
+      <div className={`${fullWidth ? "w-full" : "inline-block"}`}>
         {label && (
           <label
             htmlFor={inputId}
@@ -144,6 +144,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   },
 );
 
-Input.displayName = 'Input';
+Input.displayName = "Input";
 
 export default Input;

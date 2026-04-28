@@ -9,14 +9,14 @@ import type {
   OAuthClientInformationFull,
   OAuthClientMetadata,
   OAuthTokens,
-} from '@modelcontextprotocol/sdk/shared/auth.js';
-import { GoogleAuth } from 'google-auth-library';
-import type { MCPServerConfig } from '../config/config.js';
-import type { OAuthClientProvider } from '@modelcontextprotocol/sdk/client/auth.js';
-import { MCP_SA_IMPERSONATION_CLIENT_NAME } from './constants.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "@modelcontextprotocol/sdk/shared/auth.js";
+import { GoogleAuth } from "google-auth-library";
+import type { MCPServerConfig } from "../config/config.js";
+import type { OAuthClientProvider } from "@modelcontextprotocol/sdk/client/auth.js";
+import { MCP_SA_IMPERSONATION_CLIENT_NAME } from "./constants.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('MCP_SA_IMPERSONATION');
+const debugLogger = createDebugLogger("MCP_SA_IMPERSONATION");
 
 const fiveMinBufferMs = 5 * 60 * 1000;
 
@@ -34,13 +34,13 @@ export class ServiceAccountImpersonationProvider
   private tokenExpiryTime?: number;
 
   // Properties required by OAuthClientProvider, with no-op values
-  readonly redirectUrl = '';
+  readonly redirectUrl = "";
   readonly clientMetadata: OAuthClientMetadata = {
     client_name: MCP_SA_IMPERSONATION_CLIENT_NAME,
     redirect_uris: [],
     grant_types: [],
     response_types: [],
-    token_endpoint_auth_method: 'none',
+    token_endpoint_auth_method: "none",
   };
   private _clientInformation?: OAuthClientInformationFull;
 
@@ -48,20 +48,20 @@ export class ServiceAccountImpersonationProvider
     // This check is done in mcp-client.ts. This is just an additional check.
     if (!this.config.httpUrl && !this.config.url) {
       throw new Error(
-        'A url or httpUrl must be provided for the Service Account Impersonation provider',
+        "A url or httpUrl must be provided for the Service Account Impersonation provider",
       );
     }
 
     if (!config.targetAudience) {
       throw new Error(
-        'targetAudience must be provided for the Service Account Impersonation provider',
+        "targetAudience must be provided for the Service Account Impersonation provider",
       );
     }
     this.targetAudience = config.targetAudience;
 
     if (!config.targetServiceAccount) {
       throw new Error(
-        'targetServiceAccount must be provided for the Service Account Impersonation provider',
+        "targetServiceAccount must be provided for the Service Account Impersonation provider",
       );
     }
     this.targetServiceAccount = config.targetServiceAccount;
@@ -99,7 +99,7 @@ export class ServiceAccountImpersonationProvider
     try {
       const res = await client.request<{ token: string }>({
         url,
-        method: 'POST',
+        method: "POST",
         data: {
           audience: this.targetAudience,
           includeEmail: true,
@@ -108,7 +108,7 @@ export class ServiceAccountImpersonationProvider
       idToken = res.data.token;
 
       if (!idToken || idToken.length === 0) {
-        debugLogger.error('Failed to get ID token from Google');
+        debugLogger.error("Failed to get ID token from Google");
         return undefined;
       }
     } catch (e) {
@@ -123,7 +123,7 @@ export class ServiceAccountImpersonationProvider
     // present an ID token.
     const newTokens: OAuthTokens = {
       access_token: idToken,
-      token_type: 'Bearer',
+      token_type: "Bearer",
     };
 
     if (expiryTime) {
@@ -148,7 +148,7 @@ export class ServiceAccountImpersonationProvider
 
   codeVerifier(): string {
     // No-op
-    return '';
+    return "";
   }
 
   /**
@@ -159,10 +159,10 @@ export class ServiceAccountImpersonationProvider
   private parseTokenExpiry(idToken: string): number | undefined {
     try {
       const payload = JSON.parse(
-        Buffer.from(idToken.split('.')[1], 'base64').toString(),
+        Buffer.from(idToken.split(".")[1], "base64").toString(),
       );
 
-      if (payload && typeof payload.exp === 'number') {
+      if (payload && typeof payload.exp === "number") {
         return payload.exp * 1000; // Convert seconds to milliseconds
       }
     } catch (e) {

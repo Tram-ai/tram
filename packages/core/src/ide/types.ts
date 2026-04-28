@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * A file that is open in the IDE.
@@ -67,8 +67,8 @@ export type IdeContext = z.infer<typeof IdeContextSchema>;
  * A notification that the IDE context has been updated.
  */
 export const IdeContextNotificationSchema = z.object({
-  jsonrpc: z.literal('2.0'),
-  method: z.literal('ide/contextUpdate'),
+  jsonrpc: z.literal("2.0"),
+  method: z.literal("ide/contextUpdate"),
   params: IdeContextSchema,
 });
 
@@ -76,8 +76,8 @@ export const IdeContextNotificationSchema = z.object({
  * A notification that a diff has been accepted in the IDE.
  */
 export const IdeDiffAcceptedNotificationSchema = z.object({
-  jsonrpc: z.literal('2.0'),
-  method: z.literal('ide/diffAccepted'),
+  jsonrpc: z.literal("2.0"),
+  method: z.literal("ide/diffAccepted"),
   params: z.object({
     /**
      * The absolute path to the file that was diffed.
@@ -94,8 +94,8 @@ export const IdeDiffAcceptedNotificationSchema = z.object({
  * A notification that a diff has been rejected in the IDE.
  */
 export const IdeDiffRejectedNotificationSchema = z.object({
-  jsonrpc: z.literal('2.0'),
-  method: z.literal('ide/diffRejected'),
+  jsonrpc: z.literal("2.0"),
+  method: z.literal("ide/diffRejected"),
   params: z.object({
     /**
      * The absolute path to the file that was diffed.
@@ -111,8 +111,8 @@ export const IdeDiffRejectedNotificationSchema = z.object({
  * A notification that a diff has been closed in the IDE.
  */
 export const IdeDiffClosedNotificationSchema = z.object({
-  jsonrpc: z.literal('2.0'),
-  method: z.literal('ide/diffClosed'),
+  jsonrpc: z.literal("2.0"),
+  method: z.literal("ide/diffClosed"),
   params: z.object({
     filePath: z.string(),
     content: z.string().optional(),

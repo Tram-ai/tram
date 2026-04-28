@@ -206,7 +206,7 @@ export class TestRig {
   }
 
   /**
-   * The command and args to use to invoke Qwen Code CLI. Allows us to switch
+   * The command and args to use to invoke TRAM CLI. Allows us to switch
    * between using the bundled gemini.js (the default) and using the installed
    * 'qwen' (used to verify npm bundles).
    */

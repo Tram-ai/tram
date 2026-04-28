@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import { t } from '../../i18n/index.js';
+import { Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import { t } from "../../i18n/index.js";
 
 export const ContextUsageDisplay = ({
   promptTokenCount,
@@ -24,7 +24,7 @@ export const ContextUsageDisplay = ({
   const percentage = promptTokenCount / contextWindowSize;
   const percentageUsed = (percentage * 100).toFixed(1);
 
-  const label = terminalWidth < 100 ? t('% used') : t('% context used');
+  const label = terminalWidth < 100 ? t("% used") : t("% context used");
 
   return (
     <Text color={theme.text.secondary}>

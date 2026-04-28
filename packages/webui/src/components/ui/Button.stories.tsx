@@ -4,36 +4,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import Button from './Button';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import Button from "./Button";
 
 /**
  * Button component for user interactions.
  * Supports multiple variants and sizes.
  */
 const meta: Meta<typeof Button> = {
-  title: 'UI/Button',
+  title: "UI/Button",
   component: Button,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     variant: {
-      control: 'select',
-      options: ['primary', 'secondary', 'danger'],
-      description: 'Visual style variant',
+      control: "select",
+      options: ["primary", "secondary", "danger"],
+      description: "Visual style variant",
     },
     size: {
-      control: 'select',
-      options: ['sm', 'md', 'lg'],
-      description: 'Button size',
+      control: "select",
+      options: ["sm", "md", "lg"],
+      description: "Button size",
     },
     disabled: {
-      control: 'boolean',
-      description: 'Disabled state',
+      control: "boolean",
+      description: "Disabled state",
     },
-    onClick: { action: 'clicked' },
+    onClick: { action: "clicked" },
   },
 };
 
@@ -42,42 +42,42 @@ type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
   args: {
-    children: 'Primary Button',
-    variant: 'primary',
+    children: "Primary Button",
+    variant: "primary",
   },
 };
 
 export const Secondary: Story = {
   args: {
-    children: 'Secondary Button',
-    variant: 'secondary',
+    children: "Secondary Button",
+    variant: "secondary",
   },
 };
 
 export const Danger: Story = {
   args: {
-    children: 'Danger Button',
-    variant: 'danger',
+    children: "Danger Button",
+    variant: "danger",
   },
 };
 
 export const Small: Story = {
   args: {
-    children: 'Small Button',
-    size: 'sm',
+    children: "Small Button",
+    size: "sm",
   },
 };
 
 export const Large: Story = {
   args: {
-    children: 'Large Button',
-    size: 'lg',
+    children: "Large Button",
+    size: "lg",
   },
 };
 
 export const Disabled: Story = {
   args: {
-    children: 'Disabled Button',
+    children: "Disabled Button",
     disabled: true,
   },
 };

@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { CommandModule } from 'yargs';
-import { getExtensionManager } from './utils.js';
+import type { CommandModule } from "yargs";
+import { getExtensionManager } from "./utils.js";
 import {
   ExtensionSettingScope,
   getScopedEnvContents,
   promptForSetting,
   updateSetting,
-} from '@tram-ai/tram-core';
-import { t } from '../../i18n/index.js';
-import { writeStdoutLine } from '../../utils/stdioHelpers.js';
+} from "@tram-ai/tram-core";
+import { t } from "../../i18n/index.js";
+import { writeStdoutLine } from "../../utils/stdioHelpers.js";
 
 // --- SET COMMAND ---
 interface SetArgs {
@@ -23,25 +23,25 @@ interface SetArgs {
 }
 
 const setCommand: CommandModule<object, SetArgs> = {
-  command: 'set [--scope] <name> <setting>',
-  describe: t('Set a specific setting for an extension.'),
+  command: "set [--scope] <name> <setting>",
+  describe: t("Set a specific setting for an extension."),
   builder: (yargs) =>
     yargs
-      .positional('name', {
-        describe: t('Name of the extension to configure.'),
-        type: 'string',
+      .positional("name", {
+        describe: t("Name of the extension to configure."),
+        type: "string",
         demandOption: true,
       })
-      .positional('setting', {
-        describe: t('The setting to configure (name or env var).'),
-        type: 'string',
+      .positional("setting", {
+        describe: t("The setting to configure (name or env var)."),
+        type: "string",
         demandOption: true,
       })
-      .option('scope', {
-        describe: t('The scope to set the setting in.'),
-        type: 'string',
-        choices: ['user', 'workspace'],
-        default: 'user',
+      .option("scope", {
+        describe: t("The scope to set the setting in."),
+        type: "string",
+        choices: ["user", "workspace"],
+        default: "user",
       }),
   handler: async (args) => {
     const { name, setting, scope } = args;
@@ -70,12 +70,12 @@ interface ListArgs {
 }
 
 const listCommand: CommandModule<object, ListArgs> = {
-  command: 'list <name>',
-  describe: t('List all settings for an extension.'),
+  command: "list <name>",
+  describe: t("List all settings for an extension."),
   builder: (yargs) =>
-    yargs.positional('name', {
-      describe: t('Name of the extension.'),
-      type: 'string',
+    yargs.positional("name", {
+      describe: t("Name of the extension."),
+      type: "string",
       demandOption: true,
     }),
   handler: async (args) => {
@@ -112,38 +112,38 @@ const listCommand: CommandModule<object, ListArgs> = {
     for (const setting of extension.settings) {
       const value = mergedSettings[setting.envVar];
       let displayValue: string;
-      let scopeInfo = '';
+      let scopeInfo = "";
 
       if (workspaceSettings[setting.envVar] !== undefined) {
-        scopeInfo = ' ' + t('(workspace)');
+        scopeInfo = " " + t("(workspace)");
       } else if (userSettings[setting.envVar] !== undefined) {
-        scopeInfo = ' ' + t('(user)');
+        scopeInfo = " " + t("(user)");
       }
 
       if (value === undefined) {
-        displayValue = t('[not set]');
+        displayValue = t("[not set]");
       } else if (setting.sensitive) {
-        displayValue = t('[value stored in keychain]');
+        displayValue = t("[value stored in keychain]");
       } else {
         displayValue = value;
       }
       writeStdoutLine(`
 - ${setting.name} (${setting.envVar})`);
-      writeStdoutLine(`  ${t('Description:')} ${setting.description}`);
-      writeStdoutLine(`  ${t('Value:')} ${displayValue}${scopeInfo}`);
+      writeStdoutLine(`  ${t("Description:")} ${setting.description}`);
+      writeStdoutLine(`  ${t("Value:")} ${displayValue}${scopeInfo}`);
     }
   },
 };
 
 // --- SETTINGS COMMAND ---
 export const settingsCommand: CommandModule = {
-  command: 'settings <command>',
-  describe: t('Manage extension settings.'),
+  command: "settings <command>",
+  describe: t("Manage extension settings."),
   builder: (yargs) =>
     yargs
       .command(setCommand)
       .command(listCommand)
-      .demandCommand(1, t('You need to specify a command (set or list).'))
+      .demandCommand(1, t("You need to specify a command (set or list)."))
       .version(false),
   handler: () => {
     // This handler is not called when a subcommand is provided.

@@ -4,33 +4,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useState, useEffect } from 'react';
-import { Box, Text } from 'ink';
-import Link from 'ink-link';
-import { theme } from '../semantic-colors.js';
-import type { DeviceAuthorizationData } from '@tram-ai/tram-core';
-import { useKeypress } from '../hooks/useKeypress.js';
-import { t } from '../../i18n/index.js';
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Box, Text } from "ink";
+import Link from "ink-link";
+import { theme } from "../semantic-colors.js";
+import type { DeviceAuthorizationData } from "@tram-ai/tram-core";
+import { useKeypress } from "../hooks/useKeypress.js";
+import { t } from "../../i18n/index.js";
 
 interface TramOAuthProgressProps {
   onTimeout: () => void;
   onCancel: () => void;
   deviceAuth?: DeviceAuthorizationData;
   authStatus?:
-    | 'idle'
-    | 'polling'
-    | 'success'
-    | 'error'
-    | 'timeout'
-    | 'rate_limit';
+    | "idle"
+    | "polling"
+    | "success"
+    | "error"
+    | "timeout"
+    | "rate_limit";
   authMessage?: string | null;
 }
 
 function formatTime(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 }
 
 export function TramOAuthProgress({
@@ -42,13 +42,13 @@ export function TramOAuthProgress({
 }: TramOAuthProgressProps): React.JSX.Element {
   const defaultTimeout = deviceAuth?.expires_in || 300; // Default 5 minutes
   const [timeRemaining, setTimeRemaining] = useState<number>(defaultTimeout);
-  const [dots, setDots] = useState<string>('...');
+  const [dots, setDots] = useState<string>("...");
 
   useKeypress(
     (key) => {
-      if (authStatus === 'timeout' || authStatus === 'error') {
+      if (authStatus === "timeout" || authStatus === "error") {
         onCancel();
-      } else if (key.name === 'escape' || (key.ctrl && key.name === 'c')) {
+      } else if (key.name === "escape" || (key.ctrl && key.name === "c")) {
         onCancel();
       }
     },
@@ -72,7 +72,7 @@ export function TramOAuthProgress({
 
   // Animated dots — cycle through fixed-width patterns to avoid layout shift
   useEffect(() => {
-    const dotFrames = ['.  ', '.. ', '...'];
+    const dotFrames = [".  ", ".. ", "..."];
     let frameIndex = 0;
     const dotsTimer = setInterval(() => {
       frameIndex = (frameIndex + 1) % dotFrames.length;
@@ -83,7 +83,7 @@ export function TramOAuthProgress({
   }, []);
 
   // Handle timeout state
-  if (authStatus === 'timeout') {
+  if (authStatus === "timeout") {
     return (
       <Box
         borderStyle="round"
@@ -93,14 +93,14 @@ export function TramOAuthProgress({
         width="100%"
       >
         <Text bold color={theme.status.error}>
-          {t('TRAM OAuth Authentication Timeout')}
+          {t("TRAM OAuth Authentication Timeout")}
         </Text>
 
         <Box marginTop={1}>
           <Text>
             {authMessage ||
               t(
-                'OAuth token expired (over {{seconds}} seconds). Please select authentication method again.',
+                "OAuth token expired (over {{seconds}} seconds). Please select authentication method again.",
                 {
                   seconds: defaultTimeout.toString(),
                 },
@@ -110,14 +110,14 @@ export function TramOAuthProgress({
 
         <Box marginTop={1}>
           <Text color={theme.text.secondary}>
-            {t('Press any key to return to authentication type selection.')}
+            {t("Press any key to return to authentication type selection.")}
           </Text>
         </Box>
       </Box>
     );
   }
 
-  if (authStatus === 'error') {
+  if (authStatus === "error") {
     return (
       <Box
         borderStyle="round"
@@ -127,19 +127,19 @@ export function TramOAuthProgress({
         width="100%"
       >
         <Text bold color={theme.status.error}>
-          {t('TRAM OAuth Authentication Error')}
+          {t("TRAM OAuth Authentication Error")}
         </Text>
 
         <Box marginTop={1}>
           <Text>
             {authMessage ||
-              t('An error occurred during authentication. Please try again.')}
+              t("An error occurred during authentication. Please try again.")}
           </Text>
         </Box>
 
         <Box marginTop={1}>
           <Text color={theme.text.secondary}>
-            {t('Press any key to return to authentication type selection.')}
+            {t("Press any key to return to authentication type selection.")}
           </Text>
         </Box>
       </Box>
@@ -156,17 +156,17 @@ export function TramOAuthProgress({
         padding={1}
         width="100%"
       >
-        <Text bold>{t('TRAM OAuth Authentication')}</Text>
+        <Text bold>{t("TRAM OAuth Authentication")}</Text>
 
         <Box marginTop={1} flexDirection="column">
-          <Text>{t('Waiting for TRAM OAuth authentication...')}</Text>
+          <Text>{t("Waiting for TRAM OAuth authentication...")}</Text>
           <Text>
-            {t('Time remaining:')} {formatTime(timeRemaining)}
+            {t("Time remaining:")} {formatTime(timeRemaining)}
           </Text>
         </Box>
 
         <Box marginTop={1}>
-          <Text color={theme.text.secondary}>{t('Esc to cancel')}</Text>
+          <Text color={theme.text.secondary}>{t("Esc to cancel")}</Text>
         </Box>
       </Box>
     );
@@ -180,13 +180,13 @@ export function TramOAuthProgress({
       padding={1}
       width="100%"
     >
-      <Text bold>{t('TRAM OAuth Authentication')}</Text>
+      <Text bold>{t("TRAM OAuth Authentication")}</Text>
 
       <Box marginTop={1}>
-        <Text>{t('Please visit this URL to authorize:')}</Text>
+        <Text>{t("Please visit this URL to authorize:")}</Text>
       </Box>
 
-      <Link url={deviceAuth.verification_uri_complete || ''} fallback={false}>
+      <Link url={deviceAuth.verification_uri_complete || ""} fallback={false}>
         <Text color={theme.text.link} bold>
           {deviceAuth.verification_uri_complete}
         </Text>
@@ -194,16 +194,16 @@ export function TramOAuthProgress({
 
       <Box marginTop={1} flexDirection="column">
         <Text>
-          {t('Waiting for authorization')}
+          {t("Waiting for authorization")}
           {dots}
         </Text>
         <Text>
-          {t('Time remaining:')} {formatTime(timeRemaining)}
+          {t("Time remaining:")} {formatTime(timeRemaining)}
         </Text>
       </Box>
 
       <Box marginTop={1}>
-        <Text color={theme.text.secondary}>{t('Esc to cancel')}</Text>
+        <Text color={theme.text.secondary}>{t("Esc to cancel")}</Text>
       </Box>
     </Box>
   );

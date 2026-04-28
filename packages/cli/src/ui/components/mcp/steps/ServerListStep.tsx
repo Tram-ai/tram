@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo } from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../../../semantic-colors.js';
-import { useKeypress } from '../../../hooks/useKeypress.js';
-import { t } from '../../../../i18n/index.js';
-import type { ServerListStepProps, MCPServerDisplayInfo } from '../types.js';
+import { useState, useMemo } from "react";
+import { Box, Text } from "ink";
+import { theme } from "../../../semantic-colors.js";
+import { useKeypress } from "../../../hooks/useKeypress.js";
+import { t } from "../../../../i18n/index.js";
+import type { ServerListStepProps, MCPServerDisplayInfo } from "../types.js";
 import {
   groupServersBySource,
   getStatusIcon,
   getStatusColor,
-} from '../utils.js';
+} from "../utils.js";
 
 export const ServerListStep: React.FC<ServerListStepProps> = ({
   servers,
@@ -44,11 +44,11 @@ export const ServerListStep: React.FC<ServerListStepProps> = ({
 
   useKeypress(
     (key) => {
-      if (key.name === 'up') {
+      if (key.name === "up") {
         setSelectedIndex((prev) => Math.max(0, prev - 1));
-      } else if (key.name === 'down') {
+      } else if (key.name === "down") {
         setSelectedIndex((prev) => Math.min(flatServers.length - 1, prev + 1));
-      } else if (key.name === 'return') {
+      } else if (key.name === "return") {
         onSelect(selectedIndex);
       }
     },
@@ -59,10 +59,10 @@ export const ServerListStep: React.FC<ServerListStepProps> = ({
     return (
       <Box flexDirection="column">
         <Text color={theme.text.secondary}>
-          {t('No MCP servers configured.')}
+          {t("No MCP servers configured.")}
         </Text>
         <Text color={theme.text.secondary}>
-          {t('Add MCP servers to your settings to get started.')}
+          {t("Add MCP servers to your settings to get started.")}
         </Text>
       </Box>
     );
@@ -97,7 +97,7 @@ export const ServerListStep: React.FC<ServerListStepProps> = ({
             {`  ${group.displayName}`}
             {group.servers[0]?.configPath && (
               <Text color={theme.text.secondary}>
-                {' '}
+                {" "}
                 ({group.servers[0].configPath})
               </Text>
             )}
@@ -108,7 +108,7 @@ export const ServerListStep: React.FC<ServerListStepProps> = ({
                 groupIndex === currentPosition.groupIndex &&
                 itemIndex === currentPosition.itemIndex;
               const statusColor = server.isDisabled
-                ? 'yellow'
+                ? "yellow"
                 : getStatusColor(server.status);
 
               return (
@@ -119,7 +119,7 @@ export const ServerListStep: React.FC<ServerListStepProps> = ({
                         isSelected ? theme.text.accent : theme.text.primary
                       }
                     >
-                      {isSelected ? '❯' : ' '}
+                      {isSelected ? "❯" : " "}
                     </Text>
                   </Box>
                   {/* 服务器名称 - 固定宽度 */}
@@ -137,21 +137,21 @@ export const ServerListStep: React.FC<ServerListStepProps> = ({
                   {/* 状态图标和文本 */}
                   <Text
                     color={
-                      statusColor === 'green'
+                      statusColor === "green"
                         ? theme.status.success
-                        : statusColor === 'yellow'
+                        : statusColor === "yellow"
                           ? theme.status.warning
                           : theme.status.error
                     }
                   >
-                    {getStatusIcon(server.status)}{' '}
-                    {server.isDisabled ? t('disabled') : t(server.status)}
+                    {getStatusIcon(server.status)}{" "}
+                    {server.isDisabled ? t("disabled") : t(server.status)}
                   </Text>
                   {/* 显示无效工具警告 */}
                   {!!server.invalidToolCount && server.invalidToolCount > 0 && (
                     <Text color={theme.status.warning}>
-                      {' '}
-                      {t('{{count}} invalid tools', {
+                      {" "}
+                      {t("{{count}} invalid tools", {
                         count: String(server.invalidToolCount),
                       })}
                     </Text>
@@ -164,10 +164,10 @@ export const ServerListStep: React.FC<ServerListStepProps> = ({
       ))}
 
       {/* 提示信息 */}
-      {servers.some((s) => s.status === 'disconnected' && !s.isDisabled) && (
+      {servers.some((s) => s.status === "disconnected" && !s.isDisabled) && (
         <Box marginTop={1}>
           <Text color={theme.status.warning}>
-            ※ {t('Run tram --debug to see error logs')}
+            ※ {t("Run tram --debug to see error logs")}
           </Text>
         </Box>
       )}

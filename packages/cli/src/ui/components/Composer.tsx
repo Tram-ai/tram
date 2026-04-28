@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, useIsScreenReaderEnabled } from 'ink';
-import { useCallback, useState } from 'react';
-import { LoadingIndicator } from './LoadingIndicator.js';
-import { InputPrompt } from './InputPrompt.js';
-import { Footer } from './Footer.js';
-import { QueuedMessageDisplay } from './QueuedMessageDisplay.js';
-import { KeyboardShortcuts } from './KeyboardShortcuts.js';
-import { useUIState } from '../contexts/UIStateContext.js';
-import { useUIActions } from '../contexts/UIActionsContext.js';
-import { useVimMode } from '../contexts/VimModeContext.js';
-import { useConfig } from '../contexts/ConfigContext.js';
-import { StreamingState } from '../types.js';
-import { ConfigInitDisplay } from '../components/ConfigInitDisplay.js';
-import { FeedbackDialog } from '../FeedbackDialog.js';
-import { t } from '../../i18n/index.js';
+import { Box, useIsScreenReaderEnabled } from "ink";
+import { useCallback, useState } from "react";
+import { LoadingIndicator } from "./LoadingIndicator.js";
+import { InputPrompt } from "./InputPrompt.js";
+import { Footer } from "./Footer.js";
+import { QueuedMessageDisplay } from "./QueuedMessageDisplay.js";
+import { KeyboardShortcuts } from "./KeyboardShortcuts.js";
+import { useUIState } from "../contexts/UIStateContext.js";
+import { useUIActions } from "../contexts/UIActionsContext.js";
+import { useVimMode } from "../contexts/VimModeContext.js";
+import { useConfig } from "../contexts/ConfigContext.js";
+import { StreamingState } from "../types.js";
+import { ConfigInitDisplay } from "../components/ConfigInitDisplay.js";
+import { FeedbackDialog } from "../FeedbackDialog.js";
+import { t } from "../../i18n/index.js";
 
 export const Composer = () => {
   const config = useConfig();
@@ -107,8 +107,8 @@ export const Composer = () => {
           isEmbeddedShellFocused={uiState.embeddedShellFocused}
           placeholder={
             vimEnabled
-              ? '  ' + t("Press 'i' for INSERT mode and 'Esc' for NORMAL mode.")
-              : '  ' + t('Type your message or @path/to/file')
+              ? "  " + t("Press 'i' for INSERT mode and 'Esc' for NORMAL mode.")
+              : "  " + t("Type your message or @path/to/file")
           }
           promptSuggestion={uiState.promptSuggestion}
           onPromptSuggestionDismiss={uiState.dismissPromptSuggestion}

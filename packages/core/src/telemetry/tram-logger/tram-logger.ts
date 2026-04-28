@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Buffer } from 'buffer';
-import * as https from 'https';
-import * as os from 'node:os';
-import fs from 'node:fs';
-import path from 'node:path';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import { Buffer } from "buffer";
+import * as https from "https";
+import * as os from "node:os";
+import fs from "node:fs";
+import path from "node:path";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 import type {
   StartSessionEvent,
@@ -46,7 +46,7 @@ import type {
   RipgrepFallbackEvent,
   EndSessionEvent,
   ExtensionUpdateEvent,
-} from '../types.js';
+} from "../types.js";
 import type {
   RumEvent,
   RumViewEvent,
@@ -55,22 +55,22 @@ import type {
   RumExceptionEvent,
   RumPayload,
   RumOS,
-} from './event-types.js';
-import type { Config } from '../../config/config.js';
+} from "./event-types.js";
+import type { Config } from "../../config/config.js";
 import {
   createDebugLogger,
   type DebugLogger,
-} from '../../utils/debugLogger.js';
-import { safeJsonStringify } from '../../utils/safeJsonStringify.js';
-import { InstallationManager } from '../../utils/installationManager.js';
-import { FixedDeque } from 'mnemonist';
-import { AuthType } from '../../core/contentGenerator.js';
+} from "../../utils/debugLogger.js";
+import { safeJsonStringify } from "../../utils/safeJsonStringify.js";
+import { InstallationManager } from "../../utils/installationManager.js";
+import { FixedDeque } from "mnemonist";
+import { AuthType } from "../../core/contentGenerator.js";
 
 // Usage statistics collection endpoint
-const USAGE_STATS_HOSTNAME = 'gb4w8c3ygj-default-sea.rum.aliyuncs.com';
-const USAGE_STATS_PATH = '/';
+const USAGE_STATS_HOSTNAME = "gb4w8c3ygj-default-sea.rum.aliyuncs.com";
+const USAGE_STATS_PATH = "/";
 
-const RUN_APP_ID = 'gb4w8c3ygj@851d5d500f08f92';
+const RUN_APP_ID = "gb4w8c3ygj@851d5d500f08f92";
 
 /**
  * Interval in which buffered events are sent to RUM.
@@ -125,7 +125,7 @@ export class TramLogger {
    * Cached source information read from source.json.
    * Only read once at session start to avoid repeated file I/O.
    */
-  private sourceInfo: string = '';
+  private sourceInfo: string = "";
 
   /**
    * The value is true when there is a pending flush happening. This prevents
@@ -145,7 +145,7 @@ export class TramLogger {
 
   private constructor(config: Config) {
     this.config = config;
-    this.debugLogger = createDebugLogger('TRAM_LOGGER');
+    this.debugLogger = createDebugLogger("TRAM_LOGGER");
     this.events = new FixedDeque<RumEvent>(Array, MAX_EVENTS);
     this.installationManager = new InstallationManager();
     this.userId = this.generateUserId();
@@ -157,7 +157,7 @@ export class TramLogger {
   private generateUserId(): string {
     // Use InstallationManager to get installationId for userId
     const installationId = this.installationManager.getInstallationId();
-    return `user-${installationId ?? 'unknown'}`;
+    return `user-${installationId ?? "unknown"}`;
   }
 
   static getInstance(config?: Config): TramLogger | undefined {
@@ -187,12 +187,12 @@ export class TramLogger {
         );
       }
     } catch (error) {
-      this.debugLogger.error('TramLogger: Failed to enqueue log event.', error);
+      this.debugLogger.error("TramLogger: Failed to enqueue log event.", error);
     }
   }
 
   createRumEvent(
-    eventType: 'view' | 'action' | 'exception' | 'resource',
+    eventType: "view" | "action" | "exception" | "resource",
     type: string,
     name: string,
     properties: Partial<RumEvent>,
@@ -211,7 +211,7 @@ export class TramLogger {
     name: string,
     properties: Partial<RumViewEvent>,
   ): RumEvent {
-    return this.createRumEvent('view', type, name, properties);
+    return this.createRumEvent("view", type, name, properties);
   }
 
   createActionEvent(
@@ -219,7 +219,7 @@ export class TramLogger {
     name: string,
     properties: Partial<RumActionEvent>,
   ): RumEvent {
-    return this.createRumEvent('action', type, name, properties);
+    return this.createRumEvent("action", type, name, properties);
   }
 
   createResourceEvent(
@@ -227,7 +227,7 @@ export class TramLogger {
     name: string,
     properties: Partial<RumResourceEvent>,
   ): RumEvent {
-    return this.createRumEvent('resource', type, name, properties);
+    return this.createRumEvent("resource", type, name, properties);
   }
 
   createExceptionEvent(
@@ -235,7 +235,7 @@ export class TramLogger {
     name: string,
     properties: Partial<RumExceptionEvent>,
   ): RumEvent {
-    return this.createRumEvent('exception', type, name, properties);
+    return this.createRumEvent("exception", type, name, properties);
   }
 
   private getOsMetadata(): RumOS {
@@ -247,16 +247,16 @@ export class TramLogger {
 
   async createRumPayload(): Promise<RumPayload> {
     const authType = this.config?.getAuthType();
-    const version = this.config?.getCliVersion() || 'unknown';
+    const version = this.config?.getCliVersion() || "unknown";
     const osMetadata = this.getOsMetadata();
 
     // Use cached source information
     return {
       app: {
         id: RUN_APP_ID,
-        env: process.env['DEBUG'] ? 'dev' : 'prod',
-        version: version || 'unknown',
-        type: 'cli',
+        env: process.env["DEBUG"] ? "dev" : "prod",
+        version: version || "unknown",
+        type: "cli",
         channel: this.sourceInfo || undefined,
       },
       user: {
@@ -267,7 +267,7 @@ export class TramLogger {
       },
       view: {
         id: this.sessionId || this.config?.getSessionId(),
-        name: 'tram-cli',
+        name: "tram-cli",
       },
       os: osMetadata,
 
@@ -277,8 +277,8 @@ export class TramLogger {
         model: this.config?.getModel(),
         base_url:
           authType === AuthType.USE_OPENAI
-            ? this.config?.getContentGeneratorConfig().baseUrl || ''
-            : '',
+            ? this.config?.getContentGeneratorConfig().baseUrl || ""
+            : "",
         ...(this.config?.getChannel?.()
           ? { channel: this.config.getChannel() }
           : {}),
@@ -297,15 +297,15 @@ export class TramLogger {
 
   readSourceInfo(): string {
     try {
-      const sourceJsonPath = path.join(os.homedir(), '.tram', 'source.json');
+      const sourceJsonPath = path.join(os.homedir(), ".tram", "source.json");
       if (fs.existsSync(sourceJsonPath)) {
-        const sourceJsonContent = fs.readFileSync(sourceJsonPath, 'utf8');
+        const sourceJsonContent = fs.readFileSync(sourceJsonPath, "utf8");
         const sourceData = JSON.parse(sourceJsonContent);
         if (
           sourceData &&
-          typeof sourceData === 'object' &&
+          typeof sourceData === "object" &&
           sourceData.source &&
-          sourceData.source !== 'unknown'
+          sourceData.source !== "unknown"
         ) {
           return sourceData.source;
         }
@@ -313,13 +313,13 @@ export class TramLogger {
     } catch (_error) {
       // Ignore errors when reading source.json - continue without source info
     }
-    return '';
+    return "";
   }
 
   async flushToRum(): Promise<LogResponse> {
     if (this.isFlushInProgress) {
       this.debugLogger.debug(
-        'TramLogger: Flush already in progress, marking pending flush.',
+        "TramLogger: Flush already in progress, marking pending flush.",
       );
       this.pendingFlush = true;
       return Promise.resolve({});
@@ -343,10 +343,10 @@ export class TramLogger {
         const options = {
           hostname: USAGE_STATS_HOSTNAME,
           path: USAGE_STATS_PATH,
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Length': Buffer.byteLength(body),
-            'Content-Type': 'text/plain;charset=UTF-8',
+            "Content-Length": Buffer.byteLength(body),
+            "Content-Type": "text/plain;charset=UTF-8",
           },
         };
         const bufs: Buffer[] = [];
@@ -366,11 +366,11 @@ export class TramLogger {
               res.resume();
               return reject(err);
             }
-            res.on('data', (buf) => bufs.push(buf));
-            res.on('end', () => resolve(Buffer.concat(bufs)));
+            res.on("data", (buf) => bufs.push(buf));
+            res.on("end", () => resolve(Buffer.concat(bufs)));
           },
         );
-        req.on('error', reject);
+        req.on("error", reject);
         req.end(body);
       });
 
@@ -380,7 +380,7 @@ export class TramLogger {
       // Only log network errors if sufficient time has passed to avoid spam
       const now = Date.now();
       if (now - this.lastErrorLogTime > ERROR_LOG_INTERVAL_MS) {
-        this.debugLogger.error('RUM flush failed.', error);
+        this.debugLogger.error("RUM flush failed.", error);
         this.lastErrorLogTime = now;
       }
 
@@ -414,7 +414,7 @@ export class TramLogger {
     // Re-read source info at the start of each new session
     this.sourceInfo = this.readSourceInfo();
 
-    const applicationEvent = this.createViewEvent('session', 'session_start', {
+    const applicationEvent = this.createViewEvent("session", "session_start", {
       properties: {
         approval_mode: event.approval_mode,
         core_tools_enabled: event.core_tools_enabled,
@@ -439,7 +439,7 @@ export class TramLogger {
   }
 
   logEndSessionEvent(_event: EndSessionEvent): void {
-    const applicationEvent = this.createViewEvent('session', 'session_end', {});
+    const applicationEvent = this.createViewEvent("session", "session_end", {});
 
     // Flush immediately on session end.
     this.enqueueLogEvent(applicationEvent);
@@ -448,8 +448,8 @@ export class TramLogger {
 
   logConversationFinishedEvent(event: ConversationFinishedEvent): void {
     const rumEvent = this.createActionEvent(
-      'conversation',
-      'conversation_finished',
+      "conversation",
+      "conversation_finished",
       {
         properties: {
           approval_mode: event.approvalMode,
@@ -464,7 +464,7 @@ export class TramLogger {
 
   // user action events
   logNewPromptEvent(event: UserPromptEvent): void {
-    const rumEvent = this.createActionEvent('user', 'new_prompt', {
+    const rumEvent = this.createActionEvent("user", "new_prompt", {
       properties: {
         prompt_id: event.prompt_id,
         prompt_length: event.prompt_length,
@@ -476,7 +476,7 @@ export class TramLogger {
   }
 
   logRetryEvent(event: UserRetryEvent): void {
-    const rumEvent = this.createActionEvent('user', 'retry', {
+    const rumEvent = this.createActionEvent("user", "retry", {
       properties: {
         prompt_id: event.prompt_id,
       },
@@ -487,7 +487,7 @@ export class TramLogger {
   }
 
   logSlashCommandEvent(event: SlashCommandEvent): void {
-    const rumEvent = this.createActionEvent('user', 'slash_command', {
+    const rumEvent = this.createActionEvent("user", "slash_command", {
       properties: {
         command: event.command,
         subcommand: event.subcommand,
@@ -499,7 +499,7 @@ export class TramLogger {
   }
 
   logModelSlashCommandEvent(event: ModelSlashCommandEvent): void {
-    const rumEvent = this.createActionEvent('user', 'model_slash_command', {
+    const rumEvent = this.createActionEvent("user", "model_slash_command", {
       properties: {
         model: event.model_name,
       },
@@ -512,7 +512,7 @@ export class TramLogger {
   // tool call events
   logToolCallEvent(event: ToolCallEvent): void {
     const rumEvent = this.createActionEvent(
-      'tool',
+      "tool",
       `tool_call#${event.function_name}`,
       {
         properties: {
@@ -534,7 +534,7 @@ export class TramLogger {
 
   logFileOperationEvent(event: FileOperationEvent): void {
     const rumEvent = this.createActionEvent(
-      'tool',
+      "tool",
       `file_operation#${event.tool_name}`,
       {
         properties: {
@@ -553,7 +553,7 @@ export class TramLogger {
   }
 
   logSubagentExecutionEvent(event: SubagentExecutionEvent): void {
-    const rumEvent = this.createActionEvent('tool', 'subagent_execution', {
+    const rumEvent = this.createActionEvent("tool", "subagent_execution", {
       properties: {
         subagent_name: event.subagent_name,
         status: event.status,
@@ -571,7 +571,7 @@ export class TramLogger {
   }
 
   logToolOutputTruncatedEvent(event: ToolOutputTruncatedEvent): void {
-    const rumEvent = this.createActionEvent('tool', 'tool_output_truncated', {
+    const rumEvent = this.createActionEvent("tool", "tool_output_truncated", {
       properties: {
         tool_name: event.tool_name,
       },
@@ -589,7 +589,7 @@ export class TramLogger {
 
   // api events
   logApiRequestEvent(event: ApiRequestEvent): void {
-    const rumEvent = this.createResourceEvent('api', 'api_request', {
+    const rumEvent = this.createResourceEvent("api", "api_request", {
       properties: {
         model: event.model,
         prompt_id: event.prompt_id,
@@ -601,8 +601,8 @@ export class TramLogger {
   }
 
   logApiResponseEvent(event: ApiResponseEvent): void {
-    const rumEvent = this.createResourceEvent('api', 'api_response', {
-      status_code: event.status_code?.toString() ?? '',
+    const rumEvent = this.createResourceEvent("api", "api_response", {
+      status_code: event.status_code?.toString() ?? "",
       duration: event.duration_ms,
       success: 1,
       trace_id: event.response_id,
@@ -625,7 +625,7 @@ export class TramLogger {
   }
 
   logApiCancelEvent(event: ApiCancelEvent): void {
-    const rumEvent = this.createActionEvent('api', 'api_cancel', {
+    const rumEvent = this.createActionEvent("api", "api_cancel", {
       properties: {
         model: event.model,
         prompt_id: event.prompt_id,
@@ -638,11 +638,11 @@ export class TramLogger {
   }
 
   logApiErrorEvent(event: ApiErrorEvent): void {
-    const rumEvent = this.createResourceEvent('api', 'api_error', {
-      status_code: event.status_code?.toString() ?? '',
+    const rumEvent = this.createResourceEvent("api", "api_error", {
+      status_code: event.status_code?.toString() ?? "",
       duration: event.duration_ms,
       success: 0,
-      message: event.error,
+      message: event.error_message,
       trace_id: event.response_id,
       properties: {
         auth_type: event.auth_type,
@@ -658,8 +658,8 @@ export class TramLogger {
 
   // error events
   logInvalidChunkEvent(event: InvalidChunkEvent): void {
-    const rumEvent = this.createExceptionEvent('error', 'invalid_chunk', {
-      subtype: 'invalid_chunk',
+    const rumEvent = this.createExceptionEvent("error", "invalid_chunk", {
+      subtype: "invalid_chunk",
       message: event.error_message,
     });
 
@@ -669,10 +669,10 @@ export class TramLogger {
 
   logContentRetryFailureEvent(event: ContentRetryFailureEvent): void {
     const rumEvent = this.createExceptionEvent(
-      'error',
-      'content_retry_failure',
+      "error",
+      "content_retry_failure",
       {
-        subtype: 'content_retry_failure',
+        subtype: "content_retry_failure",
         message: `Content retry failed after ${event.total_attempts} attempts`,
         properties: {
           error_type: event.final_error_type,
@@ -688,10 +688,10 @@ export class TramLogger {
 
   logMalformedJsonResponseEvent(event: MalformedJsonResponseEvent): void {
     const rumEvent = this.createExceptionEvent(
-      'error',
-      'malformed_json_response',
+      "error",
+      "malformed_json_response",
       {
-        subtype: 'malformed_json_response',
+        subtype: "malformed_json_response",
         properties: {
           model: event.model,
         },
@@ -703,8 +703,8 @@ export class TramLogger {
   }
 
   logLoopDetectedEvent(event: LoopDetectedEvent): void {
-    const rumEvent = this.createExceptionEvent('error', 'loop_detected', {
-      subtype: 'loop_detected',
+    const rumEvent = this.createExceptionEvent("error", "loop_detected", {
+      subtype: "loop_detected",
       properties: {
         prompt_id: event.prompt_id,
         error_type: event.loop_type,
@@ -717,10 +717,10 @@ export class TramLogger {
 
   logKittySequenceOverflowEvent(event: KittySequenceOverflowEvent): void {
     const rumEvent = this.createExceptionEvent(
-      'overflow',
-      'kitty_sequence_overflow',
+      "overflow",
+      "kitty_sequence_overflow",
       {
-        subtype: 'kitty_sequence_overflow',
+        subtype: "kitty_sequence_overflow",
         properties: {
           sequence_length: event.sequence_length,
         },
@@ -736,7 +736,7 @@ export class TramLogger {
 
   // ide events
   logIdeConnectionEvent(event: IdeConnectionEvent): void {
-    const rumEvent = this.createActionEvent('ide', 'ide_connection', {
+    const rumEvent = this.createActionEvent("ide", "ide_connection", {
       properties: {
         connection_type: event.connection_type,
       },
@@ -748,7 +748,7 @@ export class TramLogger {
 
   // extension events
   logExtensionInstallEvent(event: ExtensionInstallEvent): void {
-    const rumEvent = this.createActionEvent('extension', 'extension_install', {
+    const rumEvent = this.createActionEvent("extension", "extension_install", {
       properties: {
         extension_name: event.extension_name,
         extension_version: event.extension_version,
@@ -763,8 +763,8 @@ export class TramLogger {
 
   logExtensionUninstallEvent(event: ExtensionUninstallEvent): void {
     const rumEvent = this.createActionEvent(
-      'extension',
-      'extension_uninstall',
+      "extension",
+      "extension_uninstall",
       {
         properties: {
           extension_name: event.extension_name,
@@ -778,7 +778,7 @@ export class TramLogger {
   }
 
   logExtensionUpdateEvent(event: ExtensionUpdateEvent): void {
-    const rumEvent = this.createActionEvent('extension', 'extension_update', {
+    const rumEvent = this.createActionEvent("extension", "extension_update", {
       properties: {
         extension_name: event.extension_name,
         status: event.status,
@@ -794,7 +794,7 @@ export class TramLogger {
   }
 
   logExtensionEnableEvent(event: ExtensionEnableEvent): void {
-    const rumEvent = this.createActionEvent('extension', 'extension_enable', {
+    const rumEvent = this.createActionEvent("extension", "extension_enable", {
       properties: {
         extension_name: event.extension_name,
         setting_scope: event.setting_scope,
@@ -806,7 +806,7 @@ export class TramLogger {
   }
 
   logExtensionDisableEvent(event: ExtensionDisableEvent): void {
-    const rumEvent = this.createActionEvent('extension', 'extension_disable', {
+    const rumEvent = this.createActionEvent("extension", "extension_disable", {
       properties: {
         extension_name: event.extension_name,
         setting_scope: event.setting_scope,
@@ -818,14 +818,14 @@ export class TramLogger {
   }
 
   logAuthEvent(event: AuthEvent): void {
-    const rumEvent = this.createActionEvent('auth', 'auth', {
+    const rumEvent = this.createActionEvent("auth", "auth", {
       properties: {
         auth_type: event.auth_type,
         action_type: event.action_type,
-        success: event.status === 'success' ? 1 : 0,
-        error_type: event.status !== 'success' ? event.status : undefined,
+        success: event.status === "success" ? 1 : 0,
+        error_type: event.status !== "success" ? event.status : undefined,
         error_message:
-          event.status === 'error' ? event.error_message : undefined,
+          event.status === "error" ? event.error_message : undefined,
       },
     });
 
@@ -835,7 +835,7 @@ export class TramLogger {
 
   // misc events
   logFlashFallbackEvent(event: FlashFallbackEvent): void {
-    const rumEvent = this.createActionEvent('misc', 'flash_fallback', {
+    const rumEvent = this.createActionEvent("misc", "flash_fallback", {
       properties: {
         auth_type: event.auth_type,
       },
@@ -846,7 +846,7 @@ export class TramLogger {
   }
 
   logRipgrepFallbackEvent(event: RipgrepFallbackEvent): void {
-    const rumEvent = this.createActionEvent('misc', 'ripgrep_fallback', {
+    const rumEvent = this.createActionEvent("misc", "ripgrep_fallback", {
       properties: {
         platform: process.platform,
         arch: process.arch,
@@ -862,8 +862,8 @@ export class TramLogger {
 
   logLoopDetectionDisabledEvent(): void {
     const rumEvent = this.createActionEvent(
-      'misc',
-      'loop_detection_disabled',
+      "misc",
+      "loop_detection_disabled",
       {},
     );
 
@@ -872,7 +872,7 @@ export class TramLogger {
   }
 
   logNextSpeakerCheck(event: NextSpeakerCheckEvent): void {
-    const rumEvent = this.createActionEvent('misc', 'next_speaker_check', {
+    const rumEvent = this.createActionEvent("misc", "next_speaker_check", {
       properties: {
         prompt_id: event.prompt_id,
         finish_reason: event.finish_reason,
@@ -885,7 +885,7 @@ export class TramLogger {
   }
 
   logSkillLaunchEvent(event: SkillLaunchEvent): void {
-    const rumEvent = this.createActionEvent('misc', 'skill_launch', {
+    const rumEvent = this.createActionEvent("misc", "skill_launch", {
       properties: {
         skill_name: event.skill_name,
         success: event.success ? 1 : 0,
@@ -897,13 +897,13 @@ export class TramLogger {
   }
 
   logUserFeedbackEvent(event: UserFeedbackEvent): void {
-    const rumEvent = this.createActionEvent('user', 'user_feedback', {
+    const rumEvent = this.createActionEvent("user", "user_feedback", {
       properties: {
         session_id: event.session_id,
         rating: event.rating,
         model: event.model,
         approval_mode: event.approval_mode,
-        prompt_id: event.prompt_id || '',
+        prompt_id: event.prompt_id || "",
       },
     });
 
@@ -912,7 +912,7 @@ export class TramLogger {
   }
 
   logChatCompressionEvent(event: ChatCompressionEvent): void {
-    const rumEvent = this.createActionEvent('misc', 'chat_compression', {
+    const rumEvent = this.createActionEvent("misc", "chat_compression", {
       properties: {
         tokens_before: event.tokens_before,
         tokens_after: event.tokens_after,
@@ -924,7 +924,7 @@ export class TramLogger {
   }
 
   logContentRetryEvent(event: ContentRetryEvent): void {
-    const rumEvent = this.createActionEvent('misc', 'content_retry', {
+    const rumEvent = this.createActionEvent("misc", "content_retry", {
       properties: {
         error_type: event.error_type,
         attempt_number: event.attempt_number,
@@ -941,10 +941,10 @@ export class TramLogger {
     if (!proxyUrl) return undefined;
     // undici which is widely used in the repo can only support http & https proxy protocol,
     // https://github.com/nodejs/undici/issues/2224
-    if (proxyUrl.startsWith('http')) {
+    if (proxyUrl.startsWith("http")) {
       return new HttpsProxyAgent(proxyUrl);
     } else {
-      throw new Error('Unsupported proxy type');
+      throw new Error("Unsupported proxy type");
     }
   }
 

@@ -4,25 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getErrorMessage } from '../../utils/errors.js';
-import { MessageType } from '../types.js';
+import { getErrorMessage } from "../../utils/errors.js";
+import { MessageType } from "../types.js";
 import {
   type CommandContext,
   type SlashCommand,
   CommandKind,
-} from './types.js';
-import { t } from '../../i18n/index.js';
+} from "./types.js";
+import { t } from "../../i18n/index.js";
 import {
   ExtensionManager,
   parseInstallSource,
   createDebugLogger,
-} from '@tram-ai/tram-core';
-import open from 'open';
+} from "@tram-ai/tram-core";
+import open from "open";
 
-const debugLogger = createDebugLogger('EXTENSIONS_COMMAND');
+const debugLogger = createDebugLogger("EXTENSIONS_COMMAND");
 const EXTENSION_EXPLORE_URL = {
-  Gemini: 'https://geminicli.com/extensions/',
-  ClaudeCode: 'https://claudemarketplaces.com/',
+  Gemini: "https://geminicli.com/extensions/",
+  ClaudeCode: "https://claudemarketplaces.com/",
 } as const;
 
 type ExtensionExploreSource = keyof typeof EXTENSION_EXPLORE_URL;
@@ -31,37 +31,37 @@ async function exploreAction(context: CommandContext, args: string) {
   const source = args.trim();
   const extensionsUrl = source
     ? EXTENSION_EXPLORE_URL[source as ExtensionExploreSource]
-    : '';
+    : "";
   if (!extensionsUrl) {
     context.ui.addItem(
       {
         type: MessageType.ERROR,
-        text: t('Unknown extensions source: {{source}}.', { source }),
+        text: t("Unknown extensions source: {{source}}.", { source }),
       },
       Date.now(),
     );
     return;
   }
   // Only check for NODE_ENV for explicit test mode, not for unit test framework
-  if (process.env['NODE_ENV'] === 'test') {
+  if (process.env["NODE_ENV"] === "test") {
     context.ui.addItem(
       {
         type: MessageType.INFO,
         text: t(
-          'Would open extensions page in your browser: {{url}} (skipped in test environment)',
+          "Would open extensions page in your browser: {{url}} (skipped in test environment)",
           { url: extensionsUrl },
         ),
       },
       Date.now(),
     );
   } else if (
-    process.env['SANDBOX'] &&
-    process.env['SANDBOX'] !== 'sandbox-exec'
+    process.env["SANDBOX"] &&
+    process.env["SANDBOX"] !== "sandbox-exec"
   ) {
     context.ui.addItem(
       {
         type: MessageType.INFO,
-        text: t('View available extensions at {{url}}', { url: extensionsUrl }),
+        text: t("View available extensions at {{url}}", { url: extensionsUrl }),
       },
       Date.now(),
     );
@@ -69,7 +69,7 @@ async function exploreAction(context: CommandContext, args: string) {
     context.ui.addItem(
       {
         type: MessageType.INFO,
-        text: t('Opening extensions page in your browser: {{url}}', {
+        text: t("Opening extensions page in your browser: {{url}}", {
           url: extensionsUrl,
         }),
       },
@@ -82,7 +82,7 @@ async function exploreAction(context: CommandContext, args: string) {
         {
           type: MessageType.ERROR,
           text: t(
-            'Failed to open browser. Check out the extensions gallery at {{url}}',
+            "Failed to open browser. Check out the extensions gallery at {{url}}",
             { url: extensionsUrl },
           ),
         },
@@ -94,8 +94,8 @@ async function exploreAction(context: CommandContext, args: string) {
 
 async function listAction(_context: CommandContext, _args: string) {
   return {
-    type: 'dialog' as const,
-    dialog: 'extensions_manage' as const,
+    type: "dialog" as const,
+    dialog: "extensions_manage" as const,
   };
 }
 
@@ -113,7 +113,7 @@ async function installAction(context: CommandContext, args: string) {
     context.ui.addItem(
       {
         type: MessageType.ERROR,
-        text: t('Usage: /extensions install <source>'),
+        text: t("Usage: /extensions install <source>"),
       },
       Date.now(),
     );
@@ -162,12 +162,12 @@ export async function completeExtensions(
 ) {
   let extensions = context.services.config?.getExtensions() ?? [];
 
-  if (context.invocation?.name === 'enable') {
+  if (context.invocation?.name === "enable") {
     extensions = extensions.filter((ext) => !ext.isActive);
   }
   if (
-    context.invocation?.name === 'disable' ||
-    context.invocation?.name === 'restart'
+    context.invocation?.name === "disable" ||
+    context.invocation?.name === "restart"
   ) {
     extensions = extensions.filter((ext) => ext.isActive);
   }
@@ -177,11 +177,11 @@ export async function completeExtensions(
   );
 
   if (
-    context.invocation?.name !== 'uninstall' &&
-    context.invocation?.name !== 'detail'
+    context.invocation?.name !== "uninstall" &&
+    context.invocation?.name !== "detail"
   ) {
-    if ('--all'.startsWith(partialArg) || 'all'.startsWith(partialArg)) {
-      suggestions.unshift('--all');
+    if ("--all".startsWith(partialArg) || "all".startsWith(partialArg)) {
+      suggestions.unshift("--all");
     }
   }
 
@@ -211,9 +211,9 @@ export async function completeExtensionsExplore(
 }
 
 const exploreExtensionsCommand: SlashCommand = {
-  name: 'explore',
+  name: "explore",
   get description() {
-    return t('Open extensions page in your browser');
+    return t("Open extensions page in your browser");
   },
   kind: CommandKind.BUILT_IN,
   action: exploreAction,
@@ -221,27 +221,27 @@ const exploreExtensionsCommand: SlashCommand = {
 };
 
 const manageExtensionsCommand: SlashCommand = {
-  name: 'manage',
+  name: "manage",
   get description() {
-    return t('Manage installed extensions');
+    return t("Manage installed extensions");
   },
   kind: CommandKind.BUILT_IN,
   action: listAction,
 };
 
 const installCommand: SlashCommand = {
-  name: 'install',
+  name: "install",
   get description() {
-    return t('Install an extension from a git repo or local path');
+    return t("Install an extension from a git repo or local path");
   },
   kind: CommandKind.BUILT_IN,
   action: installAction,
 };
 
 export const extensionsCommand: SlashCommand = {
-  name: 'extensions',
+  name: "extensions",
   get description() {
-    return t('Manage extensions');
+    return t("Manage extensions");
   },
   kind: CommandKind.BUILT_IN,
   subCommands: [

@@ -4,12 +4,12 @@ import type {
   ExtensionRequestOptions,
   SkillConfig,
   SubagentConfig,
-} from '@tram-ai/tram-core';
-import type { ConfirmationRequest } from '../../ui/types.js';
-import chalk from 'chalk';
-import prompts from 'prompts';
-import { t } from '../../i18n/index.js';
-import { writeStdoutLine } from '../../utils/stdioHelpers.js';
+} from "@tram-ai/tram-core";
+import type { ConfirmationRequest } from "../../ui/types.js";
+import chalk from "chalk";
+import prompts from "prompts";
+import { t } from "../../i18n/index.js";
+import { writeStdoutLine } from "../../utils/stdioHelpers.js";
 
 /**
  * Requests consent from the user to perform an action, by reading a Y/n
@@ -25,7 +25,7 @@ export async function requestConsentNonInteractive(
 ): Promise<boolean> {
   writeStdoutLine(consentDescription);
   const result = await promptForConsentNonInteractive(
-    t('Do you want to continue? [Y/n]: '),
+    t("Do you want to continue? [Y/n]: "),
   );
   return result;
 }
@@ -45,7 +45,7 @@ export async function requestChoicePluginNonInteractive(
   const plugins = marketplace.plugins;
 
   if (plugins.length === 0) {
-    throw new Error(t('No plugins available in this marketplace.'));
+    throw new Error(t("No plugins available in this marketplace."));
   }
 
   // Build choices for prompts select
@@ -56,8 +56,8 @@ export async function requestChoicePluginNonInteractive(
   }));
 
   const response = await prompts({
-    type: 'select',
-    name: 'plugin',
+    type: "select",
+    name: "plugin",
     message: t('Select a plugin to install from marketplace "{{name}}":', {
       name: marketplace.name,
     }),
@@ -67,7 +67,7 @@ export async function requestChoicePluginNonInteractive(
 
   // Handle cancellation (Ctrl+C)
   if (response.plugin === undefined) {
-    throw new Error(t('Plugin selection cancelled.'));
+    throw new Error(t("Plugin selection cancelled."));
   }
 
   return response.plugin;
@@ -87,7 +87,7 @@ export async function requestConsentInteractive(
   addExtensionUpdateConfirmationRequest: (value: ConfirmationRequest) => void,
 ): Promise<boolean> {
   return promptForConsentInteractive(
-    consentDescription + '\n\n' + t('Do you want to continue?'),
+    consentDescription + "\n\n" + t("Do you want to continue?"),
     addExtensionUpdateConfirmationRequest,
   );
 }
@@ -103,7 +103,7 @@ export async function requestConsentInteractive(
 async function promptForConsentNonInteractive(
   prompt: string,
 ): Promise<boolean> {
-  const readline = await import('node:readline');
+  const readline = await import("node:readline");
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -112,7 +112,7 @@ async function promptForConsentNonInteractive(
   return new Promise((resolve) => {
     rl.question(prompt, (answer) => {
       rl.close();
-      resolve(['y', ''].includes(answer.trim().toLowerCase()));
+      resolve(["y", ""].includes(answer.trim().toLowerCase()));
     });
   });
 }
@@ -149,13 +149,13 @@ export function extensionConsentString(
   commands: string[] = [],
   skills: SkillConfig[] = [],
   subagents: SubagentConfig[] = [],
-  originSource: string = 'Tram',
+  originSource: string = "Tram",
 ): string {
   const output: string[] = [];
-  if (originSource !== 'Tram') {
+  if (originSource !== "Tram") {
     output.push(
       t(
-        'You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.',
+        "You are installing an extension from {{originSource}}. Some features may not work perfectly with TRAM.",
         { originSource },
       ),
     );
@@ -166,53 +166,53 @@ export function extensionConsentString(
   );
   output.push(
     t(
-      '**Extensions may introduce unexpected behavior. Ensure you have investigated the extension source and trust the author.**',
+      "**Extensions may introduce unexpected behavior. Ensure you have investigated the extension source and trust the author.**",
     ),
   );
 
   if (mcpServerEntries.length) {
-    output.push(t('This extension will run the following MCP servers:'));
+    output.push(t("This extension will run the following MCP servers:"));
     for (const [key, mcpServer] of mcpServerEntries) {
       const isLocal = !!mcpServer.command;
       const source =
         mcpServer.httpUrl ??
-        `${mcpServer.command || ''}${mcpServer.args ? ' ' + mcpServer.args.join(' ') : ''}`;
+        `${mcpServer.command || ""}${mcpServer.args ? " " + mcpServer.args.join(" ") : ""}`;
       output.push(
-        `  * ${key} (${isLocal ? t('local') : t('remote')}): ${source}`,
+        `  * ${key} (${isLocal ? t("local") : t("remote")}): ${source}`,
       );
     }
   }
   if (commands && commands.length > 0) {
     output.push(
-      t('This extension will add the following commands: {{commands}}.', {
-        commands: commands.join(', '),
+      t("This extension will add the following commands: {{commands}}.", {
+        commands: commands.join(", "),
       }),
     );
   }
   if (extensionConfig.contextFileName) {
     const fileName = Array.isArray(extensionConfig.contextFileName)
-      ? extensionConfig.contextFileName.join(', ')
+      ? extensionConfig.contextFileName.join(", ")
       : extensionConfig.contextFileName;
     output.push(
       t(
-        'This extension will append info to your TRAM.md context using {{fileName}}',
+        "This extension will append info to your TRAM.md context using {{fileName}}",
         { fileName },
       ),
     );
   }
   if (skills.length > 0) {
-    output.push(t('This extension will install the following skills:'));
+    output.push(t("This extension will install the following skills:"));
     for (const skill of skills) {
       output.push(`  * ${chalk.bold(skill.name)}: ${skill.description}`);
     }
   }
   if (subagents.length > 0) {
-    output.push(t('This extension will install the following subagents:'));
+    output.push(t("This extension will install the following subagents:"));
     for (const subagent of subagents) {
       output.push(`  * ${chalk.bold(subagent.name)}: ${subagent.description}`);
     }
   }
-  return output.join('\n');
+  return output.join("\n");
 }
 
 /**
@@ -231,7 +231,7 @@ export const requestConsentOrFail = async (
   if (!options) return;
   const {
     extensionConfig,
-    originSource = 'Tram',
+    originSource = "Tram",
     commands = [],
     skills = [],
     subagents = [],

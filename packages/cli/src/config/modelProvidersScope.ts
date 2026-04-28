@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SettingScope, type LoadedSettings } from './settings.js';
+import { SettingScope, type LoadedSettings } from "./settings.js";
 
 export function hasOwnModelProviders(settingsObj: unknown): boolean {
-  if (!settingsObj || typeof settingsObj !== 'object') {
+  if (!settingsObj || typeof settingsObj !== "object") {
     return false;
   }
   const obj = settingsObj as Record<string, unknown>;
   // Treat an explicitly configured empty object (modelProviders: {}) as "owned"
   // by this scope, which is important when mergeStrategy is REPLACE.
-  return Object.prototype.hasOwnProperty.call(obj, 'modelProviders');
+  return Object.prototype.hasOwnProperty.call(obj, "modelProviders");
 }
 
 /**

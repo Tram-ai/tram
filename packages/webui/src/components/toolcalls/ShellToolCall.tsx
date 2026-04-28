@@ -7,30 +7,30 @@
  * Pure UI component - platform interactions via usePlatform hook
  */
 
-import type { FC } from 'react';
+import type { FC } from "react";
 import {
   ToolCallContainer,
   CopyButton,
   safeTitle,
   groupContent,
-} from './shared/index.js';
-import { usePlatform } from '../../context/PlatformContext.js';
+} from "./shared/index.js";
+import { usePlatform } from "../../context/PlatformContext.js";
 import type {
   BaseToolCallProps,
   ToolCallContainerProps,
-} from './shared/index.js';
-import { getToolDisplayLabel } from './labelUtils.js';
+} from "./shared/index.js";
+import { getToolDisplayLabel } from "./labelUtils.js";
 
-import './ShellToolCall.css';
+import "./ShellToolCall.css";
 
-type ShellVariant = 'execute' | 'bash';
+type ShellVariant = "execute" | "bash";
 
 /**
  * Custom container for Execute variant with different styling
  */
 const ExecuteToolCallContainer: FC<ToolCallContainerProps> = ({
   label,
-  status = 'success',
+  status = "success",
   children,
   toolCallId: _toolCallId,
   labelSuffix,
@@ -39,7 +39,7 @@ const ExecuteToolCallContainer: FC<ToolCallContainerProps> = ({
   isLast = false,
 }) => (
   <div
-    className={`ExecuteToolCall tram-message message-item ${_className || ''} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
+    className={`ExecuteToolCall tram-message message-item ${_className || ""} relative pl-[30px] py-2 select-text toolcall-container toolcall-status-${status}`}
     data-first={isFirst}
     data-last={isLast}
   >
@@ -67,7 +67,7 @@ const getCommandText = (
   title: unknown,
   rawInput?: unknown,
 ): string => {
-  if (variant === 'execute' && rawInput && typeof rawInput === 'object') {
+  if (variant === "execute" && rawInput && typeof rawInput === "object") {
     const description = (rawInput as Record<string, unknown>).description;
     const describedTitle = safeTitle(description);
     if (describedTitle) {
@@ -84,11 +84,11 @@ const getInputCommand = (
   commandText: string,
   rawInput?: string | object,
 ): string => {
-  if (rawInput && typeof rawInput === 'object') {
+  if (rawInput && typeof rawInput === "object") {
     const inputObj = rawInput as Record<string, unknown>;
     return (inputObj.command as string | undefined) || commandText;
   }
-  if (typeof rawInput === 'string') {
+  if (typeof rawInput === "string") {
     return rawInput;
   }
   return commandText;
@@ -117,7 +117,7 @@ const ShellToolCallImpl: FC<BaseToolCallProps & { variant: ShellVariant }> = ({
     }
     // Fallback: post message for platforms that handle it differently
     platform.postMessage({
-      type: 'createAndOpenTempFile',
+      type: "createAndOpenTempFile",
       data: {
         content,
         fileName,
@@ -129,7 +129,7 @@ const ShellToolCallImpl: FC<BaseToolCallProps & { variant: ShellVariant }> = ({
   const inputCommand = getInputCommand(commandText, rawInput);
 
   const Container =
-    variant === 'execute' ? ExecuteToolCallContainer : ToolCallContainer;
+    variant === "execute" ? ExecuteToolCallContainer : ToolCallContainer;
   const label = getToolDisplayLabel({ kind: toolCall.kind, title });
 
   // Group content by type
@@ -143,23 +143,23 @@ const ShellToolCallImpl: FC<BaseToolCallProps & { variant: ShellVariant }> = ({
   // Handle click on OUT section
   const handleOutClick = () => {
     if (textOutputs.length > 0) {
-      const output = textOutputs.join('\n');
+      const output = textOutputs.join("\n");
       openTempFile(output, `${classPrefix}-output-${toolCallId}`);
     }
   };
 
   // Map tool status to container status for proper bullet coloring
   const containerStatus:
-    | 'success'
-    | 'error'
-    | 'warning'
-    | 'loading'
-    | 'default' =
-    errors.length > 0 || (variant === 'execute' && toolCall.status === 'failed')
-      ? 'error'
-      : toolCall.status === 'in_progress' || toolCall.status === 'pending'
-        ? 'loading'
-        : 'success';
+    | "success"
+    | "error"
+    | "warning"
+    | "loading"
+    | "default" =
+    errors.length > 0 || (variant === "execute" && toolCall.status === "failed")
+      ? "error"
+      : toolCall.status === "in_progress" || toolCall.status === "pending"
+        ? "loading"
+        : "success";
 
   // Error case
   if (errors.length > 0) {
@@ -182,7 +182,7 @@ const ShellToolCallImpl: FC<BaseToolCallProps & { variant: ShellVariant }> = ({
             <div
               className={`${classPrefix}-toolcall-row ${classPrefix}-toolcall-row-with-copy group`}
               onClick={handleInClick}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             >
               <div className={`${classPrefix}-toolcall-label`}>IN</div>
               <div className={`${classPrefix}-toolcall-row-content`}>
@@ -199,7 +199,7 @@ const ShellToolCallImpl: FC<BaseToolCallProps & { variant: ShellVariant }> = ({
                 <pre
                   className={`${classPrefix}-toolcall-pre ${classPrefix}-toolcall-error-content`}
                 >
-                  {errors.join('\n')}
+                  {errors.join("\n")}
                 </pre>
               </div>
             </div>
@@ -211,9 +211,9 @@ const ShellToolCallImpl: FC<BaseToolCallProps & { variant: ShellVariant }> = ({
 
   // Success with output
   if (textOutputs.length > 0) {
-    const output = textOutputs.join('\n');
+    const output = textOutputs.join("\n");
     const truncatedOutput =
-      output.length > 500 ? output.substring(0, 500) + '...' : output;
+      output.length > 500 ? output.substring(0, 500) + "..." : output;
 
     return (
       <Container
@@ -234,7 +234,7 @@ const ShellToolCallImpl: FC<BaseToolCallProps & { variant: ShellVariant }> = ({
             <div
               className={`${classPrefix}-toolcall-row ${classPrefix}-toolcall-row-with-copy group`}
               onClick={handleInClick}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             >
               <div className={`${classPrefix}-toolcall-label`}>IN</div>
               <div className={`${classPrefix}-toolcall-row-content`}>
@@ -248,7 +248,7 @@ const ShellToolCallImpl: FC<BaseToolCallProps & { variant: ShellVariant }> = ({
             <div
               className={`${classPrefix}-toolcall-row`}
               onClick={handleOutClick}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             >
               <div className={`${classPrefix}-toolcall-label`}>OUT</div>
               <div className={`${classPrefix}-toolcall-row-content`}>
@@ -277,7 +277,7 @@ const ShellToolCallImpl: FC<BaseToolCallProps & { variant: ShellVariant }> = ({
       <div
         className="inline-flex text-[var(--app-secondary-foreground)] text-[0.85em] opacity-70 mt-[2px] mb-[2px] flex-row items-start w-full gap-1"
         onClick={handleInClick}
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: "pointer" }}
       >
         <span className="flex-shrink-0 relative top-[-0.1em]">⎿</span>
         <span className="flex-shrink-0 w-full">{commandText}</span>
@@ -293,6 +293,6 @@ const ShellToolCallImpl: FC<BaseToolCallProps & { variant: ShellVariant }> = ({
 export const ShellToolCall: FC<BaseToolCallProps> = (props) => {
   const normalizedKind = props.toolCall.kind.toLowerCase();
   const variant: ShellVariant =
-    normalizedKind === 'execute' ? 'execute' : 'bash';
+    normalizedKind === "execute" ? "execute" : "bash";
   return <ShellToolCallImpl {...props} variant={variant} />;
 };

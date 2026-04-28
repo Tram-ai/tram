@@ -4,24 +4,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Agent, ProxyAgent, type Dispatcher } from 'undici';
+import { Agent, ProxyAgent, type Dispatcher } from "undici";
 
 /**
  * JavaScript runtime type
  */
-export type Runtime = 'node' | 'bun' | 'unknown';
+export type Runtime = "node" | "bun" | "unknown";
 
 /**
  * Detect the current JavaScript runtime
  */
 export function detectRuntime(): Runtime {
-  if (typeof process !== 'undefined' && process.versions?.['bun']) {
-    return 'bun';
+  if (typeof process !== "undefined" && process.versions?.["bun"]) {
+    return "bun";
   }
-  if (typeof process !== 'undefined' && process.versions?.node) {
-    return 'node';
+  if (typeof process !== "undefined" && process.versions?.node) {
+    return "node";
   }
-  return 'unknown';
+  return "unknown";
 }
 
 /**
@@ -50,20 +50,20 @@ export type AnthropicRuntimeFetchOptions = {
 /**
  * SDK type identifier
  */
-export type SDKType = 'openai' | 'anthropic';
+export type SDKType = "openai" | "anthropic";
 
 /**
  * Build runtime-specific fetch options for OpenAI SDK
  */
 export function buildRuntimeFetchOptions(
-  sdkType: 'openai',
+  sdkType: "openai",
   proxyUrl?: string,
 ): OpenAIRuntimeFetchOptions;
 /**
  * Build runtime-specific fetch options for Anthropic SDK
  */
 export function buildRuntimeFetchOptions(
-  sdkType: 'anthropic',
+  sdkType: "anthropic",
   proxyUrl?: string,
 ): AnthropicRuntimeFetchOptions;
 /**
@@ -86,8 +86,8 @@ export function buildRuntimeFetchOptions(
   // ensure user-configured timeouts work as expected for long-running requests.
 
   switch (runtime) {
-    case 'bun': {
-      if (sdkType === 'openai') {
+    case "bun": {
+      if (sdkType === "openai") {
         // Bun: Disable built-in 300s timeout to let OpenAI SDK timeout control
         // This ensures user-configured timeout works as expected without interference
         return {
@@ -117,7 +117,7 @@ export function buildRuntimeFetchOptions(
       }
     }
 
-    case 'node': {
+    case "node": {
       // Node.js: Use undici dispatcher for both SDKs.
       // This enables proxy support and disables undici timeouts so SDK timeout
       // controls the total request time.
@@ -148,6 +148,6 @@ function buildFetchOptionsWithDispatcher(
         });
     return { fetchOptions: { dispatcher } };
   } catch {
-    return sdkType === 'openai' ? undefined : {};
+    return sdkType === "openai" ? undefined : {};
   }
 }

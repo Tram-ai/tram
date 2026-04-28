@@ -7,8 +7,8 @@
  * Displays token usage information with tooltip
  */
 
-import type { FC } from 'react';
-import { Tooltip } from '../ui/Tooltip.js';
+import type { FC } from "react";
+import { Tooltip } from "../ui/Tooltip.js";
 
 /**
  * Context usage information
@@ -86,7 +86,7 @@ export const ContextIndicator: FC<ContextIndicatorProps> = ({
   const tooltipContent = (
     <div className="flex flex-col gap-1">
       <div className="font-medium">
-        {percentFormatted}% • {formatNumber(contextUsage.usedTokens)} /{' '}
+        {percentFormatted}% • {formatNumber(contextUsage.usedTokens)} /{" "}
         {formatNumber(contextUsage.tokenLimit)} context used
       </div>
     </div>
@@ -118,8 +118,8 @@ export const ContextIndicator: FC<ContextIndicatorProps> = ({
             strokeDasharray={circumference}
             strokeDashoffset={dashOffset}
             style={{
-              transform: 'rotate(-90deg)',
-              transformOrigin: '50% 50%',
+              transform: "rotate(-90deg)",
+              transformOrigin: "50% 50%",
             }}
           />
         </svg>

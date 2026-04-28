@@ -1,8 +1,8 @@
-import type { GroupPolicy, GroupConfig, Envelope } from './types.js';
+import type { GroupPolicy, GroupConfig, Envelope } from "./types.js";
 
 export interface GroupCheckResult {
   allowed: boolean;
-  reason?: 'disabled' | 'not_allowlisted' | 'mention_required';
+  reason?: "disabled" | "not_allowlisted" | "mention_required";
 }
 
 export class GroupGate {
@@ -10,7 +10,7 @@ export class GroupGate {
   private groups: Record<string, GroupConfig>;
 
   constructor(
-    policy: GroupPolicy = 'disabled',
+    policy: GroupPolicy = "disabled",
     groups: Record<string, GroupConfig> = {},
   ) {
     this.policy = policy;
@@ -32,24 +32,24 @@ export class GroupGate {
       return { allowed: true };
     }
 
-    if (this.policy === 'disabled') {
-      return { allowed: false, reason: 'disabled' };
+    if (this.policy === "disabled") {
+      return { allowed: false, reason: "disabled" };
     }
 
-    if (this.policy === 'allowlist') {
+    if (this.policy === "allowlist") {
       // In allowlist mode, "*" is only a default config — not a wildcard allow.
       // The group must be explicitly listed by ID.
       if (!this.groups[envelope.chatId]) {
-        return { allowed: false, reason: 'not_allowlisted' };
+        return { allowed: false, reason: "not_allowlisted" };
       }
     }
 
     // Per-group config, falling back to "*" defaults, then built-in defaults
-    const groupConfig = this.groups[envelope.chatId] || this.groups['*'] || {};
+    const groupConfig = this.groups[envelope.chatId] || this.groups["*"] || {};
     const requireMention = groupConfig.requireMention ?? true;
 
     if (requireMention && !envelope.isMentioned && !envelope.isReplyToBot) {
-      return { allowed: false, reason: 'mention_required' };
+      return { allowed: false, reason: "mention_required" };
     }
 
     return { allowed: true };

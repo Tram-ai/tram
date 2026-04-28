@@ -1,14 +1,14 @@
-import type { CommandModule } from 'yargs';
-import { PairingStore } from '@qwen-code/channel-base';
-import { writeStderrLine, writeStdoutLine } from '../../utils/stdioHelpers.js';
+import type { CommandModule } from "yargs";
+import { PairingStore } from "@tram-ai/channel-base";
+import { writeStderrLine, writeStdoutLine } from "../../utils/stdioHelpers.js";
 
 export const pairingListCommand: CommandModule<object, { name: string }> = {
-  command: 'list <name>',
-  describe: 'List pending pairing requests for a channel',
+  command: "list <name>",
+  describe: "List pending pairing requests for a channel",
   builder: (yargs) =>
-    yargs.positional('name', {
-      type: 'string',
-      describe: 'Channel name',
+    yargs.positional("name", {
+      type: "string",
+      describe: "Channel name",
       demandOption: true,
     }),
   handler: (argv) => {
@@ -16,7 +16,7 @@ export const pairingListCommand: CommandModule<object, { name: string }> = {
     const pending = store.listPending();
 
     if (pending.length === 0) {
-      writeStdoutLine('No pending pairing requests.');
+      writeStdoutLine("No pending pairing requests.");
       return;
     }
 
@@ -34,18 +34,18 @@ export const pairingApproveCommand: CommandModule<
   object,
   { name: string; code: string }
 > = {
-  command: 'approve <name> <code>',
-  describe: 'Approve a pending pairing request',
+  command: "approve <name> <code>",
+  describe: "Approve a pending pairing request",
   builder: (yargs) =>
     yargs
-      .positional('name', {
-        type: 'string',
-        describe: 'Channel name',
+      .positional("name", {
+        type: "string",
+        describe: "Channel name",
         demandOption: true,
       })
-      .positional('code', {
-        type: 'string',
-        describe: 'Pairing code',
+      .positional("code", {
+        type: "string",
+        describe: "Pairing code",
         demandOption: true,
       }),
   handler: (argv) => {

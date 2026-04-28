@@ -9,7 +9,7 @@ import {
   ndJsonStream,
   PROTOCOL_VERSION,
   RequestError,
-} from '@agentclientprotocol/sdk';
+} from "@agentclientprotocol/sdk";
 import type {
   Client,
   Agent,
@@ -28,18 +28,18 @@ import type {
   PromptResponse,
   SetSessionModeResponse,
   SetSessionModelResponse,
-} from '@agentclientprotocol/sdk';
+} from "@agentclientprotocol/sdk";
 import type {
   AuthenticateUpdateNotification,
   AskUserQuestionRequest,
-} from '../types/acpTypes.js';
-import type { ApprovalModeValue } from '../types/approvalModeValueTypes.js';
-import type { ChildProcess, SpawnOptions } from 'child_process';
-import { spawn } from 'child_process';
-import { Readable, Writable } from 'node:stream';
-import * as fs from 'node:fs';
-import { AcpFileHandler } from './acpFileHandler.js';
-import { ACP_ERROR_CODES } from '../constants/acpSchema.js';
+} from "../types/acpTypes.js";
+import type { ApprovalModeValue } from "../types/approvalModeValueTypes.js";
+import type { ChildProcess, SpawnOptions } from "child_process";
+import { spawn } from "child_process";
+import { Readable, Writable } from "node:stream";
+import * as fs from "node:fs";
+import { AcpFileHandler } from "./acpFileHandler.js";
+import { ACP_ERROR_CODES } from "../constants/acpSchema.js";
 
 /**
  * ACP Connection Handler for VSCode Extension
@@ -61,7 +61,7 @@ export class AcpConnection {
     optionId: string;
   }> = (data) =>
     Promise.resolve({
-      optionId: this.resolvePermissionOptionId(data) || '',
+      optionId: this.resolvePermissionOptionId(data) || "",
     });
   onAuthenticateUpdate: (data: AuthenticateUpdateNotification) => void =
     () => {};
@@ -72,7 +72,7 @@ export class AcpConnection {
   onAskUserQuestion: (data: AskUserQuestionRequest) => Promise<{
     optionId: string;
     answers?: Record<string, string>;
-  }> = () => Promise.resolve({ optionId: 'cancel' });
+  }> = () => Promise.resolve({ optionId: "cancel" });
   onInitialized: (init: unknown) => void = () => {};
 
   async connect(
@@ -91,23 +91,23 @@ export class AcpConnection {
     const env = { ...process.env };
 
     const proxyArg = extraArgs.find(
-      (arg, i) => arg === '--proxy' && i + 1 < extraArgs.length,
+      (arg, i) => arg === "--proxy" && i + 1 < extraArgs.length,
     );
     if (proxyArg) {
-      const proxyIndex = extraArgs.indexOf('--proxy');
+      const proxyIndex = extraArgs.indexOf("--proxy");
       const proxyUrl = extraArgs[proxyIndex + 1];
-      console.log('[ACP] Setting proxy environment variables:', proxyUrl);
-      env['HTTP_PROXY'] = proxyUrl;
-      env['HTTPS_PROXY'] = proxyUrl;
-      env['http_proxy'] = proxyUrl;
-      env['https_proxy'] = proxyUrl;
+      console.log("[ACP] Setting proxy environment variables:", proxyUrl);
+      env["HTTP_PROXY"] = proxyUrl;
+      env["HTTPS_PROXY"] = proxyUrl;
+      env["http_proxy"] = proxyUrl;
+      env["https_proxy"] = proxyUrl;
     }
 
     const spawnCommand: string = process.execPath;
     const spawnArgs: string[] = [
       cliEntryPath,
-      '--acp',
-      '--channel=VSCode',
+      "--acp",
+      "--channel=VSCode",
       ...extraArgs,
     ];
 
@@ -117,11 +117,11 @@ export class AcpConnection {
       );
     }
 
-    console.log('[ACP] Spawning command:', spawnCommand, spawnArgs.join(' '));
+    console.log("[ACP] Spawning command:", spawnCommand, spawnArgs.join(" "));
 
     const options: SpawnOptions = {
       cwd: workingDir,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ["pipe", "pipe", "pipe"],
       env,
       shell: false,
     };
@@ -139,12 +139,12 @@ export class AcpConnection {
       rejectOnExit = reject;
     });
 
-    this.child!.stderr?.on('data', (data: Buffer) => {
+    this.child!.stderr?.on("data", (data: Buffer) => {
       const message = data.toString();
       stderrChunks.push(message);
       if (
-        message.toLowerCase().includes('error') &&
-        !message.includes('Loaded cached')
+        message.toLowerCase().includes("error") &&
+        !message.includes("Loaded cached")
       ) {
         console.error(`[ACP tram]:`, message);
       } else {
@@ -152,21 +152,21 @@ export class AcpConnection {
       }
     });
 
-    this.child!.on('error', (error: Error) => {
+    this.child!.on("error", (error: Error) => {
       spawnError = error;
     });
 
-    this.child!.on('exit', (code: number | null, signal: string | null) => {
+    this.child!.on("exit", (code: number | null, signal: string | null) => {
       console.error(
         `[ACP tram] Process exited with code: ${code}, signal: ${signal}`,
       );
       this.lastExitCode = code;
       this.lastExitSignal = signal;
 
-      const stderrOutput = stderrChunks.join('').trim();
+      const stderrOutput = stderrChunks.join("").trim();
       const stderrSuffix = stderrOutput
         ? `\nCLI stderr: ${stderrOutput.slice(-500)}`
-        : '';
+        : "";
       rejectOnExit?.(
         new Error(
           `Qwen ACP process exited unexpectedly (exit code: ${code}, signal: ${signal})${stderrSuffix}`,
@@ -190,10 +190,10 @@ export class AcpConnection {
     if (!this.child || this.child.killed) {
       const code = this.lastExitCode ?? this.child?.exitCode ?? null;
       const signal = this.lastExitSignal;
-      const stderrOutput = stderrChunks.join('').trim();
+      const stderrOutput = stderrChunks.join("").trim();
       const stderrSuffix = stderrOutput
         ? `\nCLI stderr: ${stderrOutput.slice(-500)}`
-        : '';
+        : "";
       throw new Error(
         `Qwen ACP process failed to start (exit code: ${code}, signal: ${signal})${stderrSuffix}`,
       );
@@ -212,7 +212,7 @@ export class AcpConnection {
       (_agent: Agent): Client => ({
         sessionUpdate: (params: SessionNotification): Promise<void> => {
           console.log(
-            '[ACP] >>> Processing session_update:',
+            "[ACP] >>> Processing session_update:",
             JSON.stringify(params).substring(0, 300),
           );
           this.onSessionUpdate(params as unknown as SessionNotification);
@@ -233,9 +233,9 @@ export class AcpConnection {
             if (isAskUserQuestion) {
               // Handle ask_user_question separately via dedicated callback
               const questions = (rawInput?.questions ??
-                []) as AskUserQuestionRequest['questions'];
+                []) as AskUserQuestionRequest["questions"];
               const metadata =
-                rawInput?.metadata as AskUserQuestionRequest['metadata'];
+                rawInput?.metadata as AskUserQuestionRequest["metadata"];
 
               const response = await this.onAskUserQuestion({
                 sessionId: permissionData.sessionId,
@@ -245,25 +245,25 @@ export class AcpConnection {
 
               const optionId = response?.optionId;
               const answers = response?.answers;
-              console.log('[ACP] AskUserQuestion response:', optionId);
+              console.log("[ACP] AskUserQuestion response:", optionId);
 
-              let outcome: 'selected' | 'cancelled';
+              let outcome: "selected" | "cancelled";
               if (
                 optionId &&
-                (optionId.includes('reject') || optionId === 'cancel')
+                (optionId.includes("reject") || optionId === "cancel")
               ) {
-                outcome = 'cancelled';
+                outcome = "cancelled";
               } else {
-                outcome = 'selected';
+                outcome = "selected";
               }
 
-              if (outcome === 'cancelled') {
-                return { outcome: { outcome: 'cancelled' } };
+              if (outcome === "cancelled") {
+                return { outcome: { outcome: "cancelled" } };
               }
               return {
                 outcome: {
-                  outcome: 'selected',
-                  optionId: optionId || 'proceed_once',
+                  outcome: "selected",
+                  optionId: optionId || "proceed_once",
                 },
                 answers,
               } as RequestPermissionResponse;
@@ -272,36 +272,36 @@ export class AcpConnection {
             // Handle regular permission request
             const response = await this.onPermissionRequest(permissionData);
             const optionId = response?.optionId;
-            console.log('[ACP] Permission request:', optionId);
-            let outcome: 'selected' | 'cancelled';
+            console.log("[ACP] Permission request:", optionId);
+            let outcome: "selected" | "cancelled";
             if (
               optionId &&
-              (optionId.includes('reject') || optionId === 'cancel')
+              (optionId.includes("reject") || optionId === "cancel")
             ) {
-              outcome = 'cancelled';
+              outcome = "cancelled";
             } else {
-              outcome = 'selected';
+              outcome = "selected";
             }
-            console.log('[ACP] Permission outcome:', outcome);
+            console.log("[ACP] Permission outcome:", outcome);
 
-            if (outcome === 'cancelled') {
-              return { outcome: { outcome: 'cancelled' } };
+            if (outcome === "cancelled") {
+              return { outcome: { outcome: "cancelled" } };
             }
             const selectedOptionId = this.resolvePermissionOptionId(
               permissionData,
               optionId,
             );
             if (!selectedOptionId) {
-              return { outcome: { outcome: 'cancelled' } };
+              return { outcome: { outcome: "cancelled" } };
             }
             return {
               outcome: {
-                outcome: 'selected',
+                outcome: "selected",
                 optionId: selectedOptionId,
               },
             };
           } catch (_error) {
-            return { outcome: { outcome: 'cancelled' } };
+            return { outcome: { outcome: "cancelled" } };
           }
         },
 
@@ -336,9 +336,9 @@ export class AcpConnection {
           method: string,
           params: Record<string, unknown>,
         ): Promise<void> => {
-          if (method === 'authenticate/update') {
+          if (method === "authenticate/update") {
             console.log(
-              '[ACP] >>> Processing authenticate_update:',
+              "[ACP] >>> Processing authenticate_update:",
               JSON.stringify(params).substring(0, 300),
             );
             this.onAuthenticateUpdate(
@@ -354,7 +354,7 @@ export class AcpConnection {
 
     // Race the SDK initialize against process exit so we don't hang forever
     // if the CLI crashes before responding.
-    console.log('[ACP] Sending initialize request...');
+    console.log("[ACP] Sending initialize request...");
     const initResponse = await Promise.race([
       this.sdkConnection.initialize({
         protocolVersion: PROTOCOL_VERSION,
@@ -368,12 +368,12 @@ export class AcpConnection {
       processExitPromise,
     ]);
 
-    console.log('[ACP] Initialize successful');
-    console.log('[ACP] Initialization response:', initResponse);
+    console.log("[ACP] Initialize successful");
+    console.log("[ACP] Initialization response:", initResponse);
     try {
       this.onInitialized(initResponse);
     } catch (err) {
-      console.warn('[ACP] onInitialized callback error:', err);
+      console.warn("[ACP] onInitialized callback error:", err);
     }
   }
 
@@ -381,18 +381,18 @@ export class AcpConnection {
     // sdkConnection is cleared asynchronously by the exit handler;
     // isConnected (via exitCode) catches the race window before the exit event fires.
     if (!this.sdkConnection || !this.isConnected) {
-      throw new Error('Not connected to ACP agent');
+      throw new Error("Not connected to ACP agent");
     }
     return this.sdkConnection;
   }
 
   private mapReadTextFileError(error: unknown, filePath: string): unknown {
     const errorCode =
-      typeof error === 'object' && error !== null && 'code' in error
+      typeof error === "object" && error !== null && "code" in error
         ? (error as { code?: unknown }).code
         : undefined;
 
-    if (errorCode === 'ENOENT') {
+    if (errorCode === "ENOENT") {
       throw new RequestError(
         ACP_ERROR_CODES.RESOURCE_NOT_FOUND,
         `File not found: ${filePath}`,
@@ -424,9 +424,9 @@ export class AcpConnection {
     }
 
     return (
-      options.find((option) => option.kind === 'allow_once')?.optionId ||
-      options.find((option) => option.optionId === 'proceed_once')?.optionId ||
-      options.find((option) => option.optionId.includes('proceed_once'))
+      options.find((option) => option.kind === "allow_once")?.optionId ||
+      options.find((option) => option.optionId === "proceed_once")?.optionId ||
+      options.find((option) => option.optionId.includes("proceed_once"))
         ?.optionId ||
       options[0]?.optionId
     );
@@ -434,35 +434,35 @@ export class AcpConnection {
 
   async authenticate(methodId?: string): Promise<AuthenticateResponse> {
     const conn = this.ensureConnection();
-    const authMethodId = methodId || 'default';
+    const authMethodId = methodId || "default";
     console.log(
-      '[ACP] Sending authenticate request with methodId:',
+      "[ACP] Sending authenticate request with methodId:",
       authMethodId,
     );
     const response = await conn.authenticate({ methodId: authMethodId });
-    console.log('[ACP] Authenticate successful', response);
+    console.log("[ACP] Authenticate successful", response);
     return response;
   }
 
   async newSession(cwd: string = process.cwd()): Promise<NewSessionResponse> {
     const conn = this.ensureConnection();
-    console.log('[ACP] Sending session/new request with cwd:', cwd);
+    console.log("[ACP] Sending session/new request with cwd:", cwd);
     const response: NewSessionResponse = await conn.newSession({
       cwd,
       mcpServers: [],
     });
     this.sessionId = response.sessionId || null;
-    console.log('[ACP] Session created with ID:', this.sessionId);
+    console.log("[ACP] Session created with ID:", this.sessionId);
     return response;
   }
 
   async sendPrompt(prompt: string | ContentBlock[]): Promise<PromptResponse> {
     const conn = this.ensureConnection();
     if (!this.sessionId) {
-      throw new Error('No active ACP session');
+      throw new Error("No active ACP session");
     }
     const promptBlocks =
-      typeof prompt === 'string' ? [{ type: 'text', text: prompt }] : prompt;
+      typeof prompt === "string" ? [{ type: "text", text: prompt }] : prompt;
     const response: PromptResponse = await conn.prompt({
       sessionId: this.sessionId,
       prompt: promptBlocks,
@@ -481,7 +481,7 @@ export class AcpConnection {
     cwdOverride?: string,
   ): Promise<LoadSessionResponse> {
     const conn = this.ensureConnection();
-    console.log('[ACP] Sending session/load request for session:', sessionId);
+    console.log("[ACP] Sending session/load request for session:", sessionId);
     const cwd = cwdOverride || this.workingDir;
     try {
       const response = await conn.loadSession({
@@ -490,14 +490,14 @@ export class AcpConnection {
         mcpServers: [],
       });
       console.log(
-        '[ACP] Session load succeeded. Response:',
+        "[ACP] Session load succeeded. Response:",
         JSON.stringify(response),
       );
       this.sessionId = sessionId;
       return response;
     } catch (error) {
       console.error(
-        '[ACP] Session load request failed:',
+        "[ACP] Session load request failed:",
         error instanceof Error ? error.message : String(error),
       );
       throw error;
@@ -509,59 +509,59 @@ export class AcpConnection {
     size?: number;
   }): Promise<ListSessionsResponse> {
     const conn = this.ensureConnection();
-    console.log('[ACP] Requesting session list...');
+    console.log("[ACP] Requesting session list...");
     try {
       const params: Record<string, unknown> = { cwd: this.workingDir };
       if (options?.cursor !== undefined) {
-        params['cursor'] = String(options.cursor);
+        params["cursor"] = String(options.cursor);
       }
       if (options?.size !== undefined) {
-        params['size'] = options.size;
+        params["size"] = options.size;
       }
       const response = await conn.unstable_listSessions(
         params as Parameters<typeof conn.unstable_listSessions>[0],
       );
       console.log(
-        '[ACP] Session list response:',
+        "[ACP] Session list response:",
         JSON.stringify(response).substring(0, 200),
       );
       return response;
     } catch (error) {
-      console.error('[ACP] Failed to get session list:', error);
+      console.error("[ACP] Failed to get session list:", error);
       throw error;
     }
   }
 
   async switchSession(sessionId: string): Promise<void> {
-    console.log('[ACP] Switching to session:', sessionId);
+    console.log("[ACP] Switching to session:", sessionId);
     this.sessionId = sessionId;
     console.log(
-      '[ACP] Session ID updated locally (switch not supported by CLI)',
+      "[ACP] Session ID updated locally (switch not supported by CLI)",
     );
   }
 
   async cancelSession(): Promise<void> {
     const conn = this.ensureConnection();
     if (!this.sessionId) {
-      console.warn('[ACP] No active session to cancel');
+      console.warn("[ACP] No active session to cancel");
       return;
     }
-    console.log('[ACP] Cancelling session:', this.sessionId);
+    console.log("[ACP] Cancelling session:", this.sessionId);
     await conn.cancel({ sessionId: this.sessionId });
-    console.log('[ACP] Cancel notification sent');
+    console.log("[ACP] Cancel notification sent");
   }
 
   async setMode(modeId: ApprovalModeValue): Promise<SetSessionModeResponse> {
     const conn = this.ensureConnection();
     if (!this.sessionId) {
-      throw new Error('No active ACP session');
+      throw new Error("No active ACP session");
     }
-    console.log('[ACP] Sending session/set_mode:', modeId);
+    console.log("[ACP] Sending session/set_mode:", modeId);
     const res = await conn.setSessionMode({
       sessionId: this.sessionId,
       modeId,
     });
-    console.log('[ACP] set_mode response:', res);
+    console.log("[ACP] set_mode response:", res);
     return res;
   }
 
@@ -572,28 +572,28 @@ export class AcpConnection {
     apiKeyEnvKey: string | null;
   }> {
     const conn = this.ensureConnection();
-    const result = await conn.extMethod('getAccountInfo', {
+    const result = await conn.extMethod("getAccountInfo", {
       sessionId: this.sessionId,
     });
     return {
-      authType: (result['authType'] as string | null) ?? null,
-      model: (result['model'] as string | null) ?? null,
-      baseUrl: (result['baseUrl'] as string | null) ?? null,
-      apiKeyEnvKey: (result['apiKeyEnvKey'] as string | null) ?? null,
+      authType: (result["authType"] as string | null) ?? null,
+      model: (result["model"] as string | null) ?? null,
+      baseUrl: (result["baseUrl"] as string | null) ?? null,
+      apiKeyEnvKey: (result["apiKeyEnvKey"] as string | null) ?? null,
     };
   }
 
   async setModel(modelId: string): Promise<SetSessionModelResponse> {
     const conn = this.ensureConnection();
     if (!this.sessionId) {
-      throw new Error('No active ACP session');
+      throw new Error("No active ACP session");
     }
-    console.log('[ACP] Sending session/set_model:', modelId);
+    console.log("[ACP] Sending session/set_model:", modelId);
     const res = await conn.unstable_setSessionModel({
       sessionId: this.sessionId,
       modelId,
     });
-    console.log('[ACP] set_model response:', res);
+    console.log("[ACP] set_model response:", res);
     return res;
   }
 

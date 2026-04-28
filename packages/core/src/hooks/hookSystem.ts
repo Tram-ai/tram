@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Config } from '../config/config.js';
-import { HookRegistry } from './hookRegistry.js';
-import { HookRunner } from './hookRunner.js';
-import { HookAggregator, type AggregatedHookResult } from './hookAggregator.js';
-import { HookPlanner } from './hookPlanner.js';
-import { HookEventHandler } from './hookEventHandler.js';
-import type { HookRegistryEntry } from './hookRegistry.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
-import type { DefaultHookOutput } from './types.js';
-import { createHookOutput } from './types.js';
+import type { Config } from "../config/config.js";
+import { HookRegistry } from "./hookRegistry.js";
+import { HookRunner } from "./hookRunner.js";
+import { HookAggregator, type AggregatedHookResult } from "./hookAggregator.js";
+import { HookPlanner } from "./hookPlanner.js";
+import { HookEventHandler } from "./hookEventHandler.js";
+import type { HookRegistryEntry } from "./hookRegistry.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
+import type { DefaultHookOutput } from "./types.js";
+import { createHookOutput } from "./types.js";
 import type {
   SessionStartSource,
   SessionEndReason,
@@ -25,9 +25,9 @@ import type {
   PermissionSuggestion,
   HookEventName,
   StopFailureErrorType,
-} from './types.js';
+} from "./types.js";
 
-const debugLogger = createDebugLogger('TRUSTED_HOOKS');
+const debugLogger = createDebugLogger("TRUSTED_HOOKS");
 
 /**
  * Main hook system that coordinates all hook-related functionality
@@ -59,7 +59,7 @@ export class HookSystem {
    */
   async initialize(): Promise<void> {
     await this.hookRegistry.initialize();
-    debugLogger.debug('Hook system initialized successfully');
+    debugLogger.debug("Hook system initialized successfully");
   }
 
   /**
@@ -110,13 +110,13 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('UserPromptSubmit', result.finalOutput)
+      ? createHookOutput("UserPromptSubmit", result.finalOutput)
       : undefined;
   }
 
   async fireStopEvent(
     stopHookActive: boolean = false,
-    lastAssistantMessage: string = '',
+    lastAssistantMessage: string = "",
     signal?: AbortSignal,
   ): Promise<AggregatedHookResult> {
     return this.hookEventHandler.fireStopEvent(
@@ -141,7 +141,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('SessionStart', result.finalOutput)
+      ? createHookOutput("SessionStart", result.finalOutput)
       : undefined;
   }
 
@@ -154,7 +154,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('SessionEnd', result.finalOutput)
+      ? createHookOutput("SessionEnd", result.finalOutput)
       : undefined;
   }
 
@@ -176,7 +176,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('PreToolUse', result.finalOutput)
+      ? createHookOutput("PreToolUse", result.finalOutput)
       : undefined;
   }
 
@@ -200,7 +200,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('PostToolUse', result.finalOutput)
+      ? createHookOutput("PostToolUse", result.finalOutput)
       : undefined;
   }
 
@@ -226,7 +226,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('PostToolUseFailure', result.finalOutput)
+      ? createHookOutput("PostToolUseFailure", result.finalOutput)
       : undefined;
   }
 
@@ -235,7 +235,7 @@ export class HookSystem {
    */
   async firePreCompactEvent(
     trigger: PreCompactTrigger,
-    customInstructions: string = '',
+    customInstructions: string = "",
     signal?: AbortSignal,
   ): Promise<DefaultHookOutput | undefined> {
     const result = await this.hookEventHandler.firePreCompactEvent(
@@ -244,7 +244,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('PreCompact', result.finalOutput)
+      ? createHookOutput("PreCompact", result.finalOutput)
       : undefined;
   }
 
@@ -264,7 +264,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('Notification', result.finalOutput)
+      ? createHookOutput("Notification", result.finalOutput)
       : undefined;
   }
 
@@ -284,7 +284,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('SubagentStart', result.finalOutput)
+      ? createHookOutput("SubagentStart", result.finalOutput)
       : undefined;
   }
 
@@ -310,7 +310,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('SubagentStop', result.finalOutput)
+      ? createHookOutput("SubagentStop", result.finalOutput)
       : undefined;
   }
 
@@ -346,7 +346,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('PostCompact', result.finalOutput)
+      ? createHookOutput("PostCompact", result.finalOutput)
       : undefined;
   }
 
@@ -368,7 +368,7 @@ export class HookSystem {
       signal,
     );
     return result.finalOutput
-      ? createHookOutput('PermissionRequest', result.finalOutput)
+      ? createHookOutput("PermissionRequest", result.finalOutput)
       : undefined;
   }
 }

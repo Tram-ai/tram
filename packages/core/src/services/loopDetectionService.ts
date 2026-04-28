@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createHash } from 'node:crypto';
-import type { ServerGeminiStreamEvent } from '../core/turn.js';
-import { GeminiEventType } from '../core/turn.js';
+import { createHash } from "node:crypto";
+import type { ServerGeminiStreamEvent } from "../core/turn.js";
+import { GeminiEventType } from "../core/turn.js";
 import {
   logLoopDetected,
   logLoopDetectionDisabled,
-} from '../telemetry/loggers.js';
+} from "../telemetry/loggers.js";
 import {
   LoopDetectedEvent,
   LoopDetectionDisabledEvent,
   LoopType,
-} from '../telemetry/types.js';
-import type { Config } from '../config/config.js';
+} from "../telemetry/types.js";
+import type { Config } from "../config/config.js";
 
 const TOOL_CALL_LOOP_THRESHOLD = 5;
 const CONTENT_LOOP_THRESHOLD = 10;
@@ -29,14 +29,14 @@ const MAX_HISTORY_LENGTH = 1000;
  */
 export class LoopDetectionService {
   private readonly config: Config;
-  private promptId = '';
+  private promptId = "";
 
   // Tool call tracking
   private lastToolCallKey: string | null = null;
   private toolCallRepetitionCount: number = 0;
 
   // Content streaming tracking
-  private streamContentHistory = '';
+  private streamContentHistory = "";
   private contentStats = new Map<string, number[]>();
   private lastContentIndex = 0;
   private loopDetected = false;
@@ -63,7 +63,7 @@ export class LoopDetectionService {
   private getToolCallKey(toolCall: { name: string; args: object }): string {
     const argsString = JSON.stringify(toolCall.args);
     const keyString = `${toolCall.name}:${argsString}`;
-    return createHash('sha256').update(keyString).digest('hex');
+    return createHash("sha256").update(keyString).digest("hex");
   }
 
   /**
@@ -211,7 +211,7 @@ export class LoopDetectionService {
         this.lastContentIndex,
         this.lastContentIndex + CONTENT_CHUNK_SIZE,
       );
-      const chunkHash = createHash('sha256').update(currentChunk).digest('hex');
+      const chunkHash = createHash("sha256").update(currentChunk).digest("hex");
 
       if (this.isLoopDetectedForChunk(currentChunk, chunkHash)) {
         logLoopDetected(
@@ -308,7 +308,7 @@ export class LoopDetectionService {
 
   private resetContentTracking(resetHistory = true): void {
     if (resetHistory) {
-      this.streamContentHistory = '';
+      this.streamContentHistory = "";
     }
     this.contentStats.clear();
     this.lastContentIndex = 0;

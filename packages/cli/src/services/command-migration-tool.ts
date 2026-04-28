@@ -8,11 +8,11 @@
  * Tool for migrating TOML commands to Markdown format.
  */
 
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { glob } from 'glob';
-import { convertTomlToMarkdown } from '@tram-ai/tram-core';
-import { t } from '../i18n/index.js';
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { glob } from "glob";
+import { convertTomlToMarkdown } from "@tram-ai/tram-core";
+import { t } from "../i18n/index.js";
 
 export interface MigrationResult {
   success: boolean;
@@ -44,7 +44,7 @@ export async function detectTomlCommands(
     return [];
   }
 
-  const tomlFiles = await glob('**/*.toml', {
+  const tomlFiles = await glob("**/*.toml", {
     cwd: commandDir,
     nodir: true,
     dot: false,
@@ -82,31 +82,31 @@ export async function migrateTomlCommands(
 
     try {
       // Read TOML file
-      const tomlContent = await fs.readFile(tomlPath, 'utf-8');
+      const tomlContent = await fs.readFile(tomlPath, "utf-8");
 
       // Convert to Markdown
       const markdownContent = convertTomlToMarkdown(tomlContent);
 
       // Generate Markdown file path (same location, .md extension)
-      const markdownPath = tomlPath.replace(/\.toml$/, '.md');
+      const markdownPath = tomlPath.replace(/\.toml$/, ".md");
 
       // Check if Markdown file already exists
       try {
         await fs.access(markdownPath);
         throw new Error(
-          t('Markdown file already exists: {{filename}}', {
+          t("Markdown file already exists: {{filename}}", {
             filename: path.basename(markdownPath),
           }),
         );
       } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
           throw error;
         }
         // File doesn't exist, continue
       }
 
       // Write Markdown file
-      await fs.writeFile(markdownPath, markdownContent, 'utf-8');
+      await fs.writeFile(markdownPath, markdownContent, "utf-8");
 
       // Backup original if requested (rename to .toml.backup)
       if (createBackup) {
@@ -137,37 +137,37 @@ export async function migrateTomlCommands(
  */
 export function generateMigrationPrompt(tomlFiles: string[]): string {
   if (tomlFiles.length === 0) {
-    return '';
+    return "";
   }
 
   const count = tomlFiles.length;
   const moreCount = tomlFiles.length - 3;
   const fileList =
     tomlFiles.length <= 5
-      ? tomlFiles.map((f) => `  - ${f}`).join('\n')
-      : `  - ${tomlFiles.slice(0, 3).join('\n  - ')}\n  - ${t('... and {{count}} more', { count: String(moreCount) })}`;
+      ? tomlFiles.map((f) => `  - ${f}`).join("\n")
+      : `  - ${tomlFiles.slice(0, 3).join("\n  - ")}\n  - ${t("... and {{count}} more", { count: String(moreCount) })}`;
 
   return `
-⚠️  ${t('TOML Command Format Deprecation Notice')}
+⚠️  ${t("TOML Command Format Deprecation Notice")}
 
-${t('Found {{count}} command file(s) in TOML format:', { count: String(count) })}
+${t("Found {{count}} command file(s) in TOML format:", { count: String(count) })}
 ${fileList}
 
-${t('The TOML format for commands is being deprecated in favor of Markdown format.')}
-${t('Markdown format is more readable and easier to edit.')}
+${t("The TOML format for commands is being deprecated in favor of Markdown format.")}
+${t("Markdown format is more readable and easier to edit.")}
 
-${t('You can migrate these files automatically using:')}
+${t("You can migrate these files automatically using:")}
   tram migrate-commands
 
-${t('Or manually convert each file:')}
+${t("Or manually convert each file:")}
   - ${t('TOML: prompt = "..." / description = "..."')}
-  - ${t('Markdown: YAML frontmatter + content')}
+  - ${t("Markdown: YAML frontmatter + content")}
 
-${t('The migration tool will:')}
-  ✓ ${t('Convert TOML files to Markdown')}
-  ✓ ${t('Create backups of original files')}
-  ✓ ${t('Preserve all command functionality')}
+${t("The migration tool will:")}
+  ✓ ${t("Convert TOML files to Markdown")}
+  ✓ ${t("Create backups of original files")}
+  ✓ ${t("Preserve all command functionality")}
 
-${t('TOML format will continue to work for now, but migration is recommended.')}
+${t("TOML format will continue to work for now, but migration is recommended.")}
 `.trim();
 }

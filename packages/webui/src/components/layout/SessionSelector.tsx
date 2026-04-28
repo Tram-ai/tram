@@ -7,13 +7,13 @@
  * Displays sessions grouped by date with search and infinite scroll
  */
 
-import type { FC } from 'react';
-import { Fragment } from 'react';
+import type { FC } from "react";
+import { Fragment } from "react";
 import {
   getTimeAgo,
   groupSessionsByDate,
-} from '../../utils/sessionGrouping.js';
-import { SearchIcon } from '../icons/NavigationIcons.js';
+} from "../../utils/sessionGrouping.js";
+import { SearchIcon } from "../icons/NavigationIcons.js";
 
 /**
  * Props for SessionSelector component
@@ -92,8 +92,8 @@ export const SessionSelector: FC<SessionSelectorProps> = ({
         className="session-dropdown fixed bg-[var(--app-menu-background)] rounded-[var(--corner-radius-small)] w-[min(400px,calc(100vw-32px))] max-h-[min(500px,50vh)] flex flex-col shadow-[0_4px_16px_rgba(0,0,0,0.1)] z-[1000] outline-none text-[var(--vscode-chat-font-size,13px)] font-[var(--vscode-chat-font-family)]"
         tabIndex={-1}
         style={{
-          top: '30px',
-          left: '10px',
+          top: "30px",
+          left: "10px",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -126,12 +126,12 @@ export const SessionSelector: FC<SessionSelectorProps> = ({
             <div
               className="p-5 text-center text-[var(--app-secondary-foreground)]"
               style={{
-                padding: '20px',
-                textAlign: 'center',
-                color: 'var(--app-secondary-foreground)',
+                padding: "20px",
+                textAlign: "center",
+                color: "var(--app-secondary-foreground)",
               }}
             >
-              {searchQuery ? 'No matching sessions' : 'No sessions available'}
+              {searchQuery ? "No matching sessions" : "No sessions available"}
             </div>
           ) : (
             groupSessionsByDate(sessions).map((group) => (
@@ -144,15 +144,15 @@ export const SessionSelector: FC<SessionSelectorProps> = ({
                     const sessionId =
                       (session.id as string) ||
                       (session.sessionId as string) ||
-                      '';
+                      "";
                     const title =
                       (session.title as string) ||
                       (session.name as string) ||
-                      'Untitled';
+                      "Untitled";
                     const lastUpdated =
                       (session.lastUpdated as string) ||
                       (session.startTime as string) ||
-                      '';
+                      "";
                     const isActive = sessionId === currentSessionId;
 
                     return (
@@ -161,8 +161,8 @@ export const SessionSelector: FC<SessionSelectorProps> = ({
                         type="button"
                         className={`session-item flex items-center justify-between py-1.5 px-2 bg-transparent border-none rounded-md cursor-pointer text-left w-full text-[var(--vscode-chat-font-size,13px)] font-[var(--vscode-chat-font-family)] text-[var(--app-primary-foreground)] transition-colors duration-100 hover:bg-[var(--app-list-hover-background)] ${
                           isActive
-                            ? 'active bg-[var(--app-list-active-background)] text-[var(--app-list-active-foreground)] font-[600]'
-                            : ''
+                            ? "active bg-[var(--app-list-active-background)] text-[var(--app-list-active-foreground)] font-[600]"
+                            : ""
                         }`}
                         onClick={() => {
                           onSelectSession(sessionId);
@@ -184,7 +184,7 @@ export const SessionSelector: FC<SessionSelectorProps> = ({
           )}
           {hasMore && (
             <div className="p-2 text-center opacity-60 text-[0.9em]">
-              {isLoading ? 'Loading…' : ''}
+              {isLoading ? "Loading…" : ""}
             </div>
           )}
         </div>

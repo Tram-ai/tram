@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import { theme } from '../../../semantic-colors.js';
-import { useKeypress } from '../../../hooks/useKeypress.js';
-import { t } from '../../../../i18n/index.js';
-import type { ToolDetailStepProps } from '../types.js';
+import { Box, Text } from "ink";
+import { theme } from "../../../semantic-colors.js";
+import { useKeypress } from "../../../hooks/useKeypress.js";
+import { t } from "../../../../i18n/index.js";
+import type { ToolDetailStepProps } from "../types.js";
 
 /**
  * 渲染单个参数
@@ -18,11 +18,11 @@ const renderParameter = (
   param: Record<string, unknown>,
   isRequired: boolean,
 ): React.ReactNode => {
-  const type = (param['type'] as string) || 'any';
-  const description = (param['description'] as string) || '';
+  const type = (param["type"] as string) || "any";
+  const description = (param["description"] as string) || "";
   // const defaultValue = param['default'];
   // const enumValues = param['enum'] as string[] | undefined;
-  const text = `• ${name}${isRequired ? t('required') : ''}: ${type} ${description ? `- ${description}` : ''}`;
+  const text = `• ${name}${isRequired ? t("required") : ""}: ${type} ${description ? `- ${description}` : ""}`;
 
   return (
     <Box key={name}>
@@ -45,7 +45,7 @@ const ParametersList: React.FC<{
   return (
     <Box flexDirection="column">
       <Text color={theme.text.primary} bold>
-        {t('Parameters')}:
+        {t("Parameters")}:
       </Text>
       <Box flexDirection="column" marginLeft={1}>
         {Object.entries(properties).map(([name, param]) =>
@@ -65,8 +65,8 @@ const ParametersList: React.FC<{
  */
 const SchemaSummary: React.FC<{ schema: object }> = ({ schema }) => {
   const obj = schema as Record<string, unknown>;
-  const properties = obj['properties'] as Record<string, unknown> | undefined;
-  const required = (obj['required'] as string[]) || [];
+  const properties = obj["properties"] as Record<string, unknown> | undefined;
+  const required = (obj["required"] as string[]) || [];
 
   return (
     <Box flexDirection="column">
@@ -84,7 +84,7 @@ export const ToolDetailStep: React.FC<ToolDetailStepProps> = ({
 }) => {
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         onBack();
       }
     },
@@ -94,7 +94,7 @@ export const ToolDetailStep: React.FC<ToolDetailStepProps> = ({
   if (!tool) {
     return (
       <Box>
-        <Text color={theme.status.error}>{t('No tool selected')}</Text>
+        <Text color={theme.status.error}>{t("No tool selected")}</Text>
       </Box>
     );
   }
@@ -105,14 +105,14 @@ export const ToolDetailStep: React.FC<ToolDetailStepProps> = ({
       {!tool.isValid && (
         <Box flexDirection="column" marginBottom={1}>
           <Text color={theme.status.error} bold>
-            {t('Warning: This tool cannot be called by the LLM')}
+            {t("Warning: This tool cannot be called by the LLM")}
           </Text>
           <Text color={theme.status.error}>
-            {t('Reason')}: {tool.invalidReason || t('unknown')}
+            {t("Reason")}: {tool.invalidReason || t("unknown")}
           </Text>
           <Text color={theme.text.secondary}>
             {t(
-              'Tools must have both name and description to be used by the LLM.',
+              "Tools must have both name and description to be used by the LLM.",
             )}
           </Text>
         </Box>
@@ -122,7 +122,7 @@ export const ToolDetailStep: React.FC<ToolDetailStepProps> = ({
       {tool.description && (
         <Box flexDirection="column">
           <Text color={theme.text.primary} bold>
-            {t('Description')}:
+            {t("Description")}:
           </Text>
           <Text wrap="wrap">{tool.description}</Text>
         </Box>

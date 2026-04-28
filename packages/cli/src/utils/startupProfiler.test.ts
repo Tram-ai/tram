@@ -1,16 +1,16 @@
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import * as fs from 'node:fs';
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import * as fs from "node:fs";
 import {
   initStartupProfiler,
   profileCheckpoint,
   finalizeStartupProfile,
   getStartupReport,
   resetStartupProfiler,
-} from './startupProfiler.js';
+} from "./startupProfiler.js";
 
-vi.mock('node:fs');
+vi.mock("node:fs");
 
-describe('startupProfiler', () => {
+describe("startupProfiler", () => {
   const savedEnv: Record<string, string | undefined> = {};
 
   function saveEnv(...keys: string[]) {
@@ -32,9 +32,9 @@ describe('startupProfiler', () => {
   beforeEach(() => {
     resetStartupProfiler();
     vi.restoreAllMocks();
-    saveEnv('QWEN_CODE_PROFILE_STARTUP', 'SANDBOX');
-    delete process.env['QWEN_CODE_PROFILE_STARTUP'];
-    delete process.env['SANDBOX'];
+    saveEnv("QWEN_CODE_PROFILE_STARTUP", "SANDBOX");
+    delete process.env["QWEN_CODE_PROFILE_STARTUP"];
+    delete process.env["SANDBOX"];
   });
 
   afterEach(() => {
@@ -42,54 +42,54 @@ describe('startupProfiler', () => {
   });
 
   function enableProfiler() {
-    process.env['QWEN_CODE_PROFILE_STARTUP'] = '1';
-    process.env['SANDBOX'] = '1';
+    process.env["QWEN_CODE_PROFILE_STARTUP"] = "1";
+    process.env["SANDBOX"] = "1";
   }
 
-  describe('when disabled (no env var)', () => {
-    it('should return null from getStartupReport', () => {
+  describe("when disabled (no env var)", () => {
+    it("should return null from getStartupReport", () => {
       initStartupProfiler();
-      profileCheckpoint('test');
+      profileCheckpoint("test");
       expect(getStartupReport()).toBeNull();
     });
 
-    it('should not write any files on finalize', () => {
+    it("should not write any files on finalize", () => {
       initStartupProfiler();
-      profileCheckpoint('test');
-      finalizeStartupProfile('session-1');
+      profileCheckpoint("test");
+      finalizeStartupProfile("session-1");
       expect(fs.mkdirSync).not.toHaveBeenCalled();
       expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
   });
 
-  describe('when outside sandbox (SANDBOX not set)', () => {
-    it('should not enable profiler even with QWEN_CODE_PROFILE_STARTUP=1', () => {
-      process.env['QWEN_CODE_PROFILE_STARTUP'] = '1';
-      delete process.env['SANDBOX'];
+  describe("when outside sandbox (SANDBOX not set)", () => {
+    it("should not enable profiler even with QWEN_CODE_PROFILE_STARTUP=1", () => {
+      process.env["QWEN_CODE_PROFILE_STARTUP"] = "1";
+      delete process.env["SANDBOX"];
 
       initStartupProfiler();
-      profileCheckpoint('test');
+      profileCheckpoint("test");
       expect(getStartupReport()).toBeNull();
     });
   });
 
-  describe('when enabled (QWEN_CODE_PROFILE_STARTUP=1 + SANDBOX)', () => {
+  describe("when enabled (QWEN_CODE_PROFILE_STARTUP=1 + SANDBOX)", () => {
     beforeEach(() => {
       enableProfiler();
     });
 
-    it('should collect checkpoints and return a report', () => {
+    it("should collect checkpoints and return a report", () => {
       initStartupProfiler();
-      profileCheckpoint('phase_a');
-      profileCheckpoint('phase_b');
-      profileCheckpoint('phase_c');
+      profileCheckpoint("phase_a");
+      profileCheckpoint("phase_b");
+      profileCheckpoint("phase_c");
 
       const report = getStartupReport();
       expect(report).not.toBeNull();
       expect(report!.phases).toHaveLength(3);
-      expect(report!.phases[0]!.name).toBe('phase_a');
-      expect(report!.phases[1]!.name).toBe('phase_b');
-      expect(report!.phases[2]!.name).toBe('phase_c');
+      expect(report!.phases[0]!.name).toBe("phase_a");
+      expect(report!.phases[1]!.name).toBe("phase_b");
+      expect(report!.phases[2]!.name).toBe("phase_c");
       expect(report!.totalMs).toBeGreaterThanOrEqual(0);
       expect(report!.processUptimeAtT0Ms).toBeGreaterThan(0);
       expect(report!.nodeVersion).toBe(process.version);
@@ -97,10 +97,10 @@ describe('startupProfiler', () => {
       expect(report!.arch).toBe(process.arch);
     });
 
-    it('should have non-negative durations for each phase', () => {
+    it("should have non-negative durations for each phase", () => {
       initStartupProfiler();
-      profileCheckpoint('a');
-      profileCheckpoint('b');
+      profileCheckpoint("a");
+      profileCheckpoint("b");
 
       const report = getStartupReport();
       for (const phase of report!.phases) {
@@ -109,50 +109,48 @@ describe('startupProfiler', () => {
       }
     });
 
-    it('should write JSON file on finalize and print path to stderr', () => {
+    it("should write JSON file on finalize and print path to stderr", () => {
       vi.mocked(fs.mkdirSync).mockReturnValue(undefined);
       vi.mocked(fs.writeFileSync).mockReturnValue(undefined);
-      const stderrSpy = vi
-        .spyOn(process.stderr, 'write')
-        .mockReturnValue(true);
+      const stderrSpy = vi.spyOn(process.stderr, "write").mockReturnValue(true);
 
       initStartupProfiler();
-      profileCheckpoint('main_entry');
-      profileCheckpoint('after_load_settings');
-      finalizeStartupProfile('test-session-123');
+      profileCheckpoint("main_entry");
+      profileCheckpoint("after_load_settings");
+      finalizeStartupProfile("test-session-123");
 
       expect(fs.mkdirSync).toHaveBeenCalledWith(
-        expect.stringContaining('startup-perf'),
+        expect.stringContaining("startup-perf"),
         { recursive: true },
       );
       expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
 
       const writtenPath = vi.mocked(fs.writeFileSync).mock
         .calls[0]![0] as string;
-      expect(writtenPath).toContain('startup-perf');
-      expect(writtenPath).toContain('test-session-123');
+      expect(writtenPath).toContain("startup-perf");
+      expect(writtenPath).toContain("test-session-123");
       expect(writtenPath).toMatch(/\.json$/);
 
       const writtenContent = JSON.parse(
         vi.mocked(fs.writeFileSync).mock.calls[0]![1] as string,
       );
-      expect(writtenContent.sessionId).toBe('test-session-123');
+      expect(writtenContent.sessionId).toBe("test-session-123");
       expect(writtenContent.phases).toHaveLength(2);
       expect(writtenContent.totalMs).toBeGreaterThanOrEqual(0);
 
       expect(stderrSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Startup profile written to:'),
+        expect.stringContaining("Startup profile written to:"),
       );
     });
 
-    it('should use report timestamp for filename (no double Date call)', () => {
+    it("should use report timestamp for filename (no double Date call)", () => {
       vi.mocked(fs.mkdirSync).mockReturnValue(undefined);
       vi.mocked(fs.writeFileSync).mockReturnValue(undefined);
-      vi.spyOn(process.stderr, 'write').mockReturnValue(true);
+      vi.spyOn(process.stderr, "write").mockReturnValue(true);
 
       initStartupProfiler();
-      profileCheckpoint('test');
-      finalizeStartupProfile('s1');
+      profileCheckpoint("test");
+      finalizeStartupProfile("s1");
 
       const writtenPath = vi.mocked(fs.writeFileSync).mock
         .calls[0]![0] as string;
@@ -160,19 +158,19 @@ describe('startupProfiler', () => {
         vi.mocked(fs.writeFileSync).mock.calls[0]![1] as string,
       );
       // Filename should contain the same timestamp as the report (with colons/dots replaced)
-      const expectedTs = writtenContent.timestamp.replace(/[:.]/g, '-');
+      const expectedTs = writtenContent.timestamp.replace(/[:.]/g, "-");
       expect(writtenPath).toContain(expectedTs);
     });
 
-    it('should not finalize twice', () => {
+    it("should not finalize twice", () => {
       vi.mocked(fs.mkdirSync).mockReturnValue(undefined);
       vi.mocked(fs.writeFileSync).mockReturnValue(undefined);
-      vi.spyOn(process.stderr, 'write').mockReturnValue(true);
+      vi.spyOn(process.stderr, "write").mockReturnValue(true);
 
       initStartupProfiler();
-      profileCheckpoint('test');
-      finalizeStartupProfile('s1');
-      finalizeStartupProfile('s1');
+      profileCheckpoint("test");
+      finalizeStartupProfile("s1");
+      finalizeStartupProfile("s1");
 
       expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
     });
@@ -180,42 +178,40 @@ describe('startupProfiler', () => {
     it('should use "unknown" as sessionId in both filename and JSON when not provided', () => {
       vi.mocked(fs.mkdirSync).mockReturnValue(undefined);
       vi.mocked(fs.writeFileSync).mockReturnValue(undefined);
-      vi.spyOn(process.stderr, 'write').mockReturnValue(true);
+      vi.spyOn(process.stderr, "write").mockReturnValue(true);
 
       initStartupProfiler();
-      profileCheckpoint('test');
+      profileCheckpoint("test");
       finalizeStartupProfile();
 
       const writtenPath = vi.mocked(fs.writeFileSync).mock
         .calls[0]![0] as string;
-      expect(writtenPath).toContain('unknown');
+      expect(writtenPath).toContain("unknown");
 
       const writtenContent = JSON.parse(
         vi.mocked(fs.writeFileSync).mock.calls[0]![1] as string,
       );
-      expect(writtenContent.sessionId).toBe('unknown');
+      expect(writtenContent.sessionId).toBe("unknown");
     });
 
-    it('should not throw when file write fails', () => {
+    it("should not throw when file write fails", () => {
       vi.mocked(fs.mkdirSync).mockImplementation(() => {
-        throw new Error('Permission denied');
+        throw new Error("Permission denied");
       });
-      const stderrSpy = vi
-        .spyOn(process.stderr, 'write')
-        .mockReturnValue(true);
+      const stderrSpy = vi.spyOn(process.stderr, "write").mockReturnValue(true);
 
       initStartupProfiler();
-      profileCheckpoint('test');
+      profileCheckpoint("test");
 
-      expect(() => finalizeStartupProfile('s1')).not.toThrow();
+      expect(() => finalizeStartupProfile("s1")).not.toThrow();
       expect(stderrSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Warning'),
+        expect.stringContaining("Warning"),
       );
     });
 
-    it('should return null after reset', () => {
+    it("should return null after reset", () => {
       initStartupProfiler();
-      profileCheckpoint('test');
+      profileCheckpoint("test");
       expect(getStartupReport()).not.toBeNull();
 
       resetStartupProfiler();

@@ -17,59 +17,59 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { execSync } from 'node:child_process';
+import { execSync } from "node:child_process";
 import {
   existsSync,
   readFileSync,
   readdirSync,
   rmSync,
   writeFileSync,
-} from 'node:fs';
-import { join } from 'node:path';
-import os from 'node:os';
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
-import cliPkgJson from '../packages/cli/package.json' with { type: 'json' };
+} from "node:fs";
+import { join } from "node:path";
+import os from "node:os";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
+import cliPkgJson from "../packages/cli/package.json" with { type: "json" };
 
 const argv = yargs(hideBin(process.argv))
-  .option('s', {
-    alias: 'skip-npm-install-build',
-    type: 'boolean',
+  .option("s", {
+    alias: "skip-npm-install-build",
+    type: "boolean",
     default: false,
-    description: 'skip npm install + npm run build',
+    description: "skip npm install + npm run build",
   })
-  .option('f', {
-    alias: 'dockerfile',
-    type: 'string',
-    default: 'Dockerfile',
-    description: 'use <dockerfile> for custom image',
+  .option("f", {
+    alias: "dockerfile",
+    type: "string",
+    default: "Dockerfile",
+    description: "use <dockerfile> for custom image",
   })
-  .option('i', {
-    alias: 'image',
-    type: 'string',
+  .option("i", {
+    alias: "image",
+    type: "string",
     default: cliPkgJson.config.sandboxImageUri,
-    description: 'use <image> name for custom image',
+    description: "use <image> name for custom image",
   })
-  .option('output-file', {
-    type: 'string',
+  .option("output-file", {
+    type: "string",
     description:
-      'Path to write the final image URI. Used for CI/CD pipeline integration.',
+      "Path to write the final image URI. Used for CI/CD pipeline integration.",
   }).argv;
 
 let sandboxCommand;
 try {
-  sandboxCommand = execSync('node scripts/sandbox_command.js')
+  sandboxCommand = execSync("node scripts/sandbox_command.js")
     .toString()
     .trim();
 } catch (e) {
-  console.warn('ERROR: could not detect sandbox container command');
+  console.warn("ERROR: could not detect sandbox container command");
   console.error(e);
   process.exit(process.env.CI ? 1 : 0);
 }
 
-if (sandboxCommand === 'sandbox-exec') {
+if (sandboxCommand === "sandbox-exec") {
   console.warn(
-    'WARNING: container-based sandboxing is disabled (see README.md#sandboxing)',
+    "WARNING: container-based sandboxing is disabled (see README.md#sandboxing)",
   );
   process.exit(0);
 }
@@ -81,48 +81,48 @@ const dockerFile = argv.f;
 
 if (!image.length) {
   console.warn(
-    'No default image tag specified in gemini-cli/packages/cli/package.json',
+    "No default image tag specified in gemini-cli/packages/cli/package.json",
   );
 }
 
 if (!argv.s) {
-  execSync('npm install', { stdio: 'inherit' });
-  execSync('npm run build', { stdio: 'inherit' });
+  execSync("npm install", { stdio: "inherit" });
+  execSync("npm run build", { stdio: "inherit" });
 
-  console.log('bundling...');
-  execSync('npm run bundle', { stdio: 'inherit' });
+  console.log("bundling...");
+  execSync("npm run bundle", { stdio: "inherit" });
 
-  console.log('preparing package...');
-  execSync('npm run prepare:package', { stdio: 'inherit' });
+  console.log("preparing package...");
+  execSync("npm run prepare:package", { stdio: "inherit" });
 
-  console.log('packing...');
-  const distDir = join(process.cwd(), 'dist');
+  console.log("packing...");
+  const distDir = join(process.cwd(), "dist");
   for (const f of readdirSync(distDir)) {
-    if (f.endsWith('.tgz')) {
+    if (f.endsWith(".tgz")) {
       rmSync(join(distDir, f), { force: true });
     }
   }
-  execSync('npm pack', { stdio: 'ignore', cwd: distDir });
+  execSync("npm pack", { stdio: "ignore", cwd: distDir });
 }
 
-const buildStdout = process.env.VERBOSE ? 'inherit' : 'ignore';
+const buildStdout = process.env.VERBOSE ? "inherit" : "ignore";
 
 // Determine the appropriate shell based on OS
-const isWindows = os.platform() === 'win32';
-const shellToUse = isWindows ? 'powershell.exe' : '/bin/bash';
+const isWindows = os.platform() === "win32";
+const shellToUse = isWindows ? "powershell.exe" : "/bin/bash";
 
 function buildImage(imageName, dockerfile) {
   console.log(`building ${imageName} ... (can be slow first time)`);
 
-  let buildCommandArgs = '';
-  let tempAuthFile = '';
+  let buildCommandArgs = "";
+  let tempAuthFile = "";
 
-  if (sandboxCommand === 'podman') {
+  if (sandboxCommand === "podman") {
     if (isWindows) {
       // PowerShell doesn't support <() process substitution.
       // Create a temporary auth file that we will clean up after.
       tempAuthFile = join(os.tmpdir(), `qwen-auth-${Date.now()}.json`);
-      writeFileSync(tempAuthFile, '{}');
+      writeFileSync(tempAuthFile, "{}");
       buildCommandArgs = `--authfile="${tempAuthFile}"`;
     } else {
       // Use bash-specific syntax for Linux/macOS
@@ -131,17 +131,17 @@ function buildImage(imageName, dockerfile) {
   }
 
   const npmPackageVersion = JSON.parse(
-    readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
+    readFileSync(join(process.cwd(), "package.json"), "utf-8"),
   ).version;
 
   const imageTag =
-    process.env.tram_SANDBOX_IMAGE_TAG || imageName.split(':')[1];
-  const finalImageName = `${imageName.split(':')[0]}:${imageTag}`;
+    process.env.tram_SANDBOX_IMAGE_TAG || imageName.split(":")[1];
+  const finalImageName = `${imageName.split(":")[0]}:${imageTag}`;
 
   try {
     execSync(
       `${sandboxCommand} build ${buildCommandArgs} ${
-        process.env.BUILD_SANDBOX_FLAGS || ''
+        process.env.BUILD_SANDBOX_FLAGS || ""
       } --build-arg CLI_VERSION_ARG=${npmPackageVersion} -f "${dockerfile}" -t "${finalImageName}" .`,
       { stdio: buildStdout, shell: shellToUse },
     );
@@ -171,4 +171,4 @@ function buildImage(imageName, dockerfile) {
 
 buildImage(image, dockerFile);
 
-execSync(`${sandboxCommand} image prune -f`, { stdio: 'ignore' });
+execSync(`${sandboxCommand} image prune -f`, { stdio: "ignore" });

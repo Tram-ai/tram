@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import type { Part, PartListUnion } from '@google/genai';
-import type { Config } from '../config/config.js';
-import { getErrorMessage } from './errors.js';
-import { processSingleFileContent } from './fileUtils.js';
-import { getFolderStructure } from './getFolderStructure.js';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import type { Part, PartListUnion } from "@google/genai";
+import type { Config } from "../config/config.js";
+import { getErrorMessage } from "./errors.js";
+import { processSingleFileContent } from "./fileUtils.js";
+import { getFolderStructure } from "./getFolderStructure.js";
 
 /**
  * Options for reading multiple files.
@@ -63,8 +63,8 @@ export interface ReadManyFilesResult {
   error?: string;
 }
 
-const DEFAULT_OUTPUT_HEADER = '\n--- Content from referenced files ---';
-const DEFAULT_OUTPUT_TERMINATOR = '\n--- End of content ---';
+const DEFAULT_OUTPUT_HEADER = "\n--- Content from referenced files ---";
+const DEFAULT_OUTPUT_TERMINATOR = "\n--- End of content ---";
 
 /**
  * Reads content from multiple files and directories specified by paths.
@@ -94,7 +94,7 @@ export async function readManyFiles(
     const projectRoot = config.getProjectRoot();
 
     for (const rawPattern of inputPatterns) {
-      const normalizedPattern = rawPattern.replace(/\\/g, '/');
+      const normalizedPattern = rawPattern.replace(/\\/g, "/");
       const fullPath = path.resolve(projectRoot, normalizedPattern);
       const stats = fs.existsSync(fullPath) ? fs.statSync(fullPath) : null;
 
@@ -131,7 +131,7 @@ export async function readManyFiles(
     contentParts.push({ text: DEFAULT_OUTPUT_TERMINATOR });
   } else {
     contentParts.push({
-      text: 'No files matching the criteria were found or all were skipped.',
+      text: "No files matching the criteria were found or all were skipped.",
     });
   }
 
@@ -174,8 +174,8 @@ async function readFileContent(
 
     const prefixText: Part = { text: `\nContent from ${filePath}:\n` };
 
-    if (typeof fileReadResult.llmContent === 'string') {
-      let fileContentForLlm = '';
+    if (typeof fileReadResult.llmContent === "string") {
+      let fileContentForLlm = "";
       if (fileReadResult.isTruncated) {
         const [start, end] = fileReadResult.linesShown!;
         const total = fileReadResult.originalLineCount!;

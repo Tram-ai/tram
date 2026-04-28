@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { GenerateContentResponseUsageMetadata } from '@google/genai';
+import type { GenerateContentResponseUsageMetadata } from "@google/genai";
 
 /**
  * Universal export message format - SSOT for all export formats.
@@ -15,7 +15,7 @@ export interface ExportMessage {
   parentUuid?: string | null;
   sessionId?: string;
   timestamp: string;
-  type: 'user' | 'assistant' | 'system' | 'tool_call';
+  type: "user" | "assistant" | "system" | "tool_call";
 
   /** For user/assistant messages */
   message?: {
@@ -35,7 +35,7 @@ export interface ExportMessage {
     toolCallId: string;
     kind: string;
     title: string | object;
-    status: 'pending' | 'in_progress' | 'completed' | 'failed';
+    status: "pending" | "in_progress" | "completed" | "failed";
     rawInput?: string | object;
     content?: Array<{
       type: string;

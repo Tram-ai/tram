@@ -12,15 +12,15 @@
  * and the "Always Allow" persistence logic stay in sync.
  */
 
-import * as path from 'node:path';
-import type { PermissionCheckContext } from '../permissions/types.js';
-import type { PermissionManager } from '../permissions/permission-manager.js';
+import * as path from "node:path";
+import type { PermissionCheckContext } from "../permissions/types.js";
+import type { PermissionManager } from "../permissions/permission-manager.js";
 import type {
   ToolCallConfirmationDetails,
   ToolConfirmationPayload,
-} from '../tools/tools.js';
-import { ToolConfirmationOutcome } from '../tools/tools.js';
-import { buildPermissionRules } from '../permissions/rule-parser.js';
+} from "../tools/tools.js";
+import { ToolConfirmationOutcome } from "../tools/tools.js";
+import { buildPermissionRules } from "../permissions/rule-parser.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Context building
@@ -38,24 +38,24 @@ export function buildPermissionCheckContext(
   targetDir: string,
 ): PermissionCheckContext {
   const command =
-    'command' in toolParams ? String(toolParams['command']) : undefined;
+    "command" in toolParams ? String(toolParams["command"]) : undefined;
 
   // Extract file path — tools use 'file_path' or 'path' (LS / grep / glob).
   let filePath =
-    typeof toolParams['file_path'] === 'string'
-      ? toolParams['file_path']
+    typeof toolParams["file_path"] === "string"
+      ? toolParams["file_path"]
       : undefined;
-  if (filePath === undefined && typeof toolParams['path'] === 'string') {
+  if (filePath === undefined && typeof toolParams["path"] === "string") {
     // LS uses absolute paths; grep/glob may be relative to targetDir.
-    filePath = path.isAbsolute(toolParams['path'])
-      ? toolParams['path']
-      : path.resolve(targetDir, toolParams['path']);
+    filePath = path.isAbsolute(toolParams["path"])
+      ? toolParams["path"]
+      : path.resolve(targetDir, toolParams["path"]);
   }
 
   let domain: string | undefined;
-  if (typeof toolParams['url'] === 'string') {
+  if (typeof toolParams["url"] === "string") {
     try {
-      domain = new URL(toolParams['url']).hostname;
+      domain = new URL(toolParams["url"]).hostname;
     } catch {
       // malformed URL — leave domain undefined
     }
@@ -63,10 +63,10 @@ export function buildPermissionCheckContext(
 
   // Generic specifier for literal matching (Skill name, Task subagent type, etc.)
   const specifier =
-    typeof toolParams['skill'] === 'string'
-      ? toolParams['skill']
-      : typeof toolParams['subagent_type'] === 'string'
-        ? toolParams['subagent_type']
+    typeof toolParams["skill"] === "string"
+      ? toolParams["skill"]
+      : typeof toolParams["subagent_type"] === "string"
+        ? toolParams["subagent_type"]
         : undefined;
 
   return { toolName, command, filePath, domain, specifier };
@@ -102,14 +102,14 @@ export async function evaluatePermissionRules(
   let finalPermission = defaultPermission;
   let pmForcedAsk = false;
 
-  if (pm && defaultPermission !== 'deny') {
+  if (pm && defaultPermission !== "deny") {
     if (pm.hasRelevantRules(pmCtx)) {
       const pmDecision = await pm.evaluate(pmCtx);
-      if (pmDecision !== 'default') {
+      if (pmDecision !== "default") {
         finalPermission = pmDecision;
         // If PM explicitly forces 'ask', adding allow rules won't help
         // because ask has higher priority. Hide "Always allow" options.
-        if (pmDecision === 'ask' && pm.hasMatchingAskRule(pmCtx)) {
+        if (pmDecision === "ask" && pm.hasMatchingAskRule(pmCtx)) {
           pmForcedAsk = true;
         }
       }
@@ -136,9 +136,9 @@ export function injectPermissionRulesIfMissing(
   pmCtx: PermissionCheckContext,
 ): void {
   if (
-    (confirmationDetails.type === 'exec' ||
-      confirmationDetails.type === 'mcp' ||
-      confirmationDetails.type === 'info') &&
+    (confirmationDetails.type === "exec" ||
+      confirmationDetails.type === "mcp" ||
+      confirmationDetails.type === "info") &&
     !confirmationDetails.permissionRules
   ) {
     confirmationDetails.permissionRules = buildPermissionRules(pmCtx);
@@ -165,8 +165,8 @@ export async function persistPermissionOutcome(
   confirmationDetails: ToolCallConfirmationDetails,
   persistFn:
     | ((
-        scope: 'project' | 'user',
-        ruleType: 'allow' | 'ask' | 'deny',
+        scope: "project" | "user",
+        ruleType: "allow" | "ask" | "deny",
         rule: string,
       ) => Promise<void>)
     | undefined,
@@ -182,13 +182,13 @@ export async function persistPermissionOutcome(
   }
 
   const scope =
-    outcome === ToolConfirmationOutcome.ProceedAlwaysUser ? 'user' : 'project';
+    outcome === ToolConfirmationOutcome.ProceedAlwaysUser ? "user" : "project";
 
   // Read permissionRules from the stored confirmation details first,
   // falling back to payload for backward compatibility.
   const detailsRules = (
     confirmationDetails as unknown as Record<string, unknown>
-  )?.['permissionRules'] as string[] | undefined;
+  )?.["permissionRules"] as string[] | undefined;
   const payloadRules = payload?.permissionRules;
   const rules = payloadRules ?? detailsRules ?? [];
 
@@ -196,11 +196,11 @@ export async function persistPermissionOutcome(
     for (const rule of rules) {
       // 1. Persist to disk (settings.json)
       if (persistFn) {
-        await persistFn(scope, 'allow', rule);
+        await persistFn(scope, "allow", rule);
       }
       // 2. Immediately update in-memory PermissionManager so the
       //    new rule takes effect without restart.
-      pm?.addPersistentRule(rule, 'allow');
+      pm?.addPersistentRule(rule, "allow");
     }
   }
 }

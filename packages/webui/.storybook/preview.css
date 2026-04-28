@@ -5,10 +5,10 @@
  */
 
 /* Import CSS variables BEFORE Tailwind so they're available */
-@import '../src/styles/variables.css';
+@import "../src/styles/variables.css";
 /* Import component styles */
-@import '../src/styles/components.css';
-@import '../src/styles/timeline.css';
+@import "../src/styles/components.css";
+@import "../src/styles/timeline.css";
 
 @tailwind base;
 @tailwind components;
@@ -49,6 +49,6 @@ body {
 }
 
 /* Full height stories should fill the iframe */
-[data-story-block='true'] {
+[data-story-block="true"] {
   height: 100%;
 }

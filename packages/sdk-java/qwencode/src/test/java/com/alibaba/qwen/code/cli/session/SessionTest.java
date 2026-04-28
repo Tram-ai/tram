@@ -176,7 +176,7 @@ class SessionTest {
         String json
                 = "{\"type\":\"assistant\",\"uuid\":\"ed8374fe-a4eb-4fc0-9780-9bd2fd831cda\","
                 + "\"session_id\":\"166badc0-e6d3-4978-ae47-4ccd51c468ef\",\"message\":{\"content\":[{\"text\":\"Hello! How can I help you with the"
-                + " Qwen Code SDK for Java today?\",\"type\":\"text\"}],\"id\":\"ed8374fe-a4eb-4fc0-9780-9bd2fd831cda\","
+                + " TRAM SDK for Java today?\",\"type\":\"text\"}],\"id\":\"ed8374fe-a4eb-4fc0-9780-9bd2fd831cda\","
                 + "\"model\":\"qwen3-coder-plus\",\"role\":\"assistant\",\"type\":\"message\",\"usage\":{\"cache_read_input_tokens\":12766,"
                 + "\"input_tokens\":12770,\"output_tokens\":17,\"total_tokens\":12787}}}";
         SDKAssistantMessage assistantMessage = JSON.parseObject(json, SDKAssistantMessage.class);

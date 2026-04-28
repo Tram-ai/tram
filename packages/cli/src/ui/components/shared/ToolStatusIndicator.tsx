@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { Box, Text } from 'ink';
-import { ToolCallStatus } from '../../types.js';
-import { GeminiRespondingSpinner } from '../GeminiRespondingSpinner.js';
+import type React from "react";
+import { Box, Text } from "ink";
+import { ToolCallStatus } from "../../types.js";
+import { GeminiRespondingSpinner } from "../GeminiRespondingSpinner.js";
 import {
   TOOL_STATUS,
   SHELL_COMMAND_NAME,
   SHELL_NAME,
-} from '../../constants.js';
-import { theme } from '../../semantic-colors.js';
+} from "../../constants.js";
+import { theme } from "../../semantic-colors.js";
 
 export const STATUS_INDICATOR_WIDTH = 3;
 
@@ -41,22 +41,22 @@ export const ToolStatusIndicator: React.FC<ToolStatusIndicatorProps> = ({
         />
       )}
       {status === ToolCallStatus.Success && (
-        <Text color={theme.status.success} aria-label={'Success:'}>
+        <Text color={theme.status.success} aria-label={"Success:"}>
           {TOOL_STATUS.SUCCESS}
         </Text>
       )}
       {status === ToolCallStatus.Confirming && (
-        <Text color={statusColor} aria-label={'Confirming:'}>
+        <Text color={statusColor} aria-label={"Confirming:"}>
           {TOOL_STATUS.CONFIRMING}
         </Text>
       )}
       {status === ToolCallStatus.Canceled && (
-        <Text color={statusColor} aria-label={'Canceled:'} bold>
+        <Text color={statusColor} aria-label={"Canceled:"} bold>
           {TOOL_STATUS.CANCELED}
         </Text>
       )}
       {status === ToolCallStatus.Error && (
-        <Text color={theme.status.error} aria-label={'Error:'} bold>
+        <Text color={theme.status.error} aria-label={"Error:"} bold>
           {TOOL_STATUS.ERROR}
         </Text>
       )}

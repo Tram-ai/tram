@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { LogAttributes, LogRecord } from '@opentelemetry/api-logs';
-import { logs } from '@opentelemetry/api-logs';
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
-import type { Config } from '../config/config.js';
-import { isInternalPromptId } from '../utils/internalPromptIds.js';
-import { safeJsonStringify } from '../utils/safeJsonStringify.js';
+import type { LogAttributes, LogRecord } from "@opentelemetry/api-logs";
+import { logs } from "@opentelemetry/api-logs";
+import { SemanticAttributes } from "@opentelemetry/semantic-conventions";
+import type { Config } from "../config/config.js";
+import { isInternalPromptId } from "../utils/internalPromptIds.js";
+import { safeJsonStringify } from "../utils/safeJsonStringify.js";
 import {
   EVENT_API_ERROR,
   EVENT_API_CANCEL,
@@ -47,7 +47,7 @@ import {
   EVENT_ARENA_SESSION_ENDED,
   EVENT_PROMPT_SUGGESTION,
   EVENT_SPECULATION,
-} from './constants.js';
+} from "./constants.js";
 import {
   recordApiErrorMetrics,
   recordApiResponseMetrics,
@@ -63,9 +63,10 @@ import {
   recordArenaSessionStartedMetrics,
   recordArenaAgentCompletedMetrics,
   recordArenaSessionEndedMetrics,
-} from './metrics.js';
-import { TramLogger } from './tram-logger/tram-logger.js';
-import { isTelemetrySdkInitialized } from './sdk.js';
+} from "./metrics.js";
+import { TramLogger } from "./tram-logger/tram-logger.js";
+import { QwenLogger } from "./qwen-logger/qwen-logger.js";
+import { isTelemetrySdkInitialized } from "./sdk.js";
 import type {
   ApiErrorEvent,
   ApiCancelEvent,
@@ -106,17 +107,17 @@ import type {
   ArenaSessionEndedEvent,
   PromptSuggestionEvent,
   SpeculationEvent,
-} from './types.js';
-import type { HookCallEvent } from './types.js';
-import type { UiEvent } from './uiTelemetry.js';
-import { uiTelemetryService } from './uiTelemetry.js';
+} from "./types.js";
+import type { HookCallEvent } from "./types.js";
+import type { UiEvent } from "./uiTelemetry.js";
+import { uiTelemetryService } from "./uiTelemetry.js";
 
 const shouldLogUserPrompts = (config: Config): boolean =>
   config.getTelemetryLogPromptsEnabled();
 
 function getCommonAttributes(config: Config): LogAttributes {
   return {
-    'session.id': config.getSessionId(),
+    "session.id": config.getSessionId(),
   };
 }
 
@@ -131,8 +132,8 @@ export function logStartSession(
 
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
-    'event.name': EVENT_CLI_CONFIG,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_CLI_CONFIG,
+    "event.timestamp": new Date().toISOString(),
     model: event.model,
     sandbox_enabled: event.sandbox_enabled,
     core_tools_enabled: event.core_tools_enabled,
@@ -155,7 +156,7 @@ export function logStartSession(
 
   const logger = logs.getLogger(SERVICE_NAME);
   const logRecord: LogRecord = {
-    body: 'CLI configuration loaded.',
+    body: "CLI configuration loaded.",
     attributes,
   };
   logger.emit(logRecord);
@@ -167,18 +168,18 @@ export function logUserPrompt(config: Config, event: UserPromptEvent): void {
 
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
-    'event.name': EVENT_USER_PROMPT,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_USER_PROMPT,
+    "event.timestamp": new Date().toISOString(),
     prompt_length: event.prompt_length,
     prompt_id: event.prompt_id,
   };
 
   if (event.auth_type) {
-    attributes['auth_type'] = event.auth_type;
+    attributes["auth_type"] = event.auth_type;
   }
 
   if (shouldLogUserPrompts(config)) {
-    attributes['prompt'] = event.prompt;
+    attributes["prompt"] = event.prompt;
   }
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -195,8 +196,8 @@ export function logUserRetry(config: Config, event: UserRetryEvent): void {
 
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
-    'event.name': EVENT_USER_RETRY,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_USER_RETRY,
+    "event.timestamp": new Date().toISOString(),
     prompt_id: event.prompt_id,
   };
 
@@ -211,33 +212,33 @@ export function logUserRetry(config: Config, event: UserRetryEvent): void {
 export function logToolCall(config: Config, event: ToolCallEvent): void {
   const uiEvent = {
     ...event,
-    'event.name': EVENT_TOOL_CALL,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_TOOL_CALL,
+    "event.timestamp": new Date().toISOString(),
   } as UiEvent;
   uiTelemetryService.addEvent(uiEvent);
   if (!isInternalPromptId(event.prompt_id)) {
     config.getChatRecordingService()?.recordUiTelemetryEvent(uiEvent);
   }
-  QwenLogger.getInstance(config)?.logToolCallEvent(event);
+  TramLogger.getInstance(config)?.logToolCallEvent(event);
   if (!isTelemetrySdkInitialized()) return;
 
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_TOOL_CALL,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_TOOL_CALL,
+    "event.timestamp": new Date().toISOString(),
     function_args: safeJsonStringify(event.function_args, 2),
   };
   if (event.error) {
-    attributes['error.message'] = event.error;
+    attributes["error.message"] = event.error;
     if (event.error_type) {
-      attributes['error.type'] = event.error_type;
+      attributes["error.type"] = event.error_type;
     }
   }
 
   const logger = logs.getLogger(SERVICE_NAME);
   const logRecord: LogRecord = {
-    body: `Tool call: ${event.function_name}${event.decision ? `. Decision: ${event.decision}` : ''}. Success: ${event.success}. Duration: ${event.duration_ms}ms.`,
+    body: `Tool call: ${event.function_name}${event.decision ? `. Decision: ${event.decision}` : ""}. Success: ${event.success}. Duration: ${event.duration_ms}ms.`,
     attributes,
   };
   logger.emit(logRecord);
@@ -259,8 +260,8 @@ export function logToolOutputTruncated(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': 'tool_output_truncated',
-    'event.timestamp': new Date().toISOString(),
+    "event.name": "tool_output_truncated",
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -280,23 +281,23 @@ export function logFileOperation(
 
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
-    'event.name': EVENT_FILE_OPERATION,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_FILE_OPERATION,
+    "event.timestamp": new Date().toISOString(),
     tool_name: event.tool_name,
     operation: event.operation,
   };
 
   if (event.lines) {
-    attributes['lines'] = event.lines;
+    attributes["lines"] = event.lines;
   }
   if (event.mimetype) {
-    attributes['mimetype'] = event.mimetype;
+    attributes["mimetype"] = event.mimetype;
   }
   if (event.extension) {
-    attributes['extension'] = event.extension;
+    attributes["extension"] = event.extension;
   }
   if (event.programming_language) {
-    attributes['programming_language'] = event.programming_language;
+    attributes["programming_language"] = event.programming_language;
   }
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -322,8 +323,8 @@ export function logApiRequest(config: Config, event: ApiRequestEvent): void {
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_API_REQUEST,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_API_REQUEST,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -344,8 +345,8 @@ export function logFlashFallback(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_FLASH_FALLBACK,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_FLASH_FALLBACK,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -366,8 +367,8 @@ export function logRipgrepFallback(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_RIPGREP_FALLBACK,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_RIPGREP_FALLBACK,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -381,30 +382,30 @@ export function logRipgrepFallback(
 export function logApiError(config: Config, event: ApiErrorEvent): void {
   const uiEvent = {
     ...event,
-    'event.name': EVENT_API_ERROR,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_API_ERROR,
+    "event.timestamp": new Date().toISOString(),
   } as UiEvent;
   uiTelemetryService.addEvent(uiEvent);
   if (!isInternalPromptId(event.prompt_id)) {
     config.getChatRecordingService()?.recordUiTelemetryEvent(uiEvent);
   }
-  QwenLogger.getInstance(config)?.logApiErrorEvent(event);
+  TramLogger.getInstance(config)?.logApiErrorEvent(event);
   if (!isTelemetrySdkInitialized()) return;
 
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_API_ERROR,
-    'event.timestamp': new Date().toISOString(),
-    ['error.message']: event.error_message,
+    "event.name": EVENT_API_ERROR,
+    "event.timestamp": new Date().toISOString(),
+    ["error.message"]: event.error_message,
     model_name: event.model,
     duration: event.duration_ms,
   };
 
   if (event.error_type) {
-    attributes['error.type'] = event.error_type;
+    attributes["error.type"] = event.error_type;
   }
-  if (typeof event.status_code === 'number') {
+  if (typeof event.status_code === "number") {
     attributes[SemanticAttributes.HTTP_STATUS_CODE] = event.status_code;
   }
 
@@ -424,8 +425,8 @@ export function logApiError(config: Config, event: ApiErrorEvent): void {
 export function logApiCancel(config: Config, event: ApiCancelEvent): void {
   const uiEvent = {
     ...event,
-    'event.name': EVENT_API_CANCEL,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_API_CANCEL,
+    "event.timestamp": new Date().toISOString(),
   } as UiEvent;
   uiTelemetryService.addEvent(uiEvent);
   TramLogger.getInstance(config)?.logApiCancelEvent(event);
@@ -434,8 +435,8 @@ export function logApiCancel(config: Config, event: ApiCancelEvent): void {
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_API_CANCEL,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_API_CANCEL,
+    "event.timestamp": new Date().toISOString(),
     model_name: event.model,
   };
 
@@ -450,33 +451,33 @@ export function logApiCancel(config: Config, event: ApiCancelEvent): void {
 export function logApiResponse(config: Config, event: ApiResponseEvent): void {
   const uiEvent = {
     ...event,
-    'event.name': EVENT_API_RESPONSE,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_API_RESPONSE,
+    "event.timestamp": new Date().toISOString(),
   } as UiEvent;
   uiTelemetryService.addEvent(uiEvent);
   if (!isInternalPromptId(event.prompt_id)) {
     config.getChatRecordingService()?.recordUiTelemetryEvent(uiEvent);
   }
-  QwenLogger.getInstance(config)?.logApiResponseEvent(event);
+  TramLogger.getInstance(config)?.logApiResponseEvent(event);
   if (!isTelemetrySdkInitialized()) return;
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_API_RESPONSE,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_API_RESPONSE,
+    "event.timestamp": new Date().toISOString(),
   };
   if (event.response_text) {
-    attributes['response_text'] = event.response_text;
+    attributes["response_text"] = event.response_text;
   }
   if (event.status_code) {
-    if (typeof event.status_code === 'number') {
+    if (typeof event.status_code === "number") {
       attributes[SemanticAttributes.HTTP_STATUS_CODE] = event.status_code;
     }
   }
 
   const logger = logs.getLogger(SERVICE_NAME);
   const logRecord: LogRecord = {
-    body: `API response from ${event.model}. Status: ${event.status_code || 'N/A'}. Duration: ${event.duration_ms}ms.`,
+    body: `API response from ${event.model}. Status: ${event.status_code || "N/A"}. Duration: ${event.duration_ms}ms.`,
     attributes,
   };
   logger.emit(logRecord);
@@ -486,23 +487,23 @@ export function logApiResponse(config: Config, event: ApiResponseEvent): void {
   });
   recordTokenUsageMetrics(config, event.input_token_count, {
     model: event.model,
-    type: 'input',
+    type: "input",
   });
   recordTokenUsageMetrics(config, event.output_token_count, {
     model: event.model,
-    type: 'output',
+    type: "output",
   });
   recordTokenUsageMetrics(config, event.cached_content_token_count, {
     model: event.model,
-    type: 'cache',
+    type: "cache",
   });
   recordTokenUsageMetrics(config, event.thoughts_token_count, {
     model: event.model,
-    type: 'thought',
+    type: "thought",
   });
   recordTokenUsageMetrics(config, event.tool_token_count, {
     model: event.model,
-    type: 'tool',
+    type: "tool",
   });
 }
 
@@ -543,7 +544,7 @@ export function logNextSpeakerCheck(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_NEXT_SPEAKER_CHECK,
+    "event.name": EVENT_NEXT_SPEAKER_CHECK,
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -564,7 +565,7 @@ export function logSlashCommand(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_SLASH_COMMAND,
+    "event.name": EVENT_SLASH_COMMAND,
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -585,7 +586,7 @@ export function logIdeConnection(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_IDE_CONNECTION,
+    "event.name": EVENT_IDE_CONNECTION,
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -606,7 +607,7 @@ export function logConversationFinishedEvent(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_CONVERSATION_FINISHED,
+    "event.name": EVENT_CONVERSATION_FINISHED,
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -626,7 +627,7 @@ export function logChatCompression(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_CHAT_COMPRESSION,
+    "event.name": EVENT_CHAT_COMPRESSION,
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -670,7 +671,7 @@ export function logMalformedJsonResponse(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_MALFORMED_JSON_RESPONSE,
+    "event.name": EVENT_MALFORMED_JSON_RESPONSE,
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -690,12 +691,12 @@ export function logInvalidChunk(
 
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
-    'event.name': EVENT_INVALID_CHUNK,
-    'event.timestamp': event['event.timestamp'],
+    "event.name": EVENT_INVALID_CHUNK,
+    "event.timestamp": event["event.timestamp"],
   };
 
   if (event.error_message) {
-    attributes['error.message'] = event.error_message;
+    attributes["error.message"] = event.error_message;
   }
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -717,7 +718,7 @@ export function logContentRetry(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_CONTENT_RETRY,
+    "event.name": EVENT_CONTENT_RETRY,
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -739,7 +740,7 @@ export function logContentRetryFailure(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_CONTENT_RETRY_FAILURE,
+    "event.name": EVENT_CONTENT_RETRY_FAILURE,
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -761,8 +762,8 @@ export function logSubagentExecution(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_SUBAGENT_EXECUTION,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_SUBAGENT_EXECUTION,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -789,7 +790,7 @@ export function logModelSlashCommand(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_MODEL_SLASH_COMMAND,
+    "event.name": EVENT_MODEL_SLASH_COMMAND,
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -816,8 +817,8 @@ export function logExtensionInstallEvent(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_EXTENSION_INSTALL,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_EXTENSION_INSTALL,
+    "event.timestamp": new Date().toISOString(),
     extension_name: event.extension_name,
     extension_version: event.extension_version,
     extension_source: event.extension_source,
@@ -842,8 +843,8 @@ export function logExtensionUninstall(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_EXTENSION_UNINSTALL,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_EXTENSION_UNINSTALL,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -863,8 +864,8 @@ export async function logExtensionUpdateEvent(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_EXTENSION_UPDATE,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_EXTENSION_UPDATE,
+    "event.timestamp": new Date().toISOString(),
     extension_name: event.extension_name,
     extension_id: event.extension_id,
     extension_previous_version: event.extension_previous_version,
@@ -890,8 +891,8 @@ export function logExtensionEnable(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_EXTENSION_ENABLE,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_EXTENSION_ENABLE,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -912,8 +913,8 @@ export function logExtensionDisable(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_EXTENSION_DISABLE,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_EXTENSION_DISABLE,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -931,15 +932,15 @@ export function logAuth(config: Config, event: AuthEvent): void {
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_AUTH,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_AUTH,
+    "event.timestamp": new Date().toISOString(),
     auth_type: event.auth_type,
     action_type: event.action_type,
     status: event.status,
   };
 
   if (event.error_message) {
-    attributes['error.message'] = event.error_message;
+    attributes["error.message"] = event.error_message;
   }
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -956,8 +957,8 @@ export function logSkillLaunch(config: Config, event: SkillLaunchEvent): void {
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_SKILL_LAUNCH,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_SKILL_LAUNCH,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -974,8 +975,8 @@ export function logUserFeedback(
 ): void {
   const uiEvent = {
     ...event,
-    'event.name': EVENT_USER_FEEDBACK,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_USER_FEEDBACK,
+    "event.timestamp": new Date().toISOString(),
   } as UiEvent;
   uiTelemetryService.addEvent(uiEvent);
   config.getChatRecordingService()?.recordUiTelemetryEvent(uiEvent);
@@ -985,8 +986,8 @@ export function logUserFeedback(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_USER_FEEDBACK,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_USER_FEEDBACK,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -1008,8 +1009,8 @@ export function logArenaSessionStarted(
     ...getCommonAttributes(config),
     ...event,
     model_ids: JSON.stringify(event.model_ids),
-    'event.name': EVENT_ARENA_SESSION_STARTED,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_ARENA_SESSION_STARTED,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -1031,8 +1032,8 @@ export function logArenaAgentCompleted(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_ARENA_AGENT_COMPLETED,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_ARENA_AGENT_COMPLETED,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -1061,13 +1062,13 @@ export function logArenaSessionEnded(
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
     ...event,
-    'event.name': EVENT_ARENA_SESSION_ENDED,
-    'event.timestamp': new Date().toISOString(),
+    "event.name": EVENT_ARENA_SESSION_ENDED,
+    "event.timestamp": new Date().toISOString(),
   };
 
   const logger = logs.getLogger(SERVICE_NAME);
   const logRecord: LogRecord = {
-    body: `Arena session ended: ${event.status}.${event.winner_model_id ? ` Winner: ${event.winner_model_id}.` : ''}`,
+    body: `Arena session ended: ${event.status}.${event.winner_model_id ? ` Winner: ${event.winner_model_id}.` : ""}`,
     attributes,
   };
   logger.emit(logRecord);
@@ -1088,37 +1089,37 @@ export function logPromptSuggestion(
 
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
-    'event.name': EVENT_PROMPT_SUGGESTION,
-    'event.timestamp': event['event.timestamp'],
+    "event.name": EVENT_PROMPT_SUGGESTION,
+    "event.timestamp": event["event.timestamp"],
     outcome: event.outcome,
   };
 
   if (event.prompt_id) {
-    attributes['prompt_id'] = event.prompt_id;
+    attributes["prompt_id"] = event.prompt_id;
   }
   if (event.accept_method) {
-    attributes['accept_method'] = event.accept_method;
+    attributes["accept_method"] = event.accept_method;
   }
   if (event.time_to_accept_ms !== undefined) {
-    attributes['time_to_accept_ms'] = event.time_to_accept_ms;
+    attributes["time_to_accept_ms"] = event.time_to_accept_ms;
   }
   if (event.time_to_ignore_ms !== undefined) {
-    attributes['time_to_ignore_ms'] = event.time_to_ignore_ms;
+    attributes["time_to_ignore_ms"] = event.time_to_ignore_ms;
   }
   if (event.time_to_first_keystroke_ms !== undefined) {
-    attributes['time_to_first_keystroke_ms'] = event.time_to_first_keystroke_ms;
+    attributes["time_to_first_keystroke_ms"] = event.time_to_first_keystroke_ms;
   }
   if (event.suggestion_length !== undefined) {
-    attributes['suggestion_length'] = event.suggestion_length;
+    attributes["suggestion_length"] = event.suggestion_length;
   }
   if (event.similarity !== undefined) {
-    attributes['similarity'] = event.similarity;
+    attributes["similarity"] = event.similarity;
   }
   if (event.was_focused_when_shown !== undefined) {
-    attributes['was_focused_when_shown'] = event.was_focused_when_shown;
+    attributes["was_focused_when_shown"] = event.was_focused_when_shown;
   }
   if (event.reason) {
-    attributes['reason'] = event.reason;
+    attributes["reason"] = event.reason;
   }
 
   const logger = logs.getLogger(SERVICE_NAME);
@@ -1134,8 +1135,8 @@ export function logSpeculation(config: Config, event: SpeculationEvent): void {
 
   const attributes: LogAttributes = {
     ...getCommonAttributes(config),
-    'event.name': EVENT_SPECULATION,
-    'event.timestamp': event['event.timestamp'],
+    "event.name": EVENT_SPECULATION,
+    "event.timestamp": event["event.timestamp"],
     outcome: event.outcome,
     turns_used: event.turns_used,
     files_written: event.files_written,
@@ -1145,7 +1146,7 @@ export function logSpeculation(config: Config, event: SpeculationEvent): void {
   };
 
   if (event.boundary_type) {
-    attributes['boundary_type'] = event.boundary_type;
+    attributes["boundary_type"] = event.boundary_type;
   }
 
   const logger = logs.getLogger(SERVICE_NAME);

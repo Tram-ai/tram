@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC } from 'react';
-import { CloseSmallIcon } from '../icons/NavigationIcons.js';
+import type { FC } from "react";
+import { CloseSmallIcon } from "../icons/NavigationIcons.js";
 
 // ======================== ImagePreview ========================
 
@@ -54,7 +54,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({ images, onRemove }) => {
 // ======================== ImageMessageRenderer ========================
 
 export interface ImageMessageLike {
-  kind: 'image';
+  kind: "image";
   imagePath: string;
   imageSrc?: string;
   imageMissing?: boolean;
@@ -69,7 +69,7 @@ export const ImageMessageRenderer: FC<ImageMessageRendererProps> = ({
   msg,
   imageIndex,
 }) => {
-  if (msg.kind !== 'image' || !msg.imagePath) {
+  if (msg.kind !== "image" || !msg.imagePath) {
     return null;
   }
 
@@ -81,18 +81,18 @@ export const ImageMessageRenderer: FC<ImageMessageRendererProps> = ({
       <div
         className="inline-block relative whitespace-pre-wrap rounded-md max-w-full overflow-x-auto overflow-y-hidden select-text leading-[1.5]"
         style={{
-          border: '1px solid var(--app-input-border)',
-          borderRadius: 'var(--corner-radius-medium)',
-          backgroundColor: 'var(--app-input-background)',
-          padding: '6px 8px',
-          color: 'var(--app-primary-foreground)',
+          border: "1px solid var(--app-input-border)",
+          borderRadius: "var(--corner-radius-medium)",
+          backgroundColor: "var(--app-input-background)",
+          padding: "6px 8px",
+          color: "var(--app-primary-foreground)",
         }}
       >
         <div
           style={{
-            fontSize: '12px',
-            color: 'var(--app-secondary-foreground)',
-            marginBottom: '4px',
+            fontSize: "12px",
+            color: "var(--app-secondary-foreground)",
+            marginBottom: "4px",
           }}
         >
           {label}
@@ -106,8 +106,8 @@ export const ImageMessageRenderer: FC<ImageMessageRendererProps> = ({
         ) : (
           <div
             style={{
-              fontSize: '12px',
-              color: 'var(--app-secondary-foreground)',
+              fontSize: "12px",
+              color: "var(--app-secondary-foreground)",
             }}
           >
             @{msg.imagePath}

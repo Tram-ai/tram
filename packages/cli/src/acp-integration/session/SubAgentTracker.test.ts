@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SubAgentTracker } from './SubAgentTracker.js';
-import type { SessionContext } from './types.js';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { SubAgentTracker } from "./SubAgentTracker.js";
+import type { SessionContext } from "./types.js";
 import type {
   Config,
   ToolRegistry,
@@ -17,21 +17,21 @@ import type {
   AgentStreamTextEvent,
   ToolEditConfirmationDetails,
   ToolInfoConfirmationDetails,
-} from '@tram-ai/tram-core';
+} from "@tram-ai/tram-core";
 import {
   AgentEventType,
   ToolConfirmationOutcome,
   TodoWriteTool,
-} from '@tram-ai/tram-core';
-import type { AgentSideConnection } from '@agentclientprotocol/sdk';
-import { EventEmitter } from 'node:events';
+} from "@tram-ai/tram-core";
+import type { AgentSideConnection } from "@agentclientprotocol/sdk";
+import { EventEmitter } from "node:events";
 
 // Helper to create a mock AgentToolCallEvent with required fields
 function createToolCallEvent(
   overrides: Partial<AgentToolCallEvent> & { name: string; callId: string },
 ): AgentToolCallEvent {
   return {
-    subagentId: 'test-subagent',
+    subagentId: "test-subagent",
     round: 1,
     timestamp: Date.now(),
     description: `Calling ${overrides.name}`,
@@ -49,7 +49,7 @@ function createToolResultEvent(
   },
 ): AgentToolResultEvent {
   return {
-    subagentId: 'test-subagent',
+    subagentId: "test-subagent",
     round: 1,
     timestamp: Date.now(),
     ...overrides,
@@ -61,12 +61,12 @@ function createApprovalEvent(
   overrides: Partial<AgentApprovalRequestEvent> & {
     name: string;
     callId: string;
-    confirmationDetails: AgentApprovalRequestEvent['confirmationDetails'];
-    respond: AgentApprovalRequestEvent['respond'];
+    confirmationDetails: AgentApprovalRequestEvent["confirmationDetails"];
+    respond: AgentApprovalRequestEvent["respond"];
   },
 ): AgentApprovalRequestEvent {
   return {
-    subagentId: 'test-subagent',
+    subagentId: "test-subagent",
     round: 1,
     timestamp: Date.now(),
     description: `Awaiting approval for ${overrides.name}`,
@@ -76,28 +76,28 @@ function createApprovalEvent(
 
 // Helper to create edit confirmation details
 function createEditConfirmation(
-  overrides: Partial<Omit<ToolEditConfirmationDetails, 'onConfirm' | 'type'>>,
-): Omit<ToolEditConfirmationDetails, 'onConfirm'> {
+  overrides: Partial<Omit<ToolEditConfirmationDetails, "onConfirm" | "type">>,
+): Omit<ToolEditConfirmationDetails, "onConfirm"> {
   return {
-    type: 'edit',
-    title: 'Edit file',
-    fileName: '/test.ts',
-    filePath: '/test.ts',
-    fileDiff: '',
-    originalContent: '',
-    newContent: '',
+    type: "edit",
+    title: "Edit file",
+    fileName: "/test.ts",
+    filePath: "/test.ts",
+    fileDiff: "",
+    originalContent: "",
+    newContent: "",
     ...overrides,
   };
 }
 
 // Helper to create info confirmation details
 function createInfoConfirmation(
-  overrides?: Partial<Omit<ToolInfoConfirmationDetails, 'onConfirm' | 'type'>>,
-): Omit<ToolInfoConfirmationDetails, 'onConfirm'> {
+  overrides?: Partial<Omit<ToolInfoConfirmationDetails, "onConfirm" | "type">>,
+): Omit<ToolInfoConfirmationDetails, "onConfirm"> {
   return {
-    type: 'info',
-    title: 'Tool requires approval',
-    prompt: 'Allow this action?',
+    type: "info",
+    title: "Tool requires approval",
+    prompt: "Allow this action?",
     ...overrides,
   };
 }
@@ -107,14 +107,14 @@ function createStreamTextEvent(
   overrides: Partial<AgentStreamTextEvent> & { text: string },
 ): AgentStreamTextEvent {
   return {
-    subagentId: 'test-subagent',
+    subagentId: "test-subagent",
     round: 1,
     timestamp: Date.now(),
     ...overrides,
   };
 }
 
-describe('SubAgentTracker', () => {
+describe("SubAgentTracker", () => {
   let mockContext: SessionContext;
   let mockClient: AgentSideConnection;
   let sendUpdateSpy: ReturnType<typeof vi.fn>;
@@ -134,7 +134,7 @@ describe('SubAgentTracker', () => {
     } as unknown as ToolRegistry;
 
     mockContext = {
-      sessionId: 'test-session-id',
+      sessionId: "test-session-id",
       config: {
         getToolRegistry: () => mockToolRegistry,
       } as unknown as Config,
@@ -148,23 +148,23 @@ describe('SubAgentTracker', () => {
     tracker = new SubAgentTracker(
       mockContext,
       mockClient,
-      'parent-call-123',
-      'test-subagent',
+      "parent-call-123",
+      "test-subagent",
     );
     eventEmitter = new EventEmitter() as unknown as AgentEventEmitter;
     abortController = new AbortController();
   });
 
-  describe('setup', () => {
-    it('should return cleanup function', () => {
+  describe("setup", () => {
+    it("should return cleanup function", () => {
       const cleanups = tracker.setup(eventEmitter, abortController.signal);
 
       expect(cleanups).toHaveLength(1);
-      expect(typeof cleanups[0]).toBe('function');
+      expect(typeof cleanups[0]).toBe("function");
     });
 
-    it('should register event listeners', () => {
-      const onSpy = vi.spyOn(eventEmitter, 'on');
+    it("should register event listeners", () => {
+      const onSpy = vi.spyOn(eventEmitter, "on");
 
       tracker.setup(eventEmitter, abortController.signal);
 
@@ -186,8 +186,8 @@ describe('SubAgentTracker', () => {
       );
     });
 
-    it('should remove event listeners on cleanup', () => {
-      const offSpy = vi.spyOn(eventEmitter, 'off');
+    it("should remove event listeners on cleanup", () => {
+      const offSpy = vi.spyOn(eventEmitter, "off");
       const cleanups = tracker.setup(eventEmitter, abortController.signal);
 
       cleanups[0]();
@@ -211,15 +211,15 @@ describe('SubAgentTracker', () => {
     });
   });
 
-  describe('tool call handling', () => {
-    it('should emit tool_call on TOOL_CALL event', async () => {
+  describe("tool call handling", () => {
+    it("should emit tool_call on TOOL_CALL event", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const event = createToolCallEvent({
-        name: 'read_file',
-        callId: 'call-123',
-        args: { path: '/test.ts' },
-        description: 'Reading file',
+        name: "read_file",
+        callId: "call-123",
+        args: { path: "/test.ts" },
+        description: "Reading file",
       });
 
       eventEmitter.emit(AgentEventType.TOOL_CALL, event);
@@ -232,29 +232,29 @@ describe('SubAgentTracker', () => {
       // ToolCallEmitter resolves metadata from registry - uses toolName when tool not found
       expect(sendUpdateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          sessionUpdate: 'tool_call',
-          toolCallId: 'call-123',
-          status: 'pending',
-          title: 'read_file',
+          sessionUpdate: "tool_call",
+          toolCallId: "call-123",
+          status: "pending",
+          title: "read_file",
           content: [],
           locations: [],
-          kind: 'other',
-          rawInput: { path: '/test.ts' },
+          kind: "other",
+          rawInput: { path: "/test.ts" },
           _meta: expect.objectContaining({
-            toolName: 'read_file',
-            parentToolCallId: 'parent-call-123',
-            subagentType: 'test-subagent',
+            toolName: "read_file",
+            parentToolCallId: "parent-call-123",
+            subagentType: "test-subagent",
           }),
         }),
       );
     });
 
-    it('should skip tool_call for TodoWriteTool', async () => {
+    it("should skip tool_call for TodoWriteTool", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const event = createToolCallEvent({
         name: TodoWriteTool.Name,
-        callId: 'call-todo',
+        callId: "call-todo",
         args: { todos: [] },
       });
 
@@ -266,13 +266,13 @@ describe('SubAgentTracker', () => {
       expect(sendUpdateSpy).not.toHaveBeenCalled();
     });
 
-    it('should not emit when aborted', async () => {
+    it("should not emit when aborted", async () => {
       tracker.setup(eventEmitter, abortController.signal);
       abortController.abort();
 
       const event = createToolCallEvent({
-        name: 'read_file',
-        callId: 'call-123',
+        name: "read_file",
+        callId: "call-123",
         args: {},
       });
 
@@ -284,26 +284,26 @@ describe('SubAgentTracker', () => {
     });
   });
 
-  describe('tool result handling', () => {
-    it('should emit tool_call_update on TOOL_RESULT event', async () => {
+  describe("tool result handling", () => {
+    it("should emit tool_call_update on TOOL_RESULT event", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       // First emit tool call to store state
       eventEmitter.emit(
         AgentEventType.TOOL_CALL,
         createToolCallEvent({
-          name: 'read_file',
-          callId: 'call-123',
-          args: { path: '/test.ts' },
+          name: "read_file",
+          callId: "call-123",
+          args: { path: "/test.ts" },
         }),
       );
 
       // Then emit result
       const resultEvent = createToolResultEvent({
-        name: 'read_file',
-        callId: 'call-123',
+        name: "read_file",
+        callId: "call-123",
         success: true,
-        resultDisplay: 'File contents',
+        resultDisplay: "File contents",
       });
 
       eventEmitter.emit(AgentEventType.TOOL_RESULT, resultEvent);
@@ -311,25 +311,25 @@ describe('SubAgentTracker', () => {
       await vi.waitFor(() => {
         expect(sendUpdateSpy).toHaveBeenCalledWith(
           expect.objectContaining({
-            sessionUpdate: 'tool_call_update',
-            toolCallId: 'call-123',
-            status: 'completed',
+            sessionUpdate: "tool_call_update",
+            toolCallId: "call-123",
+            status: "completed",
             _meta: expect.objectContaining({
-              toolName: 'read_file',
-              parentToolCallId: 'parent-call-123',
-              subagentType: 'test-subagent',
+              toolName: "read_file",
+              parentToolCallId: "parent-call-123",
+              subagentType: "test-subagent",
             }),
           }),
         );
       });
     });
 
-    it('should emit failed status on unsuccessful result', async () => {
+    it("should emit failed status on unsuccessful result", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const resultEvent = createToolResultEvent({
-        name: 'read_file',
-        callId: 'call-fail',
+        name: "read_file",
+        callId: "call-fail",
         success: false,
         resultDisplay: undefined,
       });
@@ -339,19 +339,19 @@ describe('SubAgentTracker', () => {
       await vi.waitFor(() => {
         expect(sendUpdateSpy).toHaveBeenCalledWith(
           expect.objectContaining({
-            sessionUpdate: 'tool_call_update',
-            status: 'failed',
+            sessionUpdate: "tool_call_update",
+            status: "failed",
             _meta: expect.objectContaining({
-              toolName: 'read_file',
-              parentToolCallId: 'parent-call-123',
-              subagentType: 'test-subagent',
+              toolName: "read_file",
+              parentToolCallId: "parent-call-123",
+              subagentType: "test-subagent",
             }),
           }),
         );
       });
     });
 
-    it('should emit plan update for TodoWriteTool results', async () => {
+    it("should emit plan update for TodoWriteTool results", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       // Store args via tool call
@@ -359,9 +359,9 @@ describe('SubAgentTracker', () => {
         AgentEventType.TOOL_CALL,
         createToolCallEvent({
           name: TodoWriteTool.Name,
-          callId: 'call-todo',
+          callId: "call-todo",
           args: {
-            todos: [{ id: '1', content: 'Task 1', status: 'pending' }],
+            todos: [{ id: "1", content: "Task 1", status: "pending" }],
           },
         }),
       );
@@ -369,11 +369,11 @@ describe('SubAgentTracker', () => {
       // Emit result with todo_list display
       const resultEvent = createToolResultEvent({
         name: TodoWriteTool.Name,
-        callId: 'call-todo',
+        callId: "call-todo",
         success: true,
         resultDisplay: JSON.stringify({
-          type: 'todo_list',
-          todos: [{ id: '1', content: 'Task 1', status: 'completed' }],
+          type: "todo_list",
+          todos: [{ id: "1", content: "Task 1", status: "completed" }],
         }),
       });
 
@@ -381,22 +381,22 @@ describe('SubAgentTracker', () => {
 
       await vi.waitFor(() => {
         expect(sendUpdateSpy).toHaveBeenCalledWith({
-          sessionUpdate: 'plan',
+          sessionUpdate: "plan",
           entries: [
-            { content: 'Task 1', priority: 'medium', status: 'completed' },
+            { content: "Task 1", priority: "medium", status: "completed" },
           ],
         });
       });
     });
 
-    it('should clean up state after result', async () => {
+    it("should clean up state after result", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       eventEmitter.emit(
         AgentEventType.TOOL_CALL,
         createToolCallEvent({
-          name: 'test_tool',
-          callId: 'call-cleanup',
+          name: "test_tool",
+          callId: "call-cleanup",
           args: { test: true },
         }),
       );
@@ -404,8 +404,8 @@ describe('SubAgentTracker', () => {
       eventEmitter.emit(
         AgentEventType.TOOL_RESULT,
         createToolResultEvent({
-          name: 'test_tool',
-          callId: 'call-cleanup',
+          name: "test_tool",
+          callId: "call-cleanup",
           success: true,
         }),
       );
@@ -415,8 +415,8 @@ describe('SubAgentTracker', () => {
       eventEmitter.emit(
         AgentEventType.TOOL_RESULT,
         createToolResultEvent({
-          name: 'test_tool',
-          callId: 'call-cleanup',
+          name: "test_tool",
+          callId: "call-cleanup",
           success: true,
         }),
       );
@@ -430,19 +430,19 @@ describe('SubAgentTracker', () => {
     });
   });
 
-  describe('approval handling', () => {
-    it('should request permission from client', async () => {
+  describe("approval handling", () => {
+    it("should request permission from client", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const respondSpy = vi.fn().mockResolvedValue(undefined);
       const event = createApprovalEvent({
-        name: 'edit_file',
-        callId: 'call-edit',
-        description: 'Editing file',
+        name: "edit_file",
+        callId: "call-edit",
+        description: "Editing file",
         confirmationDetails: createEditConfirmation({
-          fileName: '/test.ts',
-          originalContent: 'old',
-          newContent: 'new',
+          fileName: "/test.ts",
+          originalContent: "old",
+          newContent: "new",
         }),
         respond: respondSpy,
       });
@@ -455,16 +455,16 @@ describe('SubAgentTracker', () => {
 
       expect(requestPermissionSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          sessionId: 'test-session-id',
+          sessionId: "test-session-id",
           toolCall: expect.objectContaining({
-            toolCallId: 'call-edit',
-            status: 'pending',
+            toolCallId: "call-edit",
+            status: "pending",
             content: [
               {
-                type: 'diff',
-                path: '/test.ts',
-                oldText: 'old',
-                newText: 'new',
+                type: "diff",
+                path: "/test.ts",
+                oldText: "old",
+                newText: "new",
               },
             ],
           }),
@@ -472,13 +472,13 @@ describe('SubAgentTracker', () => {
       );
     });
 
-    it('should respond to subagent with permission outcome', async () => {
+    it("should respond to subagent with permission outcome", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const respondSpy = vi.fn().mockResolvedValue(undefined);
       const event = createApprovalEvent({
-        name: 'test_tool',
-        callId: 'call-123',
+        name: "test_tool",
+        callId: "call-123",
         confirmationDetails: createInfoConfirmation(),
         respond: respondSpy,
       });
@@ -495,14 +495,14 @@ describe('SubAgentTracker', () => {
       });
     });
 
-    it('should cancel on permission request failure', async () => {
-      requestPermissionSpy.mockRejectedValue(new Error('Network error'));
+    it("should cancel on permission request failure", async () => {
+      requestPermissionSpy.mockRejectedValue(new Error("Network error"));
       tracker.setup(eventEmitter, abortController.signal);
 
       const respondSpy = vi.fn().mockResolvedValue(undefined);
       const event = createApprovalEvent({
-        name: 'test_tool',
-        callId: 'call-123',
+        name: "test_tool",
+        callId: "call-123",
         confirmationDetails: createInfoConfirmation(),
         respond: respondSpy,
       });
@@ -514,16 +514,16 @@ describe('SubAgentTracker', () => {
       });
     });
 
-    it('should handle cancelled outcome from client', async () => {
+    it("should handle cancelled outcome from client", async () => {
       requestPermissionSpy.mockResolvedValue({
-        outcome: { outcome: 'cancelled' },
+        outcome: { outcome: "cancelled" },
       });
       tracker.setup(eventEmitter, abortController.signal);
 
       const respondSpy = vi.fn().mockResolvedValue(undefined);
       const event = createApprovalEvent({
-        name: 'test_tool',
-        callId: 'call-123',
+        name: "test_tool",
+        callId: "call-123",
         confirmationDetails: createInfoConfirmation(),
         respond: respondSpy,
       });
@@ -540,34 +540,34 @@ describe('SubAgentTracker', () => {
       });
     });
 
-    it('should forward answers payload from ACP permission responses', async () => {
+    it("should forward answers payload from ACP permission responses", async () => {
       requestPermissionSpy.mockResolvedValue({
         outcome: {
-          outcome: 'selected',
+          outcome: "selected",
           optionId: ToolConfirmationOutcome.ProceedOnce,
         },
         answers: {
-          answer: 'yes',
+          answer: "yes",
         },
       });
       tracker.setup(eventEmitter, abortController.signal);
 
       const respondSpy = vi.fn().mockResolvedValue(undefined);
       const confirmationDetails = {
-        type: 'ask_user_question',
-        title: 'Question',
+        type: "ask_user_question",
+        title: "Question",
         questions: [
           {
-            question: 'Continue?',
-            header: 'Question',
+            question: "Continue?",
+            header: "Question",
             options: [],
             multiSelect: false,
           },
         ],
-      } as unknown as AgentApprovalRequestEvent['confirmationDetails'];
+      } as unknown as AgentApprovalRequestEvent["confirmationDetails"];
       const event = createApprovalEvent({
-        name: 'ask_user_question',
-        callId: 'call-ask',
+        name: "ask_user_question",
+        callId: "call-ask",
         confirmationDetails,
         respond: respondSpy,
       });
@@ -579,26 +579,26 @@ describe('SubAgentTracker', () => {
           ToolConfirmationOutcome.ProceedOnce,
           {
             answers: {
-              answer: 'yes',
+              answer: "yes",
             },
           },
         );
       });
     });
 
-    it('should use filePath over fileName for diff content path', async () => {
+    it("should use filePath over fileName for diff content path", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const respondSpy = vi.fn().mockResolvedValue(undefined);
       const event = createApprovalEvent({
-        name: 'edit_file',
-        callId: 'call-path-test',
-        description: 'Editing file',
+        name: "edit_file",
+        callId: "call-path-test",
+        description: "Editing file",
         confirmationDetails: createEditConfirmation({
-          fileName: 'test.ts',
-          filePath: '/workspace/src/test.ts',
-          originalContent: 'old content',
-          newContent: 'new content',
+          fileName: "test.ts",
+          filePath: "/workspace/src/test.ts",
+          originalContent: "old content",
+          newContent: "new content",
         }),
         respond: respondSpy,
       });
@@ -614,10 +614,10 @@ describe('SubAgentTracker', () => {
           toolCall: expect.objectContaining({
             content: [
               {
-                type: 'diff',
-                path: '/workspace/src/test.ts',
-                oldText: 'old content',
-                newText: 'new content',
+                type: "diff",
+                path: "/workspace/src/test.ts",
+                oldText: "old content",
+                newText: "new content",
               },
             ],
           }),
@@ -625,22 +625,22 @@ describe('SubAgentTracker', () => {
       );
     });
 
-    it('should fall back to fileName when filePath is not available', async () => {
+    it("should fall back to fileName when filePath is not available", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const respondSpy = vi.fn().mockResolvedValue(undefined);
       const event = createApprovalEvent({
-        name: 'edit_file',
-        callId: 'call-fallback-test',
-        description: 'Editing file',
+        name: "edit_file",
+        callId: "call-fallback-test",
+        description: "Editing file",
         confirmationDetails: {
-          type: 'edit' as const,
-          title: 'Edit file',
-          fileName: 'fallback.ts',
-          fileDiff: '',
-          originalContent: 'old',
-          newContent: 'new',
-        } as Omit<ToolEditConfirmationDetails, 'onConfirm'>,
+          type: "edit" as const,
+          title: "Edit file",
+          fileName: "fallback.ts",
+          fileDiff: "",
+          originalContent: "old",
+          newContent: "new",
+        } as Omit<ToolEditConfirmationDetails, "onConfirm">,
         respond: respondSpy,
       });
 
@@ -655,10 +655,10 @@ describe('SubAgentTracker', () => {
           toolCall: expect.objectContaining({
             content: [
               {
-                type: 'diff',
-                path: 'fallback.ts',
-                oldText: 'old',
-                newText: 'new',
+                type: "diff",
+                path: "fallback.ts",
+                oldText: "old",
+                newText: "new",
               },
             ],
           }),
@@ -667,17 +667,17 @@ describe('SubAgentTracker', () => {
     });
   });
 
-  describe('permission options', () => {
+  describe("permission options", () => {
     it('should include "Allow All Edits" for edit type', async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const event = createApprovalEvent({
-        name: 'edit_file',
-        callId: 'call-123',
+        name: "edit_file",
+        callId: "call-123",
         confirmationDetails: createEditConfirmation({
-          fileName: '/test.ts',
-          originalContent: '',
-          newContent: 'new',
+          fileName: "/test.ts",
+          originalContent: "",
+          newContent: "new",
         }),
         respond: vi.fn(),
       });
@@ -692,18 +692,18 @@ describe('SubAgentTracker', () => {
       expect(call.options).toContainEqual(
         expect.objectContaining({
           optionId: ToolConfirmationOutcome.ProceedAlways,
-          name: 'Allow All Edits',
+          name: "Allow All Edits",
         }),
       );
     });
   });
 
-  describe('stream text handling', () => {
-    it('should emit agent_message_chunk on STREAM_TEXT event', async () => {
+  describe("stream text handling", () => {
+    it("should emit agent_message_chunk on STREAM_TEXT event", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const event = createStreamTextEvent({
-        text: 'Hello, this is a response from the model.',
+        text: "Hello, this is a response from the model.",
       });
 
       eventEmitter.emit(AgentEventType.STREAM_TEXT, event);
@@ -714,29 +714,29 @@ describe('SubAgentTracker', () => {
 
       expect(sendUpdateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          sessionUpdate: 'agent_message_chunk',
+          sessionUpdate: "agent_message_chunk",
           content: {
-            type: 'text',
-            text: 'Hello, this is a response from the model.',
+            type: "text",
+            text: "Hello, this is a response from the model.",
           },
         }),
       );
     });
 
-    it('should emit multiple chunks for multiple STREAM_TEXT events', async () => {
+    it("should emit multiple chunks for multiple STREAM_TEXT events", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       eventEmitter.emit(
         AgentEventType.STREAM_TEXT,
-        createStreamTextEvent({ text: 'First chunk ' }),
+        createStreamTextEvent({ text: "First chunk " }),
       );
       eventEmitter.emit(
         AgentEventType.STREAM_TEXT,
-        createStreamTextEvent({ text: 'Second chunk ' }),
+        createStreamTextEvent({ text: "Second chunk " }),
       );
       eventEmitter.emit(
         AgentEventType.STREAM_TEXT,
-        createStreamTextEvent({ text: 'Third chunk' }),
+        createStreamTextEvent({ text: "Third chunk" }),
       );
 
       await vi.waitFor(() => {
@@ -746,32 +746,32 @@ describe('SubAgentTracker', () => {
       expect(sendUpdateSpy).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          sessionUpdate: 'agent_message_chunk',
-          content: { type: 'text', text: 'First chunk ' },
+          sessionUpdate: "agent_message_chunk",
+          content: { type: "text", text: "First chunk " },
         }),
       );
       expect(sendUpdateSpy).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          sessionUpdate: 'agent_message_chunk',
-          content: { type: 'text', text: 'Second chunk ' },
+          sessionUpdate: "agent_message_chunk",
+          content: { type: "text", text: "Second chunk " },
         }),
       );
       expect(sendUpdateSpy).toHaveBeenNthCalledWith(
         3,
         expect.objectContaining({
-          sessionUpdate: 'agent_message_chunk',
-          content: { type: 'text', text: 'Third chunk' },
+          sessionUpdate: "agent_message_chunk",
+          content: { type: "text", text: "Third chunk" },
         }),
       );
     });
 
-    it('should not emit when aborted', async () => {
+    it("should not emit when aborted", async () => {
       tracker.setup(eventEmitter, abortController.signal);
       abortController.abort();
 
       const event = createStreamTextEvent({
-        text: 'This should not be emitted',
+        text: "This should not be emitted",
       });
 
       eventEmitter.emit(AgentEventType.STREAM_TEXT, event);
@@ -781,11 +781,11 @@ describe('SubAgentTracker', () => {
       expect(sendUpdateSpy).not.toHaveBeenCalled();
     });
 
-    it('should emit agent_thought_chunk when thought flag is true', async () => {
+    it("should emit agent_thought_chunk when thought flag is true", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const event = createStreamTextEvent({
-        text: 'Let me think about this...',
+        text: "Let me think about this...",
         thought: true,
       });
 
@@ -797,20 +797,20 @@ describe('SubAgentTracker', () => {
 
       expect(sendUpdateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          sessionUpdate: 'agent_thought_chunk',
+          sessionUpdate: "agent_thought_chunk",
           content: {
-            type: 'text',
-            text: 'Let me think about this...',
+            type: "text",
+            text: "Let me think about this...",
           },
         }),
       );
     });
 
-    it('should emit agent_message_chunk when thought flag is false', async () => {
+    it("should emit agent_message_chunk when thought flag is false", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       const event = createStreamTextEvent({
-        text: 'Here is the answer.',
+        text: "Here is the answer.",
         thought: false,
       });
 
@@ -822,21 +822,21 @@ describe('SubAgentTracker', () => {
 
       expect(sendUpdateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          sessionUpdate: 'agent_message_chunk',
+          sessionUpdate: "agent_message_chunk",
           content: {
-            type: 'text',
-            text: 'Here is the answer.',
+            type: "text",
+            text: "Here is the answer.",
           },
         }),
       );
     });
 
-    it('should emit agent_message_chunk when thought flag is undefined', async () => {
+    it("should emit agent_message_chunk when thought flag is undefined", async () => {
       tracker.setup(eventEmitter, abortController.signal);
 
       // Event without thought flag (undefined)
       const event = createStreamTextEvent({
-        text: 'Default behavior text.',
+        text: "Default behavior text.",
       });
 
       eventEmitter.emit(AgentEventType.STREAM_TEXT, event);
@@ -847,10 +847,10 @@ describe('SubAgentTracker', () => {
 
       expect(sendUpdateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          sessionUpdate: 'agent_message_chunk',
+          sessionUpdate: "agent_message_chunk",
           content: {
-            type: 'text',
-            text: 'Default behavior text.',
+            type: "text",
+            text: "Default behavior text.",
           },
         }),
       );

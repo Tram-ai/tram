@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OpenAIContentGenerator } from '../core/openaiContentGenerator/index.js';
-import { DashScopeOpenAICompatibleProvider } from '../core/openaiContentGenerator/provider/dashscope.js';
-import type { ITramOAuth2Client } from './tramOAuth2.js';
-import { SharedTokenManager } from './sharedTokenManager.js';
-import { type Config } from '../config/config.js';
+import { OpenAIContentGenerator } from "../core/openaiContentGenerator/index.js";
+import { DashScopeOpenAICompatibleProvider } from "../core/openaiContentGenerator/provider/dashscope.js";
+import type { ITramOAuth2Client } from "./tramOAuth2.js";
+import { SharedTokenManager } from "./sharedTokenManager.js";
+import { type Config } from "../config/config.js";
 import type {
   GenerateContentParameters,
   GenerateContentResponse,
@@ -16,16 +16,16 @@ import type {
   CountTokensResponse,
   EmbedContentParameters,
   EmbedContentResponse,
-} from '@google/genai';
-import type { ContentGeneratorConfig } from '../core/contentGenerator.js';
-import { DEFAULT_DASHSCOPE_BASE_URL } from '../core/openaiContentGenerator/constants.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "@google/genai";
+import type { ContentGeneratorConfig } from "../core/contentGenerator.js";
+import { DEFAULT_DASHSCOPE_BASE_URL } from "../core/openaiContentGenerator/constants.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
 /**
  * TRAM Content Generator that uses TRAM OAuth tokens with automatic refresh
  */
 export class TramContentGenerator extends OpenAIContentGenerator {
-  private readonly debugLogger = createDebugLogger('TRAM');
+  private readonly debugLogger = createDebugLogger("TRAM");
   private tramClient: ITramOAuth2Client;
   private sharedManager: SharedTokenManager;
   private currentToken?: string;
@@ -58,10 +58,10 @@ export class TramContentGenerator extends OpenAIContentGenerator {
    */
   private getCurrentEndpoint(resourceUrl?: string): string {
     const baseEndpoint = resourceUrl || DEFAULT_DASHSCOPE_BASE_URL;
-    const suffix = '/v1';
+    const suffix = "/v1";
 
     // Normalize the URL: add protocol if missing, ensure /v1 suffix
-    const normalizedUrl = baseEndpoint.startsWith('http')
+    const normalizedUrl = baseEndpoint.startsWith("http")
       ? baseEndpoint
       : `https://${baseEndpoint}`;
 
@@ -92,7 +92,7 @@ export class TramContentGenerator extends OpenAIContentGenerator {
       );
 
       if (!credentials.access_token) {
-        throw new Error('No access token available');
+        throw new Error("No access token available");
       }
 
       return {
@@ -104,9 +104,9 @@ export class TramContentGenerator extends OpenAIContentGenerator {
       if (this.isAuthError(error)) {
         throw error;
       }
-      this.debugLogger.warn('Failed to get token from shared manager:', error);
+      this.debugLogger.warn("Failed to get token from shared manager:", error);
       throw new Error(
-        'Failed to obtain valid TRAM access token. Please re-authenticate.',
+        "Failed to obtain valid TRAM access token. Please re-authenticate.",
       );
     }
   }
@@ -214,16 +214,16 @@ export class TramContentGenerator extends OpenAIContentGenerator {
     return (
       errorCode === 401 ||
       errorCode === 403 ||
-      errorCode === '401' ||
-      errorCode === '403' ||
-      errorMessage.includes('unauthorized') ||
-      errorMessage.includes('forbidden') ||
-      errorMessage.includes('invalid api key') ||
-      errorMessage.includes('invalid access token') ||
-      errorMessage.includes('token expired') ||
-      errorMessage.includes('authentication') ||
-      errorMessage.includes('access denied') ||
-      (errorMessage.includes('token') && errorMessage.includes('expired'))
+      errorCode === "401" ||
+      errorCode === "403" ||
+      errorMessage.includes("unauthorized") ||
+      errorMessage.includes("forbidden") ||
+      errorMessage.includes("invalid api key") ||
+      errorMessage.includes("invalid access token") ||
+      errorMessage.includes("token expired") ||
+      errorMessage.includes("authentication") ||
+      errorMessage.includes("access denied") ||
+      (errorMessage.includes("token") && errorMessage.includes("expired"))
     );
   }
 

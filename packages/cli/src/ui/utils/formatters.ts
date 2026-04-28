@@ -38,21 +38,21 @@ export const formatRelativeTime = (timestamp: number): string => {
   const months = Math.floor(days / 30);
 
   if (months > 0) {
-    return months === 1 ? '1 month ago' : `${months} months ago`;
+    return months === 1 ? "1 month ago" : `${months} months ago`;
   }
   if (weeks > 0) {
-    return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
+    return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
   }
   if (days > 0) {
-    return days === 1 ? '1 day ago' : `${days} days ago`;
+    return days === 1 ? "1 day ago" : `${days} days ago`;
   }
   if (hours > 0) {
-    return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+    return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
   }
   if (minutes > 0) {
-    return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`;
+    return minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`;
   }
-  return 'just now';
+  return "just now";
 };
 
 export const formatTokenCount = (count: number): string => {
@@ -67,7 +67,7 @@ export const formatTokenCount = (count: number): string => {
 
 export const formatDuration = (milliseconds: number): string => {
   if (milliseconds <= 0) {
-    return '0s';
+    return "0s";
   }
 
   if (milliseconds < 1000) {
@@ -103,5 +103,5 @@ export const formatDuration = (milliseconds: number): string => {
     return `${seconds}s`;
   }
 
-  return parts.join(' ');
+  return parts.join(" ");
 };

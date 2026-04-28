@@ -10,8 +10,8 @@ import type {
   SkillConfig,
   SubagentConfig,
   ClaudeMarketplaceConfig,
-} from '../index.js';
-import type { HookEventName, HookDefinition } from '../hooks/types.js';
+} from "../index.js";
+import type { HookEventName, HookDefinition } from "../hooks/types.js";
 import {
   Storage,
   Config,
@@ -19,73 +19,73 @@ import {
   logExtensionInstallEvent,
   logExtensionUninstall,
   logExtensionDisable,
-} from '../index.js';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import * as os from 'node:os';
+} from "../index.js";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as os from "node:os";
 
-import { getErrorMessage } from '../utils/errors.js';
+import { getErrorMessage } from "../utils/errors.js";
 import {
   EXTENSIONS_CONFIG_FILENAME,
   INSTALL_METADATA_FILENAME,
   recursivelyHydrateStrings,
   substituteHookVariables,
   performVariableReplacement,
-} from './variables.js';
-import { resolveEnvVarsInObject } from '../utils/envVarResolver.js';
+} from "./variables.js";
+import { resolveEnvVarsInObject } from "../utils/envVarResolver.js";
 import {
   checkForExtensionUpdate,
   cloneFromGit,
   downloadFromGitHubRelease,
   parseGitHubRepoForReleases,
-} from './github.js';
-import { downloadFromNpmRegistry } from './npm.js';
-import type { LoadExtensionContext } from './variableSchema.js';
-import { Override, type AllExtensionsEnablementConfig } from './override.js';
+} from "./github.js";
+import { downloadFromNpmRegistry } from "./npm.js";
+import type { LoadExtensionContext } from "./variableSchema.js";
+import { Override, type AllExtensionsEnablementConfig } from "./override.js";
 import {
   isGeminiExtensionConfig,
   convertGeminiExtensionPackage,
-} from './gemini-converter.js';
-import { convertClaudePluginPackage } from './claude-converter.js';
-import { glob } from 'glob';
-import { createHash } from 'node:crypto';
-import { ExtensionStorage } from './storage.js';
+} from "./gemini-converter.js";
+import { convertClaudePluginPackage } from "./claude-converter.js";
+import { glob } from "glob";
+import { createHash } from "node:crypto";
+import { ExtensionStorage } from "./storage.js";
 import {
   getEnvContents,
   maybePromptForSettings,
   promptForSetting,
-} from './extensionSettings.js';
+} from "./extensionSettings.js";
 import type {
   ExtensionSetting,
   ResolvedExtensionSetting,
-} from './extensionSettings.js';
+} from "./extensionSettings.js";
 import type {
   ExtensionOriginSource,
   TelemetrySettings,
-} from '../config/config.js';
-import { logExtensionUpdateEvent } from '../telemetry/loggers.js';
+} from "../config/config.js";
+import { logExtensionUpdateEvent } from "../telemetry/loggers.js";
 import {
   ExtensionDisableEvent,
   ExtensionEnableEvent,
   ExtensionInstallEvent,
   ExtensionUninstallEvent,
   ExtensionUpdateEvent,
-} from '../telemetry/types.js';
-import { loadSkillsFromDir } from '../skills/skill-load.js';
-import { loadSubagentFromDir } from '../subagents/subagent-manager.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+} from "../telemetry/types.js";
+import { loadSkillsFromDir } from "../skills/skill-load.js";
+import { loadSubagentFromDir } from "../subagents/subagent-manager.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('EXTENSIONS');
+const debugLogger = createDebugLogger("EXTENSIONS");
 
 // ============================================================================
 // Types and Interfaces
 // ============================================================================
 
 export enum SettingScope {
-  User = 'User',
-  Workspace = 'Workspace',
-  System = 'System',
-  SystemDefaults = 'SystemDefaults',
+  User = "User",
+  Workspace = "Workspace",
+  System = "System",
+  SystemDefaults = "SystemDefaults",
 }
 
 export interface ExtensionChannelConfig {
@@ -143,15 +143,15 @@ export interface ExtensionUpdateStatus {
 }
 
 export enum ExtensionUpdateState {
-  CHECKING_FOR_UPDATES = 'checking for updates',
-  UPDATED_NEEDS_RESTART = 'updated, needs restart',
-  UPDATING = 'updating',
-  UPDATED = 'updated',
-  UPDATE_AVAILABLE = 'update available',
-  UP_TO_DATE = 'up to date',
-  ERROR = 'error',
-  NOT_UPDATABLE = 'not updatable',
-  UNKNOWN = 'unknown',
+  CHECKING_FOR_UPDATES = "checking for updates",
+  UPDATED_NEEDS_RESTART = "updated, needs restart",
+  UPDATING = "updating",
+  UPDATED = "updated",
+  UPDATE_AVAILABLE = "update available",
+  UP_TO_DATE = "up to date",
+  ERROR = "error",
+  NOT_UPDATABLE = "not updatable",
+  UNKNOWN = "unknown",
 }
 
 export type ExtensionRequestOptions = {
@@ -186,12 +186,12 @@ export interface ExtensionManagerOptions {
 // ============================================================================
 
 function ensureLeadingAndTrailingSlash(dirPath: string): string {
-  let result = dirPath.replace(/\\/g, '/');
-  if (result.charAt(0) !== '/') {
-    result = '/' + result;
+  let result = dirPath.replace(/\\/g, "/");
+  if (result.charAt(0) !== "/") {
+    result = "/" + result;
   }
-  if (result.charAt(result.length - 1) !== '/') {
-    result = result + '/';
+  if (result.charAt(result.length - 1) !== "/") {
+    result = result + "/";
   }
   return result;
 }
@@ -205,7 +205,7 @@ function getTelemetryConfig(
     interactive: false,
     targetDir: cwd,
     cwd,
-    model: '',
+    model: "",
     debugMode: false,
   });
   return config;
@@ -219,7 +219,7 @@ function filterMcpConfig(original: MCPServerConfig): MCPServerConfig {
 
 function getContextFileNames(config: ExtensionConfig): string[] {
   if (!config.contextFileName || config.contextFileName.length === 0) {
-    return ['TRAM.md'];
+    return ["TRAM.md"];
   } else if (!Array.isArray(config.contextFileName)) {
     return [config.contextFileName];
   }
@@ -234,7 +234,7 @@ async function loadCommandsFromDir(dir: string): Promise<string[]> {
   };
 
   try {
-    const mdFiles = await glob('**/*.md', {
+    const mdFiles = await glob("**/*.md", {
       ...globOptions,
       cwd: dir,
     });
@@ -247,16 +247,16 @@ async function loadCommandsFromDir(dir: string): Promise<string[]> {
       );
       const commandName = relativePath
         .split(path.sep)
-        .map((segment) => segment.replaceAll(':', '_'))
-        .join(':');
+        .map((segment) => segment.replaceAll(":", "_"))
+        .join(":");
 
       return commandName;
     });
 
     return commandNames;
   } catch (error) {
-    const isEnoent = (error as NodeJS.ErrnoException).code === 'ENOENT';
-    const isAbortError = error instanceof Error && error.name === 'AbortError';
+    const isEnoent = (error as NodeJS.ErrnoException).code === "ENOENT";
+    const isAbortError = error instanceof Error && error.name === "AbortError";
     if (!isEnoent && !isAbortError) {
       debugLogger.error(`Error loading commands from ${dir}:`, error);
     }
@@ -269,19 +269,19 @@ async function convertGeminiOrClaudeExtension(
   pluginName?: string,
 ): Promise<{ extensionDir: string; originSource: ExtensionOriginSource }> {
   let newExtensionDir = extensionDir;
-  let originSource: ExtensionOriginSource = 'TramCode';
+  let originSource: ExtensionOriginSource = "TramCode";
   const configFilePath = path.join(extensionDir, EXTENSIONS_CONFIG_FILENAME);
   if (fs.existsSync(configFilePath)) {
     newExtensionDir = extensionDir;
   } else if (isGeminiExtensionConfig(extensionDir)) {
     newExtensionDir = (await convertGeminiExtensionPackage(extensionDir))
       .convertedDir;
-    originSource = 'Gemini';
+    originSource = "Gemini";
   } else if (pluginName) {
     newExtensionDir = (
       await convertClaudePluginPackage(extensionDir, pluginName)
     ).convertedDir;
-    originSource = 'Claude';
+    originSource = "Claude";
   }
   // Claude plugin conversion not yet implemented
   return { extensionDir: newExtensionDir, originSource };
@@ -317,11 +317,11 @@ export class ExtensionManager {
     this.configDir = ExtensionStorage.getUserExtensionsDir();
     this.configFilePath = path.join(
       this.configDir,
-      'extension-enablement.json',
+      "extension-enablement.json",
     );
     this.requestSetting = options.requestSetting;
     this.requestChoicePlugin =
-      options.requestChoicePlugin || (() => Promise.resolve(''));
+      options.requestChoicePlugin || (() => Promise.resolve(""));
     this.requestConsent = options.requestConsent || (() => Promise.resolve());
     this.config = options.config;
     this.telemetrySettings = options.telemetrySettings;
@@ -361,7 +361,7 @@ export class ExtensionManager {
    */
   validateExtensionOverrides(extensions: Extension[]): void {
     for (const name of this.enabledExtensionNamesOverride) {
-      if (name === 'none') continue;
+      if (name === "none") continue;
       if (
         !extensions.some(
           (ext) => ext.config.name.toLowerCase() === name.toLowerCase(),
@@ -381,7 +381,7 @@ export class ExtensionManager {
     // If we have a single override called 'none', this disables all extensions.
     if (
       this.enabledExtensionNamesOverride.length === 1 &&
-      this.enabledExtensionNamesOverride[0] === 'none'
+      this.enabledExtensionNamesOverride[0] === "none"
     ) {
       return false;
     }
@@ -420,7 +420,7 @@ export class ExtensionManager {
       scope === SettingScope.System ||
       scope === SettingScope.SystemDefaults
     ) {
-      throw new Error('System and SystemDefaults scopes are not supported.');
+      throw new Error("System and SystemDefaults scopes are not supported.");
     }
     const extension = this.getLoadedExtensions().find(
       (ext) => ext.name === name,
@@ -451,7 +451,7 @@ export class ExtensionManager {
       scope === SettingScope.System ||
       scope === SettingScope.SystemDefaults
     ) {
-      throw new Error('System and SystemDefaults scopes are not supported.');
+      throw new Error("System and SystemDefaults scopes are not supported.");
     }
     const extension = this.getLoadedExtensions().find(
       (ext) => ext.name === name,
@@ -513,17 +513,17 @@ export class ExtensionManager {
 
   private readEnablementConfig(): AllExtensionsEnablementConfig {
     try {
-      const content = fs.readFileSync(this.configFilePath, 'utf-8');
+      const content = fs.readFileSync(this.configFilePath, "utf-8");
       return JSON.parse(content);
     } catch (error) {
       if (
         error instanceof Error &&
-        'code' in error &&
-        error.code === 'ENOENT'
+        "code" in error &&
+        error.code === "ENOENT"
       ) {
         return {};
       }
-      debugLogger.error('Error reading extension enablement config:', error);
+      debugLogger.error("Error reading extension enablement config:", error);
       return {};
     }
   }
@@ -626,7 +626,7 @@ export class ExtensionManager {
     const installMetadata = this.loadInstallMetadata(extensionDir);
     let effectiveExtensionPath = extensionDir;
 
-    if (installMetadata?.type === 'link') {
+    if (installMetadata?.type === "link") {
       effectiveExtensionPath = installMetadata.source;
     }
 
@@ -644,7 +644,7 @@ export class ExtensionManager {
         version:
           config.version ||
           installMetadata?.marketplaceConfig?.metadata?.version ||
-          '1.0.0',
+          "1.0.0",
         path: effectiveExtensionPath,
         installMetadata,
         isActive: this.isEnabled(config.name, this.workspaceDir),
@@ -683,7 +683,7 @@ export class ExtensionManager {
         `${effectiveExtensionPath}/agents`,
       );
 
-      if (config.hooks && typeof config.hooks !== 'string') {
+      if (config.hooks && typeof config.hooks !== "string") {
         // Process the hooks to substitute variables like ${CLAUDE_PLUGIN_ROOT}
         extension.hooks = this.substituteHookVariables(
           config.hooks,
@@ -693,11 +693,11 @@ export class ExtensionManager {
 
       // Also load hooks from hooks directory or from config.hooks string path if available and not already set
       if (!extension.hooks) {
-        const hooksDir = path.join(effectiveExtensionPath, 'hooks');
-        const hooksJsonPath = path.join(hooksDir, 'hooks.json');
+        const hooksDir = path.join(effectiveExtensionPath, "hooks");
+        const hooksJsonPath = path.join(hooksDir, "hooks.json");
 
         const configHooksPath =
-          typeof config.hooks === 'string'
+          typeof config.hooks === "string"
             ? path.isAbsolute(config.hooks)
               ? config.hooks
               : path.join(effectiveExtensionPath, config.hooks)
@@ -713,11 +713,11 @@ export class ExtensionManager {
               : hooksJsonPath;
 
           try {
-            const hooksContent = fs.readFileSync(hooksFilePath, 'utf-8');
+            const hooksContent = fs.readFileSync(hooksFilePath, "utf-8");
             const parsedHooks = JSON.parse(hooksContent);
 
             let hooksData;
-            if (parsedHooks.hooks && typeof parsedHooks.hooks === 'object') {
+            if (parsedHooks.hooks && typeof parsedHooks.hooks === "object") {
               hooksData = parsedHooks.hooks as {
                 [K in HookEventName]?: HookDefinition[];
               };
@@ -767,7 +767,7 @@ export class ExtensionManager {
   ): ExtensionInstallMetadata | undefined {
     const metadataFilePath = path.join(extensionDir, INSTALL_METADATA_FILENAME);
     try {
-      const configContent = fs.readFileSync(metadataFilePath, 'utf-8');
+      const configContent = fs.readFileSync(metadataFilePath, "utf-8");
       const metadata = JSON.parse(configContent) as ExtensionInstallMetadata;
       return metadata;
     } catch (_e) {
@@ -782,12 +782,12 @@ export class ExtensionManager {
       throw new Error(`Configuration file not found at ${configFilePath}`);
     }
     try {
-      const configContent = fs.readFileSync(configFilePath, 'utf-8');
+      const configContent = fs.readFileSync(configFilePath, "utf-8");
       const config = recursivelyHydrateStrings(JSON.parse(configContent), {
         extensionPath: extensionDir,
         CLAUDE_PLUGIN_ROOT: extensionDir,
         workspacePath: workspaceDir,
-        '/': path.sep,
+        "/": path.sep,
         pathSeparator: path.sep,
       }) as unknown as ExtensionConfig;
 
@@ -844,7 +844,7 @@ export class ExtensionManager {
 
       if (
         !path.isAbsolute(installMetadata.source) &&
-        (installMetadata.type === 'local' || installMetadata.type === 'link')
+        (installMetadata.type === "local" || installMetadata.type === "link")
       ) {
         installMetadata.source = path.resolve(
           currentDir,
@@ -855,7 +855,7 @@ export class ExtensionManager {
       let tempDir: string | undefined;
 
       if (
-        installMetadata.originSource === 'Claude' &&
+        installMetadata.originSource === "Claude" &&
         installMetadata.marketplaceConfig &&
         !installMetadata.pluginName
       ) {
@@ -866,8 +866,8 @@ export class ExtensionManager {
       }
 
       if (
-        installMetadata.type === 'git' ||
-        installMetadata.type === 'github-release'
+        installMetadata.type === "git" ||
+        installMetadata.type === "github-release"
       ) {
         tempDir = await ExtensionStorage.createTmpDir();
         try {
@@ -876,27 +876,27 @@ export class ExtensionManager {
             tempDir,
           );
           if (
-            installMetadata.type === 'git' ||
-            installMetadata.type === 'github-release'
+            installMetadata.type === "git" ||
+            installMetadata.type === "github-release"
           ) {
             installMetadata.type = result.type;
             installMetadata.releaseTag = result.tagName;
           }
         } catch (_error) {
           await cloneFromGit(installMetadata, tempDir);
-          if (installMetadata.type === 'github-release') {
-            installMetadata.type = 'git';
+          if (installMetadata.type === "github-release") {
+            installMetadata.type = "git";
           }
         }
         localSourcePath = tempDir;
-      } else if (installMetadata.type === 'npm') {
+      } else if (installMetadata.type === "npm") {
         tempDir = await ExtensionStorage.createTmpDir();
         const result = await downloadFromNpmRegistry(installMetadata, tempDir);
         installMetadata.releaseTag = result.version;
         localSourcePath = tempDir;
       } else if (
-        installMetadata.type === 'local' ||
-        installMetadata.type === 'link'
+        installMetadata.type === "local" ||
+        installMetadata.type === "link"
       ) {
         localSourcePath = installMetadata.source;
       } else {
@@ -1019,29 +1019,29 @@ export class ExtensionManager {
           );
         }
 
-        if (installMetadata.type !== 'link') {
+        if (installMetadata.type !== "link") {
           await copyExtension(localSourcePath, destinationPath);
         }
 
         // Perform variable replacement in extension files (e.g., ${CLAUDE_PLUGIN_ROOT}) for Claude extensions
-        const hooksDir = path.join(destinationPath, 'hooks');
+        const hooksDir = path.join(destinationPath, "hooks");
         const configHooksPath =
-          typeof newExtensionConfig.hooks === 'string'
+          typeof newExtensionConfig.hooks === "string"
             ? path.isAbsolute(newExtensionConfig.hooks)
               ? newExtensionConfig.hooks
               : path.join(destinationPath, newExtensionConfig.hooks)
             : null;
 
         if (
-          (originSource === 'Claude' && fs.existsSync(hooksDir)) ||
-          (originSource === 'Claude' &&
+          (originSource === "Claude" && fs.existsSync(hooksDir)) ||
+          (originSource === "Claude" &&
             configHooksPath &&
             fs.existsSync(configHooksPath))
         ) {
           try {
             await performVariableReplacement(destinationPath);
           } catch (error) {
-            debugLogger.error('Variable replacement failed', error);
+            debugLogger.error("Variable replacement failed", error);
           }
         }
 
@@ -1070,7 +1070,7 @@ export class ExtensionManager {
               newExtensionConfig.version,
               previousExtensionConfig.version,
               installMetadata.type,
-              'success',
+              "success",
             ),
           );
           await this.refreshTools();
@@ -1081,7 +1081,7 @@ export class ExtensionManager {
               newExtensionConfig.name,
               newExtensionConfig!.version,
               installMetadata.source,
-              'success',
+              "success",
             ),
           );
           this.enableExtension(newExtensionConfig.name, SettingScope.User);
@@ -1092,8 +1092,8 @@ export class ExtensionManager {
         }
         if (
           localSourcePath !== tempDir &&
-          installMetadata.type !== 'link' &&
-          installMetadata.type !== 'local'
+          installMetadata.type !== "link" &&
+          installMetadata.type !== "local"
         ) {
           await fs.promises.rm(localSourcePath, {
             recursive: true,
@@ -1121,22 +1121,22 @@ export class ExtensionManager {
         logExtensionUpdateEvent(
           telemetryConfig,
           new ExtensionUpdateEvent(
-            config?.name ?? '',
-            extensionId ?? '',
-            newExtensionConfig?.version ?? '',
+            config?.name ?? "",
+            extensionId ?? "",
+            newExtensionConfig?.version ?? "",
             previousExtensionConfig.version,
             installMetadata.type,
-            'error',
+            "error",
           ),
         );
       } else {
         logExtensionInstallEvent(
           telemetryConfig,
           new ExtensionInstallEvent(
-            newExtensionConfig?.name ?? '',
-            newExtensionConfig?.version ?? '',
+            newExtensionConfig?.name ?? "",
+            newExtensionConfig?.version ?? "",
             installMetadata.source,
-            'error',
+            "error",
           ),
         );
       }
@@ -1169,7 +1169,7 @@ export class ExtensionManager {
       throw new Error(`Extension not found.`);
     }
     const storage = new ExtensionStorage(
-      extension.installMetadata?.type === 'link'
+      extension.installMetadata?.type === "link"
         ? extension.name
         : path.basename(extension.path),
     );
@@ -1190,7 +1190,7 @@ export class ExtensionManager {
 
     logExtensionUninstall(
       telemetryConfig,
-      new ExtensionUninstallEvent(extension.name, 'success'),
+      new ExtensionUninstallEvent(extension.name, "success"),
     );
   }
 
@@ -1205,8 +1205,8 @@ export class ExtensionManager {
       try {
         const installMetadata: ExtensionInstallMetadata = {
           source: extension.path,
-          type: 'local',
-          originSource: extension.installMetadata?.originSource || 'TramCode',
+          type: "local",
+          originSource: extension.installMetadata?.originSource || "TramCode",
         };
         await this.installExtension(
           installMetadata,
@@ -1258,7 +1258,7 @@ export class ExtensionManager {
         `Extension ${extension.name} cannot be updated, type is unknown.`,
       );
     }
-    if (installMetadata?.type === 'link') {
+    if (installMetadata?.type === "link") {
       callback(extension.name, ExtensionUpdateState.UP_TO_DATE);
       throw new Error(`Extension is linked so does not need to be updated`);
     }
@@ -1382,8 +1382,8 @@ export function getExtensionId(
   let githubUrlParts = null;
   if (
     installMetadata &&
-    (installMetadata.type === 'git' ||
-      installMetadata.type === 'github-release')
+    (installMetadata.type === "git" ||
+      installMetadata.type === "github-release")
   ) {
     try {
       githubUrlParts = parseGitHubRepoForReleases(installMetadata.source);
@@ -1400,7 +1400,7 @@ export function getExtensionId(
 }
 
 export function hashValue(value: string): string {
-  return createHash('sha256').update(value).digest('hex');
+  return createHash("sha256").update(value).digest("hex");
 }
 
 export function validateName(name: string) {

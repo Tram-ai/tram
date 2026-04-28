@@ -4,27 +4,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'fs';
-import * as fsp from 'fs/promises';
-import * as path from 'path';
-import { randomUUID } from 'node:crypto';
-import type { ContentBlock } from '@agentclientprotocol/sdk';
-import { Storage } from '@qwen-code/qwen-code-core';
+import * as fs from "fs";
+import * as fsp from "fs/promises";
+import * as path from "path";
+import { randomUUID } from "node:crypto";
+import type { ContentBlock } from "@agentclientprotocol/sdk";
+import { Storage } from "@tram-ai/tram-core";
 import type {
   ImageAttachment,
   SavedImageAttachment,
-} from '../../utils/imageSupport.js';
+} from "../../utils/imageSupport.js";
 import {
   MAX_IMAGE_SIZE,
   MAX_TOTAL_IMAGE_SIZE,
   getImageExtensionForMimeType,
   escapePath,
   normalizeImageAttachment,
-} from '../../utils/imageSupport.js';
+} from "../../utils/imageSupport.js";
 
 // ---------- Clipboard image storage ----------
 
-const CLIPBOARD_DIR_NAME = 'clipboard';
+const CLIPBOARD_DIR_NAME = "clipboard";
 const DEFAULT_MAX_IMAGES = 100;
 
 function getClipboardImageDir(): string {
@@ -51,7 +51,7 @@ async function pruneClipboardImages(
     const imageFiles: Array<{ filePath: string; mtimeMs: number }> = [];
 
     for (const file of files) {
-      if (file.startsWith('clipboard-')) {
+      if (file.startsWith("clipboard-")) {
         const filePath = path.join(dir, file);
         const stats = await fsp.stat(filePath);
         imageFiles.push({ filePath, mtimeMs: stats.mtimeMs });
@@ -78,7 +78,7 @@ export function appendImageReferences(
   if (imageReferences.length === 0) {
     return text;
   }
-  const imageText = imageReferences.join(' ');
+  const imageText = imageReferences.join(" ");
   if (!text.trim()) {
     return imageText;
   }
@@ -96,7 +96,7 @@ export async function saveImageToFile(
       pureBase64 = dataUrlMatch[1];
     }
 
-    const buffer = Buffer.from(pureBase64, 'base64');
+    const buffer = Buffer.from(pureBase64, "base64");
     const timestamp = Date.now();
     const ext = getImageExtensionForMimeType(mimeType);
     const fileName = `clipboard-${timestamp}-${randomUUID()}${ext}`;
@@ -105,7 +105,7 @@ export async function saveImageToFile(
     await pruneClipboardImages();
     return filePath;
   } catch (error) {
-    console.error('[ImageHandler] Failed to save image:', error);
+    console.error("[ImageHandler] Failed to save image:", error);
     return null;
   }
 }
@@ -134,7 +134,7 @@ export async function processImageAttachments(
       });
       if (!normalizedAttachment) {
         console.warn(
-          '[ImageHandler] Rejected invalid image attachment:',
+          "[ImageHandler] Rejected invalid image attachment:",
           attachment.name,
         );
         continue;
@@ -154,7 +154,7 @@ export async function processImageAttachments(
         remainingBytes -= normalizedAttachment.size;
         savedImageCount += 1;
       } else {
-        console.warn('[ImageHandler] Failed to save image:', attachment.name);
+        console.warn("[ImageHandler] Failed to save image:", attachment.name);
       }
     }
 
@@ -176,12 +176,12 @@ export function buildPromptBlocks(
   const blocks: ContentBlock[] = [];
 
   if (text || images.length === 0) {
-    blocks.push({ type: 'text', text });
+    blocks.push({ type: "text", text });
   }
 
   for (const image of images) {
     blocks.push({
-      type: 'resource_link',
+      type: "resource_link",
       name: image.name,
       mimeType: image.mimeType,
       uri: `file://${image.path}`,
@@ -210,7 +210,7 @@ export function resolveImagePathsForWebview({
   const root = workspaceRoots[0];
 
   return paths.map((imagePath) => {
-    if (!imagePath || typeof imagePath !== 'string') {
+    if (!imagePath || typeof imagePath !== "string") {
       return { path: imagePath, src: null };
     }
 

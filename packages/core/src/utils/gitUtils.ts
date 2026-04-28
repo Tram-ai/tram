@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { execSync } from 'node:child_process';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { execSync } from "node:child_process";
 
 /**
  * Checks if a directory is within a git repository
@@ -18,7 +18,7 @@ export function isGitRepository(directory: string): boolean {
     let currentDir = path.resolve(directory);
 
     while (true) {
-      const gitDir = path.join(currentDir, '.git');
+      const gitDir = path.join(currentDir, ".git");
 
       // Check if .git exists (either as directory or file for worktrees)
       if (fs.existsSync(gitDir)) {
@@ -52,7 +52,7 @@ export function findGitRoot(directory: string): string | null {
     let currentDir = path.resolve(directory);
 
     while (true) {
-      const gitDir = path.join(currentDir, '.git');
+      const gitDir = path.join(currentDir, ".git");
 
       if (fs.existsSync(gitDir)) {
         return currentDir;
@@ -78,10 +78,10 @@ export function findGitRoot(directory: string): string | null {
  */
 export const getGitBranch = (cwd: string): string | undefined => {
   try {
-    const branch = execSync('git rev-parse --abbrev-ref HEAD', {
+    const branch = execSync("git rev-parse --abbrev-ref HEAD", {
       cwd,
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe'],
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "pipe"],
     }).trim();
     return branch || undefined;
   } catch {
@@ -96,10 +96,10 @@ export const getGitBranch = (cwd: string): string | undefined => {
 export const getGitRepoName = (cwd: string): string | undefined => {
   try {
     // Try to get the repository name from the remote URL
-    const remoteUrl = execSync('git remote get-url origin', {
+    const remoteUrl = execSync("git remote get-url origin", {
       cwd,
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe'],
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "pipe"],
     }).trim();
 
     if (remoteUrl) {
@@ -111,16 +111,16 @@ export const getGitRepoName = (cwd: string): string | undefined => {
 
       // Handle SSH format: git@host.com:owner/repo.git
       let normalizedUrl = remoteUrl;
-      if (remoteUrl.startsWith('git@')) {
-        normalizedUrl = remoteUrl.replace(/^git@[^:]+:/, 'https://host.com/');
+      if (remoteUrl.startsWith("git@")) {
+        normalizedUrl = remoteUrl.replace(/^git@[^:]+:/, "https://host.com/");
       }
 
       try {
         const url = new URL(normalizedUrl);
         // Remove .git suffix and split path
         const pathParts = url.pathname
-          .replace(/\.git$/, '')
-          .split('/')
+          .replace(/\.git$/, "")
+          .split("/")
           .filter(Boolean);
         if (pathParts.length >= 2) {
           // Return owner/repo format

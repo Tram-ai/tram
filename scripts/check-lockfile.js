@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import fs from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = join(__dirname, '..');
-const lockfilePath = join(root, 'package-lock.json');
+const root = join(__dirname, "..");
+const lockfilePath = join(root, "package-lock.json");
 
 function readJsonFile(filePath) {
   try {
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const fileContent = fs.readFileSync(filePath, "utf-8");
     return JSON.parse(fileContent);
   } catch (error) {
     console.error(`Error reading or parsing ${filePath}:`, error);
@@ -22,7 +22,7 @@ function readJsonFile(filePath) {
   }
 }
 
-console.log('Checking lockfile...');
+console.log("Checking lockfile...");
 
 const lockfile = readJsonFile(lockfilePath);
 if (lockfile === null) {
@@ -33,7 +33,7 @@ const invalidPackages = [];
 
 for (const [location, details] of Object.entries(packages)) {
   // 1. Skip the root package itself.
-  if (location === '') {
+  if (location === "") {
     continue;
   }
 
@@ -41,7 +41,7 @@ for (const [location, details] of Object.entries(packages)) {
   // They are identifiable in two ways:
   // a) As a symlink within node_modules.
   // b) As the source package definition, whose path is not in node_modules.
-  if (details.link === true || !location.includes('node_modules')) {
+  if (details.link === true || !location.includes("node_modules")) {
     continue;
   }
 
@@ -52,8 +52,8 @@ for (const [location, details] of Object.entries(packages)) {
   }
   // 2) Git and file dependencies only need a "resolved" field.
   const isGitOrFileDep =
-    details.resolved?.startsWith('git') ||
-    details.resolved?.startsWith('file:');
+    details.resolved?.startsWith("git") ||
+    details.resolved?.startsWith("file:");
   if (isGitOrFileDep) {
     continue;
   }
@@ -69,6 +69,6 @@ if (invalidPackages.length > 0) {
   invalidPackages.forEach((pkg) => console.error(`- ${pkg}`));
   process.exitCode = 1;
 } else {
-  console.log('Lockfile check passed.');
+  console.log("Lockfile check passed.");
   process.exitCode = 0;
 }

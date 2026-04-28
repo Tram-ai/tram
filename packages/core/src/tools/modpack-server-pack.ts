@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
-import extractZip from 'extract-zip';
-import { ToolNames } from './tool-names.js';
-import type { ToolResult } from './tools.js';
-import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
-import { safeJsonStringify } from '../utils/safeJsonStringify.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
+import extractZip from "extract-zip";
+import { ToolNames } from "./tool-names.js";
+import type { ToolResult } from "./tools.js";
+import { BaseDeclarativeTool, BaseToolInvocation, Kind } from "./tools.js";
+import { safeJsonStringify } from "../utils/safeJsonStringify.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('MODPACK_SERVER_PACK');
+const debugLogger = createDebugLogger("MODPACK_SERVER_PACK");
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface ModpackServerPackParams {
-  action: 'curseforge-server-pack' | 'modrinth-server-pack';
+  action: "curseforge-server-pack" | "modrinth-server-pack";
 
   // CurseForge fields
   projectId?: number;
@@ -71,7 +71,11 @@ interface ModrinthServerPackResult {
   gameVersion: string;
   loader: string;
   loaderVersion: string;
-  serverMods: Array<{ path: string; url: string; hashes: Record<string, string> }>;
+  serverMods: Array<{
+    path: string;
+    url: string;
+    hashes: Record<string, string>;
+  }>;
   clientOnlyMods: Array<{ path: string; reason: string }>;
   configs: Array<{ path: string; url: string }>;
   overrides: string[];
@@ -91,7 +95,7 @@ interface ServerInstallerInfo {
 
 // ─── CurseForge API Constants ────────────────────────────────────────────────
 
-const CF_API_BASE = 'https://curseforgeapi.912778.xyz/v1';
+const CF_API_BASE = "https://curseforgeapi.912778.xyz/v1";
 
 // ─── Invocation ──────────────────────────────────────────────────────────────
 
@@ -106,19 +110,22 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
   async execute(_signal: AbortSignal): Promise<ToolResult> {
     try {
       switch (this.params.action) {
-        case 'curseforge-server-pack':
+        case "curseforge-server-pack":
           return await this.curseforgeServerPack();
-        case 'modrinth-server-pack':
+        case "modrinth-server-pack":
           return await this.modrinthServerPack();
         default:
           return {
-            llmContent: JSON.stringify({ error: `Unknown action: ${this.params.action}` }),
+            llmContent: JSON.stringify({
+              error: `Unknown action: ${this.params.action}`,
+            }),
             returnDisplay: `Error: Unknown action "${this.params.action}"`,
           };
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      debugLogger.error('modpack-server-pack execution error:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      debugLogger.error("modpack-server-pack execution error:", error);
       return {
         llmContent: JSON.stringify({ error: errorMessage }),
         returnDisplay: `Error: ${errorMessage}`,
@@ -133,23 +140,32 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
 
     if (!projectId) {
       return {
-        llmContent: JSON.stringify({ error: 'projectId is required for curseforge-server-pack' }),
-        returnDisplay: 'Error: projectId is required',
+        llmContent: JSON.stringify({
+          error: "projectId is required for curseforge-server-pack",
+        }),
+        returnDisplay: "Error: projectId is required",
       };
     }
 
     const headers: Record<string, string> = {
-      Accept: 'application/json',
-      'User-Agent': 'TRAM-AI/1.0',
+      Accept: "application/json",
+      "User-Agent": "TRAM-AI/1.0",
     };
 
     // Step 1: Get project info
-    const projectRes = await fetch(`${CF_API_BASE}/mods/${projectId}`, { headers });
+    const projectRes = await fetch(`${CF_API_BASE}/mods/${projectId}`, {
+      headers,
+    });
     if (!projectRes.ok) {
-      throw new Error(`CurseForge API error ${projectRes.status}: ${await projectRes.text()}`);
+      throw new Error(
+        `CurseForge API error ${projectRes.status}: ${await projectRes.text()}`,
+      );
     }
-    const projectData = (await projectRes.json()) as { data: Record<string, unknown> };
-    const projectName = (projectData.data['name'] as string) || `Project ${projectId}`;
+    const projectData = (await projectRes.json()) as {
+      data: Record<string, unknown>;
+    };
+    const projectName =
+      (projectData.data["name"] as string) || `Project ${projectId}`;
 
     // Step 2: Resolve the file
     let targetFileId = fileId;
@@ -160,19 +176,26 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
         { headers },
       );
       if (!filesRes.ok) {
-        throw new Error(`CurseForge files API error ${filesRes.status}: ${await filesRes.text()}`);
+        throw new Error(
+          `CurseForge files API error ${filesRes.status}: ${await filesRes.text()}`,
+        );
       }
-      const filesData = (await filesRes.json()) as { data: CurseForgeFileInfo[] };
+      const filesData = (await filesRes.json()) as {
+        data: CurseForgeFileInfo[];
+      };
       if (!filesData.data || filesData.data.length === 0) {
-        throw new Error('No files found for this CurseForge project');
+        throw new Error("No files found for this CurseForge project");
       }
       targetFileId = filesData.data[0]!.id;
     }
 
     // Step 3: Get file details
-    const fileRes = await fetch(`${CF_API_BASE}/mods/${projectId}/files/${targetFileId}`, {
-      headers,
-    });
+    const fileRes = await fetch(
+      `${CF_API_BASE}/mods/${projectId}/files/${targetFileId}`,
+      {
+        headers,
+      },
+    );
     if (!fileRes.ok) {
       throw new Error(
         `CurseForge file API error ${fileRes.status}: ${await fileRes.text()}`,
@@ -197,7 +220,8 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
 
       return {
         llmContent: safeJsonStringify(result),
-        returnDisplay: `CurseForge 整合包 "${projectName}" — 未提供服务端包\n\n` +
+        returnDisplay:
+          `CurseForge 整合包 "${projectName}" — 未提供服务端包\n\n` +
           `原始文件 ID: ${targetFileId}\n` +
           `serverPackFileId: 无\n\n` +
           `需要手动组装服务端。`,
@@ -250,15 +274,19 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
 
     if (!mrpackPath) {
       return {
-        llmContent: JSON.stringify({ error: 'mrpackPath is required for modrinth-server-pack' }),
-        returnDisplay: 'Error: mrpackPath is required',
+        llmContent: JSON.stringify({
+          error: "mrpackPath is required for modrinth-server-pack",
+        }),
+        returnDisplay: "Error: mrpackPath is required",
       };
     }
 
     const resolvedPath = path.resolve(mrpackPath);
     if (!fs.existsSync(resolvedPath)) {
       return {
-        llmContent: JSON.stringify({ error: `File not found: ${resolvedPath}` }),
+        llmContent: JSON.stringify({
+          error: `File not found: ${resolvedPath}`,
+        }),
         returnDisplay: `Error: File not found: ${resolvedPath}`,
       };
     }
@@ -269,7 +297,9 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
       await extractZip(resolvedPath, { dir: tmpDir });
     } catch (e) {
       return {
-        llmContent: JSON.stringify({ error: `Failed to extract .mrpack: ${e instanceof Error ? e.message : String(e)}` }),
+        llmContent: JSON.stringify({
+          error: `Failed to extract .mrpack: ${e instanceof Error ? e.message : String(e)}`,
+        }),
         returnDisplay: `Error: Failed to extract .mrpack file`,
       };
     }
@@ -288,70 +318,84 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
     outputDir?: string,
   ): Promise<ToolResult> {
     // Parse modrinth.index.json
-    const indexPath = path.join(extractDir, 'modrinth.index.json');
+    const indexPath = path.join(extractDir, "modrinth.index.json");
     if (!fs.existsSync(indexPath)) {
       return {
-        llmContent: JSON.stringify({ error: 'modrinth.index.json not found in .mrpack file' }),
-        returnDisplay: 'Error: Invalid .mrpack file — missing modrinth.index.json',
+        llmContent: JSON.stringify({
+          error: "modrinth.index.json not found in .mrpack file",
+        }),
+        returnDisplay:
+          "Error: Invalid .mrpack file — missing modrinth.index.json",
       };
     }
 
-    const modrinthIndex: ModrinthIndex = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+    const modrinthIndex: ModrinthIndex = JSON.parse(
+      fs.readFileSync(indexPath, "utf-8"),
+    );
 
     // Identify loader
     const deps = modrinthIndex.dependencies;
-    const gameVersion = deps['minecraft'] || 'unknown';
-    let loader = 'unknown';
-    let loaderVersion = 'unknown';
+    const gameVersion = deps["minecraft"] || "unknown";
+    let loader = "unknown";
+    let loaderVersion = "unknown";
 
-    if (deps['forge']) {
-      loader = 'forge';
-      loaderVersion = deps['forge'];
-    } else if (deps['fabric-loader']) {
-      loader = 'fabric';
-      loaderVersion = deps['fabric-loader'];
-    } else if (deps['quilt-loader']) {
-      loader = 'quilt';
-      loaderVersion = deps['quilt-loader'];
-    } else if (deps['neoforge']) {
-      loader = 'neoforge';
-      loaderVersion = deps['neoforge'];
+    if (deps["forge"]) {
+      loader = "forge";
+      loaderVersion = deps["forge"];
+    } else if (deps["fabric-loader"]) {
+      loader = "fabric";
+      loaderVersion = deps["fabric-loader"];
+    } else if (deps["quilt-loader"]) {
+      loader = "quilt";
+      loaderVersion = deps["quilt-loader"];
+    } else if (deps["neoforge"]) {
+      loader = "neoforge";
+      loaderVersion = deps["neoforge"];
     }
 
     // Classify files into server/client
-    const serverMods: ModrinthServerPackResult['serverMods'] = [];
-    const clientOnlyMods: ModrinthServerPackResult['clientOnlyMods'] = [];
-    const configs: ModrinthServerPackResult['configs'] = [];
+    const serverMods: ModrinthServerPackResult["serverMods"] = [];
+    const clientOnlyMods: ModrinthServerPackResult["clientOnlyMods"] = [];
+    const configs: ModrinthServerPackResult["configs"] = [];
 
     // Patterns for client-only resources
-    const clientOnlyPrefixes = ['resourcepacks/', 'shaderpacks/'];
-    const clientOnlyFiles = ['options.txt', 'servers.dat', 'servers.dat_old'];
+    const clientOnlyPrefixes = ["resourcepacks/", "shaderpacks/"];
+    const clientOnlyFiles = ["options.txt", "servers.dat", "servers.dat_old"];
 
     for (const file of modrinthIndex.files) {
       const filePath = file.path;
 
       // Skip client-only resources
       if (clientOnlyPrefixes.some((p) => filePath.startsWith(p))) {
-        clientOnlyMods.push({ path: filePath, reason: 'client resource pack/shader' });
+        clientOnlyMods.push({
+          path: filePath,
+          reason: "client resource pack/shader",
+        });
         continue;
       }
-      if (clientOnlyFiles.includes(filePath) || filePath.startsWith('essential/')) {
-        clientOnlyMods.push({ path: filePath, reason: 'client-only file' });
+      if (
+        clientOnlyFiles.includes(filePath) ||
+        filePath.startsWith("essential/")
+      ) {
+        clientOnlyMods.push({ path: filePath, reason: "client-only file" });
         continue;
       }
 
       const url =
         Array.isArray(file.downloads) && file.downloads.length > 0
           ? file.downloads[0]!
-          : '';
+          : "";
 
       // Check env hints from modrinth.index.json
-      if (file.env && file.env.server === 'unsupported') {
-        clientOnlyMods.push({ path: filePath, reason: `env: client=${file.env.client}, server=${file.env.server}` });
+      if (file.env && file.env.server === "unsupported") {
+        clientOnlyMods.push({
+          path: filePath,
+          reason: `env: client=${file.env.client}, server=${file.env.server}`,
+        });
         continue;
       }
 
-      if (filePath.startsWith('mods/')) {
+      if (filePath.startsWith("mods/")) {
         serverMods.push({ path: filePath, url, hashes: file.hashes });
       } else {
         // Config / scripts / other
@@ -364,18 +408,23 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
     const collectOverrides = (dir: string, prefix: string) => {
       if (!fs.existsSync(dir)) return;
       const walk = (currentDir: string) => {
-        for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
+        for (const entry of fs.readdirSync(currentDir, {
+          withFileTypes: true,
+        })) {
           const fullPath = path.join(currentDir, entry.name);
-          const relPath = path.relative(dir, fullPath).replace(/\\/g, '/');
+          const relPath = path.relative(dir, fullPath).replace(/\\/g, "/");
           const entryPath = `${prefix}/${relPath}`;
 
           // Skip client-only directories within overrides
           if (
-            relPath.startsWith('resourcepacks/') || relPath.startsWith('resourcepacks') ||
-            relPath.startsWith('shaderpacks/') || relPath.startsWith('shaderpacks') ||
-            relPath === 'options.txt' ||
-            relPath === 'servers.dat' ||
-            relPath.startsWith('essential/') || relPath.startsWith('essential')
+            relPath.startsWith("resourcepacks/") ||
+            relPath.startsWith("resourcepacks") ||
+            relPath.startsWith("shaderpacks/") ||
+            relPath.startsWith("shaderpacks") ||
+            relPath === "options.txt" ||
+            relPath === "servers.dat" ||
+            relPath.startsWith("essential/") ||
+            relPath.startsWith("essential")
           ) {
             continue;
           }
@@ -389,11 +438,18 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
       };
       walk(dir);
     };
-    collectOverrides(path.join(extractDir, 'overrides'), 'overrides');
-    collectOverrides(path.join(extractDir, 'server-overrides'), 'server-overrides');
+    collectOverrides(path.join(extractDir, "overrides"), "overrides");
+    collectOverrides(
+      path.join(extractDir, "server-overrides"),
+      "server-overrides",
+    );
 
     // Build server installer info
-    const installerInfo = getServerInstallerInfo(loader, loaderVersion, gameVersion);
+    const installerInfo = getServerInstallerInfo(
+      loader,
+      loaderVersion,
+      gameVersion,
+    );
 
     // If outputDir is specified, write server files
     let actualOutputDir: string | null = null;
@@ -403,7 +459,7 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
     }
 
     const result: ModrinthServerPackResult = {
-      modpackName: modrinthIndex.name || path.basename(originalPath, '.mrpack'),
+      modpackName: modrinthIndex.name || path.basename(originalPath, ".mrpack"),
       gameVersion,
       loader,
       loaderVersion,
@@ -424,12 +480,12 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
     const displayLines = [
       `Modrinth 整合包 "${result.modpackName}"`,
       `Minecraft ${gameVersion} / ${loader} ${loaderVersion}`,
-      '',
+      "",
       `服务端模组: ${serverMods.length}`,
       `客户端专用模组 (已排除): ${clientOnlyMods.length}`,
       `配置文件: ${configs.length}`,
       `覆盖文件: ${overrides.length}`,
-      '',
+      "",
     ];
 
     if (installerInfo) {
@@ -437,7 +493,7 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
         `服务端安装器:`,
         `  ${installerInfo.loader} ${installerInfo.loaderVersion}`,
         `  下载: ${installerInfo.installerUrl}`,
-        '',
+        "",
       );
     }
 
@@ -447,7 +503,7 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
 
     return {
       llmContent: safeJsonStringify(result),
-      returnDisplay: displayLines.join('\n'),
+      returnDisplay: displayLines.join("\n"),
     };
   }
 
@@ -461,18 +517,21 @@ class ModpackServerPackInvocation extends BaseToolInvocation<
     // Write override files
     for (const entryName of overrides) {
       // Strip the 'overrides/' or 'server-overrides/' prefix
-      const relPath = entryName.replace(/^(overrides|server-overrides)\//, '');
+      const relPath = entryName.replace(/^(overrides|server-overrides)\//, "");
       const srcPath = path.join(extractDir, entryName);
       const destPath = path.join(outputDir, relPath);
 
-      if (!fs.existsSync(srcPath) || fs.statSync(srcPath).isDirectory()) continue;
+      if (!fs.existsSync(srcPath) || fs.statSync(srcPath).isDirectory())
+        continue;
 
       const destDir = path.dirname(destPath);
       fs.mkdirSync(destDir, { recursive: true });
       fs.copyFileSync(srcPath, destPath);
     }
 
-    debugLogger.debug(`Wrote ${overrides.length} override files to ${outputDir}`);
+    debugLogger.debug(
+      `Wrote ${overrides.length} override files to ${outputDir}`,
+    );
   }
 }
 
@@ -484,7 +543,7 @@ function getServerInstallerInfo(
   gameVersion: string,
 ): ServerInstallerInfo | null {
   switch (loader) {
-    case 'forge': {
+    case "forge": {
       const fileName = `forge-${gameVersion}-${loaderVersion}-installer.jar`;
       return {
         loader,
@@ -494,7 +553,7 @@ function getServerInstallerInfo(
         installerFileName: fileName,
       };
     }
-    case 'neoforge': {
+    case "neoforge": {
       const fileName = `neoforge-${loaderVersion}-installer.jar`;
       return {
         loader,
@@ -504,7 +563,7 @@ function getServerInstallerInfo(
         installerFileName: fileName,
       };
     }
-    case 'fabric': {
+    case "fabric": {
       // Fabric server JAR URL uses meta API — provide the base; the actual
       // installer version is resolved at download time.
       return {
@@ -515,7 +574,7 @@ function getServerInstallerInfo(
         installerFileName: `fabric-server-mc.${gameVersion}-loader.${loaderVersion}.jar`,
       };
     }
-    case 'quilt': {
+    case "quilt": {
       const fileName = `quilt-installer-${loaderVersion}.jar`;
       return {
         loader,
@@ -533,44 +592,43 @@ function getServerInstallerInfo(
 // ─── Tool Definition ─────────────────────────────────────────────────────────
 
 const description =
-  'Process modpacks for server deployment: resolve CurseForge server packs via serverPackFileId, ' +
-  'or parse Modrinth .mrpack files to produce a server assembly plan (identifying server vs client-only mods, ' +
-  'configs, overrides, and loader installer info).';
+  "Process modpacks for server deployment: resolve CurseForge server packs via serverPackFileId, " +
+  "or parse Modrinth .mrpack files to produce a server assembly plan (identifying server vs client-only mods, " +
+  "configs, overrides, and loader installer info).";
 
 const paramSchema = {
-  $schema: 'https://json-schema.org/draft/2020-12/schema',
-  type: 'object',
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
   properties: {
     action: {
-      type: 'string',
-      enum: ['curseforge-server-pack', 'modrinth-server-pack'],
+      type: "string",
+      enum: ["curseforge-server-pack", "modrinth-server-pack"],
       description:
-        'Action to perform: curseforge-server-pack (resolve server pack from CurseForge modpack), ' +
-        'modrinth-server-pack (parse .mrpack and produce server assembly plan).',
+        "Action to perform: curseforge-server-pack (resolve server pack from CurseForge modpack), " +
+        "modrinth-server-pack (parse .mrpack and produce server assembly plan).",
     },
     projectId: {
-      type: 'integer',
+      type: "integer",
       description:
-        'CurseForge project ID. Required for curseforge-server-pack.',
+        "CurseForge project ID. Required for curseforge-server-pack.",
     },
     fileId: {
-      type: 'integer',
+      type: "integer",
       description:
-        'CurseForge file ID. If omitted, uses the latest file for curseforge-server-pack.',
+        "CurseForge file ID. If omitted, uses the latest file for curseforge-server-pack.",
     },
     mrpackPath: {
-      type: 'string',
-      description:
-        'Path to a .mrpack file. Required for modrinth-server-pack.',
+      type: "string",
+      description: "Path to a .mrpack file. Required for modrinth-server-pack.",
     },
     outputDir: {
-      type: 'string',
+      type: "string",
       description:
-        'Output directory for Modrinth server files. If provided, override files from the .mrpack ' +
-        'will be extracted to this directory. If omitted, only a server assembly plan is returned.',
+        "Output directory for Modrinth server files. If provided, override files from the .mrpack " +
+        "will be extracted to this directory. If omitted, only a server assembly plan is returned.",
     },
   },
-  required: ['action'],
+  required: ["action"],
   additionalProperties: false,
 };
 
@@ -581,12 +639,12 @@ export class ModpackServerPackTool extends BaseDeclarativeTool<
   override readonly name = ToolNames.MODPACK_SERVER_PACK;
   override readonly kind = Kind.Fetch;
   static readonly Name = ToolNames.MODPACK_SERVER_PACK;
-  override readonly displayName = 'ModpackServerPack';
+  override readonly displayName = "ModpackServerPack";
 
   constructor() {
     super(
       ToolNames.MODPACK_SERVER_PACK,
-      'ModpackServerPack',
+      "ModpackServerPack",
       description,
       Kind.Fetch,
       paramSchema,

@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { SessionUpdate } from '@agentclientprotocol/sdk';
-import type { Config } from '@qwen-code/qwen-code-core';
-import { createDebugLogger } from '@qwen-code/qwen-code-core';
-import type { MessageRewriteConfig } from './types.js';
-import { TurnBuffer } from './TurnBuffer.js';
-import { LlmRewriter } from './LlmRewriter.js';
+import type { SessionUpdate } from "@agentclientprotocol/sdk";
+import type { Config } from "@tram-ai/tram-core";
+import { createDebugLogger } from "@tram-ai/tram-core";
+import type { MessageRewriteConfig } from "./types.js";
+import { TurnBuffer } from "./TurnBuffer.js";
+import { LlmRewriter } from "./LlmRewriter.js";
 
-const debugLogger = createDebugLogger('MESSAGE_REWRITE');
+const debugLogger = createDebugLogger("MESSAGE_REWRITE");
 
 /**
  * Middleware that intercepts ACP messages and appends LLM-rewritten
@@ -30,7 +30,7 @@ const debugLogger = createDebugLogger('MESSAGE_REWRITE');
 export class MessageRewriteMiddleware {
   private readonly turnBuffer: TurnBuffer;
   private readonly rewriter: LlmRewriter;
-  private readonly target: MessageRewriteConfig['target'];
+  private readonly target: MessageRewriteConfig["target"];
   private turnIndex = 0;
 
   constructor(
@@ -52,10 +52,10 @@ export class MessageRewriteMiddleware {
     signal?: AbortSignal,
   ): Promise<void> {
     const updateRecord = update as Record<string, unknown>;
-    const updateType = updateRecord['sessionUpdate'] as string;
+    const updateType = updateRecord["sessionUpdate"] as string;
 
     // tool_call signals turn boundary — flush before passing through
-    if (updateType === 'tool_call') {
+    if (updateType === "tool_call") {
       await this.flushTurn(signal);
       this.turnBuffer.markToolCall();
       return this.sendUpdate(update);
@@ -63,27 +63,27 @@ export class MessageRewriteMiddleware {
 
     // tool_call_update, plan, available_commands, etc. → pass through
     if (
-      updateType !== 'agent_thought_chunk' &&
-      updateType !== 'agent_message_chunk'
+      updateType !== "agent_thought_chunk" &&
+      updateType !== "agent_message_chunk"
     ) {
       return this.sendUpdate(update);
     }
 
-    const content = updateRecord['content'] as
+    const content = updateRecord["content"] as
       | Record<string, string>
       | undefined;
-    const text = content?.['text'] ?? '';
+    const text = content?.["text"] ?? "";
 
     // Always send original message as-is
     await this.sendUpdate(update);
 
     // Accumulate for turn-end rewriting
-    if (updateType === 'agent_thought_chunk') {
-      if (this.target === 'thought' || this.target === 'all') {
+    if (updateType === "agent_thought_chunk") {
+      if (this.target === "thought" || this.target === "all") {
         this.turnBuffer.appendThought(text);
       }
-    } else if (updateType === 'agent_message_chunk') {
-      if (this.target === 'message' || this.target === 'all') {
+    } else if (updateType === "agent_message_chunk") {
+      if (this.target === "message" || this.target === "all") {
         this.turnBuffer.appendMessage(text);
       }
     }
@@ -130,8 +130,8 @@ export class MessageRewriteMiddleware {
 
           // Emit rewritten message with special _meta
           await this.sendUpdate({
-            sessionUpdate: 'agent_message_chunk',
-            content: { type: 'text', text: rewritten },
+            sessionUpdate: "agent_message_chunk",
+            content: { type: "text", text: rewritten },
             _meta: {
               rewritten: true,
               turnIndex: turnIdx,

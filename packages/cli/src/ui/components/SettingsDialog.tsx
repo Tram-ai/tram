@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
-import { useState, useEffect } from 'react';
-import { Box, Text } from 'ink';
-import { theme } from '../semantic-colors.js';
-import type { LoadedSettings, Settings } from '../../config/settings.js';
-import { SettingScope } from '../../config/settings.js';
-import { getScopeMessageForSetting } from '../../utils/dialogScopeUtils.js';
-import { ScopeSelector } from './shared/ScopeSelector.js';
-import { t } from '../../i18n/index.js';
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Box, Text } from "ink";
+import { theme } from "../semantic-colors.js";
+import type { LoadedSettings, Settings } from "../../config/settings.js";
+import { SettingScope } from "../../config/settings.js";
+import { getScopeMessageForSetting } from "../../utils/dialogScopeUtils.js";
+import { ScopeSelector } from "./shared/ScopeSelector.js";
+import { t } from "../../i18n/index.js";
 import {
   getDialogSettingKeys,
   setPendingSettingValue,
@@ -26,17 +26,17 @@ import {
   setPendingSettingValueAny,
   getNestedValue,
   getEffectiveValue,
-} from '../../utils/settingsUtils.js';
-import { updateOutputLanguageFile } from '../../utils/languageUtils.js';
-import { useVimMode } from '../contexts/VimModeContext.js';
-import { createDebugLogger, type Config } from '@tram-ai/tram-core';
-import { useKeypress } from '../hooks/useKeypress.js';
-import chalk from 'chalk';
-import { cpSlice, cpLen, stripUnsafeCharacters } from '../utils/textUtils.js';
+} from "../../utils/settingsUtils.js";
+import { updateOutputLanguageFile } from "../../utils/languageUtils.js";
+import { useVimMode } from "../contexts/VimModeContext.js";
+import { createDebugLogger, type Config } from "@tram-ai/tram-core";
+import { useKeypress } from "../hooks/useKeypress.js";
+import chalk from "chalk";
+import { cpSlice, cpLen, stripUnsafeCharacters } from "../utils/textUtils.js";
 import {
   type SettingsValue,
   TOGGLE_TYPES,
-} from '../../config/settingsSchema.js';
+} from "../../config/settingsSchema.js";
 
 interface SettingsDialogProps {
   settings: LoadedSettings;
@@ -46,7 +46,7 @@ interface SettingsDialogProps {
   config?: Config;
 }
 
-const debugLogger = createDebugLogger('SETTINGS_DIALOG');
+const debugLogger = createDebugLogger("SETTINGS_DIALOG");
 
 const maxItemsToShow = 8;
 
@@ -61,7 +61,7 @@ export function SettingsDialog({
   const { vimEnabled, toggleVimEnabled } = useVimMode();
 
   // Mode state: 'settings' or 'scope' (view switching like ThemeDialog)
-  const [mode, setMode] = useState<'settings' | 'scope'>('settings');
+  const [mode, setMode] = useState<"settings" | "scope">("settings");
   // Scope selector state (User by default)
   const [selectedScope, setSelectedScope] = useState<SettingScope>(
     SettingScope.User,
@@ -102,13 +102,13 @@ export function SettingsDialog({
     const newModified = new Set<string>();
     for (const [key, value] of globalPendingChanges.entries()) {
       const def = getSettingDefinition(key);
-      if (def?.type === 'boolean' && typeof value === 'boolean') {
+      if (def?.type === "boolean" && typeof value === "boolean") {
         updated = setPendingSettingValue(key, value, updated);
       } else if (
-        (def?.type === 'number' && typeof value === 'number') ||
-        (def?.type === 'string' && typeof value === 'string') ||
-        (def?.type === 'enum' &&
-          (typeof value === 'string' || typeof value === 'number'))
+        (def?.type === "number" && typeof value === "number") ||
+        (def?.type === "string" && typeof value === "string") ||
+        (def?.type === "enum" &&
+          (typeof value === "string" || typeof value === "number"))
       ) {
         updated = setPendingSettingValueAny(key, value, updated);
       }
@@ -139,12 +139,12 @@ export function SettingsDialog({
           }
           const currentValue = getEffectiveValue(key, pendingSettings, {});
           let newValue: SettingsValue;
-          if (definition?.type === 'boolean') {
+          if (definition?.type === "boolean") {
             newValue = !(currentValue as boolean);
             setPendingSettings((prev) =>
               setPendingSettingValue(key, newValue as boolean, prev),
             );
-          } else if (definition?.type === 'enum' && definition.options) {
+          } else if (definition?.type === "enum" && definition.options) {
             const options = definition.options;
             const currentIndex = options?.findIndex(
               (opt) => opt.value === currentValue,
@@ -179,23 +179,23 @@ export function SettingsDialog({
             );
 
             // Special handling for vim mode to sync with VimModeContext
-            if (key === 'general.vimMode' && newValue !== vimEnabled) {
+            if (key === "general.vimMode" && newValue !== vimEnabled) {
               // Call toggleVimEnabled to sync the VimModeContext local state
               toggleVimEnabled().catch((error) => {
-                debugLogger.error('Failed to toggle vim mode:', error);
+                debugLogger.error("Failed to toggle vim mode:", error);
               });
             }
 
             // Special handling for approval mode to apply to current session
             if (
-              key === 'tools.approvalMode' &&
+              key === "tools.approvalMode" &&
               settings.merged.tools?.approvalMode
             ) {
               try {
                 config?.setApprovalMode(settings.merged.tools.approvalMode);
               } catch (error) {
                 debugLogger.error(
-                  'Failed to apply approval mode to current session:',
+                  "Failed to apply approval mode to current session:",
                   error,
                 );
               }
@@ -254,7 +254,7 @@ export function SettingsDialog({
 
   // Generic edit state
   const [editingKey, setEditingKey] = useState<string | null>(null);
-  const [editBuffer, setEditBuffer] = useState<string>('');
+  const [editBuffer, setEditBuffer] = useState<string>("");
   const [editCursorPos, setEditCursorPos] = useState<number>(0); // Cursor position within edit buffer
   const [cursorVisible, setCursorVisible] = useState<boolean>(true);
 
@@ -269,7 +269,7 @@ export function SettingsDialog({
 
   const startEditing = (key: string, initial?: string) => {
     setEditingKey(key);
-    const initialValue = initial ?? '';
+    const initialValue = initial ?? "";
     setEditBuffer(initialValue);
     setEditCursorPos(cpLen(initialValue)); // Position cursor at end of initial value
   };
@@ -278,21 +278,21 @@ export function SettingsDialog({
     const definition = getSettingDefinition(key);
     const type = definition?.type;
 
-    if (editBuffer.trim() === '' && type === 'number') {
+    if (editBuffer.trim() === "" && type === "number") {
       // Nothing entered for a number; cancel edit
       setEditingKey(null);
-      setEditBuffer('');
+      setEditBuffer("");
       setEditCursorPos(0);
       return;
     }
 
     let parsed: string | number | undefined;
-    if (type === 'number') {
+    if (type === "number") {
       const numParsed = Number(editBuffer.trim());
       if (Number.isNaN(numParsed)) {
         // Invalid number; cancel edit
         setEditingKey(null);
-        setEditBuffer('');
+        setEditBuffer("");
         setEditCursorPos(0);
         return;
       }
@@ -300,9 +300,9 @@ export function SettingsDialog({
     } else {
       // For strings, use the buffer as is.
       // Special handling for outputLanguage: empty input means 'auto'
-      if (key === 'general.outputLanguage') {
+      if (key === "general.outputLanguage") {
         const trimmed = editBuffer.trim();
-        parsed = trimmed === '' ? 'auto' : trimmed;
+        parsed = trimmed === "" ? "auto" : trimmed;
       } else {
         parsed = editBuffer;
       }
@@ -366,7 +366,7 @@ export function SettingsDialog({
       );
 
       // Update output language rule file immediately (no restart needed for LLM effect)
-      if (key === 'general.outputLanguage' && typeof parsed === 'string') {
+      if (key === "general.outputLanguage" && typeof parsed === "string") {
         updateOutputLanguageFile(parsed);
       }
 
@@ -375,7 +375,7 @@ export function SettingsDialog({
     }
 
     setEditingKey(null);
-    setEditBuffer('');
+    setEditBuffer("");
     setEditCursorPos(0);
   };
 
@@ -385,12 +385,12 @@ export function SettingsDialog({
 
   const handleScopeSelect = (scope: SettingScope) => {
     handleScopeHighlight(scope);
-    setMode('settings');
+    setMode("settings");
   };
 
   // Get the description for the currently active setting
   const activeDescription =
-    mode === 'settings' && items[activeSettingIndex]?.description
+    mode === "settings" && items[activeSettingIndex]?.description
       ? items[activeSettingIndex].description
       : undefined;
 
@@ -441,10 +441,10 @@ export function SettingsDialog({
   useKeypress(
     (key) => {
       const { name, ctrl } = key;
-      if (name === 'tab') {
-        setMode((prev) => (prev === 'settings' ? 'scope' : 'settings'));
+      if (name === "tab") {
+        setMode((prev) => (prev === "settings" ? "scope" : "settings"));
       }
-      if (mode === 'settings') {
+      if (mode === "settings") {
         // If editing, capture input and control keys
         if (editingKey) {
           const definition = getSettingDefinition(editingKey);
@@ -452,8 +452,8 @@ export function SettingsDialog({
 
           if (key.paste && key.sequence) {
             let pasted = key.sequence;
-            if (type === 'number') {
-              pasted = key.sequence.replace(/[^0-9\-+.]/g, '');
+            if (type === "number") {
+              pasted = key.sequence.replace(/[^0-9\-+.]/g, "");
             }
             if (pasted) {
               setEditBuffer((b) => {
@@ -465,15 +465,15 @@ export function SettingsDialog({
             }
             return;
           }
-          if (name === 'backspace' || name === 'delete') {
-            if (name === 'backspace' && editCursorPos > 0) {
+          if (name === "backspace" || name === "delete") {
+            if (name === "backspace" && editCursorPos > 0) {
               setEditBuffer((b) => {
                 const before = cpSlice(b, 0, editCursorPos - 1);
                 const after = cpSlice(b, editCursorPos);
                 return before + after;
               });
               setEditCursorPos((pos) => pos - 1);
-            } else if (name === 'delete' && editCursorPos < cpLen(editBuffer)) {
+            } else if (name === "delete" && editCursorPos < cpLen(editBuffer)) {
               setEditBuffer((b) => {
                 const before = cpSlice(b, 0, editCursorPos);
                 const after = cpSlice(b, editCursorPos + 1);
@@ -483,18 +483,18 @@ export function SettingsDialog({
             }
             return;
           }
-          if (name === 'escape') {
+          if (name === "escape") {
             commitEdit(editingKey);
             return;
           }
-          if (name === 'return') {
+          if (name === "return") {
             commitEdit(editingKey);
             return;
           }
 
           let ch = key.sequence;
           let isValidChar = false;
-          if (type === 'number') {
+          if (type === "number") {
             // Allow digits, minus, plus, and dot.
             isValidChar = /[0-9\-+.]/.test(ch);
           } else {
@@ -514,27 +514,27 @@ export function SettingsDialog({
             return;
           }
           // Arrow key navigation
-          if (name === 'left') {
+          if (name === "left") {
             setEditCursorPos((pos) => Math.max(0, pos - 1));
             return;
           }
-          if (name === 'right') {
+          if (name === "right") {
             setEditCursorPos((pos) => Math.min(cpLen(editBuffer), pos + 1));
             return;
           }
           // Home and End keys
-          if (name === 'home') {
+          if (name === "home") {
             setEditCursorPos(0);
             return;
           }
-          if (name === 'end') {
+          if (name === "end") {
             setEditCursorPos(cpLen(editBuffer));
             return;
           }
           // Block other keys while editing
           return;
         }
-        if (name === 'up' || name === 'k') {
+        if (name === "up" || name === "k") {
           // If editing, commit first
           if (editingKey) {
             commitEdit(editingKey);
@@ -550,7 +550,7 @@ export function SettingsDialog({
           } else if (newIndex < scrollOffset) {
             setScrollOffset(newIndex);
           }
-        } else if (name === 'down' || name === 'j') {
+        } else if (name === "down" || name === "j") {
           // If editing, commit first
           if (editingKey) {
             commitEdit(editingKey);
@@ -564,58 +564,58 @@ export function SettingsDialog({
           } else if (newIndex >= scrollOffset + effectiveMaxItemsToShow) {
             setScrollOffset(newIndex - effectiveMaxItemsToShow + 1);
           }
-        } else if (name === 'return' || name === 'space') {
+        } else if (name === "return" || name === "space") {
           const currentItem = items[activeSettingIndex];
-          if (currentItem?.value === 'ui.theme') {
-            if (name === 'return') {
-              onSelect('ui.theme', selectedScope);
+          if (currentItem?.value === "ui.theme") {
+            if (name === "return") {
+              onSelect("ui.theme", selectedScope);
             }
             return;
           }
-          if (currentItem?.value === 'general.preferredEditor') {
-            if (name === 'return') {
-              onSelect('general.preferredEditor', selectedScope);
+          if (currentItem?.value === "general.preferredEditor") {
+            if (name === "return") {
+              onSelect("general.preferredEditor", selectedScope);
             }
             return;
           }
-          if (currentItem?.value === 'fastModel') {
-            if (name === 'return') {
-              onSelect('fastModel', selectedScope);
+          if (currentItem?.value === "fastModel") {
+            if (name === "return") {
+              onSelect("fastModel", selectedScope);
             }
             return;
           }
           if (
-            currentItem?.type === 'number' ||
-            currentItem?.type === 'string'
+            currentItem?.type === "number" ||
+            currentItem?.type === "string"
           ) {
             startEditing(currentItem.value);
           } else {
             currentItem?.toggle();
           }
-        } else if (name === 'right') {
+        } else if (name === "right") {
           // Right arrow opens sub-dialog settings (like a sub-menu)
           const currentItem = items[activeSettingIndex];
           if (
-            currentItem?.value === 'ui.theme' ||
-            currentItem?.value === 'general.preferredEditor' ||
-            currentItem?.value === 'fastModel'
+            currentItem?.value === "ui.theme" ||
+            currentItem?.value === "general.preferredEditor" ||
+            currentItem?.value === "fastModel"
           ) {
             onSelect(currentItem.value, selectedScope);
           }
-        } else if (/^[0-9]$/.test(key.sequence || '') && !editingKey) {
+        } else if (/^[0-9]$/.test(key.sequence || "") && !editingKey) {
           const currentItem = items[activeSettingIndex];
-          if (currentItem?.type === 'number') {
+          if (currentItem?.type === "number") {
             startEditing(currentItem.value, key.sequence);
           }
-        } else if (ctrl && (name === 'c' || name === 'l')) {
+        } else if (ctrl && (name === "c" || name === "l")) {
           // Ctrl+C or Ctrl+L: Clear current setting and reset to default
           const currentSetting = items[activeSettingIndex];
           if (currentSetting) {
             const defaultValue = getDefaultValue(currentSetting.value);
             const defType = currentSetting.type;
-            if (defType === 'boolean') {
+            if (defType === "boolean") {
               const booleanDefaultValue =
-                typeof defaultValue === 'boolean' ? defaultValue : false;
+                typeof defaultValue === "boolean" ? defaultValue : false;
               setPendingSettings((prev) =>
                 setPendingSettingValue(
                   currentSetting.value,
@@ -624,13 +624,13 @@ export function SettingsDialog({
                 ),
               );
             } else if (
-              defType === 'number' ||
-              defType === 'string' ||
-              defType === 'enum'
+              defType === "number" ||
+              defType === "string" ||
+              defType === "enum"
             ) {
               if (
-                typeof defaultValue === 'number' ||
-                typeof defaultValue === 'string'
+                typeof defaultValue === "number" ||
+                typeof defaultValue === "string"
               ) {
                 setPendingSettings((prev) =>
                   setPendingSettingValueAny(
@@ -660,12 +660,12 @@ export function SettingsDialog({
             if (!requiresRestart(currentSetting.value)) {
               const immediateSettings = new Set([currentSetting.value]);
               const toSaveValue =
-                currentSetting.type === 'boolean'
-                  ? typeof defaultValue === 'boolean'
+                currentSetting.type === "boolean"
+                  ? typeof defaultValue === "boolean"
                     ? defaultValue
                     : false
-                  : typeof defaultValue === 'number' ||
-                      typeof defaultValue === 'string'
+                  : typeof defaultValue === "number" ||
+                      typeof defaultValue === "string"
                     ? defaultValue
                     : undefined;
               const immediateSettingsObject =
@@ -686,14 +686,14 @@ export function SettingsDialog({
 
               // Special handling for approval mode to apply to current session
               if (
-                currentSetting.value === 'tools.approvalMode' &&
+                currentSetting.value === "tools.approvalMode" &&
                 settings.merged.tools?.approvalMode
               ) {
                 try {
                   config?.setApprovalMode(settings.merged.tools.approvalMode);
                 } catch (error) {
                   debugLogger.error(
-                    'Failed to apply approval mode to current session:',
+                    "Failed to apply approval mode to current session:",
                     error,
                   );
                 }
@@ -709,12 +709,12 @@ export function SettingsDialog({
             } else {
               // Track default reset as a pending change if restart required
               if (
-                (currentSetting.type === 'boolean' &&
-                  typeof defaultValue === 'boolean') ||
-                (currentSetting.type === 'number' &&
-                  typeof defaultValue === 'number') ||
-                (currentSetting.type === 'string' &&
-                  typeof defaultValue === 'string')
+                (currentSetting.type === "boolean" &&
+                  typeof defaultValue === "boolean") ||
+                (currentSetting.type === "number" &&
+                  typeof defaultValue === "number") ||
+                (currentSetting.type === "string" &&
+                  typeof defaultValue === "string")
               ) {
                 setGlobalPendingChanges((prev) => {
                   const next = new Map(prev);
@@ -729,7 +729,7 @@ export function SettingsDialog({
           }
         }
       }
-      if (showRestartPrompt && name === 'r') {
+      if (showRestartPrompt && name === "r") {
         // Only save settings that require restart (non-restart settings were already saved immediately)
         const restartRequiredSettings =
           getRestartRequiredFromModified(modifiedSettings);
@@ -757,7 +757,7 @@ export function SettingsDialog({
         setRestartRequiredSettings(new Set()); // Clear restart-required settings
         if (onRestartRequest) onRestartRequest();
       }
-      if (name === 'escape') {
+      if (name === "escape") {
         if (editingKey) {
           commitEdit(editingKey);
         } else {
@@ -776,17 +776,17 @@ export function SettingsDialog({
       padding={1}
       width="100%"
     >
-      {mode === 'settings' ? (
+      {mode === "settings" ? (
         <Box flexDirection="column" flexGrow={1}>
-          <Text bold={mode === 'settings'} wrap="truncate">
-            {mode === 'settings' ? '> ' : '  '}
-            {t('Settings')}
+          <Text bold={mode === "settings"} wrap="truncate">
+            {mode === "settings" ? "> " : "  "}
+            {t("Settings")}
           </Text>
           <Box height={1} />
           {showScrollUp && <Text color={theme.text.secondary}>▲</Text>}
           {visibleItems.map((item, idx) => {
             const isActive =
-              mode === 'settings' && activeSettingIndex === idx + scrollOffset;
+              mode === "settings" && activeSettingIndex === idx + scrollOffset;
 
             const scopeSettings = settings.forScope(selectedScope).settings;
             const mergedSettings = settings.merged;
@@ -807,20 +807,20 @@ export function SettingsDialog({
                   beforeCursor + chalk.inverse(atCursor) + afterCursor;
               } else if (cursorVisible && editCursorPos >= cpLen(editBuffer)) {
                 // Cursor is at the end - show inverted space
-                displayValue = editBuffer + chalk.inverse(' ');
+                displayValue = editBuffer + chalk.inverse(" ");
               } else {
                 // Cursor not visible
                 displayValue = editBuffer;
               }
-            } else if (item.type === 'number' || item.type === 'string') {
+            } else if (item.type === "number" || item.type === "string") {
               // Settings that open a sub-dialog on Enter
               const isSubDialogSetting =
-                item.value === 'ui.theme' ||
-                item.value === 'general.preferredEditor' ||
-                item.value === 'fastModel';
+                item.value === "ui.theme" ||
+                item.value === "general.preferredEditor" ||
+                item.value === "fastModel";
 
               // For numbers/strings, get the actual current value from pending settings
-              const path = item.value.split('.');
+              const path = item.value.split(".");
               const currentValue = getNestedValue(pendingSettings, path);
 
               const defaultValue = getDefaultValue(item.value);
@@ -831,7 +831,7 @@ export function SettingsDialog({
                 displayValue =
                   defaultValue !== undefined && defaultValue !== null
                     ? String(defaultValue)
-                    : '';
+                    : "";
               }
 
               // Add * if value differs from default OR if currently being modified
@@ -844,12 +844,12 @@ export function SettingsDialog({
                 effectiveCurrentValue !== defaultValue;
 
               if (isDifferentFromDefault || isModified) {
-                displayValue += '*';
+                displayValue += "*";
               }
 
               // Append ▸ for sub-dialog settings to hint Enter opens a picker
               if (isSubDialogSetting) {
-                displayValue = displayValue ? displayValue + ' ▸' : '▸';
+                displayValue = displayValue ? displayValue + " ▸" : "▸";
               }
             } else {
               // For booleans and other types, use existing logic
@@ -878,7 +878,7 @@ export function SettingsDialog({
                       isActive ? theme.status.success : theme.text.secondary
                     }
                   >
-                    {isActive ? '●' : ''}
+                    {isActive ? "●" : ""}
                   </Text>
                 </Box>
                 <Box flexGrow={1} flexShrink={1}>
@@ -915,28 +915,28 @@ export function SettingsDialog({
         <ScopeSelector
           onSelect={handleScopeSelect}
           onHighlight={handleScopeHighlight}
-          isFocused={mode === 'scope'}
+          isFocused={mode === "scope"}
           initialScope={selectedScope}
         />
       )}
-      {activeDescription && mode === 'settings' && (
+      {activeDescription && mode === "settings" && (
         <Box marginTop={1}>
           <Text color={theme.text.secondary} wrap="truncate-end" italic>
             {activeDescription}
           </Text>
         </Box>
       )}
-      <Box marginTop={activeDescription && mode === 'settings' ? 0 : 1}>
+      <Box marginTop={activeDescription && mode === "settings" ? 0 : 1}>
         <Text color={theme.text.secondary} wrap="truncate">
-          {mode === 'settings'
-            ? t('(Use Enter to select, Tab to configure scope)')
-            : t('(Use Enter to apply scope, Tab to go back)')}
+          {mode === "settings"
+            ? t("(Use Enter to select, Tab to configure scope)")
+            : t("(Use Enter to apply scope, Tab to go back)")}
         </Text>
       </Box>
       {showRestartPrompt && (
         <Text color={theme.status.warning}>
           {t(
-            'To see changes, TRAM must be restarted. Press r to exit and apply changes now.',
+            "To see changes, TRAM must be restarted. Press r to exit and apply changes now.",
           )}
         </Text>
       )}

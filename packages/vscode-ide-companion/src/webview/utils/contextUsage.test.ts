@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, it } from 'vitest';
-import { computeContextUsage } from './contextUsage.js';
+import { describe, expect, it } from "vitest";
+import { computeContextUsage } from "./contextUsage.js";
 
-describe('computeContextUsage', () => {
-  it('returns null when there is no trusted token limit', () => {
+describe("computeContextUsage", () => {
+  it("returns null when there is no trusted token limit", () => {
     expect(
       computeContextUsage(
         {
@@ -17,14 +17,14 @@ describe('computeContextUsage', () => {
           },
         },
         {
-          modelId: 'unknown-model',
-          name: 'Unknown Model',
+          modelId: "unknown-model",
+          name: "Unknown Model",
         },
       ),
     ).toBeNull();
   });
 
-  it('prefers usageStats.tokenLimit over model metadata', () => {
+  it("prefers usageStats.tokenLimit over model metadata", () => {
     expect(
       computeContextUsage(
         {
@@ -34,8 +34,8 @@ describe('computeContextUsage', () => {
           tokenLimit: 4000,
         },
         {
-          modelId: 'qwen3-max',
-          name: 'Qwen3 Max',
+          modelId: "qwen3-max",
+          name: "Qwen3 Max",
           _meta: { contextLimit: 8000 },
         },
       ),
@@ -46,7 +46,7 @@ describe('computeContextUsage', () => {
     });
   });
 
-  it('falls back to model metadata when usageStats does not include a limit', () => {
+  it("falls back to model metadata when usageStats does not include a limit", () => {
     expect(
       computeContextUsage(
         {
@@ -55,8 +55,8 @@ describe('computeContextUsage', () => {
           },
         },
         {
-          modelId: 'qwen3-max',
-          name: 'Qwen3 Max',
+          modelId: "qwen3-max",
+          name: "Qwen3 Max",
           _meta: { contextLimit: 8000 },
         },
       ),
@@ -67,7 +67,7 @@ describe('computeContextUsage', () => {
     });
   });
 
-  it('uses inputTokens when promptTokens is unavailable', () => {
+  it("uses inputTokens when promptTokens is unavailable", () => {
     expect(
       computeContextUsage(
         {

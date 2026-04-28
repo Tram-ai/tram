@@ -2,22 +2,22 @@
 
 ## Overview
 
-`qwen-code-action` is a GitHub Action that integrates [Qwen Code] into your development workflow via the [Qwen Code CLI]. It acts both as an autonomous agent for critical routine coding tasks, and an on-demand collaborator you can quickly delegate work to.
+`qwen-code-action` is a GitHub Action that integrates [TRAM] into your development workflow via the [TRAM CLI]. It acts both as an autonomous agent for critical routine coding tasks, and an on-demand collaborator you can quickly delegate work to.
 
-Use it to perform GitHub pull request reviews, triage issues, perform code analysis and modification, and more using [Qwen Code] conversationally (e.g., `@qwencoder fix this issue`) directly inside your GitHub repositories.
+Use it to perform GitHub pull request reviews, triage issues, perform code analysis and modification, and more using [TRAM] conversationally (e.g., `@qwencoder fix this issue`) directly inside your GitHub repositories.
 
 ## Features
 
 - **Automation**: Trigger workflows based on events (e.g. issue opening) or schedules (e.g. nightly).
 - **On-demand Collaboration**: Trigger workflows in issue and pull request
-  comments by mentioning the [Qwen Code CLI](./features/commands) (e.g., `@qwencoder /review`).
-- **Extensible with Tools**: Leverage [Qwen Code](../developers/tools/introduction.md) models' tool-calling capabilities to interact with other CLIs like the [GitHub CLI] (`gh`).
+  comments by mentioning the [TRAM CLI](./features/commands) (e.g., `@qwencoder /review`).
+- **Extensible with Tools**: Leverage [TRAM](../developers/tools/introduction.md) models' tool-calling capabilities to interact with other CLIs like the [GitHub CLI] (`gh`).
 - **Customizable**: Use a `QWEN.md` file in your repository to provide
-  project-specific instructions and context to [Qwen Code CLI](./features/commands).
+  project-specific instructions and context to [TRAM CLI](./features/commands).
 
 ## Quick Start
 
-Get started with Qwen Code CLI in your repository in just a few minutes:
+Get started with TRAM CLI in your repository in just a few minutes:
 
 ### 1. Get a Qwen API Key
 
@@ -49,13 +49,13 @@ You have two options to set up a workflow:
 
 **Option A: Use setup command (Recommended)**
 
-1. Start the Qwen Code CLI in your terminal:
+1. Start the TRAM CLI in your terminal:
 
    ```shell
    qwen
    ```
 
-2. In Qwen Code CLI in your terminal, type:
+2. In TRAM CLI in your terminal, type:
 
    ```
    /setup-github
@@ -90,9 +90,9 @@ You have two options to set up a workflow:
 
 This action provides several pre-built workflows for different use cases. Each workflow is designed to be copied into your repository's `.github/workflows` directory and customized as needed.
 
-### Qwen Code Dispatch
+### TRAM Dispatch
 
-This workflow acts as a central dispatcher for Qwen Code CLI, routing requests to the appropriate workflow based on the triggering event and the command provided in the comment. For a detailed guide on how to set up the dispatch workflow, go to the [Qwen Code Dispatch workflow documentation](./common-workflow).
+This workflow acts as a central dispatcher for TRAM CLI, routing requests to the appropriate workflow based on the triggering event and the command provided in the comment. For a detailed guide on how to set up the dispatch workflow, go to the [TRAM Dispatch workflow documentation](./common-workflow).
 
 ### Issue Triage
 
@@ -102,9 +102,9 @@ This action can be used to triage GitHub Issues automatically or on a schedule. 
 
 This action can be used to automatically review pull requests when they are opened. For a detailed guide on how to set up the pull request review system, go to the [GitHub PR Review workflow documentation](./common-workflow).
 
-### Qwen Code CLI Assistant
+### TRAM CLI Assistant
 
-This type of action can be used to invoke a general-purpose, conversational Qwen Code AI assistant within the pull requests and issues to perform a wide range of tasks. For a detailed guide on how to set up the general-purpose Qwen Code CLI workflow, go to the [Qwen Code Assistant workflow documentation](./common-workflow).
+This type of action can be used to invoke a general-purpose, conversational TRAM AI assistant within the pull requests and issues to perform a wide range of tasks. For a detailed guide on how to set up the general-purpose TRAM CLI workflow, go to the [TRAM Assistant workflow documentation](./common-workflow).
 
 ## Configuration
 
@@ -114,24 +114,24 @@ This type of action can be used to invoke a general-purpose, conversational Qwen
 
 - <a name="__input_qwen_api_key"></a><a href="#user-content-__input_qwen_api_key"><code>qwen*api_key</code></a>: *(Optional)\_ The API key for the Qwen API.
 
-- <a name="__input_qwen_cli_version"></a><a href="#user-content-__input_qwen_cli_version"><code>qwen*cli_version</code></a>: *(Optional, default: `latest`)\_ The version of the Qwen Code CLI to install. Can be "latest", "preview", "nightly", a specific version number, or a git branch, tag, or commit. For more information, see [Qwen Code CLI releases](https://github.com/QwenLM/qwen-code-action/blob/main/docs/releases.md).
+- <a name="__input_qwen_cli_version"></a><a href="#user-content-__input_qwen_cli_version"><code>qwen*cli_version</code></a>: *(Optional, default: `latest`)\_ The version of the TRAM CLI to install. Can be "latest", "preview", "nightly", a specific version number, or a git branch, tag, or commit. For more information, see [TRAM CLI releases](https://github.com/QwenLM/qwen-code-action/blob/main/docs/releases.md).
 
 - <a name="__input_qwen_debug"></a><a href="#user-content-__input_qwen_debug"><code>qwen*debug</code></a>: *(Optional)\_ Enable debug logging and output streaming.
 
-- <a name="__input_qwen_model"></a><a href="#user-content-__input_qwen_model"><code>qwen*model</code></a>: *(Optional)\_ The model to use with Qwen Code.
+- <a name="__input_qwen_model"></a><a href="#user-content-__input_qwen_model"><code>qwen*model</code></a>: *(Optional)\_ The model to use with TRAM.
 
-- <a name="__input_prompt"></a><a href="#user-content-__input_prompt"><code>prompt</code></a>: _(Optional, default: `You are a helpful assistant.`)_ A string passed to the Qwen Code CLI's [`--prompt` argument](https://github.com/QwenLM/qwen-code-action/blob/main/docs/cli/configuration.md#command-line-arguments).
+- <a name="__input_prompt"></a><a href="#user-content-__input_prompt"><code>prompt</code></a>: _(Optional, default: `You are a helpful assistant.`)_ A string passed to the TRAM CLI's [`--prompt` argument](https://github.com/QwenLM/qwen-code-action/blob/main/docs/cli/configuration.md#command-line-arguments).
 
 - <a name="__input_settings"></a><a href="#user-content-__input_settings"><code>settings</code></a>: _(Optional)_ A JSON string written to `.qwen/settings.json` to configure the CLI's _project_ settings.
   For more details, see the documentation on [settings files](https://github.com/QwenLM/qwen-code-action/blob/main/docs/cli/configuration.md#settings-files).
 
-- <a name="__input_use_qwen_code_assist"></a><a href="#user-content-__input_use_qwen_code_assist"><code>use*qwen_code_assist</code></a>: *(Optional, default: `false`)\_ Whether to use Code Assist for Qwen Code model access instead of the default Qwen Code API key.
-  For more information, see the [Qwen Code CLI documentation](https://github.com/QwenLM/qwen-code-action/blob/main/docs/cli/authentication.md).
+- <a name="__input_use_qwen_code_assist"></a><a href="#user-content-__input_use_qwen_code_assist"><code>use*qwen_code_assist</code></a>: *(Optional, default: `false`)\_ Whether to use Code Assist for TRAM model access instead of the default TRAM API key.
+  For more information, see the [TRAM CLI documentation](https://github.com/QwenLM/qwen-code-action/blob/main/docs/cli/authentication.md).
 
-- <a name="__input_use_vertex_ai"></a><a href="#user-content-__input_use_vertex_ai"><code>use*vertex_ai</code></a>: *(Optional, default: `false`)\_ Whether to use Vertex AI for Qwen Code model access instead of the default Qwen Code API key.
-  For more information, see the [Qwen Code CLI documentation](https://github.com/QwenLM/qwen-code-action/blob/main/docs/cli/authentication.md).
+- <a name="__input_use_vertex_ai"></a><a href="#user-content-__input_use_vertex_ai"><code>use*vertex_ai</code></a>: *(Optional, default: `false`)\_ Whether to use Vertex AI for TRAM model access instead of the default TRAM API key.
+  For more information, see the [TRAM CLI documentation](https://github.com/QwenLM/qwen-code-action/blob/main/docs/cli/authentication.md).
 
-- <a name="__input_extensions"></a><a href="#user-content-__input_extensions"><code>extensions</code></a>: _(Optional)_ A list of Qwen Code CLI extensions to install.
+- <a name="__input_extensions"></a><a href="#user-content-__input_extensions"><code>extensions</code></a>: _(Optional)_ A list of TRAM CLI extensions to install.
 
 - <a name="__input_upload_artifacts"></a><a href="#user-content-__input_upload_artifacts"><code>upload*artifacts</code></a>: *(Optional, default: `false`)\_ Whether to upload artifacts to the github action.
 
@@ -145,9 +145,9 @@ This type of action can be used to invoke a general-purpose, conversational Qwen
 
 <!-- BEGIN_AUTOGEN_OUTPUTS -->
 
-- <a name="__output_summary"></a><a href="#user-content-__output_summary"><code>summary</code></a>: The summarized output from the Qwen Code CLI execution.
+- <a name="__output_summary"></a><a href="#user-content-__output_summary"><code>summary</code></a>: The summarized output from the TRAM CLI execution.
 
-- <a name="__output_error"></a><a href="#user-content-__output_error"><code>error</code></a>: The error output from the Qwen Code CLI execution, if any.
+- <a name="__output_error"></a><a href="#user-content-__output_error"><code>error</code></a>: The error output from the TRAM CLI execution, if any.
 
 <!-- END_AUTOGEN_OUTPUTS -->
 
@@ -157,8 +157,8 @@ We recommend setting the following values as repository variables so they can be
 
 | Name               | Description                                               | Type     | Required | When Required             |
 | ------------------ | --------------------------------------------------------- | -------- | -------- | ------------------------- |
-| `DEBUG`            | Enables debug logging for the Qwen Code CLI.              | Variable | No       | Never                     |
-| `QWEN_CLI_VERSION` | Controls which version of the Qwen Code CLI is installed. | Variable | No       | Pinning the CLI version   |
+| `DEBUG`            | Enables debug logging for the TRAM CLI.              | Variable | No       | Never                     |
+| `QWEN_CLI_VERSION` | Controls which version of the TRAM CLI is installed. | Variable | No       | Pinning the CLI version   |
 | `APP_ID`           | GitHub App ID for custom authentication.                  | Variable | No       | Using a custom GitHub App |
 
 To add a repository variable:
@@ -188,7 +188,7 @@ For more information, refer to the [official GitHub documentation on creating an
 
 ## Authentication
 
-This action requires authentication to the GitHub API and optionally to Qwen Code services.
+This action requires authentication to the GitHub API and optionally to TRAM services.
 
 ### GitHub Authentication
 
@@ -204,7 +204,7 @@ For detailed setup instructions for both Qwen and GitHub authentication, go to t
 
 ## Extensions
 
-The Qwen Code CLI can be extended with additional functionality through extensions.
+The TRAM CLI can be extended with additional functionality through extensions.
 These extensions are installed from source from their GitHub repositories.
 
 For detailed instructions on how to set up and configure extensions, go to the
@@ -224,18 +224,18 @@ For a comprehensive guide on securing your repository and workflows, please refe
 ## Customization
 
 Create a QWEN.md file in the root of your repository to provide
-project-specific context and instructions to [Qwen Code CLI](./common-workflow). This is useful for defining
+project-specific context and instructions to [TRAM CLI](./common-workflow). This is useful for defining
 coding conventions, architectural patterns, or other guidelines the model should
 follow for a given repository.
 
 ## Contributing
 
-Contributions are welcome! Check out the Qwen Code CLI **Contributing Guide** for more details on how to get started.
+Contributions are welcome! Check out the TRAM CLI **Contributing Guide** for more details on how to get started.
 
 [secrets]: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions
-[Qwen Code]: https://github.com/QwenLM/qwen-code
+[TRAM]: https://github.com/QwenLM/qwen-code
 [DashScope]: https://dashscope.console.aliyun.com/apiKey
-[Qwen Code CLI]: https://github.com/QwenLM/qwen-code-action/
+[TRAM CLI]: https://github.com/QwenLM/qwen-code-action/
 [variables]: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables#creating-configuration-variables-for-a-repository
 [GitHub CLI]: https://docs.github.com/en/github-cli/github-cli
 [QWEN.md]: https://github.com/QwenLM/qwen-code-action/blob/main/docs/cli/configuration.md#context-files-hierarchical-instructional-context

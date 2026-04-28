@@ -8,7 +8,7 @@ import {
   type CommandContext,
   type SlashCommand,
   CommandKind,
-} from './types.js';
+} from "./types.js";
 import {
   MessageType,
   type HistoryItemContextUsage,
@@ -16,7 +16,7 @@ import {
   type ContextToolDetail,
   type ContextMemoryDetail,
   type ContextSkillDetail,
-} from '../types.js';
+} from "../types.js";
 import {
   DiscoveredMCPTool,
   uiTelemetryService,
@@ -25,8 +25,8 @@ import {
   ToolNames,
   SkillTool,
   buildSkillLlmContent,
-} from '@qwen-code/qwen-code-core';
-import { t } from '../../i18n/index.js';
+} from "@tram-ai/tram-core";
+import { t } from "../../i18n/index.js";
 
 /**
  * Default compression token threshold (triggers compression at 70% usage).
@@ -79,7 +79,7 @@ function parseMemoryFiles(memoryContent: string): ContextMemoryDetail[] {
   // If no structured markers found, treat as a single memory block
   if (results.length === 0 && memoryContent.trim().length > 0) {
     results.push({
-      path: t('memory'),
+      path: t("memory"),
       tokens: estimateTokens(memoryContent),
     });
   }
@@ -88,10 +88,10 @@ function parseMemoryFiles(memoryContent: string): ContextMemoryDetail[] {
 }
 
 export async function collectContextData(
-  config: import('@qwen-code/qwen-code-core').Config,
+  config: import("@tram-ai/tram-core").Config,
   showDetails: boolean,
 ): Promise<HistoryItemContextUsage> {
-  const modelName = config.getModel() || 'unknown';
+  const modelName = config.getModelName() || "unknown";
   const contentGeneratorConfig = config.getContentGeneratorConfig();
   const contextWindowSize =
     contentGeneratorConfig.contextWindowSize ?? DEFAULT_TOKEN_LIMIT;
@@ -153,8 +153,8 @@ export async function collectContextData(
     let bodyTokens: number | undefined;
     if (isLoaded && skill.body) {
       const baseDir = skill.filePath
-        ? skill.filePath.replace(/\/[^/]+$/, '')
-        : '';
+        ? skill.filePath.replace(/\/[^/]+$/, "")
+        : "";
       bodyTokens = estimateTokens(buildSkillLlmContent(baseDir, skill.body));
       loadedBodiesTokens += bodyTokens;
     }
@@ -308,7 +308,7 @@ export async function collectContextData(
 }
 
 export const contextCommand: SlashCommand = {
-  name: 'context',
+  name: "context",
   get description() {
     return t(
       'Show context window usage breakdown. Use "/context detail" for per-item breakdown.',
@@ -317,51 +317,51 @@ export const contextCommand: SlashCommand = {
   kind: CommandKind.BUILT_IN,
   action: async (context: CommandContext, args?: string) => {
     const showDetails =
-      args?.trim().toLowerCase() === 'detail' ||
-      args?.trim().toLowerCase() === '-d';
-    const executionMode = context.executionMode ?? 'interactive';
+      args?.trim().toLowerCase() === "detail" ||
+      args?.trim().toLowerCase() === "-d";
+    const executionMode = context.executionMode ?? "interactive";
     const { config } = context.services;
     if (!config) {
-      if (executionMode === 'interactive') {
+      if (executionMode === "interactive") {
         context.ui.addItem(
           {
             type: MessageType.ERROR,
-            text: t('Config not loaded.'),
+            text: t("Config not loaded."),
           },
           Date.now(),
         );
         return;
       }
       return {
-        type: 'message',
-        messageType: 'error',
-        content: t('Config not loaded.'),
+        type: "message",
+        messageType: "error",
+        content: t("Config not loaded."),
       };
     }
 
     const contextUsageItem = await collectContextData(config, showDetails);
 
-    if (executionMode === 'interactive') {
+    if (executionMode === "interactive") {
       context.ui.addItem(contextUsageItem, Date.now());
       return;
     } else {
       return {
-        type: 'message',
-        messageType: 'info',
+        type: "message",
+        messageType: "info",
         content: JSON.stringify(contextUsageItem, null, 2),
       };
     }
   },
   subCommands: [
     {
-      name: 'detail',
+      name: "detail",
       get description() {
-        return t('Show per-item context usage breakdown.');
+        return t("Show per-item context usage breakdown.");
       },
       kind: CommandKind.BUILT_IN,
       action: async (context: CommandContext) => {
         // Delegate to main action with 'detail' arg to show detailed view
-        await contextCommand.action!(context, 'detail');
+        await contextCommand.action!(context, "detail");
       },
     },
   ],

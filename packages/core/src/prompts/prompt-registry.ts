@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { DiscoveredMCPPrompt } from '../tools/mcp-client.js';
-import { createDebugLogger } from '../utils/debugLogger.js';
+import type { DiscoveredMCPPrompt } from "../tools/mcp-client.js";
+import { createDebugLogger } from "../utils/debugLogger.js";
 
-const debugLogger = createDebugLogger('PROMPT_REGISTRY');
+const debugLogger = createDebugLogger("PROMPT_REGISTRY");
 
 export class PromptRegistry {
   private prompts: Map<string, DiscoveredMCPPrompt> = new Map();

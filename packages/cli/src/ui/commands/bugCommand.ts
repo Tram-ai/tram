@@ -4,35 +4,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import open from 'open';
+import open from "open";
 import {
   type CommandContext,
   type SlashCommand,
   CommandKind,
-} from './types.js';
-import { MessageType, type HistoryItem } from '../types.js';
-import { getExtendedSystemInfo } from '../../utils/systemInfo.js';
-import { getSystemInfoFields } from '../../utils/systemInfoFields.js';
-import { t } from '../../i18n/index.js';
+} from "./types.js";
+import { MessageType, type HistoryItem } from "../types.js";
+import { getExtendedSystemInfo } from "../../utils/systemInfo.js";
+import { getSystemInfoFields } from "../../utils/systemInfoFields.js";
+import { t } from "../../i18n/index.js";
 
 export const bugCommand: SlashCommand = {
-  name: 'bug',
+  name: "bug",
   get description() {
-    return t('submit a bug report');
+    return t("submit a bug report");
   },
   kind: CommandKind.BUILT_IN,
   action: async (context: CommandContext, args?: string): Promise<void> => {
-    const bugDescription = (args || '').trim();
+    const bugDescription = (args || "").trim();
     const systemInfo = await getExtendedSystemInfo(context);
 
     const fields = getSystemInfoFields(systemInfo);
 
     const info = fields
       .map((field) => `${field.label}: ${field.value}`)
-      .join('\n');
+      .join("\n");
 
     let bugReportUrl =
-      'https://github.com/tram-ai/tram/issues/new?template=bug_report.yml&title={title}&info={info}';
+      "https://github.com/tram-ai/tram/issues/new?template=bug_report.yml&title={title}&info={info}";
 
     const bugCommandSettings = context.services.config?.getBugCommand();
     if (bugCommandSettings?.urlTemplate) {
@@ -40,14 +40,14 @@ export const bugCommand: SlashCommand = {
     }
 
     bugReportUrl = bugReportUrl
-      .replace('{title}', encodeURIComponent(bugDescription))
-      .replace('{info}', encodeURIComponent(`\n${info}\n`));
+      .replace("{title}", encodeURIComponent(bugDescription))
+      .replace("{info}", encodeURIComponent(`\n${info}\n`));
 
-    const bugReportItem: Omit<Extract<HistoryItem, { type: 'info' }>, 'id'> = {
+    const bugReportItem: Omit<Extract<HistoryItem, { type: "info" }>, "id"> = {
       type: MessageType.INFO,
-      text: 'To submit your bug report, please open the following URL in your browser:',
+      text: "To submit your bug report, please open the following URL in your browser:",
       linkUrl: bugReportUrl,
-      linkText: 'Open GitHub bug report form',
+      linkText: "Open GitHub bug report form",
     };
 
     context.ui.addItem(bugReportItem, Date.now());

@@ -5,10 +5,10 @@
  */
 
 // Arena-specific exports
-export * from './types.js';
-export * from './arena-events.js';
-export * from './ArenaManager.js';
-export * from './ArenaAgentClient.js';
+export * from "./types.js";
+export * from "./arena-events.js";
+export * from "./ArenaManager.js";
+export * from "./ArenaAgentClient.js";
 
 // Re-export shared agent infrastructure for backwards compatibility
-export * from '../backends/index.js';
+export * from "../backends/index.js";

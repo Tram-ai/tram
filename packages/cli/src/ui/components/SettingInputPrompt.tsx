@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Text } from 'ink';
-import { useState } from 'react';
-import { theme } from '../semantic-colors.js';
-import { TextInput } from './shared/TextInput.js';
-import { t } from '../../i18n/index.js';
-import { useKeypress, type Key } from '../hooks/useKeypress.js';
-import chalk from 'chalk';
+import { Box, Text } from "ink";
+import { useState } from "react";
+import { theme } from "../semantic-colors.js";
+import { TextInput } from "./shared/TextInput.js";
+import { t } from "../../i18n/index.js";
+import { useKeypress, type Key } from "../hooks/useKeypress.js";
+import chalk from "chalk";
 
 type SettingInputPromptProps = {
   settingName: string;
@@ -38,20 +38,20 @@ const PasswordInput = ({
   useKeypress(
     (key: Key) => {
       // Handle submit
-      if (key.name === 'return') {
+      if (key.name === "return") {
         onSubmit();
         return;
       }
 
       // Handle backspace
-      if (key.name === 'backspace' || key.name === 'delete') {
+      if (key.name === "backspace" || key.name === "delete") {
         onChange(value.slice(0, -1));
         return;
       }
 
       // Handle clear (Ctrl+U)
-      if (key.ctrl && key.name === 'u') {
-        onChange('');
+      if (key.ctrl && key.name === "u") {
+        onChange("");
         return;
       }
 
@@ -67,13 +67,13 @@ const PasswordInput = ({
     { isActive: true },
   );
 
-  const maskedValue = '*'.repeat(value.length);
-  const displayValue = maskedValue || '';
-  const cursorChar = chalk.inverse(' ');
+  const maskedValue = "*".repeat(value.length);
+  const displayValue = maskedValue || "";
+  const cursorChar = chalk.inverse(" ");
 
   return (
     <Box>
-      <Text color={theme.text.accent}>{'> '}</Text>
+      <Text color={theme.text.accent}>{"> "}</Text>
       {value.length === 0 ? (
         <Text>
           {cursorChar}
@@ -99,11 +99,11 @@ export const SettingInputPrompt = (props: SettingInputPromptProps) => {
     terminalWidth,
   } = props;
 
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
 
   useKeypress(
     (key) => {
-      if (key.name === 'escape') {
+      if (key.name === "escape") {
         onCancel();
       }
     },
@@ -136,21 +136,21 @@ export const SettingInputPrompt = (props: SettingInputPromptProps) => {
             value={value}
             onChange={setValue}
             onSubmit={handleSubmit}
-            placeholder={t('Enter sensitive value...')}
+            placeholder={t("Enter sensitive value...")}
           />
         ) : (
           <TextInput
             value={value}
             onChange={setValue}
             onSubmit={handleSubmit}
-            placeholder={t('Enter value...')}
+            placeholder={t("Enter value...")}
             inputWidth={Math.min(terminalWidth - 10, 60)}
             isActive={true}
           />
         )}
       </Box>
       <Box marginTop={1}>
-        <Text dimColor>{t('Press Enter to submit, Escape to cancel')}</Text>
+        <Text dimColor>{t("Press Enter to submit, Escape to cancel")}</Text>
       </Box>
     </Box>
   );

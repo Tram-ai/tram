@@ -4,8 +4,8 @@ import type {
   SubagentConfig,
   SDKMcpServerConfig,
   AuthType,
-} from './protocol.js';
-import type { SpawnInfo } from '../utils/cliPath.js';
+} from "./protocol.js";
+import type { SpawnInfo } from "../utils/cliPath.js";
 
 export type { PermissionMode, AuthType };
 
@@ -21,7 +21,7 @@ export type TransportOptions = {
   abortController?: AbortController;
   debug?: boolean;
   stderr?: (message: string) => void;
-  logLevel?: 'debug' | 'info' | 'warn' | 'error';
+  logLevel?: "debug" | "info" | "warn" | "error";
   maxSessionTurns?: number;
   coreTools?: string[];
   excludeTools?: string[];
@@ -49,8 +49,8 @@ export type TransportOptions = {
 };
 
 export interface QuerySystemPromptPreset {
-  type: 'preset';
-  preset: 'qwen_code';
+  type: "preset";
+  preset: "qwen_code";
   append?: string;
 }
 
@@ -69,11 +69,11 @@ export type CanUseTool = (
 
 export type PermissionResult =
   | {
-      behavior: 'allow';
+      behavior: "allow";
       updatedInput: ToolInput;
     }
   | {
-      behavior: 'deny';
+      behavior: "deny";
       message: string;
       interrupt?: boolean;
     };
@@ -98,9 +98,9 @@ export interface McpOAuthConfig {
  * Auth provider type for MCP servers
  */
 export type McpAuthProviderType =
-  | 'dynamic_discovery'
-  | 'google_credentials'
-  | 'service_account_impersonation';
+  | "dynamic_discovery"
+  | "google_credentials"
+  | "service_account_impersonation";
 
 /**
  * CLI MCP Server configuration
@@ -186,7 +186,7 @@ export type McpServerConfig = CLIMcpServerConfig | SDKMcpServerConfig;
 export function isSdkMcpServerConfig(
   config: McpServerConfig,
 ): config is SDKMcpServerConfig {
-  return 'type' in config && config.type === 'sdk';
+  return "type" in config && config.type === "sdk";
 }
 
 /**
@@ -241,7 +241,7 @@ export interface QueryOptions {
    *
    * - `string`: fully overrides the main session system prompt
    * - `{ type: 'preset', preset: 'qwen_code', append?: string }`:
-   *   uses Qwen Code's built-in prompt as the base and optionally appends extra
+   *   uses TRAM's built-in prompt as the base and optionally appends extra
    *   instructions for the main session
    */
   systemPrompt?: QuerySystemPrompt;
@@ -269,7 +269,7 @@ export interface QueryOptions {
    * @see allowedTools For auto-approving specific tools
    * @see excludeTools For blocking specific tools
    */
-  permissionMode?: 'default' | 'plan' | 'auto-edit' | 'yolo';
+  permissionMode?: "default" | "plan" | "auto-edit" | "yolo";
 
   /**
    * Custom permission handler for tool execution approval.
@@ -352,7 +352,7 @@ export interface QueryOptions {
    * Controls the verbosity of log messages output by the SDK.
    * @default 'error'
    */
-  logLevel?: 'debug' | 'info' | 'warn' | 'error';
+  logLevel?: "debug" | "info" | "warn" | "error";
 
   /**
    * Maximum number of conversation turns before the session automatically terminates.

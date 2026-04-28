@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BaseTokenStorage } from './base-token-storage.js';
-import { FileTokenStorage } from './file-token-storage.js';
-import type { TokenStorage, OAuthCredentials } from './types.js';
-import { TokenStorageType } from './types.js';
+import { BaseTokenStorage } from "./base-token-storage.js";
+import { FileTokenStorage } from "./file-token-storage.js";
+import type { TokenStorage, OAuthCredentials } from "./types.js";
+import { TokenStorageType } from "./types.js";
 
-const FORCE_FILE_STORAGE_ENV_VAR = 'TRAM_CODE_FORCE_FILE_STORAGE';
+const FORCE_FILE_STORAGE_ENV_VAR = "TRAM_CODE_FORCE_FILE_STORAGE";
 
 export class HybridTokenStorage extends BaseTokenStorage {
   private storage: TokenStorage | null = null;
@@ -21,12 +21,12 @@ export class HybridTokenStorage extends BaseTokenStorage {
   }
 
   private async initializeStorage(): Promise<TokenStorage> {
-    const forceFileStorage = process.env[FORCE_FILE_STORAGE_ENV_VAR] === 'true';
+    const forceFileStorage = process.env[FORCE_FILE_STORAGE_ENV_VAR] === "true";
 
     if (!forceFileStorage) {
       try {
         const { KeychainTokenStorage } = await import(
-          './keychain-token-storage.js'
+          "./keychain-token-storage.js"
         );
         const keychainStorage = new KeychainTokenStorage(this.serviceName);
 
