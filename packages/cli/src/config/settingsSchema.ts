@@ -432,7 +432,7 @@ const SETTINGS_SCHEMA = {
         requiresRestart: false,
         default: "",
         description:
-          "SiliconFlow API key for image OCR (DeepSeek-OCR) and audio transcription (SenseVoiceSmall) fallback. Used when the model does not support image/audio input natively.",
+          "SiliconFlow API key used by: (1) the `ocr` tool — image understanding (OCR / summarize) via Qwen/Qwen3.5-4B; (2) the read_file audio fallback — transcription via SenseVoiceSmall when the active model lacks audio modality.",
         showInDialog: false,
       },
     },

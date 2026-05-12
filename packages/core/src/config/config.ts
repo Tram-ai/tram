@@ -75,6 +75,7 @@ import { MediaCompressTool } from "../tools/media-compress.js";
 import { ModpackServerPackTool } from "../tools/modpack-server-pack.js";
 import { KnowledgeSearchTool } from "../tools/knowledge-search.js";
 import { BilibiliVideoInfoTool } from "../tools/bilibili-video-info.js";
+import { OcrTool } from "../tools/ocr.js";
 import { SubLmTool } from "../tools/sublm.js";
 import { WriteFileTool } from "../tools/write-file.js";
 import { LspTool } from "../tools/lsp.js";
@@ -1276,7 +1277,8 @@ export class Config {
   async createRequestModelTarget(
     modelReference: string,
   ): Promise<ModelRequestTarget> {
-    const { authType, model } = this.resolveRequestModelReference(modelReference);
+    const { authType, model } =
+      this.resolveRequestModelReference(modelReference);
     const key = `${authType}:${model}`;
     const currentConfig = this.getContentGeneratorConfig();
 
@@ -1310,7 +1312,10 @@ export class Config {
       displayName: this.resolveModelDisplayName(model),
       key,
       contentGeneratorConfig,
-      contentGenerator: await createContentGenerator(contentGeneratorConfig, this),
+      contentGenerator: await createContentGenerator(
+        contentGeneratorConfig,
+        this,
+      ),
     };
   }
 
@@ -1696,6 +1701,33 @@ export class Config {
       undefined, // trust
       "EXA web search MCP server", // description
       ["web_search_exa", "web_search_advanced_exa", "get_code_context_exa"], // includeTools
+      undefined, // excludeTools
+      undefined, // extensionName
+      undefined, // oauth
+      undefined, // authProviderType
+      undefined, // targetAudience
+      undefined, // targetServiceAccount
+      undefined, // type
+      true, // hidden - don't show in /mcp list
+    );
+
+    // Auto-inject Mergilink MCP server (NAT-traversal / intranet penetration
+    // service, useful for exposing local Minecraft servers to the public
+    // internet without configuring router port-forwarding). Runs over stdio
+    // by spawning `npx -y @mergilink/mcp`.
+    mcpServers["mergilink9f3a2b1c"] = new MCPServerConfig(
+      "npx", // command
+      ["-y", "@mergilink/mcp"], // args
+      undefined, // env
+      undefined, // cwd
+      undefined, // url (SSE)
+      undefined, // httpUrl
+      undefined, // headers
+      undefined, // tcp
+      60_000, // timeout (npx cold start can be slow on first run)
+      undefined, // trust
+      "Mergilink intranet-penetration MCP server (NAT traversal, e.g. expose a local Minecraft server publicly)", // description
+      undefined, // includeTools (expose everything the server provides)
       undefined, // excludeTools
       undefined, // extensionName
       undefined, // oauth
@@ -2539,6 +2571,7 @@ export class Config {
     await registerCoreTool(MediaCompressTool, this);
     await registerCoreTool(ModpackServerPackTool, this);
     await registerCoreTool(KnowledgeSearchTool, this);
+    await registerCoreTool(OcrTool, this);
     // Conditionally register web search tool if web search provider is configured
     // WebSearchTool is not available - removed upstream
     // if (this.getWebSearchConfig()) {

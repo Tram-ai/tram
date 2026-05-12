@@ -12,7 +12,7 @@ import {
   CommandKind,
 } from "./types.js";
 import { MessageType } from "../types.js";
-import { t, getCurrentLanguage } from "../../i18n/index.js";
+import { t } from "../../i18n/index.js";
 
 export const docsCommand: SlashCommand = {
   name: "docs",
@@ -21,9 +21,7 @@ export const docsCommand: SlashCommand = {
   },
   kind: CommandKind.BUILT_IN,
   action: async (context: CommandContext): Promise<void> => {
-    const langPath = getCurrentLanguage()?.startsWith("zh") ? "zh" : "en";
-    const docsUrl = `https://tram-ai.github.io/docs/${langPath}`;
-
+    const docsUrl = `https://tram.mintlify.app/`;
     if (process.env["SANDBOX"] && process.env["SANDBOX"] !== "sandbox-exec") {
       context.ui.addItem(
         {

@@ -20,10 +20,7 @@ import type { Config } from "../config/config.js";
 import { createDebugLogger } from "./debugLogger.js";
 import type { InputModalities } from "../core/contentGenerator.js";
 import { detectEncodingFromBuffer } from "./systemEncoding.js";
-import {
-  extractImageText,
-  transcribeAudio,
-} from "../services/siliconFlowFallback.js";
+import { transcribeAudio } from "../services/siliconFlowFallback.js";
 
 const debugLogger = createDebugLogger("FILE_UTILS");
 
@@ -692,42 +689,27 @@ export async function processSingleFileContent(
       const modalities: InputModalities =
         config.getContentGeneratorConfig()?.modalities ?? {};
       if (!modalities[modality]) {
-        // Try SiliconFlow fallback for image/audio when API key is configured
+        // SiliconFlow fallback for AUDIO only — image OCR is no longer
+        // performed automatically inside read_file. To analyse an image the
+        // model can't natively see, callers should use the dedicated `ocr`
+        // tool (which supports extract / summarize modes).
         const sfApiKey = config.getSiliconFlowApiKey();
-        if (sfApiKey && (modality === "image" || modality === "audio")) {
+        if (sfApiKey && modality === "audio") {
           debugLogger.info(
             `Model '${config.getModel()}' does not support ${modality} input. ` +
               `Using SiliconFlow fallback for: ${relativePathForDisplay}`,
           );
           try {
             const contentBuffer = await fs.promises.readFile(filePath);
-            if (modality === "image") {
-              const base64Data = contentBuffer.toString("base64");
-              const mimeType =
-                mime.getType(filePath) || "application/octet-stream";
-              const metadata = extractImageMetadata(contentBuffer, filePath);
-              const ocrResult = await extractImageText(
-                sfApiKey,
-                base64Data,
-                mimeType,
-                displayName,
-              );
-              return {
-                llmContent: `[Image metadata: ${metadata}]\n${ocrResult}`,
-                returnDisplay: `OCR (SiliconFlow): ${relativePathForDisplay} [${metadata}]`,
-              };
-            } else {
-              // audio
-              const transcription = await transcribeAudio(
-                sfApiKey,
-                contentBuffer,
-                displayName,
-              );
-              return {
-                llmContent: transcription,
-                returnDisplay: `Transcribed (SiliconFlow): ${relativePathForDisplay}`,
-              };
-            }
+            const transcription = await transcribeAudio(
+              sfApiKey,
+              contentBuffer,
+              displayName,
+            );
+            return {
+              llmContent: transcription,
+              returnDisplay: `Transcribed (SiliconFlow): ${relativePathForDisplay}`,
+            };
           } catch (error: unknown) {
             const errMsg =
               error instanceof Error ? error.message : String(error);

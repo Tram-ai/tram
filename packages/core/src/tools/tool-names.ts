@@ -46,6 +46,7 @@ export const ToolNames = {
   TASK: "task",
   REQUEST_LOG_PATTERN: "request_log_pattern",
   WEB_SEARCH: "web_search",
+  OCR: "ocr",
 } as const;
 
 /**
@@ -90,6 +91,7 @@ export const ToolDisplayNames = {
   TASK: "Task",
   REQUEST_LOG_PATTERN: "RequestLogPattern",
   WEB_SEARCH: "WebSearch",
+  OCR: "Ocr",
 } as const;
 
 // Migration from old tool names to new tool names
