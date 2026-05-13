@@ -20,13 +20,18 @@ import { useVimMode } from "../contexts/VimModeContext.js";
 import { useCompactMode } from "../contexts/CompactModeContext.js";
 import { ApprovalMode } from "@tram-ai/tram-core";
 import { t } from "../../i18n/index.js";
+import { BackgroundTasksPill } from "./background-view/BackgroundTasksPill.js";
+import { MCPHealthPill } from "./mcp/MCPHealthPill.js";
+import { useConfigInitMessage } from "../hooks/useConfigInitMessage.js";
+import { GeminiSpinner } from "./GeminiRespondingSpinner.js";
 
 export const Footer: React.FC = () => {
   const uiState = useUIState();
   const config = useConfig();
   const { vimEnabled, vimMode } = useVimMode();
-  const { text: statusLineText } = useStatusLine();
   const { compactMode } = useCompactMode();
+  const { lines: statusLineLines } = useStatusLine();
+  const configInitMessage = useConfigInitMessage(uiState.isConfigInitialized);
 
   const { promptTokenCount, showAutoAcceptIndicator } = {
     promptTokenCount: uiState.sessionStats.lastPromptTokenCount,
@@ -53,20 +58,36 @@ export const Footer: React.FC = () => {
     config.getContentGeneratorConfig()?.contextWindowSize;
 
   // Hide "? for shortcuts" when a custom status line is active (it already
-  // occupies the top row, so the hint is redundant). Matches upstream behavior.
-  const suppressHint = !!statusLineText;
+  // occupies the footer, so the hint is redundant). Matches upstream behavior.
+  const suppressHint = statusLineLines.length > 0;
 
-  // Left bottom row: high-priority messages > approval mode > hint.
+  // MCP init progress lives in this row (not a standalone component above the
+  // input) so the live area's height is constant in the default case, avoiding
+  // the residual-blank-line artifact left behind when a separate block unmounts.
+  // When a custom status line is active, the row shrinks by 1 on transition to
+  // ready — a one-time, small regression preferred over hiding init progress.
+  //
+  // `configInitMessage` is placed ahead of `showAutoAcceptIndicator` so users
+  // launched with YOLO / auto-accept-edits still see the ~1s startup progress;
+  // the approval-mode indicator takes over as soon as init finishes.
   const leftBottomContent = uiState.ctrlCPressedOnce ? (
     <Text color={theme.status.warning}>{t("Press Ctrl+C again to exit.")}</Text>
   ) : uiState.ctrlDPressedOnce ? (
     <Text color={theme.status.warning}>{t("Press Ctrl+D again to exit.")}</Text>
   ) : uiState.showEscapePrompt ? (
     <Text color={theme.text.secondary}>{t("Press Esc again to clear.")}</Text>
+  ) : uiState.rewindEscPending ? (
+    <Text color={theme.text.secondary}>
+      {t("Press Esc again to rewind conversation.")}
+    </Text>
   ) : vimEnabled && vimMode === "INSERT" ? (
     <Text color={theme.text.secondary}>-- INSERT --</Text>
   ) : uiState.shellModeActive ? (
     <ShellModeIndicator />
+  ) : configInitMessage ? (
+    <Text color={theme.text.secondary}>
+      <GeminiSpinner /> {configInitMessage}
+    </Text>
   ) : showAutoAcceptIndicator !== undefined &&
     showAutoAcceptIndicator !== ApprovalMode.DEFAULT ? (
     <AutoAcceptIndicator approvalMode={showAutoAcceptIndicator} />
@@ -87,6 +108,10 @@ export const Footer: React.FC = () => {
       node: <Text color={theme.status.warning}>Debug Mode</Text>,
     });
   }
+  // Dream tasks now surface via the BackgroundTasksPill (e.g. "1 dream")
+  // alongside the other background-task kinds. The previous `✦ dreaming`
+  // right-column indicator was removed to avoid two simultaneous signals
+  // for the same underlying state.
   if (promptTokenCount > 0 && contextWindowSize) {
     rightItems.push({
       key: "context",
@@ -120,18 +145,24 @@ export const Footer: React.FC = () => {
     >
       {/* Left column — status line on top, hints/mode on bottom */}
       <Box flexDirection="column" flexShrink={isNarrow ? 0 : 1}>
-        {statusLineText &&
+        {statusLineLines.length > 0 &&
           !uiState.ctrlCPressedOnce &&
-          !uiState.ctrlDPressedOnce && (
-            <Text dimColor wrap="truncate">
-              {statusLineText}
+          !uiState.ctrlDPressedOnce &&
+          statusLineLines.map((line, i) => (
+            <Text key={`status-line-${i}`} dimColor wrap="truncate">
+              {line}
             </Text>
-          )}
-        <Text wrap="truncate">{leftBottomContent}</Text>
+          ))}
+        <Box flexDirection="row" flexShrink={1}>
+          <Text wrap="truncate">{leftBottomContent}</Text>
+          <BackgroundTasksPill />
+          <MCPHealthPill />
+        </Box>
       </Box>
 
-      {/* Right Section — never compressed */}
-      <Box flexShrink={0} gap={1}>
+      {/* Right Section — never compressed, aligns to top so multi-line
+          status lines on the left don't push the indicators to the center. */}
+      <Box flexShrink={0} gap={1} alignItems="flex-start">
         {rightItems.map(({ key, node }, index) => (
           <Box key={key} alignItems="center">
             {index > 0 && <Text color={theme.text.secondary}> | </Text>}

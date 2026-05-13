@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Qwen
+ * Copyright 2025 TRAM
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,7 +14,9 @@
  * For persistent interactive agents, see AgentInteractive (Phase 2).
  */
 
+import type { Content } from "@google/genai";
 import type { Config } from "../../config/config.js";
+import type { RuntimeContentGeneratorView } from "./agent-context.js";
 import { createDebugLogger } from "../../utils/debugLogger.js";
 import type {
   AgentEventEmitter,
@@ -30,6 +32,7 @@ import type {
   ModelConfig,
   RunConfig,
   ToolConfig,
+  AgentExternalInput,
 } from "./agent-types.js";
 import { AgentTerminateMode } from "./agent-types.js";
 import { logSubagentExecution } from "../../telemetry/loggers.js";
@@ -136,6 +139,11 @@ export class AgentHeadless {
   private readonly core: AgentCore;
   private finalText: string = "";
   private terminateMode: AgentTerminateMode = AgentTerminateMode.ERROR;
+  private externalMessageProvider?: () => AgentExternalInput[];
+  private externalMessageWaiter?: (
+    signal: AbortSignal,
+  ) => Promise<AgentExternalInput[]>;
+  private externalMessageWaitPredicate?: () => boolean;
 
   private constructor(core: AgentCore) {
     this.core = core;
@@ -162,6 +170,7 @@ export class AgentHeadless {
     toolConfig?: ToolConfig,
     eventEmitter?: AgentEventEmitter,
     hooks?: AgentHooks,
+    runtimeView?: RuntimeContentGeneratorView,
   ): Promise<AgentHeadless> {
     const core = new AgentCore(
       name,
@@ -172,6 +181,7 @@ export class AgentHeadless {
       toolConfig,
       eventEmitter,
       hooks,
+      runtimeView,
     );
     return new AgentHeadless(core);
   }
@@ -202,11 +212,22 @@ export class AgentHeadless {
       skipEnvHistory?: boolean;
     },
   ): Promise<void> {
-    const chat = await this.core.createChat(context, {
-      extraHistory: options?.extraHistory,
-      generationConfigOverride: options?.generationConfigOverride,
-      skipEnvHistory: options?.skipEnvHistory,
-    });
+    const initialMessagesOverride = context.get("initial_messages_override") as
+      | Content[]
+      | undefined;
+    // Record the initial user turn in the observable message log before
+    // anything that can throw — createChat / prepareTools failures still
+    // get a transcript showing the task that was asked, which is what
+    // the background-agent detail view reads via AgentCore.getMessages().
+    // Mirrors AgentInteractive's run loop.
+    const initialTaskText = String(
+      (context.get("task_prompt") as string) ?? "Get Started!",
+    );
+    if (!initialMessagesOverride || initialMessagesOverride.length === 0) {
+      this.core.pushMessage("user", initialTaskText);
+    }
+
+    const chat = await this.core.createChat(context);
 
     if (!chat) {
       this.terminateMode = AgentTerminateMode.ERROR;
@@ -225,14 +246,12 @@ export class AgentHeadless {
       abortController.abort();
     }
 
-    const toolsList = options?.toolsOverride ?? this.core.prepareTools();
+    const toolsList = await this.core.prepareTools();
 
-    const initialTaskText = String(
-      (context.get("task_prompt") as string) ?? "Get Started!",
-    );
-    const initialMessages = [
-      { role: "user" as const, parts: [{ text: initialTaskText }] },
-    ];
+    const initialMessages =
+      initialMessagesOverride && initialMessagesOverride.length > 0
+        ? initialMessagesOverride
+        : [{ role: "user" as const, parts: [{ text: initialTaskText }] }];
 
     const startTime = Date.now();
     this.core.executionStats.startTimeMs = startTime;
@@ -267,6 +286,9 @@ export class AgentHeadless {
           maxTurns: this.core.runConfig.max_turns,
           maxTimeMinutes: this.core.runConfig.max_time_minutes,
           startTimeMs: startTime,
+          getExternalMessages: this.externalMessageProvider,
+          waitForExternalMessages: this.externalMessageWaiter,
+          shouldWaitForExternalMessages: this.externalMessageWaitPredicate,
         },
       );
 
@@ -361,6 +383,24 @@ export class AgentHeadless {
 
   getTerminateMode(): AgentTerminateMode {
     return this.terminateMode;
+  }
+
+  /**
+   * Sets a callback that the reasoning loop calls between tool rounds
+   * to drain external messages (e.g. from SendMessage tool).
+   */
+  setExternalMessageProvider(provider: () => AgentExternalInput[]): void {
+    this.externalMessageProvider = provider;
+  }
+
+  setExternalMessageWaiter(
+    waiter: (signal: AbortSignal) => Promise<AgentExternalInput[]>,
+  ): void {
+    this.externalMessageWaiter = waiter;
+  }
+
+  setExternalMessageWaitPredicate(predicate: () => boolean): void {
+    this.externalMessageWaitPredicate = predicate;
   }
 
   get name(): string {

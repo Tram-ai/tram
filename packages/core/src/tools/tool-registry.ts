@@ -16,6 +16,7 @@ import type { Config } from "../config/config.js";
 import { spawn } from "node:child_process";
 import { StringDecoder } from "node:string_decoder";
 import type { SendSdkMcpMessage } from "./mcp-client.js";
+import { removeMCPServerStatus } from "./mcp-client.js";
 import { McpClientManager } from "./mcp-client-manager.js";
 import { DiscoveredMCPTool } from "./mcp-tool.js";
 import { parse } from "shell-quote";
@@ -26,6 +27,9 @@ import { createDebugLogger } from "../utils/debugLogger.js";
 import type { ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
 
 type ToolParams = Record<string, unknown>;
+
+/** Factory function for lazy tool instantiation via dynamic import. */
+export type ToolFactory = () => Promise<AnyDeclarativeTool>;
 
 const debugLogger = createDebugLogger("TOOL_REGISTRY");
 
@@ -174,6 +178,15 @@ Signal: Signal number or \`(none)\` if no signal was received.
 export class ToolRegistry {
   // The tools keyed by tool name as seen by the LLM.
   private tools: Map<string, AnyDeclarativeTool> = new Map();
+  // Lazy tool factories keyed by tool name — resolved on first use.
+  private factories: Map<string, ToolFactory> = new Map();
+  // In-flight factory promises — ensures concurrent ensureTool() calls for the
+  // same name share one promise instead of running the factory multiple times.
+  private inflight: Map<string, Promise<AnyDeclarativeTool>> = new Map();
+  // Deferred tools that ToolSearch has loaded this session. Once revealed, a
+  // tool's schema is included in subsequent function-declaration lists even
+  // though it would normally be hidden.
+  private revealedDeferred: Set<string> = new Set();
   private config: Config;
   private mcpClientManager: McpClientManager;
 
@@ -210,12 +223,81 @@ export class ToolRegistry {
   }
 
   /**
+   * Registers a lazy tool factory. The tool module is not imported and the tool
+   * is not instantiated until {@link ensureTool} or {@link warmAll} is called.
+   */
+  registerFactory(name: string, factory: ToolFactory): void {
+    this.factories.set(name, factory);
+  }
+
+  /**
+   * Ensures a specific tool is loaded. Returns the cached instance if already
+   * loaded, otherwise invokes the factory, caches the result, and returns it.
+   * Concurrent calls for the same name share a single in-flight promise so the
+   * factory is never executed more than once.
+   */
+  async ensureTool(name: string): Promise<AnyDeclarativeTool | undefined> {
+    const cached = this.tools.get(name);
+    if (cached) {
+      // Clean up any stale factory for this name so warmAll() and bulk
+      // accessors don't treat it as still pending.
+      this.factories.delete(name);
+      return cached;
+    }
+
+    const existing = this.inflight.get(name);
+    if (existing) return existing;
+
+    const factory = this.factories.get(name);
+    if (!factory) return undefined;
+
+    const load = factory()
+      .then((tool) => {
+        this.tools.set(name, tool);
+        this.factories.delete(name);
+        this.inflight.delete(name);
+        return tool;
+      })
+      .catch((err: unknown) => {
+        this.inflight.delete(name);
+        throw err;
+      });
+
+    this.inflight.set(name, load);
+    return load;
+  }
+
+  /**
+   * Loads all pending tool factories in parallel. Safe to call multiple times
+   * (no-op when all factories have been resolved). Call this before any bulk
+   * access such as {@link getAllTools} or {@link getFunctionDeclarations}.
+   *
+   * @param options.strict - When `true`, re-throws the first factory failure
+   *   instead of swallowing it. Use this during startup (e.g. in
+   *   `Config.initialize`) so a broken built-in tool surfaces immediately
+   *   rather than leaving the session partially initialised.
+   */
+  async warmAll(options?: { strict?: boolean }): Promise<void> {
+    const pending = Array.from(this.factories.keys());
+    if (pending.length === 0) return;
+    const results = await Promise.allSettled(
+      pending.map((name) => this.ensureTool(name)),
+    );
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        if (options?.strict) throw result.reason as Error;
+        debugLogger.warn('Failed to warm tool factory:', result.reason);
+      }
+    }
+  }
+
+  /**
    * Copies discovered (non-core) tools from another registry into this one.
    * Used to share MCP/command-discovered tools with per-agent registries
    * that were built with skipDiscovery.
    */
   copyDiscoveredToolsFrom(source: ToolRegistry): void {
-    for (const tool of source.getAllTools()) {
+    for (const tool of source.tools.values()) {
       if (
         (tool instanceof DiscoveredTool || tool instanceof DiscoveredMCPTool) &&
         !this.tools.has(tool.name)
@@ -229,6 +311,10 @@ export class ToolRegistry {
     for (const tool of this.tools.values()) {
       if (tool instanceof DiscoveredTool || tool instanceof DiscoveredMCPTool) {
         this.tools.delete(tool.name);
+        // Drop reveal state too — see `removeMcpToolsByServer`. Without
+        // this a re-discovered tool of the same name would inherit
+        // stale "revealed" state across the disconnect/reconnect.
+        this.revealedDeferred.delete(tool.name);
       }
     }
   }
@@ -241,6 +327,13 @@ export class ToolRegistry {
     for (const [name, tool] of this.tools.entries()) {
       if (tool instanceof DiscoveredMCPTool && tool.serverName === serverName) {
         this.tools.delete(name);
+        // Drop reveal state for the removed tool. Otherwise a server
+        // disconnect → reconnect cycle that re-registers a tool of
+        // the same name would inherit `revealed: true` from the prior
+        // session — `getFunctionDeclarations` would emit it (since it
+        // checks reveal state) before the model has any way to know
+        // the tool exists this session.
+        this.revealedDeferred.delete(name);
       }
     }
   }
@@ -273,13 +366,29 @@ export class ToolRegistry {
     // Remove prompts
     this.config.getPromptRegistry().removePromptsByServer(serverName);
 
-    // Disconnect the MCP client
-    await this.mcpClientManager.disconnectServer(serverName);
-
-    // Update config's exclusion list
-    const currentExcluded = this.config.getExcludedMcpServers() || [];
-    if (!currentExcluded.includes(serverName)) {
-      this.config.setExcludedMcpServers([...currentExcluded, serverName]);
+    try {
+      // Disconnect the MCP client
+      await this.mcpClientManager.disconnectServer(serverName);
+    } finally {
+      try {
+        // Update the exclusion list before dropping the status entry,
+        // so a server is already marked as disabled by the time it
+        // disappears from the registry. Otherwise there's a (currently
+        // synchronous, but easy to widen) window where doctorChecks
+        // would observe a missing status (falling back to DISCONNECTED)
+        // while isMcpServerDisabled still returns false, mis-reporting
+        // an intentional disable as a connectivity failure.
+        const currentExcluded = this.config.getExcludedMcpServers() || [];
+        if (!currentExcluded.includes(serverName)) {
+          this.config.setExcludedMcpServers([...currentExcluded, serverName]);
+        }
+      } finally {
+        // Always drop the server from the global status registry — even
+        // if disconnect or the exclusion-list update throws — so the
+        // Footer's MCP health pill stops counting it as "offline". A
+        // leftover entry would resurrect the bug from #3895.
+        removeMCPServerStatus(serverName);
+      }
     }
   }
 
@@ -331,6 +440,11 @@ export class ToolRegistry {
     for (const [name, tool] of this.tools.entries()) {
       if (tool instanceof DiscoveredMCPTool && tool.serverName === serverName) {
         this.tools.delete(name);
+        // Drop reveal state too so a re-discovered tool of the same
+        // name doesn't inherit a `revealed: true` from before the
+        // disconnect (would surface in declarations before any
+        // ToolSearch call this session).
+        this.revealedDeferred.delete(name);
       }
     }
 
@@ -468,22 +582,104 @@ export class ToolRegistry {
    * Retrieves the list of tool schemas (FunctionDeclaration array).
    * Extracts the declarations from the ToolListUnion structure.
    * Includes discovered (vs registered) tools if configured.
+   *
+   * By default, tools marked `shouldDefer=true` are excluded (they are
+   * discovered by the model on demand via the ToolSearch tool). Pass
+   * `{ includeDeferred: true }` to include them, e.g. for diagnostics.
+   *
+   * Tools marked `alwaysLoad=true` are always included regardless of
+   * `shouldDefer`.
+   *
    * @returns An array of FunctionDeclarations.
    */
-  getFunctionDeclarations(): FunctionDeclaration[] {
+  getFunctionDeclarations(options?: {
+    includeDeferred?: boolean;
+  }): FunctionDeclaration[] {
+    const includeDeferred = options?.includeDeferred === true;
     const declarations: FunctionDeclaration[] = [];
     this.tools.forEach((tool) => {
+      if (
+        !includeDeferred &&
+        tool.shouldDefer &&
+        !tool.alwaysLoad &&
+        !this.revealedDeferred.has(tool.name)
+      ) {
+        return;
+      }
       declarations.push(tool.schema);
     });
     return declarations;
   }
 
   /**
+   * Marks a deferred tool as revealed. Revealed tools are included in
+   * {@link getFunctionDeclarations} output for the rest of the session, even
+   * though they are normally hidden. Called by the ToolSearch tool after it
+   * successfully loads a tool so the model can invoke it on subsequent turns.
+   */
+  revealDeferredTool(name: string): void {
+    this.revealedDeferred.add(name);
+  }
+
+  /**
+   * Removes a single tool from the revealed-deferred set. Used for rollback
+   * when a `setTools()` re-sync fails after revealing — leaving the tool
+   * "revealed" in the registry while the chat's declaration list never
+   * received the schema would mean future ToolSearch keyword queries
+   * exclude the tool (per `collectCandidates`'s isDeferredToolRevealed
+   * filter), making it unreachable until `/clear`.
+   */
+  unrevealDeferredTool(name: string): void {
+    this.revealedDeferred.delete(name);
+  }
+
+  /** Whether a given tool has been revealed via {@link revealDeferredTool}. */
+  isDeferredToolRevealed(name: string): boolean {
+    return this.revealedDeferred.has(name);
+  }
+
+  /**
+   * Clears the set of revealed deferred tools. Called by {@link GeminiClient}
+   * when a chat session is reset (e.g. `/clear`) so the new session starts
+   * with no revealed tools — the same state as any fresh session.
+   */
+  clearRevealedDeferredTools(): void {
+    this.revealedDeferred.clear();
+  }
+
+  /**
+   * Returns a lightweight summary ({name, description}) of tools that are
+   * deferred from the initial function-declaration list. Used to describe the
+   * set of on-demand tools in the system prompt so the model knows what is
+   * reachable via ToolSearch. `alwaysLoad` tools are excluded.
+   */
+  getDeferredToolSummary(): Array<{ name: string; description: string }> {
+    const summary: Array<{ name: string; description: string }> = [];
+    this.tools.forEach((tool) => {
+      if (tool.shouldDefer && !tool.alwaysLoad) {
+        summary.push({ name: tool.name, description: tool.description });
+      }
+    });
+    // Stable order so the system prompt text is deterministic across runs.
+    summary.sort((a, b) => a.name.localeCompare(b.name));
+    return summary;
+  }
+
+  /**
    * Retrieves a filtered list of tool schemas based on a list of tool names.
    * @param toolNames - An array of tool names to include.
    * @returns An array of FunctionDeclarations for the specified tools.
+   * @remarks Requires all tool factories to be resolved first. Call
+   * {@link warmAll} before invoking this method, otherwise factory-registered
+   * tools that have not yet been loaded will be silently omitted.
    */
   getFunctionDeclarationsFiltered(toolNames: string[]): FunctionDeclaration[] {
+    if (this.factories.size > 0) {
+      debugLogger.warn(
+        `getFunctionDeclarationsFiltered() called with ${this.factories.size} unloaded ` +
+          `tool factories. Call warmAll() first to avoid incomplete results.`,
+      );
+    }
     const declarations: FunctionDeclaration[] = [];
     for (const name of toolNames) {
       const tool = this.tools.get(name);
@@ -495,16 +691,27 @@ export class ToolRegistry {
   }
 
   /**
-   * Returns an array of all registered and discovered tool names.
+   * Returns an array of all registered and discovered tool names,
+   * including tools that are registered via factory but not yet loaded.
    */
   getAllToolNames(): string[] {
-    return Array.from(this.tools.keys());
+    const names = new Set([...this.tools.keys(), ...this.factories.keys()]);
+    return Array.from(names);
   }
 
   /**
    * Returns an array of all registered and discovered tool instances.
+   * @remarks Requires all tool factories to be resolved first. Call
+   * {@link warmAll} before invoking this method, otherwise factory-registered
+   * tools that have not yet been loaded will be absent from the result.
    */
   getAllTools(): AnyDeclarativeTool[] {
+    if (this.factories.size > 0) {
+      debugLogger.warn(
+        `getAllTools() called with ${this.factories.size} unloaded tool factories. ` +
+          `Call warmAll() first to avoid incomplete results.`,
+      );
+    }
     return Array.from(this.tools.values()).sort((a, b) =>
       a.displayName.localeCompare(b.displayName),
     );
@@ -547,6 +754,13 @@ export class ToolRegistry {
    * This method is idempotent and safe to call multiple times.
    */
   async stop(): Promise<void> {
+    // Wait for any in-flight factory promises to settle before disposing, so
+    // that tools which finish loading after stop() is called are still cleaned
+    // up rather than leaking their listeners and resources.
+    if (this.inflight.size > 0) {
+      await Promise.allSettled(this.inflight.values());
+    }
+
     for (const tool of this.tools.values()) {
       if ("dispose" in tool && typeof tool.dispose === "function") {
         try {

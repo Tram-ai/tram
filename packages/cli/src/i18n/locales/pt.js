@@ -73,6 +73,7 @@ export default {
     "Connecting to MCP servers... ({{connected}}/{{total}})",
   "Type your message or @path/to/file": "Type your message or @path/to/file",
   "? for shortcuts": "? for shortcuts",
+  'to toggle compact mode': 'alternar modo compacto',
   "Press 'i' for INSERT mode and 'Esc' for NORMAL mode.":
     "Press 'i' for INSERT mode and 'Esc' for NORMAL mode.",
   "Cancel operation / Clear input (double press)":
@@ -536,6 +537,8 @@ export default {
   'Extension "{{name}}" not found.': 'Extension "{{name}}" not found.',
   "No extensions to update.": "No extensions to update.",
   "Usage: /extensions install <source>": "Usage: /extensions install <source>",
+  'Auto (detect terminal theme)': 'Automático (detectar tema do terminal)',
+  Auto: 'Automático',
   'Installing extension from "{{source}}"...':
     'Installing extension from "{{source}}"...',
   'Extension "{{name}}" installed successfully.':
@@ -729,6 +732,138 @@ export default {
   "List all configured hooks": "List all configured hooks",
   "Enable a disabled hook": "Enable a disabled hook",
   "Disable an active hook": "Disable an active hook",
+  // Hooks - Dialog
+  Hooks: 'Hooks',
+  'Loading hooks...': 'Carregando hooks...',
+  'Error loading hooks:': 'Erro ao carregar hooks:',
+  'Press Escape to close': 'Pressione Escape para fechar',
+  'Press Escape, Ctrl+C, or Ctrl+D to cancel':
+    'Pressione Escape, Ctrl+C ou Ctrl+D para cancelar',
+  'Press Space, Enter, or Escape to dismiss':
+    'Pressione Espaço, Enter ou Escape para dispensar',
+  'No hook selected': 'Nenhum hook selecionado',
+  // Hooks - List Step
+  'No hook events found.': 'Nenhum evento de hook encontrado.',
+  '{{count}} hook configured': '{{count}} hook configurado',
+  '{{count}} hooks configured': '{{count}} hooks configurados',
+  'This menu is read-only. To add or modify hooks, edit settings.json directly or ask TRAM.':
+    'Este menu é somente leitura. Para adicionar ou modificar hooks, edite settings.json diretamente ou pergunte ao TRAM.',
+  'Enter to select · Esc to cancel':
+    'Enter para selecionar · Esc para cancelar',
+  // Hooks - Detail Step
+  'Exit codes:': 'Códigos de saída:',
+  'Configured hooks:': 'Hooks configurados:',
+  'No hooks configured for this event.':
+    'Nenhum hook configurado para este evento.',
+  'To add hooks, edit settings.json directly or ask Tram.':
+    'Para adicionar hooks, edite settings.json diretamente ou pergunte ao Tram.',
+  'Enter to select · Esc to go back': 'Enter para selecionar · Esc para voltar',
+  // Hooks - Config Detail Step
+  'Hook details': 'Detalhes do Hook',
+  'Event:': 'Evento:',
+  'Extension:': 'Extensão:',
+  'Desc:': 'Descrição:',
+  'No hook config selected': 'Nenhuma configuração de hook selecionada',
+  'To modify or remove this hook, edit settings.json directly or ask Tram to help.':
+    'Para modificar ou remover este hook, edite settings.json diretamente ou pergunte ao Tram.',
+  // Hooks - Disabled Step
+  'Hook Configuration - Disabled': 'Configuração de Hook - Desativado',
+  'All hooks are currently disabled. You have {{count}} that are not running.':
+    'Todos os hooks estão desativados. Você tem {{count}} que não estão em execução.',
+  '{{count}} configured hook': '{{count}} hook configurado',
+  '{{count}} configured hooks': '{{count}} hooks configurados',
+  'When hooks are disabled:': 'Quando os hooks estão desativados:',
+  'No hook commands will execute': 'Nenhum comando de hook será executado',
+  'StatusLine will not be displayed': 'StatusLine não será exibido',
+  'Tool operations will proceed without hook validation':
+    'As operações de ferramentas prosseguirão sem validação de hook',
+  'To re-enable hooks, remove "disableAllHooks" from settings.json or ask TRAM.':
+    'Para reativar os hooks, remova "disableAllHooks" do settings.json ou pergunte ao TRAM.',
+  // Hooks - Source
+  Project: 'Projeto',
+  User: 'Usuário',
+  System: 'Sistema',
+  Extension: 'Extensão',
+  'Local Settings': 'Configurações Locais',
+  'User Settings': 'Configurações do Usuário',
+  'System Settings': 'Configurações do Sistema',
+  Extensions: 'Extensões',
+  'Session (temporary)': 'Sessão (temporário)',
+  // Hooks - Status
+  '✓ Enabled': '✓ Ativado',
+  '✗ Disabled': '✗ Desativado',
+  // Hooks - Event Descriptions (short)
+  'Before tool execution': 'Antes da execução da ferramenta',
+  'After tool execution': 'Após a execução da ferramenta',
+  'After tool execution fails': 'Após a falha da execução da ferramenta',
+  'When notifications are sent': 'Quando notificações são enviadas',
+  'When the user submits a prompt': 'Quando o usuário envia um prompt',
+  'When a new session is started': 'Quando uma nova sessão é iniciada',
+  'Right before TRAM concludes its response':
+    'Logo antes do TRAM concluir sua resposta',
+  'When a subagent (Agent tool call) is started':
+    'Quando um subagente (chamada de ferramenta Agent) é iniciado',
+  'Right before a subagent concludes its response':
+    'Logo antes de um subagente concluir sua resposta',
+  'Before conversation compaction': 'Antes da compactação da conversa',
+  'When a session is ending': 'Quando uma sessão está terminando',
+  'When a permission dialog is displayed':
+    'Quando um diálogo de permissão é exibido',
+  // Hooks - Event Descriptions (detailed)
+  'Input to command is JSON of tool call arguments.':
+    'A entrada para o comando é JSON dos argumentos da chamada da ferramenta.',
+  'Input to command is JSON with fields "inputs" (tool call arguments) and "response" (tool call response).':
+    'A entrada para o comando é JSON com campos "inputs" (argumentos da chamada da ferramenta) e "response" (resposta da chamada da ferramenta).',
+  'Input to command is JSON with tool_name, tool_input, tool_use_id, error, error_type, is_interrupt, and is_timeout.':
+    'A entrada para o comando é JSON com tool_name, tool_input, tool_use_id, error, error_type, is_interrupt e is_timeout.',
+  'Input to command is JSON with notification message and type.':
+    'A entrada para o comando é JSON com mensagem e tipo de notificação.',
+  'Input to command is JSON with original user prompt text.':
+    'A entrada para o comando é JSON com o texto original do prompt do usuário.',
+  'Input to command is JSON with session start source.':
+    'A entrada para o comando é JSON com a fonte de início da sessão.',
+  'Input to command is JSON with session end reason.':
+    'A entrada para o comando é JSON com o motivo do fim da sessão.',
+  'Input to command is JSON with agent_id and agent_type.':
+    'A entrada para o comando é JSON com agent_id e agent_type.',
+  'Input to command is JSON with agent_id, agent_type, and agent_transcript_path.':
+    'A entrada para o comando é JSON com agent_id, agent_type e agent_transcript_path.',
+  'Input to command is JSON with compaction details.':
+    'A entrada para o comando é JSON com detalhes da compactação.',
+  'Input to command is JSON with tool_name, tool_input, and tool_use_id. Output JSON with hookSpecificOutput containing decision to allow or deny.':
+    'A entrada para o comando é JSON com tool_name, tool_input e tool_use_id. Saída é JSON com hookSpecificOutput contendo decisão de permitir ou negar.',
+  // Hooks - Exit Code Descriptions
+  'stdout/stderr not shown': 'stdout/stderr não exibido',
+  'show stderr to model and continue conversation':
+    'mostrar stderr ao modelo e continuar conversa',
+  'show stderr to user only': 'mostrar stderr apenas ao usuário',
+  'stdout shown in transcript mode (ctrl+o)':
+    'stdout exibido no modo transcrição (ctrl+o)',
+  'show stderr to model immediately': 'mostrar stderr ao modelo imediatamente',
+  'show stderr to user only but continue with tool call':
+    'mostrar stderr apenas ao usuário mas continuar com chamada de ferramenta',
+  'block processing, erase original prompt, and show stderr to user only':
+    'bloquear processamento, apagar prompt original e mostrar stderr apenas ao usuário',
+  'stdout shown to Tram': 'stdout mostrado ao Tram',
+  'show stderr to user only (blocking errors ignored)':
+    'mostrar stderr apenas ao usuário (erros de bloqueio ignorados)',
+  'command completes successfully': 'comando concluído com sucesso',
+  'stdout shown to subagent': 'stdout mostrado ao subagente',
+  'show stderr to subagent and continue having it run':
+    'mostrar stderr ao subagente e continuar executando',
+  'stdout appended as custom compact instructions':
+    'stdout anexado como instruções de compactação personalizadas',
+  'block compaction': 'bloquear compactação',
+  'show stderr to user only but continue with compaction':
+    'mostrar stderr apenas ao usuário mas continuar com compactação',
+  'use hook decision if provided': 'usar decisão do hook se fornecida',
+  // Hooks - Messages
+  'Config not loaded.': 'Configuração não carregada.',
+  'Hooks are not enabled. Enable hooks in settings to use this feature.':
+    'Hooks não estão ativados. Ative hooks nas configurações para usar este recurso.',
+  'No hooks configured. Add hooks in your settings.json file.':
+    'Nenhum hook configurado. Adicione hooks no seu arquivo settings.json.',
+  'Configured Hooks ({{count}} total)': 'Hooks Configurados ({{count}} total)',
 
   // ============================================================================
   // Commands - Session Export
@@ -881,6 +1016,47 @@ export default {
     "Usage: /memory add [--global|--project] <text to remember>",
   'Attempting to save to memory {{scope}}: "{{fact}}"':
     'Attempting to save to memory {{scope}}: "{{fact}}"',
+    'Tentando salvar na memória {{scope}}: "{{fact}}"',
+  'Open auto-memory folder': 'Abrir pasta de memória automática',
+  'Auto-memory: {{status}}': 'Memória automática: {{status}}',
+  'Auto-dream: {{status}} · {{lastDream}} · /dream to run':
+    'Consolidação automática: {{status}} · {{lastDream}} · /dream para executar',
+  never: 'nunca',
+  on: 'ativado',
+  off: 'desativado',
+  '❆ dreaming': '❆ consolidando',
+  'Remove matching entries from managed auto-memory.':
+    'Remover entradas correspondentes da memória automática gerenciada.',
+  'Usage: /forget <memory text to remove>':
+    'Uso: /forget <texto de memória a remover>',
+  'No managed auto-memory entries matched: {{query}}':
+    'Nenhuma entrada de memória automática gerenciada correspondeu: {{query}}',
+  'Show managed auto-memory status.':
+    'Mostrar status da memória automática gerenciada.',
+  'Run managed auto-memory extraction for the current session.':
+    'Executar extração de memória automática gerenciada para a sessão atual.',
+  'Managed auto-memory root: {{root}}':
+    'Raiz da memória automática gerenciada: {{root}}',
+  'Managed auto-memory topics:': 'Tópicos de memória automática gerenciada:',
+  'No extraction cursor found yet.':
+    'Nenhum cursor de extração encontrado ainda.',
+  'Cursor: session={{sessionId}}, offset={{offset}}, updated={{updatedAt}}':
+    'Cursor: sessão={{sessionId}}, offset={{offset}}, atualizado={{updatedAt}}',
+  'No chat client available to extract memory.':
+    'Nenhum cliente de chat disponível para extrair memória.',
+  'Managed auto-memory extraction is already running.':
+    'A extração de memória automática gerenciada já está em execução.',
+  'Managed auto-memory extraction found no new durable memories.':
+    'A extração de memória automática gerenciada não encontrou novas memórias duráveis.',
+  'Consolidate managed auto-memory topic files.':
+    'Consolidar arquivos de tópicos de memória automática gerenciada.',
+  'Managed auto-memory dream found nothing to improve.':
+    'A consolidação de memória automática não encontrou nada para melhorar.',
+  'Deduplicated entries: {{count}}': 'Entradas desduplicadas: {{count}}',
+  'Save a durable memory using the save_memory tool.':
+    'Salvar uma memória durável usando a ferramenta save_memory.',
+  'Usage: /remember [--global|--project] <text to remember>':
+    'Uso: /remember [--global|--project] <texto a lembrar>',
 
   // ============================================================================
   // Commands - MCP
@@ -1092,6 +1268,12 @@ export default {
   "Authentication type not available.": "Authentication type not available.",
   "No models available for the current authentication type ({{authType}}).":
     "No models available for the current authentication type ({{authType}}).",
+  'Switch the model for this session (--fast for suggestion model, [model-id] to switch immediately).':
+    'Trocar o modelo para esta sessão (--fast para modelo de sugestões)',
+  'Set a lighter model for prompt suggestions and speculative execution':
+    'Definir modelo mais leve para sugestões de prompt e execução especulativa',
+  // Needs translation
+  ' (not in model registry)': ' (not in model registry)',
 
   // ============================================================================
   // Commands - Clear
@@ -1293,6 +1475,33 @@ export default {
   "Failed to validate credentials": "Failed to validate credentials",
   "Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel":
     "Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel",
+  'Tram OAuth': 'Tram OAuth',
+  'Discontinued — switch to Coding Plan or API Key':
+    'Descontinuado — mude para Coding Plan ou API Key',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Run /auth to switch provider.':
+    'O nível gratuito do Tram OAuth foi descontinuado em 2026-04-15. Execute /auth para trocar de provedor.',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Please select Coding Plan or API Key instead.':
+    'O nível gratuito do Tram OAuth foi descontinuado em 2026-04-15. Selecione Coding Plan ou API Key.',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Please select a model from another provider or run /auth to switch.':
+    'O nível gratuito do Tram OAuth foi descontinuado em 2026-04-15. Por favor, selecione um modelo de outro provedor ou execute /auth para trocar.',
+  '\n⚠ Tram OAuth free tier was discontinued on 2026-04-15. Please select another option.\n':
+    '\n⚠ O nível gratuito do Tram OAuth foi descontinuado em 2026-04-15. Selecione outra opção.\n',
+  'Browser-based authentication with third-party providers (e.g. OpenRouter, ModelScope)':
+    'Autenticação baseada em navegador com provedores terceiros (por exemplo, OpenRouter, ModelScope)',
+  'Tram OAuth authentication timed out. Please try again.':
+    'A autenticação Tram OAuth expirou. Tente novamente.',
+  'Tram OAuth authentication cancelled.': 'Autenticação Tram OAuth cancelada.',
+  'Tram OAuth Authentication': 'Autenticação Tram OAuth',
+  'Tram OAuth Authentication Timeout':
+    'Tempo Limite de Autenticação Tram OAuth',
+  'Waiting for Tram OAuth authentication...':
+    'Aguardando autenticação Tram OAuth...',
+  'Note: Your existing API key in settings.json will not be cleared when using Tram OAuth. You can switch back to OpenAI authentication later if needed.':
+    'Nota: Sua chave de API existente no settings.json não será limpa ao usar o Tram OAuth. Você pode voltar para a autenticação do OpenAI mais tarde, se necessário.',
+  'Note: Your existing API key will not be cleared when using Tram OAuth.':
+    'Nota: Sua chave de API existente não será limpa ao usar o Tram OAuth.',
+  'Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel':
+    'Pressione Enter para continuar, Tab/↑↓ para navegar, Esc para cancelar',
 
   // ============================================================================
   // Dialogs - Model
@@ -1413,6 +1622,20 @@ export default {
     "You can switch permission mode quickly with Tab or /approval-mode.",
   "Try /insight to generate personalized insights from your chat history.":
     "Try /insight to generate personalized insights from your chat history.",
+  'You can resume a previous conversation by running Tram --continue or Tram --resume.':
+    'Você pode retomar uma conversa anterior executando Tram --continue ou Tram --resume.',
+  'Press Ctrl+O to toggle compact mode — hide tool output and thinking for a cleaner view.':
+    'Pressione Ctrl+O para alternar o modo compacto — ocultar saída de ferramentas e raciocínio.',
+  'Add a Tram.md file to give TRAM persistent project context.':
+    'Adicione um arquivo Tram.md para dar ao TRAM um contexto persistente do projeto.',
+  'Use /btw to ask a quick side question without disrupting the conversation.':
+    'Use /btw para fazer uma pergunta lateral rápida sem interromper a conversa.',
+  'Context is almost full! Run /compress now or start /new to continue.':
+    'O contexto está quase cheio! Execute /compress agora ou inicie /new para continuar.',
+  'Context is getting full. Use /compress to free up space.':
+    'O contexto está ficando cheio. Use /compress para liberar espaço.',
+  'Long conversation? /compress summarizes history to free context.':
+    'Conversa longa? /compress resume o histórico para liberar contexto.',
 
   // ============================================================================
   // Exit Screen / Stats
@@ -1483,6 +1706,7 @@ export default {
     "The TOML format is deprecated. Would you like to migrate them to Markdown format?",
   "(Backups will be created and original files will be preserved)":
     "(Backups will be created and original files will be preserved)",
+  'Current tasks': 'Tarefas atuais',
 
   // ============================================================================
   // Loading Phrases
@@ -1811,6 +2035,40 @@ export default {
     "Unknown subcommand: {{subcommand}}\n\n{{helpText}}",
   "[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.":
     "[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.",
+  "Context Usage": "Uso do Contexto",
+  "% used": "% usado",
+  "% context used": "% contexto usado",
+  "Context exceeds limit! Use /compress or /clear to reduce.":
+    "Contexto excede o limite! Use /compress ou /clear para reduzir.",
+  "Use /compress or /clear": "Use /compress ou /clear",
+  "No API response yet. Send a message to see actual usage.":
+    "Ainda não há resposta da API. Envie uma mensagem para ver o uso real.",
+  "Estimated pre-conversation overhead": "Sobrecarga estimada pré-conversa",
+  "Context window": "Janela de Contexto",
+  tokens: "tokens",
+  Used: "Usado",
+  Free: "Livre",
+  "Autocompact buffer": "Buffer de autocompactação",
+  "Usage by category": "Uso por categoria",
+  "System prompt": "Prompt do sistema",
+  "Built-in tools": "Ferramentas integradas",
+  "MCP tools": "Ferramentas MCP",
+  "Memory files": "Arquivos de memória",
+  Skills: "Habilidades",
+  Messages: "Mensagens",
+  "Show context window usage breakdown.":
+    "Exibe a divisão de uso da janela de contexto.",
+  "Run /context detail for per-item breakdown.":
+    "Execute /context detail para detalhamento por item.",
+  active: "ativo",
+  "body loaded": "conteúdo carregado",
+  memory: "memória",
+  "{{region}} configuration updated successfully.":
+    "Configuração do {{region}} atualizada com sucesso.",
+  "Authenticated successfully with {{region}}. API key and model configs saved to settings.json.":
+    "Autenticado com sucesso com {{region}}. Chave de API e configurações de modelo salvas em settings.json.",
+  "Tip: Use /model to switch between available Coding Plan models.":
+    "Dica: Use /model para alternar entre os modelos disponíveis do Coding Plan.",
 
   // ============================================================================
   // Ask User Question Tool
@@ -1845,6 +2103,97 @@ export default {
   // ============================================================================
   "% used": "% used",
   "% context used": "% context used",
+  // Commands - Auth
+  // ============================================================================
+  'Configure Tram authentication information with Tram-OAuth or Alibaba Cloud Coding Plan':
+    'Configurar autenticação Tram com Tram-OAuth ou Alibaba Cloud Coding Plan',
+  'Authenticate using Tram OAuth': 'Autenticar usando Tram OAuth',
+  'Authenticate using Alibaba Cloud Coding Plan':
+    'Autenticar usando Alibaba Cloud Coding Plan',
+  'Region for Coding Plan (china/global)':
+    'Região para Coding Plan (china/global)',
+  'API key for Coding Plan': 'Chave de API para Coding Plan',
+  'Show current authentication status': 'Mostrar status atual de autenticação',
+  'Authentication completed successfully.':
+    'Autenticação concluída com sucesso.',
+  'Starting Tram OAuth authentication...':
+    'Iniciando autenticação Tram OAuth...',
+  'Successfully authenticated with Tram OAuth.':
+    'Autenticado com sucesso via Tram OAuth.',
+  'Failed to authenticate with Tram OAuth: {{error}}':
+    'Falha ao autenticar com Tram OAuth: {{error}}',
+  'Processing Alibaba Cloud Coding Plan authentication...':
+    'Processando autenticação Alibaba Cloud Coding Plan...',
+  'Successfully authenticated with Alibaba Cloud Coding Plan.':
+    'Autenticado com sucesso via Alibaba Cloud Coding Plan.',
+  'Failed to authenticate with Coding Plan: {{error}}':
+    'Falha ao autenticar com Coding Plan: {{error}}',
+  '中国 (China)': '中国 (China)',
+  '阿里云百炼 (aliyun.com)': '阿里云百炼 (aliyun.com)',
+  Global: 'Global',
+  'Alibaba Cloud (alibabacloud.com)': 'Alibaba Cloud (alibabacloud.com)',
+  'Select region for Coding Plan:': 'Selecione a região para Coding Plan:',
+  'Enter your Coding Plan API key: ':
+    'Insira sua chave de API do Coding Plan: ',
+  'Select authentication method:': 'Selecione o método de autenticação:',
+  '\n=== Authentication Status ===\n': '\n=== Status de Autenticação ===\n',
+  '⚠️  No authentication method configured.\n':
+    '⚠️  Nenhum método de autenticação configurado.\n',
+  'Run one of the following commands to get started:\n':
+    'Execute um dos seguintes comandos para começar:\n',
+  '  Tram auth Tram-oauth     - Authenticate with Tram OAuth (discontinued)':
+    '  Tram auth Tram-oauth     - Autenticar com Tram OAuth (descontinuado)',
+  '  Tram auth coding-plan      - Authenticate with Alibaba Cloud Coding Plan\n':
+    '  Tram auth coding-plan      - Autenticar com Alibaba Cloud Coding Plan\n',
+  'Or simply run:': 'Ou simplesmente execute:',
+  '  Tram auth                - Interactive authentication setup\n':
+    '  Tram auth                - Configuração interativa de autenticação\n',
+  '✓ Authentication Method: Tram OAuth': '✓ Método de autenticação: Tram OAuth',
+  '  Type: Free tier (discontinued 2026-04-15)':
+    '  Tipo: Nível gratuito (descontinuado 2026-04-15)',
+  '  Limit: No longer available': '  Limite: Não mais disponível',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan, OpenRouter, Fireworks AI, or another provider.':
+    'O nível gratuito do Tram OAuth foi descontinuado em 2026-04-15. Execute /auth para mudar para Coding Plan, OpenRouter, Fireworks AI ou outro provedor.',
+  '  Models: Tram latest models\n': '  Modelos: Modelos Tram mais recentes\n',
+  '✓ Authentication Method: Alibaba Cloud Coding Plan':
+    '✓ Método de autenticação: Alibaba Cloud Coding Plan',
+  '中国 (China) - 阿里云百炼': '中国 (China) - 阿里云百炼',
+  'Global - Alibaba Cloud': 'Global - Alibaba Cloud',
+  '  Region: {{region}}': '  Região: {{region}}',
+  '  Current Model: {{model}}': '  Modelo atual: {{model}}',
+  '  Config Version: {{version}}': '  Versão da configuração: {{version}}',
+  '  Status: API key configured\n': '  Status: Chave de API configurada\n',
+  '⚠️  Authentication Method: Alibaba Cloud Coding Plan (Incomplete)':
+    '⚠️  Método de autenticação: Alibaba Cloud Coding Plan (Incompleto)',
+  '  Issue: API key not found in environment or settings\n':
+    '  Problema: Chave de API não encontrada no ambiente ou configurações\n',
+  '  Run `Tram auth coding-plan` to re-configure.\n':
+    '  Execute `Tram auth coding-plan` para reconfigurar.\n',
+  '✓ Authentication Method: {{type}}': '✓ Método de autenticação: {{type}}',
+  '  Status: Configured\n': '  Status: Configurado\n',
+  'Failed to check authentication status: {{error}}':
+    'Falha ao verificar status de autenticação: {{error}}',
+  'Select an option:': 'Selecione uma opção:',
+  'Raw mode not available. Please run in an interactive terminal.':
+    'Modo raw não disponível. Execute em um terminal interativo.',
+  '(Use ↑ ↓ arrows to navigate, Enter to select, Ctrl+C to exit)\n':
+    '(Use ↑ ↓ para navegar, Enter para selecionar, Ctrl+C para sair)\n',
+  compact: 'compacto',
+  'compact mode: on (Ctrl+O off)': 'modo compacto: ligado (Ctrl+O desligar)',
+  'Hide tool output and thinking for a cleaner view (toggle with Ctrl+O).':
+    'Ocultar saída da ferramenta e raciocínio para uma visualização mais limpa (alternar com Ctrl+O).',
+  'Press Ctrl+O to show full tool output':
+    'Pressione Ctrl+O para exibir a saída completa da ferramenta',
+  'Switch to plan mode or exit plan mode':
+    'Switch to plan mode or exit plan mode',
+  'Exited plan mode. Previous approval mode restored.':
+    'Exited plan mode. Previous approval mode restored.',
+  'Enabled plan mode. The agent will analyze and plan without executing tools.':
+    'Enabled plan mode. The agent will analyze and plan without executing tools.',
+  'Already in plan mode. Use "/plan exit" to exit plan mode.':
+    'Already in plan mode. Use "/plan exit" to exit plan mode.',
+  'Not in plan mode. Use "/plan" to enter plan mode first.':
+    'Not in plan mode. Use "/plan" to enter plan mode first.',
 
   // ============================================================================
   // Context Usage Display

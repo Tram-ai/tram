@@ -14,6 +14,7 @@ export const settingsCommand: SlashCommand = {
     return t("View and edit TRAM settings");
   },
   kind: CommandKind.BUILT_IN,
+  supportedModes: ['interactive'] as const,
   action: (_context, _args): OpenDialogActionReturn => ({
     type: "dialog",
     dialog: "settings",

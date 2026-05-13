@@ -51,3 +51,8 @@ export const EVENT_STARTUP_PERFORMANCE = "tram.startup.performance";
 export const EVENT_MEMORY_USAGE = "tram.memory.usage";
 export const EVENT_PERFORMANCE_BASELINE = "tram.performance.baseline";
 export const EVENT_PERFORMANCE_REGRESSION = "tram.performance.regression";
+
+// Managed Auto-Memory Events
+export const EVENT_MEMORY_EXTRACT = "tram.memory.extract";
+export const EVENT_MEMORY_DREAM = "tram.memory.dream";
+export const EVENT_MEMORY_RECALL = "tram.memory.recall";

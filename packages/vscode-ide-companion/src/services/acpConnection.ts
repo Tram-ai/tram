@@ -32,6 +32,7 @@ import type {
 import type {
   AuthenticateUpdateNotification,
   AskUserQuestionRequest,
+  SlashCommandNotification,
 } from "../types/acpTypes.js";
 import type { ApprovalModeValue } from "../types/approvalModeValueTypes.js";
 import type { ChildProcess, SpawnOptions } from "child_process";
@@ -64,6 +65,8 @@ export class AcpConnection {
       optionId: this.resolvePermissionOptionId(data) || "",
     });
   onAuthenticateUpdate: (data: AuthenticateUpdateNotification) => void =
+    () => {};
+  onSlashCommandNotification: (data: SlashCommandNotification) => void =
     () => {};
   onEndTurn: (reason?: string) => void = () => {};
   /** Invoked when the child process exits (expected or unexpected). */
@@ -344,6 +347,10 @@ export class AcpConnection {
             this.onAuthenticateUpdate(
               params as unknown as AuthenticateUpdateNotification,
             );
+          } else if (method === '_qwencode/slash_command') {
+            this.onSlashCommandNotification(
+              params as unknown as SlashCommandNotification,
+            );
           } else {
             console.warn(`[ACP] Unhandled extension notification: ${method}`);
           }
@@ -476,6 +483,34 @@ export class AcpConnection {
     return response;
   }
 
+  async rewindSession(
+    targetTurnIndex: number,
+  ): Promise<{ historyBeforeRewind?: unknown[] }> {
+    const conn = this.ensureConnection();
+    if (!this.sessionId) {
+      throw new Error('No active ACP session');
+    }
+
+    return (await conn.extMethod('rewindSession', {
+      sessionId: this.sessionId,
+      targetTurnIndex,
+      cwd: this.workingDir,
+    })) as { historyBeforeRewind?: unknown[] };
+  }
+
+  async restoreSessionHistory(history: unknown[]): Promise<void> {
+    const conn = this.ensureConnection();
+    if (!this.sessionId) {
+      throw new Error('No active ACP session');
+    }
+
+    await conn.extMethod('restoreSessionHistory', {
+      sessionId: this.sessionId,
+      history,
+      cwd: this.workingDir,
+    });
+  }
+
   async loadSession(
     sessionId: string,
     cwdOverride?: string,
@@ -516,7 +551,12 @@ export class AcpConnection {
         params["cursor"] = String(options.cursor);
       }
       if (options?.size !== undefined) {
-        params["size"] = options.size;
+        // ACP ListSessionsRequest schema has no `size` field; the SDK's zod
+        // validator strips unknown top-level keys, so the agent would never
+        // see it. Carry it via `_meta` instead, matching the pattern used for
+        // other TRAM ACP extensions.
+        const existingMeta = (params["_meta"] ?? {}) as Record<string, unknown>;
+        params["_meta"] = { ...existingMeta, size: options.size };
       }
       const response = await conn.unstable_listSessions(
         params as Parameters<typeof conn.unstable_listSessions>[0],
@@ -528,6 +568,38 @@ export class AcpConnection {
       return response;
     } catch (error) {
       console.error("[ACP] Failed to get session list:", error);
+      throw error;
+    }
+  }
+
+  async deleteSession(sessionId: string): Promise<{ success: boolean }> {
+    const conn = this.ensureConnection();
+    try {
+      const result = await conn.extMethod('deleteSession', {
+        sessionId,
+        cwd: this.workingDir,
+      });
+      return result as { success: boolean };
+    } catch (error) {
+      console.error('[ACP] Failed to delete session:', error);
+      throw error;
+    }
+  }
+
+  async renameSession(
+    sessionId: string,
+    title: string,
+  ): Promise<{ success: boolean }> {
+    const conn = this.ensureConnection();
+    try {
+      const result = await conn.extMethod('renameSession', {
+        sessionId,
+        title,
+        cwd: this.workingDir,
+      });
+      return result as { success: boolean };
+    } catch (error) {
+      console.error('[ACP] Failed to rename session:', error);
       throw error;
     }
   }

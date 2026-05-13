@@ -7,7 +7,6 @@
 import crypto from "crypto";
 import path from "node:path";
 import { promises as fs } from "node:fs";
-import * as os from "os";
 
 import open from "open";
 import { EventEmitter } from "events";
@@ -15,11 +14,13 @@ import type { Config } from "../config/config.js";
 import { randomUUID } from "node:crypto";
 import { formatFetchErrorForUser } from "../utils/fetch.js";
 import { createDebugLogger } from "../utils/debugLogger.js";
+import type { ChildProcess } from "node:child_process";
 import {
   SharedTokenManager,
   TokenManagerError,
   TokenError,
 } from "./sharedTokenManager.js";
+import { Storage } from "../config/storage.js";
 
 const debugLogger = createDebugLogger("TRAM_OAUTH");
 
@@ -36,7 +37,6 @@ const TRAM_OAUTH_SCOPE = "openid profile email model.completion";
 const TRAM_OAUTH_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code";
 
 // File System Configuration
-const TRAM_DIR = ".tram";
 const TRAM_CREDENTIAL_FILENAME = "oauth_creds.json";
 
 /**
@@ -717,26 +717,37 @@ async function authWithTramDeviceFlow(
 
   // Helper to handle browser launch with error handling
   const launchBrowser = async (url: string): Promise<void> => {
+    let childProcess: ChildProcess | undefined;
+
     try {
-      const childProcess = await open(url);
+      // Call open and get the process
+      childProcess = await open(url);
 
       // IMPORTANT: Attach an error handler to the returned child process.
       // Without this, if `open` fails to spawn a process (e.g., `xdg-open` is not found
       // in a minimal Docker container), it will emit an unhandled 'error' event,
       // causing the entire Node.js process to crash.
-      if (childProcess) {
-        childProcess.on("error", (err) => {
-          debugLogger.debug("Browser launch failed:", err.message || err);
+      if (childProcess && typeof childProcess.on === "function") {
+        childProcess.on("error", (err: Error) => {
+          debugLogger.warn(`Browser launch process error: ${err.message}`);
+          debugLogger.info(`Please open this URL manually: ${url}`);
         });
+
+        // Optional: Also listen for 'close' or 'exit' if needed for cleanup,
+        // but 'error' is the main crasher.
+      } else {
+        // Fallback: If open() didn't return a valid process object, log a warning
+        debugLogger.debug(
+          'open() did not return a valid child process object.',
+        );
       }
     } catch (err) {
-      debugLogger.debug(
-        "Failed to open browser:",
-        err instanceof Error ? err.message : "Unknown error",
-      );
+      // Handle synchronous errors or promise rejections from open()
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      debugLogger.warn(`Failed to open browser automatically: ${errorMessage}`);
+      debugLogger.info(`Please open this URL manually: ${url}`);
     }
   };
-
   try {
     // Generate PKCE code verifier and challenge
     const { code_verifier, code_challenge } = generatePKCEPair();
@@ -1025,7 +1036,7 @@ export async function clearTramCredentials(): Promise<void> {
 }
 
 function getTramCachedCredentialPath(): string {
-  return path.join(os.homedir(), TRAM_DIR, TRAM_CREDENTIAL_FILENAME);
+  return path.join(Storage.getGlobalTramDir(), TRAM_CREDENTIAL_FILENAME);
 }
 
 export const clearCachedCredentialFile = clearTramCredentials;

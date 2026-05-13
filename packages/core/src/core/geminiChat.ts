@@ -17,13 +17,17 @@ import type {
   GenerateContentResponseUsageMetadata,
 } from "@google/genai";
 import { createUserContent, FinishReason } from "@google/genai";
-import { retryWithBackoff } from "../utils/retry.js";
-import { getErrorStatus } from "../utils/errors.js";
+import { retryWithBackoff, isUnattendedMode } from "../utils/retry.js";
+import { getErrorStatus, isAbortError } from "../utils/errors.js";
 import { createDebugLogger } from "../utils/debugLogger.js";
 import { parseAndFormatApiError } from "../utils/errorParsing.js";
 import { isRateLimitError, type RetryInfo } from "../utils/rateLimit.js";
 import type { Config, ModelRequestTarget } from "../config/config.js";
-import { ESCALATED_MAX_TOKENS } from "./tokenLimits.js";
+import {
+  DEFAULT_TOKEN_LIMIT,
+  ESCALATED_MAX_TOKENS,
+  tokenLimit,
+} from "./tokenLimits.js";
 import { hasCycleInSchema } from "../tools/tools.js";
 import type { StructuredError } from "./turn.js";
 import {
@@ -32,12 +36,26 @@ import {
 } from "../telemetry/loggers.js";
 import { type ChatRecordingService } from "../services/chatRecordingService.js";
 import {
+  ChatCompressionService,
+  type CompactTrigger,
+} from '../services/chatCompressionService.js';
+import {
   ContentRetryEvent,
   ContentRetryFailureEvent,
 } from "../telemetry/types.js";
 import type { UiTelemetryService } from "../telemetry/uiTelemetry.js";
+import { type ChatCompressionInfo, CompressionStatus } from "./turn.js";
+import { getContextLengthExceededInfo } from "../utils/contextLengthError.js";
 
 const debugLogger = createDebugLogger("TRAM_CODE_CHAT");
+
+function isCompressionFailureStatus(status: CompressionStatus): boolean {
+  return (
+    status === CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT ||
+    status === CompressionStatus.COMPRESSION_FAILED_EMPTY_SUMMARY ||
+    status === CompressionStatus.COMPRESSION_FAILED_TOKEN_COUNT_ERROR
+  );
+}
 
 export enum StreamEventType {
   /** A regular content chunk from the API. */
@@ -45,11 +63,24 @@ export enum StreamEventType {
   /** A signal that a retry is about to happen. The UI should discard any partial
    * content from the attempt that just failed. */
   RETRY = "retry",
+  /** Emitted once at the start of the stream when an automatic compression
+   * pass succeeded. Carries the compression result so callers (the main
+   * agent UI, subagent loop) can surface it without each call site running
+   * its own compaction step. */
+  COMPRESSED = "compressed",
 }
 
 export type StreamEvent =
   | { type: StreamEventType.CHUNK; value: GenerateContentResponse }
-  | { type: StreamEventType.RETRY; retryInfo?: RetryInfo };
+  | {
+      type: StreamEventType.RETRY;
+      retryInfo?: RetryInfo;
+      /** When true, the retry is a continuation (recovery) rather than a
+       *  fresh restart (escalation). The UI should keep the accumulated text
+       *  buffer so the continuation appends to it. */
+      isContinuation?: boolean;
+    }
+  | { type: StreamEventType.COMPRESSED; info: ChatCompressionInfo };
 
 /**
  * Options for retrying due to invalid content from the model.
@@ -59,6 +90,11 @@ interface ContentRetryOptions {
   maxAttempts: number;
   /** The base delay in milliseconds for linear backoff. */
   initialDelayMs: number;
+}
+
+interface TryCompressOptions {
+  originalTokenCountOverride?: number;
+  trigger?: CompactTrigger;
 }
 
 const INVALID_CONTENT_RETRY_OPTIONS: ContentRetryOptions = {
@@ -77,13 +113,32 @@ const INVALID_STREAM_RETRY_CONFIG = {
 };
 
 /**
+ * Max recovery attempts when the escalated response is also truncated.
+ * Each attempt keeps the partial response in history and injects a recovery
+ * message so the model can continue from where it left off.
+ */
+const MAX_OUTPUT_RECOVERY_ATTEMPTS = 3;
+
+/**
+ * Recovery message injected as a user turn when the model's output is
+ * truncated even after token escalation. Instructs the model to resume
+ * without repeating itself and to break remaining work into smaller steps.
+ */
+const OUTPUT_RECOVERY_MESSAGE =
+  'Output token limit hit. Resume directly — no apology, no recap of what ' +
+  'you were doing. Pick up mid-thought if that is where the cut happened. ' +
+  'Break remaining work into smaller pieces.';
+
+/**
  * Options for retrying on rate-limit throttling errors returned as stream content.
- * Fixed 60s delay matches the DashScope per-minute quota window.
+ * Starts at 60s to match DashScope's per-minute quota window, then backs off
+ * across repeated stream-side throttling errors.
  * 10 retries aligns with Claude Code's retry behavior.
  */
 const RATE_LIMIT_RETRY_OPTIONS = {
   maxRetries: 10,
-  delayMs: 60000,
+  initialDelayMs: 60000,
+  maxDelayMs: 5 * 60 * 1000,
 };
 
 /**
@@ -276,6 +331,22 @@ export class GeminiChat {
   private sendPromise: Promise<void> = Promise.resolve();
 
   /**
+   * Per-chat last-prompt-token-count, populated from `usageMetadata` on each
+   * model response. Used by the compaction threshold check so that subagents
+   * (which intentionally don't write to the global telemetry singleton) can
+   * still make compaction decisions based on their *own* context size.
+   */
+  private lastPromptTokenCount = 0;
+
+  /**
+   * Per-chat sticky flag. After an unforced compression attempt fails (empty
+   * summary or inflated token count), automatic compaction is suppressed
+   * for the remainder of this chat to avoid burning compression API calls
+   * in a loop. Manual `/compress` still works (it passes `force=true`).
+   */
+  private hasFailedCompressionAttempt = false;
+
+  /**
    * Creates a new GeminiChat instance.
    *
    * @param config - The configuration object.
@@ -295,6 +366,92 @@ export class GeminiChat {
     private readonly telemetryService?: UiTelemetryService,
   ) {
     validateHistory(history);
+  }
+
+  /**
+   * Most recent prompt-token count reported by the model for *this* chat,
+   * mirroring the value in {@link UiTelemetryService} for the main session.
+   * Subagent chats have no telemetry service wired but still need a per-chat
+   * count for compaction decisions, so this is always populated regardless
+   * of whether the global telemetry is updated.
+   */
+  getLastPromptTokenCount(): number {
+    return this.lastPromptTokenCount;
+  }
+
+  /**
+   * Seed the last-prompt-token-count for chats created with inherited
+   * history (forks, subagents, speculation). Without this, the auto-compress
+   * threshold check sees `0` and refuses to compress — so the first API call
+   * can 400 from oversized history. Callers pass the parent chat's
+   * `getLastPromptTokenCount()` here.
+   */
+  setLastPromptTokenCount(count: number): void {
+    this.lastPromptTokenCount = count;
+  }
+
+  /**
+   * Attempt to compress this chat's history.
+   *
+   * Returns the compression info regardless of outcome. On a successful
+   * compaction (`COMPRESSED`), this method has already mutated the chat's
+   * history, recorded the event to `chatRecordingService` (if wired), and
+   * updated both the per-chat token count and (when wired) the global
+   * telemetry singleton.
+   */
+  async tryCompress(
+    promptId: string,
+    model: string,
+    force = false,
+    signal?: AbortSignal,
+    options?: TryCompressOptions,
+  ): Promise<ChatCompressionInfo> {
+    const service = new ChatCompressionService();
+    const { newHistory, info } = await service.compress(this, {
+      promptId,
+      force,
+      model,
+      config: this.config,
+      hasFailedCompressionAttempt: this.hasFailedCompressionAttempt,
+      originalTokenCount:
+        options?.originalTokenCountOverride ?? this.lastPromptTokenCount,
+      trigger: options?.trigger,
+      signal,
+    });
+
+    if (info.compressionStatus === CompressionStatus.COMPRESSED && newHistory) {
+      this.chatRecordingService?.recordChatCompression({
+        info,
+        compressedHistory: newHistory,
+      });
+      // Auto-compaction replaces history in place — no env-context refresh
+      // here. Manual /compress goes through GeminiClient.tryCompressChat,
+      // which calls startChat() to re-prepend a fresh env snapshot. See
+      // GeminiClient.sendMessageStream for the rationale behind the split.
+      this.setHistory(newHistory);
+      // Compaction summarises away prior full-Read tool results, but the
+      // FileReadCache still treats those reads as "in this conversation".
+      // A follow-up Read could then return the file_unchanged placeholder
+      // pointing at content the model can no longer retrieve from history.
+      debugLogger.debug('[FILE_READ_CACHE] clear after auto tryCompress');
+      this.config.getFileReadCache().clear();
+      this.lastPromptTokenCount = info.newTokenCount;
+      // Mirror to the global singleton only when wired (main session).
+      // Subagents pass `telemetryService=undefined` to keep their context
+      // usage out of the main agent's UI counters.
+      this.telemetryService?.setLastPromptTokenCount(info.newTokenCount);
+      // Re-enable auto-compaction so a forced /compress recovers a chat
+      // that an earlier auto-attempt latched off.
+      this.hasFailedCompressionAttempt = false;
+    } else if (isCompressionFailureStatus(info.compressionStatus)) {
+      // Track failed attempts (only mark as failed if not forced) so we
+      // stop spending compression-API calls on a chat that can't shrink.
+      if (!force) {
+        this.hasFailedCompressionAttempt = true;
+      }
+    }
+
+    return info;
   }
 
   setSystemInstruction(sysInstr: string) {
@@ -336,20 +493,58 @@ export class GeminiChat {
     });
     this.sendPromise = streamDonePromise;
 
-    const userContent = createUserContent(params.message);
+    let compressionInfo: ChatCompressionInfo;
+    let requestContents: Content[];
+    let userContentAdded = false;
+    try {
+      // The send-lock above is held but the generator's `finally` (which
+      // resolves it) has not run yet. Any setup error before returning the
+      // generator must release the lock or subsequent sends will block forever
+      // at `await this.sendPromise`.
+      compressionInfo = await this.tryCompress(
+        prompt_id,
+        model,
+        false,
+        params.config?.abortSignal,
+      );
 
-    // Add user content to history ONCE before any attempts.
-    this.history.push(userContent);
-    const requestContents = this.getHistory(true);
+      const userContent = createUserContent(params.message);
+
+      // Add user content to history ONCE before any attempts.
+      this.history.push(userContent);
+      userContentAdded = true;
+      requestContents = this.getHistory(true);
+    } catch (error) {
+      if (userContentAdded) {
+        this.history.pop();
+      }
+      streamDoneResolver!();
+      throw error;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     return (async function* () {
       try {
+        // Surface a successful auto-compression to the caller as the first
+        // event in the stream. Failed/skipped compaction attempts are silent.
+        // Must be inside the try so that a consumer abandoning the stream
+        // immediately after this event still triggers the finally below;
+        // otherwise `streamDoneResolver` never fires and the next send hangs.
+        if (
+          compressionInfo.compressionStatus === CompressionStatus.COMPRESSED
+        ) {
+          yield {
+            type: StreamEventType.COMPRESSED,
+            info: compressionInfo,
+          };
+        }
+
         let lastError: unknown = new Error(
           "Request failed after all configured fallbacks.",
         );
         let hasFailedAttempt = false;
+        let reactiveCompressionAttempted = false;
         const seenTargets = new Set<string>();
 
         for (const reference of [model, ...self.config.getFallbackModels()]) {
@@ -389,6 +584,96 @@ export class GeminiChat {
             if (params.config?.abortSignal?.aborted) {
               throw error;
             }
+
+            // Reactive compression on context-overflow errors. Only attempt
+            // once per stream — on success, retry the same target with the
+            // compressed history; on failure, mark and fall through to fallback
+            // model iteration (which itself uses the same compressed history).
+            const contextOverflow = getContextLengthExceededInfo(error);
+            if (contextOverflow.isExceeded && !reactiveCompressionAttempted) {
+              reactiveCompressionAttempted = true;
+              const reactiveOriginalTokenCount =
+                contextOverflow.actualTokens ??
+                contextOverflow.limitTokens ??
+                self.config.getContentGeneratorConfig()?.contextWindowSize ??
+                DEFAULT_TOKEN_LIMIT;
+              debugLogger.warn(
+                "Context length exceeded; attempting reactive compression.",
+              );
+              try {
+                const reactiveInfo = await self.tryCompress(
+                  prompt_id,
+                  target.model,
+                  true,
+                  params.config?.abortSignal,
+                  {
+                    originalTokenCountOverride: reactiveOriginalTokenCount,
+                    trigger: "auto",
+                  },
+                );
+
+                if (
+                  reactiveInfo.compressionStatus ===
+                  CompressionStatus.COMPRESSED
+                ) {
+                  requestContents = self.getHistory(true);
+                  debugLogger.info(
+                    `Reactive compression succeeded: ` +
+                      `${reactiveInfo.originalTokenCount} -> ` +
+                      `${reactiveInfo.newTokenCount} tokens.`,
+                  );
+                  yield {
+                    type: StreamEventType.COMPRESSED,
+                    info: reactiveInfo,
+                  };
+                  // Retry this same target with the compressed history.
+                  hasFailedAttempt = true;
+                  // Re-iterate via outer for-loop is awkward; instead, retry
+                  // explicitly by yielding back into sendMessageStreamForTarget.
+                  try {
+                    yield { type: StreamEventType.RETRY };
+                    yield* self.sendMessageStreamForTarget(
+                      target,
+                      requestContents,
+                      params,
+                      prompt_id,
+                    );
+                    return;
+                  } catch (retryError) {
+                    lastError = retryError;
+                    if (params.config?.abortSignal?.aborted) {
+                      throw retryError;
+                    }
+                    debugLogger.warn(
+                      `Model request failed after reactive compression for ${target.reference}; trying next fallback if available: ${retryError instanceof Error ? retryError.message : String(retryError)}`,
+                    );
+                    continue;
+                  }
+                }
+
+                debugLogger.warn(
+                  `Reactive compression did not recover context overflow: ` +
+                    `status=${reactiveInfo.compressionStatus}.`,
+                );
+                if (
+                  isCompressionFailureStatus(reactiveInfo.compressionStatus)
+                ) {
+                  self.hasFailedCompressionAttempt = true;
+                }
+              } catch (compressionError) {
+                if (
+                  params.config?.abortSignal?.aborted ||
+                  isAbortError(compressionError)
+                ) {
+                  throw compressionError;
+                }
+                debugLogger.warn(
+                  "Reactive compression failed.",
+                  compressionError,
+                );
+              }
+            }
+
             hasFailedAttempt = true;
             debugLogger.warn(
               `Model request failed for ${target.reference}; trying next fallback if available: ${error instanceof Error ? error.message : String(error)}`,
@@ -418,6 +703,13 @@ export class GeminiChat {
       cgConfig?.maxRetries ?? RATE_LIMIT_RETRY_OPTIONS.maxRetries;
     const extraRetryErrorCodes = cgConfig?.retryErrorCodes;
 
+    // Max output tokens escalation: if the retry loop succeeded with the
+    // capped default (8K) but hit MAX_TOKENS, retry once at the model's full
+    // output limit. This ensures models with large output limits (e.g., 128K
+    // for Claude Opus, GPT-5) are fully utilized, while using
+    // ESCALATED_MAX_TOKENS (64K) as a floor for unknown models. Placed
+    // outside the retry loop so that any errors from the escalated stream
+    // propagate directly (not caught by retry logic).
     let maxTokensEscalated = false;
     const hasUserMaxTokensOverride =
       (cgConfig?.samplingParams?.max_tokens !== undefined &&
@@ -462,7 +754,7 @@ export class GeminiChat {
         const isRateLimit = isRateLimitError(error, extraRetryErrorCodes);
         if (isRateLimit && rateLimitRetryCount < maxRateLimitRetries) {
           rateLimitRetryCount++;
-          const delayMs = RATE_LIMIT_RETRY_OPTIONS.delayMs;
+          const delayMs = RATE_LIMIT_RETRY_OPTIONS.initialDelayMs;
           const message = parseAndFormatApiError(
             error instanceof Error ? error.message : String(error),
           );
@@ -550,23 +842,31 @@ export class GeminiChat {
       !hasUserMaxTokensOverride
     ) {
       maxTokensEscalated = true;
-      debugLogger.info(
-        `Output truncated at capped default. Escalating to ${ESCALATED_MAX_TOKENS} tokens.`,
+      const escalatedLimit = Math.max(
+        ESCALATED_MAX_TOKENS,
+        tokenLimit(target.model, "output"),
       );
+      debugLogger.info(
+        `Output truncated at capped default. Escalating to ${escalatedLimit} tokens.`,
+      );
+      // Remove partial model response from history
+      // (processStreamResponse already pushed it)
       if (
         this.history.length > 0 &&
         this.history[this.history.length - 1].role === "model"
       ) {
         this.history.pop();
       }
+      // Signal UI to discard partial output
       yield { type: StreamEventType.RETRY };
       const escalatedParams: SendMessageParameters = {
         ...params,
         config: {
           ...params.config,
-          maxOutputTokens: ESCALATED_MAX_TOKENS,
+          maxOutputTokens: escalatedLimit,
         },
       };
+      let escalatedFinishReason: string | undefined;
       const escalatedStream = await this.makeApiCallAndProcessStream(
         target,
         requestContents,
@@ -574,7 +874,111 @@ export class GeminiChat {
         prompt_id,
       );
       for await (const chunk of escalatedStream) {
+        const fr = chunk.candidates?.[0]?.finishReason;
+        if (fr) escalatedFinishReason = fr;
         yield { type: StreamEventType.CHUNK, value: chunk };
+      }
+
+      // Recovery: if the escalated response is also truncated, keep the
+      // partial response in history and inject a recovery message so the
+      // model can continue from where it left off.
+      let recoveryCount = 0;
+      let successfulRecoveries = 0;
+      while (
+        escalatedFinishReason === FinishReason.MAX_TOKENS &&
+        recoveryCount < MAX_OUTPUT_RECOVERY_ATTEMPTS
+      ) {
+        // Skip recovery when the truncated turn already contains a
+        // functionCall. Injecting a plain user message between a
+        // functionCall and its functionResponse produces an invalid API
+        // sequence that providers commonly reject. The existing layer-3
+        // tool scheduler fallback handles these cases correctly.
+        const lastEntry = this.history[this.history.length - 1];
+        const hasFunctionCall =
+          lastEntry?.role === "model" &&
+          lastEntry.parts?.some((p) => p.functionCall) === true;
+        if (hasFunctionCall) {
+          debugLogger.info(
+            "Skipping recovery: truncated turn contains functionCall; " +
+              "deferring to tool scheduler fallback.",
+          );
+          break;
+        }
+
+        recoveryCount++;
+        debugLogger.info(
+          `Output still truncated after escalation. ` +
+            `Recovery attempt ${recoveryCount}/${MAX_OUTPUT_RECOVERY_ATTEMPTS}.`,
+        );
+        // The partial model response is already in history
+        // (pushed by processStreamResponse). Push a recovery user
+        // message so the model sees its partial output and continues.
+        this.history.push(
+          createUserContent([{ text: OUTPUT_RECOVERY_MESSAGE }]),
+        );
+        // Signal UI/turn to clear pending (incomplete) tool calls.
+        // isContinuation tells the UI to keep the text buffer so the
+        // model's continuation appends to the previous partial output.
+        yield { type: StreamEventType.RETRY, isContinuation: true };
+        // Re-send with the updated history (includes partial + recovery)
+        const recoveryContents = this.getHistory(true);
+        escalatedFinishReason = undefined;
+        try {
+          const recoveryStream = await this.makeApiCallAndProcessStream(
+            target,
+            recoveryContents,
+            escalatedParams,
+            prompt_id,
+          );
+          for await (const chunk of recoveryStream) {
+            const fr = chunk.candidates?.[0]?.finishReason;
+            if (fr) escalatedFinishReason = fr;
+            yield { type: StreamEventType.CHUNK, value: chunk };
+          }
+          // Iteration fully succeeded: both the user recovery turn and
+          // the model continuation turn are now in history and can be
+          // coalesced back into the preceding model entry after the loop.
+          successfulRecoveries++;
+        } catch (recoveryError) {
+          // If a recovery attempt fails (e.g., empty response, network
+          // error), stop recovering and let the partial output stand.
+          // Pop the dangling recovery message to keep history valid.
+          if (
+            this.history.length > 0 &&
+            this.history[this.history.length - 1].role === "user"
+          ) {
+            this.history.pop();
+          }
+          debugLogger.warn(
+            `Recovery attempt ${recoveryCount} failed: ${recoveryError}`,
+          );
+          // Emit a synthetic finish-reason chunk so the UI gets a
+          // terminal signal (Finished event) instead of a partial
+          // response with no end marker. Uses STOP because partial
+          // chunks from prior successful iterations are already in
+          // the transcript and represent the user-visible response.
+          yield {
+            type: StreamEventType.CHUNK,
+            value: {
+              candidates: [
+                {
+                  content: { role: "model", parts: [] },
+                  finishReason: FinishReason.STOP,
+                },
+              ],
+            } as unknown as GenerateContentResponse,
+          };
+          break;
+        }
+      }
+
+      // Coalesce completed recovery pairs back into the preceding model
+      // turn so the OUTPUT_RECOVERY_MESSAGE control prompt does not
+      // persist as a synthetic user turn in durable history. The user
+      // never sent that message, and leaving it in history would bias
+      // later turns and pollute compression / replay / export.
+      if (successfulRecoveries > 0) {
+        this.coalesceRecoveryPairs(successfulRecoveries);
       }
       return;
     }
@@ -625,6 +1029,13 @@ export class GeminiChat {
         return false;
       },
       authType: target.contentGeneratorConfig?.authType,
+      persistentMode: isUnattendedMode(),
+      signal: params.config?.abortSignal,
+      heartbeatFn: (info) => {
+        process.stderr.write(
+          `[tram] Waiting for API capacity... attempt ${info.attempt}, retry in ${Math.ceil(info.remainingMs / 1000)}s\n`,
+        );
+      },
     });
 
     return this.processStreamResponse(target.model, streamResponse);
@@ -663,6 +1074,15 @@ export class GeminiChat {
   }
 
   /**
+   * Returns the number of entries in the raw chat history. O(1) and
+   * does not clone — use this when you only need the count and would
+   * otherwise pay the {@link getHistory} `structuredClone` cost.
+   */
+  getHistoryLength(): number {
+    return this.history.length;
+  }
+
+  /**
    * Clears the chat history.
    */
   clearHistory(): void {
@@ -678,6 +1098,10 @@ export class GeminiChat {
 
   setHistory(history: Content[]): void {
     this.history = history;
+  }
+
+  truncateHistory(keepCount: number): void {
+    this.history = this.history.slice(0, keepCount);
   }
 
   stripThoughtsFromHistory(): void {
@@ -832,7 +1256,9 @@ export class GeminiChat {
       isSchemaDepthError(error.message) ||
       isInvalidArgumentError(error.message)
     ) {
-      const tools = this.config.getToolRegistry().getAllTools();
+      const toolRegistry = this.config.getToolRegistry();
+      await toolRegistry.warmAll();
+      const tools = toolRegistry.getAllTools();
       const cyclicSchemaTools: string[] = [];
       for (const tool of tools) {
         if (
@@ -889,8 +1315,14 @@ export class GeminiChat {
         // Some providers omit total_tokens or return 0 in streaming usage chunks.
         const lastPromptTokenCount =
           usageMetadata.totalTokenCount || usageMetadata.promptTokenCount;
-        if (lastPromptTokenCount && this.telemetryService) {
-          this.telemetryService.setLastPromptTokenCount(lastPromptTokenCount);
+        if (lastPromptTokenCount) {
+          // Always update the per-chat counter so this chat (including
+          // subagents) can make its own compaction decisions.
+          this.lastPromptTokenCount = lastPromptTokenCount;
+          // Mirror to the global telemetry only when wired — subagents
+          // pass `telemetryService=undefined` to keep their context usage
+          // out of the main session's UI counters.
+          this.telemetryService?.setLastPromptTokenCount(lastPromptTokenCount);
         }
         if (usageMetadata.cachedContentTokenCount && this.telemetryService) {
           this.telemetryService.setLastCachedContentTokenCount(
@@ -997,6 +1429,44 @@ export class GeminiChat {
         ...consolidatedHistoryParts,
       ],
     });
+  }
+
+  /**
+   * Merge `pairCount` trailing (user_recovery, model_continuation) pairs back
+   * into the model turn that precedes them. Used after the output-token
+   * recovery loop so the internal OUTPUT_RECOVERY_MESSAGE control prompt
+   * does not persist in durable history as if the user sent it.
+   *
+   * Expected tail shape per iteration (walking from the back):
+   *   [..., precedingModel, userRecovery, modelContinuation]
+   *
+   * If any pair doesn't match that shape the method bails defensively
+   * rather than corrupting history.
+   */
+  private coalesceRecoveryPairs(pairCount: number): void {
+    for (let i = 0; i < pairCount; i++) {
+      const len = this.history.length;
+      if (len < 3) return;
+
+      const modelContinuation = this.history[len - 1]!;
+      const userRecovery = this.history[len - 2]!;
+      const precedingModel = this.history[len - 3]!;
+
+      if (
+        modelContinuation.role !== 'model' ||
+        userRecovery.role !== 'user' ||
+        precedingModel.role !== 'model'
+      ) {
+        return;
+      }
+
+      precedingModel.parts = [
+        ...(precedingModel.parts ?? []),
+        ...(modelContinuation.parts ?? []),
+      ];
+      // Drop the (userRecovery, modelContinuation) pair.
+      this.history.splice(len - 2, 2);
+    }
   }
 }
 

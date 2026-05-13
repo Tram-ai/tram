@@ -12,6 +12,7 @@ import {
   FileDiscoveryService,
   getAllGeminiMdFilenames,
   loadServerHierarchicalMemory,
+  type LoadServerHierarchicalMemoryResponse,
   setGeminiMdFilename as setServerGeminiMdFilename,
   resolveTelemetrySettings,
   FatalConfigError,
@@ -23,13 +24,15 @@ import {
   type ResumedSessionData,
   type LspClient,
   type ToolName,
-  EditTool,
-  ShellTool,
-  WriteFileTool,
+  ToolNames,
   NativeLspClient,
   createDebugLogger,
   NativeLspService,
+  isBareMode,
   isToolEnabled,
+  type ConfigParameters,
+  type MCPServerConfig,
+  SchemaValidator,
 } from "@tram-ai/tram-core";
 import { extensionsCommand } from "../commands/extensions.js";
 import { hooksCommand } from "../commands/hooks.js";
@@ -45,6 +48,7 @@ import { hideBin } from "yargs/helpers";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { homedir } from "node:os";
+import stripJsonComments from "strip-json-comments";
 
 import { resolvePath } from "../utils/resolvePath.js";
 import { getCliVersion } from "../utils/version.js";
@@ -52,6 +56,7 @@ import { loadSandboxConfig } from "./sandboxConfig.js";
 import { appEvents } from "../utils/events.js";
 import { mcpCommand } from "../commands/mcp.js";
 import { channelCommand } from "../commands/channel.js";
+import { reviewCommand } from "../commands/review.js";
 
 // UUID v4 regex pattern for validation
 const SESSION_ID_REGEX =
@@ -62,7 +67,7 @@ const SESSION_ID_REGEX =
  * Accepts a standard UUID, or a UUID followed by `-agent-{suffix}`
  * (used by Arena to give each agent a deterministic session ID).
  */
-function isValidSessionId(value: string): boolean {
+export function isValidSessionId(value: string): boolean {
   return SESSION_ID_REGEX.test(value);
 }
 
@@ -158,6 +163,7 @@ export interface CliArgs {
   systemPrompt: string | undefined;
   appendSystemPrompt: string | undefined;
   yolo: boolean | undefined;
+  bare: boolean | undefined;
   approvalMode: string | undefined;
   telemetry: boolean | undefined;
   checkpointing: boolean | undefined;
@@ -167,6 +173,7 @@ export interface CliArgs {
   telemetryLogPrompts: boolean | undefined;
   telemetryOutfile: string | undefined;
   allowedMcpServerNames: string[] | undefined;
+  mcpConfig: string | undefined;
   allowedTools: string[] | undefined;
   acp: boolean | undefined;
   experimentalAcp: boolean | undefined;
@@ -179,10 +186,6 @@ export interface CliArgs {
   openaiLoggingDir: string | undefined;
   proxy: string | undefined;
   includeDirectories: string[] | undefined;
-  tavilyApiKey: string | undefined;
-  googleApiKey: string | undefined;
-  googleSearchEngineId: string | undefined;
-  webSearchDefault: string | undefined;
   screenReader: boolean | undefined;
   inputFormat?: string | undefined;
   outputFormat: string | undefined;
@@ -201,12 +204,128 @@ export interface CliArgs {
   maxSessionTurns: number | undefined;
   coreTools: string[] | undefined;
   excludeTools: string[] | undefined;
+  disabledSlashCommands: string[] | undefined;
   authType: string | undefined;
   channel: string | undefined;
   /** Run initialization setup wizard */
   initialize: boolean | undefined;
   /** Enable local model list input in initialize wizard */
   initializeLocalModelList: boolean | undefined;
+  jsonFd?: number | undefined;
+  jsonFile?: string | undefined;
+  jsonSchema?: string | undefined;
+  inputFile?: string | undefined;
+}
+
+/** 4 MiB — well above any real schema, well below an accidental
+ * gigabyte-sized file that would OOM `fs.readFileSync` + `JSON.parse`.
+ */
+const MAX_JSON_SCHEMA_FILE_BYTES = 4 * 1024 * 1024;
+
+/**
+ * Resolves the `--json-schema` argument into a parsed JSON Schema object.
+ *
+ * Accepts either a JSON literal or `@path/to/schema.json`. Fails fast with a
+ * FatalConfigError if the input can't be read/parsed/compiled — invalid
+ * schemas should not silently skip validation at runtime.
+ */
+export function resolveJsonSchemaArg(
+  raw: string | undefined,
+): Record<string, unknown> | undefined {
+  if (raw === undefined) {
+    return undefined;
+  }
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    throw new FatalConfigError("--json-schema cannot be empty.");
+  }
+
+  let payload: string;
+  if (trimmed.startsWith("@")) {
+    const resolvedPath = resolvePath(trimmed.slice(1));
+    try {
+      // Cap the read size at 4 MiB. Real-world JSON schemas are well
+      // under this (the spec encourages decomposition via `$ref`); any
+      // multi-MiB file is almost certainly a wrong-path mistake or a
+      // typo'd argument. Without a cap, a multi-GB file (e.g. accidental
+      // `--json-schema @./node_modules/.cache/*.json`) loads into memory
+      // before `JSON.parse` even runs and OOMs the CLI.
+      const stat = fs.statSync(resolvedPath);
+      if (stat.size > MAX_JSON_SCHEMA_FILE_BYTES) {
+        throw new FatalConfigError(
+          `--json-schema file "${resolvedPath}" is ${stat.size} bytes ` +
+            `(>${MAX_JSON_SCHEMA_FILE_BYTES}). Refusing to read; this is ` +
+            "almost certainly a wrong-path argument. Schemas should be " +
+            "small enough to fit in a few KiB; decompose with `$ref` if " +
+            "you need a large family of types.",
+        );
+      }
+      payload = fs.readFileSync(resolvedPath, "utf8");
+    } catch (err) {
+      if (err instanceof FatalConfigError) throw err;
+      throw new FatalConfigError(
+        `--json-schema could not read "${resolvedPath}": ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
+  } else {
+    payload = trimmed;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(payload);
+  } catch (err) {
+    throw new FatalConfigError(
+      `--json-schema is not valid JSON: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
+
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    throw new FatalConfigError(
+      "--json-schema must be a JSON object describing a schema.",
+    );
+  }
+
+  // Ajv compile-time validation. SchemaValidator.validate is deliberately
+  // lenient at runtime (falls back to no-op on compile failure to support
+  // exotic MCP schemas) — but `--json-schema` is explicit user intent, so
+  // surface a bad schema here rather than letting it silently no-op later.
+  const compileError = SchemaValidator.compileStrict(parsed);
+  if (compileError) {
+    throw new FatalConfigError(
+      `--json-schema is not a valid JSON Schema: ${compileError}`,
+    );
+  }
+
+  // The schema becomes the parameter schema of the synthetic
+  // structured_output tool, and tool-call arguments are object-shaped.
+  // A schema like `{"type":"string"}` would compile fine but be
+  // unsatisfiable as a tool-call argument — fail at parse time so the
+  // user sees the contract violation immediately instead of at runtime.
+  //
+  // We only check the direct `type` field (or array of types). Deeper
+  // analysis of `anyOf`/`oneOf`/`not` is intentionally not done here:
+  // the strict-Ajv compile is the right place for full structural
+  // validation, and a partial check would either give false reassurance
+  // or wrongly reject valid composed schemas. Schemas with no top-level
+  // `type` are allowed through (covers `{}`, plain `properties`, etc).
+  const schemaType = (parsed as { type?: unknown }).type;
+  const isObjectAllowed =
+    schemaType === undefined ||
+    schemaType === "object" ||
+    (Array.isArray(schemaType) && schemaType.includes("object"));
+  if (!isObjectAllowed) {
+    throw new FatalConfigError(
+      `--json-schema top-level type must include "object" (got ${JSON.stringify(schemaType)}); ` +
+        "wrap your value under an object property if you need a non-object payload.",
+    );
+  }
+
+  return parsed as Record<string, unknown>;
 }
 
 function normalizeOutputFormat(
@@ -302,6 +421,12 @@ export async function parseArguments(): Promise<CliArgs> {
       alias: "d",
       type: "boolean",
       description: "Run in debug mode?",
+      default: false,
+    })
+    .option("bare", {
+      type: "boolean",
+      description:
+        "Minimal mode: skip implicit startup auto-discovery and only honor explicitly provided CLI inputs.",
       default: false,
     })
     .option("proxy", {
@@ -413,6 +538,11 @@ export async function parseArguments(): Promise<CliArgs> {
               mcpServerName.split(",").map((m) => m.trim()),
             ),
         })
+        .option("mcp-config", {
+          type: "string",
+          description:
+            'MCP server configuration as JSON string or file path. Can be a path to a JSON file or inline JSON with {"mcpServers": {...}} format.',
+        })
         .option("allowed-tools", {
           type: "array",
           string: true,
@@ -511,6 +641,33 @@ export async function parseArguments(): Promise<CliArgs> {
             "Run the initialization setup wizard to configure AI settings, approval mode, proxy, and theme.",
           default: false,
         })
+        .option("json-fd", {
+          type: "number",
+          description:
+            "File descriptor for structured JSON event output (dual output mode). " +
+            "The TUI renders normally on stdout while JSON events are written to this fd. " +
+            "The caller must provide this fd via spawn stdio configuration.",
+        })
+        .option("json-file", {
+          type: "string",
+          description:
+            "File path for structured JSON event output (dual output mode). " +
+            "Can be a regular file, FIFO (named pipe), or /dev/fd/N.",
+        })
+        .option("json-schema", {
+          type: "string",
+          description:
+            "JSON Schema that the model's final output must conform to " +
+            '(headless mode only). Accepts a JSON literal or "@path/to/schema.json". ' +
+            "Registers a synthetic `structured_output` tool; the session ends on " +
+            "the first valid call.",
+        })
+        .option("input-file", {
+          type: "string",
+          description:
+            "File path for receiving remote input commands (bidirectional sync). " +
+            "An external process writes JSONL commands; the TUI watches and processes them.",
+        })
         .option("initialize-local-model-list", {
           type: "boolean",
           description:
@@ -551,6 +708,17 @@ export async function parseArguments(): Promise<CliArgs> {
           description: "Tools to exclude",
           coerce: (tools: string[]) =>
             tools.flatMap((tool) => tool.split(",").map((t) => t.trim())),
+        })
+        .option("disabled-slash-commands", {
+          type: "array",
+          string: true,
+          description:
+            "Slash command names to hide/disable (comma-separated or " +
+            "repeated). Merged with the `slashCommands.disabled` setting " +
+            "and TRAM_DISABLED_SLASH_COMMANDS. Matched case-insensitively " +
+            "against the final command name.",
+          coerce: (names: string[]) =>
+            names.flatMap((n) => n.split(",").map((t) => t.trim())),
         })
         .option("allowed-tools", {
           type: "array",
@@ -644,6 +812,34 @@ export async function parseArguments(): Promise<CliArgs> {
           if (argv["resume"] && !isValidSessionId(argv["resume"] as string)) {
             return `Invalid --resume: "${argv["resume"]}". Must be a valid UUID (e.g., "123e4567-e89b-12d3-a456-426614174000").`;
           }
+          if (argv["jsonFd"] != null && argv["jsonFile"] != null) {
+            return "--json-fd and --json-file are mutually exclusive. Use one or the other.";
+          }
+          if (argv["jsonSchema"]) {
+            if (argv["promptInteractive"]) {
+              return "--json-schema cannot be used with --prompt-interactive (-i); structured output only terminates the non-interactive flow.";
+            }
+            // Stream-json input runs through runNonInteractiveStreamJson,
+            // which doesn't honor the structured-output termination
+            // contract. Reject the combination explicitly so users see
+            // the mismatch at parse time instead of confusion at runtime.
+            if (argv["inputFormat"] === "stream-json") {
+              return "--json-schema cannot be used with --input-format stream-json; structured output is a single-shot contract incompatible with stream-json input.";
+            }
+            const hasPrompt = !!argv["prompt"];
+            const query = argv["query"] as string | string[] | undefined;
+            const hasPositionalQuery = Array.isArray(query)
+              ? query.length > 0
+              : !!query;
+            // Allow stdin piping (`echo "..." | tram --json-schema ...`):
+            // when stdin is not a TTY, the prompt is supplied via the pipe
+            // and headless mode runs normally. Only reject true interactive
+            // invocations with neither flag nor positional nor pipe.
+            const stdinIsPiped = !process.stdin.isTTY;
+            if (!hasPrompt && !hasPositionalQuery && !stdinIsPiped) {
+              return "--json-schema only applies to non-interactive mode; pass a prompt via -p, as a positional argument, or piped via stdin.";
+            }
+          }
           return true;
         }),
     )
@@ -657,6 +853,8 @@ export async function parseArguments(): Promise<CliArgs> {
     .command(hooksCommand)
     // Register Channel subcommands
     .command(channelCommand)
+    // Register /review skill helpers (presubmit checks, cleanup)
+    .command(reviewCommand);
 
   yargsInstance
     .version(await getCliVersion()) // This will enable the --version flag based on package.json
@@ -680,9 +878,13 @@ export async function parseArguments(): Promise<CliArgs> {
       result._[0] === "hooks" ||
       result._[0] === "web" ||
       result._[0] === "webui" ||
-      result._[0] === "channel")
+      result._[0] === "channel" ||
+      result._[0] === "review")
   ) {
-    // MCP/Extensions/Hooks commands handle their own execution and process exit
+    // MCP/Extensions/Hooks/Channel/Review commands handle their own
+    // execution and exit. Returning here would let the main interactive
+    // flow run, which would prompt for stdin input despite the user
+    // having already invoked a subcommand.
     process.exit(0);
   }
 
@@ -738,7 +940,17 @@ export async function loadHierarchicalGeminiMemory(
   extensionContextFilePaths: string[] = [],
   folderTrust: boolean,
   memoryImportFormat: "flat" | "tree" = "tree",
-): Promise<{ memoryContent: string; fileCount: number }> {
+  // TODO(merge-v0.15.10): upstream adds `contextRuleExcludes` param + returns
+  // `LoadServerHierarchicalMemoryResponse`. We pass through `contextRuleExcludes`
+  // but still adapt the result to TRAM's legacy `{ memoryContent, fileCount }`
+  // shape so callers do not need to migrate yet.
+  contextRuleExcludes: string[] = [],
+): Promise<{
+  memoryContent: string;
+  fileCount: number;
+  conditionalRules: LoadServerHierarchicalMemoryResponse["conditionalRules"];
+  projectRoot: string;
+}> {
   // FIX: Use real, canonical paths for a reliable comparison to handle symlinks.
   const realCwd = fs.realpathSync(path.resolve(currentWorkingDirectory));
   const realHome = fs.realpathSync(path.resolve(homedir()));
@@ -749,14 +961,21 @@ export async function loadHierarchicalGeminiMemory(
   const effectiveCwd = isHomeDirectory ? "" : currentWorkingDirectory;
 
   // Directly call the server function with the corrected path.
-  return loadServerHierarchicalMemory(
+  const response = await loadServerHierarchicalMemory(
     effectiveCwd,
     includeDirectoriesToReadGemini,
     fileService,
     extensionContextFilePaths,
     folderTrust,
     memoryImportFormat,
+    contextRuleExcludes,
   );
+  return {
+    memoryContent: response.memoryContent,
+    fileCount: response.fileCount,
+    conditionalRules: response.conditionalRules,
+    projectRoot: response.projectRoot,
+  };
 }
 
 export function isDebugMode(argv: CliArgs): boolean {
@@ -768,13 +987,100 @@ export function isDebugMode(argv: CliArgs): boolean {
   );
 }
 
+/**
+ * Validates that the provided config is a valid MCP server configuration object.
+ */
+function validateMcpServerConfig(
+  config: unknown,
+): config is Record<string, MCPServerConfig> {
+  if (typeof config !== 'object' || config === null || Array.isArray(config)) {
+    return false;
+  }
+
+  // Basic validation - each entry should be an object
+  return Object.values(config).every(
+    (server) => typeof server === 'object' && server !== null,
+  );
+}
+
+/**
+ * Parses MCP configuration from command-line argument.
+ * Supports both file paths and inline JSON strings.
+ * Handles both {"mcpServers": {...}} and direct {...} formats.
+ *
+ * @param mcpConfigArg - The --mcp-config value (file path or JSON string)
+ * @returns Record of MCP server configurations, or null if no config provided
+ * @throws FatalConfigError if the configuration is invalid
+ */
+function parseMcpConfig(
+  mcpConfigArg: string | undefined,
+): Record<string, MCPServerConfig> | null {
+  if (!mcpConfigArg) {
+    return null;
+  }
+
+  try {
+    let parsed: unknown;
+
+    // Check if it's a file path
+    if (fs.existsSync(mcpConfigArg)) {
+      debugLogger.debug(`Reading MCP config from file: ${mcpConfigArg}`);
+      const content = fs.readFileSync(mcpConfigArg, 'utf-8');
+      parsed = JSON.parse(stripJsonComments(content));
+    } else {
+      // Try parsing as JSON string
+      debugLogger.debug('Parsing MCP config as JSON string');
+      parsed = JSON.parse(mcpConfigArg);
+    }
+
+    // Handle both {"mcpServers": {...}} and direct {...} formats
+    let servers: unknown;
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'mcpServers' in parsed &&
+      typeof (parsed as { mcpServers: unknown }).mcpServers === 'object'
+    ) {
+      servers = (parsed as { mcpServers: unknown }).mcpServers;
+    } else {
+      servers = parsed;
+    }
+
+    // Validate the structure
+    if (!validateMcpServerConfig(servers)) {
+      throw new Error(
+        'Invalid MCP server configuration format. Expected an object with server names as keys.',
+      );
+    }
+
+    debugLogger.debug(
+      `Loaded ${Object.keys(servers).length} MCP server(s) from --mcp-config`,
+    );
+    return servers as Record<string, MCPServerConfig>;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new FatalConfigError(
+      `Invalid MCP configuration provided via --mcp-config: ${errorMessage}`,
+    );
+  }
+}
+
 export async function loadCliConfig(
   settings: Settings,
   argv: CliArgs,
   cwd: string = process.cwd(),
   overrideExtensions?: string[],
+  /**
+   * Optional separated hooks for proper source attribution.
+   * If provided, these override settings.hooks for hook loading.
+   */
+  hooksConfig?: {
+    userHooks?: Record<string, unknown>;
+    projectHooks?: Record<string, unknown>;
+  },
 ): Promise<Config> {
   const debugMode = isDebugMode(argv);
+  const bareMode = isBareMode(argv.bare);
 
   // Set runtime output directory from settings (env var QWEN_RUNTIME_DIR
   // is auto-detected inside getRuntimeBaseDir() at each call site).
@@ -810,20 +1116,24 @@ export async function loadCliConfig(
   );
 
   let outputLanguageFilePath: string | undefined;
-  if (fs.existsSync(projectOutputLanguagePath)) {
-    outputLanguageFilePath = projectOutputLanguagePath;
-  } else if (fs.existsSync(globalOutputLanguagePath)) {
-    outputLanguageFilePath = globalOutputLanguagePath;
+  if (!bareMode) {
+    if (fs.existsSync(projectOutputLanguagePath)) {
+      outputLanguageFilePath = projectOutputLanguagePath;
+    } else if (fs.existsSync(globalOutputLanguagePath)) {
+      outputLanguageFilePath = globalOutputLanguagePath;
+    }
   }
 
   const fileService = new FileDiscoveryService(cwd);
 
-  const includeDirectories = (settings.context?.includeDirectories || [])
+  const includeDirectories = (
+    bareMode ? [] : (settings.context?.includeDirectories ?? [])
+  )
     .map(resolvePath)
     .concat((argv.includeDirectories || []).map(resolvePath));
 
   // LSP configuration: enabled only via --experimental-lsp flag
-  const lspEnabled = argv.experimentalLsp === true;
+  const lspEnabled = !bareMode && argv.experimentalLsp === true;
   let lspClient: LspClient | undefined;
   const question = argv.promptInteractive || argv.prompt || "";
   const inputFormat: InputFormat =
@@ -849,7 +1159,7 @@ export async function loadCliConfig(
     approvalMode = parseApprovalModeValue(argv.approvalMode);
   } else if (argv.yolo) {
     approvalMode = ApprovalMode.YOLO;
-  } else if (settings.tools?.approvalMode) {
+  } else if (!bareMode && settings.tools?.approvalMode) {
     approvalMode = parseApprovalModeValue(settings.tools.approvalMode);
   } else {
     approvalMode = ApprovalMode.YOLO; //DEFAULT原本
@@ -927,17 +1237,19 @@ export async function loadCliConfig(
   // not auto-approve semantics. They are passed via the `coreTools` Config param
   // and handled by PermissionManager.coreToolsAllowList.
   const resolvedCoreTools: string[] = [
-    ...(argv.coreTools ?? []),
-    ...(settings.tools?.core ?? []),
+    ...(bareMode ? [] : (argv.coreTools ?? [])),
+    ...(bareMode ? [] : (settings.tools?.core ?? [])),
   ];
   const mergedAllow: string[] = [
-    ...(settings.permissions?.allow ?? []),
-    ...(settings.tools?.allowed ?? []),
+    ...(bareMode ? [] : (settings.permissions?.allow ?? [])),
+    ...(bareMode ? [] : (settings.tools?.allowed ?? [])),
   ];
-  const mergedAsk: string[] = [...(settings.permissions?.ask ?? [])];
+  const mergedAsk: string[] = [
+    ...(bareMode ? [] : (settings.permissions?.ask ?? [])),
+  ];
   const mergedDeny: string[] = [
-    ...(settings.permissions?.deny ?? []),
-    ...(settings.tools?.exclude ?? []),
+    ...(bareMode ? [] : (settings.permissions?.deny ?? [])),
+    ...(bareMode ? [] : (settings.tools?.exclude ?? [])),
   ];
 
   // argv.allowedTools adds allow rules (auto-approve).
@@ -950,21 +1262,36 @@ export async function loadCliConfig(
     if (t && !mergedDeny.includes(t)) mergedDeny.push(t);
   }
 
+  // Merge the slash-command denylist from settings + CLI flag + env var.
+  // Settings merge (UNION across scopes) is already handled upstream; we
+  // only de-duplicate while preserving case for diagnostic purposes.
+  const disabledSlashCommands: string[] = [];
+  const seenDisabled = new Set<string>();
+  const addDisabled = (value: string | undefined) => {
+    if (!value) return;
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    const key = trimmed.toLowerCase();
+    if (!seenDisabled.has(key)) {
+      seenDisabled.add(key);
+      disabledSlashCommands.push(trimmed);
+    }
+  };
+  for (const name of settings.slashCommands?.disabled ?? []) addDisabled(name);
+  for (const name of argv.disabledSlashCommands ?? []) addDisabled(name);
+  for (const name of (process.env['QWEN_DISABLED_SLASH_COMMANDS'] ?? '').split(
+    ',',
+  )) {
+    addDisabled(name);
+  }
+
   // Helper: check if a tool is explicitly covered by an allow rule OR by the
   // coreTools whitelist. Uses alias matching for coreTools (via isToolEnabled)
   // to preserve the original behaviour where "ShellTool", "Shell", and
   // "run_shell_command" are all accepted as the same tool.
   const isExplicitlyAllowed = (toolName: ToolName): boolean => {
-    const name = toolName as string;
     // 1. Check permissions.allow / allowedTools rules.
-    if (
-      mergedAllow.some((rule) => {
-        const openParen = rule.indexOf("(");
-        const ruleName =
-          openParen === -1 ? rule.trim() : rule.substring(0, openParen).trim();
-        return ruleName === name;
-      })
-    ) {
+    if (mergedAllow.some((rule) => isToolEnabled(toolName, [rule], []))) {
       return true;
     }
     // 2. Check coreTools whitelist (with alias matching).
@@ -980,7 +1307,12 @@ export async function loadCliConfig(
   // the caller has explicitly allowed them. Stream-JSON input is excluded from
   // this logic because approval can be sent programmatically via JSON messages.
   const isAcpMode = argv.acp || argv.experimentalAcp;
-  if (!interactive && !isAcpMode && inputFormat !== InputFormat.STREAM_JSON) {
+  if (
+    !bareMode &&
+    !interactive &&
+    !isAcpMode &&
+    inputFormat !== InputFormat.STREAM_JSON
+  ) {
     const denyUnlessAllowed = (toolName: ToolName): void => {
       if (!isExplicitlyAllowed(toolName)) {
         const name = toolName as string;
@@ -992,13 +1324,15 @@ export async function loadCliConfig(
       case ApprovalMode.PLAN:
       case ApprovalMode.DEFAULT:
         // Deny all write/execute tools unless explicitly allowed.
-        denyUnlessAllowed(ShellTool.Name as ToolName);
-        denyUnlessAllowed(EditTool.Name as ToolName);
-        denyUnlessAllowed(WriteFileTool.Name as ToolName);
+        denyUnlessAllowed(ToolNames.SHELL as ToolName);
+        denyUnlessAllowed(ToolNames.MONITOR as ToolName);
+        denyUnlessAllowed(ToolNames.EDIT as ToolName);
+        denyUnlessAllowed(ToolNames.WRITE_FILE as ToolName);
         break;
       case ApprovalMode.AUTO_EDIT:
-        // Only shell requires a prompt in auto-edit mode.
-        denyUnlessAllowed(ShellTool.Name as ToolName);
+        // Shell-like execute tools still require a prompt in auto-edit mode.
+        denyUnlessAllowed(ToolNames.SHELL as ToolName);
+        denyUnlessAllowed(ToolNames.MONITOR as ToolName);
         break;
       case ApprovalMode.YOLO:
         // No extra denials for YOLO mode.
@@ -1013,7 +1347,7 @@ export async function loadCliConfig(
   if (argv.allowedMcpServerNames) {
     allowedMcpServers = new Set(argv.allowedMcpServerNames.filter(Boolean));
     excludedMcpServers = undefined;
-  } else {
+  } else if (!bareMode) {
     allowedMcpServers = settings.mcp?.allowed
       ? new Set(settings.mcp.allowed.filter(Boolean))
       : undefined;
@@ -1024,7 +1358,7 @@ export async function loadCliConfig(
 
   const selectedAuthType =
     (argv.authType as AuthType | undefined) ||
-    settings.security?.auth?.selectedType ||
+    (bareMode ? undefined : settings.security?.auth?.selectedType) ||
     /* getAuthTypeFromEnv means no authType was explicitly provided, we infer the authType from env vars */
     getAuthTypeFromEnv();
 
@@ -1044,7 +1378,10 @@ export async function loadCliConfig(
 
   const { model: resolvedModel } = resolvedCliConfig;
 
-  const sandboxConfig = await loadSandboxConfig(settings, argv);
+  const sandboxConfig = await loadSandboxConfig(
+    bareMode ? ({} as Settings) : settings,
+    argv,
+  );
   const screenReader =
     argv.screenReader !== undefined
       ? argv.screenReader
@@ -1063,6 +1400,9 @@ export async function loadCliConfig(
     }
 
     if (argv.resume) {
+      // By the time we get here, argv.resume has been resolved to a valid
+      // session UUID by gemini.tsx (which handles custom title lookup and
+      // the interactive picker for ambiguous matches).
       sessionId = argv.resume;
       sessionData = await sessionService.loadSession(argv.resume);
       if (!sessionData) {
@@ -1086,24 +1426,31 @@ export async function loadCliConfig(
 
   const modelProvidersConfig = settings.modelProviders;
 
-  const config = new Config({
+  const configParams: ConfigParameters = {
     sessionId,
     sessionData,
     embeddingModel: DEFAULT_TRAM_EMBEDDING_MODEL,
     sandbox: sandboxConfig,
     targetDir: cwd,
     includeDirectories,
-    loadMemoryFromIncludeDirectories:
-      settings.context?.loadFromIncludeDirectories || false,
+    loadMemoryFromIncludeDirectories: bareMode
+      ? includeDirectories.length > 0
+      : (settings.context?.loadFromIncludeDirectories ?? false),
     importFormat: settings.context?.importFormat || "tree",
     debugMode,
     question,
     systemPrompt: argv.systemPrompt,
     appendSystemPrompt: argv.appendSystemPrompt,
     // Legacy fields – kept for backward compatibility with getCoreTools() etc.
-    coreTools: argv.coreTools || settings.tools?.core || undefined,
-    allowedTools: argv.allowedTools || settings.tools?.allowed || undefined,
+    coreTools: bareMode
+      ? undefined
+      : argv.coreTools || settings.tools?.core || undefined,
+    allowedTools: bareMode
+      ? argv.allowedTools || undefined
+      : argv.allowedTools || settings.tools?.allowed || undefined,
     excludeTools: mergedDeny,
+    disabledSlashCommands:
+      disabledSlashCommands.length > 0 ? disabledSlashCommands : undefined,
     // New unified permissions (PermissionManager source of truth).
     permissions: {
       allow: mergedAllow.length > 0 ? mergedAllow : undefined,
@@ -1124,10 +1471,18 @@ export async function loadCliConfig(
         currentSettings.setValue(settingScope, key, [...currentRules, rule]);
       }
     },
-    toolDiscoveryCommand: settings.tools?.discoveryCommand,
-    toolCallCommand: settings.tools?.callCommand,
-    mcpServerCommand: settings.mcp?.serverCommand,
-    mcpServers: settings.mcpServers || {},
+    toolDiscoveryCommand: bareMode
+      ? undefined
+      : settings.tools?.discoveryCommand,
+    toolCallCommand: bareMode ? undefined : settings.tools?.callCommand,
+    mcpServerCommand: bareMode ? undefined : settings.mcp?.serverCommand,
+    mcpServers: bareMode
+      ? {}
+      : (() => {
+          const base = settings.mcpServers || {};
+          const cliMcpServers = parseMcpConfig(argv.mcpConfig);
+          return cliMcpServers ? { ...base, ...cliMcpServers } : base;
+        })(),
     allowedMcpServers: allowedMcpServers
       ? Array.from(allowedMcpServers)
       : undefined,
@@ -1157,6 +1512,7 @@ export async function loadCliConfig(
       argv.maxSessionTurns ?? settings.model?.maxSessionTurns ?? -1,
     experimentalZedIntegration: argv.acp || argv.experimentalAcp || false,
     cronEnabled: settings.experimental?.cron ?? false,
+    emitToolUseSummaries: settings.experimental?.emitToolUseSummaries ?? true,
     listExtensions: argv.listExtensions || false,
     overrideExtensions: overrideExtensions || argv.extensions,
     noBrowser: !!process.env["NO_BROWSER"],
@@ -1168,6 +1524,10 @@ export async function loadCliConfig(
     generationConfigSources: resolvedCliConfig.sources,
     generationConfig: resolvedCliConfig.generationConfig,
     warnings: resolvedCliConfig.warnings,
+    bareMode,
+    allowedHttpHookUrls: bareMode
+      ? []
+      : (settings.security?.allowedHttpHookUrls ?? []),
     cliVersion: await getCliVersion(),
     ideMode,
     omitToolInstructions,
@@ -1189,9 +1549,30 @@ export async function loadCliConfig(
     output: {
       format: outputSettingsFormat,
     },
-    hooks: settings.hooks,
-    disableAllHooks: settings.disableAllHooks ?? false,
+    enableManagedAutoMemory: bareMode
+      ? false
+      : (settings.memory?.enableManagedAutoMemory ?? true),
+    enableManagedAutoDream: settings.memory?.enableManagedAutoDream ?? false,
+    enableAutoSkill: bareMode
+      ? false
+      : (settings.memory?.enableAutoSkill ?? false),
+    fastModel: settings.fastModel || undefined,
+    // Use separated hooks if provided, otherwise fall back to merged hooks
+    userHooks: bareMode
+      ? undefined
+      : (hooksConfig?.userHooks ?? settings.hooks),
+    projectHooks: bareMode ? undefined : hooksConfig?.projectHooks,
+    hooks: bareMode ? undefined : settings.hooks, // Keep for backward compatibility
+    disableAllHooks: bareMode ? true : (settings.disableAllHooks ?? false),
     channel: argv.channel,
+    // CLI flag wins over settings.json. `--json-fd` is fd-only (no settings
+    // equivalent — fd passing is a spawn-time concern). `--json-file` and
+    // `--input-file` fall back to settings.dualOutput.* when the flag is
+    // absent.
+    jsonFd: argv.jsonFd,
+    jsonFile: argv.jsonFile ?? settings.dualOutput?.jsonFile,
+    jsonSchema: resolveJsonSchemaArg(argv.jsonSchema),
+    inputFile: argv.inputFile ?? settings.dualOutput?.inputFile,
     // Precedence: explicit CLI flag > settings file > default(true).
     // NOTE: do NOT set a yargs default for `chat-recording`, otherwise argv will
     // always be true and the settings file can never disable recording.
@@ -1215,7 +1596,9 @@ export async function loadCliConfig(
             : undefined,
         }
       : undefined,
-  });
+  };
+
+  const config = new Config(configParams);
 
   if (lspEnabled) {
     try {

@@ -13,7 +13,9 @@ export const mcpCommand: SlashCommand = {
   get description() {
     return t("Open MCP management dialog");
   },
+  argumentHint: 'desc|nodesc|schema|auth|noauth',
   kind: CommandKind.BUILT_IN,
+  supportedModes: ['interactive'] as const,
   action: async (): Promise<OpenDialogActionReturn> => ({
     type: "dialog",
     dialog: "mcp",

@@ -309,6 +309,26 @@ describe("extension tests", () => {
         true,
       );
     });
+
+    it('should only load explicitly named extensions when refreshCache is filtered', async () => {
+      createExtension({
+        extensionsDir: userExtensionsDir,
+        name: 'ext1',
+        version: '1.0.0',
+      });
+      createExtension({
+        extensionsDir: userExtensionsDir,
+        name: 'ext2',
+        version: '1.0.0',
+      });
+
+      const manager = createExtensionManager();
+      await manager.refreshCache({ names: ['ext2'] });
+      const extensions = manager.getLoadedExtensions();
+
+      expect(extensions).toHaveLength(1);
+      expect(extensions[0].name).toBe('ext2');
+    });
   });
 
   describe("enableExtension / disableExtension", () => {
@@ -806,9 +826,13 @@ describe("extension tests", () => {
       expect(extensions).toHaveLength(1);
       expect(extensions[0].hooks).toBeDefined();
       expect(extensions[0].hooks!["PreToolUse"]).toHaveLength(1);
-      expect(extensions[0].hooks!["PreToolUse"]![0].hooks![0].command).toBe(
-        'echo "hello"',
-      );
+      expect(
+        (
+          extensions[0].hooks!["PreToolUse"]![0].hooks![0] as {
+            command: string;
+          }
+        ).command,
+      ).toBe('echo "hello"');
     });
 
     it("should load hooks from hooks/hooks.json when not in main config", async () => {
@@ -859,9 +883,13 @@ describe("extension tests", () => {
       expect(extensions).toHaveLength(1);
       expect(extensions[0].hooks).toBeDefined();
       expect(extensions[0].hooks!["PostToolUse"]).toHaveLength(1);
-      expect(extensions[0].hooks!["PostToolUse"]![0].hooks![0].command).toBe(
-        `echo "installed in ${extensionDir}"`,
-      );
+      expect(
+        (
+          extensions[0].hooks!["PostToolUse"]![0].hooks![0] as {
+            command: string;
+          }
+        ).command,
+      ).toBe(`echo "installed in ${extensionDir}"`);
     });
 
     it("should substitute ${CLAUDE_PLUGIN_ROOT} variable in hooks", async () => {
@@ -899,9 +927,13 @@ describe("extension tests", () => {
       expect(extensions).toHaveLength(1);
       expect(extensions[0].hooks).toBeDefined();
       expect(extensions[0].hooks!["PreToolUse"]).toHaveLength(1);
-      expect(extensions[0].hooks!["PreToolUse"]![0].hooks![0].command).toBe(
-        `${extensionDir}/scripts/setup.sh`,
-      );
+      expect(
+        (
+          extensions[0].hooks!["PreToolUse"]![0].hooks![0] as {
+            command: string;
+          }
+        ).command,
+      ).toBe(`${extensionDir}/scripts/setup.sh`);
     });
 
     it("should load hooks from config.hooks string path", async () => {
@@ -953,9 +985,13 @@ describe("extension tests", () => {
       expect(extensions).toHaveLength(1);
       expect(extensions[0].hooks).toBeDefined();
       expect(extensions[0].hooks!["PreToolUse"]).toHaveLength(1);
-      expect(extensions[0].hooks!["PreToolUse"]![0].hooks![0].command).toBe(
-        'echo "custom hooks path"',
-      );
+      expect(
+        (
+          extensions[0].hooks!["PreToolUse"]![0].hooks![0] as {
+            command: string;
+          }
+        ).command,
+      ).toBe('echo "custom hooks path"');
     });
 
     it("should prefer config.hooks string path over hooks/hooks.json", async () => {
@@ -1011,9 +1047,13 @@ describe("extension tests", () => {
 
       expect(extensions).toHaveLength(1);
       expect(extensions[0].hooks).toBeDefined();
-      expect(extensions[0].hooks!["PreToolUse"]![0].hooks![0].command).toBe(
-        'echo "config path"',
-      );
+      expect(
+        (
+          extensions[0].hooks!["PreToolUse"]![0].hooks![0] as {
+            command: string;
+          }
+        ).command,
+      ).toBe('echo "config path"');
     });
 
     it("should substitute ${CLAUDE_PLUGIN_ROOT} in hooks file from config.hooks string path", async () => {
@@ -1063,9 +1103,13 @@ describe("extension tests", () => {
       expect(extensions).toHaveLength(1);
       expect(extensions[0].hooks).toBeDefined();
       expect(extensions[0].hooks!["PreToolUse"]).toHaveLength(1);
-      expect(extensions[0].hooks!["PreToolUse"]![0].hooks![0].command).toBe(
-        `${extensionDir}/scripts/setup.sh`,
-      );
+      expect(
+        (
+          extensions[0].hooks!["PreToolUse"]![0].hooks![0] as {
+            command: string;
+          }
+        ).command,
+      ).toBe(`${extensionDir}/scripts/setup.sh`);
     });
   });
 });

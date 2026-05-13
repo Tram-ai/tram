@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * Copyright 2025 Qwen
  * SPDX-License-Identifier: Apache-2.0
@@ -48,6 +48,28 @@ vi.mock("../agents/runtime/agent-headless.js", () => ({
   ContextState: class {},
 }));
 
+// Mirrors the positional AgentHeadless.create parameters so tests can
+// destructure by name instead of indexing — adding new parameters can't
+// silently shift assertions onto the wrong slot.
+function destructureAgentHeadlessCall(call: unknown[]) {
+  return {
+    name: call[0] as string,
+    runtimeContext: call[1],
+    promptConfig: call[2],
+    modelConfig: call[3],
+    runConfig: call[4],
+    toolConfig: call[5],
+    eventEmitter: call[6],
+    hooks: call[7],
+    runtimeView: call[8] as
+      | {
+          contentGenerator: unknown;
+          contentGeneratorConfig: { authType?: string; model?: string };
+        }
+      | undefined,
+  };
+}
+
 // Mock createContentGenerator for model override tests
 const mockCreateContentGenerator = vi.hoisted(() => vi.fn());
 vi.mock("../core/contentGenerator.js", async (importOriginal) => {
@@ -65,12 +87,23 @@ describe("SubagentManager", () => {
   let mockConfig: Config;
 
   beforeEach(() => {
+    // Mock os.homedir before makeFakeConfig, since Config constructor
+    // calls Storage.getGlobalQwenDir() which needs os.homedir()
+    vi.mocked(os.homedir).mockReturnValue('/home/user');
+    vi.mocked(os.tmpdir).mockReturnValue('/tmp');
+
     mockToolRegistry = {
+      warmAll: vi.fn().mockResolvedValue(undefined),
       getAllTools: vi.fn().mockReturnValue([
         { name: "read_file", displayName: "Read File" },
         { name: "write_file", displayName: "Write File" },
         { name: "grep", displayName: "Search Files" },
       ]),
+      // `buildSubagentContextOverride` now rebuilds the tool registry on
+      // its override and copies discovered tools from this parent
+      // registry. The real implementation iterates `source.tools.values()`,
+      // so the stub needs a `tools` Map to avoid a TypeError.
+      tools: new Map(),
     } as unknown as ToolRegistry;
 
     // Create mock Config object using test utility
@@ -82,7 +115,6 @@ describe("SubagentManager", () => {
 
     // Mock os.homedir
     vi.mocked(os.homedir).mockReturnValue("/home/user");
-
     // Reset and setup mocks
     vi.clearAllMocks();
     mockValidateConfig.mockReturnValue({
@@ -130,6 +162,16 @@ describe("SubagentManager", () => {
           name: "test-agent",
           description: "A test subagent",
           runConfig: { max_time_minutes: 5, max_turns: 10 },
+        };
+      }
+      if (yamlString.includes("background:")) {
+        const bgMatch = yamlString.match(/background:\s*"?(true|false)"?/);
+        const bgValue = bgMatch?.[1] === "true" ? true : false;
+        return {
+          name: yamlString.match(/name:\s*(\S+)/)?.[1] ?? "test-agent",
+          description:
+            yamlString.match(/description:\s*(.+)/)?.[1] ?? "A test subagent",
+          background: bgValue,
         };
       }
       if (yamlString.includes("name: agent1")) {
@@ -486,6 +528,73 @@ You are a helpful assistant.
 
       consoleSpy.mockRestore();
     });
+
+    it('should parse background: true from frontmatter', () => {
+      const markdownWithBackground = `---
+name: monitor
+description: A background monitor
+background: true
+---
+
+You are a monitor.
+`;
+
+      const config = manager.parseSubagentContent(
+        markdownWithBackground,
+        validConfig.filePath!,
+        'project',
+      );
+
+      expect(config.background).toBe(true);
+    });
+
+    it('should parse background: "true" string from frontmatter', () => {
+      const markdownWithBgString = `---
+name: monitor
+description: A background monitor
+background: "true"
+---
+
+You are a monitor.
+`;
+
+      const config = manager.parseSubagentContent(
+        markdownWithBgString,
+        validConfig.filePath!,
+        'project',
+      );
+
+      expect(config.background).toBe(true);
+    });
+
+    it('should not set background when background: false', () => {
+      const markdownWithBgFalse = `---
+name: monitor
+description: A foreground agent
+background: false
+---
+
+You are an agent.
+`;
+
+      const config = manager.parseSubagentContent(
+        markdownWithBgFalse,
+        validConfig.filePath!,
+        'project',
+      );
+
+      expect(config.background).toBeUndefined();
+    });
+
+    it('should not set background when omitted', () => {
+      const config = manager.parseSubagentContent(
+        validMarkdown,
+        validConfig.filePath!,
+        'project',
+      );
+
+      expect(config.background).toBeUndefined();
+    });
   });
 
   describe("serializeSubagent", () => {
@@ -563,6 +672,37 @@ You are a helpful assistant.
       );
 
       expect(parsed.disallowedTools).toEqual(["write_file", "mcp__slack"]);
+    });
+
+    it('should serialize background: true', () => {
+      const configWithBackground: SubagentConfig = {
+        ...validConfig,
+        background: true,
+      };
+
+      const serialized = manager.serializeSubagent(configWithBackground);
+      expect(serialized).toContain('background: true');
+    });
+
+    it('should not serialize background when undefined', () => {
+      const serialized = manager.serializeSubagent(validConfig);
+      expect(serialized).not.toContain('background');
+    });
+
+    it('should roundtrip background through serialize and parse', () => {
+      const configWithBackground: SubagentConfig = {
+        ...validConfig,
+        background: true,
+      };
+
+      const serialized = manager.serializeSubagent(configWithBackground);
+      const parsed = manager.parseSubagentContent(
+        serialized,
+        validConfig.filePath!,
+        'project',
+      );
+
+      expect(parsed.background).toBe(true);
     });
   });
 
@@ -1188,8 +1328,8 @@ System prompt 3`);
 
   describe("Runtime Configuration Methods", () => {
     describe("convertToRuntimeConfig", () => {
-      it("should convert basic configuration", () => {
-        const runtimeConfig = manager.convertToRuntimeConfig(validConfig);
+      it("should convert basic configuration", async () => {
+        const runtimeConfig = await manager.convertToRuntimeConfig(validConfig);
 
         expect(runtimeConfig.promptConfig.systemPrompt).toBe(
           validConfig.systemPrompt,
@@ -1199,13 +1339,14 @@ System prompt 3`);
         expect(runtimeConfig.toolConfig).toBeUndefined();
       });
 
-      it("should include tool configuration when tools are specified", () => {
+      it("should include tool configuration when tools are specified", async () => {
         const configWithTools: SubagentConfig = {
           ...validConfig,
           tools: ["read_file", "write_file"],
         };
 
-        const runtimeConfig = manager.convertToRuntimeConfig(configWithTools);
+        const runtimeConfig =
+          await manager.convertToRuntimeConfig(configWithTools);
 
         expect(runtimeConfig.toolConfig).toBeDefined();
         expect(runtimeConfig.toolConfig!.tools).toEqual([
@@ -1214,13 +1355,13 @@ System prompt 3`);
         ]);
       });
 
-      it("should transform display names to tool names in tool configuration", () => {
+      it("should transform display names to tool names in tool configuration", async () => {
         const configWithDisplayNames: SubagentConfig = {
           ...validConfig,
           tools: ["Read File", "write_file", "Search Files", "unknown_tool"],
         };
 
-        const runtimeConfig = manager.convertToRuntimeConfig(
+        const runtimeConfig = await manager.convertToRuntimeConfig(
           configWithDisplayNames,
         );
 
@@ -1233,26 +1374,27 @@ System prompt 3`);
         ]);
       });
 
-      it("should set modelConfig.model from model selector and merge run configurations", () => {
+      it("should set modelConfig.model from model selector and merge run configurations", async () => {
         const configWithCustom: SubagentConfig = {
           ...validConfig,
           model: "custom-model",
           runConfig: { max_time_minutes: 5 },
         };
 
-        const runtimeConfig = manager.convertToRuntimeConfig(configWithCustom);
+        const runtimeConfig =
+          await manager.convertToRuntimeConfig(configWithCustom);
 
         expect(runtimeConfig.modelConfig.model).toBe("custom-model");
         expect(runtimeConfig.runConfig.max_time_minutes).toBe(5);
       });
 
-      it("should accept cross-provider model selectors", () => {
+      it("should accept cross-provider model selectors", async () => {
         const configWithCrossProvider: SubagentConfig = {
           ...validConfig,
           model: "openai:gpt-4",
         };
 
-        const runtimeConfig = manager.convertToRuntimeConfig(
+        const runtimeConfig = await manager.convertToRuntimeConfig(
           configWithCrossProvider,
         );
         expect(runtimeConfig.modelConfig.model).toBe("gpt-4");
@@ -1330,9 +1472,12 @@ System prompt 3`);
 
         await manager.createAgentHeadless(config, mockConfig);
 
+        // Owner is the runtimeContext passed to createAgentHeadless — assert
+        // the exact instance so a regression that swaps in a different Config
+        // (e.g. the override) gets caught.
         expect(mockCreateContentGenerator).toHaveBeenCalledWith(
           expect.objectContaining({ model: "custom-model" }),
-          expect.anything(),
+          mockConfig,
         );
       });
 
@@ -1346,7 +1491,7 @@ System prompt 3`);
             model: "claude-sonnet",
             authType: "anthropic",
           }),
-          expect.anything(),
+          mockConfig,
         );
       });
 
@@ -1364,16 +1509,23 @@ System prompt 3`);
         expect(mockCreateContentGenerator).not.toHaveBeenCalled();
       });
 
-      it("should pass the overridden Config to AgentHeadless.create", async () => {
+      it("should pass the agent runtimeView to AgentHeadless.create", async () => {
         const config = { ...agentConfig, model: "custom-model" };
         const fakeGenerator = { generateContentStream: vi.fn() };
         mockCreateContentGenerator.mockResolvedValue(fakeGenerator);
 
         await manager.createAgentHeadless(config, mockConfig);
 
-        const passedConfig = mockAgentHeadlessCreate.mock.calls[0][1];
-        expect(passedConfig.getContentGenerator()).toBe(fakeGenerator);
-        expect(passedConfig.getModel()).toBe("custom-model");
+        const { runtimeContext, runtimeView } = destructureAgentHeadlessCall(
+          mockAgentHeadlessCreate.mock.calls[0],
+        );
+        // Subagents always get an `Object.create(parent)` wrapper for
+        // FileReadCache isolation — distinct instance, prototype === parent.
+        expect(runtimeContext).not.toBe(mockConfig);
+        expect(Object.getPrototypeOf(runtimeContext)).toBe(mockConfig);
+        expect(runtimeView).toBeDefined();
+        expect(runtimeView!.contentGenerator).toBe(fakeGenerator);
+        expect(runtimeView!.contentGeneratorConfig.model).toBe("custom-model");
       });
     });
   });

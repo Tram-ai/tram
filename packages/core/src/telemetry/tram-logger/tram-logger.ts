@@ -616,7 +616,8 @@ export class TramLogger {
         output_token_count: event.output_token_count,
         cached_content_token_count: event.cached_content_token_count,
         thoughts_token_count: event.thoughts_token_count,
-        tool_token_count: event.tool_token_count,
+        // TODO(merge-v0.15.10): tool_token_count removed from ApiResponseEvent
+        // upstream; restore once tool-only tokens are tracked again.
       }),
     });
 

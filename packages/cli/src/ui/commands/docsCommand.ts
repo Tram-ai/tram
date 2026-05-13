@@ -20,8 +20,19 @@ export const docsCommand: SlashCommand = {
     return t("open full TRAM documentation in your browser");
   },
   kind: CommandKind.BUILT_IN,
-  action: async (context: CommandContext): Promise<void> => {
+  supportedModes: ["interactive", "non_interactive", "acp"] as const,
+  action: async (context: CommandContext) => {
     const docsUrl = `https://tram.mintlify.app/`;
+
+    // Non-interactive/ACP: return URL directly, no browser, no addItem
+    if (context.executionMode !== "interactive") {
+      return {
+        type: "message" as const,
+        messageType: "info" as const,
+        content: `TRAM documentation: ${docsUrl}`,
+      };
+    }
+
     if (process.env["SANDBOX"] && process.env["SANDBOX"] !== "sandbox-exec") {
       context.ui.addItem(
         {
@@ -47,5 +58,6 @@ export const docsCommand: SlashCommand = {
       );
       await open(docsUrl);
     }
+    return;
   },
 };

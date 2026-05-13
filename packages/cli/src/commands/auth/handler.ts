@@ -12,37 +12,48 @@ import {
 } from "@tram-ai/tram-core";
 import { writeStdoutLine, writeStderrLine } from "../../utils/stdioHelpers.js";
 import { t } from "../../i18n/index.js";
-import {
-  getCodingPlanConfig,
-  isCodingPlanConfig,
-  CodingPlanRegion,
-  CODING_PLAN_ENV_KEY,
-} from "../../constants/codingPlan.js";
 import { getPersistScopeForModelSelection } from "../../config/modelProvidersScope.js";
-import { backupSettingsFile } from "../../utils/settingsUtils.js";
-import { normalizeModelsForAuthType } from "../../utils/modelProviderIds.js";
+import { applyProviderInstallPlan } from "../../auth/install/applyProviderInstallPlan.js";
+import { codingPlanProvider } from "../../auth/providers/alibaba/codingPlan.js";
+import { createOpenRouterProviderInstallPlan } from "../../auth/providers/oauth/openrouter.js";
+import {
+  buildInstallPlan,
+  resolveBaseUrl,
+  resolveMetadataKey,
+  getDefaultModelIds,
+  PROVIDER_METADATA_NS,
+} from "../../auth/providerConfig.js";
+import { findProviderByCredentials } from "../../auth/allProviders.js";
 import { loadSettings, type LoadedSettings } from "../../config/settings.js";
 import { loadCliConfig } from "../../config/config.js";
 import type { CliArgs } from "../../config/config.js";
 import { InteractiveSelector } from "./interactiveSelector.js";
+import {
+  createOpenRouterOAuthSession,
+  isOpenRouterConfig,
+  OPENROUTER_ENV_KEY,
+  runOpenRouterOAuthLogin,
+} from "../../auth/providers/oauth/openrouterOAuth.js";
 
-interface QwenAuthOptions {
-  region?: string;
-  key?: string;
+function formatElapsedTime(startMs: number): string {
+  return `${((Date.now() - startMs) / 1000).toFixed(2)}s`;
 }
 
-interface CodingPlanSettings {
-  region?: CodingPlanRegion;
-  version?: string;
+interface QwenAuthOptions {
+  /** Legacy TRAM option — maps "china"/"global" to a Coding Plan base URL. */
+  region?: string;
+  baseUrl?: string;
+  key?: string;
 }
 
 interface MergedSettingsWithCodingPlan {
   security?: {
     auth?: {
       selectedType?: string;
+      apiKey?: string;
+      baseUrl?: string;
     };
   };
-  codingPlan?: CodingPlanSettings;
   model?: {
     name?: string;
   };
@@ -51,84 +62,117 @@ interface MergedSettingsWithCodingPlan {
 }
 
 /**
- * Handles the authentication process based on the specified command and options
+ * Creates a minimal CliArgs for auth command config loading.
+ */
+function createMinimalArgv(): CliArgs {
+  return {
+    query: undefined,
+    model: undefined,
+    sandbox: undefined,
+    sandboxImage: undefined,
+    debug: undefined,
+    prompt: undefined,
+    promptInteractive: undefined,
+    yolo: undefined,
+    bare: undefined,
+    approvalMode: undefined,
+    telemetry: undefined,
+    checkpointing: undefined,
+    telemetryTarget: undefined,
+    telemetryOtlpEndpoint: undefined,
+    telemetryOtlpProtocol: undefined,
+    telemetryLogPrompts: undefined,
+    telemetryOutfile: undefined,
+    allowedMcpServerNames: undefined,
+    mcpConfig: undefined,
+    allowedTools: undefined,
+    acp: undefined,
+    experimentalAcp: undefined,
+    experimentalLsp: undefined,
+    extensions: [],
+    listExtensions: undefined,
+    openaiLogging: undefined,
+    openaiApiKey: undefined,
+    openaiBaseUrl: undefined,
+    openaiLoggingDir: undefined,
+    proxy: undefined,
+    includeDirectories: undefined,
+    screenReader: undefined,
+    inputFormat: undefined,
+    outputFormat: undefined,
+    includePartialMessages: undefined,
+    chatRecording: undefined,
+    continue: undefined,
+    resume: undefined,
+    sessionId: undefined,
+    maxSessionTurns: undefined,
+    coreTools: undefined,
+    excludeTools: undefined,
+    disabledSlashCommands: undefined,
+    authType: undefined,
+    channel: undefined,
+    systemPrompt: undefined,
+    appendSystemPrompt: undefined,
+    initialize: undefined,
+    initializeLocalModelList: undefined,
+  };
+}
+
+/**
+ * Loads settings and config for auth commands.
+ */
+async function loadAuthConfig(settings: LoadedSettings) {
+  return loadCliConfig(
+    settings.merged,
+    createMinimalArgv(),
+    process.cwd(),
+    [],
+    {
+      userHooks: settings.getUserHooks(),
+      projectHooks: settings.getProjectHooks(),
+    },
+  );
+}
+
+/**
+ * Resolves the legacy `--region china|global` flag into a Coding Plan base URL,
+ * delegating to the codingPlanProvider's declarative baseUrl list.
+ */
+function resolveLegacyRegionToBaseUrl(region: string): string | undefined {
+  const normalized = region.toLowerCase();
+  if (!Array.isArray(codingPlanProvider.baseUrl)) {
+    return undefined;
+  }
+  // codingPlanProvider.baseUrl is in order: [China, Global/International]
+  if (normalized === "global" || normalized === "international") {
+    return codingPlanProvider.baseUrl[1]?.url;
+  }
+  if (normalized === "china" || normalized === "cn") {
+    return codingPlanProvider.baseUrl[0]?.url;
+  }
+  return undefined;
+}
+
+/**
+ * Handles the authentication process based on the specified command and options.
  */
 export async function handleQwenAuth(
-  command: "qwen-oauth" | "coding-plan",
+  command: "qwen-oauth" | "coding-plan" | "openrouter",
   options: QwenAuthOptions,
 ) {
   try {
     const settings = loadSettings();
-
-    // Create a minimal argv for config loading
-    const minimalArgv: CliArgs = {
-      query: undefined,
-      model: undefined,
-      sandbox: undefined,
-      sandboxImage: undefined,
-      debug: undefined,
-      prompt: undefined,
-      promptInteractive: undefined,
-      yolo: undefined,
-      approvalMode: undefined,
-      telemetry: undefined,
-      checkpointing: undefined,
-      telemetryTarget: undefined,
-      telemetryOtlpEndpoint: undefined,
-      telemetryOtlpProtocol: undefined,
-      telemetryLogPrompts: undefined,
-      telemetryOutfile: undefined,
-      allowedMcpServerNames: undefined,
-      allowedTools: undefined,
-      acp: undefined,
-      experimentalAcp: undefined,
-      experimentalLsp: undefined,
-      extensions: [],
-      listExtensions: undefined,
-      openaiLogging: undefined,
-      openaiApiKey: undefined,
-      openaiBaseUrl: undefined,
-      openaiLoggingDir: undefined,
-      proxy: undefined,
-      includeDirectories: undefined,
-      tavilyApiKey: undefined,
-      googleApiKey: undefined,
-      googleSearchEngineId: undefined,
-      webSearchDefault: undefined,
-      screenReader: undefined,
-      inputFormat: undefined,
-      outputFormat: undefined,
-      includePartialMessages: undefined,
-      chatRecording: undefined,
-      continue: undefined,
-      resume: undefined,
-      sessionId: undefined,
-      maxSessionTurns: undefined,
-      coreTools: undefined,
-      excludeTools: undefined,
-      authType: undefined,
-      channel: undefined,
-      systemPrompt: undefined,
-      appendSystemPrompt: undefined,
-      initialize: undefined,
-      initializeLocalModelList: undefined,
-    };
-
-    // Create a minimal config to access settings and storage
-    const config = await loadCliConfig(
-      settings.merged,
-      minimalArgv,
-      process.cwd(),
-      [], // No extensions for auth command
-    );
+    const config = await loadAuthConfig(settings);
 
     if (command === "qwen-oauth") {
       await handleQwenOAuth(config, settings);
     } else if (command === "coding-plan") {
       await handleCodePlanAuth(config, settings, options);
+    } else if (command === "openrouter") {
+      await handleOpenRouterAuth(config, settings, options);
     }
 
-    // Exit after authentication is complete
+    // Exit after authentication is complete.
     writeStdoutLine(t("Authentication completed successfully."));
     process.exit(0);
   } catch (error) {
@@ -138,13 +182,13 @@ export async function handleQwenAuth(
 }
 
 /**
- * Handles Qwen OAuth authentication
+ * Handles Tram OAuth authentication.
  */
 async function handleQwenOAuth(
   config: Config,
   settings: LoadedSettings,
 ): Promise<void> {
-  writeStdoutLine(t("Starting Qwen OAuth authentication..."));
+  writeStdoutLine(t("Starting Tram OAuth authentication..."));
 
   try {
     await config.refreshAuth(AuthType.TRAM_OAUTH);
@@ -157,11 +201,11 @@ async function handleQwenOAuth(
       AuthType.TRAM_OAUTH,
     );
 
-    writeStdoutLine(t("Successfully authenticated with Qwen OAuth."));
+    writeStdoutLine(t("Successfully authenticated with Tram OAuth."));
     process.exit(0);
   } catch (error) {
     writeStderrLine(
-      t("Failed to authenticate with Qwen OAuth: {{error}}", {
+      t("Failed to authenticate with Tram OAuth: {{error}}", {
         error: getErrorMessage(error),
       }),
     );
@@ -170,104 +214,42 @@ async function handleQwenOAuth(
 }
 
 /**
- * Handles Alibaba Cloud Coding Plan authentication
+ * Handles Alibaba Cloud Coding Plan authentication.
  */
 async function handleCodePlanAuth(
   config: Config,
   settings: LoadedSettings,
   options: QwenAuthOptions,
 ): Promise<void> {
-  const { region, key } = options;
+  const { region, baseUrl, key } = options;
 
-  let selectedRegion: CodingPlanRegion;
+  let selectedBaseUrl: string;
   let selectedKey: string;
 
-  // If region and key are provided as options, use them
-  if (region && key) {
-    selectedRegion =
-      region.toLowerCase() === "global"
-        ? CodingPlanRegion.GLOBAL
-        : CodingPlanRegion.CHINA;
+  // Resolve baseUrl: explicit baseUrl wins over legacy --region flag.
+  const legacyBaseUrl = region
+    ? resolveLegacyRegionToBaseUrl(region)
+    : undefined;
+  const candidateBaseUrl = baseUrl ?? legacyBaseUrl;
+
+  if (candidateBaseUrl && key) {
+    selectedBaseUrl = candidateBaseUrl;
     selectedKey = key;
   } else {
-    // Otherwise, prompt interactively
-    selectedRegion = await promptForRegion();
-    selectedKey = await promptForKey();
+    selectedBaseUrl = await promptForCodingPlanBaseUrl();
+    selectedKey = await promptForKey(t("Enter your Coding Plan API key: "));
   }
 
   writeStdoutLine(t("Processing Alibaba Cloud Coding Plan authentication..."));
 
   try {
-    // Get configuration based on region
-    const { template, version } = getCodingPlanConfig(selectedRegion);
-
-    // Get persist scope
-    const authTypeScope = getPersistScopeForModelSelection(settings);
-
-    // Backup settings file before modification
-    const settingsFile = settings.forScope(authTypeScope);
-    backupSettingsFile(settingsFile.path);
-
-    // Store api-key in settings.env (unified env key)
-    settings.setValue(authTypeScope, `env.${CODING_PLAN_ENV_KEY}`, selectedKey);
-
-    // Sync to process.env immediately so refreshAuth can read the apiKey
-    process.env[CODING_PLAN_ENV_KEY] = selectedKey;
-
-    // Generate model configs from template
-    const newConfigs = template.map((templateConfig) => ({
-      ...templateConfig,
-      envKey: CODING_PLAN_ENV_KEY,
-    }));
-
-    // Get existing configs
-    const existingConfigs =
-      (settings.merged.modelProviders as Record<string, ModelConfig[]>)?.[
-        AuthType.USE_OPENAI
-      ] || [];
-
-    // Filter out all existing Coding Plan configs (mutually exclusive)
-    const nonCodingPlanConfigs = existingConfigs.filter(
-      (existing) => !isCodingPlanConfig(existing.baseUrl, existing.envKey),
-    );
-
-    // Add new Coding Plan configs at the beginning
-    const updatedConfigs = normalizeModelsForAuthType(AuthType.USE_OPENAI, [
-      ...newConfigs,
-      ...nonCodingPlanConfigs,
-    ]);
-
-    // Persist to modelProviders
-    settings.setValue(
-      authTypeScope,
-      `modelProviders.${AuthType.USE_OPENAI}`,
-      updatedConfigs,
-    );
-
-    // Also persist authType
-    settings.setValue(
-      authTypeScope,
-      "security.auth.selectedType",
-      AuthType.USE_OPENAI,
-    );
-
-    // Persist coding plan region
-    settings.setValue(authTypeScope, "codingPlan.region", selectedRegion);
-
-    // Persist coding plan version (single field for backward compatibility)
-    settings.setValue(authTypeScope, "codingPlan.version", version);
-
-    // If there are configs, use the first one as the model
-    if (updatedConfigs.length > 0 && updatedConfigs[0]?.id) {
-      settings.setValue(
-        authTypeScope,
-        "model.name",
-        (updatedConfigs[0] as ModelConfig).id,
-      );
-    }
-
-    // Refresh auth with the new configuration
-    await config.refreshAuth(AuthType.USE_OPENAI);
+    const resolved = resolveBaseUrl(codingPlanProvider, selectedBaseUrl);
+    const installPlan = buildInstallPlan(codingPlanProvider, {
+      baseUrl: resolved,
+      apiKey: selectedKey,
+      modelIds: getDefaultModelIds(codingPlanProvider),
+    });
+    await applyProviderInstallPlan(installPlan, { settings, config });
 
     writeStdoutLine(
       t("Successfully authenticated with Alibaba Cloud Coding Plan."),
@@ -283,39 +265,123 @@ async function handleCodePlanAuth(
 }
 
 /**
- * Prompts the user to select a region using an interactive selector
+ * Handles OpenRouter API key setup.
  */
-async function promptForRegion(): Promise<CodingPlanRegion> {
+async function handleOpenRouterAuth(
+  config: Config,
+  settings: LoadedSettings,
+  options: QwenAuthOptions,
+): Promise<void> {
+  writeStdoutLine(t("Processing OpenRouter authentication..."));
+
+  try {
+    const authStartMs = Date.now();
+    let selectedKey = options.key;
+
+    if (!selectedKey) {
+      const oauthStartMs = Date.now();
+      const oauthSession = createOpenRouterOAuthSession();
+      writeStdoutLine(
+        t(
+          "Starting OpenRouter OAuth in your browser. If needed, open this link manually: {{authorizationUrl}}",
+          {
+            authorizationUrl: oauthSession.authorizationUrl,
+          },
+        ),
+      );
+      const oauthResult = await runOpenRouterOAuthLogin(undefined, {
+        session: oauthSession,
+      });
+      writeStdoutLine(
+        t("Waited for OpenRouter browser authorization in {{elapsed}}.", {
+          elapsed:
+            typeof oauthResult.authorizationCodeWaitMs === "number"
+              ? `${(oauthResult.authorizationCodeWaitMs / 1000).toFixed(2)}s`
+              : formatElapsedTime(oauthStartMs),
+        }),
+      );
+      writeStdoutLine(
+        t("Exchanged OpenRouter auth code for API key in {{elapsed}}.", {
+          elapsed:
+            typeof oauthResult.apiKeyExchangeMs === "number"
+              ? `${(oauthResult.apiKeyExchangeMs / 1000).toFixed(2)}s`
+              : formatElapsedTime(oauthStartMs),
+        }),
+      );
+      writeStdoutLine(
+        t("OpenRouter OAuth callback completed in {{elapsed}}.", {
+          elapsed: formatElapsedTime(oauthStartMs),
+        }),
+      );
+      selectedKey = oauthResult.apiKey;
+    }
+
+    if (!selectedKey) {
+      throw new Error(
+        "OpenRouter authentication completed without an API key.",
+      );
+    }
+
+    const modelsStartMs = Date.now();
+    const installPlan = await createOpenRouterProviderInstallPlan({
+      apiKey: selectedKey,
+    });
+    await applyProviderInstallPlan(installPlan, { settings, config });
+    writeStdoutLine(
+      t("Fetched OpenRouter models in {{elapsed}}.", {
+        elapsed: formatElapsedTime(modelsStartMs),
+      }),
+    );
+
+    writeStdoutLine(
+      t("Total OpenRouter setup time: {{elapsed}}.", {
+        elapsed: formatElapsedTime(authStartMs),
+      }),
+    );
+
+    writeStdoutLine(t("Successfully configured OpenRouter."));
+  } catch (error) {
+    writeStderrLine(
+      t("Failed to configure OpenRouter: {{error}}", {
+        error: getErrorMessage(error),
+      }),
+    );
+    process.exit(1);
+  }
+}
+
+async function promptForCodingPlanBaseUrl(): Promise<string> {
+  const baseUrlOptions = Array.isArray(codingPlanProvider.baseUrl)
+    ? codingPlanProvider.baseUrl
+    : [];
   const selector = new InteractiveSelector(
-    [
-      {
-        value: CodingPlanRegion.CHINA,
-        label: t("中国 (China)"),
-        description: t("阿里云百炼 (aliyun.com)"),
-      },
-      {
-        value: CodingPlanRegion.GLOBAL,
-        label: t("Global"),
-        description: t("Alibaba Cloud (alibabacloud.com)"),
-      },
-    ],
-    t("Select region for Coding Plan:"),
+    baseUrlOptions.map((opt) => ({
+      value: opt.url,
+      label: t(opt.label),
+      description: opt.url,
+    })),
+    t("Select Base URL for Coding Plan:"),
   );
 
   return await selector.select();
 }
 
 /**
- * Prompts the user to enter an API key
+ * Generic raw-mode text input prompt.
+ * @param promptText - Text displayed before the cursor
+ * @param options.mask - If true, echoes '*' instead of the typed character (for passwords)
+ * @param options.defaultValue - Value returned when the user presses Enter on empty input
  */
-async function promptForKey(): Promise<string> {
-  // Create a simple password-style input (without echoing characters)
+async function promptForInput(
+  promptText: string,
+  options: { mask?: boolean; defaultValue?: string } = {},
+): Promise<string> {
+  const { mask = false, defaultValue } = options;
   const stdin = process.stdin;
   const stdout = process.stdout;
 
-  stdout.write(t("Enter your Coding Plan API key: "));
+  stdout.write(promptText);
 
-  // Set raw mode to capture keystrokes
   const wasRaw = stdin.isRaw;
   if (stdin.setRawMode) {
     stdin.setRawMode(true);
@@ -334,8 +400,10 @@ async function promptForKey(): Promise<string> {
             if (stdin.setRawMode) {
               stdin.setRawMode(wasRaw);
             }
-            stdout.write("\n"); // New line after input
-            resolve(input);
+            stdout.write("\n");
+            resolve(
+              defaultValue !== undefined && !input ? defaultValue : input,
+            );
             return;
           case "\x03": // Ctrl+C
             stdin.removeListener("data", onData);
@@ -354,10 +422,8 @@ async function promptForKey(): Promise<string> {
             }
             break;
           default:
-            // Add character to input
             input += char;
-            // Print asterisk instead of the actual character for security
-            stdout.write("*");
+            stdout.write(mask ? "*" : char);
             break;
         }
       }
@@ -368,11 +434,27 @@ async function promptForKey(): Promise<string> {
 }
 
 /**
- * Runs the interactive authentication flow
+ * Prompts the user to enter an API key (masked input).
+ */
+async function promptForKey(
+  promptText: string = t("Enter your Coding Plan API key: "),
+): Promise<string> {
+  return promptForInput(promptText, { mask: true });
+}
+
+/**
+ * Runs the interactive authentication flow.
  */
 export async function runInteractiveAuth() {
   const selector = new InteractiveSelector(
     [
+      {
+        value: "openrouter" as const,
+        label: t("OpenRouter"),
+        description: t(
+          "API key setup · OpenAI-compatible provider via OpenRouter",
+        ),
+      },
       {
         value: "coding-plan" as const,
         label: t("Alibaba Cloud Coding Plan"),
@@ -381,8 +463,13 @@ export async function runInteractiveAuth() {
         ),
       },
       {
+        value: "api-key" as const,
+        label: t("API Key"),
+        description: t("Bring your own API key"),
+      },
+      {
         value: "qwen-oauth" as const,
-        label: t("Qwen OAuth"),
+        label: t("Tram OAuth"),
         description: t("Discontinued — switch to Coding Plan or API Key"),
       },
     ],
@@ -391,11 +478,11 @@ export async function runInteractiveAuth() {
 
   let choice = await selector.select();
 
-  // If user selects discontinued Qwen OAuth, warn and re-prompt
+  // If user selects discontinued Tram OAuth, warn and re-prompt.
   while (choice === "qwen-oauth") {
     writeStdoutLine(
       t(
-        "\n⚠ Qwen OAuth free tier was discontinued on 2026-04-15. Please select another option.\n",
+        "\n⚠ Tram OAuth free tier was discontinued on 2026-04-15. Please select another option.\n",
       ),
     );
     choice = await selector.select();
@@ -403,11 +490,40 @@ export async function runInteractiveAuth() {
 
   if (choice === "coding-plan") {
     await handleQwenAuth("coding-plan", {});
+  } else if (choice === "api-key") {
+    await handleApiKeyAuth();
+  } else if (choice === "openrouter") {
+    await handleQwenAuth("openrouter", {});
   }
 }
 
 /**
- * Shows the current authentication status
+ * Handles API Key authentication — directs user to documentation.
+ *
+ * Intentionally simplified: the full interactive provider setup is now
+ * available through the `/auth` slash command in the UI. The CLI sub-command
+ * (`tram auth api-key`) serves as a lightweight fallback that points users
+ * to the docs. A future improvement could wire this into the provider
+ * registry for a fully interactive CLI flow.
+ */
+export async function handleApiKeyAuth() {
+  handleCustomApiKeyAuth();
+}
+
+/**
+ * Handles Custom API Key — prints docs link.
+ */
+function handleCustomApiKeyAuth(): void {
+  writeStdoutLine(
+    t(
+      "\nYou can configure your API key and models in settings.json.\nRefer to the documentation for setup instructions:\n  https://tram-ai.github.io/docs/en/users/configuration/model-providers/\n",
+    ),
+  );
+  process.exit(0);
+}
+
+/**
+ * Shows the current authentication status.
  */
 export async function showAuthStatus(): Promise<void> {
   try {
@@ -416,87 +532,218 @@ export async function showAuthStatus(): Promise<void> {
 
     writeStdoutLine(t("\n=== Authentication Status ===\n"));
 
-    // Check for selected auth type
+    // Check for selected auth type.
     const selectedType = mergedSettings.security?.auth?.selectedType;
 
     if (!selectedType) {
       writeStdoutLine(t("⚠️  No authentication method configured.\n"));
       writeStdoutLine(t("Run one of the following commands to get started:\n"));
       writeStdoutLine(
-        t(
-          "  qwen auth qwen-oauth     - Authenticate with Qwen OAuth (free tier)",
-        ),
+        t("  tram auth openrouter      - Configure OpenRouter API key"),
       );
       writeStdoutLine(
         t(
-          "  qwen auth coding-plan      - Authenticate with Alibaba Cloud Coding Plan\n",
+          "  tram auth coding-plan    - Authenticate with Alibaba Cloud Coding Plan",
+        ),
+      );
+      writeStdoutLine(
+        t("  tram auth api-key        - Authenticate with an API key"),
+      );
+      writeStdoutLine(
+        t(
+          "  tram auth qwen-oauth     - Authenticate with Tram OAuth (discontinued)\n",
         ),
       );
       writeStdoutLine(t("Or simply run:"));
       writeStdoutLine(
-        t("  qwen auth                - Interactive authentication setup\n"),
+        t("  tram auth                - Interactive authentication setup\n"),
       );
       process.exit(0);
     }
 
-    // Display status based on auth type
+    // Display status based on auth type.
     if (selectedType === AuthType.TRAM_OAUTH) {
-      writeStdoutLine(t("✓ Authentication Method: Qwen OAuth"));
+      writeStdoutLine(t("✓ Authentication Method: Tram OAuth"));
       writeStdoutLine(t("  Type: Free tier (discontinued 2026-04-15)"));
       writeStdoutLine(t("  Limit: No longer available"));
-      writeStdoutLine(t("  Models: Qwen latest models"));
+      writeStdoutLine(t("  Models: Tram latest models"));
       writeStdoutLine(
         t("\n  ⚠ Run /auth to switch to Coding Plan or another provider.\n"),
       );
     } else if (selectedType === AuthType.USE_OPENAI) {
-      // Check for Coding Plan configuration
-      const codingPlanRegion = mergedSettings.codingPlan?.region;
-      const codingPlanVersion = mergedSettings.codingPlan?.version;
       const modelName = mergedSettings.model?.name;
+      const openAiProviders =
+        mergedSettings.modelProviders?.[AuthType.USE_OPENAI] || [];
+      const activeConfig = modelName
+        ? openAiProviders.find((c) => c.id === modelName)
+        : openAiProviders[0];
+      const isActiveOpenRouter = activeConfig
+        ? isOpenRouterConfig(activeConfig)
+        : false;
+      const hasOpenRouterApiKey =
+        !!process.env[OPENROUTER_ENV_KEY] ||
+        !!mergedSettings.env?.[OPENROUTER_ENV_KEY];
 
-      // Check if API key is set in environment
-      const hasApiKey =
-        !!process.env[CODING_PLAN_ENV_KEY] ||
-        !!mergedSettings.env?.[CODING_PLAN_ENV_KEY];
+      const foundProvider = activeConfig
+        ? findProviderByCredentials(activeConfig.baseUrl, activeConfig.envKey)
+        : undefined;
+      const managedProvider =
+        foundProvider && resolveMetadataKey(foundProvider)
+          ? foundProvider
+          : undefined;
 
-      if (hasApiKey) {
-        writeStdoutLine(
-          t("✓ Authentication Method: Alibaba Cloud Coding Plan"),
-        );
+      if (isActiveOpenRouter) {
+        if (hasOpenRouterApiKey) {
+          writeStdoutLine(t("✓ Authentication Method: OpenRouter"));
 
-        if (codingPlanRegion) {
-          const regionDisplay =
-            codingPlanRegion === CodingPlanRegion.CHINA
-              ? t("中国 (China) - 阿里云百炼")
-              : t("Global - Alibaba Cloud");
-          writeStdoutLine(t("  Region: {{region}}", { region: regionDisplay }));
-        }
+          if (modelName) {
+            writeStdoutLine(
+              t("  Current Model: {{model}}", { model: modelName }),
+            );
+          }
 
-        if (modelName) {
+          writeStdoutLine(t("  Status: API key configured\n"));
+        } else {
           writeStdoutLine(
-            t("  Current Model: {{model}}", { model: modelName }),
+            t("⚠️  Authentication Method: OpenRouter (Incomplete)"),
           );
-        }
-
-        if (codingPlanVersion) {
           writeStdoutLine(
-            t("  Config Version: {{version}}", {
-              version: codingPlanVersion.substring(0, 8) + "...",
+            t("  Issue: API key not found in environment or settings\n"),
+          );
+          writeStdoutLine(t("  Run `tram auth openrouter` to re-configure.\n"));
+        }
+      } else if (managedProvider) {
+        const envKey =
+          typeof managedProvider.envKey === "string"
+            ? managedProvider.envKey
+            : "";
+        const metaKey = resolveMetadataKey(managedProvider)!;
+        const ns = (mergedSettings as Record<string, unknown>)[
+          PROVIDER_METADATA_NS
+        ] as Record<string, unknown> | undefined;
+        const metadata = ns?.[metaKey] as
+          | { version?: string; baseUrl?: string }
+          | undefined;
+        const hasApiKey =
+          !!process.env[envKey] || !!mergedSettings.env?.[envKey];
+
+        if (hasApiKey) {
+          writeStdoutLine(
+            t("✓ Authentication Method: {{plan}}", {
+              plan: t(managedProvider.label),
             }),
           );
+
+          if (metadata?.baseUrl) {
+            writeStdoutLine(
+              t("  Base URL: {{baseUrl}}", { baseUrl: metadata.baseUrl }),
+            );
+          }
+
+          if (modelName) {
+            writeStdoutLine(
+              t("  Current Model: {{model}}", { model: modelName }),
+            );
+          }
+
+          if (metadata?.version) {
+            writeStdoutLine(
+              t("  Config Version: {{version}}", {
+                version: metadata.version.substring(0, 8) + "...",
+              }),
+            );
+          }
+
+          writeStdoutLine(t("  Status: API key configured\n"));
+        } else {
+          writeStdoutLine(
+            t("⚠️  Authentication Method: {{plan}} (Incomplete)", {
+              plan: t(managedProvider.label),
+            }),
+          );
+          writeStdoutLine(
+            t("  Issue: API key not found in environment or settings\n"),
+          );
+          writeStdoutLine(
+            t("  Run `tram auth` to re-configure authentication.\n"),
+          );
+        }
+      } else if (activeConfig) {
+        let hasApiKey: boolean;
+        if (activeConfig.envKey) {
+          hasApiKey =
+            !!process.env[activeConfig.envKey] ||
+            !!mergedSettings.env?.[activeConfig.envKey];
+        } else {
+          hasApiKey =
+            !!process.env["OPENAI_API_KEY"] ||
+            !!mergedSettings.env?.["OPENAI_API_KEY"] ||
+            !!mergedSettings.security?.auth?.apiKey;
         }
 
-        writeStdoutLine(t("  Status: API key configured\n"));
+        if (hasApiKey) {
+          writeStdoutLine(
+            t("✓ Authentication Method: OpenAI-compatible Provider"),
+          );
+
+          if (modelName) {
+            writeStdoutLine(
+              t("  Current Model: {{model}}", { model: modelName }),
+            );
+          }
+
+          const baseUrl =
+            activeConfig.baseUrl || mergedSettings.security?.auth?.baseUrl;
+          if (baseUrl) {
+            writeStdoutLine(t("  Base URL: {{baseUrl}}", { baseUrl }));
+          }
+
+          writeStdoutLine(t("  Status: API key configured\n"));
+        } else {
+          writeStdoutLine(
+            t(
+              "⚠️  Authentication Method: OpenAI-compatible Provider (Incomplete)",
+            ),
+          );
+          writeStdoutLine(
+            t("  Issue: API key not found in environment or settings\n"),
+          );
+          writeStdoutLine(t("  Run `tram auth` to re-configure.\n"));
+        }
       } else {
-        writeStdoutLine(
-          t(
-            "⚠️  Authentication Method: Alibaba Cloud Coding Plan (Incomplete)",
-          ),
-        );
-        writeStdoutLine(
-          t("  Issue: API key not found in environment or settings\n"),
-        );
-        writeStdoutLine(t("  Run `qwen auth coding-plan` to re-configure.\n"));
+        const hasGenericApiKey =
+          !!process.env["OPENAI_API_KEY"] ||
+          !!mergedSettings.env?.["OPENAI_API_KEY"] ||
+          !!mergedSettings.security?.auth?.apiKey;
+
+        if (hasGenericApiKey) {
+          writeStdoutLine(
+            t("✓ Authentication Method: OpenAI-compatible Provider"),
+          );
+
+          if (modelName) {
+            writeStdoutLine(
+              t("  Current Model: {{model}}", { model: modelName }),
+            );
+          }
+
+          const baseUrl = mergedSettings.security?.auth?.baseUrl;
+          if (baseUrl) {
+            writeStdoutLine(t("  Base URL: {{baseUrl}}", { baseUrl }));
+          }
+
+          writeStdoutLine(t("  Status: API key configured\n"));
+        } else {
+          writeStdoutLine(
+            t(
+              "⚠️  Authentication Method: OpenAI-compatible Provider (Incomplete)",
+            ),
+          );
+          writeStdoutLine(
+            t("  Issue: API key not found in environment or settings\n"),
+          );
+          writeStdoutLine(t("  Run `tram auth` to re-configure.\n"));
+        }
       }
     } else {
       writeStdoutLine(

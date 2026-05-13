@@ -81,6 +81,15 @@ const reactDedupPlugin = {
   },
 };
 
+const publicCliExportPlugin = {
+  name: 'public-cli-export',
+  setup(build) {
+    build.onResolve({ filter: /^@tram-ai\/qwen-code\/export$/ }, () => ({
+      path: resolve(repoRoot, 'packages/cli/src/export/index.ts'),
+    }));
+  },
+};
+
 /**
  * Resolve `*.wasm?binary` imports to embedded Uint8Array content.
  * This keeps the companion bundle compatible with core's inline-WASM loader.
@@ -187,6 +196,7 @@ async function main() {
       "import.meta.url": "import_meta.url",
     },
     plugins: [
+      publicCliExportPlugin,
       wasmBinaryPlugin,
       wasmLoader({ mode: "embedded" }),
       /* add to the end of plugins array */
@@ -205,19 +215,22 @@ async function main() {
     sourcesContent: false,
     platform: "browser",
     outfile: "dist/webview.js",
-    // @qwen-code/qwen-code-core is a peer dependency of @qwen-code/webui.
-    // Since @qwen-code/webui marks it as external in its own Vite build, the
+    // @tram-ai/tram-core is a peer dependency of @tram-ai/webui.
+    // Since @tram-ai/webui marks it as external in its own Vite build, the
     // browser bundle must also mark it external to avoid bundling Node.js-only
     // modules (undici, @grpc/grpc-js, fs, stream, etc.) into the webview.
     // The wildcard ensures deep sub-path imports (e.g.
-    // '@qwen-code/qwen-code-core/src/core/tokenLimits.js') are also excluded;
+    // '@tram-ai/tram-core/src/core/tokenLimits.js') are also excluded;
     // without it esbuild only matches the bare package name and attempts to
     // bundle the sub-path, which triggers "Dynamic require is not supported"
     // at runtime in the browser.
-    external: ["@qwen-code/qwen-code-core", "@qwen-code/qwen-code-core/*"],
+    external: ["@tram-ai/tram-core", "@tram-ai/tram-core/*"],
     logLevel: "silent",
     plugins: [reactDedupPlugin, cssInjectPlugin, esbuildProblemMatcherPlugin],
     jsx: "automatic", // Use new JSX transform (React 17+)
+    loader: {
+      ".png": "dataurl",
+    },
     define: {
       "process.env.NODE_ENV": production ? '"production"' : '"development"',
     },

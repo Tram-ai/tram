@@ -137,7 +137,7 @@ jobs:
         if: |-
           ${{ github.event.inputs.force_skip_tests != 'true' }}
         run: |
-          npm run build --workspace=@qwen-code/webui
+          npm run build --workspace=@tram-ai/webui
 
       - name: "Run Tests"
         if: |-

@@ -4,31 +4,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// TODO(merge-v0.15.10): upstream moved ErrorHandler/RequestContext into ./types.js with a different RequestContext shape (no isStreaming, userPromptId, authType, duration). TRAM's EnhancedErrorHandler reads isStreaming/authType/userPromptId via optional fields; we re-export RequestContext/ErrorHandler from ./types.js as the single source of truth, while still augmenting it with TRAM-specific optional context fields.
 import type { GenerateContentParameters } from "@google/genai";
 import { createDebugLogger } from "../../utils/debugLogger.js";
+import type {
+  RequestContext as BaseRequestContext,
+  ErrorHandler,
+} from "./types.js";
 
 const debugLogger = createDebugLogger("OPENAI_ERROR");
 
-export interface RequestContext {
-  userPromptId: string;
-  model: string;
-  authType: string;
-  startTime: number;
-  duration: number;
-  isStreaming: boolean;
-}
+/**
+ * TRAM-extended request context. Adds optional fields consumed by the
+ * local error-handling/troubleshooting code so we don't have to widen the
+ * upstream RequestContext shape used by the converter functions.
+ */
+export type RequestContext = BaseRequestContext & {
+  userPromptId?: string;
+  authType?: string;
+  duration?: number;
+  isStreaming?: boolean;
+};
 
-export interface ErrorHandler {
-  handle(
-    error: unknown,
-    context: RequestContext,
-    request: GenerateContentParameters,
-  ): never;
-  shouldSuppressErrorLogging(
-    error: unknown,
-    request: GenerateContentParameters,
-  ): boolean;
-}
+export type { ErrorHandler };
 
 export class EnhancedErrorHandler implements ErrorHandler {
   constructor(
@@ -105,7 +103,7 @@ export class EnhancedErrorHandler implements ErrorHandler {
     context: RequestContext,
     isTimeoutError: boolean,
   ): string {
-    const durationSeconds = Math.round(context.duration / 1000);
+    const durationSeconds = Math.round((Date.now() - context.startTime) / 1000);
 
     if (isTimeoutError) {
       const prefix = context.isStreaming

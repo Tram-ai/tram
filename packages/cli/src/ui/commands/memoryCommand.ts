@@ -45,6 +45,7 @@ export const memoryCommand: SlashCommand = {
   get description() {
     return t("Commands for interacting with memory.");
   },
+  argumentHint: 'show|add|refresh',
   kind: CommandKind.BUILT_IN,
   subCommands: [
     {

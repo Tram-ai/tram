@@ -6,10 +6,10 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import * as os from "os";
 import * as crypto from "crypto";
 import { getProjectHash } from "@tram-ai/tram-core/src/utils/paths.js";
 import type { TramSession } from "./tramSessionReader.js";
+import { getRuntimeBaseDir } from "../utils/paths.js";
 
 /**
  * Tram Session Manager
@@ -21,18 +21,17 @@ import type { TramSession } from "./tramSessionReader.js";
  * when ACP methods are unavailable or fail.
  */
 export class TramSessionManager {
-  private tramDir: string;
-
-  constructor() {
-    this.tramDir = path.join(os.homedir(), ".tram");
-  }
-
   /**
    * Get the session directory for a project with backward compatibility
    */
   private getSessionDir(workingDir: string): string {
     const projectHash = getProjectHash(workingDir);
-    const sessionDir = path.join(this.tramDir, "tmp", projectHash, "chats");
+    const sessionDir = path.join(
+      getRuntimeBaseDir(),
+      "tmp",
+      projectHash,
+      "chats",
+    );
     return sessionDir;
   }
 

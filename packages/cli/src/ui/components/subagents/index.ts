@@ -10,5 +10,6 @@ export { AgentCreationWizard } from "./create/AgentCreationWizard.js";
 // Management Dialog
 export { AgentsManagerDialog } from "./manage/AgentsManagerDialog.js";
 
-// Execution Display
-export { AgentExecutionDisplay } from "./runtime/AgentExecutionDisplay.js";
+// TODO(merge-v0.15.10): Execution Display (AgentExecutionDisplay) not yet
+// ported from upstream. Re-export once `runtime/AgentExecutionDisplay.tsx`
+// is restored.

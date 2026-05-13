@@ -14,6 +14,7 @@ import type {
 import type {
   AuthenticateUpdateNotification,
   AskUserQuestionRequest,
+  SlashCommandNotification,
 } from "../types/acpTypes.js";
 import type { ApprovalModeValue } from "../types/approvalModeValueTypes.js";
 import { TramSessionReader, type TramSession } from "./tramSessionReader.js";
@@ -271,6 +272,12 @@ export class TramAgentManager {
       }
     };
 
+    this.connection.onSlashCommandNotification = (
+      data: SlashCommandNotification,
+    ) => {
+      this.callbacks.onSlashCommandNotification?.(data);
+    };
+
     // Initialize callback to surface available modes and current mode to UI
     this.connection.onInitialized = (init: unknown) => {
       try {
@@ -382,6 +389,16 @@ export class TramAgentManager {
    */
   async sendMessage(message: string | ContentBlock[]): Promise<void> {
     await this.connection.sendPrompt(message);
+  }
+
+  async rewindSession(
+    targetTurnIndex: number,
+  ): Promise<{ historyBeforeRewind?: unknown[] }> {
+    return this.connection.rewindSession(targetTurnIndex);
+  }
+
+  async restoreSessionHistory(history: unknown[]): Promise<void> {
+    await this.connection.restoreSessionHistory(history);
   }
 
   /**
@@ -706,6 +723,32 @@ export class TramAgentManager {
         error,
       );
       return [];
+    }
+  }
+
+  /**
+   * Delete a session by ID via ACP.
+   */
+  async deleteSession(sessionId: string): Promise<boolean> {
+    try {
+      const res = await this.connection.deleteSession(sessionId);
+      return res.success;
+    } catch (error) {
+      console.error('[QwenAgentManager] Failed to delete session:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Rename a session via ACP.
+   */
+  async renameSession(sessionId: string, title: string): Promise<boolean> {
+    try {
+      const res = await this.connection.renameSession(sessionId, title);
+      return res.success;
+    } catch (error) {
+      console.error('[QwenAgentManager] Failed to rename session:', error);
+      return false;
     }
   }
 
@@ -1446,10 +1489,25 @@ export class TramAgentManager {
   }
 
   /**
+   * Register callback for available skills updates (from ACP available_skills_update)
+   */
+  onAvailableSkills(callback: (skills: string[]) => void): void {
+    this.callbacks.onAvailableSkills = callback;
+    this.sessionUpdateHandler.updateCallbacks(this.callbacks);
+  }
+
+  /**
    * Register callback for available models updates (from session/new response)
    */
   onAvailableModels(callback: (models: ModelInfo[]) => void): void {
     this.callbacks.onAvailableModels = callback;
+    this.sessionUpdateHandler.updateCallbacks(this.callbacks);
+  }
+
+  onSlashCommandNotification(
+    callback: (event: SlashCommandNotification) => void,
+  ): void {
+    this.callbacks.onSlashCommandNotification = callback;
     this.sessionUpdateHandler.updateCallbacks(this.callbacks);
   }
 

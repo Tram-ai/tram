@@ -206,6 +206,12 @@ export class ExitPlanModeTool extends BaseDeclarativeTool<
         string,
         unknown
       >,
+      true, // isOutputMarkdown
+      false, // canUpdateOutput
+      false, // isLmOnly
+      true, // shouldDefer — only used when leaving plan mode
+      false, // alwaysLoad
+      "plan mode exit approve",
     );
   }
 

@@ -17,6 +17,7 @@ export const authCommand: SlashCommand = {
     );
   },
   kind: CommandKind.BUILT_IN,
+  supportedModes: ["interactive"] as const,
   action: () => ({
     type: "dialog",
     dialog: "initialize",

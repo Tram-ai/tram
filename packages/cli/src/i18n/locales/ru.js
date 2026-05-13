@@ -149,6 +149,18 @@ export default {
   "Initialization complete.": "Initialization complete.",
   "Settings were saved. Press Enter to continue.":
     "Settings were saved. Press Enter to continue.",
+  "for shell mode": "режим оболочки",
+  "for commands": "меню команд",
+  "for file paths": "пути к файлам",
+  "to clear input": "очистить ввод",
+  "to cycle approvals": "переключить режим",
+  "to quit": "выход",
+  "for newline": "новая строка",
+  "to clear screen": "очистить экран",
+  "to search history": "поиск в истории",
+  "to paste images": "вставить изображения",
+  "for external editor": "внешний редактор",
+  "to toggle compact mode": "переключить компактный режим",
 
   // ============================================================================
   // System Information Fields
@@ -536,6 +548,11 @@ export default {
   'Extension "{{name}}" not found.': 'Extension "{{name}}" not found.',
   "No extensions to update.": "No extensions to update.",
   "Usage: /extensions install <source>": "Usage: /extensions install <source>",
+    'Команда "/{{command}}" не поддерживается в неинтерактивном режиме.',
+  'How is Tram doing this session? (optional)':
+    'Как дела у Tram в этой сессии? (необязательно)',
+  'Auto (detect terminal theme)': 'Авто (определить тему терминала)',
+  Auto: 'Авто',
   'Installing extension from "{{source}}"...':
     'Installing extension from "{{source}}"...',
   'Extension "{{name}}" installed successfully.':
@@ -729,6 +746,137 @@ export default {
   "List all configured hooks": "List all configured hooks",
   "Enable a disabled hook": "Enable a disabled hook",
   "Disable an active hook": "Disable an active hook",
+  // Hooks - Dialog
+  Hooks: 'Хуки',
+  'Loading hooks...': 'Загрузка хуков...',
+  'Error loading hooks:': 'Ошибка загрузки хуков:',
+  'Press Escape to close': 'Нажмите Escape для закрытия',
+  'Press Escape, Ctrl+C, or Ctrl+D to cancel':
+    'Нажмите Escape, Ctrl+C или Ctrl+D для отмены',
+  'Press Space, Enter, or Escape to dismiss':
+    'Нажмите Пробел, Enter или Escape для закрытия',
+  'No hook selected': 'Хук не выбран',
+  // Hooks - List Step
+  'No hook events found.': 'События хуков не найдены.',
+  '{{count}} hook configured': '{{count}} хук настроен',
+  '{{count}} hooks configured': '{{count}} хуков настроено',
+  'This menu is read-only. To add or modify hooks, edit settings.json directly or ask TRAM.':
+    'Это меню только для чтения. Чтобы добавить или изменить хуки, отредактируйте settings.json напрямую или спросите TRAM.',
+  'Enter to select · Esc to cancel': 'Enter для выбора · Esc для отмены',
+  // Hooks - Detail Step
+  'Exit codes:': 'Коды выхода:',
+  'Configured hooks:': 'Настроенные хуки:',
+  'No hooks configured for this event.':
+    'Для этого события нет настроенных хуков.',
+  'To add hooks, edit settings.json directly or ask Tram.':
+    'Чтобы добавить хуки, отредактируйте settings.json напрямую или спросите Tram.',
+  'Enter to select · Esc to go back': 'Enter для выбора · Esc для возврата',
+  // Hooks - Config Detail Step
+  'Hook details': 'Детали хука',
+  'Event:': 'Событие:',
+  'Extension:': 'Расширение:',
+  'Desc:': 'Описание:',
+  'No hook config selected': 'Конфигурация хука не выбрана',
+  'To modify or remove this hook, edit settings.json directly or ask Tram to help.':
+    'Чтобы изменить или удалить этот хук, отредактируйте settings.json напрямую или спросите Tram.',
+  // Hooks - Disabled Step
+  'Hook Configuration - Disabled': 'Конфигурация хуков - Отключено',
+  'All hooks are currently disabled. You have {{count}} that are not running.':
+    'Все хуки в данный момент отключены. У вас {{count}} не выполняются.',
+  '{{count}} configured hook': '{{count}} настроенный хук',
+  '{{count}} configured hooks': '{{count}} настроенных хуков',
+  'When hooks are disabled:': 'Когда хуки отключены:',
+  'No hook commands will execute': 'Никакие команды хуков не будут выполняться',
+  'StatusLine will not be displayed': 'StatusLine не будет отображаться',
+  'Tool operations will proceed without hook validation':
+    'Операции инструментов будут выполняться без проверки хуков',
+  'To re-enable hooks, remove "disableAllHooks" from settings.json or ask TRAM.':
+    'Чтобы снова включить хуки, удалите "disableAllHooks" из settings.json или спросите TRAM.',
+  // Hooks - Source
+  Project: 'Проект',
+  User: 'Пользователь',
+  System: 'Система',
+  Extension: 'Расширение',
+  'Local Settings': 'Локальные настройки',
+  'User Settings': 'Пользовательские настройки',
+  'System Settings': 'Системные настройки',
+  Extensions: 'Расширения',
+  'Session (temporary)': 'Сессия (временно)',
+  // Hooks - Status
+  '✓ Enabled': '✓ Включен',
+  '✗ Disabled': '✗ Отключен',
+  // Hooks - Event Descriptions (short)
+  'Before tool execution': 'Перед выполнением инструмента',
+  'After tool execution': 'После выполнения инструмента',
+  'After tool execution fails': 'При неудачном выполнении инструмента',
+  'When notifications are sent': 'При отправке уведомлений',
+  'When the user submits a prompt': 'Когда пользователь отправляет промпт',
+  'When a new session is started': 'При запуске новой сессии',
+  'Right before TRAM concludes its response':
+    'Непосредственно перед завершением ответа TRAM',
+  'When a subagent (Agent tool call) is started':
+    'При запуске субагента (вызов инструмента Agent)',
+  'Right before a subagent concludes its response':
+    'Непосредственно перед завершением ответа субагента',
+  'Before conversation compaction': 'Перед сжатием разговора',
+  'When a session is ending': 'При завершении сессии',
+  'When a permission dialog is displayed': 'При отображении диалога разрешений',
+  // Hooks - Event Descriptions (detailed)
+  'Input to command is JSON of tool call arguments.':
+    'Ввод в команду — это JSON аргументов вызова инструмента.',
+  'Input to command is JSON with fields "inputs" (tool call arguments) and "response" (tool call response).':
+    'Ввод в команду — это JSON с полями "inputs" (аргументы вызова инструмента) и "response" (ответ вызова инструмента).',
+  'Input to command is JSON with tool_name, tool_input, tool_use_id, error, error_type, is_interrupt, and is_timeout.':
+    'Ввод в команду — это JSON с tool_name, tool_input, tool_use_id, error, error_type, is_interrupt и is_timeout.',
+  'Input to command is JSON with notification message and type.':
+    'Ввод в команду — это JSON с сообщением уведомления и типом.',
+  'Input to command is JSON with original user prompt text.':
+    'Ввод в команду — это JSON с исходным текстом промпта пользователя.',
+  'Input to command is JSON with session start source.':
+    'Ввод в команду — это JSON с источником запуска сессии.',
+  'Input to command is JSON with session end reason.':
+    'Ввод в команду — это JSON с причиной завершения сессии.',
+  'Input to command is JSON with agent_id and agent_type.':
+    'Ввод в команду — это JSON с agent_id и agent_type.',
+  'Input to command is JSON with agent_id, agent_type, and agent_transcript_path.':
+    'Ввод в команду — это JSON с agent_id, agent_type и agent_transcript_path.',
+  'Input to command is JSON with compaction details.':
+    'Ввод в команду — это JSON с деталями сжатия.',
+  'Input to command is JSON with tool_name, tool_input, and tool_use_id. Output JSON with hookSpecificOutput containing decision to allow or deny.':
+    'Ввод в команду — это JSON с tool_name, tool_input и tool_use_id. Вывод — JSON с hookSpecificOutput, содержащим решение о разрешении или отказе.',
+  // Hooks - Exit Code Descriptions
+  'stdout/stderr not shown': 'stdout/stderr не отображаются',
+  'show stderr to model and continue conversation':
+    'показать stderr модели и продолжить разговор',
+  'show stderr to user only': 'показать stderr только пользователю',
+  'stdout shown in transcript mode (ctrl+o)':
+    'stdout отображается в режиме транскрипции (ctrl+o)',
+  'show stderr to model immediately': 'показать stderr модели немедленно',
+  'show stderr to user only but continue with tool call':
+    'показать stderr только пользователю, но продолжить вызов инструмента',
+  'block processing, erase original prompt, and show stderr to user only':
+    'заблокировать обработку, стереть исходный промпт и показать stderr только пользователю',
+  'stdout shown to Tram': 'stdout показан Tram',
+  'show stderr to user only (blocking errors ignored)':
+    'показать stderr только пользователю (блокирующие ошибки игнорируются)',
+  'command completes successfully': 'команда успешно завершена',
+  'stdout shown to subagent': 'stdout показан субагенту',
+  'show stderr to subagent and continue having it run':
+    'показать stderr субагенту и продолжить его выполнение',
+  'stdout appended as custom compact instructions':
+    'stdout добавлен как пользовательские инструкции сжатия',
+  'block compaction': 'заблокировать сжатие',
+  'show stderr to user only but continue with compaction':
+    'показать stderr только пользователю, но продолжить сжатие',
+  'use hook decision if provided':
+    'использовать решение хука, если предоставлено',
+  // Hooks - Messages
+  'Config not loaded.': 'Конфигурация не загружена.',
+  'Hooks are not enabled. Enable hooks in settings to use this feature.':
+    'Хуки не включены. Включите хуки в настройках, чтобы использовать эту функцию.',
+  'No hooks configured. Add hooks in your settings.json file.':
+    'Хуки не настроены. Добавьте хуки в файл settings.json.',
+  'Configured Hooks ({{count}} total)': 'Настроенные хуки (всего {{count}})',
 
   // ============================================================================
   // Commands - Session Export
@@ -881,6 +1029,45 @@ export default {
     "Usage: /memory add [--global|--project] <text to remember>",
   'Attempting to save to memory {{scope}}: "{{fact}}"':
     'Attempting to save to memory {{scope}}: "{{fact}}"',
+    'Попытка сохранить в память {{scope}}: "{{fact}}"',
+  'Open auto-memory folder': 'Открыть папку автопамяти',
+  'Auto-memory: {{status}}': 'Автопамять: {{status}}',
+  'Auto-dream: {{status}} · {{lastDream}} · /dream to run':
+    'Автоконсолидация: {{status}} · {{lastDream}} · /dream для запуска',
+  never: 'никогда',
+  on: 'вкл',
+  off: 'выкл',
+  '❆ dreaming': '❆ консолидация',
+  'Remove matching entries from managed auto-memory.':
+    'Удалить совпадающие записи из управляемой автопамяти.',
+  'Usage: /forget <memory text to remove>':
+    'Использование: /forget <текст воспоминания для удаления>',
+  'No managed auto-memory entries matched: {{query}}':
+    'Не найдено совпадающих записей автопамяти: {{query}}',
+  'Show managed auto-memory status.': 'Показать статус управляемой автопамяти.',
+  'Run managed auto-memory extraction for the current session.':
+    'Запустить извлечение управляемой автопамяти для текущей сессии.',
+  'Managed auto-memory root: {{root}}':
+    'Корневая директория управляемой автопамяти: {{root}}',
+  'Managed auto-memory topics:': 'Темы управляемой автопамяти:',
+  'No extraction cursor found yet.': 'Курсор извлечения ещё не найден.',
+  'Cursor: session={{sessionId}}, offset={{offset}}, updated={{updatedAt}}':
+    'Курсор: сессия={{sessionId}}, смещение={{offset}}, обновлено={{updatedAt}}',
+  'No chat client available to extract memory.':
+    'Нет доступного чат-клиента для извлечения памяти.',
+  'Managed auto-memory extraction is already running.':
+    'Извлечение управляемой автопамяти уже выполняется.',
+  'Managed auto-memory extraction found no new durable memories.':
+    'Извлечение управляемой автопамяти не нашло новых долгосрочных воспоминаний.',
+  'Consolidate managed auto-memory topic files.':
+    'Консолидировать файлы тем управляемой автопамяти.',
+  'Managed auto-memory dream found nothing to improve.':
+    'Консолидация автопамяти не нашла чего улучшать.',
+  'Deduplicated entries: {{count}}': 'Удалено дубликатов: {{count}}',
+  'Save a durable memory using the save_memory tool.':
+    'Сохранить долгосрочную память с помощью инструмента save_memory.',
+  'Usage: /remember [--global|--project] <text to remember>':
+    'Использование: /remember [--global|--project] <текст для запоминания>',
 
   // ============================================================================
   // Commands - MCP
@@ -1092,6 +1279,14 @@ export default {
   "Authentication type not available.": "Authentication type not available.",
   "No models available for the current authentication type ({{authType}}).":
     "No models available for the current authentication type ({{authType}}).",
+  // Команды - Модель
+  // ============================================================================
+  'Switch the model for this session (--fast for suggestion model, [model-id] to switch immediately).':
+    'Переключение модели для этой сессии (--fast для модели подсказок)',
+  'Set a lighter model for prompt suggestions and speculative execution':
+    'Установить облегчённую модель для подсказок и спекулятивного выполнения',
+  // Needs translation
+  ' (not in model registry)': ' (not in model registry)',
 
   // ============================================================================
   // Commands - Clear
@@ -1293,6 +1488,32 @@ export default {
   "Failed to validate credentials": "Failed to validate credentials",
   "Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel":
     "Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel",
+  'Tram OAuth': 'Tram OAuth',
+  'Discontinued — switch to Coding Plan or API Key':
+    'Прекращено — переключитесь на Coding Plan или API Key',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Run /auth to switch provider.':
+    'Бесплатный уровень Tram OAuth прекращён 2026-04-15. Выполните /auth для смены провайдера.',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Please select Coding Plan or API Key instead.':
+    'Бесплатный уровень Tram OAuth прекращён 2026-04-15. Выберите Coding Plan или API Key.',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Please select a model from another provider or run /auth to switch.':
+    'Бесплатный уровень Tram OAuth был прекращен 2026-04-15. Пожалуйста, выберите модель от другого провайдера или выполните /auth для переключения.',
+  '\n⚠ Tram OAuth free tier was discontinued on 2026-04-15. Please select another option.\n':
+    '\n⚠ Бесплатный уровень Tram OAuth прекращён 2026-04-15. Выберите другую опцию.\n',
+  'Browser-based authentication with third-party providers (e.g. OpenRouter, ModelScope)':
+    'Браузерная аутентификация с использованием сторонних провайдеров (например, OpenRouter, ModelScope)',
+  'Tram OAuth authentication timed out. Please try again.':
+    'Время ожидания авторизации Tram OAuth истекло. Пожалуйста, попробуйте снова.',
+  'Tram OAuth authentication cancelled.': 'Авторизация Tram OAuth отменена.',
+  'Tram OAuth Authentication': 'Авторизация Tram OAuth',
+  'Tram OAuth Authentication Timeout': 'Таймаут авторизации Tram OAuth',
+  'Waiting for Tram OAuth authentication...':
+    'Ожидание авторизации Tram OAuth...',
+  'Note: Your existing API key in settings.json will not be cleared when using Tram OAuth. You can switch back to OpenAI authentication later if needed.':
+    'Примечание: Ваш существующий ключ API в settings.json не будет удален при использовании Tram OAuth. Вы можете переключиться обратно на авторизацию OpenAI позже при необходимости.',
+  'Note: Your existing API key will not be cleared when using Tram OAuth.':
+    'Примечание: Ваш существующий ключ API не будет удален при использовании Tram OAuth.',
+  'Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel':
+    'Enter для продолжения, Tab/↑↓ для навигации, Esc для отмены',
 
   // ============================================================================
   // Dialogs - Model
@@ -1483,6 +1704,7 @@ export default {
     "The TOML format is deprecated. Would you like to migrate them to Markdown format?",
   "(Backups will be created and original files will be preserved)":
     "(Backups will be created and original files will be preserved)",
+  'Current tasks': 'Текущие задачи',
 
   // ============================================================================
   // Loading Phrases
@@ -1673,6 +1895,38 @@ export default {
     "Opening extensions page in your browser: {{url}}",
   "Failed to open browser. Check out the extensions gallery at {{url}}":
     "Failed to open browser. Check out the extensions gallery at {{url}}",
+  'Use /compress when the conversation gets long to summarize history and free up context.':
+    'Используйте /compress, когда разговор становится длинным, чтобы подвести итог и освободить контекст.',
+  'Start a fresh idea with /clear or /new; the previous session stays available in history.':
+    'Начните новую идею с /clear или /new; предыдущая сессия останется в истории.',
+  'Use /bug to submit issues to the maintainers when something goes off.':
+    'Используйте /bug, чтобы сообщить о проблемах разработчикам.',
+  'Switch auth type quickly with /auth.':
+    'Быстро переключите тип аутентификации с помощью /auth.',
+  'You can run any shell commands from TRAM using ! (e.g. !ls).':
+    'Вы можете выполнять любые shell-команды в TRAM с помощью ! (например, !ls).',
+  'Type / to open the command popup; Tab autocompletes slash commands and saved prompts.':
+    'Введите /, чтобы открыть меню команд; Tab автодополняет слэш-команды и сохранённые промпты.',
+  'You can resume a previous conversation by running Tram --continue or Tram --resume.':
+    'Вы можете продолжить предыдущий разговор, запустив Tram --continue или Tram --resume.',
+  'You can switch permission mode quickly with Shift+Tab or /approval-mode.':
+    'Вы можете быстро переключать режим разрешений с помощью Shift+Tab или /approval-mode.',
+  'You can switch permission mode quickly with Tab or /approval-mode.':
+    'Вы можете быстро переключать режим разрешений с помощью Tab или /approval-mode.',
+  'Try /insight to generate personalized insights from your chat history.':
+    'Попробуйте /insight, чтобы получить персонализированные выводы из истории чатов.',
+  'Press Ctrl+O to toggle compact mode — hide tool output and thinking for a cleaner view.':
+    'Нажмите Ctrl+O для переключения компактного режима — скрыть вывод инструментов и рассуждения.',
+  'Add a Tram.md file to give TRAM persistent project context.':
+    'Добавьте файл Tram.md, чтобы предоставить TRAM постоянный контекст проекта.',
+  'Use /btw to ask a quick side question without disrupting the conversation.':
+    'Используйте /btw, чтобы задать короткий побочный вопрос, не прерывая основной разговор.',
+  'Context is almost full! Run /compress now or start /new to continue.':
+    'Контекст почти заполнен! Выполните /compress сейчас или начните /new, чтобы продолжить.',
+  'Context is getting full. Use /compress to free up space.':
+    'Контекст заполняется. Используйте /compress, чтобы освободить место.',
+  'Long conversation? /compress summarizes history to free context.':
+    'Долгий разговор? /compress подведёт итог истории, чтобы освободить контекст.',
 
   // ============================================================================
   // Retry / Rate Limit
@@ -1811,6 +2065,105 @@ export default {
     "Unknown subcommand: {{subcommand}}\n\n{{helpText}}",
   "[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.":
     "[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.",
+  "Context Usage": "Использование контекста",
+  "% used": "% использовано",
+  "% context used": "% контекста использовано",
+  "Context exceeds limit! Use /compress or /clear to reduce.":
+    "Контекст превышает лимит! Используйте /compress или /clear для уменьшения.",
+  "Use /compress or /clear": "Используйте /compress или /clear",
+  "No API response yet. Send a message to see actual usage.":
+    "Пока нет ответа от API. Отправьте сообщение, чтобы увидеть фактическое использование.",
+  "Estimated pre-conversation overhead":
+    "Оценочные накладные расходы перед беседой",
+  "Context window": "Контекстное окно",
+  tokens: "токенов",
+  Used: "Использовано",
+  Free: "Свободно",
+  "Autocompact buffer": "Буфер автоупаковки",
+  "Usage by category": "Использование по категориям",
+  "System prompt": "Системная подсказка",
+  "Built-in tools": "Встроенные инструменты",
+  "MCP tools": "Инструменты MCP",
+  "Memory files": "Файлы памяти",
+  Skills: "Навыки",
+  Messages: "Сообщения",
+  "Show context window usage breakdown.":
+    "Показать разбивку использования контекстного окна.",
+  "Run /context detail for per-item breakdown.":
+    "Выполните /context detail для детализации по элементам.",
+  active: "активно",
+  "body loaded": "содержимое загружено",
+  memory: "память",
+  "MCP Management": "Управление MCP",
+  "Server List": "Список серверов",
+  "Server Detail": "Детали сервера",
+  "Disable Server": "Отключить сервер",
+  "Tool List": "Список инструментов",
+  "Tool Detail": "Детали инструмента",
+  "Loading...": "Загрузка...",
+  "Unknown step": "Неизвестный шаг",
+  "Esc to back": "Esc для возврата",
+  "↑↓ to navigate · Enter to select · Esc to close":
+    "↑↓ навигация · Enter выбрать · Esc закрыть",
+  "↑↓ to navigate · Enter to select · Esc to back":
+    "↑↓ навигация · Enter выбрать · Esc назад",
+  "↑↓ to navigate · Enter to confirm · Esc to back":
+    "↑↓ навигация · Enter подтвердить · Esc назад",
+  "User Settings (global)": "Настройки пользователя (глобальные)",
+  "Workspace Settings (project-specific)":
+    "Настройки рабочего пространства (проектные)",
+  "Disable server:": "Отключить сервер:",
+  "Select where to add the server to the exclude list:":
+    "Выберите, где добавить сервер в список исключений:",
+  "Press Enter to confirm, Esc to cancel":
+    "Enter для подтверждения, Esc для отмены",
+  "Status:": "Статус:",
+  "Command:": "Команда:",
+  "Working Directory:": "Рабочий каталог:",
+  "Capabilities:": "Возможности:",
+  "No server selected": "Сервер не выбран",
+  "User MCPs": "MCP пользователя",
+  "Project MCPs": "MCP проекта",
+  "Extension MCPs": "MCP расширений",
+  server: "сервер",
+  servers: "серверов",
+  "Add MCP servers to your settings to get started.":
+    "Добавьте серверы MCP в настройки, чтобы начать.",
+  "Run tram --debug to see error logs":
+    "Запустите tram --debug для просмотра журналов ошибок",
+  "OAuth Authentication": "OAuth-аутентификация",
+  "Press Enter to start authentication, Esc to go back":
+    "Нажмите Enter для начала аутентификации, Esc для возврата",
+  "Authenticating... Please complete the login in your browser.":
+    "Аутентификация... Пожалуйста, завершите вход в браузере.",
+  "Press Enter or Esc to go back": "Нажмите Enter или Esc для возврата",
+  "No tools available for this server.":
+    "Для этого сервера нет доступных инструментов.",
+  destructive: "деструктивный",
+  "read-only": "только чтение",
+  "open-world": "открытый мир",
+  idempotent: "идемпотентный",
+  "Tools for {{name}}": "Инструменты для {{name}}",
+  "Tools for {{serverName}}": "Инструменты для {{serverName}}",
+  "{{current}}/{{total}}": "{{current}}/{{total}}",
+  required: "обязательный",
+  Type: "Тип",
+  Enum: "Перечисление",
+  Parameters: "Параметры",
+  "No tool selected": "Инструмент не выбран",
+  Annotations: "Аннотации",
+  Title: "Заголовок",
+  "Read Only": "Только чтение",
+  Destructive: "Деструктивный",
+  Idempotent: "Идемпотентный",
+  "Open World": "Открытый мир",
+  Server: "Сервер",
+  "{{region}} configuration updated successfully.":
+    "Конфигурация {{region}} успешно обновлена.",
+  "Authenticated successfully with {{region}}. API key and model configs saved to settings.json.":
+    "Успешная аутентификация с {{region}}. API-ключ и конфигурации моделей сохранены в settings.json.",
+  "Tip: Use /model to switch between available Coding Plan models.":
+    "Совет: Используйте /model для переключения между доступными моделями Coding Plan.",
 
   // ============================================================================
   // Ask User Question Tool
@@ -1845,6 +2198,96 @@ export default {
   // ============================================================================
   "% used": "% used",
   "% context used": "% context used",
+  // Commands - Auth
+  // ============================================================================
+  'Configure Tram authentication information with Tram-OAuth or Alibaba Cloud Coding Plan':
+    'Настроить аутентификацию Tram через Tram-OAuth или Alibaba Cloud Coding Plan',
+  'Authenticate using Tram OAuth': 'Аутентификация через Tram OAuth',
+  'Authenticate using Alibaba Cloud Coding Plan':
+    'Аутентификация через Alibaba Cloud Coding Plan',
+  'Region for Coding Plan (china/global)':
+    'Регион для Coding Plan (china/global)',
+  'API key for Coding Plan': 'API-ключ для Coding Plan',
+  'Show current authentication status':
+    'Показать текущий статус аутентификации',
+  'Authentication completed successfully.': 'Аутентификация успешно завершена.',
+  'Starting Tram OAuth authentication...':
+    'Запуск аутентификации Tram OAuth...',
+  'Successfully authenticated with Tram OAuth.':
+    'Успешная аутентификация через Tram OAuth.',
+  'Failed to authenticate with Tram OAuth: {{error}}':
+    'Ошибка аутентификации через Tram OAuth: {{error}}',
+  'Processing Alibaba Cloud Coding Plan authentication...':
+    'Обработка аутентификации Alibaba Cloud Coding Plan...',
+  'Successfully authenticated with Alibaba Cloud Coding Plan.':
+    'Успешная аутентификация через Alibaba Cloud Coding Plan.',
+  'Failed to authenticate with Coding Plan: {{error}}':
+    'Ошибка аутентификации через Coding Plan: {{error}}',
+  '中国 (China)': '中国 (China)',
+  '阿里云百炼 (aliyun.com)': '阿里云百炼 (aliyun.com)',
+  Global: 'Глобальный',
+  'Alibaba Cloud (alibabacloud.com)': 'Alibaba Cloud (alibabacloud.com)',
+  'Select region for Coding Plan:': 'Выберите регион для Coding Plan:',
+  'Enter your Coding Plan API key: ': 'Введите ваш API-ключ Coding Plan: ',
+  'Select authentication method:': 'Выберите метод аутентификации:',
+  '\n=== Authentication Status ===\n': '\n=== Статус аутентификации ===\n',
+  '⚠️  No authentication method configured.\n':
+    '⚠️  Метод аутентификации не настроен.\n',
+  'Run one of the following commands to get started:\n':
+    'Выполните одну из следующих команд для начала:\n',
+  '  Tram auth Tram-oauth     - Authenticate with Tram OAuth (discontinued)':
+    '  Tram auth Tram-oauth     - Аутентификация через Tram OAuth (прекращено)',
+  '  Tram auth coding-plan      - Authenticate with Alibaba Cloud Coding Plan\n':
+    '  Tram auth coding-plan      - Аутентификация через Alibaba Cloud Coding Plan\n',
+  'Or simply run:': 'Или просто выполните:',
+  '  Tram auth                - Interactive authentication setup\n':
+    '  Tram auth                - Интерактивная настройка аутентификации\n',
+  '✓ Authentication Method: Tram OAuth': '✓ Метод аутентификации: Tram OAuth',
+  '  Type: Free tier (discontinued 2026-04-15)':
+    '  Тип: Бесплатный уровень (прекращено 2026-04-15)',
+  '  Limit: No longer available': '  Лимит: Больше не доступен',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan, OpenRouter, Fireworks AI, or another provider.':
+    'Бесплатный уровень Tram OAuth прекращён 2026-04-15. Выполните /auth для переключения на Coding Plan, OpenRouter, Fireworks AI или другого провайдера.',
+  '  Models: Tram latest models\n': '  Модели: Последние модели Tram\n',
+  '✓ Authentication Method: Alibaba Cloud Coding Plan':
+    '✓ Метод аутентификации: Alibaba Cloud Coding Plan',
+  '中国 (China) - 阿里云百炼': '中国 (China) - 阿里云百炼',
+  'Global - Alibaba Cloud': 'Глобальный - Alibaba Cloud',
+  '  Region: {{region}}': '  Регион: {{region}}',
+  '  Current Model: {{model}}': '  Текущая модель: {{model}}',
+  '  Config Version: {{version}}': '  Версия конфигурации: {{version}}',
+  '  Status: API key configured\n': '  Статус: API-ключ настроен\n',
+  '⚠️  Authentication Method: Alibaba Cloud Coding Plan (Incomplete)':
+    '⚠️  Метод аутентификации: Alibaba Cloud Coding Plan (Не завершён)',
+  '  Issue: API key not found in environment or settings\n':
+    '  Проблема: API-ключ не найден в окружении или настройках\n',
+  '  Run `Tram auth coding-plan` to re-configure.\n':
+    '  Выполните `Tram auth coding-plan` для повторной настройки.\n',
+  '✓ Authentication Method: {{type}}': '✓ Метод аутентификации: {{type}}',
+  '  Status: Configured\n': '  Статус: Настроено\n',
+  'Failed to check authentication status: {{error}}':
+    'Не удалось проверить статус аутентификации: {{error}}',
+  'Select an option:': 'Выберите вариант:',
+  'Raw mode not available. Please run in an interactive terminal.':
+    'Raw-режим недоступен. Пожалуйста, запустите в интерактивном терминале.',
+  '(Use ↑ ↓ arrows to navigate, Enter to select, Ctrl+C to exit)\n':
+    '(↑ ↓ стрелки для навигации, Enter для выбора, Ctrl+C для выхода)\n',
+  compact: 'компактный',
+  'compact mode: on (Ctrl+O off)': 'компактный режим: вкл (Ctrl+O выкл)',
+  'Hide tool output and thinking for a cleaner view (toggle with Ctrl+O).':
+    'Скрывать вывод инструментов и процесс рассуждений для более чистого вида (переключить с помощью Ctrl+O).',
+  'Press Ctrl+O to show full tool output':
+    'Нажмите Ctrl+O для показа полного вывода инструментов',
+  'Switch to plan mode or exit plan mode':
+    'Switch to plan mode or exit plan mode',
+  'Exited plan mode. Previous approval mode restored.':
+    'Exited plan mode. Previous approval mode restored.',
+  'Enabled plan mode. The agent will analyze and plan without executing tools.':
+    'Enabled plan mode. The agent will analyze and plan without executing tools.',
+  'Already in plan mode. Use "/plan exit" to exit plan mode.':
+    'Already in plan mode. Use "/plan exit" to exit plan mode.',
+  'Not in plan mode. Use "/plan" to enter plan mode first.':
+    'Not in plan mode. Use "/plan" to enter plan mode first.',
 
   // ============================================================================
   // Context Usage Display

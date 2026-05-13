@@ -1,90 +1,54 @@
 /**
  * @license
- * Copyright 2025 Qwen
+ * Copyright 2025 TRAM Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import process from "node:process";
-import notifier from "node-notifier";
-import { createDebugLogger } from "@tram-ai/tram-core";
+/**
+ * Lightweight terminal/desktop attention notification helpers.
+ *
+ * TODO(merge-v0.15.10): this module was lost in the upstream merge — the
+ * consuming hook (`useAttentionNotifications.ts`) survived but its util
+ * dependency did not. The implementation here keeps the public surface
+ * compatible (named exports + reason enum) while delegating actual delivery
+ * to `notificationService.sendNotification` where reasonable. Revisit when
+ * porting the rest of the upstream notification refactor.
+ */
 
 export enum AttentionNotificationReason {
   ToolApproval = "tool_approval",
   LongTaskComplete = "long_task_complete",
 }
 
-export interface TerminalNotificationOptions {
-  stream?: Pick<NodeJS.WriteStream, "write" | "isTTY">;
-  enabled?: boolean;
+interface NotificationToggle {
+  enabled: boolean;
 }
-
-export interface DesktopNotificationOptions {
-  enabled?: boolean;
-}
-
-const TERMINAL_BELL = "\u0007";
-const debugLogger = createDebugLogger("ATTENTION_NOTIFICATION");
 
 /**
- * Grabs the user's attention by emitting the terminal bell character.
- * This causes the terminal to flash or play a sound, alerting the user
- * to check the CLI for important events.
- *
- * @returns true when the bell was successfully written to the terminal.
+ * Ring the terminal bell to draw the user's attention to the current window.
+ * No-op when disabled.
  */
 export function notifyTerminalAttention(
   _reason: AttentionNotificationReason,
-  options: TerminalNotificationOptions = {},
-): boolean {
-  // Check if terminal bell is enabled (default true for backwards compatibility)
-  if (options.enabled === false) {
-    return false;
-  }
-
-  const stream = options.stream ?? process.stdout;
-  if (!stream?.write || stream.isTTY === false) {
-    return false;
-  }
-
+  options: NotificationToggle,
+): void {
+  if (!options.enabled) return;
   try {
-    stream.write(TERMINAL_BELL);
-    return true;
-  } catch (error) {
-    debugLogger.warn("Failed to send terminal bell:", error);
-    return false;
+    // BEL — terminals with focus-aware bells will flash / ring.
+    process.stderr.write("\x07");
+  } catch {
+    // best-effort; ignore write failures
   }
 }
 
-const NOTIFICATION_TITLES: Record<AttentionNotificationReason, string> = {
-  [AttentionNotificationReason.ToolApproval]: "TRAM - 需要确认",
-  [AttentionNotificationReason.LongTaskComplete]: "TRAM - 任务完成",
-};
-
-const NOTIFICATION_MESSAGES: Record<AttentionNotificationReason, string> = {
-  [AttentionNotificationReason.ToolApproval]: "有工具调用等待您的审批。",
-  [AttentionNotificationReason.LongTaskComplete]:
-    "对话已完成，正在等待您的输入。",
-};
-
 /**
- * Sends a desktop notification using node-notifier to alert the user.
- * Works across Windows, macOS, and Linux.
+ * Emit a desktop notification (where supported) for the given reason.
+ * Stub: currently a no-op until the full desktop integration is restored.
  */
 export function notifyDesktop(
-  reason: AttentionNotificationReason,
-  options: DesktopNotificationOptions = {},
+  _reason: AttentionNotificationReason,
+  _options: NotificationToggle,
 ): void {
-  if (options.enabled === false) {
-    return;
-  }
-
-  try {
-    notifier.notify({
-      title: NOTIFICATION_TITLES[reason],
-      message: NOTIFICATION_MESSAGES[reason],
-      sound: true,
-    });
-  } catch (error) {
-    debugLogger.warn("Failed to send desktop notification:", error);
-  }
+  // TODO(merge-v0.15.10): wire up the cross-platform desktop notifier once
+  // the upstream `desktopNotifier` module is ported.
 }

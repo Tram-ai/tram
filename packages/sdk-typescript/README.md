@@ -259,7 +259,7 @@ const result = query({
 ### Override the System Prompt
 
 ```typescript
-import { query } from "@qwen-code/sdk";
+import { query } from "@tram-ai/sdk";
 
 const result = query({
   prompt: "Say hello in one sentence.",
@@ -272,7 +272,7 @@ const result = query({
 ### Append to the Built-in System Prompt
 
 ```typescript
-import { query } from "@qwen-code/sdk";
+import { query } from "@tram-ai/sdk";
 
 const result = query({
   prompt: "Review the current directory.",

@@ -1,4 +1,4 @@
-(version 1)
+﻿(version 1)
 
 ;; allow everything by default
 (allow default)
@@ -10,6 +10,7 @@
     (subpath (param "TMP_DIR"))
     (subpath (param "CACHE_DIR"))
     (subpath (string-append (param "HOME_DIR") "/.tram"))
+    (subpath (param "RUNTIME_DIR"))
     (subpath (string-append (param "HOME_DIR") "/.npm"))
     (subpath (string-append (param "HOME_DIR") "/.cache"))
     (subpath (string-append (param "HOME_DIR") "/.gitconfig"))

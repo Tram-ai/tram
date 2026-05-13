@@ -17,7 +17,7 @@ import {
   type ClaudeMarketplacePluginConfig,
   type ClaudeMarketplaceConfig,
 } from "./claude-converter.js";
-import { HookType } from "../hooks/types.js";
+import { HookType, type CommandHookConfig } from "../hooks/types.js";
 import { performVariableReplacement } from "./variables.js";
 
 describe("convertClaudeToTramConfig", () => {
@@ -504,9 +504,10 @@ describe("convertClaudePluginPackage", () => {
     expect(result.config.hooks).toBeDefined();
     expect(result.config.hooks!["PostToolUse"]).toHaveLength(1);
     // Check that the variable was substituted
-    expect(result.config.hooks!["PostToolUse"]![0].hooks![0].command).toBe(
-      `${pluginSourceDir}/scripts/post-install.sh`,
-    );
+    expect(
+      (result.config.hooks!["PostToolUse"]![0].hooks![0] as CommandHookConfig)
+        .command,
+    ).toBe(`${pluginSourceDir}/scripts/post-install.sh`);
 
     // Clean up converted directory
     fs.rmSync(result.convertedDir, { recursive: true, force: true });

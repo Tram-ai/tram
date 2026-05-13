@@ -19,15 +19,16 @@ import express, {
   type Response,
   type NextFunction,
 } from "express";
+import cors from "cors";
 import { randomUUID } from "node:crypto";
 import { type Server as HTTPServer } from "node:http";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
-import * as os from "node:os";
 import type { z } from "zod";
 import type { DiffManager } from "./diff-manager.js";
 import { OpenFilesManager } from "./open-files-manager.js";
 import { ACP_ERROR_CODES } from "./constants/acpSchema.js";
+import { getGlobalQwenDir } from "./utils/paths.js";
 
 class CORSError extends Error {
   constructor(message: string) {
@@ -39,16 +40,14 @@ class CORSError extends Error {
 const MCP_SESSION_ID_HEADER = "mcp-session-id";
 const IDE_SERVER_PORT_ENV_VAR = "TRAM_CODE_IDE_SERVER_PORT";
 const IDE_WORKSPACE_PATH_ENV_VAR = "TRAM_CODE_IDE_WORKSPACE_PATH";
-const TRAM_DIR = ".tram";
 const IDE_DIR = "ide";
 
 async function getGlobalIdeDir(): Promise<string> {
-  const homeDir = os.homedir();
-  // Prefer home dir, but fall back to tmpdir if unavailable (matches core Storage behavior).
-  const baseDir = homeDir
-    ? path.join(homeDir, TRAM_DIR)
-    : path.join(os.tmpdir(), TRAM_DIR);
-  const ideDir = path.join(baseDir, IDE_DIR);
+  // Anchored to the global TRAM dir (not the runtime base dir) so the CLI's
+  // discovery path matches: the CLI can resolve runtime dirs from settings,
+  // but this extension only sees env vars, so settings-based overrides would
+  // silently desync the lock-file location.
+  const ideDir = path.join(getGlobalQwenDir(), IDE_DIR);
   await fs.mkdir(ideDir, { recursive: true });
   return ideDir;
 }

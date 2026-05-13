@@ -44,6 +44,15 @@ import { MCPManagementDialog } from "./mcp/MCPManagementDialog.js";
 import { HooksManagementDialog } from "./hooks/HooksManagementDialog.js";
 import { SessionPicker } from "./SessionPicker.js";
 import { InitializeDialog } from "./InitializeDialog.js";
+import { ProviderUpdatePrompt } from "./ProviderUpdatePrompt.js";
+import { ExternalAuthProgress } from "./ExternalAuthProgress.js";
+import { ManageModelsDialog } from "./ManageModelsDialog.js";
+import { RewindSelector } from "./RewindSelector.js";
+import { MemoryDialog } from "./MemoryDialog.js";
+import { Help } from "./Help.js";
+import { BackgroundTasksDialog } from "./background-view/BackgroundTasksDialog.js";
+import { useBackgroundTaskViewState } from "../contexts/BackgroundTaskViewContext.js";
+import { t } from "../../i18n/index.js";
 
 interface DialogManagerProps {
   addItem: UseHistoryManagerReturn["addItem"];
@@ -60,6 +69,7 @@ export const DialogManager = ({
 
   const uiState = useUIState();
   const uiActions = useUIActions();
+  const { dialogOpen: bgTasksDialogOpen } = useBackgroundTaskViewState();
   const { constrainHeight, terminalHeight, staticExtraHeight, mainAreaWidth } =
     uiState;
 
@@ -130,12 +140,11 @@ export const DialogManager = ({
       />
     );
   }
-  if (uiState.codingPlanUpdateRequest) {
+  if (uiState.providerUpdateRequest) {
     return (
-      <ConsentPrompt
-        prompt={uiState.codingPlanUpdateRequest.prompt}
-        onConfirm={uiState.codingPlanUpdateRequest.onConfirm}
-        terminalWidth={terminalWidth}
+      <ProviderUpdatePrompt
+        entries={uiState.providerUpdateRequest.entries}
+        onConfirm={uiState.providerUpdateRequest.onConfirm}
       />
     );
   }
@@ -211,6 +220,14 @@ export const DialogManager = ({
       />
     );
   }
+  if (uiState.isManageModelsDialogOpen) {
+    return (
+      <ManageModelsDialog
+        config={config}
+        onClose={uiActions.closeManageModelsDialog}
+      />
+    );
+  }
   if (uiState.isSettingsDialogOpen) {
     return (
       <Box flexDirection="column">
@@ -236,6 +253,21 @@ export const DialogManager = ({
           config={config}
         />
       </Box>
+    );
+  }
+  if (uiState.isMemoryDialogOpen) {
+    return <MemoryDialog onClose={uiActions.closeMemoryDialog} />;
+  }
+  if (uiState.isHelpDialogOpen) {
+    return (
+      <Help
+        commands={uiState.slashCommands}
+        width={mainAreaWidth}
+        activeTab={uiState.activeHelpTab}
+        onTabChange={uiActions.setHelpTab}
+        onClose={uiActions.closeHelpDialog}
+        isInteractive
+      />
     );
   }
   if (uiState.isApprovalModeDialogOpen) {
@@ -307,7 +339,7 @@ export const DialogManager = ({
     );
   }
 
-  if (uiState.isAuthDialogOpen || uiState.authError) {
+  if (uiState.auth.isAuthDialogOpen || uiState.auth.authError) {
     return (
       <Box flexDirection="column">
         <AuthDialog />
@@ -315,23 +347,40 @@ export const DialogManager = ({
     );
   }
 
-  if (uiState.isAuthenticating) {
+  if (uiState.auth.isAuthenticating) {
+    if (
+      uiState.auth.pendingAuthType === AuthType.USE_OPENAI &&
+      uiState.auth.externalAuthState
+    ) {
+      return (
+        <ExternalAuthProgress
+          title={uiState.auth.externalAuthState.title}
+          message={uiState.auth.externalAuthState.message}
+          detail={uiState.auth.externalAuthState.detail}
+          onCancel={() => {
+            uiActions.auth.cancelAuthentication();
+            uiActions.auth.setAuthState(AuthState.Updating);
+          }}
+        />
+      );
+    }
+
     // OpenAI authentication now handled through AuthDialog with coding-plan/custom sub-modes
     // TRAM OAuth remains as a separate flow
-    if (uiState.pendingAuthType === AuthType.TRAM_OAUTH) {
+    if (uiState.auth.pendingAuthType === AuthType.TRAM_OAUTH) {
       return (
         <TramOAuthProgress
-          deviceAuth={uiState.TramAuthState.deviceAuth || undefined}
-          authStatus={uiState.TramAuthState.authStatus}
-          authMessage={uiState.TramAuthState.authMessage}
+          deviceAuth={uiState.auth.tramAuthState.deviceAuth || undefined}
+          authStatus={uiState.auth.tramAuthState.authStatus}
+          authMessage={uiState.auth.tramAuthState.authMessage}
           onTimeout={() => {
-            uiActions.onAuthError("TRAM OAuth authentication timed out.");
-            uiActions.cancelAuthentication();
-            uiActions.setAuthState(AuthState.Updating);
+            uiActions.auth.onAuthError("TRAM OAuth authentication timed out.");
+            uiActions.auth.cancelAuthentication();
+            uiActions.auth.setAuthState(AuthState.Updating);
           }}
           onCancel={() => {
-            uiActions.cancelAuthentication();
-            uiActions.setAuthState(AuthState.Updating);
+            uiActions.auth.cancelAuthentication();
+            uiActions.auth.setAuthState(AuthState.Updating);
           }}
         />
       );
@@ -387,6 +436,44 @@ export const DialogManager = ({
         currentBranch={uiState.branchName}
         onSelect={uiActions.handleResume}
         onCancel={uiActions.closeResumeDialog}
+        initialSessions={uiState.resumeMatchedSessions}
+        enablePreview
+      />
+    );
+  }
+
+  if (uiState.isDeleteDialogOpen) {
+    return (
+      <SessionPicker
+        sessionService={config.getSessionService()}
+        currentBranch={uiState.branchName}
+        onSelect={uiActions.handleDelete}
+        onCancel={uiActions.closeDeleteDialog}
+        title={t('Delete Session')}
+      />
+    );
+  }
+
+  if (uiState.isRewindSelectorOpen) {
+    return (
+      <RewindSelector
+        history={uiState.history}
+        onRewind={uiActions.handleRewindConfirm}
+        onCancel={uiActions.closeRewindSelector}
+      />
+    );
+  }
+
+  // Background tasks dialog — lowest priority so other dialogs
+  // (permissions, trust prompts, auth, etc.) always take precedence. The
+  // dialog is part of the shared dialogsVisible machinery (see
+  // AppContainer) so its visibility mutes the composer and the global
+  // Ctrl+C / Esc handlers route through `closeAnyOpenDialog`.
+  if (bgTasksDialogOpen) {
+    return (
+      <BackgroundTasksDialog
+        availableTerminalHeight={terminalHeight - staticExtraHeight}
+        terminalWidth={mainAreaWidth}
       />
     );
   }

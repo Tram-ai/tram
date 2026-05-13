@@ -117,13 +117,13 @@ export function registerNewCommands(
   disposables.push(
     vscode.commands.registerCommand(loginCommand, async () => {
       const providers = getWebViewProviders();
-      if (providers.length > 0) {
-        await providers[providers.length - 1].forceReLogin();
-      } else {
-        vscode.window.showInformationMessage(
-          "Please open TRAM chat first before logging in.",
-        );
-      }
+      const provider =
+        providers.length > 0
+          ? providers[providers.length - 1]
+          : createWebViewProvider();
+
+      await provider.show();
+      await provider.startInteractiveAuth();
     }),
   );
 

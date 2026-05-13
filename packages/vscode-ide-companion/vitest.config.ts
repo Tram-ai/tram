@@ -1,6 +1,15 @@
+import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@tram-ai/qwen-code/export': path.resolve(
+        __dirname,
+        '../cli/src/export/index.ts',
+      ),
+    },
+  },
   test: {
     globals: true,
     environment: "node",

@@ -6,7 +6,6 @@
 
 import path from "node:path";
 import { promises as fs, unlinkSync } from "node:fs";
-import * as os from "os";
 import { randomUUID } from "node:crypto";
 
 import type { ITramOAuth2Client } from "./tramOAuth2.js";
@@ -18,11 +17,11 @@ import {
   CredentialsClearRequiredError,
 } from "./tramOAuth2.js";
 import { createDebugLogger } from "../utils/debugLogger.js";
+import { Storage } from "../config/storage.js";
 
 const debugLogger = createDebugLogger("TRAM_OAUTH");
 
 // File System Configuration
-const TRAM_DIR = ".tram";
 const TRAM_CREDENTIAL_FILENAME = "oauth_creds.json";
 const TRAM_LOCK_FILENAME = "oauth_creds.lock";
 
@@ -691,7 +690,7 @@ export class SharedTokenManager {
    * @returns The absolute path to the credentials file
    */
   private getCredentialFilePath(): string {
-    return path.join(os.homedir(), TRAM_DIR, TRAM_CREDENTIAL_FILENAME);
+    return path.join(Storage.getGlobalTramDir(), TRAM_CREDENTIAL_FILENAME);
   }
 
   /**
@@ -700,7 +699,7 @@ export class SharedTokenManager {
    * @returns The absolute path to the lock file
    */
   private getLockFilePath(): string {
-    return path.join(os.homedir(), TRAM_DIR, TRAM_LOCK_FILENAME);
+    return path.join(Storage.getGlobalTramDir(), TRAM_LOCK_FILENAME);
   }
 
   /**

@@ -38,7 +38,6 @@ describe("helpCommand", () => {
     expect(mockContext.ui.addItem).toHaveBeenCalledWith(
       expect.objectContaining({
         type: MessageType.HELP,
-        timestamp: expect.any(Date),
       }),
       expect.any(Number),
     );
@@ -47,6 +46,7 @@ describe("helpCommand", () => {
   it("should have the correct command properties", () => {
     expect(helpCommand.name).toBe("help");
     expect(helpCommand.kind).toBe(CommandKind.BUILT_IN);
+    expect(helpCommand.argumentHint).toBeUndefined();
     expect(helpCommand.description).toBe("for help on TRAM");
   });
 });

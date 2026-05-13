@@ -14,7 +14,11 @@ import type { Config } from "../../config/config.js";
 import type { ContentGenerator } from "../contentGenerator.js";
 import { AuthType } from "../contentGenerator.js";
 import { LoggingContentGenerator } from "./index.js";
-import { OpenAIContentConverter } from "../openaiContentGenerator/converter.js";
+import {
+  OpenAIContentConverter,
+  OpenAIContentConverterClass,
+} from "../openaiContentGenerator/converter.js";
+import { openaiRequestCaptureContext } from "../openaiContentGenerator/requestCaptureContext.js";
 import {
   logApiRequest,
   logApiResponse,
@@ -41,7 +45,7 @@ vi.mock("../../utils/openaiLogger.js", () => ({
 }));
 
 const realConvertGeminiRequestToOpenAI =
-  OpenAIContentConverter.prototype.convertGeminiRequestToOpenAI;
+  OpenAIContentConverter.convertGeminiRequestToOpenAI;
 const convertGeminiRequestToOpenAISpy = vi
   .spyOn(OpenAIContentConverter.prototype, "convertGeminiRequestToOpenAI")
   .mockReturnValue([{ role: "user", content: "converted" }]);
@@ -57,10 +61,11 @@ const convertGeminiResponseToOpenAISpy = vi
     model: "test-model",
     choices: [],
   } as OpenAI.Chat.ChatCompletion);
-const setModalitiesSpy = vi.spyOn(
-  OpenAIContentConverter.prototype,
-  "setModalities",
-);
+// TODO(merge-v0.15.10): setModalitiesSpy was previously asserted on; converter
+// is now a const-namespace and modalities flow via RequestContext, not setters.
+// Keep the spy active so existing call-count expectations remain accurate, but
+// drop the unused local binding.
+vi.spyOn(OpenAIContentConverter.prototype, "setModalities");
 
 const createConfig = (overrides: Record<string, unknown> = {}): Config => {
   const configContent = {
@@ -112,6 +117,9 @@ const createResponse = (
   return response;
 };
 
+const MAX_RESPONSE_TEXT_LENGTH = 4096;
+const RESPONSE_TEXT_TRUNCATION_SUFFIX = "...[truncated]";
+
 describe("LoggingContentGenerator", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -121,7 +129,6 @@ describe("LoggingContentGenerator", () => {
     convertGeminiRequestToOpenAISpy.mockClear();
     convertGeminiToolsToOpenAISpy.mockClear();
     convertGeminiResponseToOpenAISpy.mockClear();
-    setModalitiesSpy.mockClear();
   });
 
   it("logs request/response, normalizes thought parts, and logs OpenAI interaction", async () => {
@@ -204,6 +211,7 @@ describe("LoggingContentGenerator", () => {
     expect(responseEvent.model).toBe("model-v2");
     expect(responseEvent.prompt_id).toBe("prompt-1");
     expect(responseEvent.input_token_count).toBe(3);
+    expect(responseEvent.response_text).toBe('ok');
 
     expect(convertGeminiRequestToOpenAISpy).toHaveBeenCalledTimes(1);
     expect(convertGeminiToolsToOpenAISpy).toHaveBeenCalledTimes(1);
@@ -234,6 +242,69 @@ describe("LoggingContentGenerator", () => {
       choices: [],
     });
     expect(openaiError).toBeUndefined();
+  });
+
+  it("truncates long response text in API response telemetry", async () => {
+    const longText = "x".repeat(MAX_RESPONSE_TEXT_LENGTH + 100);
+    const wrapped = createWrappedGenerator(
+      vi
+        .fn()
+        .mockResolvedValue(
+          createResponse("resp-long", "test-model", [{ text: longText }]),
+        ),
+      vi.fn(),
+    );
+    const generator = new LoggingContentGenerator(wrapped, createConfig(), {
+      model: "test-model",
+      authType: AuthType.USE_OPENAI,
+      enableOpenAILogging: false,
+    });
+
+    const request = {
+      model: "test-model",
+      contents: "Hello",
+    } as unknown as GenerateContentParameters;
+
+    await generator.generateContent(request, "prompt-long");
+
+    const [, responseEvent] = vi.mocked(logApiResponse).mock.calls[0];
+    expect(responseEvent.response_text).toHaveLength(MAX_RESPONSE_TEXT_LENGTH);
+    expect(responseEvent.response_text).toBe(
+      `${longText.slice(
+        0,
+        MAX_RESPONSE_TEXT_LENGTH - RESPONSE_TEXT_TRUNCATION_SUFFIX.length,
+      )}${RESPONSE_TEXT_TRUNCATION_SUFFIX}`,
+    );
+  });
+
+  it.each([
+    ["thought-only", [{ text: "hidden thought", thought: true }]],
+    [
+      "functionCall-only",
+      [{ functionCall: { id: "call-1", name: "tool", args: "{}" } }],
+    ],
+  ])("omits response_text for %s API responses", async (_name, parts) => {
+    const wrapped = createWrappedGenerator(
+      vi
+        .fn()
+        .mockResolvedValue(createResponse("resp-empty", "test-model", parts)),
+      vi.fn(),
+    );
+    const generator = new LoggingContentGenerator(wrapped, createConfig(), {
+      model: "test-model",
+      authType: AuthType.USE_OPENAI,
+      enableOpenAILogging: false,
+    });
+
+    const request = {
+      model: "test-model",
+      contents: "Hello",
+    } as unknown as GenerateContentParameters;
+
+    await generator.generateContent(request, "prompt-empty");
+
+    const [, responseEvent] = vi.mocked(logApiResponse).mock.calls[0];
+    expect(responseEvent.response_text).toBeUndefined();
   });
 
   it("logs errors with status code and request id, then rethrows", async () => {
@@ -347,10 +418,11 @@ describe("LoggingContentGenerator", () => {
     const [, responseEvent] = vi.mocked(logApiResponse).mock.calls[0];
     expect(responseEvent.response_id).toBe("resp-1");
     expect(responseEvent.input_token_count).toBe(2);
+    expect(responseEvent.response_text).toBe('Hello world');
 
     expect(convertGeminiResponseToOpenAISpy).toHaveBeenCalledTimes(1);
-    const [consolidatedResponse] =
-      convertGeminiResponseToOpenAISpy.mock.calls[0];
+    const [consolidatedResponse] = convertGeminiResponseToOpenAISpy.mock
+      .calls[0] as [GenerateContentResponse];
     const consolidatedParts =
       consolidatedResponse.candidates?.[0]?.content?.parts || [];
     expect(consolidatedParts).toEqual([
@@ -409,13 +481,25 @@ describe("LoggingContentGenerator", () => {
   });
 
   it("uses generator modalities when converting logged OpenAI requests", async () => {
+    // TODO(merge-v0.15.10): real convertGeminiRequestToOpenAI is now a standalone
+    // function taking (request, requestContext, options). Test exercises the
+    // backward-compat prototype method which constructs the context internally.
     convertGeminiRequestToOpenAISpy.mockImplementationOnce(function (
-      this: OpenAIContentConverter,
-      request,
-      options,
+      this: OpenAIContentConverterClass,
+      ...args: unknown[]
     ) {
-      return realConvertGeminiRequestToOpenAI.call(this, request, options);
-    });
+      const [request, options] = args as [
+        GenerateContentParameters,
+        { cleanOrphanToolCalls: boolean } | undefined,
+      ];
+      return (
+        realConvertGeminiRequestToOpenAI as unknown as (
+          this: OpenAIContentConverterClass,
+          request: GenerateContentParameters,
+          options?: { cleanOrphanToolCalls: boolean },
+        ) => OpenAI.Chat.ChatCompletionMessageParam[]
+      ).call(this, request, options);
+    } as never);
 
     const wrapped = createWrappedGenerator(
       vi
@@ -458,7 +542,14 @@ describe("LoggingContentGenerator", () => {
 
     await generator.generateContent(request, "prompt-5");
 
-    expect(setModalitiesSpy).toHaveBeenCalledWith({ image: true });
+    expect(convertGeminiRequestToOpenAISpy).toHaveBeenCalledWith(
+      request,
+      expect.objectContaining({
+        model: 'test-model',
+        modalities: { image: true },
+      }),
+      { cleanOrphanToolCalls: false },
+    );
 
     const openaiLoggerInstance = vi.mocked(OpenAILogger).mock.results[0]
       ?.value as { logInteraction: ReturnType<typeof vi.fn> };
@@ -478,6 +569,290 @@ describe("LoggingContentGenerator", () => {
         ],
       },
     ]);
+  });
+
+  it("logs the captured wire request including provider-injected fields (generateContent)", async () => {
+    const wireRequest: OpenAI.Chat.ChatCompletionCreateParams = {
+      model: "deepseek-v4-pro",
+      messages: [{ role: "user", content: "hi" }],
+      temperature: 0.5,
+      max_tokens: 1024,
+      // Provider-injected fields the synthetic reconstruction would drop:
+      reasoning_effort: "max",
+      extra_body: { thinking: { type: "enabled" }, enable_thinking: true },
+      metadata: { dashscope_user_id: "abc" },
+    } as unknown as OpenAI.Chat.ChatCompletionCreateParams;
+
+    const wrapped = createWrappedGenerator(
+      vi.fn().mockImplementation(async () => {
+        openaiRequestCaptureContext.getStore()?.(wireRequest);
+        return createResponse("resp-cap", "deepseek-v4-pro", [{ text: "ok" }]);
+      }),
+      vi.fn(),
+    );
+
+    const generator = new LoggingContentGenerator(wrapped, createConfig(), {
+      model: "deepseek-v4-pro",
+      authType: AuthType.USE_OPENAI,
+      enableOpenAILogging: true,
+      openAILoggingDir: "logs",
+    });
+
+    const request = {
+      model: "deepseek-v4-pro",
+      contents: [{ role: "user", parts: [{ text: "hi" }] }],
+    } as unknown as GenerateContentParameters;
+
+    await generator.generateContent(request, "prompt-cap");
+
+    const openaiLoggerInstance = vi.mocked(OpenAILogger).mock.results[0]
+      ?.value as { logInteraction: ReturnType<typeof vi.fn> };
+    expect(openaiLoggerInstance.logInteraction).toHaveBeenCalledTimes(1);
+    const [loggedRequest] = openaiLoggerInstance.logInteraction.mock
+      .calls[0] as [OpenAI.Chat.ChatCompletionCreateParams];
+    // The logger must observe the actual wire request, not a stripped reconstruction.
+    expect(loggedRequest).toBe(wireRequest);
+    expect(loggedRequest).toMatchObject({
+      reasoning_effort: "max",
+      extra_body: { thinking: { type: "enabled" }, enable_thinking: true },
+      metadata: { dashscope_user_id: "abc" },
+    });
+  });
+
+  it("logs the captured wire request for streaming requests (generateContentStream)", async () => {
+    const wireRequest: OpenAI.Chat.ChatCompletionCreateParams = {
+      model: "glm-5.1",
+      messages: [{ role: "user", content: "hi" }],
+      stream: true,
+      stream_options: { include_usage: true },
+      extra_body: { thinking: { type: "enabled" } },
+    } as unknown as OpenAI.Chat.ChatCompletionCreateParams;
+
+    const chunk = createResponse("resp-stream-cap", "glm-5.1", [
+      { text: "ok" },
+    ]);
+
+    const wrapped = createWrappedGenerator(
+      vi.fn(),
+      vi.fn().mockImplementation(async () => {
+        openaiRequestCaptureContext.getStore()?.(wireRequest);
+        return (async function* () {
+          yield chunk;
+        })();
+      }),
+    );
+
+    const generator = new LoggingContentGenerator(wrapped, createConfig(), {
+      model: "glm-5.1",
+      authType: AuthType.USE_OPENAI,
+      enableOpenAILogging: true,
+      openAILoggingDir: "logs",
+    });
+
+    const request = {
+      model: "glm-5.1",
+      contents: [{ role: "user", parts: [{ text: "hi" }] }],
+    } as unknown as GenerateContentParameters;
+
+    const stream = await generator.generateContentStream(
+      request,
+      "prompt-stream-cap",
+    );
+    for await (const _ of stream) {
+      // drain
+    }
+
+    const openaiLoggerInstance = vi.mocked(OpenAILogger).mock.results[0]
+      ?.value as { logInteraction: ReturnType<typeof vi.fn> };
+    expect(openaiLoggerInstance.logInteraction).toHaveBeenCalledTimes(1);
+    const [loggedRequest] = openaiLoggerInstance.logInteraction.mock
+      .calls[0] as [OpenAI.Chat.ChatCompletionCreateParams];
+    expect(loggedRequest).toBe(wireRequest);
+    expect(loggedRequest).toMatchObject({
+      stream: true,
+      stream_options: { include_usage: true },
+      extra_body: { thinking: { type: "enabled" } },
+    });
+  });
+
+  it("falls back to synthetic request when the wrapped generator does not capture", async () => {
+    const wrapped = createWrappedGenerator(
+      vi
+        .fn()
+        .mockResolvedValue(
+          createResponse("resp-fallback", "test-model", [{ text: "ok" }]),
+        ),
+      vi.fn(),
+    );
+
+    const generator = new LoggingContentGenerator(wrapped, createConfig(), {
+      model: "test-model",
+      authType: AuthType.USE_OPENAI,
+      enableOpenAILogging: true,
+      openAILoggingDir: "logs",
+    });
+
+    const request = {
+      model: "test-model",
+      contents: [{ role: "user", parts: [{ text: "hi" }] }],
+      config: { temperature: 0.4 },
+    } as unknown as GenerateContentParameters;
+
+    await generator.generateContent(request, "prompt-fallback");
+
+    const openaiLoggerInstance = vi.mocked(OpenAILogger).mock.results[0]
+      ?.value as { logInteraction: ReturnType<typeof vi.fn> };
+    const [loggedRequest] = openaiLoggerInstance.logInteraction.mock
+      .calls[0] as [OpenAI.Chat.ChatCompletionCreateParams];
+    expect(loggedRequest).toEqual(
+      expect.objectContaining({
+        model: "test-model",
+        temperature: 0.4,
+      }),
+    );
+  });
+
+  it("does not propagate logging-side throws (success and error paths)", async () => {
+    const successResponse = createResponse("resp-safe", "test-model", [
+      { text: "ok" },
+    ]);
+    const successWrapped = createWrappedGenerator(
+      vi.fn().mockResolvedValue(successResponse),
+      vi.fn(),
+    );
+    const successGen = new LoggingContentGenerator(
+      successWrapped,
+      createConfig(),
+      {
+        model: "test-model",
+        authType: AuthType.USE_OPENAI,
+        enableOpenAILogging: true,
+        openAILoggingDir: "logs",
+      },
+    );
+
+    // No capture fires, so resolve() falls through to the synthetic builder.
+    // Force the synthetic build to throw, then verify the API result still surfaces.
+    convertGeminiRequestToOpenAISpy.mockImplementationOnce(() => {
+      throw new Error("synth-fail-success");
+    });
+
+    const request = {
+      model: "test-model",
+      contents: [{ role: "user", parts: [{ text: "hi" }] }],
+    } as unknown as GenerateContentParameters;
+
+    await expect(
+      successGen.generateContent(request, "prompt-safe-success"),
+    ).resolves.toBe(successResponse);
+
+    const apiError = new Error("api-boom");
+    const errorWrapped = createWrappedGenerator(
+      vi.fn().mockRejectedValue(apiError),
+      vi.fn(),
+    );
+    const errorGen = new LoggingContentGenerator(errorWrapped, createConfig(), {
+      model: "test-model",
+      authType: AuthType.USE_OPENAI,
+      enableOpenAILogging: true,
+      openAILoggingDir: "logs",
+    });
+    convertGeminiRequestToOpenAISpy.mockImplementationOnce(() => {
+      throw new Error("synth-fail-error");
+    });
+
+    await expect(
+      errorGen.generateContent(request, "prompt-safe-error"),
+    ).rejects.toThrow("api-boom");
+  });
+
+  it("does not propagate logging-side throws on a successful stream", async () => {
+    const chunk1 = createResponse("resp-stream-safe-1", "test-model", [
+      { text: "hello" },
+    ]);
+    const chunk2 = createResponse("resp-stream-safe-2", "test-model", [
+      { text: " world" },
+    ]);
+    const wrapped = createWrappedGenerator(
+      vi.fn(),
+      vi.fn().mockResolvedValue(
+        (async function* () {
+          yield chunk1;
+          yield chunk2;
+        })(),
+      ),
+    );
+    const generator = new LoggingContentGenerator(wrapped, createConfig(), {
+      model: "test-model",
+      authType: AuthType.USE_OPENAI,
+      enableOpenAILogging: true,
+      openAILoggingDir: "logs",
+    });
+    const openaiLoggerInstance = vi.mocked(OpenAILogger).mock.results[0]
+      ?.value as { logInteraction: ReturnType<typeof vi.fn> };
+    openaiLoggerInstance.logInteraction.mockRejectedValueOnce(
+      new Error("log-fail-on-stream-success"),
+    );
+
+    const request = {
+      model: "test-model",
+      contents: [{ role: "user", parts: [{ text: "hi" }] }],
+    } as unknown as GenerateContentParameters;
+
+    const stream = await generator.generateContentStream(
+      request,
+      "prompt-stream-safe-success",
+    );
+    const seen: GenerateContentResponse[] = [];
+    for await (const item of stream) {
+      seen.push(item);
+    }
+    // All chunks must reach the consumer; the logger throw must not surface.
+    expect(seen).toHaveLength(2);
+    expect(openaiLoggerInstance.logInteraction).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not let logging-side throws replace the original stream error", async () => {
+    const chunk = createResponse("resp-stream-err", "test-model", [
+      { text: "partial" },
+    ]);
+    const apiError = new Error("stream-api-fail");
+    const wrapped = createWrappedGenerator(
+      vi.fn(),
+      vi.fn().mockResolvedValue(
+        (async function* () {
+          yield chunk;
+          throw apiError;
+        })(),
+      ),
+    );
+    const generator = new LoggingContentGenerator(wrapped, createConfig(), {
+      model: "test-model",
+      authType: AuthType.USE_OPENAI,
+      enableOpenAILogging: true,
+      openAILoggingDir: "logs",
+    });
+    const openaiLoggerInstance = vi.mocked(OpenAILogger).mock.results[0]
+      ?.value as { logInteraction: ReturnType<typeof vi.fn> };
+    openaiLoggerInstance.logInteraction.mockRejectedValueOnce(
+      new Error("log-fail-on-stream-error"),
+    );
+
+    const request = {
+      model: "test-model",
+      contents: [{ role: "user", parts: [{ text: "hi" }] }],
+    } as unknown as GenerateContentParameters;
+
+    const stream = await generator.generateContentStream(
+      request,
+      "prompt-stream-safe-error",
+    );
+    await expect(async () => {
+      for await (const _item of stream) {
+        // drain
+      }
+    }).rejects.toThrow("stream-api-fail");
+    expect(openaiLoggerInstance.logInteraction).toHaveBeenCalledTimes(1);
   });
 
   it.each(["prompt_suggestion", "forked_query", "speculation"])(
@@ -512,6 +887,8 @@ describe("LoggingContentGenerator", () => {
       expect(logApiRequest).not.toHaveBeenCalled();
       // logApiResponse SHOULD be called (for /stats token tracking)
       expect(logApiResponse).toHaveBeenCalled();
+      const [, responseEvent] = vi.mocked(logApiResponse).mock.calls[0];
+      expect(responseEvent.response_text).toBeUndefined();
       // OpenAI logger should be constructed, but no interaction should be logged
       expect(OpenAILogger).toHaveBeenCalled();
       const loggerInstance = (
@@ -559,6 +936,8 @@ describe("LoggingContentGenerator", () => {
 
       expect(logApiRequest).not.toHaveBeenCalled();
       expect(logApiResponse).toHaveBeenCalled();
+      const [, responseEvent] = vi.mocked(logApiResponse).mock.calls[0];
+      expect(responseEvent.response_text).toBeUndefined();
       expect(OpenAILogger).toHaveBeenCalled();
       const loggerInstance = (
         OpenAILogger as unknown as ReturnType<typeof vi.fn>

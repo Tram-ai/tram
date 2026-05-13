@@ -27,6 +27,10 @@ interface MockToolOptions {
   kind?: Kind;
   canUpdateOutput?: boolean;
   isOutputMarkdown?: boolean;
+  isLmOnly?: boolean;
+  shouldDefer?: boolean;
+  alwaysLoad?: boolean;
+  searchHint?: string;
   getDefaultPermission?: () => Promise<PermissionDecision>;
   getConfirmationDetails?: (
     signal: AbortSignal,
@@ -102,6 +106,10 @@ export class MockTool extends BaseDeclarativeTool<
       options.params,
       options.isOutputMarkdown ?? false,
       options.canUpdateOutput ?? false,
+      options.isLmOnly ?? false,
+      options.shouldDefer ?? false,
+      options.alwaysLoad ?? false,
+      options.searchHint,
     );
 
     if (options.getDefaultPermission) {

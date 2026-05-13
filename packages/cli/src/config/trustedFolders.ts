@@ -12,6 +12,7 @@ import {
   getErrorMessage,
   isWithinRoot,
   ideContextStore,
+  Storage,
 } from "@tram-ai/tram-core";
 import type { Settings } from "./settings.js";
 import stripJsonComments from "strip-json-comments";
@@ -25,7 +26,9 @@ export function getTrustedFoldersPath(): string {
   if (process.env["TRAM_CODE_TRUSTED_FOLDERS_PATH"]) {
     return process.env["TRAM_CODE_TRUSTED_FOLDERS_PATH"];
   }
-  return path.join(USER_SETTINGS_DIR, TRUSTED_FOLDERS_FILENAME);
+  // Resolve lazily on every call: see settings.ts:getUserSettingsPath for why
+  // a top-level const would be stale after `preResolveHomeEnvOverrides()`.
+  return path.join(Storage.getGlobalQwenDir(), TRUSTED_FOLDERS_FILENAME);
 }
 
 export enum TrustLevel {

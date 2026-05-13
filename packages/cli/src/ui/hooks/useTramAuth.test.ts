@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * Copyright 2025 Qwen
  * SPDX-License-Identifier: Apache-2.0
@@ -56,7 +56,7 @@ describe("useTramAuth", () => {
       useTramAuth(AuthType.USE_GEMINI, false),
     );
 
-    expect(result.current.TramAuthState).toEqual({
+    expect(result.current.tramAuthState).toEqual({
       deviceAuth: null,
       authStatus: "idle",
       authMessage: null,
@@ -69,7 +69,7 @@ describe("useTramAuth", () => {
       useTramAuth(AuthType.TRAM_OAUTH, false),
     );
 
-    expect(result.current.TramAuthState).toEqual({
+    expect(result.current.tramAuthState).toEqual({
       deviceAuth: null,
       authStatus: "idle",
       authMessage: null,
@@ -106,8 +106,8 @@ describe("useTramAuth", () => {
       handleDeviceAuth!(mockDeviceAuth);
     });
 
-    expect(result.current.TramAuthState.deviceAuth).toEqual(mockDeviceAuth);
-    expect(result.current.TramAuthState.authStatus).toBe("polling");
+    expect(result.current.tramAuthState.deviceAuth).toEqual(mockDeviceAuth);
+    expect(result.current.tramAuthState.authStatus).toBe("polling");
   });
 
   it("should handle auth progress event - success", () => {
@@ -129,8 +129,8 @@ describe("useTramAuth", () => {
       handleAuthProgress!("success", "Authentication successful!");
     });
 
-    expect(result.current.TramAuthState.authStatus).toBe("success");
-    expect(result.current.TramAuthState.authMessage).toBe(
+    expect(result.current.tramAuthState.authStatus).toBe("success");
+    expect(result.current.tramAuthState.authMessage).toBe(
       "Authentication successful!",
     );
   });
@@ -154,8 +154,8 @@ describe("useTramAuth", () => {
       handleAuthProgress!("error", "Authentication failed");
     });
 
-    expect(result.current.TramAuthState.authStatus).toBe("error");
-    expect(result.current.TramAuthState.authMessage).toBe(
+    expect(result.current.tramAuthState.authStatus).toBe("error");
+    expect(result.current.tramAuthState.authMessage).toBe(
       "Authentication failed",
     );
   });
@@ -179,8 +179,8 @@ describe("useTramAuth", () => {
       handleAuthProgress!("polling", "Waiting for user authorization...");
     });
 
-    expect(result.current.TramAuthState.authStatus).toBe("polling");
-    expect(result.current.TramAuthState.authMessage).toBe(
+    expect(result.current.tramAuthState.authStatus).toBe("polling");
+    expect(result.current.tramAuthState.authMessage).toBe(
       "Waiting for user authorization...",
     );
   });
@@ -207,8 +207,8 @@ describe("useTramAuth", () => {
       );
     });
 
-    expect(result.current.TramAuthState.authStatus).toBe("rate_limit");
-    expect(result.current.TramAuthState.authMessage).toBe(
+    expect(result.current.tramAuthState.authStatus).toBe("rate_limit");
+    expect(result.current.tramAuthState.authMessage).toBe(
       "Too many requests. The server is rate limiting our requests. Please select a different authentication method or try again later.",
     );
   });
@@ -232,8 +232,8 @@ describe("useTramAuth", () => {
       handleAuthProgress!("success");
     });
 
-    expect(result.current.TramAuthState.authStatus).toBe("success");
-    expect(result.current.TramAuthState.authMessage).toBe(null);
+    expect(result.current.tramAuthState.authStatus).toBe("success");
+    expect(result.current.tramAuthState.authMessage).toBe(null);
   });
 
   it("should clean up event listeners when auth type changes", () => {
@@ -324,15 +324,15 @@ describe("useTramAuth", () => {
       handleDeviceAuth!(mockDeviceAuth);
     });
 
-    expect(result.current.TramAuthState.deviceAuth).toEqual(mockDeviceAuth);
-    expect(result.current.TramAuthState.authStatus).toBe("polling");
+    expect(result.current.tramAuthState.deviceAuth).toEqual(mockDeviceAuth);
+    expect(result.current.tramAuthState.authStatus).toBe("polling");
 
     // Switch to different auth type
     rerender({ pendingAuthType: AuthType.USE_GEMINI, isAuthenticating: true });
 
-    expect(result.current.TramAuthState.deviceAuth).toBe(null);
-    expect(result.current.TramAuthState.authStatus).toBe("idle");
-    expect(result.current.TramAuthState.authMessage).toBe(null);
+    expect(result.current.tramAuthState.deviceAuth).toBe(null);
+    expect(result.current.tramAuthState.authStatus).toBe("idle");
+    expect(result.current.tramAuthState.authMessage).toBe(null);
   });
 
   it("should reset state when authentication stops", () => {
@@ -356,15 +356,15 @@ describe("useTramAuth", () => {
       handleDeviceAuth!(mockDeviceAuth);
     });
 
-    expect(result.current.TramAuthState.deviceAuth).toEqual(mockDeviceAuth);
-    expect(result.current.TramAuthState.authStatus).toBe("polling");
+    expect(result.current.tramAuthState.deviceAuth).toEqual(mockDeviceAuth);
+    expect(result.current.tramAuthState.authStatus).toBe("polling");
 
     // Stop authentication
     rerender({ isAuthenticating: false });
 
-    expect(result.current.TramAuthState.deviceAuth).toBe(null);
-    expect(result.current.TramAuthState.authStatus).toBe("idle");
-    expect(result.current.TramAuthState.authMessage).toBe(null);
+    expect(result.current.tramAuthState.deviceAuth).toBe(null);
+    expect(result.current.tramAuthState.authStatus).toBe("idle");
+    expect(result.current.tramAuthState.authMessage).toBe(null);
   });
 
   it("should handle cancelTramAuth function", () => {
@@ -384,16 +384,16 @@ describe("useTramAuth", () => {
       handleDeviceAuth!(mockDeviceAuth);
     });
 
-    expect(result.current.TramAuthState.deviceAuth).toEqual(mockDeviceAuth);
+    expect(result.current.tramAuthState.deviceAuth).toEqual(mockDeviceAuth);
 
     // Cancel auth
     act(() => {
       result.current.cancelTramAuth();
     });
 
-    expect(result.current.TramAuthState.deviceAuth).toBe(null);
-    expect(result.current.TramAuthState.authStatus).toBe("idle");
-    expect(result.current.TramAuthState.authMessage).toBe(null);
+    expect(result.current.tramAuthState.deviceAuth).toBe(null);
+    expect(result.current.tramAuthState.authStatus).toBe("idle");
+    expect(result.current.tramAuthState.authMessage).toBe(null);
   });
 
   it("should handle different auth types correctly", () => {
@@ -401,25 +401,25 @@ describe("useTramAuth", () => {
     const { result: tramResult } = renderHook(() =>
       useTramAuth(AuthType.TRAM_OAUTH, true),
     );
-    expect(tramResult.current.TramAuthState.authStatus).toBe("idle");
+    expect(tramResult.current.tramAuthState.authStatus).toBe("idle");
     expect(mockTramOAuth2Events.on).toHaveBeenCalled();
 
     // Test with other auth types - should not set up event listeners
     const { result: geminiResult } = renderHook(() =>
       useTramAuth(AuthType.USE_GEMINI, true),
     );
-    expect(geminiResult.current.TramAuthState.authStatus).toBe("idle");
+    expect(geminiResult.current.tramAuthState.authStatus).toBe("idle");
 
     const { result: oauthResult } = renderHook(() =>
       useTramAuth(AuthType.USE_OPENAI, true),
     );
-    expect(oauthResult.current.TramAuthState.authStatus).toBe("idle");
+    expect(oauthResult.current.tramAuthState.authStatus).toBe("idle");
   });
 
   it("should initialize with idle status when starting authentication with TRAM auth", () => {
     const { result } = renderHook(() => useTramAuth(AuthType.TRAM_OAUTH, true));
 
-    expect(result.current.TramAuthState.authStatus).toBe("idle");
+    expect(result.current.tramAuthState.authStatus).toBe("idle");
     expect(mockTramOAuth2Events.on).toHaveBeenCalled();
   });
 });

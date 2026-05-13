@@ -59,6 +59,7 @@ export default {
   "to search history": "to search history",
   "to paste images": "to paste images",
   "for external editor": "for external editor",
+  "to toggle compact mode": "to toggle compact mode",
   "Jump through words in the input": "Jump through words in the input",
   "Close dialogs, cancel requests, or quit application":
     "Close dialogs, cancel requests, or quit application",
@@ -377,6 +378,29 @@ export default {
   "WeChat binding failed.": "WeChat binding failed.",
   "must be a number.": "must be a number.",
   "must be valid JSON": "must be valid JSON",
+  "Show working-tree change stats versus HEAD":
+    "Show working-tree change stats versus HEAD",
+  "Could not determine current working directory.":
+    "Could not determine current working directory.",
+  "Failed to compute git diff stats": "Failed to compute git diff stats",
+  "No diff available. Either this is not a git repository, HEAD is missing, or a merge/rebase/cherry-pick/revert is in progress.":
+    "No diff available. Either this is not a git repository, HEAD is missing, or a merge/rebase/cherry-pick/revert is in progress.",
+  "Clean working tree — no changes against HEAD.":
+    "Clean working tree — no changes against HEAD.",
+  "{{count}} file changed, +{{added}} / -{{removed}}":
+    "{{count}} file changed, +{{added}} / -{{removed}}",
+  "{{count}} files changed, +{{added}} / -{{removed}}":
+    "{{count}} files changed, +{{added}} / -{{removed}}",
+  "{{count}} file changed": "{{count}} file changed",
+  "{{count}} files changed": "{{count}} files changed",
+  "…and {{hidden}} more (showing first {{shown}})":
+    "…and {{hidden}} more (showing first {{shown}})",
+  "(binary)": "(binary)",
+  "(binary, new)": "(binary, new)",
+  "(new)": "(new)",
+  "(new, partial)": "(new, partial)",
+  "(deleted)": "(deleted)",
+  "(binary, deleted)": "(binary, deleted)",
 
   // ============================================================================
   // Commands - Agents
@@ -655,6 +679,8 @@ export default {
   "Tool Schema Compliance": "Tool Schema Compliance",
   // Settings enum options
   "Auto (detect from system)": "Auto (detect from system)",
+  "Auto (detect terminal theme)": "Auto (detect terminal theme)",
+  Auto: "Auto",
   Text: "Text",
   JSON: "JSON",
   Plan: "Plan",
@@ -796,6 +822,8 @@ export default {
   "Updates all extensions or a named extension to the latest version.":
     "Updates all extensions or a named extension to the latest version.",
   "Update all extensions.": "Update all extensions.",
+  "The name of the extension to update.":
+    "The name of the extension to update.",
   "Either an extension name or --all must be provided":
     "Either an extension name or --all must be provided",
   "Lists installed extensions.": "Lists installed extensions.",
@@ -893,6 +921,136 @@ export default {
   "List all configured hooks": "List all configured hooks",
   "Enable a disabled hook": "Enable a disabled hook",
   "Disable an active hook": "Disable an active hook",
+  // Hooks - Dialog
+  Hooks: "Hooks",
+  "Loading hooks...": "Loading hooks...",
+  "Error loading hooks:": "Error loading hooks:",
+  "Press Escape to close": "Press Escape to close",
+  "Press Escape, Ctrl+C, or Ctrl+D to cancel":
+    "Press Escape, Ctrl+C, or Ctrl+D to cancel",
+  "Press Space, Enter, or Escape to dismiss":
+    "Press Space, Enter, or Escape to dismiss",
+  "No hook selected": "No hook selected",
+  // Hooks - List Step
+  "No hook events found.": "No hook events found.",
+  "{{count}} hook configured": "{{count}} hook configured",
+  "{{count}} hooks configured": "{{count}} hooks configured",
+  "This menu is read-only. To add or modify hooks, edit settings.json directly or ask TRAM.":
+    "This menu is read-only. To add or modify hooks, edit settings.json directly or ask TRAM.",
+  "Enter to select · Esc to cancel": "Enter to select · Esc to cancel",
+  // Hooks - Detail Step
+  "Exit codes:": "Exit codes:",
+  "Configured hooks:": "Configured hooks:",
+  "No hooks configured for this event.": "No hooks configured for this event.",
+  "To add hooks, edit settings.json directly or ask Tram.":
+    "To add hooks, edit settings.json directly or ask Tram.",
+  "Enter to select · Esc to go back": "Enter to select · Esc to go back",
+  // Hooks - Config Detail Step
+  "Hook details": "Hook details",
+  "Event:": "Event:",
+  "Extension:": "Extension:",
+  "Desc:": "Desc:",
+  "No hook config selected": "No hook config selected",
+  "To modify or remove this hook, edit settings.json directly or ask Tram to help.":
+    "To modify or remove this hook, edit settings.json directly or ask Tram to help.",
+  // Hooks - Disabled Step
+  "Hook Configuration - Disabled": "Hook Configuration - Disabled",
+  "All hooks are currently disabled. You have {{count}} that are not running.":
+    "All hooks are currently disabled. You have {{count}} that are not running.",
+  "{{count}} configured hook": "{{count}} configured hook",
+  "{{count}} configured hooks": "{{count}} configured hooks",
+  "When hooks are disabled:": "When hooks are disabled:",
+  "No hook commands will execute": "No hook commands will execute",
+  "StatusLine will not be displayed": "StatusLine will not be displayed",
+  "Tool operations will proceed without hook validation":
+    "Tool operations will proceed without hook validation",
+  'To re-enable hooks, remove "disableAllHooks" from settings.json or ask TRAM.':
+    'To re-enable hooks, remove "disableAllHooks" from settings.json or ask TRAM.',
+  // Hooks - Source
+  Project: "Project",
+  User: "User",
+  System: "System",
+  Extension: "Extension",
+  "Local Settings": "Local Settings",
+  "User Settings": "User Settings",
+  "System Settings": "System Settings",
+  Extensions: "Extensions",
+  "Session (temporary)": "Session (temporary)",
+  // Hooks - Status
+  "✓ Enabled": "✓ Enabled",
+  "✗ Disabled": "✗ Disabled",
+  // Hooks - Event Descriptions (short)
+  "Before tool execution": "Before tool execution",
+  "After tool execution": "After tool execution",
+  "After tool execution fails": "After tool execution fails",
+  "When notifications are sent": "When notifications are sent",
+  "When the user submits a prompt": "When the user submits a prompt",
+  "When a new session is started": "When a new session is started",
+  "Right before TRAM concludes its response":
+    "Right before TRAM concludes its response",
+  "When a subagent (Agent tool call) is started":
+    "When a subagent (Agent tool call) is started",
+  "Right before a subagent concludes its response":
+    "Right before a subagent concludes its response",
+  "Before conversation compaction": "Before conversation compaction",
+  "When a session is ending": "When a session is ending",
+  "When a permission dialog is displayed":
+    "When a permission dialog is displayed",
+  // Hooks - Event Descriptions (detailed)
+  "Input to command is JSON of tool call arguments.":
+    "Input to command is JSON of tool call arguments.",
+  'Input to command is JSON with fields "inputs" (tool call arguments) and "response" (tool call response).':
+    'Input to command is JSON with fields "inputs" (tool call arguments) and "response" (tool call response).',
+  "Input to command is JSON with tool_name, tool_input, tool_use_id, error, error_type, is_interrupt, and is_timeout.":
+    "Input to command is JSON with tool_name, tool_input, tool_use_id, error, error_type, is_interrupt, and is_timeout.",
+  "Input to command is JSON with notification message and type.":
+    "Input to command is JSON with notification message and type.",
+  "Input to command is JSON with original user prompt text.":
+    "Input to command is JSON with original user prompt text.",
+  "Input to command is JSON with session start source.":
+    "Input to command is JSON with session start source.",
+  "Input to command is JSON with session end reason.":
+    "Input to command is JSON with session end reason.",
+  "Input to command is JSON with agent_id and agent_type.":
+    "Input to command is JSON with agent_id and agent_type.",
+  "Input to command is JSON with agent_id, agent_type, and agent_transcript_path.":
+    "Input to command is JSON with agent_id, agent_type, and agent_transcript_path.",
+  "Input to command is JSON with compaction details.":
+    "Input to command is JSON with compaction details.",
+  "Input to command is JSON with tool_name, tool_input, and tool_use_id. Output JSON with hookSpecificOutput containing decision to allow or deny.":
+    "Input to command is JSON with tool_name, tool_input, and tool_use_id. Output JSON with hookSpecificOutput containing decision to allow or deny.",
+  // Hooks - Exit Code Descriptions
+  "stdout/stderr not shown": "stdout/stderr not shown",
+  "show stderr to model and continue conversation":
+    "show stderr to model and continue conversation",
+  "show stderr to user only": "show stderr to user only",
+  "stdout shown in transcript mode (ctrl+o)":
+    "stdout shown in transcript mode (ctrl+o)",
+  "show stderr to model immediately": "show stderr to model immediately",
+  "show stderr to user only but continue with tool call":
+    "show stderr to user only but continue with tool call",
+  "block processing, erase original prompt, and show stderr to user only":
+    "block processing, erase original prompt, and show stderr to user only",
+  "stdout shown to Tram": "stdout shown to Tram",
+  "show stderr to user only (blocking errors ignored)":
+    "show stderr to user only (blocking errors ignored)",
+  "command completes successfully": "command completes successfully",
+  "stdout shown to subagent": "stdout shown to subagent",
+  "show stderr to subagent and continue having it run":
+    "show stderr to subagent and continue having it run",
+  "stdout appended as custom compact instructions":
+    "stdout appended as custom compact instructions",
+  "block compaction": "block compaction",
+  "show stderr to user only but continue with compaction":
+    "show stderr to user only but continue with compaction",
+  "use hook decision if provided": "use hook decision if provided",
+  // Hooks - Messages
+  "Config not loaded.": "Config not loaded.",
+  "Hooks are not enabled. Enable hooks in settings to use this feature.":
+    "Hooks are not enabled. Enable hooks in settings to use this feature.",
+  "No hooks configured. Add hooks in your settings.json file.":
+    "No hooks configured. Add hooks in your settings.json file.",
+  "Configured Hooks ({{count}} total)": "Configured Hooks ({{count}} total)",
 
   // ============================================================================
   // Commands - Session Export
@@ -1045,6 +1203,43 @@ export default {
     "Usage: /memory add [--global|--project] <text to remember>",
   'Attempting to save to memory {{scope}}: "{{fact}}"':
     'Attempting to save to memory {{scope}}: "{{fact}}"',
+  'Open auto-memory folder': 'Open auto-memory folder',
+  'Auto-memory: {{status}}': 'Auto-memory: {{status}}',
+  'Auto-dream: {{status}} · {{lastDream}} · /dream to run':
+    'Auto-dream: {{status}} · {{lastDream}} · /dream to run',
+  never: 'never',
+  on: 'on',
+  off: 'off',
+  '✦ dreaming': '✦ dreaming',
+  'Remove matching entries from managed auto-memory.':
+    'Remove matching entries from managed auto-memory.',
+  'Usage: /forget <memory text to remove>':
+    'Usage: /forget <memory text to remove>',
+  'No managed auto-memory entries matched: {{query}}':
+    'No managed auto-memory entries matched: {{query}}',
+  'Show managed auto-memory status.': 'Show managed auto-memory status.',
+  'Run managed auto-memory extraction for the current session.':
+    'Run managed auto-memory extraction for the current session.',
+  'Managed auto-memory root: {{root}}': 'Managed auto-memory root: {{root}}',
+  'Managed auto-memory topics:': 'Managed auto-memory topics:',
+  'No extraction cursor found yet.': 'No extraction cursor found yet.',
+  'Cursor: session={{sessionId}}, offset={{offset}}, updated={{updatedAt}}':
+    'Cursor: session={{sessionId}}, offset={{offset}}, updated={{updatedAt}}',
+  'No chat client available to extract memory.':
+    'No chat client available to extract memory.',
+  'Managed auto-memory extraction is already running.':
+    'Managed auto-memory extraction is already running.',
+  'Managed auto-memory extraction found no new durable memories.':
+    'Managed auto-memory extraction found no new durable memories.',
+  'Consolidate managed auto-memory topic files.':
+    'Consolidate managed auto-memory topic files.',
+  'Managed auto-memory dream found nothing to improve.':
+    'Managed auto-memory dream found nothing to improve.',
+  'Deduplicated entries: {{count}}': 'Deduplicated entries: {{count}}',
+  'Save a durable memory using the save_memory tool.':
+    'Save a durable memory using the save_memory tool.',
+  'Usage: /remember [--global|--project] <text to remember>':
+    'Usage: /remember [--global|--project] <text to remember>',
 
   // ============================================================================
   // Commands - MCP
@@ -1144,6 +1339,12 @@ export default {
     "Press Enter to start authentication, Esc to go back",
   "Authenticating... Please complete the login in your browser.":
     "Authenticating... Please complete the login in your browser.",
+  "Press c to copy the authorization URL to your clipboard.":
+    "Press c to copy the authorization URL to your clipboard.",
+  "Copy request sent to your terminal. If paste is empty, copy the URL above manually.":
+    "Copy request sent to your terminal. If paste is empty, copy the URL above manually.",
+  "Cannot write to terminal — copy the URL above manually.":
+    "Cannot write to terminal — copy the URL above manually.",
   "Press Enter or Esc to go back": "Press Enter or Esc to go back",
 
   // MCP Tool List
@@ -1256,6 +1457,11 @@ export default {
   "Authentication type not available.": "Authentication type not available.",
   "No models available for the current authentication type ({{authType}}).":
     "No models available for the current authentication type ({{authType}}).",
+  "Switch the model for this session (--fast for suggestion model, [model-id] to switch immediately).":
+    "Switch the model for this session (--fast for suggestion model, [model-id] to switch immediately).",
+  "Set a lighter model for prompt suggestions and speculative execution":
+    "Set a lighter model for prompt suggestions and speculative execution",
+  " (not in model registry)": " (not in model registry)",
 
   // ============================================================================
   // Commands - Clear
@@ -1457,6 +1663,49 @@ export default {
   "Failed to validate credentials": "Failed to validate credentials",
   "Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel":
     "Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel",
+  'Tram OAuth': 'Tram OAuth',
+  'Discontinued — switch to Coding Plan or API Key':
+    'Discontinued — switch to Coding Plan or API Key',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Run /auth to switch provider.':
+    'Tram OAuth free tier was discontinued on 2026-04-15. Run /auth to switch provider.',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Please select Coding Plan or API Key instead.':
+    'Tram OAuth free tier was discontinued on 2026-04-15. Please select Coding Plan or API Key instead.',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Please select a model from another provider or run /auth to switch.':
+    'Tram OAuth free tier was discontinued on 2026-04-15. Please select a model from another provider or run /auth to switch.',
+  '\n⚠ Tram OAuth free tier was discontinued on 2026-04-15. Please select another option.\n':
+    '\n⚠ Tram OAuth free tier was discontinued on 2026-04-15. Please select another option.\n',
+  'For teams \u00B7 Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models':
+    'For teams \u00B7 Paid \u00B7 Up to 6,000 requests/5 hrs \u00B7 All Alibaba Cloud Coding Plan Models',
+  'For individual developers \u00B7 Pay per model call \u00B7 5-hour/weekly quotas':
+    'For individual developers \u00B7 Pay per model call \u00B7 5-hour/weekly quotas',
+  Subscribe: 'Subscribe',
+  'Paid subscription plans from Alibaba Cloud ModelStudio':
+    'Paid subscription plans from Alibaba Cloud ModelStudio',
+  'Select Subscription Plan': 'Select Subscription Plan',
+  'Alibaba Cloud Token Plan': 'Alibaba Cloud Token Plan',
+  'Pay-as-you-go tokens \u00B7 Configure ModelStudio standard API key':
+    'Pay-as-you-go tokens \u00B7 Configure ModelStudio standard API key',
+  'For individuals \u00B7 Pay-as-you-go tokens \u00B7 Dedicated Token Plan endpoint':
+    'For individuals \u00B7 Pay-as-you-go tokens \u00B7 Dedicated Token Plan endpoint',
+  'For teams/companies \u00B7 Credits deducted by token usage \u00B7 Dedicated API key and base URL':
+    'For teams/companies \u00B7 Credits deducted by token usage \u00B7 Dedicated API key and base URL',
+  'Token Plan documentation': 'Token Plan documentation',
+  'Browser-based authentication with third-party providers (e.g. OpenRouter, ModelScope)':
+    'Browser-based authentication with third-party providers (e.g. OpenRouter, ModelScope)',
+  'Tram OAuth authentication timed out. Please try again.':
+    'Tram OAuth authentication timed out. Please try again.',
+  'Tram OAuth authentication cancelled.':
+    'Tram OAuth authentication cancelled.',
+  'Tram OAuth Authentication': 'Tram OAuth Authentication',
+  'Tram OAuth Authentication Timeout': 'Tram OAuth Authentication Timeout',
+  'Waiting for Tram OAuth authentication...':
+    'Waiting for Tram OAuth authentication...',
+  'Note: Your existing API key in settings.json will not be cleared when using Tram OAuth. You can switch back to OpenAI authentication later if needed.':
+    'Note: Your existing API key in settings.json will not be cleared when using Tram OAuth. You can switch back to OpenAI authentication later if needed.',
+  'Note: Your existing API key will not be cleared when using Tram OAuth.':
+    'Note: Your existing API key will not be cleared when using Tram OAuth.',
+  'Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel':
+    'Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel',
 
   // ============================================================================
   // Dialogs - Model
@@ -1577,6 +1826,18 @@ export default {
     "You can switch permission mode quickly with Tab or /approval-mode.",
   "Try /insight to generate personalized insights from your chat history.":
     "Try /insight to generate personalized insights from your chat history.",
+  "Press Ctrl+O to toggle compact mode — hide tool output and thinking for a cleaner view.":
+    "Press Ctrl+O to toggle compact mode — hide tool output and thinking for a cleaner view.",
+  "Add a QWEN.md file to give TRAM persistent project context.":
+    "Add a QWEN.md file to give TRAM persistent project context.",
+  "Use /btw to ask a quick side question without disrupting the conversation.":
+    "Use /btw to ask a quick side question without disrupting the conversation.",
+  "Context is almost full! Run /compress now or start /new to continue.":
+    "Context is almost full! Run /compress now or start /new to continue.",
+  "Context is getting full. Use /compress to free up space.":
+    "Context is getting full. Use /compress to free up space.",
+  "Long conversation? /compress summarizes history to free context.":
+    "Long conversation? /compress summarizes history to free context.",
 
   // ============================================================================
   // Exit Screen / Stats
@@ -1642,6 +1903,7 @@ export default {
   "Command Format Migration": "Command Format Migration",
   "Found {{count}} TOML command file:": "Found {{count}} TOML command file:",
   "Found {{count}} TOML command files:": "Found {{count}} TOML command files:",
+  "Current tasks": "Current tasks",
   "... and {{count}} more": "... and {{count}} more",
   "The TOML format is deprecated. Would you like to migrate them to Markdown format?":
     "The TOML format is deprecated. Would you like to migrate them to Markdown format?",
@@ -1852,8 +2114,12 @@ export default {
   // Coding Plan Authentication
   // ============================================================================
   "API key cannot be empty.": "API key cannot be empty.",
+  'Invalid API key. Coding Plan API keys start with "sk-sp-". Please check.':
+    'Invalid API key. Coding Plan API keys start with "sk-sp-". Please check.',
   "You can get your Coding Plan API key here":
     "You can get your Coding Plan API key here",
+  "You can get your Token Plan API key here":
+    "You can get your Token Plan API key here",
   "API key is stored in settings.env. You can migrate it to a .env file for better security.":
     "API key is stored in settings.env. You can migrate it to a .env file for better security.",
   "New model configurations are available for Alibaba Cloud Coding Plan. Update now?":
@@ -1890,6 +2156,9 @@ export default {
   "Choose based on where your account is registered":
     "Choose based on where your account is registered",
   "Enter Coding Plan API Key": "Enter Coding Plan API Key",
+  "Paste your api key of ModelStudio Coding Plan and you're all set!":
+    "Paste your api key of ModelStudio Coding Plan and you're all set!",
+  "Enter Token Plan API Key": "Enter Token Plan API Key",
 
   // ============================================================================
   // Coding Plan International Updates
@@ -1975,6 +2244,41 @@ export default {
     "Unknown subcommand: {{subcommand}}\n\n{{helpText}}",
   "[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.":
     "[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.",
+  "Context Usage": "Context Usage",
+  "% used": "% used",
+  "% context used": "% context used",
+  "Context exceeds limit! Use /compress or /clear to reduce.":
+    "Context exceeds limit! Use /compress or /clear to reduce.",
+  "Use /compress or /clear": "Use /compress or /clear",
+  "No API response yet. Send a message to see actual usage.":
+    "No API response yet. Send a message to see actual usage.",
+  "Estimated pre-conversation overhead": "Estimated pre-conversation overhead",
+  "Context window": "Context window",
+  tokens: "tokens",
+  Used: "Used",
+  Free: "Free",
+  "Autocompact buffer": "Autocompact buffer",
+  "Usage by category": "Usage by category",
+  "System prompt": "System prompt",
+  "Built-in tools": "Built-in tools",
+  "MCP tools": "MCP tools",
+  "Memory files": "Memory files",
+  Skills: "Skills",
+  Messages: "Messages",
+  "Show context window usage breakdown.":
+    "Show context window usage breakdown.",
+  "Run /context detail for per-item breakdown.":
+    "Run /context detail for per-item breakdown.",
+  'Show context window usage breakdown. Use "/context detail" for per-item breakdown.':
+    'Show context window usage breakdown. Use "/context detail" for per-item breakdown.',
+  "body loaded": "body loaded",
+  memory: "memory",
+  "{{region}} configuration updated successfully.":
+    "{{region}} configuration updated successfully.",
+  "Authenticated successfully with {{region}}. API key and model configs saved to settings.json.":
+    "Authenticated successfully with {{region}}. API key and model configs saved to settings.json.",
+  "Tip: Use /model to switch between available Coding Plan models.":
+    "Tip: Use /model to switch between available Coding Plan models.",
 
   // ============================================================================
   // Ask User Question Tool
@@ -2009,6 +2313,86 @@ export default {
   // ============================================================================
   "% used": "% used",
   "% context used": "% context used",
+  // Commands - Auth
+  // ============================================================================
+  'Configure Tram authentication information with Tram-OAuth or Alibaba Cloud Coding Plan':
+    'Configure Tram authentication information with Tram-OAuth or Alibaba Cloud Coding Plan',
+  'Authenticate using Tram OAuth': 'Authenticate using Tram OAuth',
+  'Authenticate using Alibaba Cloud Coding Plan':
+    'Authenticate using Alibaba Cloud Coding Plan',
+  'Region for Coding Plan (china/global)':
+    'Region for Coding Plan (china/global)',
+  'API key for Coding Plan': 'API key for Coding Plan',
+  'Show current authentication status': 'Show current authentication status',
+  'Authentication completed successfully.':
+    'Authentication completed successfully.',
+  'Starting Tram OAuth authentication...':
+    'Starting Tram OAuth authentication...',
+  'Successfully authenticated with Tram OAuth.':
+    'Successfully authenticated with Tram OAuth.',
+  'Failed to authenticate with Tram OAuth: {{error}}':
+    'Failed to authenticate with Tram OAuth: {{error}}',
+  'Processing Alibaba Cloud Coding Plan authentication...':
+    'Processing Alibaba Cloud Coding Plan authentication...',
+  'Successfully authenticated with Alibaba Cloud Coding Plan.':
+    'Successfully authenticated with Alibaba Cloud Coding Plan.',
+  'Failed to authenticate with Coding Plan: {{error}}':
+    'Failed to authenticate with Coding Plan: {{error}}',
+  '中国 (China)': '中国 (China)',
+  '阿里云百炼 (aliyun.com)': '阿里云百炼 (aliyun.com)',
+  Global: 'Global',
+  'Alibaba Cloud (alibabacloud.com)': 'Alibaba Cloud (alibabacloud.com)',
+  'Select region for Coding Plan:': 'Select region for Coding Plan:',
+  'Enter your Coding Plan API key: ': 'Enter your Coding Plan API key: ',
+  'Select authentication method:': 'Select authentication method:',
+  '\n=== Authentication Status ===\n': '\n=== Authentication Status ===\n',
+  '⚠️  No authentication method configured.\n':
+    '⚠️  No authentication method configured.\n',
+  'Run one of the following commands to get started:\n':
+    'Run one of the following commands to get started:\n',
+  '  Tram auth Tram-oauth     - Authenticate with Tram OAuth (discontinued)':
+    '  Tram auth Tram-oauth     - Authenticate with Tram OAuth (discontinued)',
+  '  Tram auth coding-plan      - Authenticate with Alibaba Cloud Coding Plan\n':
+    '  Tram auth coding-plan      - Authenticate with Alibaba Cloud Coding Plan\n',
+  'Or simply run:': 'Or simply run:',
+  '  Tram auth                - Interactive authentication setup\n':
+    '  Tram auth                - Interactive authentication setup\n',
+  '✓ Authentication Method: Tram OAuth': '✓ Authentication Method: Tram OAuth',
+  '  Type: Free tier (discontinued 2026-04-15)':
+    '  Type: Free tier (discontinued 2026-04-15)',
+  '  Limit: No longer available': '  Limit: No longer available',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan, OpenRouter, Fireworks AI, or another provider.':
+    'Tram OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan, OpenRouter, Fireworks AI, or another provider.',
+  '  Models: Tram latest models\n': '  Models: Tram latest models\n',
+  '✓ Authentication Method: Alibaba Cloud Coding Plan':
+    '✓ Authentication Method: Alibaba Cloud Coding Plan',
+  '中国 (China) - 阿里云百炼': '中国 (China) - 阿里云百炼',
+  'Global - Alibaba Cloud': 'Global - Alibaba Cloud',
+  '  Region: {{region}}': '  Region: {{region}}',
+  '  Current Model: {{model}}': '  Current Model: {{model}}',
+  '  Config Version: {{version}}': '  Config Version: {{version}}',
+  '  Status: API key configured\n': '  Status: API key configured\n',
+  '⚠️  Authentication Method: Alibaba Cloud Coding Plan (Incomplete)':
+    '⚠️  Authentication Method: Alibaba Cloud Coding Plan (Incomplete)',
+  '  Issue: API key not found in environment or settings\n':
+    '  Issue: API key not found in environment or settings\n',
+  '  Run `Tram auth coding-plan` to re-configure.\n':
+    '  Run `Tram auth coding-plan` to re-configure.\n',
+  '✓ Authentication Method: {{type}}': '✓ Authentication Method: {{type}}',
+  '  Status: Configured\n': '  Status: Configured\n',
+  'Failed to check authentication status: {{error}}':
+    'Failed to check authentication status: {{error}}',
+  'Select an option:': 'Select an option:',
+  'Raw mode not available. Please run in an interactive terminal.':
+    'Raw mode not available. Please run in an interactive terminal.',
+  '(Use ↑ ↓ arrows to navigate, Enter to select, Ctrl+C to exit)\n':
+    '(Use ↑ ↓ arrows to navigate, Enter to select, Ctrl+C to exit)\n',
+  compact: 'compact',
+  'compact mode: on (Ctrl+O off)': 'compact mode: on (Ctrl+O off)',
+  'Hide tool output and thinking for a cleaner view (toggle with Ctrl+O).':
+    'Hide tool output and thinking for a cleaner view (toggle with Ctrl+O).',
+  'Press Ctrl+O to show full tool output':
+    'Press Ctrl+O to show full tool output',
 
   // ============================================================================
   // Context Usage Display

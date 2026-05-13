@@ -657,7 +657,7 @@ describe("HookRunner", () => {
       expect(result.output?.systemMessage).toBe("plain text response");
     });
 
-    it("should convert non-zero exit code to deny output", async () => {
+    it("should treat non-blocking non-zero exit codes as non-blocking warnings", async () => {
       const mockProcess = createMockProcess(3, "", "error message");
       mockSpawn.mockImplementation(() => mockProcess);
 
@@ -675,8 +675,8 @@ describe("HookRunner", () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.output?.decision).toBe("deny");
-      expect(result.output?.reason).toBe("error message");
+      expect(result.output?.decision).toBe("allow");
+      expect(result.output?.systemMessage).toBe("Warning: error message");
     });
 
     it("should use stderr when stdout is empty on success", async () => {
@@ -738,6 +738,75 @@ describe("HookRunner", () => {
       );
 
       expect(result.output?.decision).toBe("allow");
+    });
+  });
+
+  describe('shell configuration', () => {
+    it('should use global shell configuration when hookConfig.shell is not specified', async () => {
+      const mockProcess = createMockProcess(0, '{"continue": true}');
+      mockSpawn.mockImplementation(() => mockProcess);
+
+      const hookConfig: HookConfig = {
+        type: HookType.Command,
+        command: 'echo test',
+        source: HooksConfigSource.Project,
+        // No shell specified - should use global config
+      };
+      const input = createMockInput();
+
+      await hookRunner.executeHook(hookConfig, HookEventName.PreToolUse, input);
+
+      // Verify spawn was called with global shell config
+      expect(mockSpawn).toHaveBeenCalled();
+      const spawnArgs = mockSpawn.mock.calls[0];
+      // Global config uses bash or cmd depending on platform
+      expect(spawnArgs[2].shell).toBe(false);
+    });
+
+    it('should use bash shell when hookConfig.shell is bash', async () => {
+      const mockProcess = createMockProcess(0, '{"continue": true}');
+      mockSpawn.mockImplementation(() => mockProcess);
+
+      const hookConfig: HookConfig = {
+        type: HookType.Command,
+        command: 'echo test',
+        source: HooksConfigSource.Project,
+        shell: 'bash',
+      };
+      const input = createMockInput();
+
+      await hookRunner.executeHook(hookConfig, HookEventName.PreToolUse, input);
+
+      // Verify spawn was called with bash configuration
+      expect(mockSpawn).toHaveBeenCalled();
+      const spawnArgs = mockSpawn.mock.calls[0];
+      // Should use bash executable
+      expect(spawnArgs[0]).toMatch(/bash/);
+      expect(spawnArgs[1]).toContain('-c');
+      expect(spawnArgs[2].shell).toBe(false);
+    });
+
+    it('should use powershell when hookConfig.shell is powershell', async () => {
+      const mockProcess = createMockProcess(0, '{"continue": true}');
+      mockSpawn.mockImplementation(() => mockProcess);
+
+      const hookConfig: HookConfig = {
+        type: HookType.Command,
+        command: 'Write-Output test',
+        source: HooksConfigSource.Project,
+        shell: 'powershell',
+      };
+      const input = createMockInput();
+
+      await hookRunner.executeHook(hookConfig, HookEventName.PreToolUse, input);
+
+      // Verify spawn was called with powershell configuration
+      expect(mockSpawn).toHaveBeenCalled();
+      const spawnArgs = mockSpawn.mock.calls[0];
+      // Should use powershell executable
+      expect(spawnArgs[0]).toBe('powershell');
+      expect(spawnArgs[1]).toContain('-Command');
+      expect(spawnArgs[2].shell).toBe(false);
     });
   });
 });

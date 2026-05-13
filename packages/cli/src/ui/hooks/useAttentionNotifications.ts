@@ -13,9 +13,17 @@ import {
 } from "../../utils/attentionNotification.js";
 import type { LoadedSettings } from "../../config/settings.js";
 import type { Config } from "@tram-ai/tram-core";
-import { fireNotificationHook, NotificationType } from "@tram-ai/tram-core";
+import {
+  fireNotificationHook,
+  NotificationType,
+} from "@tram-ai/tram-core";
+import type { TerminalNotification } from "./useTerminalNotification.js";
+import type { TrackedToolCall } from "./useReactToolScheduler.js";
+import { sendNotification } from "../../services/notificationService.js";
 
 export const LONG_TASK_NOTIFICATION_THRESHOLD_SECONDS = 20;
+
+const NOTIFICATION_TITLE = "TRAM";
 
 interface UseAttentionNotificationsOptions {
   isFocused: boolean;
@@ -23,6 +31,8 @@ interface UseAttentionNotificationsOptions {
   elapsedTime: number;
   settings: LoadedSettings;
   config?: Config;
+  terminal: TerminalNotification;
+  pendingToolCalls?: TrackedToolCall[];
 }
 
 export const useAttentionNotifications = ({
@@ -31,10 +41,12 @@ export const useAttentionNotifications = ({
   elapsedTime,
   settings,
   config,
+  terminal,
 }: UseAttentionNotificationsOptions) => {
   const terminalBellEnabled = settings?.merged?.general?.terminalBell ?? true;
   const desktopNotificationEnabled =
     settings?.merged?.general?.desktopNotification ?? true;
+
   const awaitingNotificationSentRef = useRef(false);
   const respondingElapsedRef = useRef(0);
   const idleNotificationSentRef = useRef(false);
@@ -43,7 +55,8 @@ export const useAttentionNotifications = ({
     if (
       streamingState === StreamingState.WaitingForConfirmation &&
       !isFocused &&
-      !awaitingNotificationSentRef.current
+      !awaitingNotificationSentRef.current &&
+      terminalBellEnabled
     ) {
       notifyTerminalAttention(AttentionNotificationReason.ToolApproval, {
         enabled: terminalBellEnabled,
@@ -57,12 +70,16 @@ export const useAttentionNotifications = ({
     if (streamingState !== StreamingState.WaitingForConfirmation || isFocused) {
       awaitingNotificationSentRef.current = false;
     }
-  }, [isFocused, streamingState, terminalBellEnabled, desktopNotificationEnabled]);
+  }, [
+    isFocused,
+    streamingState,
+    terminalBellEnabled,
+    desktopNotificationEnabled,
+  ]);
 
   useEffect(() => {
     if (streamingState === StreamingState.Responding) {
       respondingElapsedRef.current = elapsedTime;
-      // Reset idle notification flag when responding
       idleNotificationSentRef.current = false;
       return;
     }
@@ -71,10 +88,15 @@ export const useAttentionNotifications = ({
       const wasLongTask =
         respondingElapsedRef.current >=
         LONG_TASK_NOTIFICATION_THRESHOLD_SECONDS;
-      if (wasLongTask && !isFocused) {
-        notifyTerminalAttention(AttentionNotificationReason.LongTaskComplete, {
-          enabled: terminalBellEnabled,
-        });
+      if (wasLongTask && !isFocused && terminalBellEnabled) {
+        sendNotification(
+          {
+            message: "TRAM is waiting for your input",
+            title: NOTIFICATION_TITLE,
+          },
+          terminal,
+          terminalBellEnabled,
+        );
       }
 
       // Send desktop notification whenever conversation enters idle state
@@ -98,7 +120,6 @@ export const useAttentionNotifications = ({
             "Waiting for input",
           ).catch(() => {
             // Silently ignore errors - fireNotificationHook has internal error handling
-            // and notification hooks should not block the idle flow
           });
         }
         idleNotificationSentRef.current = true;
@@ -106,7 +127,14 @@ export const useAttentionNotifications = ({
       return;
     }
 
-    // Reset idle notification flag when in WaitingForConfirmation state
     idleNotificationSentRef.current = false;
-  }, [streamingState, elapsedTime, isFocused, terminalBellEnabled, desktopNotificationEnabled, config]);
+  }, [
+    streamingState,
+    elapsedTime,
+    isFocused,
+    terminalBellEnabled,
+    desktopNotificationEnabled,
+    config,
+    terminal,
+  ]);
 };

@@ -22,6 +22,7 @@ describe("EnhancedErrorHandler", () => {
       startTime: Date.now() - 5000,
       duration: 5000,
       isStreaming: false,
+      modalities: {},
     };
 
     mockRequest = {

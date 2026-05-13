@@ -18,6 +18,12 @@ import fs from "node:fs";
 import { MockTool } from "../test-utils/mock-tool.js";
 
 import { McpClientManager } from "./mcp-client-manager.js";
+import {
+  getAllMCPServerStatuses,
+  MCPServerStatus,
+  removeMCPServerStatus,
+  updateMCPServerStatus,
+} from "./mcp-client.js";
 import { ToolErrorType } from "./tool-error.js";
 
 vi.mock("node:fs");
@@ -183,6 +189,129 @@ describe("ToolRegistry", () => {
 
       // Assert that the returned array contains all tool names
       expect(toolNames).toEqual(["c-tool", "a-tool", "b-tool"]);
+    });
+
+    it('should include factory-registered tools that have not yet been loaded', () => {
+      toolRegistry.registerTool(new MockTool({ name: 'loaded-tool' }));
+      toolRegistry.registerFactory('lazy-tool', async () => {
+        throw new Error('should not be called');
+      });
+
+      const names = toolRegistry.getAllToolNames();
+
+      expect(names).toContain('loaded-tool');
+      expect(names).toContain('lazy-tool');
+    });
+  });
+
+  describe('deferred tool filtering', () => {
+    it('excludes shouldDefer tools from getFunctionDeclarations by default', () => {
+      toolRegistry.registerTool(new MockTool({ name: 'visible' }));
+      toolRegistry.registerTool(
+        new MockTool({ name: 'hidden', shouldDefer: true }),
+      );
+
+      const names = toolRegistry.getFunctionDeclarations().map((d) => d.name);
+      expect(names).toEqual(['visible']);
+    });
+
+    it('includes deferred tools when includeDeferred is true', () => {
+      toolRegistry.registerTool(new MockTool({ name: 'visible' }));
+      toolRegistry.registerTool(
+        new MockTool({ name: 'hidden', shouldDefer: true }),
+      );
+
+      const names = toolRegistry
+        .getFunctionDeclarations({ includeDeferred: true })
+        .map((d) => d.name);
+      expect(names).toEqual(expect.arrayContaining(['visible', 'hidden']));
+      expect(names).toHaveLength(2);
+    });
+
+    it('always keeps alwaysLoad tools visible even when shouldDefer is true', () => {
+      toolRegistry.registerTool(
+        new MockTool({
+          name: 'always-visible',
+          shouldDefer: true,
+          alwaysLoad: true,
+        }),
+      );
+
+      const names = toolRegistry.getFunctionDeclarations().map((d) => d.name);
+      expect(names).toEqual(['always-visible']);
+    });
+
+    it('includes revealed deferred tools in getFunctionDeclarations', () => {
+      toolRegistry.registerTool(
+        new MockTool({ name: 'hidden', shouldDefer: true }),
+      );
+      toolRegistry.registerTool(
+        new MockTool({ name: 'other-hidden', shouldDefer: true }),
+      );
+
+      toolRegistry.revealDeferredTool('hidden');
+
+      const names = toolRegistry.getFunctionDeclarations().map((d) => d.name);
+      expect(names).toEqual(['hidden']);
+      expect(toolRegistry.isDeferredToolRevealed('hidden')).toBe(true);
+      expect(toolRegistry.isDeferredToolRevealed('other-hidden')).toBe(false);
+    });
+
+    it('getDeferredToolSummary lists deferred tools sorted by name', () => {
+      toolRegistry.registerTool(new MockTool({ name: 'zebra' }));
+      toolRegistry.registerTool(
+        new MockTool({
+          name: 'bravo',
+          description: 'bravo desc',
+          shouldDefer: true,
+        }),
+      );
+      toolRegistry.registerTool(
+        new MockTool({
+          name: 'alpha',
+          description: 'alpha desc',
+          shouldDefer: true,
+        }),
+      );
+      toolRegistry.registerTool(
+        new MockTool({
+          name: 'charlie',
+          description: 'charlie desc',
+          shouldDefer: true,
+          alwaysLoad: true, // excluded from summary
+        }),
+      );
+
+      const summary = toolRegistry.getDeferredToolSummary();
+      expect(summary).toEqual([
+        { name: 'alpha', description: 'alpha desc' },
+        { name: 'bravo', description: 'bravo desc' },
+      ]);
+    });
+
+    it('removeMcpToolsByServer also drops revealedDeferred entries', async () => {
+      // Pin the regression: a server-disconnect-then-reconnect cycle that
+      // re-registers a tool of the same name must NOT inherit
+      // `revealed: true` from before the disconnect — that would leak
+      // into `getFunctionDeclarations` before the model has any way to
+      // know the tool exists this session.
+      const mcpCallable = {} as CallableTool;
+      const tool = new DiscoveredMCPTool(
+        mcpCallable,
+        'slack',
+        'send_message',
+        'send a message',
+        {},
+      );
+      toolRegistry.registerTool(tool);
+      // Use the actual generated tool name (mcp__slack__send_message) — the
+      // reveal-state map is keyed by that, not the server-tool-name alone.
+      const toolName = tool.name;
+      toolRegistry.revealDeferredTool(toolName);
+      expect(toolRegistry.isDeferredToolRevealed(toolName)).toBe(true);
+
+      toolRegistry.removeMcpToolsByServer('slack');
+      expect(toolRegistry.isDeferredToolRevealed(toolName)).toBe(false);
     });
   });
 
@@ -427,6 +556,227 @@ describe("ToolRegistry", () => {
       const invocation = tool.build(params);
       const description = invocation.getDescription();
       expect(description).toBe(JSON.stringify(params));
+    });
+  });
+
+  describe('ensureTool concurrency', () => {
+    it('runs the factory only once when two calls are made concurrently', async () => {
+      let callCount = 0;
+      const tool = new MockTool({ name: 'concurrent-tool' });
+      toolRegistry.registerFactory('concurrent-tool', async () => {
+        callCount++;
+        return tool;
+      });
+
+      const [result1, result2] = await Promise.all([
+        toolRegistry.ensureTool('concurrent-tool'),
+        toolRegistry.ensureTool('concurrent-tool'),
+      ]);
+
+      expect(callCount).toBe(1);
+      expect(result1).toBe(tool);
+      expect(result2).toBe(tool);
+    });
+
+    it('runs the factory only once when warmAll() and ensureTool() overlap', async () => {
+      let callCount = 0;
+      const tool = new MockTool({ name: 'overlap-tool' });
+      toolRegistry.registerFactory('overlap-tool', async () => {
+        callCount++;
+        return tool;
+      });
+
+      const warmPromise = toolRegistry.warmAll();
+      const ensurePromise = toolRegistry.ensureTool('overlap-tool');
+      await Promise.all([warmPromise, ensurePromise]);
+
+      expect(callCount).toBe(1);
+    });
+
+    it('clears the inflight entry on failure so subsequent calls can retry', async () => {
+      let callCount = 0;
+      const tool = new MockTool({ name: 'retry-tool' });
+      toolRegistry.registerFactory('retry-tool', async () => {
+        callCount++;
+        if (callCount === 1) throw new Error('transient failure');
+        return tool;
+      });
+
+      await expect(toolRegistry.ensureTool('retry-tool')).rejects.toThrow(
+        'transient failure',
+      );
+
+      // Factory remains in the registry after a failure — the second call retries it.
+      const result = await toolRegistry.ensureTool('retry-tool');
+      expect(result).toBe(tool);
+      expect(callCount).toBe(2);
+    });
+  });
+
+  describe('warmAll strict mode', () => {
+    it('throws when a factory fails and strict is true', async () => {
+      toolRegistry.registerFactory('bad-tool', async () => {
+        throw new Error('factory error');
+      });
+
+      await expect(toolRegistry.warmAll({ strict: true })).rejects.toThrow(
+        'factory error',
+      );
+    });
+
+    it('does not throw when a factory fails and strict is false (default)', async () => {
+      toolRegistry.registerFactory('bad-tool', async () => {
+        throw new Error('factory error');
+      });
+
+      await expect(toolRegistry.warmAll()).resolves.toBeUndefined();
+    });
+
+    it('still loads successful tools before throwing in strict mode', async () => {
+      const goodTool = new MockTool({ name: 'good-tool' });
+      toolRegistry.registerFactory('good-tool', async () => goodTool);
+      toolRegistry.registerFactory('bad-tool', async () => {
+        throw new Error('factory error');
+      });
+
+      await expect(toolRegistry.warmAll({ strict: true })).rejects.toThrow(
+        'factory error',
+      );
+
+      // The good tool should still have been loaded despite the failure.
+      expect(await toolRegistry.ensureTool('good-tool')).toBe(goodTool);
+    });
+  });
+
+  describe('disableMcpServer', () => {
+    afterEach(() => {
+      for (const name of getAllMCPServerStatuses().keys()) {
+        removeMCPServerStatus(name);
+      }
+    });
+
+    it('still removes the registry entry and updates the exclusion list when disconnect throws', async () => {
+      updateMCPServerStatus('flaky-server', MCPServerStatus.DISCONNECTED);
+      vi.spyOn(config, 'getExcludedMcpServers').mockReturnValue([]);
+      const setExcludedSpy = vi
+        .spyOn(config, 'setExcludedMcpServers')
+        .mockImplementation(() => {});
+      vi.spyOn(
+        McpClientManager.prototype,
+        'disconnectServer',
+      ).mockRejectedValue(new Error('boom'));
+
+      await expect(
+        toolRegistry.disableMcpServer('flaky-server'),
+      ).rejects.toThrow('boom');
+
+      // Even though disconnect threw, the global status entry must be cleared
+      // so the health pill stops counting the server, and the exclusion list
+      // must still be updated so the server doesn't reappear on next discovery.
+      expect(getAllMCPServerStatuses().has('flaky-server')).toBe(false);
+      expect(setExcludedSpy).toHaveBeenCalledWith(['flaky-server']);
+    });
+
+    it('still removes the registry entry when the exclusion-list update throws', async () => {
+      // Defensive: if a future config implementation makes setExcludedMcpServers
+      // throw, the status registry must still be cleaned up — otherwise the
+      // health pill would keep a stale entry forever.
+      updateMCPServerStatus('flaky-server', MCPServerStatus.DISCONNECTED);
+      vi.spyOn(config, 'getExcludedMcpServers').mockReturnValue([]);
+      vi.spyOn(config, 'setExcludedMcpServers').mockImplementation(() => {
+        throw new Error('config write failed');
+      });
+      vi.spyOn(
+        McpClientManager.prototype,
+        'disconnectServer',
+      ).mockResolvedValue(undefined);
+
+      await expect(
+        toolRegistry.disableMcpServer('flaky-server'),
+      ).rejects.toThrow('config write failed');
+
+      expect(getAllMCPServerStatuses().has('flaky-server')).toBe(false);
+    });
+
+    it('removes the server from the global status registry so the health pill stops counting it', async () => {
+      // Simulate an MCP server that connected and then dropped — the global
+      // registry would carry a DISCONNECTED entry for it.
+      updateMCPServerStatus('flaky-server', MCPServerStatus.DISCONNECTED);
+      expect(getAllMCPServerStatuses().has('flaky-server')).toBe(true);
+
+      const setExcludedSpy = vi
+        .spyOn(config, 'setExcludedMcpServers')
+        .mockImplementation(() => {});
+      vi.spyOn(config, 'getExcludedMcpServers').mockReturnValue([]);
+      // disableMcpServer delegates the actual transport teardown to the
+      // McpClientManager — stub it out so we can isolate the status-registry
+      // behavior.
+      vi.spyOn(
+        McpClientManager.prototype,
+        'disconnectServer',
+      ).mockResolvedValue(undefined);
+
+      await toolRegistry.disableMcpServer('flaky-server');
+
+      expect(getAllMCPServerStatuses().has('flaky-server')).toBe(false);
+      expect(setExcludedSpy).toHaveBeenCalledWith(['flaky-server']);
+    });
+
+    it('updates the exclusion list before dropping the status entry', async () => {
+      // Order matters: doctorChecks classifies a server as "disabled" only
+      // when it appears in the exclusion list. If the status entry is
+      // dropped before the exclusion list is updated, there's a window
+      // where the server is reported as a connectivity failure instead of
+      // an intentional disable.
+      updateMCPServerStatus('flaky-server', MCPServerStatus.DISCONNECTED);
+      vi.spyOn(config, 'getExcludedMcpServers').mockReturnValue([]);
+      vi.spyOn(
+        McpClientManager.prototype,
+        'disconnectServer',
+      ).mockResolvedValue(undefined);
+
+      const callOrder: string[] = [];
+      vi.spyOn(config, 'setExcludedMcpServers').mockImplementation(() => {
+        callOrder.push(
+          `setExcludedMcpServers:hasStatus=${getAllMCPServerStatuses().has(
+            'flaky-server',
+          )}`,
+        );
+      });
+
+      await toolRegistry.disableMcpServer('flaky-server');
+
+      // When setExcludedMcpServers ran, the status entry must still be
+      // present — i.e. the exclusion list is updated first.
+      expect(callOrder).toEqual(['setExcludedMcpServers:hasStatus=true']);
+      expect(getAllMCPServerStatuses().has('flaky-server')).toBe(false);
+    });
+  });
+
+  describe('stop', () => {
+    it('disposes tools that were still inflight when stop() was called', async () => {
+      let resolveFactory!: (tool: MockTool) => void;
+      const factoryPromise = new Promise<MockTool>((resolve) => {
+        resolveFactory = resolve;
+      });
+
+      const disposeSpy = vi.fn();
+      const tool = new MockTool({ name: 'inflight-tool' });
+      (tool as unknown as { dispose: () => void }).dispose = disposeSpy;
+
+      toolRegistry.registerFactory('inflight-tool', () => factoryPromise);
+
+      // Start loading the tool but don't await — it's inflight when stop() is called.
+      const ensurePromise = toolRegistry.ensureTool('inflight-tool');
+
+      // Resolve the factory after stop() has started but before it returns.
+      const stopPromise = toolRegistry.stop();
+      resolveFactory(tool);
+
+      await stopPromise;
+      await ensurePromise;
+
+      expect(disposeSpy).toHaveBeenCalledOnce();
     });
   });
 });

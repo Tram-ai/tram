@@ -8,6 +8,7 @@ import { useCallback } from "react";
 import type { VSCodeAPI } from "./useVSCode.js";
 import { getRandomLoadingMessage } from "../../constants/loadingMessages.js";
 import type { ImageAttachment } from "./useImage.js";
+import { ZERO_WIDTH_SPACE, stripZeroWidthSpaces } from "@tram-ai/webui";
 
 interface UseMessageSubmitProps {
   vscode: VSCodeAPI;
@@ -18,6 +19,8 @@ interface UseMessageSubmitProps {
   inputFieldRef: React.RefObject<HTMLDivElement | null>;
   isStreaming: boolean;
   isWaitingForResponse: boolean;
+  editTargetTurnIndex?: number | null;
+  onSubmitted?: () => void;
   // When true, do NOT auto-attach the active editor file/selection to context
   skipAutoActiveContext?: boolean;
 
@@ -49,7 +52,7 @@ export const shouldSendMessage = ({
     return false;
   }
 
-  const hasText = inputText.replace(/\u200B/g, "").trim().length > 0;
+  const hasText = stripZeroWidthSpaces(inputText).trim().length > 0;
   const hasAttachments = (attachedImages?.length ?? 0) > 0;
   return hasText || hasAttachments;
 };
@@ -67,6 +70,8 @@ export const useMessageSubmit = ({
   inputFieldRef,
   isStreaming,
   isWaitingForResponse,
+  editTargetTurnIndex = null,
+  onSubmitted,
   skipAutoActiveContext = false,
   fileContext,
   messageHandling,
@@ -93,19 +98,22 @@ export const useMessageSubmit = ({
       if (textToSend.trim() === "/account") {
         setInputText("");
         if (inputFieldRef.current) {
-          inputFieldRef.current.textContent = "\u200B";
+          inputFieldRef.current.textContent = ZERO_WIDTH_SPACE;
           inputFieldRef.current.setAttribute("data-empty", "true");
         }
         vscode.postMessage({ type: "getAccountInfo", data: {} });
         return;
       }
 
-      // Handle /login command - show inline loading while extension authenticates
-      if (textToSend.trim() === "/login") {
+      // Handle /login (and its alias /auth) — trigger interactive
+      // login flow directly in the extension instead of sending the command
+      // to the agent.
+      const trimmedInput = textToSend.trim();
+      if (trimmedInput === "/login" || trimmedInput === "/auth") {
         setInputText("");
         if (inputFieldRef.current) {
           // Use a zero-width space to maintain the height of the contentEditable element
-          inputFieldRef.current.textContent = "\u200B";
+          inputFieldRef.current.textContent = ZERO_WIDTH_SPACE;
           // Set the data-empty attribute to show the placeholder
           inputFieldRef.current.setAttribute("data-empty", "true");
         }
@@ -113,7 +121,6 @@ export const useMessageSubmit = ({
           type: "login",
           data: {},
         });
-        // Show a friendly loading message in the chat while logging in
         try {
           messageHandling.setWaitingForResponse("Logging in to TRAM...");
         } catch (_err) {
@@ -183,19 +190,25 @@ export const useMessageSubmit = ({
       }
 
       vscode.postMessage({
-        type: "sendMessage",
+        type:
+          typeof editTargetTurnIndex === "number"
+            ? "editMessage"
+            : "sendMessage",
         data: {
           text: textToSend,
           context: context.length > 0 ? context : undefined,
           fileContext: fileContextForMessage,
           attachments: attachedImages.length > 0 ? attachedImages : undefined,
+          ...(typeof editTargetTurnIndex === 'number'
+            ? { targetTurnIndex: editTargetTurnIndex }
+            : {}),
         },
       });
 
       setInputText("");
       if (inputFieldRef.current) {
         // Use a zero-width space to maintain the height of the contentEditable element
-        inputFieldRef.current.textContent = "\u200B";
+        inputFieldRef.current.textContent = ZERO_WIDTH_SPACE;
         // Set the data-empty attribute to show the placeholder
         inputFieldRef.current.setAttribute("data-empty", "true");
       }
@@ -203,6 +216,7 @@ export const useMessageSubmit = ({
       if (clearImages) {
         clearImages();
       }
+      onSubmitted?.();
     },
     [
       inputText,
@@ -216,6 +230,8 @@ export const useMessageSubmit = ({
       skipAutoActiveContext,
       isWaitingForResponse,
       messageHandling,
+      editTargetTurnIndex,
+      onSubmitted,
     ],
   );
 

@@ -35,11 +35,13 @@ export {
   type ModelConfigSourcesInput,
   type ModelConfigValidationResult,
   ModelRegistry,
+  modelRegistryKey,
   type ModelGenerationConfig,
   ModelsConfig,
   type ModelsConfigOptions,
   type ModelProvidersConfig,
   type ModelSwitchMetadata,
+  MODEL_GENERATION_CONFIG_FIELDS,
   type OnModelChangeCallback,
   TRAM_OAUTH_MODELS,
   resolveModelConfig,
@@ -58,9 +60,11 @@ export * from "./output/types.js";
 export * from "./core/client.js";
 export * from "./core/contentGenerator.js";
 export * from "./core/coreToolScheduler.js";
+export * from "./core/permissionFlow.js";
 export * from "./core/permission-helpers.js";
 export * from "./core/geminiChat.js";
 export * from "./core/geminiRequest.js";
+export * from "./core/insightProtocol.js";
 export * from "./core/logger.js";
 export * from "./core/nonInteractiveToolExecutor.js";
 export * from "./core/prompts.js";
@@ -77,6 +81,11 @@ export * from "./tools/tool-error.js";
 export * from "./tools/tool-registry.js";
 export * from "./tools/tools.js";
 
+// TODO(merge-v0.15.10): theirs refactored tool exports to lazy-loading (only type re-exports
+// for non-MCP tool classes), but ours actively does `export *` for many tool classes including
+// tram-specific tools. Ours references missing files (`memoryTool.js` -> moved to `memory/const.js`,
+// `agent.js` -> moved to `agent/agent.js`). Kept ours' eager exports but removed invalid paths
+// and added new MCP/SDK infrastructure from theirs that ours has.
 // Individual tools
 export * from "./tools/edit.js";
 export * from "./tools/exitPlanMode.js";
@@ -87,17 +96,19 @@ export * from "./tools/lsp.js";
 export * from "./tools/mcp-client.js";
 export * from "./tools/mcp-client-manager.js";
 export * from "./tools/mcp-tool.js";
-export * from "./tools/memoryTool.js";
+export * from "./tools/modifiable-tool.js";
 export * from "./tools/openapi-link-list.js";
 export * from "./tools/read-file.js";
 export * from "./tools/ripGrep.js";
 export * from "./tools/sdk-control-client-transport.js";
 export * from "./tools/shell.js";
 export * from "./tools/skill.js";
-export * from "./tools/agent.js";
+export { buildSkillLlmContent } from "./tools/skill-utils.js";
+export * from "./tools/agent/agent.js";
 export * from "./tools/todoWrite.js";
 export * from "./tools/tool-error.js";
 export * from "./tools/tool-registry.js";
+export * from "./tools/tool-search.js";
 export * from "./tools/web-fetch.js";
 export * from "./tools/write-file.js";
 export * from "./tools/cron-create.js";
@@ -112,12 +123,41 @@ export * from "./services/chatRecordingService.js";
 export * from "./services/cronJobActions.js";
 export * from "./services/cronScheduler.js";
 export * from "./services/fileDiscoveryService.js";
+export * from "./services/fileReadCache.js";
 export * from "./services/fileSystemService.js";
 export * from "./services/gitService.js";
 export * from "./services/gitWorktreeService.js";
+export * from "./services/sessionRecap.js";
 export * from "./services/sessionService.js";
+export * from "./services/sessionTitle.js";
+export {
+  stripTerminalControlSequences,
+  TERMINAL_OSC_REGEX,
+  TERMINAL_CSI_REGEX,
+  TERMINAL_SHIFT_DCS_REGEX,
+} from "./utils/terminalSafe.js";
 export * from "./services/shellExecutionService.js";
+export * from "./services/monitorRegistry.js";
+export * from "./services/backgroundShellRegistry.js";
+export * from "./services/toolUseSummary.js";
 export * from "./services/serviceRuntimeManager.js";
+export * from "./utils/bareMode.js";
+
+// ============================================================================
+// Managed Auto-Memory
+// ============================================================================
+
+// MemoryManager is the single public API for all memory operations.
+// Production code: config.getMemoryManager().method(...)
+// Tests: new MemoryManager()
+export * from "./memory/manager.js";
+
+// Foundational utilities (paths, storage scaffold, type definitions, constants)
+// that are legitimately needed by UI code (MemoryDialog, commands, etc.)
+export * from "./memory/types.js";
+export * from "./memory/paths.js";
+export * from "./memory/store.js";
+export * from "./memory/const.js";
 
 // ============================================================================
 // IDE Support
@@ -147,7 +187,11 @@ export * from "./lsp/types.js";
 // MCP (Model Context Protocol)
 // ============================================================================
 
-export { MCPOAuthProvider } from "./mcp/oauth-provider.js";
+export {
+  MCPOAuthProvider,
+  OAUTH_AUTH_URL_EVENT,
+  OAUTH_DISPLAY_MESSAGE_EVENT,
+} from "./mcp/oauth-provider.js";
 export type {
   MCPOAuthConfig,
   OAuthDisplayMessage,
@@ -188,6 +232,7 @@ export {
   ExtensionUninstallEvent,
   IdeConnectionEvent,
   IdeConnectionType,
+  LoopType,
   ModelSlashCommandEvent,
   PromptSuggestionEvent,
   SpeculationEvent,
@@ -225,13 +270,17 @@ export * from "./utils/filesearch/fileSearch.js";
 export * from "./utils/formatters.js";
 export * from "./utils/generateContentResponseUtilities.js";
 export * from "./utils/getFolderStructure.js";
+export * from "./utils/gitDiff.js";
 export * from "./utils/gitIgnoreParser.js";
 export * from "./utils/gitUtils.js";
 export * from "./utils/ignorePatterns.js";
 export * from "./utils/jsonl-utils.js";
 export * from "./utils/memoryDiscovery.js";
+export { ConditionalRulesRegistry } from "./utils/rulesDiscovery.js";
+export type { RuleFile } from "./utils/rulesDiscovery.js";
 export { OpenAILogger, openaiLogger } from "./utils/openaiLogger.js";
 export * from "./utils/partUtils.js";
+export * from "./utils/sessionStorageUtils.js";
 export * from "./utils/pathReader.js";
 export * from "./utils/paths.js";
 export * from "./utils/projectSummary.js";
@@ -244,6 +293,10 @@ export * from "./utils/request-tokenizer/supportedImageFormats.js";
 export { TextTokenizer } from "./utils/request-tokenizer/textTokenizer.js";
 export * from "./utils/retry.js";
 export * from "./utils/ripgrepUtils.js";
+export {
+  detectRuntime,
+  getOrCreateSharedDispatcher,
+} from "./utils/runtimeFetchOptions.js";
 export * from "./utils/schemaValidator.js";
 export * from "./utils/shell-utils.js";
 export * from "./utils/subagentGenerator.js";
@@ -256,12 +309,25 @@ export * from "./utils/toml-to-markdown-converter.js";
 export * from "./utils/tool-utils.js";
 export * from "./utils/workspaceContext.js";
 export * from "./utils/yaml-parser.js";
+export * from "./utils/forkedAgent.js";
+export * from "./utils/sideQuery.js";
 
 // ============================================================================
 // OAuth & Authentication
 // ============================================================================
 
 export * from "./tram/tramOAuth2.js";
+
+// ============================================================================
+// Message Bus Types
+// ============================================================================
+
+export {
+  MessageBusType,
+  type HookExecutionRequest,
+  type HookExecutionResponse,
+} from './confirmation-bus/types.js';
+export { MessageBus } from './confirmation-bus/message-bus.js';
 
 // ============================================================================
 // Testing Utilities
@@ -276,11 +342,20 @@ export * from "./test-utils/index.js";
 
 export * from "./hooks/types.js";
 export { HookSystem, HookRegistry } from "./hooks/index.js";
-export type { HookRegistryEntry } from "./hooks/index.js";
+export type { HookRegistryEntry, SessionHookEntry } from "./hooks/index.js";
+export { type StopFailureErrorType } from "./hooks/types.js";
 
-// Export hook triggers for notification hooks
+// Export hook triggers for all hook events
 export {
   fireNotificationHook,
   firePermissionRequestHook,
+  firePreToolUseHook,
+  firePostToolUseHook,
+  firePostToolUseFailureHook,
   type NotificationHookResult,
+  type PermissionRequestHookResult,
+  type PreToolUseHookResult,
+  type PostToolUseHookResult,
+  type PostToolUseFailureHookResult,
+  generateToolUseId,
 } from "./core/toolHookTriggers.js";

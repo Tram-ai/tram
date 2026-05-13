@@ -233,7 +233,7 @@ describe("OpenAIContentGenerator Timeout Handling", () => {
       await expect(
         generator.generateContentStream(request, "test-prompt-id"),
       ).rejects.toThrow(
-        /Streaming request timeout after \d+s\. Try reducing input length or increasing timeout in config\./,
+        /Request timeout after \d+s\. Try reducing input length or increasing timeout in config\./,
       );
     });
 

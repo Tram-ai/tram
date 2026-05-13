@@ -10,7 +10,11 @@ import {
   substituteHookVariables,
   performVariableReplacement,
 } from "./variables.js";
-import { HookType } from "../hooks/types.js";
+import {
+  HookType,
+  type CommandHookConfig,
+  type HookDefinition,
+} from "../hooks/types.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -29,10 +33,9 @@ describe("substituteHookVariables", () => {
   it("should substitute ${CLAUDE_PLUGIN_ROOT} with the actual path in hooks", () => {
     const basePath = "/path/to/plugin";
 
-    const hooks = {
+    const hooks: { PreToolUse?: HookDefinition[] } = {
       PreToolUse: [
         {
-          description: "Setup before start",
           hooks: [
             {
               type: HookType.Command,
@@ -47,18 +50,17 @@ describe("substituteHookVariables", () => {
 
     expect(result).toBeDefined();
     expect(result!["PreToolUse"]).toHaveLength(1);
-    expect(result!["PreToolUse"]![0].hooks![0].command).toBe(
-      "/path/to/plugin/scripts/setup.sh",
-    );
+    expect(
+      (result!["PreToolUse"]![0].hooks![0] as CommandHookConfig).command,
+    ).toBe("/path/to/plugin/scripts/setup.sh");
   });
 
   it("should handle multiple hooks with variables", () => {
     const basePath = "/project/plugins/my-plugin";
 
-    const hooks = {
+    const hooks: { PostToolUse?: HookDefinition[] } = {
       PostToolUse: [
         {
-          description: "Post install hook 1",
           hooks: [
             {
               type: HookType.Command,
@@ -67,7 +69,6 @@ describe("substituteHookVariables", () => {
           ],
         },
         {
-          description: "Post install hook 2",
           hooks: [
             {
               type: HookType.Command,
@@ -82,18 +83,21 @@ describe("substituteHookVariables", () => {
 
     expect(result).toBeDefined();
     expect(result!["PostToolUse"]).toHaveLength(2);
-    expect(result!["PostToolUse"]![0].hooks![0].command).toBe(
-      "/project/plugins/my-plugin/bin/init.sh",
-    );
-    expect(result!["PostToolUse"]![1].hooks![0].command).toBe(
-      "chmod +x /project/plugins/my-plugin/bin/executable.sh",
-    );
+    expect(
+      (result!["PostToolUse"]![0].hooks![0] as CommandHookConfig).command,
+    ).toBe("/project/plugins/my-plugin/bin/init.sh");
+    expect(
+      (result!["PostToolUse"]![1].hooks![0] as CommandHookConfig).command,
+    ).toBe("chmod +x /project/plugins/my-plugin/bin/executable.sh");
   });
 
   it("should handle multiple event types with hooks", () => {
     const basePath = "/home/user/.tram/extensions/my-extension";
 
-    const hooks = {
+    const hooks: {
+      PreToolUse?: HookDefinition[];
+      UserPromptSubmit?: HookDefinition[];
+    } = {
       PreToolUse: [
         {
           matcher: "test-matcher", // Part of HookDefinition
@@ -126,19 +130,19 @@ describe("substituteHookVariables", () => {
 
     expect(result).toBeDefined();
     expect(result!["PreToolUse"]).toHaveLength(1);
-    expect(result!["PreToolUse"]![0].hooks![0].command).toBe(
-      "/home/user/.tram/extensions/my-extension/scripts/pre-start.sh",
-    );
+    expect(
+      (result!["PreToolUse"]![0].hooks![0] as CommandHookConfig).command,
+    ).toBe("/home/user/.tram/extensions/my-extension/scripts/pre-start.sh");
     expect(result!["UserPromptSubmit"]).toHaveLength(1);
-    expect(result!["UserPromptSubmit"]![0].hooks![0].command).toBe(
-      "/home/user/.tram/extensions/my-extension/setup/install.py",
-    );
+    expect(
+      (result!["UserPromptSubmit"]![0].hooks![0] as CommandHookConfig).command,
+    ).toBe("/home/user/.tram/extensions/my-extension/setup/install.py");
   });
 
   it("should not modify non-command hooks", () => {
     const basePath = "/path/to/extension";
 
-    const hooks = {
+    const hooks: { SessionStart?: HookDefinition[] } = {
       SessionStart: [
         {
           matcher: "test-matcher", // This is part of HookDefinition
@@ -162,12 +166,12 @@ describe("substituteHookVariables", () => {
 
     expect(result).toBeDefined();
     expect(result!["SessionStart"]).toHaveLength(1);
-    expect(result!["SessionStart"]![0].hooks![0].command).toBe(
-      "/path/to/extension/scripts/run.sh",
-    );
-    expect(result!["SessionStart"]![0].hooks![1].command).toBe(
-      "${CLAUDE_PLUGIN_ROOT}/not-affected",
-    ); // Non-command type won't be processed
+    expect(
+      (result!["SessionStart"]![0].hooks![0] as CommandHookConfig).command,
+    ).toBe("/path/to/extension/scripts/run.sh");
+    expect(
+      (result!["SessionStart"]![0].hooks![1] as CommandHookConfig).command,
+    ).toBe("${CLAUDE_PLUGIN_ROOT}/not-affected"); // Non-command type won't be processed
   });
 
   it("should return undefined when hooks is undefined", () => {
@@ -186,7 +190,7 @@ describe("substituteHookVariables", () => {
           hooks: [
             // This is the HookConfig[] array inside HookDefinition
             {
-              type: HookType.Command, // This is part of CommandHookConfig
+              type: HookType.Command as const, // This is part of CommandHookConfig
               command: 'echo "hello world"', // This is part of CommandHookConfig
             },
           ],
@@ -198,7 +202,9 @@ describe("substituteHookVariables", () => {
 
     expect(result).toBeDefined();
     expect(result).toEqual(hooks); // Should be equal but not the same object (deep clone)
-    expect(result!["Stop"]![0].hooks![0].command).toBe('echo "hello world"');
+    expect(
+      (result!["Stop"]![0].hooks![0] as CommandHookConfig).command,
+    ).toBe('echo "hello world"');
   });
 });
 

@@ -24,10 +24,18 @@ export interface AuthenticateUpdateNotification {
   };
 }
 
+export interface SlashCommandNotification {
+  sessionId: string;
+  command: string;
+  messageType: 'info' | 'error';
+  message: string;
+}
+
 export interface SessionUpdateMeta {
   usage?: Usage | null;
   durationMs?: number | null;
   timestamp?: number | null;
+  availableSkills?: string[] | null;
 }
 
 export {
@@ -40,10 +48,10 @@ export {
 export const NEXT_APPROVAL_MODE: {
   [k in ApprovalModeValue]: ApprovalModeValue;
 } = {
+  plan: "default",
   default: "auto-edit",
   "auto-edit": "yolo",
-  plan: "yolo",
-  yolo: "default",
+  yolo: "plan",
 };
 
 // Ask User Question types

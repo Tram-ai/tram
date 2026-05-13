@@ -1,6 +1,6 @@
 {
   "name": "@tram-ai/channel-dingtalk",
-  "version": "0.1.0-U0145",
+  "version": "0.1.1-U01510",
   "description": "DingTalk channel adapter for TRAM",
   "type": "module",
   "main": "dist/index.js",

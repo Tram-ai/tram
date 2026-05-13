@@ -28,7 +28,7 @@ export const useTramAuth = (
   pendingAuthType: AuthType | undefined,
   isAuthenticating: boolean,
 ) => {
-  const [TramAuthState, setTramAuthState] = useState<TramAuthState>({
+  const [tramAuthState, setTramAuthState] = useState<TramAuthState>({
     deviceAuth: null,
     authStatus: "idle",
     authMessage: null,
@@ -102,7 +102,7 @@ export const useTramAuth = (
   }, []);
 
   return {
-    TramAuthState,
+    tramAuthState,
     cancelTramAuth,
   };
 };

@@ -1,14 +1,14 @@
-/**
+﻿/**
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { UiTelemetryService } from "./uiTelemetry.js";
 import { ToolCallDecision } from "./tool-call-decision.js";
 import type { ApiErrorEvent, ApiResponseEvent } from "./types.js";
 import { ToolCallEvent } from "./types.js";
+import { UiTelemetryService, MAIN_SOURCE } from "./uiTelemetry.js";
 import {
   EVENT_API_ERROR,
   EVENT_API_RESPONSE,
@@ -187,7 +187,7 @@ describe("UiTelemetryService", () => {
       service.addEvent(event);
 
       const metrics = service.getMetrics();
-      expect(metrics.models["gemini-2.5-pro"]).toEqual({
+      const modelAggregate = {
         api: {
           totalRequests: 1,
           totalErrors: 0,
@@ -199,7 +199,12 @@ describe("UiTelemetryService", () => {
           total: 30,
           cached: 5,
           thoughts: 2,
-          tool: 3,
+        },
+      };
+      expect(metrics.models['gemini-2.5-pro']).toEqual({
+        ...modelAggregate,
+        bySource: {
+          [MAIN_SOURCE]: modelAggregate,
         },
       });
       expect(service.getLastPromptTokenCount()).toBe(0);
@@ -215,7 +220,6 @@ describe("UiTelemetryService", () => {
         total_token_count: 30,
         cached_content_token_count: 5,
         thoughts_token_count: 2,
-        tool_token_count: 3,
       } as ApiResponseEvent & {
         "event.name": typeof EVENT_API_RESPONSE;
       };
@@ -228,7 +232,6 @@ describe("UiTelemetryService", () => {
         total_token_count: 40,
         cached_content_token_count: 10,
         thoughts_token_count: 4,
-        tool_token_count: 6,
       } as ApiResponseEvent & {
         "event.name": typeof EVENT_API_RESPONSE;
       };
@@ -237,7 +240,7 @@ describe("UiTelemetryService", () => {
       service.addEvent(event2);
 
       const metrics = service.getMetrics();
-      expect(metrics.models["gemini-2.5-pro"]).toEqual({
+      const modelAggregate = {
         api: {
           totalRequests: 2,
           totalErrors: 0,
@@ -249,7 +252,12 @@ describe("UiTelemetryService", () => {
           total: 70,
           cached: 15,
           thoughts: 6,
-          tool: 9,
+        },
+      };
+      expect(metrics.models['gemini-2.5-pro']).toEqual({
+        ...modelAggregate,
+        bySource: {
+          [MAIN_SOURCE]: modelAggregate,
         },
       });
       expect(service.getLastPromptTokenCount()).toBe(0);
@@ -265,7 +273,6 @@ describe("UiTelemetryService", () => {
         total_token_count: 30,
         cached_content_token_count: 5,
         thoughts_token_count: 2,
-        tool_token_count: 3,
       } as ApiResponseEvent & {
         "event.name": typeof EVENT_API_RESPONSE;
       };
@@ -278,7 +285,6 @@ describe("UiTelemetryService", () => {
         total_token_count: 300,
         cached_content_token_count: 50,
         thoughts_token_count: 20,
-        tool_token_count: 30,
       } as ApiResponseEvent & {
         "event.name": typeof EVENT_API_RESPONSE;
       };
@@ -350,7 +356,7 @@ describe("UiTelemetryService", () => {
       service.addEvent(event);
 
       const metrics = service.getMetrics();
-      expect(metrics.models["gemini-2.5-pro"]).toEqual({
+      const modelAggregate = {
         api: {
           totalRequests: 1,
           totalErrors: 1,
@@ -362,7 +368,12 @@ describe("UiTelemetryService", () => {
           total: 0,
           cached: 0,
           thoughts: 0,
-          tool: 0,
+        },
+      };
+      expect(metrics.models['gemini-2.5-pro']).toEqual({
+        ...modelAggregate,
+        bySource: {
+          [MAIN_SOURCE]: modelAggregate,
         },
       });
     });
@@ -377,7 +388,6 @@ describe("UiTelemetryService", () => {
         total_token_count: 30,
         cached_content_token_count: 5,
         thoughts_token_count: 2,
-        tool_token_count: 3,
       } as ApiResponseEvent & {
         "event.name": typeof EVENT_API_RESPONSE;
       };
@@ -392,7 +402,7 @@ describe("UiTelemetryService", () => {
       service.addEvent(errorEvent);
 
       const metrics = service.getMetrics();
-      expect(metrics.models["gemini-2.5-pro"]).toEqual({
+      const modelAggregate = {
         api: {
           totalRequests: 2,
           totalErrors: 1,
@@ -404,9 +414,154 @@ describe("UiTelemetryService", () => {
           total: 30,
           cached: 5,
           thoughts: 2,
-          tool: 3,
+        },
+      };
+      expect(metrics.models['gemini-2.5-pro']).toEqual({
+        ...modelAggregate,
+        bySource: {
+          [MAIN_SOURCE]: modelAggregate,
         },
       });
+    });
+  });
+
+  describe("Subagent Source Attribution", () => {
+    it("attributes API calls without subagent_name to MAIN_SOURCE", () => {
+      const event = {
+        "event.name": EVENT_API_RESPONSE,
+        model: "glm-5",
+        duration_ms: 100,
+        input_token_count: 10,
+        output_token_count: 5,
+        total_token_count: 15,
+        cached_content_token_count: 0,
+        thoughts_token_count: 0,
+      } as ApiResponseEvent & { "event.name": typeof EVENT_API_RESPONSE };
+
+      service.addEvent(event);
+
+      const modelMetrics = service.getMetrics().models["glm-5"];
+      expect(Object.keys(modelMetrics.bySource)).toEqual([MAIN_SOURCE]);
+      expect(modelMetrics.bySource[MAIN_SOURCE].api.totalRequests).toBe(1);
+      expect(modelMetrics.api.totalRequests).toBe(1);
+    });
+
+    it("splits a single model between main and a subagent", () => {
+      const mainEvent = {
+        "event.name": EVENT_API_RESPONSE,
+        model: "glm-5",
+        duration_ms: 200,
+        input_token_count: 100,
+        output_token_count: 50,
+        total_token_count: 150,
+        cached_content_token_count: 20,
+        thoughts_token_count: 0,
+      } as ApiResponseEvent & { "event.name": typeof EVENT_API_RESPONSE };
+      const subagentEvent = {
+        "event.name": EVENT_API_RESPONSE,
+        model: "glm-5",
+        duration_ms: 80,
+        input_token_count: 40,
+        output_token_count: 10,
+        total_token_count: 50,
+        cached_content_token_count: 0,
+        thoughts_token_count: 0,
+        subagent_name: "echoer",
+      } as ApiResponseEvent & { "event.name": typeof EVENT_API_RESPONSE };
+
+      service.addEvent(mainEvent);
+      service.addEvent(subagentEvent);
+
+      const modelMetrics = service.getMetrics().models["glm-5"];
+      // Aggregate spans both main and subagent calls
+      expect(modelMetrics.api.totalRequests).toBe(2);
+      expect(modelMetrics.api.totalLatencyMs).toBe(280);
+      expect(modelMetrics.tokens.prompt).toBe(140);
+      expect(modelMetrics.tokens.total).toBe(200);
+      // Per-source breakdown isolates each contributor
+      expect(new Set(Object.keys(modelMetrics.bySource))).toEqual(
+        new Set([MAIN_SOURCE, "echoer"]),
+      );
+      expect(modelMetrics.bySource[MAIN_SOURCE].api.totalRequests).toBe(1);
+      expect(modelMetrics.bySource[MAIN_SOURCE].tokens.prompt).toBe(100);
+      expect(modelMetrics.bySource["echoer"].api.totalRequests).toBe(1);
+      expect(modelMetrics.bySource["echoer"].tokens.prompt).toBe(40);
+    });
+
+    it("splits two subagents sharing a model into distinct source buckets", () => {
+      const makeEvent = (
+        subagentName: string,
+        duration: number,
+      ): ApiResponseEvent & { "event.name": typeof EVENT_API_RESPONSE } =>
+        ({
+          "event.name": EVENT_API_RESPONSE,
+          model: "glm-5",
+          duration_ms: duration,
+          input_token_count: 10,
+          output_token_count: 5,
+          total_token_count: 15,
+          cached_content_token_count: 0,
+          thoughts_token_count: 0,
+          subagent_name: subagentName,
+        }) as ApiResponseEvent & { "event.name": typeof EVENT_API_RESPONSE };
+
+      service.addEvent(makeEvent("alpha", 50));
+      service.addEvent(makeEvent("bravo", 70));
+
+      const modelMetrics = service.getMetrics().models["glm-5"];
+      expect(modelMetrics.api.totalRequests).toBe(2);
+      expect(Object.keys(modelMetrics.bySource).sort()).toEqual([
+        "alpha",
+        "bravo",
+      ]);
+      expect(modelMetrics.bySource["alpha"].api.totalRequests).toBe(1);
+      expect(modelMetrics.bySource["bravo"].api.totalRequests).toBe(1);
+      // Main bucket should NOT be created when no main-origin event arrived
+      expect(modelMetrics.bySource[MAIN_SOURCE]).toBeUndefined();
+    });
+
+    it("handles a subagent named after an Object.prototype member without crashing", () => {
+      // `constructor` is a valid subagent name per the naming regex. A
+      // plain-object `bySource` would return `Object.prototype.constructor`
+      // from a truthiness check, short-circuiting the bucket creation and
+      // crashing the aggregation path. The prototype-free map prevents this.
+      const event = {
+        "event.name": EVENT_API_RESPONSE,
+        model: "glm-5",
+        duration_ms: 100,
+        input_token_count: 10,
+        output_token_count: 5,
+        total_token_count: 15,
+        cached_content_token_count: 0,
+        thoughts_token_count: 0,
+        subagent_name: "constructor",
+      } as ApiResponseEvent & { "event.name": typeof EVENT_API_RESPONSE };
+
+      expect(() => service.addEvent(event)).not.toThrow();
+
+      const modelMetrics = service.getMetrics().models["glm-5"];
+      expect(modelMetrics.bySource["constructor"]).toBeDefined();
+      expect(modelMetrics.bySource["constructor"].api.totalRequests).toBe(1);
+      expect(modelMetrics.bySource["constructor"].tokens.prompt).toBe(10);
+      // Sanity: the Object prototype member was not actually mutated.
+      expect(typeof modelMetrics.bySource["constructor"]).toBe("object");
+    });
+
+    it("attributes API errors to the subagent source bucket", () => {
+      const errorEvent = {
+        "event.name": EVENT_API_ERROR,
+        model: "glm-5",
+        duration_ms: 150,
+        error_message: "boom",
+        subagent_name: "alpha",
+      } as ApiErrorEvent & { "event.name": typeof EVENT_API_ERROR };
+
+      service.addEvent(errorEvent);
+
+      const modelMetrics = service.getMetrics().models["glm-5"];
+      expect(modelMetrics.api.totalErrors).toBe(1);
+      expect(modelMetrics.bySource["alpha"].api.totalErrors).toBe(1);
+      expect(modelMetrics.bySource[MAIN_SOURCE]).toBeUndefined();
     });
   });
 

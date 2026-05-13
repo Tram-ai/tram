@@ -35,6 +35,15 @@ export interface WebFetchToolParams {
    * The prompt to run on the fetched content
    */
   prompt: string;
+  /**
+   * Preferred content format (controls only the Accept header)
+   * All content is normalized to plain text for LLM processing
+   * - auto: Prefers markdown via content negotiation (default)
+   * - markdown: Request markdown format only
+   * - html: Request HTML format only (still converted to text)
+   * - text: Request plain text format
+   */
+  format?: 'auto' | 'markdown' | 'html' | 'text';
 }
 
 /**
@@ -51,6 +60,21 @@ class WebFetchToolInvocation extends BaseToolInvocation<
     this.debugLogger = createDebugLogger("WEB_FETCH");
   }
 
+  private getAcceptHeader(): string {
+    const format = this.params.format ?? 'auto';
+    switch (format) {
+      case 'markdown':
+        return 'text/markdown';
+      case 'html':
+        return 'text/html';
+      case 'text':
+        return 'text/plain';
+      case 'auto':
+      default:
+        return 'text/markdown, text/html, text/plain';
+    }
+  }
+
   private async executeDirectFetch(signal: AbortSignal): Promise<ToolResult> {
     let url = this.params.url;
 
@@ -64,9 +88,16 @@ class WebFetchToolInvocation extends BaseToolInvocation<
       );
     }
 
+    const acceptHeader = this.getAcceptHeader();
+    this.debugLogger.debug(
+      `[WebFetchTool] Using Accept header: ${acceptHeader}`,
+    );
+
     try {
       this.debugLogger.debug(`[WebFetchTool] Fetching content from: ${url}`);
-      const response = await fetchWithTimeout(url, URL_FETCH_TIMEOUT_MS);
+      const response = await fetchWithTimeout(url, URL_FETCH_TIMEOUT_MS, {
+        Accept: acceptHeader,
+      });
 
       // Collect response metadata for the model
       const responseStatus = response.status;
@@ -151,7 +182,8 @@ class WebFetchToolInvocation extends BaseToolInvocation<
       this.params.prompt.length > 100
         ? this.params.prompt.substring(0, 97) + "..."
         : this.params.prompt;
-    return `Fetching content from ${this.params.url} and processing with prompt: "${displayPrompt}"`;
+    const format = this.params.format ?? 'auto';
+    return `Fetching content from ${this.params.url} (format: ${format}) and processing with prompt: "${displayPrompt}"`;
   }
 
   /**
@@ -224,7 +256,7 @@ export class WebFetchTool extends BaseDeclarativeTool<
     super(
       WebFetchTool.Name,
       ToolDisplayNames.WEB_FETCH,
-      'Fetches content from a specified URL and processes it using an AI model\n- Takes a URL and a prompt as input\n- Fetches the URL content, converts HTML to markdown\n- Processes the content with the prompt using a small, fast model\n- Returns the model\'s response about the content\n- Use this tool when you need to retrieve and analyze web content\n\nUsage notes:\n  - IMPORTANT: If an MCP-provided web fetch tool is available, prefer using that tool instead of this one, as it may have fewer restrictions. All MCP-provided tools start with "mcp__".\n  - The URL must be a fully-formed valid URL\n  - The prompt should describe what information you want to extract from the page\n  - This tool is read-only and does not modify any files\n  - Results may be summarized if the content is very large\n  - Supports both public and private/localhost URLs using direct fetch',
+      'Fetches content from a specified URL and processes it using an AI model\n- Takes a URL and a prompt as input\n- Supports content negotiation for markdown (reduces tokens by ~80%)\n- Fetches the URL content, converts HTML to text if needed\n- Processes the content with the prompt using a small, fast model\n- Returns the model\'s response about the content\n- Use this tool when you need to retrieve and analyze web content\n\nUsage notes:\n  - IMPORTANT: If an MCP-provided web fetch tool is available, prefer using that tool instead of this one, as it may have fewer restrictions. All MCP-provided tools start with "mcp__".\n  - The URL must be a fully-formed valid URL\n  - The prompt should describe what information you want to extract from the page\n  - format parameter (optional): controls only the Accept header sent to the server. All content is normalized to plain text for LLM processing, regardless of format.\n  - "auto" (default): Prefers markdown via content negotiation, accepts HTML as fallback. Use when user does NOT specify a format.\n  - "markdown": Sends Accept: text/markdown. Use when user explicitly asks for markdown content.\n  - "html": Sends Accept: text/html. Content is still converted to plain text for LLM processing.\n  - "text": Sends Accept: text/plain. Use when user explicitly asks for plain text.\n  - This tool is read-only and does not modify any files\n  - Results may be summarized if the content is very large\n  - Supports both public and private/localhost URLs using direct fetch',
       Kind.Fetch,
       {
         properties: {
@@ -235,6 +267,12 @@ export class WebFetchTool extends BaseDeclarativeTool<
           prompt: {
             description: "The prompt to run on the fetched content",
             type: "string",
+          },
+          format: {
+            description:
+              'Preferred content format (Accept header only): auto (default, prefers markdown), markdown, html, or text. All content is normalized to plain text.',
+            type: 'string',
+            enum: ['auto', 'markdown', 'html', 'text'],
           },
         },
         required: ["url", "prompt"],

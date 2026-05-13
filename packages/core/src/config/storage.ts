@@ -8,9 +8,9 @@ import * as path from "node:path";
 import * as os from "node:os";
 import * as fs from "node:fs";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { getProjectHash, sanitizeCwd } from "../utils/paths.js";
+import { getProjectHash, TRAM_DIR, sanitizeCwd } from "../utils/paths.js";
 
-export const TRAM_DIR = ".tram";
+export { TRAM_DIR } from "../utils/paths.js";
 export const GOOGLE_ACCOUNTS_FILENAME = "google_accounts.json";
 export const OAUTH_FILE = "oauth_creds.json";
 export const SKILL_PROVIDER_CONFIG_DIRS = [".tram", ".agents"];
@@ -38,14 +38,10 @@ export class Storage {
     this.targetDir = targetDir;
   }
 
-  private static resolveRuntimeBaseDir(
-    dir: string | null | undefined,
-    cwd?: string,
-  ): string | null {
-    if (!dir) {
-      return null;
-    }
-
+  /**
+   * Expands tilde and resolves relative paths to absolute.
+   */
+  private static resolvePath(dir: string, cwd?: string): string {
     let resolved = dir;
     if (
       resolved === "~" ||
@@ -65,6 +61,16 @@ export class Storage {
       resolved = cwd ? path.resolve(cwd, resolved) : path.resolve(resolved);
     }
     return resolved;
+  }
+
+  private static resolveRuntimeBaseDir(
+    dir: string | null | undefined,
+    cwd?: string,
+  ): string | null {
+    if (!dir) {
+      return null;
+    }
+    return Storage.resolvePath(dir, cwd);
   }
 
   /**
@@ -119,6 +125,10 @@ export class Storage {
   }
 
   static getGlobalQwenDir(): string {
+    const envDir = process.env['QWEN_HOME'];
+    if (envDir) {
+      return Storage.resolvePath(envDir);
+    }
     const homeDir = os.homedir();
     if (!homeDir) {
       return path.join(os.tmpdir(), ".tram");
@@ -185,7 +195,10 @@ export class Storage {
   }
 
   static getGlobalIdeDir(): string {
-    return path.join(Storage.getRuntimeBaseDir(), IDE_DIR_NAME);
+    // Pinned to the global Qwen dir so the VS Code companion (which only
+    // sees env vars, not settings-based runtimeOutputDir) finds the same
+    // lock-file location as the CLI.
+    return path.join(Storage.getGlobalQwenDir(), IDE_DIR_NAME);
   }
 
   static getPlansDir(): string {
@@ -270,7 +283,9 @@ export class Storage {
   getUserSkillsDirs(): string[] {
     const homeDir = os.homedir() || os.tmpdir();
     return SKILL_PROVIDER_CONFIG_DIRS.map((dir) =>
-      path.join(homeDir, dir, "skills"),
+      dir === TRAM_DIR
+        ? path.join(Storage.getGlobalTramDir(), "skills")
+        : path.join(homeDir, dir, "skills"),
     );
   }
 

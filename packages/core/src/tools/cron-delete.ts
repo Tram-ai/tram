@@ -68,6 +68,12 @@ export class CronDeleteTool extends BaseDeclarativeTool<
         required: ["id"],
         additionalProperties: false,
       },
+      true, // isOutputMarkdown
+      false, // canUpdateOutput
+      false, // isLmOnly
+      true, // shouldDefer — only needed after CronCreate/CronList
+      false, // alwaysLoad
+      "cron delete cancel remove",
     );
   }
 

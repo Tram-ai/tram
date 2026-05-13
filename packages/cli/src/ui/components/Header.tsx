@@ -13,6 +13,8 @@ import { shortAsciiLogo } from "./AsciiArt.js";
 import { getAsciiArtWidth, getCachedStringWidth } from "../utils/textUtils.js";
 import { useTerminalSize } from "../hooks/useTerminalSize.js";
 import { t } from "../../i18n/index.js";
+import { getRenderableGradientColors } from "../utils/gradientUtils.js";
+import { pickAsciiArtTier } from "../utils/customBanner.js";
 
 /**
  * Auth display type for the Header component.
@@ -26,15 +28,36 @@ export enum AuthDisplayType {
 }
 
 interface HeaderProps {
-  customAsciiArt?: string; // For user-defined ASCII art
+  /**
+   * Width-aware override for the logo column. Each tier is a sanitized
+   * ASCII string; the renderer picks `large` when it fits, then `small`,
+   * then falls through to the default Qwen logo. Either tier may be
+   * omitted: a missing tier simply skips that step.
+   */
+  customAsciiArt?: { small?: string; large?: string };
+  /**
+   * Sanitized replacement for the bold ">_ Qwen Code" title in the info
+   * panel. The version suffix is always appended. When undefined or empty
+   * the default title is used; the leading `>_` glyph is part of the
+   * default brand and is dropped when a custom title is set.
+   */
+  customBannerTitle?: string;
+  /**
+   * Sanitized subtitle string rendered between the title and the
+   * auth/model line. When undefined the existing blank spacer row is
+   * preserved so unset users see the same layout as before.
+   */
+  customBannerSubtitle?: string;
   version: string;
-  authDisplayType?: AuthDisplayType;
+  authDisplayType?: AuthDisplayType | string;
   model: string;
   workingDirectory: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   customAsciiArt,
+  customBannerTitle,
+  customBannerSubtitle,
   version,
   authDisplayType,
   model,
@@ -42,8 +65,6 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { columns: terminalWidth } = useTerminalSize();
 
-  const displayLogo = customAsciiArt ?? shortAsciiLogo;
-  const logoWidth = getAsciiArtWidth(displayLogo);
   const formattedAuthType = authDisplayType ?? AuthDisplayType.UNKNOWN;
 
   // Calculate available space properly:
@@ -64,8 +85,30 @@ export const Header: React.FC<HeaderProps> = ({
     terminalWidth - containerMarginLeft - containerMarginRight,
   );
 
-  // Check if we have enough space for logo + gap + minimum info panel
+  // Two distinct fallback paths:
+  //   - User supplied a custom tier and at least one tier fits → render that.
+  //   - User supplied custom art but neither tier fits → hide the logo column.
+  //     Falling back to the bundled TRAM logo here would silently undo a
+  //     white-label deployment on narrow terminals.
+  //   - User supplied no custom art → fall through to `shortAsciiLogo` and let
+  //     the existing width gate decide whether to show or hide it.
+  const hasCustomArt = Boolean(customAsciiArt?.small || customAsciiArt?.large);
+  const customTier = pickAsciiArtTier(
+    customAsciiArt?.small,
+    customAsciiArt?.large,
+    availableTerminalWidth,
+    logoGap,
+    minInfoPanelWidth,
+    getAsciiArtWidth,
+  );
+  const displayLogo = customTier ?? (hasCustomArt ? "" : shortAsciiLogo);
+  const logoWidth = getAsciiArtWidth(displayLogo);
+
+  // TRAM: logo column is intentionally hidden. We keep the calculation
+  // (displayLogo / logoWidth) so layout math stays consistent, but always
+  // suppress rendering the logo.
   const autoShowLogo =
+    displayLogo !== "" &&
     availableTerminalWidth >= logoWidth + logoGap + minInfoPanelWidth;
   const showLogo = false && autoShowLogo;
 
@@ -119,12 +162,11 @@ export const Header: React.FC<HeaderProps> = ({
   );
   const displayPath = shortenedPath;
 
-  // Use theme gradient colors if available, otherwise use text colors (excluding primary)
-  const gradientColors = theme.ui.gradient || [
+  const gradientColors = getRenderableGradientColors(theme.ui.gradient, [
     theme.text.secondary,
     theme.text.link,
     theme.text.accent,
-  ];
+  ]);
 
   return (
     <Box
@@ -138,9 +180,13 @@ export const Header: React.FC<HeaderProps> = ({
       {showLogo && (
         <>
           <Box flexShrink={0}>
-            <Gradient colors={gradientColors}>
+            {gradientColors ? (
+              <Gradient colors={gradientColors}>
+                <Text>{displayLogo}</Text>
+              </Gradient>
+            ) : (
               <Text>{displayLogo}</Text>
-            </Gradient>
+            )}
           </Box>
           {/* Fixed gap between logo and info panel */}
           <Box width={logoGap} />
@@ -156,13 +202,22 @@ export const Header: React.FC<HeaderProps> = ({
         paddingRight={infoPanelPaddingRight}
         width={availableInfoPanelWidth}
       >
-        {/* Title line: >_ TRAM (v{version}) color={theme.text.accent} */}
+        {/* Title line: customBannerTitle (already sanitized) or the default
+            ">_ TRAM Cli" brand. Version suffix is always appended. */}
         <Text>
-          <Text bold>&gt;_ TRAM Cli</Text>
+          <Text bold color={theme.text.accent}>
+            {customBannerTitle ? customBannerTitle : ">_ TRAM Cli"}
+          </Text>
           <Text color={theme.text.secondary}> (v{version})</Text>
         </Text>
-        {/* Empty line for spacing */}
-        <Text> </Text>
+        {/* Subtitle (when set) replaces the blank spacer row. We always
+            emit a row here so the auth/model line stays at the same
+            vertical position regardless of whether the subtitle is set. */}
+        {customBannerSubtitle ? (
+          <Text color={theme.text.secondary}>{customBannerSubtitle}</Text>
+        ) : (
+          <Text> </Text>
+        )}
         {/* Auth and Model line */}
         <Text>
           <Text color={theme.text.secondary}>{authModelText}</Text>

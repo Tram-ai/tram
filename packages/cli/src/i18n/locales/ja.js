@@ -729,6 +729,151 @@ export default {
   "List all configured hooks": "List all configured hooks",
   "Enable a disabled hook": "Enable a disabled hook",
   "Disable an active hook": "Disable an active hook",
+    'コマンド "/{{command}}" は非対話モードではサポートされていません',
+  'View and edit TRAM settings': 'TRAM の設定を表示・編集',
+  Settings: '設定',
+  Language: '言語',
+  'Hide Banner': 'バナーを非表示',
+  'Show Memory Usage': 'メモリ使用量を表示',
+  'Show Line Numbers': '行番号を表示',
+  'Hide Context Summary': 'コンテキスト要約を非表示',
+  'Hide CWD': '作業ディレクトリを非表示',
+  'Hide Sandbox Status': 'サンドボックス状態を非表示',
+  'Hide Model Info': 'モデル情報を非表示',
+  'Hide Footer': 'フッターを非表示',
+  'Enable Welcome Back': 'ウェルカムバック機能を有効化',
+  'Enable Interactive Shell': '対話型シェルを有効化',
+  'Auto (detect terminal theme)': '自動（端末テーマを検出）',
+  Auto: '自動',
+  // Hooks - Dialog
+  Hooks: 'フック',
+  'Loading hooks...': 'フックを読み込んでいます...',
+  'Error loading hooks:': 'フックの読み込みエラー：',
+  'Press Escape to close': 'Escape キーで閉じる',
+  'Press Escape, Ctrl+C, or Ctrl+D to cancel':
+    'Escape、Ctrl+C、Ctrl+D でキャンセル',
+  'Press Space, Enter, or Escape to dismiss': 'Space、Enter、Escape で閉じる',
+  'No hook selected': 'フックが選択されていません',
+  // Hooks - List Step
+  'No hook events found.': 'フックイベントが見つかりません。',
+  '{{count}} hook configured': '{{count}} 件のフックが設定されています',
+  '{{count}} hooks configured': '{{count}} 件のフックが設定されています',
+  'This menu is read-only. To add or modify hooks, edit settings.json directly or ask TRAM.':
+    'このメニューは読み取り専用です。フックを追加または変更するには、settings.json を直接編集するか、TRAM に尋ねてください。',
+  'Enter to select · Esc to cancel': 'Enter で選択 · Esc でキャンセル',
+  // Hooks - Detail Step
+  'Exit codes:': '終了コード：',
+  'Configured hooks:': '設定済みのフック：',
+  'No hooks configured for this event.':
+    'このイベントにはフックが設定されていません。',
+  'To add hooks, edit settings.json directly or ask Tram.':
+    'フックを追加するには、settings.json を直接編集するか、Tram に尋ねてください。',
+  'Enter to select · Esc to go back': 'Enter で選択 · Esc で戻る',
+  // Hooks - Config Detail Step
+  'Hook details': 'フック詳細',
+  'Event:': 'イベント：',
+  'Extension:': '拡張機能：',
+  'Desc:': '説明：',
+  'No hook config selected': 'フック設定が選択されていません',
+  'To modify or remove this hook, edit settings.json directly or ask Tram to help.':
+    'このフックを変更または削除するには、settings.json を直接編集するか、Tram に尋ねてください。',
+  // Hooks - Disabled Step
+  'Hook Configuration - Disabled': 'フック設定 - 無効',
+  'All hooks are currently disabled. You have {{count}} that are not running.':
+    'すべてのフックは現在無効です。{{count}} が実行されていません。',
+  '{{count}} configured hook': '{{count}} 個の設定されたフック',
+  '{{count}} configured hooks': '{{count}} 個の設定されたフック',
+  'When hooks are disabled:': 'フックが無効な場合：',
+  'No hook commands will execute': 'フックコマンドは実行されません',
+  'StatusLine will not be displayed': 'StatusLine は表示されません',
+  'Tool operations will proceed without hook validation':
+    'ツール操作はフック検証なしで続行されます',
+  'To re-enable hooks, remove "disableAllHooks" from settings.json or ask TRAM.':
+    'フックを再有効化するには、settings.json から "disableAllHooks" を削除するか、TRAM に尋ねてください。',
+  // Hooks - Source
+  Project: 'プロジェクト',
+  User: 'ユーザー',
+  System: 'システム',
+  Extension: '拡張機能',
+  'Local Settings': 'ローカル設定',
+  'User Settings': 'ユーザー設定',
+  'System Settings': 'システム設定',
+  Extensions: '拡張機能',
+  'Session (temporary)': 'セッション（一時）',
+  // Hooks - Status
+  '✓ Enabled': '✓ 有効',
+  '✗ Disabled': '✗ 無効',
+  // Hooks - Event Descriptions (short)
+  'Before tool execution': 'ツール実行前',
+  'After tool execution': 'ツール実行後',
+  'After tool execution fails': 'ツール実行失敗時',
+  'When notifications are sent': '通知送信時',
+  'When the user submits a prompt': 'ユーザーがプロンプトを送信した時',
+  'When a new session is started': '新しいセッションが開始された時',
+  'Right before TRAM concludes its response':
+    'TRAM が応答を終了する直前',
+  'When a subagent (Agent tool call) is started':
+    'サブエージェント（Agent ツール呼び出し）が開始された時',
+  'Right before a subagent concludes its response':
+    'サブエージェントが応答を終了する直前',
+  'Before conversation compaction': '会話圧縮前',
+  'When a session is ending': 'セッション終了時',
+  'When a permission dialog is displayed': '権限ダイアログ表示時',
+  // Hooks - Event Descriptions (detailed)
+  'Input to command is JSON of tool call arguments.':
+    'コマンドへの入力はツール呼び出し引数の JSON です。',
+  'Input to command is JSON with fields "inputs" (tool call arguments) and "response" (tool call response).':
+    'コマンドへの入力は "inputs"（ツール呼び出し引数）と "response"（ツール呼び出し応答）フィールドを持つ JSON です。',
+  'Input to command is JSON with tool_name, tool_input, tool_use_id, error, error_type, is_interrupt, and is_timeout.':
+    'コマンドへの入力は tool_name、tool_input、tool_use_id、error、error_type、is_interrupt、is_timeout を持つ JSON です。',
+  'Input to command is JSON with notification message and type.':
+    'コマンドへの入力は通知メッセージとタイプを持つ JSON です。',
+  'Input to command is JSON with original user prompt text.':
+    'コマンドへの入力は元のユーザープロンプトテキストを持つ JSON です。',
+  'Input to command is JSON with session start source.':
+    'コマンドへの入力はセッション開始ソースを持つ JSON です。',
+  'Input to command is JSON with session end reason.':
+    'コマンドへの入力はセッション終了理由を持つ JSON です。',
+  'Input to command is JSON with agent_id and agent_type.':
+    'コマンドへの入力は agent_id と agent_type を持つ JSON です。',
+  'Input to command is JSON with agent_id, agent_type, and agent_transcript_path.':
+    'コマンドへの入力は agent_id、agent_type、agent_transcript_path を持つ JSON です。',
+  'Input to command is JSON with compaction details.':
+    'コマンドへの入力は圧縮詳細を持つ JSON です。',
+  'Input to command is JSON with tool_name, tool_input, and tool_use_id. Output JSON with hookSpecificOutput containing decision to allow or deny.':
+    'コマンドへの入力は tool_name、tool_input、tool_use_id を持つ JSON です。許可または拒否の決定を含む hookSpecificOutput を持つ JSON を出力します。',
+  // Hooks - Exit Code Descriptions
+  'stdout/stderr not shown': 'stdout/stderr は表示されません',
+  'show stderr to model and continue conversation':
+    'stderr をモデルに表示し、会話を続ける',
+  'show stderr to user only': 'stderr をユーザーのみに表示',
+  'stdout shown in transcript mode (ctrl+o)':
+    'stdout はトランスクリプトモードで表示 (ctrl+o)',
+  'show stderr to model immediately': 'stderr をモデルに即座に表示',
+  'show stderr to user only but continue with tool call':
+    'stderr をユーザーのみに表示し、ツール呼び出しを続ける',
+  'block processing, erase original prompt, and show stderr to user only':
+    '処理をブロックし、元のプロンプトを消去し、stderr をユーザーのみに表示',
+  'stdout shown to Tram': 'stdout をモデルに表示',
+  'show stderr to user only (blocking errors ignored)':
+    'stderr をユーザーのみに表示（ブロッキングエラーは無視）',
+  'command completes successfully': 'コマンドが正常に完了',
+  'stdout shown to subagent': 'stdout をサブエージェントに表示',
+  'show stderr to subagent and continue having it run':
+    'stderr をサブエージェントに表示し、実行を続ける',
+  'stdout appended as custom compact instructions':
+    'stdout をカスタム圧縮指示として追加',
+  'block compaction': '圧縮をブロック',
+  'show stderr to user only but continue with compaction':
+    'stderr をユーザーのみに表示し、圧縮を続ける',
+  'use hook decision if provided': '提供されている場合はフックの決定を使用',
+  // Hooks - Messages
+  'Config not loaded.': '設定が読み込まれていません。',
+  'Hooks are not enabled. Enable hooks in settings to use this feature.':
+    'フックが有効になっていません。この機能を使用するには設定でフックを有効にしてください。',
+  'No hooks configured. Add hooks in your settings.json file.':
+    'フックが設定されていません。settings.json ファイルにフックを追加してください。',
+  'Configured Hooks ({{count}} total)': '設定済みのフック（合計 {{count}} 件）',
 
   // ============================================================================
   // Commands - Session Export
@@ -900,6 +1045,47 @@ export default {
   "Use /mcp auth <server-name> to authenticate.":
     "Use /mcp auth <server-name> to authenticate.",
   "MCP server '{{name}}' not found.": "MCP server '{{name}}' not found.",
+    'メモリ {{scope}} への保存を試行中: "{{fact}}"',
+  'Open auto-memory folder': '自動メモリフォルダを開く',
+  'Auto-memory: {{status}}': '自動メモリ: {{status}}',
+  'Auto-dream: {{status}} · {{lastDream}} · /dream to run':
+    '自動統合: {{status}} · {{lastDream}} · /dream で実行',
+  never: '未実行',
+  on: 'オン',
+  off: 'オフ',
+  '❆ dreaming': '❆ 整理中',
+  'Remove matching entries from managed auto-memory.':
+    'マネージド自動メモリから一致するエントリを削除する。',
+  'Usage: /forget <memory text to remove>':
+    '使い方: /forget <削除するメモリテキスト>',
+  'No managed auto-memory entries matched: {{query}}':
+    '一致するマネージド自動メモリエントリなし: {{query}}',
+  'Show managed auto-memory status.':
+    'マネージド自動メモリのステータスを表示する。',
+  'Run managed auto-memory extraction for the current session.':
+    '現在のセッションのマネージド自動メモリ抽出を実行する。',
+  'Managed auto-memory root: {{root}}':
+    'マネージド自動メモリのルート: {{root}}',
+  'Managed auto-memory topics:': 'マネージド自動メモリのトピック:',
+  'No extraction cursor found yet.': 'まだ抽出カーソルが見つかりません。',
+  'Cursor: session={{sessionId}}, offset={{offset}}, updated={{updatedAt}}':
+    'カーソル: セッション={{sessionId}}, オフセット={{offset}}, 更新={{updatedAt}}',
+  'No chat client available to extract memory.':
+    'メモリを抽出できるチャットクライアントがありません。',
+  'Managed auto-memory extraction is already running.':
+    'マネージド自動メモリ抽出はすでに実行中です。',
+  'Managed auto-memory extraction found no new durable memories.':
+    'マネージド自動メモリ抽出で新しい永続メモリは見つかりませんでした。',
+  'Consolidate managed auto-memory topic files.':
+    'マネージド自動メモリトピックファイルを統合する。',
+  'Managed auto-memory dream found nothing to improve.':
+    '自動メモリ統合で改善するものは見つかりませんでした。',
+  'Deduplicated entries: {{count}}': '重複除去したエントリ: {{count}}',
+  'Save a durable memory using the save_memory tool.':
+    'save_memoryツールを使用して永続メモリを保存する。',
+  'Usage: /remember [--global|--project] <text to remember>':
+    '使い方: /remember [--global|--project] <覚えておくテキスト>',
+  'No MCP servers configured.': 'MCPサーバーが設定されていません',
   "Successfully authenticated and refreshed tools for '{{name}}'.":
     "Successfully authenticated and refreshed tools for '{{name}}'.",
   "Failed to authenticate with MCP server '{{name}}': {{error}}":
@@ -915,6 +1101,133 @@ export default {
     "If the browser does not open, copy and paste this URL into your browser:",
   "Make sure to copy the COMPLETE URL - it may wrap across multiple lines.":
     "Make sure to copy the COMPLETE URL - it may wrap across multiple lines.",
+    "'{{name}}' から {{count}} 個のツールを検出しました。",
+  'Configured MCP servers:': '設定済みMCPサーバー:',
+  Ready: '準備完了',
+  Disconnected: '切断',
+  '{{count}} tool': '{{count}} ツール',
+  '{{count}} tools': '{{count}} ツール',
+  'Restarting MCP servers...': 'MCPサーバーを再起動中...',
+  // Chat
+  'Manage conversation history.': '会話履歴を管理します',
+  'List saved conversation checkpoints':
+    '保存された会話チェックポイントを一覧表示',
+  'No saved conversation checkpoints found.':
+    '保存された会話チェックポイントが見つかりません',
+  'List of saved conversations:': '保存された会話の一覧:',
+  'Note: Newest last, oldest first':
+    '注: 最新のものが下にあり、過去のものが上にあります',
+  'Save the current conversation as a checkpoint. Usage: /chat save <tag>':
+    '現在の会話をチェックポイントとして保存。使い方: /chat save <タグ>',
+  'Missing tag. Usage: /chat save <tag>':
+    'タグが不足しています。使い方: /chat save <タグ>',
+  'Delete a conversation checkpoint. Usage: /chat delete <tag>':
+    '会話チェックポイントを削除。使い方: /chat delete <タグ>',
+  'Missing tag. Usage: /chat delete <tag>':
+    'タグが不足しています。使い方: /chat delete <タグ>',
+  "Conversation checkpoint '{{tag}}' has been deleted.":
+    "会話チェックポイント '{{tag}}' を削除しました",
+  "Error: No checkpoint found with tag '{{tag}}'.":
+    "エラー: タグ '{{tag}}' のチェックポイントが見つかりません",
+  'Resume a conversation from a checkpoint. Usage: /chat resume <tag>':
+    'チェックポイントから会話を再開。使い方: /chat resume <タグ>',
+  'Missing tag. Usage: /chat resume <tag>':
+    'タグが不足しています。使い方: /chat resume <タグ>',
+  'No saved checkpoint found with tag: {{tag}}.':
+    'タグ {{tag}} のチェックポイントが見つかりません',
+  'A checkpoint with the tag {{tag}} already exists. Do you want to overwrite it?':
+    'タグ {{tag}} のチェックポイントは既に存在します。上書きしますか?',
+  'No chat client available to save conversation.':
+    '会話を保存するためのチャットクライアントがありません',
+  'Conversation checkpoint saved with tag: {{tag}}.':
+    'タグ {{tag}} で会話チェックポイントを保存しました',
+  'No conversation found to save.': '保存する会話が見つかりません',
+  'No chat client available to share conversation.':
+    '会話を共有するためのチャットクライアントがありません',
+  'Invalid file format. Only .md and .json are supported.':
+    '無効なファイル形式です。.md と .json のみサポートされています',
+  'Error sharing conversation: {{error}}': '会話の共有中にエラー: {{error}}',
+  'Conversation shared to {{filePath}}': '会話を {{filePath}} に共有しました',
+  'No conversation found to share.': '共有する会話が見つかりません',
+  'Share the current conversation to a markdown or json file. Usage: /chat share <file>':
+    '現在の会話をmarkdownまたはjsonファイルに共有。使い方: /chat share <ファイル>',
+  // Summary
+  'Generate a project summary and save it to .tram/PROJECT_SUMMARY.md':
+    'プロジェクトサマリーを生成し、.tram/PROJECT_SUMMARY.md に保存',
+  'No chat client available to generate summary.':
+    'サマリーを生成するためのチャットクライアントがありません',
+  'Already generating summary, wait for previous request to complete':
+    'サマリー生成中です。前のリクエストの完了をお待ちください',
+  'No conversation found to summarize.': '要約する会話が見つかりません',
+  'Failed to generate project context summary: {{error}}':
+    'プロジェクトコンテキストサマリーの生成に失敗: {{error}}',
+  'Saved project summary to {{filePathForDisplay}}.':
+    'プロジェクトサマリーを {{filePathForDisplay}} に保存しました',
+  'Saving project summary...': 'プロジェクトサマリーを保存中...',
+  'Generating project summary...': 'プロジェクトサマリーを生成中...',
+  'Failed to generate summary - no text content received from LLM response':
+    'サマリーの生成に失敗 - LLMレスポンスからテキストコンテンツを受信できませんでした',
+  // Model
+  'Switch the model for this session (--fast for suggestion model, [model-id] to switch immediately).':
+    'このセッションのモデルを切り替え（--fast で提案モデルを設定）',
+  'Set a lighter model for prompt suggestions and speculative execution':
+    'プロンプト提案と投機的実行用の軽量モデルを設定',
+  'Content generator configuration not available.':
+    'コンテンツジェネレーター設定が利用できません',
+  'Authentication type not available.': '認証タイプが利用できません',
+  'No models available for the current authentication type ({{authType}}).':
+    '現在の認証タイプ({{authType}})で利用可能なモデルはありません',
+  // Needs translation
+  ' (not in model registry)': ' (not in model registry)',
+  // Clear
+  'Starting a new session, resetting chat, and clearing terminal.':
+    '新しいセッションを開始し、チャットをリセットし、ターミナルをクリアしています',
+  'Starting a new session and clearing.':
+    '新しいセッションを開始してクリアしています',
+  // Compress
+  'Already compressing, wait for previous request to complete':
+    '圧縮中です。前のリクエストの完了をお待ちください',
+  'Failed to compress chat history.': 'チャット履歴の圧縮に失敗しました',
+  'Failed to compress chat history: {{error}}':
+    'チャット履歴の圧縮に失敗: {{error}}',
+  'Compressing chat history': 'チャット履歴を圧縮中',
+  'Chat history compressed from {{originalTokens}} to {{newTokens}} tokens.':
+    'チャット履歴を {{originalTokens}} トークンから {{newTokens}} トークンに圧縮しました',
+  'Compression was not beneficial for this history size.':
+    'この履歴サイズには圧縮の効果がありませんでした',
+  'Chat history compression did not reduce size. This may indicate issues with the compression prompt.':
+    'チャット履歴の圧縮でサイズが減少しませんでした。圧縮プロンプトに問題がある可能性があります',
+  'Could not compress chat history due to a token counting error.':
+    'トークンカウントエラーのため、チャット履歴を圧縮できませんでした',
+  'Chat history is already compressed.': 'チャット履歴は既に圧縮されています',
+  // Directory
+  'Configuration is not available.': '設定が利用できません',
+  'Please provide at least one path to add.':
+    '追加するパスを少なくとも1つ指定してください',
+  'The /directory add command is not supported in restrictive sandbox profiles. Please use --include-directories when starting the session instead.':
+    '制限的なサンドボックスプロファイルでは /directory add コマンドはサポートされていません。代わりにセッション開始時に --include-directories を使用してください',
+  "Error adding '{{path}}': {{error}}":
+    "'{{path}}' の追加中にエラー: {{error}}",
+  'Successfully added Tram.md files from the following directories if there are:\n- {{directories}}':
+    '以下のディレクトリから Tram.md ファイルを追加しました(存在する場合):\n- {{directories}}',
+  'Error refreshing memory: {{error}}': 'メモリの更新中にエラー: {{error}}',
+  'Successfully added directories:\n- {{directories}}':
+    'ディレクトリを正常に追加しました:\n- {{directories}}',
+  'Current workspace directories:\n{{directories}}':
+    '現在のワークスペースディレクトリ:\n{{directories}}',
+  // Docs
+  'Please open the following URL in your browser to view the documentation:\n{{url}}':
+    'ドキュメントを表示するには、ブラウザで以下のURLを開いてください:\n{{url}}',
+  'Opening documentation in your browser: {{url}}':
+    '  ブラウザでドキュメントを開きました: {{url}}',
+  // Dialogs - Tool Confirmation
+  'Do you want to proceed?': '続行しますか?',
+  'Yes, allow once': 'はい(今回のみ許可)',
+  'Allow always': '常に許可する',
+  Yes: 'はい',
+  No: 'いいえ',
+  'No (esc)': 'いいえ (Esc)',
+  'Yes, allow always for this session': 'はい、このセッションで常に許可',
 
   // ============================================================================
   // MCP Management Dialog
@@ -1295,6 +1608,37 @@ export default {
     "Press Enter to continue, Tab/闂佹剚鍋呴崹鐔煎疮?to navigate, Esc to cancel",
 
   // ============================================================================
+  'Current tasks': '現在のタスク',
+  '... and {{count}} more': '... 他 {{count}} 件',
+  '👋 Welcome back! (Last updated: {{timeAgo}})':
+    '👋 おかえりなさい!(最終更新: {{timeAgo}})',
+  '🎯 Overall Goal:': '🎯 全体目標:',
+  'Tram OAuth': 'Tram OAuth',
+  'Discontinued — switch to Coding Plan or API Key':
+    '終了 — Coding Plan または API Key に切り替えてください',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Run /auth to switch provider.':
+    'Tram OAuth 無料枠は 2026-04-15 に終了しました。/auth を実行してプロバイダーを切り替えてください。',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Please select Coding Plan or API Key instead.':
+    'Tram OAuth 無料枠は 2026-04-15 に終了しました。Coding Plan または API Key を選択してください。',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Please select a model from another provider or run /auth to switch.':
+    'Tram OAuth無料プランは2026-04-15に終了しました。他のプロバイダーのモデルを選択するか、/authを実行して切り替えてください。',
+  '\n⚠ Tram OAuth free tier was discontinued on 2026-04-15. Please select another option.\n':
+    '\n⚠ Tram OAuth 無料枠は 2026-04-15 に終了しました。他のオプションを選択してください。\n',
+  'Browser-based authentication with third-party providers (e.g. OpenRouter, ModelScope)':
+    'サードパーティプロバイダーによるブラウザベースの認証（例：OpenRouter、ModelScope）',
+  'Tram OAuth authentication timed out. Please try again.':
+    'Tram OAuth認証がタイムアウトしました。再度お試しください',
+  'Tram OAuth authentication cancelled.':
+    'Tram OAuth認証がキャンセルされました',
+  'Tram OAuth Authentication': 'Tram OAuth認証',
+  'Tram OAuth Authentication Timeout': 'Tram OAuth認証タイムアウト',
+  'Waiting for Tram OAuth authentication...': 'Tram OAuth認証を待っています...',
+  'Note: Your existing API key in settings.json will not be cleared when using Tram OAuth. You can switch back to OpenAI authentication later if needed.':
+    '注: Tram OAuthを使用しても、settings.json内の既存のAPIキーはクリアされません。必要に応じて後でOpenAI認証に切り替えることができます',
+  'Note: Your existing API key will not be cleared when using Tram OAuth.':
+    '注: Tram OAuthを使用しても、既存のAPIキーはクリアされません。',
+  'Press Enter to continue, Tab/↑↓ to navigate, Esc to cancel':
+    'Enter で続行、Tab/↑↓ で移動、Esc でキャンセル',
   // Dialogs - Model
   // ============================================================================
   "Select Model": "Select Model",
@@ -1415,6 +1759,28 @@ export default {
     "Try /insight to generate personalized insights from your chat history.",
 
   // ============================================================================
+  'You can resume a previous conversation by running Tram --continue or Tram --resume.':
+    'Tram --continue または Tram --resume で前の会話を再開できます。',
+  'Press Ctrl+O to toggle compact mode — hide tool output and thinking for a cleaner view.':
+    'Ctrl+O でコンパクトモードを切り替え — ツール出力と思考を非表示にしてすっきり表示。',
+  'Add a Tram.md file to give TRAM persistent project context.':
+    'Tram.md ファイルを追加すると、TRAM に永続的なプロジェクトコンテキストを与えられます。',
+  'Use /btw to ask a quick side question without disrupting the conversation.':
+    '会話を中断せずに /btw でちょっとした横道の質問ができます。',
+  'Context is almost full! Run /compress now or start /new to continue.':
+    'コンテキストがもうすぐいっぱいです！今すぐ /compress を実行するか、/new を開始して続けてください。',
+  'Context is getting full. Use /compress to free up space.':
+    'コンテキストが埋まりつつあります。/compress を使って空きを増やしてください。',
+  'Long conversation? /compress summarizes history to free context.':
+    '会話が長くなりましたか？ /compress は履歴を要約してコンテキストを空けます。',
+  'Tips for getting started:': '始めるためのヒント:',
+  '1. Ask questions, edit files, or run commands.':
+    '1. 質問したり、ファイルを編集したり、コマンドを実行したりできます',
+  '2. Be specific for the best results.':
+    '2. 具体的に指示すると最良の結果が得られます',
+  'files to customize your interactions with TRAM.':
+    'TRAM との対話をカスタマイズするためのファイル',
+  'for more information.': '詳細情報を確認できます',
   // Exit Screen / Stats
   // ============================================================================
   "Agent powering down. Goodbye!": "Agent powering down. Goodbye!",
@@ -1811,6 +2177,40 @@ export default {
     "Unknown subcommand: {{subcommand}}\n\n{{helpText}}",
   "[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.":
     "[service/{{name}}] detected error signal: {{sourceLine}}\nLogs were buffered from this point. Recommended: press Alt+L to open the ask flow. You can also use /service alert {{name}} to inspect and decide whether to send logs to LM.\nThen use /service analyze {{name}} all or /service analyze {{name}} errors.\nTip: Press Ctrl+Tab to switch to Servers Log, then press again to return to Chat.",
+  "Context Usage": "コンテキスト使用量",
+  "% used": "% 使用",
+  "% context used": "% コンテキスト使用",
+  "Context exceeds limit! Use /compress or /clear to reduce.":
+    "コンテキストが制限を超えています！/compress または /clear を使用して減らしてください。",
+  "Use /compress or /clear": "/compress または /clear を使用",
+  "No API response yet. Send a message to see actual usage.":
+    "API応答はありません。メッセージを送信して実際の使用量を確認してください。",
+  "Estimated pre-conversation overhead": "推定事前会話オーバーヘッド",
+  "Context window": "コンテキストウィンドウ",
+  tokens: "トークン",
+  Used: "使用済み",
+  Free: "空き",
+  "Autocompact buffer": "自動圧縮バッファ",
+  "Usage by category": "カテゴリ別の使用量",
+  "System prompt": "システムプロンプト",
+  "Built-in tools": "組み込みツール",
+  "MCP tools": "MCPツール",
+  "Memory files": "メモリファイル",
+  Skills: "スキル",
+  Messages: "メッセージ",
+  "Show context window usage breakdown.":
+    "コンテキストウィンドウの使用状況を表示します。",
+  "Run /context detail for per-item breakdown.":
+    "/context detail を実行すると項目ごとの内訳を表示します。",
+  active: "有効",
+  "body loaded": "本文読み込み済み",
+  memory: "メモリ",
+  "{{region}} configuration updated successfully.":
+    "{{region}} の設定が正常に更新されました。",
+  "Authenticated successfully with {{region}}. API key and model configs saved to settings.json.":
+    "{{region}} での認証に成功しました。APIキーとモデル設定が settings.json に保存されました。",
+  "Tip: Use /model to switch between available Coding Plan models.":
+    "ヒント: /model で利用可能な Coding Plan モデルを切り替えられます。",
 
   // ============================================================================
   // Ask User Question Tool
@@ -1845,6 +2245,95 @@ export default {
   // ============================================================================
   "% used": "% used",
   "% context used": "% context used",
+  // Commands - Auth
+  // ============================================================================
+  'Configure Tram authentication information with Tram-OAuth or Alibaba Cloud Coding Plan':
+    'Tram-OAuth または Alibaba Cloud Coding Plan で Tram 認証情報を設定する',
+  'Authenticate using Tram OAuth': 'Tram OAuth で認証する',
+  'Authenticate using Alibaba Cloud Coding Plan':
+    'Alibaba Cloud Coding Plan で認証する',
+  'Region for Coding Plan (china/global)':
+    'Coding Plan のリージョン (china/global)',
+  'API key for Coding Plan': 'Coding Plan の API キー',
+  'Show current authentication status': '現在の認証ステータスを表示',
+  'Authentication completed successfully.': '認証が正常に完了しました。',
+  'Starting Tram OAuth authentication...': 'Tram OAuth 認証を開始しています...',
+  'Successfully authenticated with Tram OAuth.':
+    'Tram OAuth での認証に成功しました。',
+  'Failed to authenticate with Tram OAuth: {{error}}':
+    'Tram OAuth での認証に失敗しました: {{error}}',
+  'Processing Alibaba Cloud Coding Plan authentication...':
+    'Alibaba Cloud Coding Plan 認証を処理しています...',
+  'Successfully authenticated with Alibaba Cloud Coding Plan.':
+    'Alibaba Cloud Coding Plan での認証に成功しました。',
+  'Failed to authenticate with Coding Plan: {{error}}':
+    'Coding Plan での認証に失敗しました: {{error}}',
+  '中国 (China)': '中国 (China)',
+  '阿里云百炼 (aliyun.com)': '阿里云百炼 (aliyun.com)',
+  Global: 'グローバル',
+  'Alibaba Cloud (alibabacloud.com)': 'Alibaba Cloud (alibabacloud.com)',
+  'Select region for Coding Plan:': 'Coding Plan のリージョンを選択:',
+  'Enter your Coding Plan API key: ':
+    'Coding Plan の API キーを入力してください: ',
+  'Select authentication method:': '認証方法を選択:',
+  '\n=== Authentication Status ===\n': '\n=== 認証ステータス ===\n',
+  '⚠️  No authentication method configured.\n':
+    '⚠️  認証方法が設定されていません。\n',
+  'Run one of the following commands to get started:\n':
+    '以下のコマンドのいずれかを実行して開始してください:\n',
+  '  Tram auth Tram-oauth     - Authenticate with Tram OAuth (discontinued)':
+    '  Tram auth Tram-oauth     - Tram OAuth で認証（終了）',
+  '  Tram auth coding-plan      - Authenticate with Alibaba Cloud Coding Plan\n':
+    '  Tram auth coding-plan      - Alibaba Cloud Coding Plan で認証\n',
+  'Or simply run:': 'または以下を実行:',
+  '  Tram auth                - Interactive authentication setup\n':
+    '  Tram auth                - インタラクティブ認証セットアップ\n',
+  '✓ Authentication Method: Tram OAuth': '✓ 認証方法: Tram OAuth',
+  '  Type: Free tier (discontinued 2026-04-15)':
+    '  タイプ: 無料枠（2026-04-15 終了）',
+  '  Limit: No longer available': '  制限: 利用不可',
+  'Tram OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to Coding Plan, OpenRouter, Fireworks AI, or another provider.':
+    'Tram OAuth 無料枠は 2026-04-15 に終了しました。/auth を実行して Coding Plan、OpenRouter、Fireworks AI、または他のプロバイダーに切り替えてください。',
+  '  Models: Tram latest models\n': '  モデル: Tram 最新モデル\n',
+  '✓ Authentication Method: Alibaba Cloud Coding Plan':
+    '✓ 認証方法: Alibaba Cloud Coding Plan',
+  '中国 (China) - 阿里云百炼': '中国 (China) - 阿里云百炼',
+  'Global - Alibaba Cloud': 'グローバル - Alibaba Cloud',
+  '  Region: {{region}}': '  リージョン: {{region}}',
+  '  Current Model: {{model}}': '  現在のモデル: {{model}}',
+  '  Config Version: {{version}}': '  設定バージョン: {{version}}',
+  '  Status: API key configured\n': '  ステータス: APIキー設定済み\n',
+  '⚠️  Authentication Method: Alibaba Cloud Coding Plan (Incomplete)':
+    '⚠️  認証方法: Alibaba Cloud Coding Plan（不完全）',
+  '  Issue: API key not found in environment or settings\n':
+    '  問題: 環境変数または設定にAPIキーが見つかりません\n',
+  '  Run `Tram auth coding-plan` to re-configure.\n':
+    '  `Tram auth coding-plan` を実行して再設定してください。\n',
+  '✓ Authentication Method: {{type}}': '✓ 認証方法: {{type}}',
+  '  Status: Configured\n': '  ステータス: 設定済み\n',
+  'Failed to check authentication status: {{error}}':
+    '認証ステータスの確認に失敗しました: {{error}}',
+  'Select an option:': 'オプションを選択:',
+  'Raw mode not available. Please run in an interactive terminal.':
+    'Rawモードが利用できません。インタラクティブターミナルで実行してください。',
+  '(Use ↑ ↓ arrows to navigate, Enter to select, Ctrl+C to exit)\n':
+    '(↑ ↓ 矢印キーで移動、Enter で選択、Ctrl+C で終了)\n',
+  compact: 'コンパクト',
+  'compact mode: on (Ctrl+O off)': 'コンパクトモード: オン (Ctrl+O でオフ)',
+  'to toggle compact mode': 'コンパクトモードの切り替え',
+  'Hide tool output and thinking for a cleaner view (toggle with Ctrl+O).':
+    'コンパクトモードでツール出力と思考を非表示にします（Ctrl+O で切り替え）。',
+  'Press Ctrl+O to show full tool output': 'Ctrl+O で完全なツール出力を表示',
+  'Switch to plan mode or exit plan mode':
+    'Switch to plan mode or exit plan mode',
+  'Exited plan mode. Previous approval mode restored.':
+    'Exited plan mode. Previous approval mode restored.',
+  'Enabled plan mode. The agent will analyze and plan without executing tools.':
+    'Enabled plan mode. The agent will analyze and plan without executing tools.',
+  'Already in plan mode. Use "/plan exit" to exit plan mode.':
+    'Already in plan mode. Use "/plan exit" to exit plan mode.',
+  'Not in plan mode. Use "/plan" to enter plan mode first.':
+    'Not in plan mode. Use "/plan" to enter plan mode first.',
 
   // ============================================================================
   // Context Usage Display

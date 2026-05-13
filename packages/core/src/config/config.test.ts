@@ -10,11 +10,13 @@ import type { ConfigParameters, SandboxConfig } from "./config.js";
 import { Config, ApprovalMode } from "./config.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { setGeminiMdFilename as mockSetGeminiMdFilename } from "../tools/memoryTool.js";
+import { setGeminiMdFilename as mockSetGeminiMdFilename } from "../memory/const.js";
 import {
   DEFAULT_TELEMETRY_TARGET,
   DEFAULT_OTLP_ENDPOINT,
   TramLogger,
+  isTelemetrySdkInitialized,
+  shutdownTelemetry,
 } from "../telemetry/index.js";
 import type {
   ContentGenerator,
@@ -30,15 +32,18 @@ import {
 import { GeminiClient } from "../core/client.js";
 import { GitService } from "../services/gitService.js";
 import { ShellTool } from "../tools/shell.js";
-import { ReadFileTool } from "../tools/read-file.js";
-import { GrepTool } from "../tools/grep.js";
 import { canUseRipgrep } from "../utils/ripgrepUtils.js";
-import { RipGrepTool } from "../tools/ripGrep.js";
 import { logRipgrepFallback } from "../telemetry/loggers.js";
 import { RipgrepFallbackEvent } from "../telemetry/types.js";
 import { ToolRegistry } from "../tools/tool-registry.js";
+import { ToolNames } from "../tools/tool-names.js";
 import { fireNotificationHook } from "../core/toolHookTriggers.js";
 import type { MessageBus } from "../confirmation-bus/message-bus.js";
+import { loadServerHierarchicalMemory } from "../utils/memoryDiscovery.js";
+import { readAutoMemoryIndex } from "../memory/store.js";
+import { ExtensionManager } from "../extension/extensionManager.js";
+import { SkillManager } from "../skills/skill-manager.js";
+import { HookSystem } from "../hooks/index.js";
 
 function createToolMock(toolName: string) {
   const ToolMock = vi.fn();
@@ -72,6 +77,9 @@ vi.mock("node:fs", async (importOriginal) => {
 vi.mock("../tools/tool-registry", () => {
   const ToolRegistryMock = vi.fn();
   ToolRegistryMock.prototype.registerTool = vi.fn();
+  ToolRegistryMock.prototype.registerFactory = vi.fn();
+  ToolRegistryMock.prototype.ensureTool = vi.fn();
+  ToolRegistryMock.prototype.warmAll = vi.fn();
   ToolRegistryMock.prototype.discoverAllTools = vi.fn();
   ToolRegistryMock.prototype.getAllTools = vi.fn(() => []); // Mock methods if needed
   ToolRegistryMock.prototype.getAllToolNames = vi.fn(() => []);
@@ -81,10 +89,29 @@ vi.mock("../tools/tool-registry", () => {
 });
 
 vi.mock("../utils/memoryDiscovery.js", () => ({
-  loadServerHierarchicalMemory: vi
-    .fn()
-    .mockResolvedValue({ memoryContent: "", fileCount: 0 }),
+  loadServerHierarchicalMemory: vi.fn().mockResolvedValue({
+    memoryContent: "",
+    fileCount: 0,
+    ruleCount: 0,
+    conditionalRules: [],
+    projectRoot: "/tmp",
+  }),
 }));
+
+vi.mock("../memory/store.js", () => ({
+  readAutoMemoryIndex: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock('../hooks/index.js', () => {
+  const HookSystemMock = vi.fn();
+  HookSystemMock.prototype.initialize = vi.fn().mockResolvedValue(undefined);
+  HookSystemMock.prototype.hasHooksForEvent = vi.fn().mockReturnValue(false);
+  HookSystemMock.prototype.getAllHooks = vi.fn().mockReturnValue([]);
+  return {
+    HookSystem: HookSystemMock,
+    createHookOutput: vi.fn(),
+  };
+});
 
 // Mock individual tools if their constructors are complex or have side effects
 vi.mock("../tools/ls", () => ({
@@ -120,13 +147,19 @@ vi.mock("../tools/web-fetch", () => ({
 vi.mock("../tools/read-many-files", () => ({
   ReadManyFilesTool: createToolMock("read_many_files"),
 }));
-vi.mock("../tools/memoryTool", () => ({
-  MemoryTool: createToolMock("save_memory"),
+vi.mock("../memory/const.js", () => ({
   setGeminiMdFilename: vi.fn(),
-  getCurrentGeminiMdFilename: vi.fn(() => "TRAM.md"), // Mock the original filename
-  getAllGeminiMdFilenames: vi.fn(() => ["TRAM.md", "AGENTS.md"]),
-  DEFAULT_CONTEXT_FILENAME: "TRAM.md",
-  TRAM_CONFIG_DIR: ".tram",
+  getCurrentGeminiMdFilename: vi.fn(() => "QWEN.md"), // Mock the original filename
+  getAllGeminiMdFilenames: vi.fn(() => ["QWEN.md", "AGENTS.md"]),
+  DEFAULT_CONTEXT_FILENAME: "QWEN.md",
+}));
+vi.mock("../tools/memory-config", () => ({
+  setGeminiMdFilename: vi.fn(),
+  getCurrentGeminiMdFilename: vi.fn(() => "QWEN.md"),
+  getAllGeminiMdFilenames: vi.fn(() => ["QWEN.md", "AGENTS.md"]),
+  DEFAULT_CONTEXT_FILENAME: "QWEN.md",
+  AGENT_CONTEXT_FILENAME: "AGENTS.md",
+  MEMORY_SECTION_HEADER: "## Tram Added Memories",
 }));
 
 vi.mock("../core/contentGenerator.js");
@@ -135,7 +168,6 @@ vi.mock("../core/client.js", () => ({
   GeminiClient: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(undefined),
     isInitialized: vi.fn().mockReturnValue(true),
-    stripThoughtsFromHistory: vi.fn(),
     setTools: vi.fn(),
   })),
 }));
@@ -145,6 +177,8 @@ vi.mock("../telemetry/index.js", async (importOriginal) => {
   return {
     ...actual,
     initializeTelemetry: vi.fn(),
+    isTelemetrySdkInitialized: vi.fn(() => false),
+    shutdownTelemetry: vi.fn().mockResolvedValue(undefined),
     uiTelemetryService: {
       getLastPromptTokenCount: vi.fn(),
     },
@@ -171,10 +205,23 @@ vi.mock("../skills/skill-manager.js", () => {
   SkillManagerMock.prototype.startWatching = vi
     .fn()
     .mockResolvedValue(undefined);
+  SkillManagerMock.prototype.refreshCache = vi
+    .fn()
+    .mockResolvedValue(undefined);
   SkillManagerMock.prototype.stopWatching = vi.fn();
   SkillManagerMock.prototype.listSkills = vi.fn().mockResolvedValue([]);
   SkillManagerMock.prototype.addChangeListener = vi.fn();
   SkillManagerMock.prototype.removeChangeListener = vi.fn();
+  // Path-conditional skill activation hook (called from
+  // CoreToolScheduler.executeSingleToolCall on every tool invocation).
+  // Mocks return empty so no activation-side effects fire in tests that
+  // exercise the scheduler.
+  SkillManagerMock.prototype.matchAndActivateByPath = vi
+    .fn()
+    .mockResolvedValue([]);
+  SkillManagerMock.prototype.matchAndActivateByPaths = vi
+    .fn()
+    .mockResolvedValue([]);
   return { SkillManager: SkillManagerMock };
 });
 
@@ -240,6 +287,7 @@ describe("Server Config (config.ts)", () => {
   beforeEach(() => {
     // Reset mocks if necessary
     vi.clearAllMocks();
+    vi.mocked(isTelemetrySdkInitialized).mockReturnValue(false);
     vi.spyOn(TramLogger.prototype, "logStartSessionEvent").mockImplementation(
       async () => undefined,
     );
@@ -278,6 +326,76 @@ describe("Server Config (config.ts)", () => {
     expect(config.getSystemPrompt()).toBeUndefined();
   });
 
+  describe("FileReadCache isolation", () => {
+    it("returns a distinct cache for child Configs created via Object.create", () => {
+      // Subagent / scoped-agent / fork construction all use
+      // `Object.create(parent)`, which does NOT run field initializers.
+      // Without explicit handling the child would resolve fileReadCache
+      // through the prototype chain back to the parent's instance, so a
+      // subagent"s ReadFile would see the parent"s recorded reads and
+      // return file_unchanged placeholders for files the subagent has
+      // never received in its own transcript.
+      const parent = new Config(baseParams);
+      const child = Object.create(parent) as Config;
+
+      const parentCache = parent.getFileReadCache();
+      const childCache = child.getFileReadCache();
+
+      expect(parentCache).toBeDefined();
+      expect(childCache).toBeDefined();
+      expect(childCache).not.toBe(parentCache);
+
+      parentCache.recordRead(
+        "/tmp/parent.ts",
+        {
+          dev: 1,
+          ino: 100,
+          mtimeMs: 1_000_000,
+          size: 42,
+        } as unknown as import("node:fs").Stats,
+        { full: true, cacheable: true },
+      );
+
+      expect(parentCache.size()).toBe(1);
+      expect(childCache.size()).toBe(0);
+    });
+
+    it("returns the same cache instance on repeated getter calls within one Config", () => {
+      // Sanity: the lazy own-property initialization in
+      // getFileReadCache() must not allocate a fresh cache on every
+      // call — recorded entries would vanish between operations.
+      const config = new Config(baseParams);
+      expect(config.getFileReadCache()).toBe(config.getFileReadCache());
+    });
+  });
+
+  describe("startNewSession", () => {
+    it("clears the FileReadCache so a new session does not inherit prior reads", () => {
+      // Regression guard: the file-read cache backs ReadFile's
+      // file_unchanged placeholder, whose correctness depends on the
+      // model having seen the prior read earlier in the *current*
+      // conversation. /clear and resume both go through
+      // startNewSession(), so it must drop cache entries the new
+      // session has never seen.
+      const config = new Config(baseParams);
+      const cache = config.getFileReadCache();
+      cache.recordRead(
+        "/tmp/whatever.ts",
+        {
+          dev: 1,
+          ino: 100,
+          mtimeMs: 1_000_000,
+          size: 42,
+        } as unknown as import("node:fs").Stats,
+        { full: true, cacheable: true },
+      );
+      expect(cache.size()).toBe(1);
+
+      config.startNewSession();
+      expect(cache.size()).toBe(0);
+    });
+  });
+
   describe("initialize", () => {
     it("should throw an error if checkpointing is enabled and GitService fails", async () => {
       const gitError = new Error("Git is not installed");
@@ -313,6 +431,31 @@ describe("Server Config (config.ts)", () => {
       await expect(config.initialize()).rejects.toThrow(
         "Config was already initialized",
       );
+    });
+
+    it('should skip implicit startup discovery in bare mode', async () => {
+      const extensionRefreshSpy = vi
+        .spyOn(ExtensionManager.prototype, 'refreshCache')
+        .mockResolvedValue(undefined);
+
+      const config = new Config({
+        ...baseParams,
+        checkpointing: false,
+        bareMode: true,
+      });
+
+      await expect(config.initialize()).resolves.toBeUndefined();
+
+      expect(extensionRefreshSpy).not.toHaveBeenCalled();
+      expect(HookSystem).not.toHaveBeenCalled();
+      expect(SkillManager.prototype.startWatching).not.toHaveBeenCalled();
+      expect(SkillManager.prototype.refreshCache).toHaveBeenCalledTimes(1);
+      expect(ToolRegistry.prototype.discoverAllTools).not.toHaveBeenCalled();
+      expect(
+        (ToolRegistry.prototype.registerFactory as Mock).mock.calls.map(
+          (call) => call[0],
+        ),
+      ).toEqual([ToolNames.READ_FILE, ToolNames.EDIT, ToolNames.SHELL]);
     });
   });
 
@@ -416,10 +559,6 @@ describe("Server Config (config.ts)", () => {
       await config.refreshAuth(AuthType.USE_VERTEX_AI);
 
       await config.refreshAuth(AuthType.USE_GEMINI);
-
-      expect(
-        config.getGeminiClient().stripThoughtsFromHistory,
-      ).not.toHaveBeenCalledWith();
     });
   });
 
@@ -468,6 +607,81 @@ describe("Server Config (config.ts)", () => {
         vi.mocked(resolveContentGeneratorConfigWithSources),
       ).toHaveBeenCalledTimes(2);
       expect(vi.mocked(createContentGenerator)).toHaveBeenCalledTimes(1);
+    });
+
+    it('should preserve thoughts from history on model switch', async () => {
+      const config = new Config(baseParams);
+
+      const mockContentConfig: ContentGeneratorConfig = {
+        authType: AuthType.TRAM_OAUTH,
+        model: 'coder-model',
+        apiKey: 'QWEN_OAUTH_DYNAMIC_TOKEN',
+        baseUrl: DEFAULT_DASHSCOPE_BASE_URL,
+        timeout: 60000,
+        maxRetries: 3,
+      } as ContentGeneratorConfig;
+
+      vi.mocked(resolveContentGeneratorConfigWithSources).mockImplementation(
+        (_config, authType, generationConfig) => ({
+          config: {
+            ...mockContentConfig,
+            authType,
+            model: generationConfig?.model ?? mockContentConfig.model,
+          } as ContentGeneratorConfig,
+          sources: {},
+        }),
+      );
+      vi.mocked(createContentGenerator).mockResolvedValue({
+        generateContent: vi.fn(),
+        generateContentStream: vi.fn(),
+        countTokens: vi.fn(),
+        embedContent: vi.fn(),
+      } as unknown as ContentGenerator);
+
+      await config.refreshAuth(AuthType.TRAM_OAUTH);
+
+      await config.switchModel(AuthType.TRAM_OAUTH, 'coder-model');
+    });
+
+    it('should notify model change listeners after switchModel', async () => {
+      const config = new Config(baseParams);
+
+      const mockContentConfig: ContentGeneratorConfig = {
+        authType: AuthType.TRAM_OAUTH,
+        model: 'coder-model',
+        apiKey: 'QWEN_OAUTH_DYNAMIC_TOKEN',
+        baseUrl: DEFAULT_DASHSCOPE_BASE_URL,
+        timeout: 60000,
+        maxRetries: 3,
+      } as ContentGeneratorConfig;
+
+      vi.mocked(resolveContentGeneratorConfigWithSources).mockImplementation(
+        (_config, authType, generationConfig) => ({
+          config: {
+            ...mockContentConfig,
+            authType,
+            model: generationConfig?.model ?? mockContentConfig.model,
+          } as ContentGeneratorConfig,
+          sources: {},
+        }),
+      );
+      vi.mocked(createContentGenerator).mockResolvedValue({
+        generateContent: vi.fn(),
+        generateContentStream: vi.fn(),
+        countTokens: vi.fn(),
+        embedContent: vi.fn(),
+      } as unknown as ContentGenerator);
+
+      await config.refreshAuth(AuthType.TRAM_OAUTH);
+
+      const listener = vi.fn();
+      const unsubscribe = config.onModelChange(listener);
+
+      await config.switchModel(AuthType.TRAM_OAUTH, 'coder-model');
+
+      expect(listener).toHaveBeenCalledWith('coder-model');
+
+      unsubscribe();
     });
   });
 
@@ -562,6 +776,94 @@ describe("Server Config (config.ts)", () => {
     expect(config.getUserMemory()).toBe("");
   });
 
+  it("refreshHierarchicalMemory should append managed auto-memory index when present", async () => {
+    const config = new Config(baseParams);
+
+    vi.mocked(loadServerHierarchicalMemory).mockResolvedValue({
+      memoryContent: '--- Context from: QWEN.md ---\nProject rules',
+      fileCount: 1,
+      ruleCount: 0,
+      conditionalRules: [],
+      projectRoot: "/tmp",
+    });
+    vi.mocked(readAutoMemoryIndex).mockResolvedValue(
+      '# Managed Auto-Memory Index\n\n- [Project Memory](project.md)',
+    );
+
+    await config.refreshHierarchicalMemory();
+
+    expect(config.getUserMemory()).toContain("Project rules");
+    expect(config.getUserMemory()).toContain("# auto memory");
+    expect(config.getUserMemory()).toContain("[Project Memory](project.md)");
+  });
+
+  it("refreshHierarchicalMemory should include empty memory prompt when no managed auto-memory index exists", async () => {
+    const config = new Config(baseParams);
+
+    vi.mocked(loadServerHierarchicalMemory).mockResolvedValue({
+      memoryContent: '--- Context from: QWEN.md ---\nProject rules',
+      fileCount: 1,
+      ruleCount: 0,
+      conditionalRules: [],
+      projectRoot: "/tmp",
+    });
+    vi.mocked(readAutoMemoryIndex).mockResolvedValue(null);
+
+    await config.refreshHierarchicalMemory();
+
+    expect(config.getUserMemory()).toContain("Project rules");
+    expect(config.getUserMemory()).toContain("# auto memory");
+    expect(config.getUserMemory()).toContain("MEMORY.md is currently empty");
+  });
+
+  it("refreshHierarchicalMemory should only use explicit inputs in bare mode", async () => {
+    const config = new Config({
+      ...baseParams,
+      bareMode: true,
+    });
+
+    vi.mocked(loadServerHierarchicalMemory).mockResolvedValue({
+      memoryContent: '--- Context from: QWEN.md ---\nProject rules',
+      fileCount: 1,
+      ruleCount: 0,
+      conditionalRules: [],
+      projectRoot: "/tmp",
+    });
+
+    await config.refreshHierarchicalMemory();
+
+    const lastCall = vi.mocked(loadServerHierarchicalMemory).mock.calls.at(-1);
+    expect(lastCall?.at(-1)).toEqual({ explicitOnly: true });
+    expect(lastCall?.[1]).toEqual([]);
+    expect(readAutoMemoryIndex).not.toHaveBeenCalled();
+    expect(config.getUserMemory()).toContain("Project rules");
+    expect(config.getUserMemory()).not.toContain("# auto memory");
+  });
+
+  it("refreshHierarchicalMemory should exclude implicit cwd from bare include-directories", async () => {
+    const explicitDir = "/tmp/explicit";
+    const config = new Config({
+      ...baseParams,
+      bareMode: true,
+      includeDirectories: [explicitDir],
+      loadMemoryFromIncludeDirectories: true,
+    });
+
+    vi.mocked(loadServerHierarchicalMemory).mockResolvedValue({
+      memoryContent: '--- Context from: QWEN.md ---\nProject rules',
+      fileCount: 1,
+      ruleCount: 0,
+      conditionalRules: [],
+      projectRoot: "/tmp",
+    });
+
+    await config.refreshHierarchicalMemory();
+
+    const lastCall = vi.mocked(loadServerHierarchicalMemory).mock.calls.at(-1);
+    expect(lastCall?.[1]).toEqual([explicitDir]);
+    expect(lastCall?.at(-1)).toEqual({ explicitOnly: true });
+  });
+
   it("Config constructor should call setGeminiMdFilename with contextFileName if provided", () => {
     const contextFileName = "CUSTOM_AGENTS.md";
     const paramsWithContextFile: ConfigParameters = {
@@ -617,6 +919,32 @@ describe("Server Config (config.ts)", () => {
     };
     const config = new Config(paramsWithTelemetry);
     expect(config.getTelemetryEnabled()).toBe(true);
+  });
+
+  it("Config shutdown should flush telemetry when SDK is initialized", async () => {
+    const paramsWithTelemetry: ConfigParameters = {
+      ...baseParams,
+      telemetry: { enabled: true },
+    };
+    vi.mocked(isTelemetrySdkInitialized).mockReturnValue(true);
+    const config = new Config(paramsWithTelemetry);
+
+    await config.shutdown();
+
+    expect(shutdownTelemetry).toHaveBeenCalledTimes(1);
+  });
+
+  it("Config shutdown should skip telemetry shutdown before SDK initialization", async () => {
+    const paramsWithTelemetry: ConfigParameters = {
+      ...baseParams,
+      telemetry: { enabled: true },
+    };
+    vi.mocked(isTelemetrySdkInitialized).mockReturnValue(false);
+    const config = new Config(paramsWithTelemetry);
+
+    await config.shutdown();
+
+    expect(shutdownTelemetry).not.toHaveBeenCalled();
   });
 
   it("Config constructor should set telemetry to false when provided as false", () => {
@@ -700,6 +1028,95 @@ describe("Server Config (config.ts)", () => {
     });
   });
 
+  describe("GitCoAuthor Settings", () => {
+    it("defaults both commit and pr to true when not specified", () => {
+      const config = new Config({ ...baseParams, gitCoAuthor: undefined });
+      const settings = config.getGitCoAuthor();
+      expect(settings.commit).toBe(true);
+      expect(settings.pr).toBe(true);
+    });
+
+    it("accepts an object with independent commit and pr toggles", () => {
+      const config = new Config({
+        ...baseParams,
+        gitCoAuthor: { commit: true, pr: false },
+      });
+      const settings = config.getGitCoAuthor();
+      expect(settings.commit).toBe(true);
+      expect(settings.pr).toBe(false);
+    });
+
+    // Legacy shape: before commit and PR attribution were split, this
+    // setting was a single boolean. Treat it as governing both toggles so
+    // existing users' preferences carry over.
+    it.each([true, false])(
+      "coerces legacy boolean %s to { commit, pr } with the same value",
+      (value) => {
+        const config = new Config({ ...baseParams, gitCoAuthor: value });
+        const settings = config.getGitCoAuthor();
+        expect(settings.commit).toBe(value);
+        expect(settings.pr).toBe(value);
+      },
+    );
+
+    // settings.json is hand-editable; without intent-aware string
+    // parsing a hand-edited `{ commit: "false" }` would silently
+    // inflate to `commit: true` (the previous "default-to-true on
+    // mismatch" policy). Honor common string disable-intent forms
+    // and fall through to disabled on genuinely unrecognisable
+    // input — safer-by-default than turning attribution on against
+    // the user's clear opt-out.
+    it.each([
+      // Disable-intent strings.
+      ['string "false"', "false", false],
+      ['string "FALSE"', "FALSE", false],
+      ['string "no"', "no", false],
+      ['string "off"', "off", false],
+      ['string "0"', "0", false],
+      ["empty string", "", false],
+      // Enable-intent strings.
+      ['string "true"', "true", true],
+      ['string "yes"', "yes", true],
+      ['string "on"', "on", true],
+      ['string "1"', "1", true],
+      // Numbers.
+      ["number 1", 1, true],
+      ["number 0", 0, false],
+      ["number 42", 42, false],
+      // Other types fall through to disabled.
+      ["null", null, false],
+      ["object", {}, false],
+      ["array", [], false],
+      // Unknown strings → disabled (don't quietly enable).
+      ["unknown string", "maybe", false],
+    ])(
+      "parses %s as %s for both commit and pr",
+      (_label: string, badValue: unknown, expected: boolean) => {
+        const config = new Config({
+          ...baseParams,
+          gitCoAuthor: {
+            commit: badValue as unknown as boolean,
+            pr: badValue as unknown as boolean,
+          },
+        });
+        const settings = config.getGitCoAuthor();
+        expect(settings.commit).toBe(expected);
+        expect(settings.pr).toBe(expected);
+      },
+    );
+
+    // A genuinely-absent sub-field still defaults to true (schema default).
+    it("defaults absent commit/pr to true", () => {
+      const config = new Config({
+        ...baseParams,
+        gitCoAuthor: {} as { commit?: boolean; pr?: boolean },
+      });
+      const settings = config.getGitCoAuthor();
+      expect(settings.commit).toBe(true);
+      expect(settings.pr).toBe(true);
+    });
+  });
+
   describe("Telemetry Settings", () => {
     it("should return default telemetry target if not provided", () => {
       const params: ConfigParameters = {
@@ -754,6 +1171,32 @@ describe("Server Config (config.ts)", () => {
       expect(config.getTelemetryLogPromptsEnabled()).toBe(true);
     });
 
+    it("should return provided includeSensitiveSpanAttributes setting", () => {
+      const params: ConfigParameters = {
+        ...baseParams,
+        telemetry: { enabled: true, includeSensitiveSpanAttributes: true },
+      };
+      const config = new Config(params);
+      expect(config.getTelemetryIncludeSensitiveSpanAttributes()).toBe(true);
+    });
+
+    it("should default includeSensitiveSpanAttributes to false", () => {
+      const configWithTelemetry = new Config({
+        ...baseParams,
+        telemetry: { enabled: true },
+      });
+      expect(
+        configWithTelemetry.getTelemetryIncludeSensitiveSpanAttributes(),
+      ).toBe(false);
+
+      const paramsWithoutTelemetry: ConfigParameters = { ...baseParams };
+      delete paramsWithoutTelemetry.telemetry;
+      const configWithoutTelemetry = new Config(paramsWithoutTelemetry);
+      expect(
+        configWithoutTelemetry.getTelemetryIncludeSensitiveSpanAttributes(),
+      ).toBe(false);
+    });
+
     it("should return default telemetry target if telemetry object is not provided", () => {
       const paramsWithoutTelemetry: ConfigParameters = { ...baseParams };
       delete paramsWithoutTelemetry.telemetry;
@@ -791,6 +1234,41 @@ describe("Server Config (config.ts)", () => {
       delete paramsWithoutTelemetry.telemetry;
       const config = new Config(paramsWithoutTelemetry);
       expect(config.getTelemetryOtlpProtocol()).toBe("grpc");
+    });
+  });
+
+  describe("Per-Signal OTLP Endpoint Configuration", () => {
+    it("should return per-signal endpoints when provided", () => {
+      const params: ConfigParameters = {
+        ...baseParams,
+        telemetry: {
+          enabled: true,
+          otlpTracesEndpoint: "http://traces:4318/v1/traces",
+          otlpLogsEndpoint: "http://logs:4318/v1/logs",
+          otlpMetricsEndpoint: "http://metrics:4318/v1/metrics",
+        },
+      };
+      const config = new Config(params);
+      expect(config.getTelemetryOtlpTracesEndpoint()).toBe(
+        "http://traces:4318/v1/traces",
+      );
+      expect(config.getTelemetryOtlpLogsEndpoint()).toBe(
+        "http://logs:4318/v1/logs",
+      );
+      expect(config.getTelemetryOtlpMetricsEndpoint()).toBe(
+        "http://metrics:4318/v1/metrics",
+      );
+    });
+
+    it("should return undefined when per-signal endpoints are not provided", () => {
+      const params: ConfigParameters = {
+        ...baseParams,
+        telemetry: { enabled: true },
+      };
+      const config = new Config(params);
+      expect(config.getTelemetryOtlpTracesEndpoint()).toBeUndefined();
+      expect(config.getTelemetryOtlpLogsEndpoint()).toBeUndefined();
+      expect(config.getTelemetryOtlpMetricsEndpoint()).toBeUndefined();
     });
   });
 
@@ -863,6 +1341,30 @@ describe("Server Config (config.ts)", () => {
   });
 
   describe("createToolRegistry", () => {
+    it("should ignore coreTools overrides in bare mode", async () => {
+      const config = new Config({
+        ...baseParams,
+        bareMode: true,
+        coreTools: [ToolNames.WEB_FETCH],
+      });
+      await config.initialize();
+
+      const registerToolMock = (
+        (await vi.importMock("../tools/tool-registry")) as {
+          ToolRegistry: { prototype: { registerFactory: Mock } };
+        }
+      ).ToolRegistry.prototype.registerFactory;
+
+      expect(config.getCoreTools()).toEqual([
+        ToolNames.READ_FILE,
+        ToolNames.EDIT,
+        ToolNames.SHELL,
+      ]);
+      expect(
+        (registerToolMock as Mock).mock.calls.map((call) => call[0]),
+      ).toEqual([ToolNames.READ_FILE, ToolNames.EDIT, ToolNames.SHELL]);
+    });
+
     it("should register a tool if coreTools contains an argument-specific pattern", async () => {
       const params: ConfigParameters = {
         ...baseParams,
@@ -874,20 +1376,20 @@ describe("Server Config (config.ts)", () => {
       // The ToolRegistry class is mocked, so we can inspect its prototype's methods.
       const registerToolMock = (
         (await vi.importMock("../tools/tool-registry")) as {
-          ToolRegistry: { prototype: { registerTool: Mock } };
+          ToolRegistry: { prototype: { registerFactory: Mock } };
         }
-      ).ToolRegistry.prototype.registerTool;
+      ).ToolRegistry.prototype.registerFactory;
 
       // Check that registerTool was called for ShellTool
       const wasShellToolRegistered = (registerToolMock as Mock).mock.calls.some(
-        (call) => call[0] instanceof vi.mocked(ShellTool),
+        (call) => call[0] === ToolNames.SHELL,
       );
       expect(wasShellToolRegistered).toBe(true);
 
       // Check that registerTool was NOT called for ReadFileTool
       const wasReadFileToolRegistered = (
         registerToolMock as Mock
-      ).mock.calls.some((call) => call[0] instanceof vi.mocked(ReadFileTool));
+      ).mock.calls.some((call) => call[0] === ToolNames.READ_FILE);
       expect(wasReadFileToolRegistered).toBe(false);
     });
 
@@ -901,12 +1403,12 @@ describe("Server Config (config.ts)", () => {
 
       const registerToolMock = (
         (await vi.importMock("../tools/tool-registry")) as {
-          ToolRegistry: { prototype: { registerTool: Mock } };
+          ToolRegistry: { prototype: { registerFactory: Mock } };
         }
-      ).ToolRegistry.prototype.registerTool;
+      ).ToolRegistry.prototype.registerFactory;
 
       const wasShellToolRegistered = (registerToolMock as Mock).mock.calls.some(
-        (call) => call[0] instanceof vi.mocked(ShellTool),
+        (call) => call[0] === ToolNames.SHELL,
       );
       expect(wasShellToolRegistered).toBe(true);
     });
@@ -921,12 +1423,12 @@ describe("Server Config (config.ts)", () => {
 
       const registerToolMock = (
         (await vi.importMock("../tools/tool-registry")) as {
-          ToolRegistry: { prototype: { registerTool: Mock } };
+          ToolRegistry: { prototype: { registerFactory: Mock } };
         }
-      ).ToolRegistry.prototype.registerTool;
+      ).ToolRegistry.prototype.registerFactory;
 
       const wasShellToolRegistered = (registerToolMock as Mock).mock.calls.some(
-        (call) => call[0] instanceof vi.mocked(ShellTool),
+        (call) => call[0] === ToolNames.SHELL,
       );
       expect(wasShellToolRegistered).toBe(true);
     });
@@ -942,12 +1444,12 @@ describe("Server Config (config.ts)", () => {
 
       const registerToolMock = (
         (await vi.importMock("../tools/tool-registry")) as {
-          ToolRegistry: { prototype: { registerTool: Mock } };
+          ToolRegistry: { prototype: { registerFactory: Mock } };
         }
-      ).ToolRegistry.prototype.registerTool;
+      ).ToolRegistry.prototype.registerFactory;
 
       const wasGrepToolRegistered = (registerToolMock as Mock).mock.calls.some(
-        (call) => call[0] instanceof vi.mocked(GrepTool),
+        (call) => call[0] === ToolNames.GREP,
       );
       expect(wasGrepToolRegistered).toBe(true);
     });
@@ -964,12 +1466,12 @@ describe("Server Config (config.ts)", () => {
 
       const registerToolMock = (
         (await vi.importMock("../tools/tool-registry")) as {
-          ToolRegistry: { prototype: { registerTool: Mock } };
+          ToolRegistry: { prototype: { registerFactory: Mock } };
         }
-      ).ToolRegistry.prototype.registerTool;
+      ).ToolRegistry.prototype.registerFactory;
 
       const wasGrepToolRegistered = (registerToolMock as Mock).mock.calls.some(
-        (call) => call[0] instanceof vi.mocked(GrepTool),
+        (call) => call[0] === ToolNames.GREP,
       );
       expect(wasGrepToolRegistered).toBe(false);
     });
@@ -1006,13 +1508,13 @@ describe("Server Config (config.ts)", () => {
 
         const registerToolMock = (
           (await vi.importMock("../tools/tool-registry")) as {
-            ToolRegistry: { prototype: { registerTool: Mock } };
+            ToolRegistry: { prototype: { registerFactory: Mock } };
           }
-        ).ToolRegistry.prototype.registerTool;
+        ).ToolRegistry.prototype.registerFactory;
 
         const wasShellToolRegistered = (
           registerToolMock as Mock
-        ).mock.calls.some((call) => call[0] instanceof vi.mocked(ShellTool));
+        ).mock.calls.some((call) => call[0] === ToolNames.SHELL);
         expect(wasShellToolRegistered).toBe(true);
       });
 
@@ -1026,13 +1528,13 @@ describe("Server Config (config.ts)", () => {
 
         const registerToolMock = (
           (await vi.importMock("../tools/tool-registry")) as {
-            ToolRegistry: { prototype: { registerTool: Mock } };
+            ToolRegistry: { prototype: { registerFactory: Mock } };
           }
-        ).ToolRegistry.prototype.registerTool;
+        ).ToolRegistry.prototype.registerFactory;
 
         const wasShellToolRegistered = (
           registerToolMock as Mock
-        ).mock.calls.some((call) => call[0] instanceof vi.mocked(ShellTool));
+        ).mock.calls.some((call) => call[0] === ToolNames.SHELL);
         expect(wasShellToolRegistered).toBe(true);
       });
 
@@ -1047,13 +1549,13 @@ describe("Server Config (config.ts)", () => {
 
         const registerToolMock = (
           (await vi.importMock("../tools/tool-registry")) as {
-            ToolRegistry: { prototype: { registerTool: Mock } };
+            ToolRegistry: { prototype: { registerFactory: Mock } };
           }
-        ).ToolRegistry.prototype.registerTool;
+        ).ToolRegistry.prototype.registerFactory;
 
         const wasShellToolRegistered = (
           registerToolMock as Mock
-        ).mock.calls.some((call) => call[0] instanceof vi.mocked(ShellTool));
+        ).mock.calls.some((call) => call[0] === ToolNames.SHELL);
         expect(wasShellToolRegistered).toBe(false);
       });
 
@@ -1068,13 +1570,13 @@ describe("Server Config (config.ts)", () => {
 
         const registerToolMock = (
           (await vi.importMock("../tools/tool-registry")) as {
-            ToolRegistry: { prototype: { registerTool: Mock } };
+            ToolRegistry: { prototype: { registerFactory: Mock } };
           }
-        ).ToolRegistry.prototype.registerTool;
+        ).ToolRegistry.prototype.registerFactory;
 
         const wasShellToolRegistered = (
           registerToolMock as Mock
-        ).mock.calls.some((call) => call[0] instanceof vi.mocked(ShellTool));
+        ).mock.calls.some((call) => call[0] === ToolNames.SHELL);
         expect(wasShellToolRegistered).toBe(false);
       });
 
@@ -1088,13 +1590,13 @@ describe("Server Config (config.ts)", () => {
 
         const registerToolMock = (
           (await vi.importMock("../tools/tool-registry")) as {
-            ToolRegistry: { prototype: { registerTool: Mock } };
+            ToolRegistry: { prototype: { registerFactory: Mock } };
           }
-        ).ToolRegistry.prototype.registerTool;
+        ).ToolRegistry.prototype.registerFactory;
 
         const wasShellToolRegistered = (
           registerToolMock as Mock
-        ).mock.calls.some((call) => call[0] instanceof vi.mocked(ShellTool));
+        ).mock.calls.some((call) => call[0] === ToolNames.SHELL);
         expect(wasShellToolRegistered).toBe(true);
       });
 
@@ -1108,13 +1610,13 @@ describe("Server Config (config.ts)", () => {
 
         const registerToolMock = (
           (await vi.importMock("../tools/tool-registry")) as {
-            ToolRegistry: { prototype: { registerTool: Mock } };
+            ToolRegistry: { prototype: { registerFactory: Mock } };
           }
-        ).ToolRegistry.prototype.registerTool;
+        ).ToolRegistry.prototype.registerFactory;
 
         const wasShellToolRegistered = (
           registerToolMock as Mock
-        ).mock.calls.some((call) => call[0] instanceof vi.mocked(ShellTool));
+        ).mock.calls.some((call) => call[0] === ToolNames.SHELL);
         expect(wasShellToolRegistered).toBe(true);
       });
     });
@@ -1309,25 +1811,22 @@ describe("setApprovalMode with folder trust", () => {
       vi.clearAllMocks();
     });
 
-    it("should register RipGrepTool when useRipgrep is true and it is available", async () => {
+    it("should register grep tool when useRipgrep is true and it is available", async () => {
       (canUseRipgrep as Mock).mockResolvedValue(true);
       const config = new Config({ ...baseParams, useRipgrep: true });
       await config.initialize();
 
-      const calls = (ToolRegistry.prototype.registerTool as Mock).mock.calls;
-      const wasRipGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(RipGrepTool),
-      );
-      const wasGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(GrepTool),
+      const calls = (ToolRegistry.prototype.registerFactory as Mock).mock.calls;
+      const grepRegistrations = calls.filter(
+        (call) => call[0] === ToolNames.GREP,
       );
 
-      expect(wasRipGrepRegistered).toBe(true);
-      expect(wasGrepRegistered).toBe(false);
+      // Exactly one grep tool should be registered
+      expect(grepRegistrations.length).toBe(1);
       expect(canUseRipgrep).toHaveBeenCalledWith(true);
     });
 
-    it("should register RipGrepTool with system ripgrep when useBuiltinRipgrep is false", async () => {
+    it("should register grep tool with system ripgrep when useBuiltinRipgrep is false", async () => {
       (canUseRipgrep as Mock).mockResolvedValue(true);
       const config = new Config({
         ...baseParams,
@@ -1336,16 +1835,12 @@ describe("setApprovalMode with folder trust", () => {
       });
       await config.initialize();
 
-      const calls = (ToolRegistry.prototype.registerTool as Mock).mock.calls;
-      const wasRipGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(RipGrepTool),
-      );
-      const wasGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(GrepTool),
+      const calls = (ToolRegistry.prototype.registerFactory as Mock).mock.calls;
+      const grepRegistrations = calls.filter(
+        (call) => call[0] === ToolNames.GREP,
       );
 
-      expect(wasRipGrepRegistered).toBe(true);
-      expect(wasGrepRegistered).toBe(false);
+      expect(grepRegistrations.length).toBe(1);
       expect(canUseRipgrep).toHaveBeenCalledWith(false);
     });
 
@@ -1358,16 +1853,12 @@ describe("setApprovalMode with folder trust", () => {
       });
       await config.initialize();
 
-      const calls = (ToolRegistry.prototype.registerTool as Mock).mock.calls;
-      const wasRipGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(RipGrepTool),
-      );
-      const wasGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(GrepTool),
+      const calls = (ToolRegistry.prototype.registerFactory as Mock).mock.calls;
+      const grepRegistrations = calls.filter(
+        (call) => call[0] === ToolNames.GREP,
       );
 
-      expect(wasRipGrepRegistered).toBe(false);
-      expect(wasGrepRegistered).toBe(true);
+      expect(grepRegistrations.length).toBe(1);
       expect(canUseRipgrep).toHaveBeenCalledWith(false);
       expect(logRipgrepFallback).toHaveBeenCalledWith(
         config,
@@ -1382,16 +1873,12 @@ describe("setApprovalMode with folder trust", () => {
       const config = new Config({ ...baseParams, useRipgrep: true });
       await config.initialize();
 
-      const calls = (ToolRegistry.prototype.registerTool as Mock).mock.calls;
-      const wasRipGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(RipGrepTool),
-      );
-      const wasGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(GrepTool),
+      const calls = (ToolRegistry.prototype.registerFactory as Mock).mock.calls;
+      const grepRegistrations = calls.filter(
+        (call) => call[0] === ToolNames.GREP,
       );
 
-      expect(wasRipGrepRegistered).toBe(false);
-      expect(wasGrepRegistered).toBe(true);
+      expect(grepRegistrations.length).toBe(1);
       expect(canUseRipgrep).toHaveBeenCalledWith(true);
       expect(logRipgrepFallback).toHaveBeenCalledWith(
         config,
@@ -1407,16 +1894,12 @@ describe("setApprovalMode with folder trust", () => {
       const config = new Config({ ...baseParams, useRipgrep: true });
       await config.initialize();
 
-      const calls = (ToolRegistry.prototype.registerTool as Mock).mock.calls;
-      const wasRipGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(RipGrepTool),
-      );
-      const wasGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(GrepTool),
+      const calls = (ToolRegistry.prototype.registerFactory as Mock).mock.calls;
+      const grepRegistrations = calls.filter(
+        (call) => call[0] === ToolNames.GREP,
       );
 
-      expect(wasRipGrepRegistered).toBe(false);
-      expect(wasGrepRegistered).toBe(true);
+      expect(grepRegistrations.length).toBe(1);
       expect(logRipgrepFallback).toHaveBeenCalledWith(
         config,
         expect.any(RipgrepFallbackEvent),
@@ -1429,16 +1912,12 @@ describe("setApprovalMode with folder trust", () => {
       const config = new Config({ ...baseParams, useRipgrep: false });
       await config.initialize();
 
-      const calls = (ToolRegistry.prototype.registerTool as Mock).mock.calls;
-      const wasRipGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(RipGrepTool),
-      );
-      const wasGrepRegistered = calls.some(
-        (call) => call[0] instanceof vi.mocked(GrepTool),
+      const calls = (ToolRegistry.prototype.registerFactory as Mock).mock.calls;
+      const grepRegistrations = calls.filter(
+        (call) => call[0] === ToolNames.GREP,
       );
 
-      expect(wasRipGrepRegistered).toBe(false);
-      expect(wasGrepRegistered).toBe(true);
+      expect(grepRegistrations.length).toBe(1);
       expect(canUseRipgrep).not.toHaveBeenCalled();
     });
   });
@@ -1714,6 +2193,104 @@ describe("Model Switching and Config Updates", () => {
 
       expect(config.hasHooksForEvent("Stop")).toBe(false);
       expect(mockHasHooksForEvent).toHaveBeenCalledWith("Stop");
+    });
+  });
+
+  describe('runtime ContentGenerator view (AsyncLocalStorage)', () => {
+    // The Config getters consult the per-run ALS view published by the
+    // agent runtime when a sub-agent runs on a different model than the
+    // parent. These tests pin that integration: tools that captured the
+    // parent Config at construction must still resolve to the agent's
+    // values when called inside the agent's runtime frame.
+    function setInstanceFields(
+      config: Config,
+      contentGenerator: ContentGenerator,
+      generatorConfig: ContentGeneratorConfig,
+    ): void {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (config as any).contentGenerator = contentGenerator;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (config as any).contentGeneratorConfig = generatorConfig;
+    }
+
+    it('resolves getters to the runtime view inside the frame, instance fields outside', async () => {
+      const { runWithRuntimeContentGenerator } = await import(
+        '../agents/runtime/agent-context.js'
+      );
+      const config = new Config(baseParams);
+      const parentGenerator = {
+        generateContentStream: vi.fn(),
+      } as unknown as ContentGenerator;
+      const parentGeneratorConfig: ContentGeneratorConfig = {
+        model: 'parent-model',
+        authType: AuthType.TRAM_OAUTH,
+        apiKey: 'parent-key',
+      };
+      setInstanceFields(config, parentGenerator, parentGeneratorConfig);
+
+      const agentGenerator = {
+        generateContentStream: vi.fn(),
+      } as unknown as ContentGenerator;
+      const agentGeneratorConfig: ContentGeneratorConfig = {
+        model: 'agent-model',
+        authType: AuthType.USE_OPENAI,
+        apiKey: 'agent-key',
+      };
+
+      // Outside the frame, getters resolve to the parent's instance fields.
+      expect(config.getContentGenerator()).toBe(parentGenerator);
+      expect(config.getContentGeneratorConfig()).toBe(parentGeneratorConfig);
+      expect(config.getModel()).toBe('parent-model');
+      expect(config.getAuthType()).toBe(AuthType.TRAM_OAUTH);
+
+      // Inside the frame, every getter resolves to the agent's view.
+      await runWithRuntimeContentGenerator(
+        {
+          contentGenerator: agentGenerator,
+          contentGeneratorConfig: agentGeneratorConfig,
+        },
+        async () => {
+          expect(config.getContentGenerator()).toBe(agentGenerator);
+          expect(config.getContentGeneratorConfig()).toBe(agentGeneratorConfig);
+          expect(config.getModel()).toBe('agent-model');
+          expect(config.getAuthType()).toBe(AuthType.USE_OPENAI);
+        },
+      );
+
+      // Frame exit restores resolution to the parent's instance fields.
+      expect(config.getContentGenerator()).toBe(parentGenerator);
+      expect(config.getModel()).toBe('parent-model');
+    });
+
+    it('falls back to the parent model id when the runtime view config has no model', async () => {
+      const { runWithRuntimeContentGenerator } = await import(
+        '../agents/runtime/agent-context.js'
+      );
+      const config = new Config(baseParams);
+      setInstanceFields(
+        config,
+        { generateContentStream: vi.fn() } as unknown as ContentGenerator,
+        {
+          model: 'parent-model',
+          authType: AuthType.TRAM_OAUTH,
+        } as ContentGeneratorConfig,
+      );
+
+      await runWithRuntimeContentGenerator(
+        {
+          contentGenerator: {
+            generateContentStream: vi.fn(),
+          } as unknown as ContentGenerator,
+          contentGeneratorConfig: {
+            model: '',
+            authType: AuthType.USE_OPENAI,
+          } as ContentGeneratorConfig,
+        },
+        async () => {
+          // Empty model on the runtime view falls through to modelsConfig.
+          expect(config.getModel()).toBe(baseParams.model);
+        },
+      );
     });
   });
 });

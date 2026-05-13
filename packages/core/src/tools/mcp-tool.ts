@@ -208,7 +208,7 @@ class DiscoveredMCPToolInvocation extends BaseToolInvocation<
       const toolRegistry = this.cliConfig.getToolRegistry();
       await toolRegistry.discoverToolsForServer(this.serverName);
 
-      const newTool = toolRegistry.getTool(
+      const newTool = await toolRegistry.ensureTool(
         `mcp__${this.serverName}__${this.serverToolName}`,
       );
       if (newTool instanceof DiscoveredMCPTool) {
@@ -479,6 +479,13 @@ export class DiscoveredMCPTool extends BaseDeclarativeTool<
       parameterSchema,
       true, // isOutputMarkdown
       true, // canUpdateOutput — enables streaming progress for MCP tools
+      false, // isLmOnly
+      true, // shouldDefer — MCP tools are discovered via ToolSearch to keep the
+      //   initial tool-declaration list small when many MCP servers are attached.
+      false, // alwaysLoad
+      // searchHint: server name boosts fuzzy matching when the user references
+      // the server in their query ("send a slack message").
+      `mcp ${serverName}`,
     );
   }
 

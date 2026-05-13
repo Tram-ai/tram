@@ -2,7 +2,7 @@
   "name": "tram-vscode-ide-companion",
   "displayName": "TRAM Companion",
   "description": "Enable TRAM with direct access to your VS Code workspace.",
-  "version": "0.1.0-U0145",
+  "version": "0.1.1-U01510",
   "publisher": "tram-ai",
   "icon": "assets/icon.png",
   "repository": {
@@ -136,6 +136,18 @@
       {
         "command": "tram.toggleServiceFollow",
         "title": "TRAM: Toggle Service Follow"
+      },
+      {
+        "command": "tram.copyMessage",
+        "title": "%tram.copyMessage.title%"
+      },
+      {
+        "command": "tram.copyAllMessages",
+        "title": "%tram.copyAllMessages.title%"
+      },
+      {
+        "command": "tram.copyLastReply",
+        "title": "%tram.copyLastReply.title%"
       }
     ],
     "menus": {
@@ -151,6 +163,35 @@
         {
           "command": "tram.login",
           "when": "false"
+        },
+        {
+          "command": "tram.copyMessage",
+          "when": "false"
+        },
+        {
+          "command": "tram.copyAllMessages",
+          "when": "false"
+        },
+        {
+          "command": "tram.copyLastReply",
+          "when": "false"
+        }
+      ],
+      "webview/context": [
+        {
+          "command": "tram.copyMessage",
+          "when": "webviewSection == 'chat-messages'",
+          "group": "9_cutcopypaste@1"
+        },
+        {
+          "command": "tram.copyAllMessages",
+          "when": "webviewSection == 'chat-messages'",
+          "group": "9_cutcopypaste@2"
+        },
+        {
+          "command": "tram.copyLastReply",
+          "when": "webviewSection == 'chat-messages'",
+          "group": "9_cutcopypaste@3"
         }
       ],
       "editor/title": [
@@ -169,6 +210,57 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "TRAM",
+      "properties": {
+        "tram.provider": {
+          "order": 0,
+          "type": "string",
+          "enum": [
+            "coding-plan",
+            "api-key"
+          ],
+          "enumDescriptions": [
+            "Alibaba Cloud Coding Plan — configurable from VS Code Settings",
+            "Configured via TRAM: Login or the onboarding button"
+          ],
+          "default": "coding-plan",
+          "markdownDescription": "**Coding Plan**: enter API Key + Region here to sync `~/.tram/settings.json`.\n\n**API Key**: use **TRAM: Login** or the onboarding button to configure ModelStudio or custom OpenAI-compatible providers."
+        },
+        "tram.apiKey": {
+          "order": 1,
+          "type": "string",
+          "default": "",
+          "markdownDescription": "API key used for **Coding Plan** settings sync. For **API Key** providers, configure the full provider details through **TRAM: Login**."
+        },
+        "tram.codingPlanRegion": {
+          "order": 2,
+          "type": "string",
+          "enum": [
+            "china",
+            "global"
+          ],
+          "enumDescriptions": [
+            "China — 阿里云百炼 (aliyun.com)",
+            "Global — Alibaba Cloud (alibabacloud.com)"
+          ],
+          "default": "china",
+          "markdownDescription": "Region for Coding Plan. _(Only used when Provider is `coding-plan`)_"
+        },
+        "tram.dotIndicator": {
+          "order": 3,
+          "type": "boolean",
+          "default": true,
+          "description": "Show a colored dot on the tab icon when a task completes (orange) or needs your attention (blue) while the tab is hidden."
+        },
+        "tram.notifications": {
+          "order": 4,
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications with sound when a task completes (at least 20 seconds) or needs your attention, while you are not actively viewing the TRAM panel."
+        }
+      }
     },
     "keybindings": [
       {
@@ -248,6 +340,7 @@
     "@tram-ai/webui": "*",
     "@modelcontextprotocol/sdk": "^1.25.1",
     "cors": "^2.8.5",
+    "dotenv": "^17.1.0",
     "express": "^5.1.0",
     "markdown-it": "^14.1.0",
     "react": "^19.2.4",

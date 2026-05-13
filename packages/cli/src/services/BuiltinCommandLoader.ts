@@ -50,6 +50,18 @@ import { vimCommand } from "../ui/commands/vimCommand.js";
 import { setupGithubCommand } from "../ui/commands/setupGithubCommand.js";
 import { insightCommand } from "../ui/commands/insightCommand.js";
 import { statuslineCommand } from "../ui/commands/statuslineCommand.js";
+import { tasksCommand } from "../ui/commands/tasksCommand.js";
+import { branchCommand } from "../ui/commands/branchCommand.js";
+import { deleteCommand } from "../ui/commands/deleteCommand.js";
+import { doctorCommand } from "../ui/commands/doctorCommand.js";
+import { diffCommand } from "../ui/commands/diffCommand.js";
+import { dreamCommand } from "../ui/commands/dreamCommand.js";
+import { forgetCommand } from "../ui/commands/forgetCommand.js";
+import { manageModelsCommand } from "../ui/commands/manageModelsCommand.js";
+import { rememberCommand } from "../ui/commands/rememberCommand.js";
+import { recapCommand } from "../ui/commands/recapCommand.js";
+import { renameCommand } from "../ui/commands/renameCommand.js";
+import { rewindCommand } from "../ui/commands/rewindCommand.js";
 
 const builtinDebugLogger = createDebugLogger("BUILTIN_COMMAND_LOADER");
 
@@ -84,16 +96,21 @@ export class BuiltinCommandLoader implements ICommandLoader {
     const allDefinitions: Array<SlashCommand | null> = [
       aboutCommand,
       agentsCommand,
+      tasksCommand,
       arenaCommand,
       approvalModeCommand,
       authCommand,
+      branchCommand,
       btwCommand,
       bugCommand,
       clearCommand,
       compressCommand,
       contextCommand,
       copyCommand,
+      diffCommand,
+      deleteCommand,
       docsCommand,
+      doctorCommand,
       directoryCommand,
       editorCommand,
       exportCommand,
@@ -104,15 +121,23 @@ export class BuiltinCommandLoader implements ICommandLoader {
       initCommand,
       languageCommand,
       mcpCommand,
+      ...(this.config?.getManagedAutoMemoryEnabled()
+        ? [dreamCommand, forgetCommand]
+        : []),
       memoryCommand,
       modelCommand,
+      manageModelsCommand,
+      rememberCommand,
       planCommand,
       permissionsCommand,
       ...(this.config?.getFolderTrust() ? [trustCommand] : []),
       quitCommand,
+      recapCommand,
+      renameCommand,
       restoreCommand(this.config),
       resumeCommand,
       serviceCommand,
+      rewindCommand,
       skillsCommand,
       statsCommand,
       summaryCommand,
@@ -126,6 +151,14 @@ export class BuiltinCommandLoader implements ICommandLoader {
       statuslineCommand,
     ];
 
-    return allDefinitions.filter((cmd): cmd is SlashCommand => cmd !== null);
+    return allDefinitions
+      .filter((cmd): cmd is SlashCommand => cmd !== null)
+      .map((cmd) => ({
+        ...cmd,
+        source: 'builtin-command' as const,
+        sourceLabel: 'Built-in',
+        modelInvocable: false,
+        userInvocable: cmd.userInvocable ?? true,
+      }));
   }
 }

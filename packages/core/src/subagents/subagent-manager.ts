@@ -35,20 +35,19 @@ import type {
 } from "../agents/runtime/agent-events.js";
 import type { Config } from "../config/config.js";
 import { APPROVAL_MODES } from "../config/config.js";
-import {
-  type AuthType,
-  type ContentGenerator,
-  type ContentGeneratorConfig,
-  createContentGenerator,
-} from "../core/contentGenerator.js";
-import { buildAgentContentGeneratorConfig } from "../models/content-generator-config.js";
+import type { RuntimeContentGeneratorView } from "../agents/runtime/agent-context.js";
+import { createRuntimeContentGeneratorView } from "../models/content-generator-config.js";
 import { createDebugLogger } from "../utils/debugLogger.js";
 import { normalizeContent } from "../utils/textUtils.js";
 import { parseSubagentModelSelection } from "./model-selection.js";
-
 const debugLogger = createDebugLogger("SUBAGENT_MANAGER");
 import { BuiltinAgentRegistry } from "./builtin-agents.js";
 import { ToolDisplayNamesMigration } from "../tools/tool-names.js";
+import { Storage } from "../config/storage.js";
+import {
+  hasRebuiltToolRegistry,
+  rebuildToolRegistryOnOverride,
+} from "../tools/agent/agent.js";
 
 const TRAM_CONFIG_DIR = ".tram";
 const AGENT_CONFIG_DIR = "agents";
@@ -606,6 +605,10 @@ export class SubagentManager {
       frontmatter["approvalMode"] = config.approvalMode;
     }
 
+    if (config.background) {
+      frontmatter['background'] = true;
+    }
+
     // Serialize to YAML
     const yamlContent = stringifyYaml(frontmatter, {
       lineWidth: 0, // Disable line wrapping
@@ -629,28 +632,51 @@ export class SubagentManager {
     options?: {
       eventEmitter?: AgentEventEmitter;
       hooks?: AgentHooks;
+      promptConfigOverrides?: Partial<PromptConfig>;
+      modelConfigOverrides?: Partial<ModelConfig>;
+      runConfigOverrides?: Partial<RunConfig>;
+      toolConfigOverride?: ToolConfig;
     },
   ): Promise<AgentHeadless> {
     try {
-      const runtimeConfig = this.convertToRuntimeConfig(config);
+      const runtimeConfig = await this.convertToRuntimeConfig(config);
+      const promptConfig: PromptConfig = {
+        ...runtimeConfig.promptConfig,
+        ...options?.promptConfigOverrides,
+      };
+      const modelConfig: ModelConfig = {
+        ...runtimeConfig.modelConfig,
+        ...options?.modelConfigOverrides,
+      };
+      const runConfig: RunConfig = {
+        ...runtimeConfig.runConfig,
+        ...options?.runConfigOverrides,
+      };
+      const toolConfig =
+        options?.toolConfigOverride ?? runtimeConfig.toolConfig;
 
       // When the model selector specifies a different provider, build a
-      // per-agent Config with a dedicated ContentGenerator so the subagent
-      // talks to the right API without affecting the parent process.
-      const agentContext = await this.maybeOverrideContentGenerator(
+      // dedicated ContentGenerator + view so the subagent talks to the
+      // right API without affecting the parent process. The view is
+      // applied via AsyncLocalStorage when the agent runs.
+      const runtimeView = await this.buildRuntimeContentGeneratorView(
         config,
         runtimeContext,
       );
 
+      const subagentContext =
+        await this.buildSubagentContextOverride(runtimeContext);
+
       return await AgentHeadless.create(
         config.name,
-        agentContext,
-        runtimeConfig.promptConfig,
-        runtimeConfig.modelConfig,
-        runtimeConfig.runConfig,
-        runtimeConfig.toolConfig,
+        subagentContext,
+        promptConfig,
+        modelConfig,
+        runConfig,
+        toolConfig,
         options?.eventEmitter,
         options?.hooks,
+        runtimeView,
       );
     } catch (error) {
       if (error instanceof Error) {
@@ -665,18 +691,55 @@ export class SubagentManager {
   }
 
   /**
-   * When a subagent's model selector specifies a model (bare ID or
-   * authType-prefixed), build a Config override with a dedicated
-   * ContentGenerator so the model actually reaches the API.
-   * Returns the original context unchanged for inherit selectors.
+   * Build the per-subagent Config override used as the AgentHeadless
+   * runtime context. The override is a thin prototype-delegation wrapper
+   * (`Object.create(runtimeContext)`): no method changes, but a distinct
+   * instance triggers the lazy own-property init in
+   * `Config.getFileReadCache()` so the subagent gets its own cache
+   * rather than inheriting the parent's recorded reads — which would
+   * silently weaken prior-read enforcement on its mutation paths.
+   *
+   * The tool registry is also rebuilt on the override so `EditTool` /
+   * `WriteFileTool` / `ReadFileTool` resolve `this.config` to the
+   * subagent — without that step, the parent's cached tool instances
+   * still reach the parent's FileReadCache. The rebuild is skipped when
+   * a wrapper above `runtimeContext` already rebuilt one (typically
+   * `agent.ts:createApprovalModeOverride`, which marks itself via a
+   * Symbol-keyed flag — Symbol lookup walks the prototype chain, so
+   * this also catches wrapper-on-wrapper layering like
+   * `bgConfig = Object.create(agentConfig)` from the background path).
+   * Rebuilding twice would waste work, leak listeners on shared
+   * managers, and split caches across registry layers.
    */
-  private async maybeOverrideContentGenerator(
+  private async buildSubagentContextOverride(
+    runtimeContext: Config,
+  ): Promise<Config> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const subagentContext = Object.create(runtimeContext) as any as Config;
+    if (!hasRebuiltToolRegistry(runtimeContext)) {
+      await rebuildToolRegistryOnOverride(subagentContext, runtimeContext);
+    }
+    return subagentContext;
+  }
+
+  /**
+   * When a subagent's model selector specifies a model (bare ID or
+   * authType-prefixed), build a dedicated ContentGenerator and the view
+   * the agent runtime should publish via AsyncLocalStorage during the
+   * run. Returns `undefined` for inherit selectors (no override needed).
+   *
+   * FileReadCache isolation and tool-registry rebuilding are handled
+   * separately in {@link buildSubagentContextOverride} — every subagent
+   * (inherit or explicit) gets that, regardless of whether a runtime
+   * view is built here.
+   */
+  private async buildRuntimeContentGeneratorView(
     config: SubagentConfig,
     base: Config,
-  ): Promise<Config> {
+  ): Promise<RuntimeContentGeneratorView | undefined> {
     const selection = parseSubagentModelSelection(config.model);
     if (selection.inherits) {
-      return base;
+      return undefined;
     }
 
     const authType =
@@ -685,31 +748,18 @@ export class SubagentManager {
       authType: authType as string,
     };
 
-    const agentGeneratorConfig = buildAgentContentGeneratorConfig(
+    const view = await createRuntimeContentGeneratorView(
+      base,
       base,
       selection.modelId,
       authOverrides,
     );
 
-    const agentGenerator = await createContentGenerator(
-      agentGeneratorConfig,
-      base,
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const override = Object.create(base) as any;
-    override.getContentGenerator = (): ContentGenerator => agentGenerator;
-    override.getContentGeneratorConfig = (): ContentGeneratorConfig =>
-      agentGeneratorConfig;
-    override.getAuthType = (): AuthType | undefined =>
-      agentGeneratorConfig.authType;
-    override.getModel = (): string => agentGeneratorConfig.model;
-
     debugLogger.info(
-      `Created per-agent ContentGenerator for subagent "${config.name}": authType=${authType}, model=${agentGeneratorConfig.model}`,
+      `Created per-agent ContentGenerator for subagent "${config.name}": authType=${authType}, model=${view.contentGeneratorConfig.model}`,
     );
 
-    return override as Config;
+    return view;
   }
 
   /**
@@ -719,7 +769,9 @@ export class SubagentManager {
    * @param config - File-based subagent configuration
    * @returns Runtime configuration for AgentHeadless
    */
-  convertToRuntimeConfig(config: SubagentConfig): SubagentRuntimeConfig {
+  async convertToRuntimeConfig(
+    config: SubagentConfig,
+  ): Promise<SubagentRuntimeConfig> {
     const promptConfig: PromptConfig = {
       systemPrompt: config.systemPrompt,
     };
@@ -739,13 +791,13 @@ export class SubagentManager {
       (config.disallowedTools && config.disallowedTools.length > 0)
     ) {
       const toolNames = config.tools
-        ? this.transformToToolNames(config.tools)
+        ? await this.transformToToolNames(config.tools)
         : ["*"];
       toolConfig = {
         tools: toolNames,
         ...(config.disallowedTools && config.disallowedTools.length > 0
           ? {
-              disallowedTools: this.transformToToolNames(
+              disallowedTools: await this.transformToToolNames(
                 config.disallowedTools,
               ),
             }
@@ -769,12 +821,13 @@ export class SubagentManager {
    * @returns Array of tool names
    * @private
    */
-  private transformToToolNames(tools: string[]): string[] {
+  private async transformToToolNames(tools: string[]): Promise<string[]> {
     const toolRegistry = this.config.getToolRegistry();
     if (!toolRegistry) {
       return tools;
     }
 
+    await toolRegistry.warmAll();
     const allTools = toolRegistry.getAllTools();
 
     const result: string[] = [];
@@ -857,7 +910,7 @@ export class SubagentManager {
             TRAM_CONFIG_DIR,
             AGENT_CONFIG_DIR,
           )
-        : path.join(os.homedir(), TRAM_CONFIG_DIR, AGENT_CONFIG_DIR);
+        : path.join(Storage.getGlobalTramDir(), AGENT_CONFIG_DIR);
 
     return path.join(baseDir, `${name}.md`);
   }
@@ -892,8 +945,10 @@ export class SubagentManager {
       return [];
     }
 
-    let baseDir = level === "project" ? projectRoot : homeDir;
-    baseDir = path.join(baseDir, TRAM_CONFIG_DIR, AGENT_CONFIG_DIR);
+    const baseDir =
+      level === "project"
+        ? path.join(projectRoot, TRAM_CONFIG_DIR, AGENT_CONFIG_DIR)
+        : path.join(Storage.getGlobalTramDir(), AGENT_CONFIG_DIR);
 
     try {
       const files = await fs.readdir(baseDir);
@@ -907,8 +962,12 @@ export class SubagentManager {
         try {
           const config = await this.parseSubagentFile(filePath, level);
           subagents.push(config);
-        } catch (_error) {
-          // Ignore invalid files
+        } catch (error) {
+          // Skip invalid files but surface the reason. Before this warning
+          // was added, invalid subagent files failed silently — a user who
+          // mistyped frontmatter or used a reserved name had no way to see
+          // why their agent wasn't loading.
+          warnInvalidSubagentFile(filePath, error);
           continue;
         }
       }
@@ -987,8 +1046,8 @@ export async function loadSubagentFromDir(
           new SubagentValidator(),
         );
         subagents.push(config);
-      } catch (_error) {
-        // Ignore invalid files
+      } catch (error) {
+        warnInvalidSubagentFile(filePath, error);
         continue;
       }
     }
@@ -1087,6 +1146,21 @@ function parseSubagentContent(
           ? legacyModelConfig["model"]
           : undefined;
 
+    const backgroundRaw = frontmatter['background'];
+    if (
+      backgroundRaw !== undefined &&
+      backgroundRaw !== 'true' &&
+      backgroundRaw !== 'false' &&
+      backgroundRaw !== true &&
+      backgroundRaw !== false
+    ) {
+      debugLogger.warn(
+        `Agent file ${filePath} has invalid background value '${backgroundRaw}'. Must be 'true', 'false', or omitted.`,
+      );
+    }
+    const background =
+      backgroundRaw === 'true' || backgroundRaw === true ? true : undefined;
+
     const config: SubagentConfig = {
       name,
       description,
@@ -1099,6 +1173,7 @@ function parseSubagentContent(
       runConfig: runConfig as Partial<RunConfig>,
       color,
       level,
+      ...(background ? { background } : {}),
     };
 
     // Validate the parsed configuration
@@ -1114,4 +1189,15 @@ function parseSubagentContent(
       SubagentErrorCode.INVALID_CONFIG,
     );
   }
+}
+
+/**
+ * Log an invalid-subagent-file error via the debug logger. Before this was
+ * added, the loader swallowed these errors entirely — users running with
+ * debug logging enabled had no way to tell why their subagent wasn't loading.
+ * Kept on the debug channel so the TUI stays quiet during normal startup.
+ */
+function warnInvalidSubagentFile(filePath: string, error: unknown): void {
+  const message = error instanceof Error ? error.message : String(error);
+  debugLogger.debug(`Skipped invalid file ${filePath}: ${message}`);
 }

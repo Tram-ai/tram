@@ -171,6 +171,11 @@ export default tseslint.config(
     plugins: {
       vitest,
     },
+    languageOptions: {
+      globals: {
+        ...globals.vitest,
+      },
+    },
     rules: {
       ...vitest.configs.recommended.rules,
       "vitest/expect-expect": "off",
@@ -190,12 +195,14 @@ export default tseslint.config(
   {
     files: [
       "./scripts/**/*.js",
+      "./scripts/**/*.mjs",
       "esbuild.config.js",
       "packages/*/scripts/**/*.js",
     ],
     languageOptions: {
       globals: {
         ...globals.node,
+        ...globals.browser,
         process: "readonly",
         console: "readonly",
       },

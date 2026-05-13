@@ -1,6 +1,6 @@
 {
   "name": "@tram-ai/channel-base",
-  "version": "0.1.0-U0145",
+  "version": "0.1.1-U01510",
   "description": "Base channel infrastructure for TRAM",
   "type": "module",
   "main": "dist/index.js",

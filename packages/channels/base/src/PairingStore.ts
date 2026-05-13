@@ -1,7 +1,7 @@
 import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import * as os from "node:os";
+import { getGlobalTramDir } from "./paths.js";
 
 // Alphabet without ambiguous chars: 0/O, 1/I
 const SAFE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -22,7 +22,7 @@ export class PairingStore {
   private allowlistPath: string;
 
   constructor(channelName: string) {
-    this.dir = path.join(os.homedir(), ".tram", "channels");
+    this.dir = path.join(getGlobalTramDir(), "channels");
     this.pendingPath = path.join(this.dir, `${channelName}-pairing.json`);
     this.allowlistPath = path.join(this.dir, `${channelName}-allowlist.json`);
   }

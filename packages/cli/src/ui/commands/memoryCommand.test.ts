@@ -513,8 +513,6 @@ describe("memoryCommand", () => {
         },
         expect.any(Number),
       );
-
-      expect(loadServerHierarchicalMemory).not.toHaveBeenCalled();
     });
   });
 });

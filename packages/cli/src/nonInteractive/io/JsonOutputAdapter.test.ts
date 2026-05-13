@@ -425,7 +425,7 @@ describe("JsonOutputAdapter", () => {
 
       expect(stdoutWriteSpy).toHaveBeenCalled();
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
-      expect(output).toBe("Response text");
+      expect(output).toBe("Response text\n");
     });
 
     it("should emit error result to stderr in text mode", () => {
@@ -444,7 +444,7 @@ describe("JsonOutputAdapter", () => {
 
       expect(stderrWriteSpy).toHaveBeenCalled();
       const output = stderrWriteSpy.mock.calls[0][0] as string;
-      expect(output).toBe("Test error message");
+      expect(output).toBe("Test error message\n");
 
       stderrWriteSpy.mockRestore();
     });
@@ -462,7 +462,7 @@ describe("JsonOutputAdapter", () => {
 
       expect(stdoutWriteSpy).toHaveBeenCalled();
       const output = stdoutWriteSpy.mock.calls[0][0] as string;
-      expect(output).toBe("Custom summary text");
+      expect(output).toBe("Custom summary text\n");
     });
 
     it("should handle empty error message in text mode", () => {
@@ -481,7 +481,7 @@ describe("JsonOutputAdapter", () => {
       expect(stderrWriteSpy).toHaveBeenCalled();
       const output = stderrWriteSpy.mock.calls[0][0] as string;
       // When no errorMessage is provided, the default 'Unknown error' is used
-      expect(output).toBe("Unknown error");
+      expect(output).toBe("Unknown error\n");
 
       stderrWriteSpy.mockRestore();
     });

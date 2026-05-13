@@ -8,6 +8,9 @@ import path from "node:path";
 import os from "node:os";
 import picomatch from "picomatch";
 import { parse } from "shell-quote";
+import { createDebugLogger } from "../utils/debugLogger.js";
+
+const debugLogger = createDebugLogger("PERMISSIONS");
 
 /**
  * Normalize a filesystem path to use POSIX-style forward slashes.
@@ -84,7 +87,6 @@ export const TOOL_NAME_ALIASES: Readonly<Record<string, string>> = {
   save_memory: "save_memory",
   SaveMemory: "save_memory",
   SaveMemoryTool: "save_memory",
-
   // TodoWrite tool
   todo_write: "todo_write",
   TodoWrite: "todo_write",
@@ -99,7 +101,6 @@ export const TOOL_NAME_ALIASES: Readonly<Record<string, string>> = {
   web_search: "web_search",
   WebSearch: "web_search",
   WebSearchTool: "web_search",
-
   // Agent (subagent) tool
   agent: "agent",
   Agent: "agent",
@@ -125,14 +126,22 @@ export const TOOL_NAME_ALIASES: Readonly<Record<string, string>> = {
   Lsp: "lsp",
   LspTool: "lsp",
 
+  // Monitor tool
+  monitor: 'monitor',
+  Monitor: 'monitor',
+  MonitorTool: 'monitor',
+
   // Legacy edit tool name
   replace: "edit",
 };
 
 /**
- * Shell tool canonical names.
+ * Shell tool canonical names. These use command-style rule specifiers.
  */
-const SHELL_TOOL_NAMES = new Set(["run_shell_command"]);
+export const SHELL_TOOL_NAMES: ReadonlySet<string> = new Set([
+  "run_shell_command",
+  "monitor",
+]);
 
 /**
  * File-reading tools — "Read" rules apply to all of these (best-effort).
@@ -195,6 +204,8 @@ export function getSpecifierKind(canonicalToolName: string): SpecifierKind {
  *
  * "Read" → resolves to "read_file", but also covers grep_search, glob, list_directory
  * "Edit" → resolves to "edit", but also covers write_file
+ * "Bash" → resolves to "run_shell_command", but also covers monitor
+ * "Monitor" → resolves to "monitor" only; it does not cover shell
  */
 export function toolMatchesRuleToolName(
   ruleToolName: string,
@@ -209,6 +220,12 @@ export function toolMatchesRuleToolName(
   }
   // "Edit" → covers all EDIT_TOOLS
   if (ruleToolName === "edit" && EDIT_TOOLS.has(contextToolName)) {
+    return true;
+  }
+  // "Bash" (run_shell_command) → also covers monitor so that existing
+  // `Bash(...)` allow rules are not silently bypassed by switching to
+  // the monitor tool.  Monitor-only rules do NOT cover shell.
+  if (ruleToolName === 'run_shell_command' && contextToolName === 'monitor') {
     return true;
   }
   return false;
@@ -252,10 +269,13 @@ export function parseRule(raw: string): PermissionRule {
   }
 
   const toolPart = normalized.substring(0, openParen).trim();
-  const specifier = normalized.endsWith(")")
-    ? normalized.substring(openParen + 1, normalized.length - 1)
-    : undefined;
 
+  if (!normalized.endsWith(")")) {
+    // Malformed: unbalanced parentheses — mark as invalid so it never matches.
+    return { raw: trimmed, toolName: resolveToolName(toolPart), invalid: true };
+  }
+
+  const specifier = normalized.substring(openParen + 1, normalized.length - 1);
   const canonicalName = resolveToolName(toolPart);
   const specifierKind = specifier ? getSpecifierKind(canonicalName) : undefined;
 
@@ -272,7 +292,17 @@ export function parseRule(raw: string): PermissionRule {
  * silently skipping any empty entries.
  */
 export function parseRules(raws: string[]): PermissionRule[] {
-  return raws.filter((r) => r && r.trim()).map(parseRule);
+  return raws
+    .filter((r) => r && r.trim())
+    .map(parseRule)
+    .map((r) => {
+      if (r.invalid) {
+        debugLogger.warn(
+          `Ignoring malformed rule (unbalanced parentheses): ${r.raw}`,
+        );
+      }
+      return r;
+    });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -302,6 +332,9 @@ const CANONICAL_TO_RULE_DISPLAY: Readonly<Record<string, string>> = {
   // Web
   web_fetch: "WebFetch",
   web_search: "WebSearch",
+  // Monitor
+  monitor: "Monitor",
+  // Web
   // Agent / Skill
   agent: "Agent",
   skill: "Skill",
@@ -422,6 +455,7 @@ const DISPLAY_NAME_TO_VERB: Readonly<Record<string, string>> = {
   TodoWrite: "write todos",
   Lsp: "use LSP",
   ExitPlanMode: "exit plan mode",
+  Monitor: "monitor commands",
 };
 
 /**
@@ -490,9 +524,13 @@ export function buildHumanReadableRuleLabel(rules: string[]): string {
         parts.push(`${verb} in ${cleanPath}`);
         break;
       }
-      case "command":
-        parts.push(`run '${specifier}' commands`);
+      case "command": {
+        const cmdVerb = DISPLAY_NAME_TO_VERB[displayName] ?? "run";
+        // Extract just the verb word (e.g. "run commands" → "run", "monitor commands" → "monitor")
+        const verbWord = cmdVerb.split(" ")[0]!;
+        parts.push(`${verbWord} '${specifier}' commands`);
         break;
+      }
       case "domain":
         parts.push(`${verb} ${specifier}`);
         break;
@@ -943,6 +981,11 @@ export function matchesRule(
   specifier?: string,
 ): boolean {
   const canonicalCtxToolName = resolveToolName(toolName);
+
+  // ── Invalid (malformed) rules never match anything ──────────────────
+  if (rule.invalid) {
+    return false;
+  }
 
   // ── MCP tool matching ────────────────────────────────────────────────
   if (

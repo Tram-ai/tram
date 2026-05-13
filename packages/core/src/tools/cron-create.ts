@@ -200,6 +200,12 @@ export class CronCreateTool extends BaseDeclarativeTool<
         required: ["cron"],
         additionalProperties: false,
       },
+      true, // isOutputMarkdown
+      false, // canUpdateOutput
+      false, // isLmOnly
+      true, // shouldDefer — scheduling is infrequent
+      false, // alwaysLoad
+      "cron schedule reminder recurring timer",
     );
   }
 

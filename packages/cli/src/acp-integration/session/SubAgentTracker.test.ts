@@ -358,8 +358,8 @@ describe("SubAgentTracker", () => {
       eventEmitter.emit(
         AgentEventType.TOOL_CALL,
         createToolCallEvent({
-          name: TodoWriteTool.Name,
-          callId: "call-todo",
+        name: TodoWriteTool.Name,
+        callId: "call-todo",
           args: {
             todos: [{ id: "1", content: "Task 1", status: "pending" }],
           },
